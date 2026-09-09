@@ -43,7 +43,13 @@ def validate_mixture(config: dict[str, Any], known_sources: set[str] | None = No
             raise ValueError(f"unknown dataset source: {sorted(unknown)}")
     for key in ("source_weights", "behavior_weights"):
         weights = config.get(key)
-        if weights and isinstance(weights, dict):
+        if weights is None:
+            continue
+        if isinstance(weights, str) and weights == "GENERATED_AFTER_BASELINE":
+            continue
+        if not isinstance(weights, dict):
+            raise TypeError(f"{key} must be a mapping")
+        if weights:
             validate_weights(weights, set(weights) if key == "source_weights" else capability_ids())
 
 

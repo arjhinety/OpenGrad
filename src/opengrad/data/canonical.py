@@ -36,6 +36,8 @@ class ToolConversation:
             raise ValueError("id and source are required")
         if not isinstance(self.tools, list) or not isinstance(self.messages, list):
             raise TypeError("tools and messages must be lists")
+        if not isinstance(self.metadata, dict):
+            raise TypeError("metadata must be an object")
         if not self.metadata.get("split"):
             raise ValueError("metadata.split is required for provenance")
         behavior = self.metadata.get("behavior")
@@ -90,6 +92,33 @@ class ToolConversation:
                 if known_calls and call_id not in known_calls:
                     raise ValueError(f"tool result has unknown call id: {call_id}")
 
+    def validate_training_semantics(self) -> None:
+        """Validate the stricter trajectory contract used at the training boundary."""
+        try:
+            self.validate()
+        except ValueError as exc:
+            if str(exc).startswith("unknown tool:"):
+                raise ValueError(
+                    f"SEM_UNDECLARED_TOOL: unknown tool: {str(exc).split(':', 1)[1].strip()}"
+                ) from exc
+            raise
+        from opengrad.data.semantic import validate_training_trajectory
+
+        issues = validate_training_trajectory(self)
+        if issues:
+            issue = issues[0]
+            aliases = {
+                "INVALID_TOOL_CALL_ID": "SEM_CALL_ID_REQUIRED",
+                "UNDECLARED_TOOL": "SEM_UNDECLARED_TOOL",
+                "DUPLICATE_TOOL_CALL_ID": "SEM_DUPLICATE_CALL_ID",
+                "ORPHAN_TOOL_RESULT": "SEM_ORPHAN_RESULT",
+                "MISSING_TOOL_RESULT": "SEM_UNRESOLVED_CALL",
+                "INVALID_MESSAGE_SEQUENCE": "SEM_RESULT_ORDER",
+            }
+            code = aliases.get(issue.code, "SEM_ARGUMENT_INVALID" if issue.code.startswith("ARG_") else f"SEM_{issue.code}")
+            detail = f"unknown tool: {issue.message}" if issue.code == "UNDECLARED_TOOL" else issue.message
+            raise ValueError(f"{code}: {detail}")
+
 
 @dataclass(frozen=True)
 class CanonicalSFTExample:
@@ -104,7 +133,7 @@ class CanonicalSFTExample:
             "llm_judge_test",
         }:
             raise ValueError("non-SFT split cannot be used as SFT")
-        self.conversation.validate()
+        self.conversation.validate_training_semantics()
 
 
 @dataclass(frozen=True)

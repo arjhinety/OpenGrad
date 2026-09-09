@@ -2,7 +2,7 @@ import pytest
 
 from opengrad.data.behavior import capability_ids, load_taxonomy, validate_behavior
 from opengrad.data.canonical import ToolConversation
-from opengrad.data.mixture import load_mixture
+from opengrad.data.mixture import load_mixture, validate_mixture
 from opengrad.data.residuals import residual_to_weights, validate_residual_profile
 from opengrad.data.selection import validate_counterfactual_groups, validate_sft_selection
 
@@ -73,3 +73,14 @@ def test_counterfactual_and_sft_boundaries_fail_loudly():
         validate_sft_selection(["when2call:mcq"])
     with pytest.raises(ValueError, match="contaminated"):
         validate_sft_selection(["apigen-mt-5k"], {"apigen-mt-5k"})
+
+
+def test_malformed_mixture_weights_fail_closed():
+    with pytest.raises(TypeError, match="behavior_weights must be a mapping"):
+        validate_mixture(
+            {
+                "mixture_class": "behavior_balanced",
+                "status": "HYPOTHESIS_ONLY",
+                "behavior_weights": ["must_call"],
+            }
+        )

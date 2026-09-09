@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "manifest_id": "behavioral-heldout-v2",
+  "status": "EXACT_AND_PROMPT_HASHES_RECORDED",
+  "training_sources_checked": [
+    "xlam-function-calling-60k",
+    "toolace",
+    "looptool-23k",
+    "glaive-function-calling-v2",
+    "button",
+    "when2call-sft"
+  ],
+  "levels": {
+    "1_exact_canonical_conversation_hash": "MEASURED",
+    "2_normalized_prompt_hash": "MEASURED",
+    "3_near_duplicate_ngram_minhash": "PENDING_SEMANTIC_REVIEW",
+    "4_semantic_similarity": "NOT_RUN",
+    "5_manual_audit": "NOT_RUN"
+  },
+  "interpretation": "No exact-overlap or prompt-hash clean claim is implied for paraphrase, semantic, or source-derived contamination. Any generalization claim requires levels 3-5."
+}

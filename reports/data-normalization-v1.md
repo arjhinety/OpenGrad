@@ -54,13 +54,13 @@ Full SFT token statistics are in reports/artifacts/token-statistics-full.json:
 - BUTTON: n=7,941; mean 2,442.06; P50/P75/P90/P95/P99/max = 2,168/2,868/3,740/4,422/6,872/26,057.
 - When2Call SFT: n=14,829; mean 520.37; P50/P75/P90/P95/P99/max = 508/679/882/1,030/1,281/2,500.
 
-Candidate sequence lengths are evidence-based proposals only: 2048 covers the large majority of ToolACE/Glaive/When2Call examples but truncates long trajectories; 4096 is the first candidate for the long-context mixture and must be selected after GPU feasibility measurement.
+Candidate sequence lengths are evidence-based proposals only: 2048 covers the large majority of ToolACE/Glaive/When2Call examples but truncates long trajectories. The baseline execution contract now freezes `max_input_tokens: 4096` with `overflow: reject`; training mixtures may measure a separate bucket later, but they cannot silently truncate this baseline.
 
 Rendered lineage is in reports/artifacts/render-manifest-lineage.json and per-source JSONL manifests. All 3,077 LoopTool failures are not silently converted into training text; all other retained SFT records have canonical parent IDs and rendered checksums.
 
 ## Evaluation and experiments
 
-reports/evaluation/behavioral-heldout-v1.manifest.json is MATERIALIZED and frozen with 3,952 evaluation-only records (MCQ 3,652; LLM judge 300), the exact renderer/model contract, source hashes, and an explicit training exclusion policy. No model scores exist. The behavioral evaluator contract includes CALL, ANSWER, CLARIFY, UNSUPPORTED, confusion matrix, call precision/recall/F1, under/over-call, wrong-tool, argument, clarification, and unsupported errors.
+reports/evaluation/behavioral-heldout-v2.manifest.json is MATERIALIZED and frozen with 3,952 evaluation-only records (MCQ 3,652; LLM judge 300), the exact renderer/model contract, source hashes, and an explicit exclusion policy covering all six SFT sources. No model scores exist. The behavioral evaluator contract includes CALL, ANSWER, CLARIFY, UNSUPPORTED, confusion matrix, call precision/recall/F1, under/over-call, wrong-tool, argument, clarification, and unsupported errors.
 
 The baseline config is prepared for the unmodified Qwen3.5-2B instruct checkpoint. M0 is the source-oriented hypothesis control; M1 is the behavior-balanced HYPOTHESIS_ONLY config; M2 is SCHEMA_READY and UNRESOLVED_UNTIL_BASELINE with no fabricated weights. Residual failure schema and experiment lineage are prepared but unpopulated.
 

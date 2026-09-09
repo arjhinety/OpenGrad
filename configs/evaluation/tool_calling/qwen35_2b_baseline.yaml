@@ -13,22 +13,37 @@ generation:
   do_sample: false
   tool_choice: auto
 evaluations:
-  behavioral_manifest: reports/evaluation/behavioral-heldout-v1.manifest.json
+  behavioral_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json
   external:
-    bfcl: PINNED_REGISTRY_REVISION_REQUIRED_AT_EXECUTION
-    when2call: 0582f7749df63a96fdc3070932e83e72396ace53
-    tau2: PINNED_REGISTRY_REVISION_REQUIRED_AT_EXECUTION
+    bfcl:
+      version: V4
+      repository_revision: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+      evaluator_revision: 2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc
+    when2call:
+      version: when2call-eval-v1
+      dataset_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+      evaluator_revision: 2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc
+    tau2:
+      version: tau2
+      repository_revision: 59a200c6d575d595120f1cb70fea53cef0632f6b
+      evaluator_revision: 2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc
 runtime:
   backend: transformers
-  version: TO_BE_RECORDED_AT_EXECUTION
-  precision: TO_BE_RECORDED_AT_EXECUTION
-  device: TO_BE_RECORDED_AT_EXECUTION
+  transformers_version: 5.16.1
+  torch_version: 2.13.0
+  precision: bfloat16
+  device_policy: accelerator_required
+  context_length: 4096
+  overflow_policy: separate_bucket
 hardware: TO_BE_RECORDED_AT_EXECUTION
 outputs:
   predictions: reports/baselines/qwen35_2b_baseline/predictions.jsonl
+  metrics: reports/baselines/qwen35_2b_baseline/metrics.json
   residual_profile: reports/failures/qwen35_2b_baseline/residual-profile.json
   environment: reports/baselines/qwen35_2b_baseline/environment.json
 provenance:
   dataset_manifests: reports/data/normalization-v1
-  evaluator_revision: TO_BE_RECORDED_AT_EXECUTION
+  evaluator_revision: 2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc
   manifest_status: FROZEN_PRE_GPU
+  native_parser: opengrad.formatting.parser.parse_qwen_native_output@v1
+  contamination_report: reports/data/behavioral-heldout-v2-contamination.json

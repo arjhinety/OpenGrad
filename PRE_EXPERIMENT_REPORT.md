@@ -2,6 +2,14 @@
 
 Historical phase report. Its statements describe the Phase 0.5 checkpoint; current accessible-corpus completion is recorded in `reports/data-normalization-v1.md` and `ROADMAP.md`.
 
+## Current gate (post-review)
+
+The repository is `DATA_READY / BASELINE_PIPELINE_HARDENING`, not
+`BASELINE_INFERENCE_READY`. `opengrad baseline --dry-run` now runs the B0
+pipeline on CPU with a deterministic backend. A real model or benchmark score
+still does not exist. The frozen experiment uses `behavioral-heldout-v2`, pins
+the evaluator and benchmark revisions, and fixes the 4096-token overflow policy.
+
 ## 1. Completed work
 
 Implemented CPU-safe canonical tool schema validation, six source adapter boundaries with fixtures, model-family renderer seams, strict tool-call parser states, synthetic contamination methods, benchmark mock harnesses, normalized evaluation results, taxonomy mapping, experiment definition, lineage and stage gates, data statistics and mixture analysis, configuration validation, report generation, environment capture, CLI preflight, and Phase 1/2 protocols.
@@ -12,7 +20,7 @@ The bibliography and dataset registry now use field-level `VERIFIED`, `PARTIAL`,
 
 ## 3. Benchmark harness status
 
-CPU mock smoke harnesses accept deterministic predictions and emit `SMOKE_TEST_ONLY` result envelopes for BFCL, When2Call, τ-bench/τ², ToolSandbox, MCPMark, and Toolathlon. No real model or benchmark score was produced. BFCL and τ-bench repository default revisions are pinned in `registry/benchmarks.yaml`; other defaults remain explicitly unresolved where no canonical repository was established.
+CPU mock smoke harnesses accept deterministic predictions and emit `SMOKE_TEST_ONLY` result envelopes for BFCL, When2Call, τ-bench/τ², ToolSandbox, MCPMark, and Toolathlon. In addition, `opengrad baseline --dry-run` exercises the real B0 pipeline from the frozen manifest through rendering, native Qwen parsing, behavioral scoring, predictions, residuals, and environment capture. No real model or benchmark score was produced.
 
 ## 4. Dataset-adapter status
 
@@ -28,7 +36,7 @@ Synthetic tests cover normalized exact hashes, canonical JSON signatures, n-gram
 
 ## 7. Experiment registry status
 
-`tool_calling/qwen35_2b/baseline` exists as `PLANNED` only. The intended model repository and resolved Hugging Face snapshot are pinned in the model registry and planned experiment definition. Native template/parser validation and generation settings remain Phase 1 tasks. Lineage and scientific stage gates are unit-tested.
+`tool_calling/qwen35_2b/baseline` remains `PLANNED` for the real model run, but its execution contract is frozen. The native parser has adversarial golden tests, generation settings/runtime versions are pinned, and the GPU backend is the only unexercised implementation boundary.
 
 ## 8. Tests executed
 

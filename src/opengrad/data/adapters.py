@@ -9,6 +9,7 @@ from functools import lru_cache
 from typing import Any
 
 from opengrad.data.canonical import ToolConversation
+from opengrad.data.schema import normalize_tool
 
 
 def _json(value: Any, field: str) -> Any:
@@ -102,6 +103,7 @@ def _base(
     status: str = "VALID",
     **extra: Any,
 ) -> ToolConversation:
+    tools = [normalize_tool(tool) for tool in tools]
     raw_hash = hashlib.sha256(
         json.dumps(record, ensure_ascii=False, sort_keys=True, default=str).encode()
     ).hexdigest()
@@ -126,6 +128,11 @@ def _base(
         "source_features": extra,
         "tool_context": {"tool_count": len(tools)},
     }
+    source_metadata = record.get("metadata")
+    if isinstance(source_metadata, dict) and "eligibility" in source_metadata:
+        # Preserve eligibility provenance at the canonical boundary; training
+        # selection must not depend on a split-name heuristic alone.
+        metadata["eligibility"] = source_metadata["eligibility"]
     if any(m.get("role") == "tool" for m in messages):
         metadata["behavior"] = {
             "decision": "CALL",
@@ -238,10 +245,10 @@ def _when_messages(record: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def adapt_when2call(record: dict[str, Any], split: str = "train_sft") -> ToolConversation:
-    if "messages" in record and "conversation" not in record and record.get("id"):
-        return adapt(record, "when2call", split)
     if split in {"mcq", "test", "llm_judge", "mcq_test", "llm_judge_test"}:
         raise ValueError("evaluation rows cannot be normalized as training conversations")
+    if "messages" in record and "conversation" not in record and record.get("id"):
+        return adapt(record, "when2call", split)
     messages = _when_messages(record)
     if "prompt" in record and not any(m.get("role") == "user" for m in messages):
         messages.insert(0, {"role": "user", "content": str(record["prompt"])})

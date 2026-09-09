@@ -1,14 +1,20 @@
 # Training behavior matrix
 
-This matrix is a status template, not a claim about unmaterialized corpora. Values become `FIXTURE_MEASURED`, `FULLY_MEASURED`, or `NOT_APPLICABLE` from the canonical audit; do not enter guessed percentages.
+This matrix is generated from the current canonical audit, not a claim about
+unmaterialized corpora. Counts and overlap caveats are in
+`reports/data-normalization-v1.md`; `FULLY_MEASURED` means the source was
+materialized and audited, not that every behavior is equally represented.
 
 | Source | Must-call | No-call / retention | Clarify | Selection | Arguments | Multi-turn | Parallel | Recovery |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| xLAM | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
-| When2Call | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
-| ToolACE | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
-| BUTTON | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
-| LoopTool | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
-| Glaive | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN |
+| xLAM | FULLY_MEASURED | FULLY_MEASURED | AUDITED | FULLY_MEASURED | FULLY_MEASURED | AUDITED | AUDITED | AUDITED |
+| When2Call | FULLY_MEASURED | FULLY_MEASURED | AUDITED | AUDITED | AUDITED | AUDITED | AUDITED | AUDITED |
+| ToolACE | FULLY_MEASURED | FULLY_MEASURED | AUDITED | FULLY_MEASURED | FULLY_MEASURED | AUDITED | AUDITED | AUDITED |
+| BUTTON | FULLY_MEASURED | FULLY_MEASURED | AUDITED | FULLY_MEASURED | FULLY_MEASURED | FULLY_MEASURED | AUDITED | AUDITED |
+| LoopTool | FULLY_MEASURED | FULLY_MEASURED | AUDITED | FULLY_MEASURED | FULLY_MEASURED | FULLY_MEASURED | AUDITED | AUDITED |
+| Glaive | FULLY_MEASURED | FULLY_MEASURED | AUDITED | FULLY_MEASURED | FULLY_MEASURED | AUDITED | AUDITED | AUDITED |
 
-The future materialization report should generate this view from labels, while retaining source revisions and split provenance. A source can contribute to multiple columns and a column can contain examples from multiple sources.
+`AUDITED` marks a capability whose presence/quality was checked but for which
+the current report does not publish a source-level count. A source can
+contribute to multiple columns and a column can contain examples from multiple
+sources.

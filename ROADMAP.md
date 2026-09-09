@@ -6,6 +6,7 @@ OpenGrad proceeds from infrastructure to controlled measurement. A later phase i
 
 0. Repository and research infrastructure — COMPLETE
 0.5. CPU-only pre-experiment validation — COMPLETE
+0.6. Deterministic CPU baseline pipeline hardening — COMPLETE; GPU execution not run
 1. Data source audit and provenance registration — COMPLETE
 2. Canonical normalization and quarantine policy — COMPLETE
 3. Accessible corpus materialization, overlap, contamination, and coverage audits — COMPLETE
@@ -29,8 +30,8 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 ## Next empirical sequence
 
-6. B0 unmodified Qwen3.5-2B baseline inference — READY / NOT RUN
-   Run `Qwen/Qwen3.5-2B` at the pinned revision against the frozen behavioral held-out evaluation.
+6. B0 unmodified Qwen3.5-2B baseline inference — PIPELINE READY / GPU NOT RUN
+   First run `opengrad baseline --dry-run`; then run `Qwen/Qwen3.5-2B` at the pinned revision against the frozen behavioral-heldout-v2 evaluation.
 
 7. Freeze B0 evidence and generate the residual profile — REQUIRES B0
    Preserve the exact output, evaluator, renderer, generation configuration, and failure taxonomy.

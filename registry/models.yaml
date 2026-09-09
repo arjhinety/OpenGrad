@@ -10,7 +10,7 @@ models:
   tokenizer: null
   chat_template: null
   tool_protocol: native Qwen protocol; runtime validation required
-  native_tool_parser: null
+  native_tool_parser: opengrad.formatting.parser.parse_qwen_native_output@v1
   renderer: qwen3_5_2b_v1
   template_hash: 273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80
   multimodal: null
@@ -18,7 +18,7 @@ models:
     value: Apache-2.0
     verified: true
     source: https://huggingface.co/Qwen/Qwen3.5-2B/blob/main/LICENSE
-  preferred_precision: null
+  preferred_precision: bfloat16
   known_runtimes:
   - transformers
   - llama-cpp
@@ -27,5 +27,6 @@ models:
   mobile_candidate: true
   teacher_candidate: false
   student_candidate: true
-  notes: PLANNED_ONLY. Revision is pinned; renderer/template contract is fixture-validated,
-    while runtime-native parser, architecture, and compatibility remain unverified.
+  notes: PLANNED_ONLY. Revision and renderer/template contract are pinned; the
+    native parser is golden-test validated. Runtime architecture and hardware
+    compatibility remain unverified until the GPU run.

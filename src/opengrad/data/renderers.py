@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from opengrad.data.canonical import ToolConversation
+from opengrad.data.schema import normalize_tool
 
 
 @dataclass(frozen=True)
@@ -39,10 +40,7 @@ def _qwen_messages(example: ToolConversation) -> list[dict[str, Any]]:
 
 
 def _qwen_tools(example: ToolConversation) -> list[dict[str, Any]]:
-    return [
-        {key: value for key, value in tool.items() if key in {"name", "description", "parameters"}}
-        for tool in example.tools
-    ]
+    return [normalize_tool(tool) for tool in example.tools]
 
 
 class Qwen35_2BRenderer:
@@ -78,7 +76,7 @@ class Qwen35_2BRenderer:
         return self._tokenizer
 
     def render_sft(self, example: ToolConversation) -> RenderedTrainingExample:
-        example.validate()
+        example.validate_training_semantics()
         tokenizer = self._load()
         kwargs: dict[str, Any] = {
             "tokenize": False,
@@ -101,6 +99,36 @@ class Qwen35_2BRenderer:
             self.enable_thinking,
         )
 
+    def render_evaluation(self, example: Any) -> RenderedTrainingExample:
+        """Render an evaluation example with the same frozen Qwen contract.
+
+        Evaluation examples intentionally do not reuse an SFT assistant answer.
+        Only the question and declared tool catalogue are sent to the model.
+        """
+        if hasattr(example, "validate"):
+            example.validate()
+        tokenizer = self._load()
+        messages = [{"role": "user", "content": str(example.question)}]
+        kwargs: dict[str, Any] = {
+            "tokenize": False,
+            "add_generation_prompt": True,
+            "enable_thinking": self.enable_thinking,
+        }
+        if example.tools:
+            kwargs["tools"] = [normalize_tool(tool) for tool in example.tools]
+        text = tokenizer.apply_chat_template(messages, **kwargs)
+        template = str(getattr(tokenizer, "chat_template", ""))
+        return RenderedTrainingExample(
+            example.example_id,
+            str(text),
+            self.hf_repo,
+            self.model_revision,
+            self.renderer_version,
+            self.model_revision,
+            hashlib.sha256(template.encode()).hexdigest(),
+            self.enable_thinking,
+        )
+
     def token_lengths(self, example: ToolConversation) -> dict[str, int]:
         rendered = self.render_sft(example)
         tokenizer = self._load()
@@ -117,6 +145,11 @@ class Qwen35_2BRenderer:
             if example.tools
             else 0,
         }
+
+    def text_token_length(self, text: str) -> int:
+        """Count prompt tokens without applying truncation."""
+        tokenizer = self._load()
+        return len(tokenizer(text, add_special_tokens=False)["input_ids"])
 
 
 def renderer_for(model: str) -> Qwen35_2BRenderer:

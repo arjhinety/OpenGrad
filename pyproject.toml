@@ -14,6 +14,7 @@ data = ["datasets>=2.20", "pyarrow>=15.0"]
 evaluation = ["jsonschema>=4.23"]
 training = ["torch", "transformers", "trl", "peft"]
 inference = ["llama-cpp-python"]
+gpu-evaluation = ["torch==2.13.0", "transformers==5.16.1", "pyyaml==6.0.3", "pyarrow>=15.0"]
 dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11", "pyyaml>=6.0", "jsonschema>=4.23"]
 
 [project.scripts]

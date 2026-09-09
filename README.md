@@ -19,7 +19,7 @@ OpenGrad studies how much capability can be extracted from small open-weight lan
 
 Model changes are hypotheses, not improvements. Every intervention is measured. Every regression matters. Failed experiments remain part of the record, and every reported result must be reproducible.
 
-> **Current state:** the repository has validated CPU-safe research infrastructure, registries, schemas, fixtures, adapters, mock evaluation harnesses, and future experiment protocols. It has **no trained OpenGrad model, model inference run, real benchmark score, inference benchmark, speculative-decoding experiment, or published empirical result**. See the [Phase 0.5 report](PRE_EXPERIMENT_REPORT.md).
+> **Current state:** the repository has validated CPU-safe research infrastructure and a complete deterministic baseline pipeline. It has **no trained OpenGrad model, real model inference run, real benchmark score, speculative-decoding experiment, or published empirical result**. The pre-GPU gate is `DATA_READY / BASELINE_PIPELINE_HARDENING`. See the [Phase 0.5 report](PRE_EXPERIMENT_REPORT.md).
 
 ## At a glance
 
@@ -131,13 +131,13 @@ flowchart TD
 
 ## Current research status
 
-Pre-GPU preparation: COMPLETE / BASELINE_INFERENCE_READY. The first empirical action is B0 baseline inference; no model result exists yet.
+Pre-GPU preparation: DATA_READY / BASELINE_PIPELINE_HARDENING. B0 plumbing is executable end-to-end with a CPU deterministic backend; no real model result exists yet.
 
 | Stage | Status | Evidence |
 | --- | --- | --- |
 | Repository and research infrastructure | VALIDATED | [Bootstrap report](BOOTSTRAP_REPORT.md) |
 | CPU fixture and preflight validation | VALIDATED | [Phase 0.5 report](PRE_EXPERIMENT_REPORT.md) |
-| Qwen3.5-2B baseline reproduction | READY / NOT RUN | [Baseline record](configs/experiments/tool_calling/qwen35_2b_baseline.yaml) |
+| Qwen3.5-2B baseline reproduction | PIPELINE READY / GPU NOT RUN | [Baseline record](configs/experiments/tool_calling/qwen35_2b_baseline.yaml); `opengrad baseline --dry-run` |
 | Dataset materialization and audit | COMPLETE for current accessible pinned corpora; BUTTON and xLAM included | [Normalization report](reports/data-normalization-v1.md) |
 | Tool-use SFT | NOT STARTED | [Roadmap](ROADMAP.md) |
 | Preference optimization | CONDITIONAL | Only if full evaluation justifies it |
@@ -183,13 +183,27 @@ OpenGrad has deterministic mock smoke harnesses for the following configured eva
 | Benchmark | Measures in the registry | Harness status | Real score available? | Revision state |
 | --- | --- | --- | --- | --- |
 | BFCL V4 | Function-call accuracy | Mock smoke harness | **No** | Recommended Gorilla revision pinned |
-| When2Call | Call decision, answer quality | Mock smoke harness | **No** | Evaluator revision unresolved |
+| When2Call | Call decision, answer quality | End-to-end CPU mock + frozen runner | **No** | Frozen in baseline v2 config |
 | τ-bench / τ² | Task success, reward | Mock smoke harness | **No** | Recommended repository revision pinned |
 | ToolSandbox | Tool-use correctness | Mock smoke harness | **No** | Authoritative metadata pending |
 | MCPMark Verified | Task success | Mock smoke harness | **No** | Stretch evaluation; metadata pending |
 | Toolathlon | Task success | Mock smoke harness | **No** | Stretch evaluation; metadata pending |
 
 The full benchmark registry is [`registry/benchmarks.yaml`](registry/benchmarks.yaml). The current checkout reports `BOOTSTRAP_NO_SCORES`; **no real OpenGrad benchmark score exists**.
+
+### Baseline execution gate
+
+The frozen B0 definition is `configs/evaluation/tool_calling/qwen35_2b_baseline.yaml` and points to held-out v2. Before using a GPU, run:
+
+```text
+opengrad baseline --dry-run
+```
+
+This loads the held-out manifest, renders the exact Qwen prompt, calls
+`InferenceBackend.generate()`, parses native Qwen tool calls, evaluates routing,
+and writes predictions, metrics, a residual profile, and environment capture.
+The deterministic backend is a plumbing test only; it must never be reported as
+a model score.
 
 Benchmarks are measurements, not the product requirement. The intended evaluation stack is: deterministic behavior and regression checks; established external tool-use benchmarks; and downstream agent/runtime evaluation under realistic constrained-device conditions. The third layer is planned, not implemented. A benchmark gain that becomes worse in an OpenWeights-style workload is not an unqualified success.
 

@@ -6,8 +6,8 @@ benchmarks:
   canonical_repository: https://github.com/ShishirPatil/gorilla
   reference: null
   version: V4
-  commit_sha: null
-  evaluator_version: null
+  commit_sha: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+  evaluator_version: opengrad-frozen-baseline-v1
   splits: []
   metrics:
   - function_call_accuracy
@@ -22,9 +22,9 @@ benchmarks:
   name: When2Call evaluation
   canonical_repository: null
   reference: arxiv:2504.18851
-  version: null
-  commit_sha: null
-  evaluator_version: null
+  version: when2call-eval-v1
+  commit_sha: 0582f7749df63a96fdc3070932e83e72396ace53
+  evaluator_version: opengrad-frozen-baseline-v1
   splits:
   - mcq_test
   - llm_judge_test
@@ -43,8 +43,8 @@ benchmarks:
   canonical_repository: https://github.com/sierra-research/tau-bench
   reference: null
   version: null
-  commit_sha: null
-  evaluator_version: null
+  commit_sha: 59a200c6d575d595120f1cb70fea53cef0632f6b
+  evaluator_version: opengrad-frozen-baseline-v1
   splits: []
   metrics:
   - task_success

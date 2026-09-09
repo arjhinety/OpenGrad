@@ -5,18 +5,31 @@ hypothesis: Baseline behavior must be measured before any post-training interven
 model_id: qwen3.5-2b
 model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
 parent_checkpoint: null
-dataset_manifest: reports/evaluation/behavioral-heldout-v1.manifest.json
-dataset_hash: null
+dataset_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json
+dataset_hash: e80c15e450af9a848ffea01552cc6a6177889743f9e510f337991492cafaddfd
 benchmark_versions:
-  bfcl: null
-  when2call: null
-  tau2: null
+  bfcl: V4@6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+  when2call: when2call-eval-v1@0582f7749df63a96fdc3070932e83e72396ace53
+  tau2: tau2@59a200c6d575d595120f1cb70fea53cef0632f6b
 config: configs/evaluation/tool_calling/qwen35_2b_baseline.yaml
 seed: 0
 hardware: {required: accelerator-later, gpu_used_now: false}
-software: {}
+software:
+  python: '3.11'
+  transformers: 5.16.1
+  torch: 2.13.0
+  evaluator_revision: 2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc
 compute_provider: null
-tool_parser: model-native-pending-runtime-validation
+tool_parser: opengrad.formatting.parser.parse_qwen_native_output@v1
 evaluation_config: configs/evaluation/tool_calling/qwen35_2b_baseline.yaml
-generation_config: {}
+generation_config:
+  temperature: 0.0
+  top_p: 1.0
+  max_new_tokens: 512
+  do_sample: false
+  tool_choice: auto
+context_policy:
+  max_input_tokens: 4096
+  overflow: separate_bucket
+  decision_frozen_before_results: true
 acceptance_criteria: exact revisions, native parser validation, reproducible benchmark suite, discrepancy analysis

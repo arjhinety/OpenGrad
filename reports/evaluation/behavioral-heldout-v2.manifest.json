@@ -1,0 +1,41 @@
+{
+  "$schema": "../../registry/evaluation_manifest.schema.json",
+  "contamination_policy": {
+    "derived_prompts_excluded": true,
+    "training_manifests_excluded": [
+      "data/processed/normalization-v1/xlam",
+      "data/processed/normalization-v1/toolace",
+      "data/processed/normalization-v1/looptool",
+      "data/processed/normalization-v1/glaive",
+      "data/processed/normalization-v1/button",
+      "data/processed/normalization-v1/when2call-sft"
+    ]
+  },
+  "freeze_revision": "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc",
+  "frozen": true,
+  "manifest_id": "behavioral-heldout-v2",
+  "model_renderer_contract": {
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "renderer": "qwen3_5_2b_v1",
+    "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80"
+  },
+  "notes": "Re-frozen before baseline inference. The held-out namespace is evaluation-only and excludes all six training-eligible SFT sources. Exact conversation and normalized prompt overlap evidence is recorded separately; this is not a semantic-clean claim.",
+  "schema_version": 1,
+  "splits": [
+    {
+      "content_hash": "ae0f31fbb858bd8239999fafd1c4fe1ab424c4e1b272b505acb293d661f93c49",
+      "id": "when2call-mcq",
+      "items": 3652,
+      "purpose": "CALL/ANSWER/CLARIFY/UNSUPPORTED behavioral decisions",
+      "source": "data/processed/normalization-v1/when2call-mcq/manifest.json"
+    },
+    {
+      "content_hash": "2a626635783240d45e6bdd58e84bc17802307099ad51bbb4206beda2fc3f7f98",
+      "id": "when2call-llm-judge",
+      "items": 300,
+      "purpose": "safety and unsupported-request behavioral decisions",
+      "source": "data/processed/normalization-v1/when2call-llm-judge/manifest.json"
+    }
+  ],
+  "status": "FROZEN_PRE_GPU"
+}
