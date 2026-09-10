@@ -19,6 +19,7 @@ from opengrad.training.teacher import MockTeacherProvider, TeacherProvider
 
 @dataclass
 class RolloutRecord:
+    rollout_id: str
     prompt_id: str
     student_checkpoint: str
     teacher_model: str
@@ -34,6 +35,7 @@ class RolloutRecord:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "rollout_id": self.rollout_id,
             "prompt_id": self.prompt_id,
             "student_checkpoint": self.student_checkpoint,
             "teacher_model": self.teacher_model,
@@ -158,6 +160,7 @@ class OnPolicyDistillationTrainerBackend(TrainerBackend):
                     )
                     is_accepted = teacher_res.score >= min_score
                     record = RolloutRecord(
+                        rollout_id=f"ro_{experiment_id}_{r['prompt_id']}",
                         prompt_id=r["prompt_id"],
                         student_checkpoint=student_ckpt,
                         teacher_model=teacher_res.model_id,

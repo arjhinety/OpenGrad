@@ -1,0 +1,17 @@
+schema_version: 1
+prompt_state_dataset_id: toolpolicy_opd_prompts_v1
+description: Prompt states extracted immediately prior to assistant decision points from canonical tool trajectories
+source_corpus: arrochi112/OpenGrad-ToolPolicy-Canonical-v1
+canonical_revision: bb295d8a4ad64f7e8161044ad2fa34f873ede418
+profiles:
+  broad:
+    description: Representative cross-section of eligible tool-calling prefixes
+    weight: 0.50
+  residual:
+    description: Focus on ambiguous decision boundaries, multi-turn state, and error recovery
+    weight: 0.50
+eligibility:
+  exclude_held_outs: true
+  exclude_quarantined: true
+  exclude_rendering_failures: true
+  require_valid_tool_definitions: true

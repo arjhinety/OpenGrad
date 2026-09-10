@@ -1,0 +1,51 @@
+experiment_id: qwen35_2b_qwen38_27b_a100
+hypothesis: "On-policy distillation from frozen Qwen3.8-27B transfers high-capacity multi-turn tool calling and error recovery to Qwen3.5-2B on a single A100."
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+teacher:
+  model_id: Qwen/Qwen3.8-27B
+  model_revision: pinned_qwen38_27b_v1
+  precision: bfloat16
+  thinking: false
+  execution_mode: MODE_A_CO_RESIDENT
+datasets:
+  manifest_ids:
+    - toolpolicy_opd_prompts_v1
+  manifest_paths:
+    - configs/data/distillation/toolpolicy_opd_prompts_v1.yaml
+trainer:
+  type: on_policy_distillation
+  divergence_type: forward_kl
+  temperature: 1.0
+  on_policy_fraction: 1.0
+  learning_rate: 1.0e-5
+  iterations: 5
+  prompts_per_iteration: 20
+  min_teacher_score: 0.75
+  rollout_refresh_interval: 1
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 4
+  precision: bfloat16
+evaluation:
+  suite: agent_transfer
+generation:
+  temperature: 0.7
+  top_p: 0.95
+  max_output_tokens: 512
+checkpointing:
+  save_steps: 10
+  max_checkpoints: 3
+promotion:
+  must_pass:
+    tau3: 36.0
+    openweights: 65.0
+  max_regression:
+    default: 1.0
+reproducibility:
+  seed: 42
+  precision: bfloat16
+  hardware: NVIDIA_A100_80GB
+speculative_decoding:
+  enabled: false
