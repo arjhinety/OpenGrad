@@ -329,6 +329,59 @@ datasets:
     status: pending_dataset_preparation
   exact_revision: null
   source_repository: https://huggingface.co/datasets/Salesforce/APIGen-MT-5k
+- id: canonical_v2
+  display_name: OpenGrad ToolPolicy Canonical v2 (local candidate, partial)
+  organization: OpenGrad
+  hf_id: unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial
+  repository: configs/releases/toolpolicy_canonical_v2.yaml
+  papers:
+  - apigen
+  - toolace
+  - when2call
+  retrieval_date: '2026-09-10'
+  license:
+    value: COMPOSITE_PER_SOURCE
+    verified: true
+    source: .release/hf/toolpolicy-canonical-v2/source-licenses.md
+  redistribution: PER_SOURCE
+  upstream_access_mode: mixed
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: APIGen
+  modifications_disclosed: true
+  original_sample_count: 103036
+  retained_sample_count: 103036
+  preprocessing_version: normalization-v2
+  checksum: 09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1
+  source_revision:
+    value: 7a2a8e7b069bfac8eb98809eff8d24df3eb26e64
+    verified: true
+    source: opengrad_git_commit in .release/hf/toolpolicy-canonical-v2/release-manifest.json
+  exact_revision: 7a2a8e7b069bfac8eb98809eff8d24df3eb26e64
+  category: tool_use
+  intended_stages:
+  - future_sft
+  allowed_splits:
+  - train
+  forbidden_splits:
+  - evaluation
+  - heldout
+  - preference
+  - mcq_test
+  - llm_judge_test
+  benchmark_overlap_risk: HIGH_IF_TEST_LEAKS
+  known_source_overlap: SAME_SOURCES_AS_V1_EXCEPT_GATED_ONES
+  # v1 completed a semantic contamination review; v2 has not been re-reviewed, and it is not
+  # claimed to be. Its sources overlap v1's and its evaluation-side artifacts are excluded by
+  # the same policy, but the newly recovered Glaive records have not been through the audit.
+  contamination_status: NOT_REVIEWED_FOR_V2
+  planned_initial_mixture_percent: null
+  notes: 'Locally built candidate, three sources of six: xlam and button are gated upstream
+    and looptools source was not located. It exists to test whether the tool-call collapse
+    observed on v1 is caused by the absence of tool-call supervision in the training signal.
+    Not published, and not a drop-in replacement for v1.'
+
 - id: canonical_v1
   display_name: OpenGrad ToolPolicy Canonical v1
   organization: OpenGrad
