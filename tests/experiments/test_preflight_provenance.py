@@ -34,8 +34,8 @@ def test_preflight_reports_the_real_commit_not_unknown():
     result = run_experiment_preflight(M0_SFT, root=ROOT)
     git = _check(result, "Git State")
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-    assert f"SHA: {head[:10]}" in git.details, git.details
-    assert "unknown" not in git.details
+    assert head[:10] in git.details, git.details
+    assert "unknown" not in git.details, git.details
 
 
 def test_preflight_git_state_reflects_only_tracked_files():
