@@ -200,3 +200,50 @@ def test_glaive_v2_rejects_a_call_without_a_name():
     )
     with pytest.raises(ValueError, match="malformed Glaive function call"):
         adapt_glaive_v2(_glaive_raw(nameless))
+
+
+def test_glaive_v2_reads_the_single_quoted_arguments_shape():
+    """`arguments` is a single-quoted JSON string, which is the shape the source actually uses."""
+    from opengrad.data.adapters import adapt_glaive_v2
+
+    assistant = [
+        m for m in adapt_glaive_v2(_glaive_raw(UNTERMINATED)).messages if m["role"] == "assistant"
+    ]
+    assert assistant[0]["tool_calls"][0]["arguments"] == {"country": "US"}
+
+
+def test_glaive_v2_reads_json_booleans_inside_the_single_quoted_value():
+    from opengrad.data.adapters import adapt_glaive_v2
+
+    call = (
+        "USER: make one "
+        'ASSISTANT: <functioncall> {"name": "get_news", "arguments": \'{"length": 12, '
+        '"include_symbols": true, "nested": {"a": 1}}\'} <|endoftext|> '
+        "FUNCTION RESPONSE: {} "
+        "ASSISTANT: done."
+    )
+    assistant = [m for m in adapt_glaive_v2(_glaive_raw(call)).messages if m["role"] == "assistant"]
+    assert assistant[0]["tool_calls"][0]["arguments"] == {
+        "length": 12,
+        "include_symbols": True,
+        "nested": {"a": 1},
+    }
+
+
+def test_glaive_balanced_body_is_not_ended_by_a_brace_inside_a_string():
+    from opengrad.data.adapters import parse_glaive_body
+
+    body = '{"name": "f", "arguments": \'{"pattern": "}{"}\'}'
+    assert parse_glaive_body(body)["name"] == "f"
+
+
+def test_glaive_v2_still_refuses_a_body_it_cannot_read():
+    from opengrad.data.adapters import adapt_glaive_v2
+
+    with pytest.raises(ValueError):
+        adapt_glaive_v2(
+            _glaive_raw(
+                'USER: q ASSISTANT: <functioncall> {"name": "get_news", '
+                "\"arguments\": 'not json at all'} FUNCTION RESPONSE: {} ASSISTANT: x."
+            )
+        )

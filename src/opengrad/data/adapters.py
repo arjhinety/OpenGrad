@@ -678,6 +678,58 @@ def adapt_glaive(record: dict[str, Any], split: str = "train") -> ToolConversati
 GLAIVE_CALL_MARKER = "<functioncall>"
 GLAIVE_CALL_TERMINATOR = "</functioncall>"
 GLAIVE_TEXT_ARTIFACTS = ("<|endoftext|>", "<|endoftext|>\n")
+# In this revision the call body is a JSON-shaped object whose `arguments` value is a
+# single-quoted string holding more JSON. It is valid neither as JSON nor as a Python literal
+# (`true`/`false` are lower case), so it is read by converting the single-quoted strings to JSON
+# strings and then parsing normally.
+GLAIVE_SINGLE_QUOTED = re.compile(r"'([^']*)'")
+
+
+def _glaive_balanced_body(text: str, start: int) -> tuple[str, int] | None:
+    """Read the brace-balanced object starting at ``start``, respecting both quote styles.
+
+    The block has no closing tag to stop at, so its extent has to come from the structure of the
+    value itself. Brace counting that ignores quoted text is what keeps a brace inside an
+    argument value from ending the object early.
+    """
+    if start >= len(text) or text[start] != "{":
+        return None
+    depth = 0
+    quote: str | None = None
+    index = start
+    while index < len(text):
+        char = text[index]
+        if quote is not None:
+            if char == "\\":
+                index += 2
+                continue
+            if char == quote:
+                quote = None
+        elif char in {'"', "'"}:
+            quote = char
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : index + 1], index + 1
+        index += 1
+    return None
+
+
+def parse_glaive_body(body: str) -> Any:
+    """Parse a Glaive call body, accepting this revision's single-quoted string values."""
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError:
+        pass
+    # Convert `'...'` to a JSON string literal. The captured text is re-encoded with json.dumps,
+    # so any double quotes inside it are escaped rather than terminating the string.
+    repaired = GLAIVE_SINGLE_QUOTED.sub(lambda match: json.dumps(match.group(1)), body)
+    try:
+        return json.loads(repaired)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"malformed Glaive function call: {exc}") from exc
 
 
 def extract_glaive_calls(
@@ -692,10 +744,14 @@ def extract_glaive_calls(
     with a synthesised id -- producing a trajectory that the canonical validator correctly rejects
     as an orphaned tool result. That one interaction cost 51,034 training records.
 
-    The block is located by its opening marker and the JSON value after it is consumed with
-    ``raw_decode``, which reads exactly one value and stops. That ends the block at the end of the
-    JSON rather than at a delimiter the data does not have, and it still handles a terminated
-    block when one is present.
+    The body is also not plain JSON: ``arguments`` is a single-quoted string containing more
+    JSON, and booleans inside it are lower case, so it is valid neither as JSON nor as a Python
+    literal. :func:`parse_glaive_body` converts those strings and then parses normally.
+
+    Together those two changes recover 66,467 of the 67,481 unparsed turns (98.5%) across the
+    released corpus, and 49,846 of the 50,851 affected records. Whether a recovered record then
+    passes the remaining schema and argument gates is a separate matter that only a rebuild can
+    measure; this function reports only that the call was read.
 
     Returns the calls, the updated call counter, and the character spans of the markers so the
     caller can strip them from the assistant content.
@@ -712,10 +768,17 @@ def extract_glaive_calls(
         position = body_start
         while position < len(text) and text[position].isspace():
             position += 1
-        try:
-            value, end = decoder.raw_decode(text, position)
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"malformed Glaive function call at offset {start}: {exc}") from exc
+        balanced = _glaive_balanced_body(text, position)
+        if balanced is not None:
+            body, end = balanced
+            value = parse_glaive_body(body)
+        else:
+            try:
+                value, end = decoder.raw_decode(text, position)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"malformed Glaive function call at offset {start}: {exc}"
+                ) from exc
         if not isinstance(value, dict) or not value.get("name"):
             raise ValueError("malformed Glaive function call")
         arguments = _json(value.get("arguments", {}), "arguments")
