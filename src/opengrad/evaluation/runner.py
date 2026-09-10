@@ -22,7 +22,15 @@ from opengrad.data.canonical import CanonicalEvaluationExample
 from opengrad.data.renderers import Qwen35_2BRenderer
 from opengrad.env_capture import capture
 from opengrad.evaluation.routing import routing_metrics
+from opengrad.experiments.schema import ExperimentRecord, ExperimentStatus
+from opengrad.experiments.store import ExperimentStore
 from opengrad.formatting.parser import ParsedNativeOutput, parse_qwen_native_output
+
+PINNED_MODEL_REVISION = "15852e8c16360a2fea060d615a32b45270f8a8fc"
+PINNED_TEMPLATE_HASH = "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80"
+PINNED_EVALUATOR_REVISION = "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc"
+CANONICAL_MODEL_ID = "Qwen/Qwen3.5-2B"
+BASELINE_EXPERIMENT_ID = "tool_calling/qwen35_2b/baseline"
 
 
 class InferenceBackend(Protocol):
@@ -89,42 +97,81 @@ def _qwen_tool(tool: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def load_evaluation_examples(root: Path, manifest_path: Path) -> list[CanonicalEvaluationExample]:
-    """Load exactly the materialized splits named by a frozen manifest."""
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("frozen") is not True or manifest.get("status") not in {
-        "FROZEN_PRE_GPU",
-        "MATERIALIZED",
-        "EXECUTED",
-    }:
-        raise ValueError("evaluation manifest is not frozen")
-    examples: list[CanonicalEvaluationExample] = []
-    import pyarrow.parquet as pq  # type: ignore[import-untyped]
+def _resolve_inside(root: Path, value: Any, label: str) -> Path:
+    if not isinstance(value, str) or not value or Path(value).is_absolute():
+        raise ValueError(f"{label} must be a non-empty repository-relative path")
+    result = (root / value).resolve()
+    if not result.is_relative_to(root.resolve()):
+        raise ValueError(f"{label} must remain inside the repository")
+    return result
 
+
+def _materialized_rows(root: Path, split: dict[str, Any]) -> list[dict[str, Any]]:
+    source = _resolve_inside(root, split.get("source"), f"split {split.get('id')} source")
+    manifest_path = source if source.name == "manifest.json" else source / "manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"evaluation materialization manifest is missing: {manifest_path}")
+    shard_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if shard_manifest.get("finalized") is not True or not isinstance(shard_manifest.get("shards"), list) or not shard_manifest["shards"]:
+        raise ValueError(f"evaluation materialization is not finalized: {manifest_path}")
+    expected_count = split.get("items")
+    if not isinstance(expected_count, int) or expected_count < 1:
+        raise ValueError(f"split {split.get('id')} has an invalid item count")
+    rows: list[dict[str, Any]] = []
+    import pyarrow.parquet as pq  # type: ignore[import-untyped]
+    seen_shards: set[str] = set()
+    seen_ids: set[str] = set()
+    for shard_name in shard_manifest["shards"]:
+        if not isinstance(shard_name, str) or not shard_name or shard_name in seen_shards:
+            raise ValueError(f"split {split.get('id')} has invalid shard names")
+        seen_shards.add(shard_name)
+        shard_path = _resolve_inside(manifest_path.parent, shard_name, f"split {split.get('id')} shard")
+        if not shard_path.is_file():
+            raise FileNotFoundError(f"evaluation shard is missing: {shard_path}")
+        for batch in pq.ParquetFile(shard_path).iter_batches(batch_size=128):
+            for row in batch.to_pylist():
+                example_id = row.get("example_id") if isinstance(row, dict) else None
+                if not isinstance(example_id, str) or not example_id or example_id in seen_ids:
+                    raise ValueError(f"split {split.get('id')} contains missing or duplicate example_id")
+                seen_ids.add(example_id)
+                rows.append(row)
+    if len(rows) != expected_count:
+        raise ValueError(f"split {split.get('id')} has {len(rows)} rows; expected {expected_count}")
+    digest = hashlib.sha256(b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\\n").encode("utf-8") for row in rows)).hexdigest()
+    if shard_manifest.get("content_hash") != split.get("content_hash") or shard_manifest.get("content_hash") != digest:
+        raise ValueError(f"split {split.get('id')} content hash does not match materialized rows")
+    return rows
+
+
+def load_evaluation_examples(root: Path, manifest_path: Path) -> list[CanonicalEvaluationExample]:
+    """Load exactly the finalized, hash-bound materialized splits."""
+    root = root.resolve()
+    if manifest_path.is_absolute():
+        if not manifest_path.resolve().is_relative_to(root):
+            raise ValueError("evaluation manifest must remain inside the repository")
+        manifest_value = str(manifest_path.resolve().relative_to(root))
+    else:
+        manifest_value = str(manifest_path)
+    manifest_path = _resolve_inside(root, manifest_value, "evaluation manifest")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("schema_version") != 1 or manifest.get("manifest_id") != "behavioral-heldout-v2" or manifest.get("frozen") is not True or manifest.get("status") not in {"FROZEN_PRE_GPU", "MATERIALIZED", "EXECUTED"}:
+        raise ValueError("evaluation manifest is not the pinned frozen contract")
+    contract = manifest.get("model_renderer_contract", {})
+    if contract.get("model_revision") != PINNED_MODEL_REVISION or contract.get("renderer") != "qwen3_5_2b_v1" or contract.get("template_hash") != PINNED_TEMPLATE_HASH:
+        raise ValueError("evaluation manifest renderer contract is not pinned")
+    examples: list[CanonicalEvaluationExample] = []
     for split in manifest.get("splits", []):
-        source = root / str(split["source"])
-        if source.name == "manifest.json":
-            source = source.parent
-        if not source.exists():
-            raise FileNotFoundError(f"evaluation split is missing: {source}")
-        shard_manifest = json.loads((source / "manifest.json").read_text(encoding="utf-8"))
-        for shard_name in shard_manifest.get("shards", []):
-            for batch in pq.ParquetFile(source / shard_name).iter_batches(batch_size=128):
-                for raw in batch.to_pylist():
-                    row = dict(raw)
-                    for key in ("source", "tools", "candidates", "metadata"):
-                        row[key] = _json(row[key])
-                    example = CanonicalEvaluationExample(
-                        str(row["example_id"]),
-                        row["source"],
-                        str(row["question"]),
-                        [_qwen_tool(tool) for tool in row["tools"]],
-                        str(row["expected_decision"]),
-                        row["candidates"],
-                        row["metadata"],
-                    )
-                    example.validate()
-                    examples.append(example)
+        for raw in _materialized_rows(root, split):
+            row = dict(raw)
+            for key in ("source", "tools", "candidates", "metadata"):
+                row[key] = _json(row[key])
+            example = CanonicalEvaluationExample(
+                str(row["example_id"]), row["source"], str(row["question"]),
+                [_qwen_tool(tool) for tool in row["tools"]], str(row["expected_decision"]),
+                row["candidates"], row["metadata"],
+            )
+            example.validate()
+            examples.append(example)
     return examples
 
 
@@ -286,7 +333,14 @@ def _prediction(
     }
 
 
-def _residuals(predictions: Iterable[dict[str, Any]], baseline_experiment: str) -> dict[str, Any]:
+def _residuals(
+    predictions: Iterable[dict[str, Any]],
+    baseline_experiment: str,
+    *,
+    model_id: str,
+    model_revision: str,
+    manifest_sha256: str,
+) -> dict[str, Any]:
     counts: Counter[str] = Counter()
     total = 0
     for row in predictions:
@@ -303,12 +357,55 @@ def _residuals(predictions: Iterable[dict[str, Any]], baseline_experiment: str) 
             counts["PREMATURE_STOP"] += 1
     return {
         "schema_version": 1,
-        "model": "qwen3.5-2b",
+        "model_id": model_id,
+        "model_revision": model_revision,
+        "manifest_sha256": manifest_sha256,
         "baseline_experiment": baseline_experiment,
         "sample_count": total,
         "residuals": {key: value / total for key, value in sorted(counts.items())} if total else {},
         "failure_counts": dict(sorted(counts.items())),
     }
+
+
+def _project_path(root: Path, value: Any, label: str) -> Path:
+    if not isinstance(value, str) or not value or Path(value).is_absolute():
+        raise ValueError(f"{label} must be a non-empty repository-relative path")
+    path = (root / value).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError(f"{label} must remain inside the repository")
+    return path
+
+
+def _validate_baseline_config(config: dict[str, Any]) -> None:
+    required = {"schema_version", "status", "model_id", "model_revision", "tokenizer_revision", "renderer", "template_hash", "seed", "generation", "evaluations", "runtime", "outputs", "provenance"}
+    missing = sorted(required - set(config))
+    if missing:
+        raise ValueError(f"baseline config is missing required field(s): {', '.join(missing)}")
+    if config["schema_version"] != 1 or config["status"] != "FROZEN_PRE_GPU":
+        raise ValueError("baseline config must be schema 1 and FROZEN_PRE_GPU")
+    if config["model_id"] != CANONICAL_MODEL_ID or config["model_revision"] != PINNED_MODEL_REVISION or config["tokenizer_revision"] != PINNED_MODEL_REVISION:
+        raise ValueError("baseline config must pin the canonical model, model revision, and tokenizer revision")
+    if config["renderer"] != "qwen3_5_2b_v1" or config["template_hash"] != PINNED_TEMPLATE_HASH or config["seed"] != 0:
+        raise ValueError("baseline config renderer, template, or seed is not the frozen contract")
+    if config.get("evaluations", {}).get("behavioral_manifest") != "reports/evaluation/behavioral-heldout-v2.manifest.json":
+        raise ValueError("baseline config must use the pinned behavioral-heldout-v2 manifest")
+    provenance = config["provenance"]
+    if provenance.get("evaluator_revision") != PINNED_EVALUATOR_REVISION or provenance.get("manifest_status") != "FROZEN_PRE_GPU":
+        raise ValueError("baseline provenance must pin the evaluator revision and frozen manifest status")
+    generation = config["generation"]
+    if not isinstance(generation, dict) or generation.get("max_new_tokens", 0) < 1 or generation.get("do_sample") is not False or generation.get("temperature") != 0.0 or generation.get("top_p") != 1.0:
+        raise ValueError("baseline generation config is not deterministic and bounded")
+    runtime = config["runtime"]
+    if not isinstance(runtime, dict) or runtime.get("backend") != "transformers" or runtime.get("precision") != "bfloat16" or runtime.get("device_policy") != "accelerator_required" or not isinstance(runtime.get("context_length"), int) or runtime["context_length"] < 1:
+        raise ValueError("baseline runtime config is not the pinned transformers/BF16 contract")
+    evaluations = config["evaluations"]
+    if not isinstance(evaluations, dict) or not isinstance(evaluations.get("behavioral_manifest"), str) or evaluations.get("evaluator_revision") not in {None, PINNED_MODEL_REVISION}:
+        raise ValueError("baseline evaluation config is malformed")
+    if not isinstance(config["provenance"], dict):
+        raise ValueError("baseline provenance must be an object")
+    outputs = config["outputs"]
+    if not isinstance(outputs, dict) or set(outputs) != {"predictions", "metrics", "residual_profile", "environment"} or not all(isinstance(value, str) and value for value in outputs.values()):
+        raise ValueError("baseline must define exactly predictions, metrics, residual_profile, and environment outputs")
 
 
 def _write_json(path: Path, value: dict[str, Any]) -> None:
@@ -328,12 +425,21 @@ def run_baseline(
     limit: int | None = None,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Run the frozen baseline from manifest through artifacts."""
-    root = root or config_path.parents[3]
+    """Run the frozen baseline from manifest through artifacts.
+
+    Real runs are immutable lifecycle events: they cannot overwrite an existing
+    baseline artifact set or ledger record.  A dry-run is explicitly plumbing
+    only and is redirected away from the canonical evidence paths when the
+    default config is used.
+    """
+    root = (root or config_path.parents[3]).resolve()
+    config_path = config_path.resolve()
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
-    if not isinstance(config, dict) or config.get("status") != "FROZEN_PRE_GPU":
-        raise ValueError("baseline config must be FROZEN_PRE_GPU")
-    manifest_path = root / str(config["evaluations"]["behavioral_manifest"])
+    if not isinstance(config, dict):
+        raise ValueError("baseline config must be a YAML object")
+    _validate_baseline_config(config)
+    manifest_value = config.get("evaluations", {}).get("behavioral_manifest")
+    manifest_path = _project_path(root, manifest_value, "behavioral manifest")
     examples = load_evaluation_examples(root, manifest_path)
     if limit is not None:
         if limit < 1:
@@ -364,12 +470,43 @@ def run_baseline(
         predictions.append(
             _prediction(example, rendered.text, input_tokens, context_limit, raw, parsed)
         )
-    output_config = config.get("outputs", {})
-    prediction_path = root / str(output_config["predictions"])
+    output_config = config.get("outputs")
+    if not isinstance(output_config, dict) or set(output_config) != {"predictions", "metrics", "residual_profile", "environment"}:
+        raise ValueError("baseline config must define predictions, metrics, residual_profile, and environment outputs")
+    output_paths = {}
+    for name in output_config:
+        value = output_config[name]
+        if dry_run and isinstance(value, str) and Path(value).is_absolute():
+            output_paths[name] = Path(value).resolve()
+        else:
+            output_paths[name] = _project_path(root, value, f"{name} output")
+    canonical_outputs = {
+        "predictions": "reports/baselines/qwen35_2b_baseline/predictions.jsonl",
+        "metrics": "reports/baselines/qwen35_2b_baseline/metrics.json",
+        "residual_profile": "reports/failures/qwen35_2b_baseline/residual-profile.json",
+        "environment": "reports/baselines/qwen35_2b_baseline/environment.json",
+    }
+    if not dry_run and {name: str(path.relative_to(root)) for name, path in output_paths.items()} != canonical_outputs:
+        raise ValueError("real baseline must write the canonical evidence paths")
+    if not dry_run:
+        if any(path.exists() for path in output_paths.values()):
+            raise FileExistsError("real baseline evidence already exists; use a new immutable run identity")
+        try:
+            ExperimentStore(root).get_experiment(BASELINE_EXPERIMENT_ID)
+        except FileNotFoundError:
+            pass
+        else:
+            raise FileExistsError("real baseline experiment record already exists; refusing to overwrite")
+    prediction_path = output_paths["predictions"]
     prediction_path.parent.mkdir(parents=True, exist_ok=True)
-    with prediction_path.open("w", encoding="utf-8", newline="\n") as handle:
-        for row in predictions:
-            handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+    prediction_temporary = prediction_path.with_name(prediction_path.name + ".tmp")
+    try:
+        with prediction_temporary.open("x", encoding="utf-8", newline="\n") as handle:
+            for row in predictions:
+                handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+        prediction_temporary.replace(prediction_path)
+    finally:
+        prediction_temporary.unlink(missing_ok=True)
     actual = [str(row["expected_decision"]) for row in predictions]
     predicted = [str(row["prediction"]["decision"]) for row in predictions]
     metrics = routing_metrics(actual, predicted) if predictions else {"records": 0}
@@ -377,7 +514,7 @@ def run_baseline(
     context_counts = Counter(str(row["context_bucket"]) for row in predictions)
     result = {
         "schema_version": 1,
-        "run_id": "tool_calling/qwen3.5-2b/baseline",
+        "run_id": "tool_calling/qwen35_2b/baseline",
         "status": "DRY_RUN" if dry_run else "EXECUTED",
         "model_id": config["model_id"],
         "model_revision": config["model_revision"],
@@ -398,16 +535,60 @@ def run_baseline(
         },
         "elapsed_seconds": round(time.monotonic() - started, 6),
         "artifacts": {
-            "predictions": str(output_config["predictions"]),
-            "metrics": str(output_config["metrics"]),
-            "residual_profile": str(output_config["residual_profile"]),
-            "environment": str(output_config["environment"]),
+            name: str(path.relative_to(root)) if path.is_relative_to(root) else str(path)
+            for name, path in output_paths.items()
         },
     }
-    residual = _residuals(predictions, str(result["run_id"]))
+    residual = _residuals(
+        predictions,
+        str(result["run_id"]),
+        model_id=str(result["model_id"]),
+        model_revision=str(result["model_revision"]),
+        manifest_sha256=str(result["manifest_sha256"]),
+    )
     environment = capture(root)
-    environment.update({"run_id": result["run_id"], "backend": model.name, "dry_run": dry_run})
-    _write_json(root / str(output_config["metrics"]), result)
-    _write_json(root / str(output_config["residual_profile"]), residual)
-    _write_json(root / str(output_config["environment"]), environment)
+    environment.update({
+        "run_id": result["run_id"],
+        "backend": model.name,
+        "dry_run": dry_run,
+        "model_id": result["model_id"],
+        "model_revision": result["model_revision"],
+        "manifest_sha256": result["manifest_sha256"],
+    })
+    result["git_commit"] = environment.get("git_sha")
+    result["git_dirty"] = environment.get("git_dirty")
+    _write_json(output_paths["metrics"], result)
+    _write_json(output_paths["residual_profile"], residual)
+    _write_json(output_paths["environment"], environment)
+    if not dry_run:
+        store = ExperimentStore(root)
+        record = ExperimentRecord(
+            experiment_id=BASELINE_EXPERIMENT_ID,
+            hypothesis="Frozen Qwen3.5-2B behavioral baseline inference",
+            model_id=str(result["model_id"]),
+            model_revision=str(result["model_revision"]),
+            tokenizer_revision=str(config["tokenizer_revision"]),
+            training_algorithm="evaluation",
+            training_config={},
+            dataset_manifest_ids=[str(config["evaluations"]["behavioral_manifest"])],
+            dataset_hashes={str(config["evaluations"]["behavioral_manifest"]): str(result["manifest_sha256"])},
+            git_commit=str(result.get("git_commit") or "unknown"),
+            git_dirty=bool(result.get("git_dirty")),
+            environment=environment,
+            random_seed=int(config["seed"]),
+            hardware_info=dict(environment.get("gpu", {}) or {}),
+            status=ExperimentStatus.EVALUATED.value,
+            metadata={
+                "kind": "REAL_BASELINE",
+                "manifest": result["manifest"],
+                "manifest_sha256": result["manifest_sha256"],
+                "metrics": str(output_paths["metrics"].relative_to(root)) if output_paths["metrics"].is_relative_to(root) else str(output_paths["metrics"]),
+                "predictions": str(output_paths["predictions"].relative_to(root)) if output_paths["predictions"].is_relative_to(root) else str(output_paths["predictions"]),
+                "residual_profile": str(output_paths["residual_profile"].relative_to(root)) if output_paths["residual_profile"].is_relative_to(root) else str(output_paths["residual_profile"]),
+            },
+        )
+        try:
+            store.register_record(record)
+        except FileExistsError as exc:
+            raise FileExistsError("real baseline experiment record already exists; refusing to overwrite") from exc
     return result

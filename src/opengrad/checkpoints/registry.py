@@ -100,6 +100,14 @@ class CheckpointRegistry:
                 pass
 
     def register_checkpoint(self, record: CheckpointRecord) -> CheckpointRecord:
+        existing = self._checkpoints.get(record.checkpoint_id)
+        if existing is not None:
+            # Checkpoint identities are immutable. Re-registering the same ID is
+            # only valid when it is the exact same artifact/experiment lineage;
+            # silently replacing a record would destroy provenance.
+            if existing.to_dict() != record.to_dict():
+                raise FileExistsError(f"Checkpoint already registered with different provenance: {record.checkpoint_id}")
+            return existing
         self._checkpoints[record.checkpoint_id] = record
         self._save()
         return record

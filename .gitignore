@@ -10,6 +10,7 @@ venv/
 !.env.example
 .cache/
 dist/
+node_modules/
 build/
 wandb/
 runs/
@@ -36,3 +37,8 @@ prompt*.txt
 # Personal application materials — local only, never publish
 docs/research/compute-proposal.md
 docs/research/runpod-application-draft.md
+
+# Machine-local agent/MCP registration and personal taste learning.
+# Portable config lives in integrations/opengrad-mcp/mcp.example.json.
+.mcp.json
+.commandcode/taste/

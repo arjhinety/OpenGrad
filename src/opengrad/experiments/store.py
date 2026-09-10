@@ -88,6 +88,21 @@ class ExperimentStore:
 
         return record
 
+    def register_record(self, record: ExperimentRecord) -> ExperimentRecord:
+        """Persist a non-training lifecycle record without inventing a config schema."""
+        r_dir = self.run_dir(record.experiment_id)
+        target = r_dir / "experiment.json"
+        if target.exists():
+            raise FileExistsError(f"Experiment already exists: {record.experiment_id}")
+        r_dir.mkdir(parents=True, exist_ok=True)
+        for sub in ["dataset_manifests", "logs", "metrics", "checkpoints", "eval", "failures", "regression", "promotion"]:
+            (r_dir / sub).mkdir(parents=True, exist_ok=True)
+        self._save_record(record)
+        local_ledger = ExperimentLedger(r_dir / "ledger.jsonl")
+        local_ledger.record(LedgerEventType.EXPERIMENT_CREATED, record.experiment_id)
+        self.central_ledger.record(LedgerEventType.EXPERIMENT_CREATED, record.experiment_id)
+        return record
+
     def get_experiment(self, experiment_id: str) -> ExperimentRecord:
         exp_file = self.run_dir(experiment_id) / "experiment.json"
         if not exp_file.exists():
@@ -97,13 +112,17 @@ class ExperimentStore:
 
     def list_experiments(self) -> list[ExperimentRecord]:
         results: list[ExperimentRecord] = []
-        for exp_dir in sorted(self.runs_dir.iterdir()):
-            if exp_dir.is_dir() and (exp_dir / "experiment.json").exists():
-                try:
-                    data = json.loads((exp_dir / "experiment.json").read_text(encoding="utf-8"))
-                    results.append(ExperimentRecord.from_dict(data))
-                except (json.JSONDecodeError, KeyError):
-                    continue
+        # Experiment identifiers may contain slashes (for example the baseline
+        # namespace). Walk only canonical record files so nested run IDs are not
+        # silently omitted from readiness and status projections.
+        for exp_file in sorted(self.runs_dir.rglob("experiment.json")):
+            if not exp_file.is_file():
+                continue
+            try:
+                data = json.loads(exp_file.read_text(encoding="utf-8"))
+                results.append(ExperimentRecord.from_dict(data))
+            except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+                continue
         return results
 
     def update_status(

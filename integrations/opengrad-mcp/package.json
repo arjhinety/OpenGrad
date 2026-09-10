@@ -1,0 +1,22 @@
+{
+  "name": "@opengrad/mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Harness-agnostic Model Context Protocol server for OpenGrad",
+  "type": "module",
+  "bin": { "opengrad-mcp": "src/index.js" },
+  "main": "src/server.js",
+  "exports": {
+    ".": "./src/server.js",
+    "./core": "./src/core.js",
+    "./guardian": "./src/guardian.js",
+    "./tools": "./src/tools.js",
+    "./workflows": "./src/workflows.js"
+  },
+  "files": ["src", "README.md", "mcp.example.json", "install.sh", "tests"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "check": "node --check src/index.js && node --check src/server.js && node --check src/core.js && node --check src/tools.js && node --check src/guardian.js && node --check src/workflows.js && node --check src/receipts.js",
+    "test": "node --test tests/*.test.js"
+  }
+}

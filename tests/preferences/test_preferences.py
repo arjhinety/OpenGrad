@@ -79,7 +79,11 @@ def test_deterministic_judge_scoring() -> None:
     assert pair.preference_source == "deterministic"
 
 
-def test_openai_judge_budget_and_mock(tmp_path: Path) -> None:
+def test_openai_judge_budget_and_mock(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # The mock adjudication path is only selected without a key; control the
+    # environment explicitly so an ambient OPENAI_API_KEY cannot turn this CPU
+    # test into a live network call.
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     budget = JudgeBudget(max_requests=2, max_cost_usd=0.05)
     judge = OpenAIJudge(budget=budget, cache_dir=tmp_path)
 

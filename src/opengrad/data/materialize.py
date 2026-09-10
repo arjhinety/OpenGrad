@@ -381,6 +381,11 @@ def materialize_parquet(
     counts["training_eligible"] = counts["valid"] if mode == "sft" else 0
     counts["preference_only"] = counts["valid"] if mode == "preference" else 0
     counts["evaluation_only"] = counts["valid"] if mode == "evaluation" else 0
+    content_digest = hashlib.sha256()
+    for name in valid_shards:
+        for batch in pq.ParquetFile(output_dir / name).iter_batches(batch_size=128):
+            for row in batch.to_pylist():
+                content_digest.update(_row_bytes(row))
     manifest = {
         "manifest_version": 3,
         "materializer": "opengrad.data.materialize.materialize_parquet",
@@ -388,6 +393,7 @@ def materialize_parquet(
         "mode": mode,
         "shards": valid_shards,
         "counts": dict(counts),
+        "content_hash": content_digest.hexdigest(),
         "finalized": True,
     }
     _atomic_json(manifest_path, manifest)

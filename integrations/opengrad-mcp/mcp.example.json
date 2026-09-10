@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "opengrad": {
+      "command": "node",
+      "args": ["/path/to/OpenGrad/integrations/opengrad-mcp/src/index.js"],
+      "env": { "OPENGRAD_ROOT": "/path/to/OpenGrad" }
+    }
+  }
+}

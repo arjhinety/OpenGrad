@@ -2,7 +2,7 @@ run_id: tool_calling/qwen35_2b/baseline
 status: PLANNED
 research_question: Can a small open-weight model reliably decide when and how to use tools?
 hypothesis: Baseline behavior must be measured before any post-training intervention.
-model_id: qwen3.5-2b
+model_id: Qwen/Qwen3.5-2B
 model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
 parent_checkpoint: null
 dataset_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json

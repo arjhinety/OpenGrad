@@ -1,0 +1,67 @@
+{
+  "checks": [
+    {
+      "details": "Qwen/Qwen3.5-2B",
+      "name": "model_access",
+      "status": "PASS"
+    },
+    {
+      "characters": 1184,
+      "name": "native_template",
+      "status": "PASS"
+    },
+    {
+      "device": "cuda:0",
+      "name": "model_load",
+      "status": "PASS"
+    },
+    {
+      "name": "one_generation",
+      "output_chars": 30,
+      "status": "PASS"
+    },
+    {
+      "decision": "ANSWER",
+      "errors": [
+        "UNCLOSED_TOOL_CALL"
+      ],
+      "name": "native_parser",
+      "parser_status": "FORMAT_ERROR",
+      "status": "FAIL"
+    },
+    {
+      "code": "GPU_SMOKE_FAILED",
+      "details": "RuntimeError: native parser rejected smoke output: FORMAT_ERROR: ['UNCLOSED_TOOL_CALL']",
+      "name": "runtime",
+      "status": "FAIL"
+    }
+  ],
+  "hardware": {
+    "a100_variant": "A100_80GB",
+    "bf16_supported": true,
+    "compute_capability": [
+      8,
+      0
+    ],
+    "cuda_driver_version": null,
+    "cuda_runtime_version": "12.4",
+    "details": {},
+    "fp8_native_supported": false,
+    "gpu_available": true,
+    "gpu_name": "NVIDIA A100-SXM4-80GB",
+    "is_a100": true,
+    "pytorch_version": "2.6.0+cu124",
+    "total_vram_gb": 79.25,
+    "transformers_version": "5.17.0",
+    "trl_version": "1.13.0",
+    "vllm_available": false
+  },
+  "kind": "GPU_BOUNDARY_VERIFIED",
+  "limitations": [
+    "Real baseline and SFT are blocked until this boundary passes."
+  ],
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "schema_version": 1,
+  "status": "INCOMPLETE"
+}

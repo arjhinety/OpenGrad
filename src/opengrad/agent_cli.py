@@ -16,11 +16,22 @@ from opengrad.env_capture import capture
 from opengrad.experiments.diff import diff_experiments
 from opengrad.experiments.preflight import run_experiment_preflight
 from opengrad.experiments.schema import ExperimentConfig, ExperimentStatus
+from opengrad.readiness import readiness
 from opengrad.experiments.store import ExperimentStore
 from opengrad.training.distillation import OnPolicyDistillationTrainerBackend
 from opengrad.training.dpo import DPOTrainerBackend
 from opengrad.training.protocol import TrainerBackend
 from opengrad.training.sft import SFTTrainerBackend
+
+
+def _select_trainer(trainer_type: str) -> TrainerBackend | None:
+    if trainer_type == "sft":
+        return SFTTrainerBackend()
+    if trainer_type == "dpo":
+        return DPOTrainerBackend()
+    if trainer_type in {"on_policy_distillation", "distillation"}:
+        return OnPolicyDistillationTrainerBackend()
+    return None
 
 
 def handle_validate_data(args: argparse.Namespace, root: Path) -> int:
@@ -93,6 +104,13 @@ def handle_inspect_template(args: argparse.Namespace, root: Path) -> int:
 
 def handle_train(args: argparse.Namespace, root: Path) -> int:
     config_path = Path(args.config)
+    if not config_path.is_absolute():
+        config_path = root / config_path
+    config_path = config_path.resolve()
+    if not config_path.is_relative_to(root.resolve()):
+        err = {"code": "PATH_OUTSIDE_PROJECT", "message": "Training config must remain inside the OpenGrad repository"}
+        print(json.dumps(err) if args.json else f"Error: {err['message']}")
+        return 1
     if not config_path.exists():
         err = {"code": "CONFIG_NOT_FOUND", "message": f"Config not found: {config_path}"}
         print(json.dumps(err) if args.json else f"Error: {err['message']}")
@@ -100,35 +118,81 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
 
     # Run Preflight Gate first (Section 9)
     preflight = run_experiment_preflight(config_path, root=root)
-    if preflight.overall_status == "FAIL" and not args.force:
+    # WARN is acceptable only for an explicitly requested CPU plumbing run.
+    # A real launch requires a clean preflight and then the stronger readiness
+    # contract below; dry-run never creates scientific evidence.
+    if preflight.overall_status == "FAIL" or (preflight.overall_status == "WARN" and not args.dry_run):
         if args.json:
             print(json.dumps(preflight.to_dict(), indent=2))
         else:
             print(preflight.render_summary())
-            print("\nTraining aborted: Preflight gate FAILED.")
+            print("\nTraining aborted: Preflight gate did not PASS.")
         return 1
 
     exp_config = ExperimentConfig.from_file(config_path)
+    trainer_type = str(exp_config.trainer.get("type", "sft")).lower()
+    # The integration and the native CLI share the same baseline-first boundary.
+    # A dry-run is an explicitly non-evidence CPU plumbing check, so it may
+    # proceed through WARNs (but never through a failed preflight). Real SFT
+    # remains fail-closed on the authoritative B0/readiness contract.
+    if trainer_type == "sft" and not args.dry_run:
+        gate = readiness(root, config_path)
+        if gate.get("status") != "PASS" or gate.get("ready_for_sft") is not True:
+            error = {
+                "code": "NO_REAL_SFT_WITHOUT_VALID_B0",
+                "message": "SFT is blocked until OpenGrad reports ready_for_sft",
+                "blocking": True,
+                "blocking_gates": gate.get("blocking_gates", []),
+            }
+            print(json.dumps(error, indent=2) if args.json else f"Error: {error['message']}: {', '.join(error['blocking_gates'])}")
+            return 1
     store = ExperimentStore(root)
 
-    # Initialize experiment record
+    trainer = _select_trainer(trainer_type)
+
+    # A dry-run is CPU plumbing, not evidence. It must not create or mutate an
+    # experiment record, register checkpoints, or collide with a real run
+    # directory. Run it in a scratch namespace and label it non-evidence.
+    if args.dry_run:
+        if trainer is None:
+            err = {"code": "ALGORITHM_UNSUPPORTED", "message": f"Unsupported trainer: {trainer_type}"}
+            print(json.dumps(err) if args.json else err["message"])
+            return 1
+        scratch_dir = root / "runs" / ".dry-run" / exp_config.experiment_id
+        train_res = trainer.train(
+            exp_config.experiment_id, exp_config.trainer, output_dir=scratch_dir, dry_run=True
+        )
+        payload = train_res.to_dict()
+        payload.update(
+            {
+                "status": "DRY_RUN",
+                "evidence": False,
+                "experiment_id": exp_config.experiment_id,
+                "note": "CPU deterministic plumbing only; not a scientific result and not an experiment record",
+            }
+        )
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print(f"DRY-RUN COMPLETED for '{exp_config.experiment_id}' ({train_res.algorithm.upper()}) - NOT EVIDENCE")
+            print(f"Steps: {train_res.total_steps} | Final Loss: {train_res.final_loss:.4f}")
+            print(f"Scratch output: {scratch_dir}")
+        return 0
+
+    # Experiment identity is immutable. A second launch with the same ID must
+    # create an explicit new experiment/config rather than silently resuming or
+    # mutating an existing ledger entry.
     try:
         store.create_experiment(exp_config)
     except FileExistsError:
-        pass  # allow resuming or re-running existing experiment run
+        err = {"code": "EXPERIMENT_ID_COLLISION", "message": f"Experiment already exists: {exp_config.experiment_id}"}
+        print(json.dumps(err) if args.json else f"Error: {err['message']}")
+        return 1
 
     store.update_status(exp_config.experiment_id, ExperimentStatus.TRAINING)
-    trainer_type = str(exp_config.trainer.get("type", "sft")).lower()
     run_dir = store.run_dir(exp_config.experiment_id)
 
-    trainer: TrainerBackend
-    if trainer_type == "sft":
-        trainer = SFTTrainerBackend()
-    elif trainer_type == "dpo":
-        trainer = DPOTrainerBackend()
-    elif trainer_type in {"on_policy_distillation", "distillation"}:
-        trainer = OnPolicyDistillationTrainerBackend()
-    else:
+    if trainer is None:
         err = {"code": "ALGORITHM_UNSUPPORTED", "message": f"Unsupported trainer: {trainer_type}"}
         print(json.dumps(err) if args.json else err["message"])
         store.update_status(exp_config.experiment_id, ExperimentStatus.FAILED, {"error": err})

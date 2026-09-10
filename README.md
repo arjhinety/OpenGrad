@@ -45,6 +45,7 @@ Connecting direct post-training research to consumer mobile devices:
 - **Complete Experiment Lifecycle:** Hypothesis $\to$ Config $\to$ Preflight $\to$ Training $\to$ Checkpoints $\to$ Evaluation $\to$ Regression Detection $\to$ Promotion Policy.
 - **Active Trainer Backends:** SFT, DPO, and On-Policy Distillation (with decoupled `RolloutProvider` and `TeacherProvider`).
 - **Future Reinforcement Learning (RL) Boundary:** Architectural foundation ready for GRPO, PPO, RLOO, and verl without restructuring the codebase.
+- **Harness-Agnostic Agent Boundary:** OpenGrad is driven by any agent harness through the same documented `opengrad … --json` CLI. `integrations/opengrad-mcp/` packages that boundary as a dependency-free stdio MCP server for evaluation, readiness, gating, and post-training orchestration — no vendor plugin required.
 - **Documentation:** See [Experiment Foundation](docs/EXPERIMENT_FOUNDATION.md), [Training Lifecycle](docs/TRAINING_LIFECYCLE.md), [Future RL Integration](docs/FUTURE_RL_INTEGRATION.md), and [Agent / Harness Integration](docs/AGENT_INTEGRATION.md).
 
 ---
@@ -298,6 +299,7 @@ flowchart TD
 - `configs/` — data, evaluation, model, training, inference, and planned experiment configurations.
 - `experiments/`, `reports/`, `results/` — append-only namespaces for future evidence; no completed result is present.
 - `docs/` — methodology, architecture, data, benchmark, inference, reproducibility, contribution, and publication protocols.
+- `integrations/` — harness-facing integrations over the `opengrad … --json` boundary; `opengrad-mcp/` is the dependency-free stdio MCP server.
 - `release/` — tracked Hugging Face release definitions, dataset-card template, attribution audit, and citations.
 - `hf/` — model-card, dataset-card, and experiment-report templates.
 
@@ -410,6 +412,7 @@ There is no completed experiment to reproduce yet. The future baseline workflow 
 | See experiment records | [experiments/](experiments/README.md) |
 | See results | [results/](results/registry.jsonl) |
 | See reports and failures | [reports/](reports/README.md) |
+| Operate OpenGrad from an agent harness | [Agent / Harness Integration](docs/AGENT_INTEGRATION.md) and [MCP server](integrations/opengrad-mcp/README.md) |
 | Add or challenge a finding | [CONTRIBUTING.md](CONTRIBUTING.md) and [contribution protocols](docs/contributing/README.md) |
 | Cite OpenGrad | [CITATION.cff](CITATION.cff) |
 

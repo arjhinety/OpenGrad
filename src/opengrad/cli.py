@@ -27,6 +27,7 @@ from opengrad.experiments.preflight import run_experiment_preflight
 from opengrad.failures.analyzer import FailureAnalyzer, FailureItem
 from opengrad.registry.preflight import check
 from opengrad.registry.validate import validate
+from opengrad.readiness import gpu_smoke, readiness, repository_status
 
 
 def preflight(root: Path) -> int:
@@ -63,7 +64,19 @@ def main() -> int:
     parser = argparse.ArgumentParser(prog="opengrad", description="OpenGrad Research Platform")
     sub = parser.add_subparsers(dest="command")
 
-    sub.add_parser("validate", help="validate repository registries")
+    validate_p = sub.add_parser("validate", help="validate repository registries")
+    validate_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+
+    status_p = sub.add_parser("status", help="show authoritative repository and experiment state")
+    status_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+
+    readiness_p = sub.add_parser("readiness", help="evaluate baseline and SFT readiness gates")
+    readiness_p.add_argument("config", nargs="?", help="optional baseline or experiment config path")
+    readiness_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+
+    gpu_p = sub.add_parser("gpu-smoke", help="run the bounded real-model GPU boundary smoke")
+    gpu_p.add_argument("config", nargs="?", help="optional frozen baseline evaluation config")
+    gpu_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
     # preflight
     pre_p = sub.add_parser("preflight", help="pre-experiment or config readiness check")
@@ -89,7 +102,6 @@ def main() -> int:
     train_p = sub.add_parser("train", help="launch SFT, DPO, or on-policy distillation training")
     train_p.add_argument("config", help="experiment config YAML path")
     train_p.add_argument("--dry-run", action="store_true", help="execute CPU mock training without GPU")
-    train_p.add_argument("--force", action="store_true", help="override preflight failure (auditable)")
     train_p.add_argument("--json", action="store_true", help="emit JSON output")
 
     # evaluate
@@ -184,7 +196,6 @@ def main() -> int:
     dist_trn = dist_sub.add_parser("train", help="launch on-policy distillation training")
     dist_trn.add_argument("config", help="distillation experiment config YAML path")
     dist_trn.add_argument("--dry-run", action="store_true", help="force CPU mock training")
-    dist_trn.add_argument("--force", action="store_true", help="override preflight failures")
     dist_trn.add_argument("--json", action="store_true", help="emit JSON output")
 
     # rollout
@@ -206,7 +217,8 @@ def main() -> int:
     corpus_audit = sub.add_parser("audit-corpus", help="strict semantic audit of canonical training records")
     corpus_audit.add_argument("--records", required=True, help="canonical JSONL records")
     env = sub.add_parser("env")
-    env.add_subparsers(dest="env_command").add_parser("capture")
+    env_capture = env.add_subparsers(dest="env_command").add_parser("capture")
+    env_capture.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     baseline = sub.add_parser("baseline", help="run the frozen baseline end-to-end (use --dry-run before GPU time)")
     baseline.add_argument(
         "--config",
@@ -215,14 +227,33 @@ def main() -> int:
     )
     baseline.add_argument("--dry-run", action="store_true", help="use the CPU deterministic backend")
     baseline.add_argument("--limit", type=int, help="evaluate only the first N held-out examples")
+    baseline.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
     args = parser.parse_args()
     root = Path.cwd()
 
     if args.command == "validate":
         errors = validate(root)
-        print("OK" if not errors else "\n".join(errors))
+        if args.json:
+            print(json.dumps({"ok": not errors, "errors": errors, "code": None if not errors else "CONFIG_INVALID", "message": "registry validation passed" if not errors else "registry validation failed", "blocking": bool(errors)}))
+        else:
+            print("OK" if not errors else "\n".join(errors))
         return int(bool(errors))
+
+    if args.command == "status":
+        payload = repository_status(root)
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "readiness":
+        payload = readiness(root, root / args.config if args.config else None)
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0 if payload["status"] in {"PASS", "WARN"} else 1
+
+    if args.command == "gpu-smoke":
+        payload = gpu_smoke(root, root / args.config if args.config else None)
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0 if payload["status"] == "PASS" else 1
 
     if args.command == "preflight":
         if getattr(args, "config", None):
@@ -245,14 +276,17 @@ def main() -> int:
 
     if args.command == "evaluate":
         runner = BenchmarkRunner(root)
+        allowed_suites = {"smoke", "tool_use_core", "regression_core", "agent_transfer", "full_post_training", "speculative_decoding"}
+        if args.suite not in allowed_suites:
+            err = {"code": "SUITE_NOT_FOUND", "message": f"Suite must be one of: {', '.join(sorted(allowed_suites))}"}
+            print(json.dumps(err) if args.json else f"Error: {err['message']}")
+            return 1
         suite_path = root / "configs" / "benchmark_suites" / f"{args.suite}.yaml"
-        if not suite_path.exists():
-            suite_path = Path(args.suite)
-        if not suite_path.exists():
+        if not suite_path.is_file():
             err = {"code": "SUITE_NOT_FOUND", "message": f"Suite not found: {args.suite}"}
             print(json.dumps(err) if args.json else f"Error: {err['message']}")
             return 1
-        res_suite = runner.run_suite(suite_path, dry_run=args.dry_run or True, limit=args.limit)
+        res_suite = runner.run_suite(suite_path, dry_run=args.dry_run, limit=args.limit)
         if args.json:
             print(json.dumps(res_suite, indent=2))
         else:
@@ -389,13 +423,33 @@ def main() -> int:
         return int(bool(failures))
 
     if args.command == "env" and args.env_command == "capture":
-        print(capture(root))
+        value = capture(root)
+        print(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) if getattr(args, "json", False) else value)
         return 0
 
     if args.command == "baseline":
-        result = run_baseline(root / args.config, root=root, limit=args.limit, dry_run=args.dry_run)
-        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
-        return 0
+        config_path = root / args.config
+        if not args.dry_run:
+            gate = readiness(root, config_path)
+            smoke_gate = next((item for item in gate.get("gates", []) if item.get("name") == "gpu_boundary"), {})
+            if gate.get("ready_for_baseline") is not True or smoke_gate.get("status") != "PASS":
+                error = {
+                    "ok": False,
+                    "code": "BASELINE_NOT_READY",
+                    "message": "real baseline is blocked by OpenGrad readiness gates",
+                    "blocking": True,
+                    "readiness": gate,
+                }
+                print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
+                return 1
+        try:
+            result = run_baseline(config_path, root=root, limit=args.limit, dry_run=args.dry_run)
+        except (OSError, KeyError, TypeError, ValueError, RuntimeError) as exc:
+            error = {"ok": False, "code": getattr(exc, "code", "BASELINE_FAILED"), "message": str(exc), "blocking": True}
+            print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
+            return 1
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) if args.json else json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0 if result.get("status") == "EXECUTED" else 1
 
     parser.print_help()
     return 0
