@@ -562,8 +562,12 @@ def run_real_sft(
                     if world["optimizer_step"] >= settings.max_steps:
                         done = True
                         break
-            epoch += 1
-            world["epoch"] = epoch
+            # Only a pass that ran to the end of the data counts as a completed epoch. The
+            # loop breaks out early on max_steps, and counting that as an epoch reported
+            # "epochs_completed: 1" for a run that had seen under half the corpus.
+            if not done:
+                epoch += 1
+                world["epoch"] = epoch
     finally:
         restore_interrupt_handlers(previous_handlers)
 

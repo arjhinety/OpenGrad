@@ -112,7 +112,9 @@ def test_reference_cancels_when_both_models_agree():
 
 def test_beta_must_be_positive():
     with pytest.raises(ValueError, match="beta must be positive"):
-        dpo_loss(torch.tensor([0.0]), torch.tensor([0.0]), torch.tensor([0.0]), torch.tensor([0.0]), 0.0)
+        dpo_loss(
+            torch.tensor([0.0]), torch.tensor([0.0]), torch.tensor([0.0]), torch.tensor([0.0]), 0.0
+        )
 
 
 def test_accuracy_is_the_share_of_correct_pairs():
@@ -192,7 +194,9 @@ def test_identity_is_a_content_hash_and_count(tmp_path):
     same = _write(tmp_path / "b.jsonl", [{"prompt": "p", "chosen": "y", "rejected": "n"}])
     other = _write(tmp_path / "c.jsonl", [{"prompt": "p", "chosen": "y2", "rejected": "n"}])
     assert preference_dataset_identity(one)["sha256"] == preference_dataset_identity(same)["sha256"]
-    assert preference_dataset_identity(one)["sha256"] != preference_dataset_identity(other)["sha256"]
+    assert (
+        preference_dataset_identity(one)["sha256"] != preference_dataset_identity(other)["sha256"]
+    )
     assert preference_dataset_identity(one)["records"] == 1
 
 
@@ -204,12 +208,12 @@ def test_identity_is_a_content_hash_and_count(tmp_path):
 class _StubTokenizer:
     """Whitespace tokenizer: enough to test the masking arithmetic without model artifacts."""
 
-    def __call__(self, text, add_special_tokens=False):  # noqa: ARG002
+    def __call__(self, text, add_special_tokens=False):
         return {"input_ids": [len(word) for word in text.split()]}
 
 
 def test_completion_mask_covers_exactly_the_completion():
-    ids, mask = encode_pair(_StubTokenizer(), "a bb", " ccc", max_length=16)
+    _ids, mask = encode_pair(_StubTokenizer(), "a bb", " ccc", max_length=16)
     assert mask == [0, 0, 1]
 
 

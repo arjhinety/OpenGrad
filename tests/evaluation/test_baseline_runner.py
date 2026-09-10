@@ -20,7 +20,9 @@ def _patch_manifest_and_renderer(monkeypatch, root: Path):
     # loader is stubbed, so the pinned manifest must exist under the test root.
     manifest = root / "reports/evaluation/behavioral-heldout-v2.manifest.json"
     manifest.parent.mkdir(parents=True, exist_ok=True)
-    manifest.write_bytes(Path("reports/evaluation/behavioral-heldout-v2.manifest.json").read_bytes())
+    manifest.write_bytes(
+        Path("reports/evaluation/behavioral-heldout-v2.manifest.json").read_bytes()
+    )
 
     def render(self, example):
         return RenderedTrainingExample(
@@ -130,7 +132,9 @@ def test_dry_run_executes_manifest_to_artifacts(monkeypatch, tmp_path: Path):
     assert {"raw_output", "prediction", "parser"} <= first.keys()
 
 
-def test_real_baseline_registers_canonical_record_and_refuses_overwrite(monkeypatch, tmp_path: Path):
+def test_real_baseline_registers_canonical_record_and_refuses_overwrite(
+    monkeypatch, tmp_path: Path
+):
     from opengrad.experiments.store import ExperimentStore
 
     _patch_manifest_and_renderer(monkeypatch, tmp_path)
@@ -221,7 +225,9 @@ def test_baseline_config_validation_rejects_revision_and_output_drift():
     drifted_revision = dict(config, model_revision="0" * 40)
     with pytest.raises(ValueError):
         runner._validate_baseline_config(drifted_revision)
-    drifted_outputs = dict(config, outputs={k: v for k, v in config["outputs"].items() if k != "metrics"})
+    drifted_outputs = dict(
+        config, outputs={k: v for k, v in config["outputs"].items() if k != "metrics"}
+    )
     with pytest.raises(ValueError):
         runner._validate_baseline_config(drifted_outputs)
 
@@ -351,9 +357,7 @@ def test_baseline_plumbing_runs_over_a_real_materialized_split(monkeypatch, tmp_
         path = Path(result["artifacts"][name])
         return path if path.is_absolute() else tmp_path / path
 
-    predictions = [
-        json.loads(line) for line in artifact("predictions").read_text().splitlines()
-    ]
+    predictions = [json.loads(line) for line in artifact("predictions").read_text().splitlines()]
     assert {row["example_id"] for row in predictions} == {"e0", "e1", "e2"}
     assert all(row["parser"]["status"] == "RAW_VALID" for row in predictions)
     residual = json.loads(artifact("residual_profile").read_text())

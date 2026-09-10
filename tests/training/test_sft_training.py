@@ -126,17 +126,30 @@ def test_full_tuning_resolves_and_records_every_field():
 def test_unknown_scheduler_is_refused():
     with pytest.raises(TrainingConfigError, match="scheduler"):
         resolve_settings(
-            _experiment(), {"type": "sft", "tuning_method": "full", "micro_batch_tokens": 4096, "scheduler": "warmup"}
+            _experiment(),
+            {
+                "type": "sft",
+                "tuning_method": "full",
+                "micro_batch_tokens": 4096,
+                "scheduler": "warmup",
+            },
         )
 
 
 def test_lora_requires_an_explicit_block_with_targets():
     with pytest.raises(TrainingConfigError, match="lora tuning requires"):
-        resolve_settings(_experiment(), {"type": "sft", "tuning_method": "lora", "micro_batch_tokens": 4096})
+        resolve_settings(
+            _experiment(), {"type": "sft", "tuning_method": "lora", "micro_batch_tokens": 4096}
+        )
     with pytest.raises(TrainingConfigError, match="target_modules"):
         resolve_settings(
             _experiment(),
-            {"type": "sft", "tuning_method": "lora", "micro_batch_tokens": 4096, "lora": {"rank": 8, "alpha": 16}},
+            {
+                "type": "sft",
+                "tuning_method": "lora",
+                "micro_batch_tokens": 4096,
+                "lora": {"rank": 8, "alpha": 16},
+            },
         )
     settings = resolve_settings(
         _experiment(),
@@ -167,7 +180,13 @@ def test_precision_must_be_supported():
 def test_batch_sizes_must_be_positive():
     with pytest.raises(TrainingConfigError, match="positive"):
         resolve_settings(
-            _experiment(), {"type": "sft", "tuning_method": "full", "micro_batch_tokens": 4096, "micro_batch_size": 0}
+            _experiment(),
+            {
+                "type": "sft",
+                "tuning_method": "full",
+                "micro_batch_tokens": 4096,
+                "micro_batch_size": 0,
+            },
         )
 
 
@@ -282,7 +301,8 @@ def test_learning_rate_warms_up_then_decays():
 
 def test_checkpoint_lineage_carries_every_required_field():
     settings = resolve_settings(
-        _experiment(), {"type": "sft", "tuning_method": "full", "micro_batch_tokens": 4096, "max_steps": 5}
+        _experiment(),
+        {"type": "sft", "tuning_method": "full", "micro_batch_tokens": 4096, "max_steps": 5},
     )
     lineage = checkpoint_lineage(
         _experiment(),

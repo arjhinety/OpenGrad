@@ -93,6 +93,27 @@ def main() -> int:
         Path(args.out) if args.out else ROOT / "runs" / args.experiment_id / "eval" / "curve.json"
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # Merge with any previously measured points. Evaluating a subset must not silently discard the
+    # rest of the curve: checking one checkpoint at a time would otherwise leave a file that looks
+    # like a one-point history of the run.
+    existing: dict[int, dict] = {}
+    if out_path.is_file():
+        try:
+            previous = json.loads(out_path.read_text(encoding="utf-8"))
+            for previous_point in previous.get("points", []):
+                existing[int(previous_point["checkpoint_step"])] = previous_point
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+            existing = {}
+    for point in curve:
+        existing[int(point["lineage"]["checkpoint_step"])] = {
+            "checkpoint_step": point["lineage"]["checkpoint_step"],
+            "checkpoint_id": point["lineage"]["checkpoint_id"],
+            "records": point["records"],
+            "parse_valid_rate": point["parse_valid_rate"],
+            "routing": point["routing"],
+            "baseline_comparison": point.get("baseline_comparison"),
+            "evaluation_seconds": point["evaluation_seconds"],
+        }
     out_path.write_text(
         json.dumps(
             {
@@ -100,18 +121,7 @@ def main() -> int:
                 "experiment_id": args.experiment_id,
                 "baseline_run_id": "tool_calling/qwen35_2b/baseline",
                 "limit": args.limit,
-                "points": [
-                    {
-                        "checkpoint_step": point["lineage"]["checkpoint_step"],
-                        "checkpoint_id": point["lineage"]["checkpoint_id"],
-                        "records": point["records"],
-                        "parse_valid_rate": point["parse_valid_rate"],
-                        "routing": point["routing"],
-                        "baseline_comparison": point.get("baseline_comparison"),
-                        "evaluation_seconds": point["evaluation_seconds"],
-                    }
-                    for point in curve
-                ],
+                "points": [existing[step] for step in sorted(existing)],
             },
             indent=2,
             sort_keys=True,
