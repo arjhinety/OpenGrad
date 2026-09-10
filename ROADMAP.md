@@ -30,14 +30,24 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 ## Next empirical sequence
 
-6. B0 unmodified Qwen3.5-2B baseline inference — PIPELINE READY / GPU NOT RUN
-   First run `opengrad baseline --dry-run`; then run `Qwen/Qwen3.5-2B` at the pinned revision against the frozen behavioral-heldout-v2 evaluation.
+6. B0 unmodified Qwen3.5-2B baseline inference — **REAL_RESULT**
+   Executed on an A100 (engine vLLM 0.29.0) over the frozen behavioral-heldout-v2 evaluation:
+   3,650 distinct examples, 196 s, from a clean traced tree. See
+   [the B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md). External benchmark
+   families remain FROZEN_NOT_EXECUTED.
 
-7. Freeze B0 evidence and generate the residual profile — REQUIRES B0
-   Preserve the exact output, evaluator, renderer, generation configuration, and failure taxonomy.
+7. Freeze B0 evidence and generate the residual profile — **COMPLETE**
+   Predictions, metrics, environment, residual profile, and the canonical experiment record
+   are recorded and committed. The engine, renderer, evaluator, generation configuration,
+   and failure taxonomy are pinned alongside them.
 
 8. Decide and run the controlled SFT comparison — NOT STARTED
    Compare M0 source-oriented control, M1 behavior-balanced hypothesis, and M2 residual-driven mixture only after B0 evidence. M2 requires a real residual profile and remains unresolved.
+   The readiness contract for SFT is satisfied (`opengrad readiness configs/experiments/m0_sft.yaml`
+   reports PASS with no blocking gates) and the dry-run plumbing is verified, but no SFT run
+   has been launched. M1 and M2 additionally reference datasets that have not been
+   materialized (`when2call_pref_v1`, `onpolicy_prompts_v1`), so their contracts do not yet
+   resolve.
 
 9. Full post-SFT evaluation and diagnosis — NOT STARTED
 
