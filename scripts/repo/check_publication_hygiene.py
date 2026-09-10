@@ -26,6 +26,9 @@ PATTERNS: dict[str, re.Pattern[str]] = {
         r"(?:/home/|/Users/|C:\\\\Users\\\\|/mnt/data/|/workspace/|/tmp/)", re.IGNORECASE
     ),
     "tracking_url": re.compile(r"[?&]utm_[^\s)]+", re.IGNORECASE),
+    "api_secret": re.compile(
+        r"(?:sk-[a-zA-Z0-9]{20,}|OPENAI_API_KEY\s*=\s*['\"][a-zA-Z0-9_\-]+['\"])",
+    ),
     "placeholder": re.compile(
         r"\b(?:YOUR_(?:NAME|USERNAME|EMAIL)|INSERT_HERE|REPLACE_ME|CHANGE_ME|LOREM IPSUM)\b",
         re.IGNORECASE,
