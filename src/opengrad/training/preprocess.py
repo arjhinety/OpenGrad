@@ -40,7 +40,9 @@ SAMPLES_FILE = "sft_samples.parquet"
 CACHE_MANIFEST = "sft_cache.json"
 
 
-def default_cache_dir(root: Path, model_id: str, max_seq_length: int) -> Path:
+def default_cache_dir(
+    root: Path, model_id: str, max_seq_length: int, release_dir: Path | None = None
+) -> Path:
     """Where a run keeps its rendered sample cache.
 
     Keyed by the rendering contract (model and sequence length) rather than by experiment, so a
@@ -52,7 +54,13 @@ def default_cache_dir(root: Path, model_id: str, max_seq_length: int) -> Path:
     Under ``data/processed/`` because it is a large, regenerable derived artifact.
     """
     slug = model_id.replace("/", "-")
-    return root / "data/processed" / f"sft-cache-{slug}-{max_seq_length}"
+    base = root / "data/processed" / f"sft-cache-{slug}-{max_seq_length}"
+    # Two corpora rendered with the same model and window would otherwise share one cache
+    # directory and each rebuild would evict the other's samples. The default release keeps the
+    # original name so an existing cache still resolves.
+    if release_dir is None or release_dir.resolve() == (root / DEFAULT_RELEASE_DIR).resolve():
+        return base
+    return base.with_name(f"{base.name}-{release_dir.resolve().name}")
 
 
 @dataclass

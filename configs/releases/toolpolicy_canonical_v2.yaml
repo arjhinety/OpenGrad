@@ -1,0 +1,73 @@
+# Canonical corpus v2 — a locally built candidate, NOT a published release.
+#
+# v1 (configs/releases/toolpolicy_canonical_v1.yaml) is pinned by B0 and every result that
+# depends on it, and it is left untouched. This file exists to test one hypothesis with a
+# measurement attached: that the tool-call collapse both M0 and M1 exhibited is caused by the
+# training corpus containing almost no tool-call supervision, rather than by the training
+# procedure.
+#
+# Measured on identical raw input, at the training boundary rather than at materialization:
+#
+#   adapter  trainable      records with tool calls   training-boundary rejections
+#   v1       48,757 (48.9%) 0                         50,900  (all SEM_ORPHAN_RESULT)
+#   v2       97,475 (99.1%) 48,726 (50.0%)              864
+#
+# Composition differs from v1 for sources that could not be fetched here: xlam and button are
+# gated (HTTP 401) and looptool's upstream was not located, so this release is three sources
+# rather than six. Read it as an ablation on the presence of tool-call supervision, not as a
+# drop-in replacement for v1.
+release_name: OpenGrad ToolPolicy Canonical (v2 candidate, partial)
+release_version: v2.0.0-local-partial
+hub_repository: unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial
+release_class: PRE_TRAINING_CANONICAL_RELEASE
+canonical_schema_version: tool_use_ir_v1
+behavior_taxonomy_version: tool-use-behavior-taxonomy-v1
+redistribution_policy: exclude_uncleared
+allow_gated_sources: false
+shard_size: 1000
+included_sources:
+  - id: glaive-function-calling-v2
+    artifact: data/processed/normalization-v2/glaive
+    # Digest of the raw Parquet actually consumed, recorded by the materializer.
+    source_revision: 7e7e32f0466699513b38923bc4991858e192c9274df22e243b9e77eb2775b6e8
+    upstream_license: Apache-2.0
+    redistribution_status: REDISTRIBUTION_WITH_ATTRIBUTION
+    upstream_access_mode: public
+    downstream_access_requirement: public_allowed
+    attribution_required: true
+    citation_required: true
+    citation_target: source
+    modifications_disclosed: true
+    modification_status: NORMALIZED_DERIVATIVE
+    adapter_version: 1.0.2
+  - id: toolace
+    artifact: data/processed/normalization-v2/toolace
+    source_revision: 7a7a6a2c3b1003c7
+    upstream_license: Apache-2.0
+    redistribution_status: REDISTRIBUTION_WITH_ATTRIBUTION
+    upstream_access_mode: public
+    downstream_access_requirement: public_allowed
+    attribution_required: true
+    citation_required: true
+    citation_target: source
+    modifications_disclosed: true
+    modification_status: NORMALIZED_DERIVATIVE
+    adapter_version: 1.0.2
+  - id: when2call
+    artifact: data/processed/normalization-v2/when2call-sft
+    source_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    upstream_license: CC-BY-4.0
+    redistribution_status: REDISTRIBUTION_WITH_ATTRIBUTION
+    upstream_access_mode: public
+    downstream_access_requirement: public_allowed
+    attribution_required: true
+    citation_required: true
+    citation_target: source
+    modifications_disclosed: true
+    modification_status: NORMALIZED_DERIVATIVE
+    adapter_version: 1.0.2
+excluded_artifacts:
+  - data/processed/normalization-v2/when2call-preference
+  - data/processed/normalization-v2/when2call-mcq
+  - data/processed/normalization-v2/when2call-llm-judge
+  - reports/artifacts/rendered

@@ -246,10 +246,13 @@ def run_real_sft(
     )
 
     # ------------------------------------------------------------------ corpus
-    cache_dir = default_cache_dir(root, model_id, settings.max_seq_length)
+    release_dir = (experiment.get("datasets") or {}).get("release_dir")
+    release_path = Path(str(release_dir)) if release_dir else None
+    cache_dir = default_cache_dir(root, model_id, settings.max_seq_length, release_path)
     rendering_report = preprocess_corpus(
         root,
         cache_dir=cache_dir,
+        release_dir=release_path,
         model_id=model_id,
         model_revision=model_revision,
         tokenizer_revision=str(tokenizer_revision),
