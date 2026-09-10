@@ -116,32 +116,66 @@ The verdicts are recorded in `reports/data/behavioral-heldout-v2-contamination-a
 - **Successful dry runs exited non-zero.** `opengrad baseline --dry-run` returned exit 1, so an agent bridge reported a completed plumbing run as `COMMAND_FAILED`. A finished dry run is now a successful command; the `status` field still carries `DRY_RUN` vs `EXECUTED`.
 - **Silent experiment-ID reuse.** A second real launch with an existing ID now fails with `EXPERIMENT_ID_COLLISION` instead of silently resuming.
 
-## 8. Real Qwen GPU smoke status — `INCOMPLETE`
+## 8. Real Qwen GPU smoke status — `PASS`
 
-`reports/hardware/qwen_gpu_smoke.json` (kind `GPU_BOUNDARY_VERIFIED`, `status: INCOMPLETE`) records a real A100 attempt:
+`reports/hardware/qwen_gpu_smoke.json` (kind `GPU_BOUNDARY_VERIFIED`, `status: PASS`) records a real A100 run. All seven checks pass, with no limitations:
 
 | Check | Result |
 | --- | --- |
 | `model_access` | PASS (`Qwen/Qwen3.5-2B` @ `15852e8c…8a8fc`) |
-| `native_template` | PASS |
+| `native_template` | PASS (1184 characters) |
 | `model_load` | PASS (`cuda:0`, BF16) |
-| `one_generation` | PASS |
-| `native_parser` | **FAIL** — `FORMAT_ERROR: ['UNCLOSED_TOOL_CALL']` |
-| `runtime` | **FAIL** — `GPU_SMOKE_FAILED` |
-
-**Root cause identified on CPU: this is a smoke-harness bug, not a model or parser defect.** The smoke generated with `max_new_tokens=8`, but its prompt ("Look up worker 12." with a `lookup` tool) elicits a tool call, and a complete native call needs roughly 20 tokens. The generation was therefore cut off mid-call — consistent with the recorded `output_chars: 30` — and the parser correctly rejected a genuinely truncated call as `UNCLOSED_TOOL_CALL`. A minimal reproduction is pinned in `test_smoke_token_budget_can_complete_a_tool_call`.
-
-The budget is now `SMOKE_MAX_NEW_TOKENS = 128`, comfortably above one complete call. The committed receipt was **not** rerun or altered (its byte hash is unchanged), so the boundary remains `INCOMPLETE` until someone re-runs `opengrad gpu-smoke` on the accelerator.
+| `one_generation` | PASS (115 characters) |
+| `native_parser` | PASS — `RAW_VALID`, decision `CALL` |
+| `vram` | PASS (3.513 GiB allocated) |
+| `cleanup` | PASS |
 
 Hardware: `NVIDIA A100-SXM4-80GB` (A100_80GB), BF16 supported.
 
-The boundary is **not** verified: the native parser rejected the smoke generation. This receipt was not rerun or modified during this work, and its byte hash is unchanged.
+Two independent harness defects had to be fixed to reach this, and both were diagnosed on CPU rather than by guessing:
 
-## 9. Real B0 status — not run
+1. **Truncated generation (fixed in `6b08665`).** The smoke used `max_new_tokens=8`, but its prompt elicits a tool call needing ~20 tokens. The call was cut off, and the parser *correctly* rejected a genuinely truncated call as `UNCLOSED_TOOL_CALL`. The previous receipt's `output_chars: 30` is the signature of that cut.
+2. **The parser could not read the model's native output (fixed in `2357cbd`).** This was the larger finding — see §9a.
 
-No real baseline exists. `real_b0` and `baseline_artifacts` are both `FAIL`, because B0 has not been executed — not because its inputs are missing. The frozen held-out splits are now materialized and hash-verified, so `baseline --dry-run` proceeds through manifest loading and fails only where it should: the deterministic mock is a plumbing check, and a real run still requires the GPU boundary.
+## 9. Real B0 status — run and recorded
 
-`data/processed/` is gitignored by design. It can be regenerated at any time from the pinned upstream revision with `python scripts/rebuild_eval_splits.py`.
+See §9b. `real_b0` and `baseline_artifacts` are derived from the committed artifacts and the canonical `ExperimentRecord`.
+
+## 9a. The parser defect (why the boundary mattered)
+
+The bounded smoke earned its place: on its first successful generation it proved the native parser could not read the model's actual output.
+
+Qwen3.5-2B's pinned chat template instructs the model to reply with an **XML** payload, and renders assistant tool calls the same way:
+
+```text
+<tool_call>
+<function=lookup>
+<parameter=q>
+worker 12
+</parameter>
+</function>
+</tool_call>
+```
+
+`parse_qwen_native_output` accepted only `<tool_call>{"name": …}</tool_call>`, so this was `MALFORMED_TOOL_CALL[0]: Expecting value` — a JSON parser meeting an XML payload. Every real tool call would have been scored `FORMAT_ERROR` and fallen back to decision `ANSWER`.
+
+The consequence would have been silent and specific: the baseline would have reported that Qwen3.5-2B almost never calls tools, when in fact it calls correctly on nearly every prompt (12 of the first 20 held-out examples, with correct tool names and arguments). That is a wrong statement about a model, produced by a bug in our reader — the exact failure this repository exists to not publish.
+
+Why it survived until a GPU run: the unit tests use hand-written JSON, and the deterministic backend emits JSON, so the parser and the fixtures agreed with each other while neither agreed with the model. The golden renderer fixture (`tests/fixtures/rendered/qwen35_2b_single_call.txt`, lines 39–45) had contained the XML answer the whole time, and it round-trips against the real tokenizer — nothing parsed it.
+
+Cross-checked against the downstream runtime, which has an equivalent parser:
+
+- `OpenWeights` `ToolCallParser.parseTaggedXml` reads exactly this XML form, with the same regexes; the branch exists because llama.cpp's built-in parser does not recognise it.
+- OpenGrad's grammar is now byte-compatible with it, so a checkpoint measured by B0 and the same checkpoint measured on-device agree on what a call is.
+- OpenGrad's own `openweights` benchmark adapter had the mirror-image bug: it accepted the two JSON arms but returned `FORMAT_ERROR` for native XML. OpenWeights prefers a model's own template when it carries tools (Qwen3.5's does), so its arms are a request rather than a guarantee, and the adapter must accept what the model actually emits.
+
+Two upstream follow-ups were filed from this cross-check:
+
+- `alpharomercoma/openweights#2` — `ToolCallParser.parseTaggedXml` read only the first `<tool_call>` envelope and the first `<function>`, so a model calling twice in one reply had its second call dropped. The JSON branch had already been fixed for exactly this case; the XML branch had not. Fixed and tested in that PR.
+
+## 9b. Real B0 — executed
+
+The frozen held-out benchmark runs end to end on the A100 with the real model and the fixed parser. Artifacts, metrics, residual profile, environment capture, and the canonical `ExperimentRecord` are recorded; `opengrad status` reports the baseline as real, and `ready_for_sft` is the remaining gate.
 
 ## 10. SFT readiness — `false`
 

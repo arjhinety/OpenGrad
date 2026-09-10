@@ -54,7 +54,32 @@ opengrad benchmark run --benchmark openweights --dry-run
 
 ---
 
-## 4. Android Studio & Pixel Phone Provisioning
+## 4. Tool-call format contract with OpenWeights
+
+OpenGrad and OpenWeights must agree on what a tool call *is*, or a checkpoint measured in one place is not comparable to the same checkpoint measured in the other. The two parsers are kept byte-compatible on purpose.
+
+The format question has three parts, and conflating them is the failure mode:
+
+| Layer | Who decides | Qwen3.5-2B |
+| --- | --- | --- |
+| What the model is *asked* for | The OpenWeights arm's prompt (`CallFormat.BARE` / `TAGGED`) | A request, not a constraint |
+| What the model's template *allows* | The model's own chat template | XML `<function=...><parameter=...>` only |
+| What gets *read back* | llama.cpp's parser, then `ToolCallParser`, then the adapter | XML branch of `ToolCallParser` |
+
+When a model's own template carries tools, OpenWeights prefers it — `LlamaCppEngine` asks `nativeSupportsTools` of the loaded GGUF, and `PromptTemplates.forModel` refuses families whose protocol it has not transcribed (Qwen3.5 sits in that refusal list alongside vision and coder variants). So an arm's prompt cannot override a template that already fixes the shape, and the adapter must accept the native form rather than score it a format error.
+
+OpenGrad's `parse_qwen_native_output` reads both the native XML form and the older JSON spelling, using the same `FUNCTION_TAG` / `PARAMETER_TAG` regexes as `ToolCallParser.parseTaggedXml`. `parse_openweights_reply` accepts the native XML shape first, then the two JSON arms.
+
+Parameter values are kept as the strings the model emitted. The template stringifies every argument when rendering, so the original JSON type is not recoverable from a rendered transcript and is not guessed; argument comparison is an evaluator concern. `tests/benchmarks/test_openweights_format_contract.py` pins the shared grammar using OpenWeights' own fixtures.
+
+Two upstream findings came out of this cross-check and are recorded rather than silently worked around:
+
+- `alpharomercoma/openweights#2` — `parseTaggedXml` read only the first envelope and the first `<function>`, so a model calling twice in one reply lost the second call. Fixed and tested in that PR.
+- A reply mixing an XML envelope with a JSON envelope still yields only the XML calls, because `ToolCallParser.parse` is a fallback chain and the first branch to claim the reply wins. Left as an upstream design question; OpenGrad does not depend on the mixed shape.
+
+---
+
+## 5. Android Studio & Pixel Phone Provisioning
 
 The local host environment is provisioned with official Android development and testing tools:
 
