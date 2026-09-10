@@ -96,7 +96,7 @@ OPENWEIGHTS_TOOLS: list[dict[str, Any]] = [
 def render_openweights_prompt(
     tools: list[dict[str, Any]], user_prompt: str, format_mode: str = "bare"
 ) -> str:
-    """Render the exact lightweight OpenWeights system prompt (under 150 tokens)."""
+    """Render the exact lightweight OpenWeights system instruction (under 150 tokens)."""
     tool_lines = []
     for t in tools:
         params_compact = json.dumps(t.get("parameters", {}), separators=(",", ":"))

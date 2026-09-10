@@ -20,7 +20,7 @@ class MCPMarkAdapter(BenchmarkAdapter):
     def load_tasks(self, split: str = "filesystem", limit: int | None = None) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("filesystem", "Find all files matching '*.py' in directory /workspace/src.", "mcp__filesystem__list_directory"),
+            ("filesystem", "Find all files matching '*.py' in directory /project/src.", "mcp__filesystem__list_directory"),
             ("github", "Create an issue with title 'Bug in tokenizer' in repo 'opengrad/core'.", "mcp__github__create_issue"),
             ("postgresql", "Query active users from table 'accounts' created in last 7 days.", "mcp__postgres__query"),
             ("browser", "Navigate to docs page and extract the API endpoint specification.", "mcp__browser__navigate"),

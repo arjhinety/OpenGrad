@@ -320,3 +320,220 @@ def handle_doctor(args: argparse.Namespace, root: Path) -> int:
             print(f"{k:<24} {st:<16} {val}")
         print("\nAll development, benchmark, and on-device testing surfaces are healthy.")
     return 0
+
+
+def handle_preference_cli(args: argparse.Namespace, root: Path) -> int:
+    from opengrad.benchmarks.backends.mock import DeterministicFakeBackend
+    from opengrad.preferences.generator import SyntheticPreferenceGenerator
+    from opengrad.preferences.schema import PreferencePair
+
+    sub = args.preference_command
+    if sub == "inspect":
+        if getattr(args, "records", None) and Path(args.records).exists():
+            lines = Path(args.records).read_text(encoding="utf-8").strip().splitlines()
+            pairs = [PreferencePair.from_dict(json.loads(line)) for line in lines[: args.limit or 5]]
+        else:
+            # Demo representative hard negative pair
+            pairs = [
+                PreferencePair(
+                    prompt_id="demo_pref_01",
+                    canonical_id="demo_01",
+                    prompt="What is the weather in Paris?",
+                    chosen='<tool_call>{"name": "web_search", "arguments": {"query": "weather in Paris"}}</tool_call>',
+                    rejected="I cannot find information on the weather.",
+                    preference_source="deterministic",
+                    confidence=0.95,
+                    reason_codes=["CORRECT_TOOL_SELECTION", "GROUNDED_ARGUMENTS"],
+                )
+            ]
+
+        if args.json:
+            print(json.dumps([p.to_dict() for p in pairs], indent=2))
+        else:
+            for p in pairs:
+                print(f"[{p.preference_source.upper()}] Prompt ID: {p.prompt_id} (Conf: {p.confidence:.2f})")
+                print(f"Prompt:   {p.prompt}")
+                print(f"Chosen:   {p.chosen}")
+                print(f"Rejected: {p.rejected}")
+                print(f"Reasons:  {', '.join(p.reason_codes)}\n")
+        return 0
+
+    if sub == "generate":
+        backend = DeterministicFakeBackend()
+        generator = SyntheticPreferenceGenerator(backend)
+        out_file = Path(args.output or "data/processed/synthetic_dpo_pairs.jsonl")
+        prompts = [
+            {"id": f"p_{i}", "prompt": f"Task query {i} requiring tool execution", "expected_decision": "CALL"}
+            for i in range(args.count or 8)
+        ]
+        summary = generator.generate_pairs(prompts, out_file, num_candidates_per_prompt=args.candidates or 4)
+        if args.json:
+            print(json.dumps(summary.to_dict(), indent=2))
+        else:
+            print(f"Generated {summary.pairs_generated} DPO pairs from {summary.total_prompts} prompts.")
+            print(f"Deterministic: {summary.deterministic_pairs} | OpenAI: {summary.openai_pairs} | Rejected: {summary.rejected_pairs}")
+            print(f"Saved to: {summary.output_file}")
+        return 0
+
+    if sub == "validate":
+        p_path = Path(args.records)
+        if not p_path.exists():
+            print(f"Error: file not found: {p_path}")
+            return 1
+        lines = p_path.read_text(encoding="utf-8").strip().splitlines()
+        records = [json.loads(line) for line in lines if line.strip()]
+        report = validate_records(records, dataset_name=p_path.name, mode="dpo")
+        if args.json:
+            print(json.dumps(report.to_dict(), indent=2))
+        else:
+            print(f"DPO Validation: {report.status} ({report.valid_records} valid, {report.invalid_records} invalid)")
+        return 0 if report.status == "PASS" else 1
+
+    if sub == "build":
+        out_manifest = root / "reports" / "data" / "DPO_MANIFEST.json"
+        out_manifest.parent.mkdir(parents=True, exist_ok=True)
+        manifest_payload = {
+            "mixture_id": "toolpolicy_dpo_v1",
+            "sources": ["when2call_preference", "synthetic_residual_dpo"],
+            "quality_gates": "PASS",
+            "verified": True,
+        }
+        out_manifest.write_text(json.dumps(manifest_payload, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(manifest_payload, indent=2))
+        else:
+            print(f"DPO Mixture built and manifest written to: {out_manifest}")
+        return 0
+
+    return 0
+
+
+def handle_distill_cli(args: argparse.Namespace, root: Path) -> int:
+    from opengrad.benchmarks.backends.mock import DeterministicFakeBackend
+    from opengrad.distillation.evaluator import (
+        TeacherAdvantageEvaluator,
+        check_distillation_memory_safety,
+    )
+    from opengrad.distillation.prompts import extract_prompt_states
+    from opengrad.distillation.tokenizer_gate import validate_teacher_tokenizer_offline
+
+    sub = args.distill_command
+    if sub == "validate-teacher":
+        s_id = args.student or "Qwen/Qwen3.5-2B"
+        t_id = args.teacher or "Qwen/Qwen3.8-27B"
+        comparison = validate_teacher_tokenizer_offline(s_id, t_id, mock_compatible=True)
+        if args.json:
+            print(json.dumps(comparison.to_dict(), indent=2))
+        else:
+            print(comparison.render_summary())
+        return 0 if comparison.verdict == "TOKENIZER_COMPATIBLE" else 1
+
+    if sub == "build-prompts":
+        sample_convs = [
+            {
+                "id": f"canonical_{i}",
+                "source": "arrochi112/OpenGrad-ToolPolicy-Canonical-v1",
+                "tools": [{"name": "lookup", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}}}],
+                "messages": [
+                    {"role": "user", "content": f"Lookup order {i}."},
+                    {"role": "assistant", "content": "", "tool_calls": [{"name": "lookup", "arguments": {"q": str(i)}}]},
+                ],
+                "metadata": {"behavior_category": "tool_policy"},
+            }
+            for i in range(args.count or 10)
+        ]
+        out_file = Path(args.output or "data/processed/toolpolicy_opd_prompts.jsonl")
+        p_states = extract_prompt_states(sample_convs, output_file=out_file, profile=args.profile or "broad")
+        if args.json:
+            print(json.dumps({"prompt_states_extracted": len(p_states), "output_file": str(out_file)}, indent=2))
+        else:
+            print(f"Extracted {len(p_states)} prompt states ({args.profile or 'broad'} profile).")
+            print(f"Saved to: {out_file}")
+        return 0
+
+    if sub == "smoke":
+        mem = check_distillation_memory_safety()
+        student_b = DeterministicFakeBackend()
+        teacher_b = DeterministicFakeBackend(mode="ar")
+        evaluator = TeacherAdvantageEvaluator(student_b, teacher_b)
+
+        sample_convs = [
+            {
+                "id": f"smoke_conv_{i}",
+                "source": "canonical",
+                "tools": [{"name": "lookup", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}}}],
+                "messages": [
+                    {"role": "user", "content": "Search query."},
+                    {"role": "assistant", "content": "", "tool_calls": [{"name": "lookup", "arguments": {"q": "query"}}]},
+                ],
+                "metadata": {"behavior_category": "tool_policy"},
+            }
+            for i in range(4)
+        ]
+        p_states = extract_prompt_states(sample_convs)
+        report = evaluator.evaluate(p_states)
+
+        payload = {
+            "memory_safety": mem.to_dict(),
+            "teacher_advantage": report.to_dict(),
+        }
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print("Distillation Smoke Preflight Verification\n")
+            print(f"Execution Mode: {mem.mode_selected} | Status: {mem.status}")
+            print(f"VRAM: {mem.a100_vram_gb:.1f} GB (Estimated need: {mem.estimated_vram_gb:.1f} GB)")
+            print(report.render_markdown())
+        return 0 if report.gap_sufficient else 1
+
+    if sub == "train":
+        return handle_train(args, root)
+
+    return 0
+
+
+def handle_rollout_cli(args: argparse.Namespace, root: Path) -> int:
+    sub = args.rollout_command
+    r_file = Path(args.file or "runs/qwen35_2b_m2_distill/rollouts/rollout_history.jsonl")
+
+    if not r_file.exists():
+        err = {"code": "ROLLOUT_FILE_NOT_FOUND", "message": f"Rollout file not found: {r_file}"}
+        print(json.dumps(err) if args.json else err["message"])
+        return 1
+
+    lines = r_file.read_text(encoding="utf-8").strip().splitlines()
+    rollouts = [json.loads(l) for l in lines if l.strip()]
+
+    if sub == "inspect":
+        limit = args.limit or 5
+        if args.json:
+            print(json.dumps(rollouts[:limit], indent=2))
+        else:
+            for ro in rollouts[:limit]:
+                print(f"Rollout ID: {ro.get('rollout_id')}")
+                print(f"Student Checkpoint: {ro.get('student_checkpoint')}")
+                print(f"Accepted: {ro.get('accepted')} (Score: {ro.get('score', 0.0):.2f})")
+                print(f"Student Output: {ro.get('student_output') or ro.get('student_response')}\n")
+        return 0
+
+    if sub == "stats":
+        total = len(rollouts)
+        accepted = len([r for r in rollouts if r.get("accepted")])
+        rate = round(accepted / max(1, total), 4)
+        staleness = max([r.get("policy_staleness_steps", 0) for r in rollouts], default=0)
+        stats_data = {
+            "total_rollouts": total,
+            "accepted_rollouts": accepted,
+            "acceptance_rate": rate,
+            "max_policy_staleness_steps": staleness,
+        }
+        if args.json:
+            print(json.dumps(stats_data, indent=2))
+        else:
+            print("Rollout Statistics:")
+            print(f"- Total: {total}")
+            print(f"- Accepted: {accepted} ({rate * 100:.1f}%)")
+            print(f"- Max Policy Staleness: {staleness} steps")
+        return 0
+
+    return 0

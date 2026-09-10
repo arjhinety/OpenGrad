@@ -5,10 +5,13 @@ from pathlib import Path
 
 from opengrad.agent_cli import (
     handle_checkpoint_cli,
+    handle_distill_cli,
     handle_doctor,
     handle_experiment_cli,
     handle_inspect_template,
+    handle_preference_cli,
     handle_promote_reject,
+    handle_rollout_cli,
     handle_train,
     handle_validate_data,
 )
@@ -146,6 +149,55 @@ def main() -> int:
     doc_p = sub.add_parser("doctor", help="diagnose environment, tooling, and on-device testing surfaces")
     doc_p.add_argument("--json", action="store_true", help="emit JSON output")
 
+    # preference
+    pref_p = sub.add_parser("preference", help="synthetic DPO preference generation and validation")
+    pref_sub = pref_p.add_subparsers(dest="preference_command")
+    pref_ins = pref_sub.add_parser("inspect", help="inspect preference records or sample pair")
+    pref_ins.add_argument("--records", help="JSONL preference dataset path")
+    pref_ins.add_argument("--limit", type=int, default=5, help="limit records to display")
+    pref_ins.add_argument("--json", action="store_true", help="emit JSON output")
+    pref_gen = pref_sub.add_parser("generate", help="generate synthetic candidate preference pairs")
+    pref_gen.add_argument("--output", default="data/processed/synthetic_dpo_pairs.jsonl", help="output path")
+    pref_gen.add_argument("--count", type=int, default=8, help="number of prompts to generate for")
+    pref_gen.add_argument("--candidates", type=int, default=4, help="candidates per prompt")
+    pref_gen.add_argument("--json", action="store_true", help="emit JSON output")
+    pref_val = pref_sub.add_parser("validate", help="validate DPO preference pairs")
+    pref_val.add_argument("records", help="path to DPO JSONL records")
+    pref_val.add_argument("--json", action="store_true", help="emit JSON output")
+    pref_bld = pref_sub.add_parser("build", help="build DPO mixture and manifest")
+    pref_bld.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # distill
+    dist_p = sub.add_parser("distill", help="on-policy distillation teacher validation and training")
+    dist_sub = dist_p.add_subparsers(dest="distill_command")
+    dist_tok = dist_sub.add_parser("validate-teacher", help="verify tokenizer compatibility between student and teacher")
+    dist_tok.add_argument("--student", default="Qwen/Qwen3.5-2B", help="student model ID")
+    dist_tok.add_argument("--teacher", default="Qwen/Qwen3.8-27B", help="teacher model ID")
+    dist_tok.add_argument("--json", action="store_true", help="emit JSON output")
+    dist_bld = dist_sub.add_parser("build-prompts", help="extract eligible prompt states for on-policy rollouts")
+    dist_bld.add_argument("--output", default="data/processed/toolpolicy_opd_prompts.jsonl", help="output path")
+    dist_bld.add_argument("--profile", default="broad", choices=["broad", "residual"], help="prompt profile")
+    dist_bld.add_argument("--count", type=int, default=10, help="number of prompt states to extract")
+    dist_bld.add_argument("--json", action="store_true", help="emit JSON output")
+    dist_smk = dist_sub.add_parser("smoke", help="run distillation smoke preflight checking VRAM and teacher gap")
+    dist_smk.add_argument("--json", action="store_true", help="emit JSON output")
+    dist_trn = dist_sub.add_parser("train", help="launch on-policy distillation training")
+    dist_trn.add_argument("config", help="distillation experiment config YAML path")
+    dist_trn.add_argument("--dry-run", action="store_true", help="force CPU mock training")
+    dist_trn.add_argument("--force", action="store_true", help="override preflight failures")
+    dist_trn.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # rollout
+    ro_p = sub.add_parser("rollout", help="inspect on-policy rollout history and staleness stats")
+    ro_sub = ro_p.add_subparsers(dest="rollout_command")
+    ro_ins = ro_sub.add_parser("inspect", help="inspect rollout records")
+    ro_ins.add_argument("--file", help="rollout history JSONL path")
+    ro_ins.add_argument("--limit", type=int, default=5, help="limit records to display")
+    ro_ins.add_argument("--json", action="store_true", help="emit JSON output")
+    ro_stat = ro_sub.add_parser("stats", help="compute rollout acceptance and staleness statistics")
+    ro_stat.add_argument("--file", help="rollout history JSONL path")
+    ro_stat.add_argument("--json", action="store_true", help="emit JSON output")
+
     # Legacy CLI tools
     data_audit = sub.add_parser("data-audit")
     data_audit.add_argument("--records", required=True, help="JSON array or JSONL canonical records")
@@ -261,6 +313,15 @@ def main() -> int:
 
     if args.command == "doctor":
         return handle_doctor(args, root)
+
+    if args.command == "preference":
+        return handle_preference_cli(args, root)
+
+    if args.command == "distill":
+        return handle_distill_cli(args, root)
+
+    if args.command == "rollout":
+        return handle_rollout_cli(args, root)
 
     # Legacy CLI dispatch
     if args.command == "data-audit":

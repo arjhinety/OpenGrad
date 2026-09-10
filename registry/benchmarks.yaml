@@ -365,7 +365,7 @@ benchmarks:
   contamination_sensitivity: HIGH
   prohibit_training: true
   parser_requirements: openweights-tool-parser
-  notes: Evaluates on-device tool calling under minimal system prompt without explicit instruction bloating.
+  notes: Evaluates on-device tool calling under minimal system instructions without explicit instruction bloating.
   recommended_repository_revision: c593452243d548325a7a8d5f309a473e045ab552
   revision_source: https://github.com/alpharomercoma/openweights
 

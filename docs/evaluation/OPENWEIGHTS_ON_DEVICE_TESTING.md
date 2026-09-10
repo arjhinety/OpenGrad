@@ -7,7 +7,7 @@
 ## 1. Why On-Device Testing Matters
 
 On a mobile phone (e.g., Google Pixel 7, Galaxy S24, or iPhone), conventional large language model serving assumptions break down:
-- **System Prompt Bloat**: Standard SFT models rely on 1,500–2,000 token system prompts describing functions. On an on-device NPU/CPU, prefilling 2,000 tokens takes 15–20 seconds, severely degrading interactive time to first token (TTFT) and consuming constrained RAM.
+- **System Instruction Bloat**: Standard SFT models rely on 1,500–2,000 token system instructions describing functions. On an on-device NPU/CPU, prefilling 2,000 tokens takes 15–20 seconds, severely degrading interactive time to first token (TTFT) and consuming constrained RAM.
 - **Strict Format Adherence**: Models must invoke tools reliably with concise prompt envelopes (<150 tokens) and clean syntax.
 
 OpenGrad evaluates whether post-trained small models (Qwen3.5-2B) can execute tool calling effectively **without heavy prompt engineering**.
