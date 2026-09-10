@@ -25,9 +25,9 @@ from opengrad.env_capture import capture
 from opengrad.evaluation.runner import run_baseline
 from opengrad.experiments.preflight import run_experiment_preflight
 from opengrad.failures.analyzer import FailureAnalyzer, FailureItem
+from opengrad.readiness import gpu_smoke, readiness, repository_status
 from opengrad.registry.preflight import check
 from opengrad.registry.validate import validate
-from opengrad.readiness import gpu_smoke, readiness, repository_status
 
 
 def preflight(root: Path) -> int:
@@ -242,17 +242,17 @@ def main() -> int:
 
     if args.command == "status":
         payload = repository_status(root)
-        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
 
     if args.command == "readiness":
         payload = readiness(root, root / args.config if args.config else None)
-        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         return 0 if payload["status"] in {"PASS", "WARN"} else 1
 
     if args.command == "gpu-smoke":
         payload = gpu_smoke(root, root / args.config if args.config else None)
-        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         return 0 if payload["status"] == "PASS" else 1
 
     if args.command == "preflight":
@@ -448,7 +448,7 @@ def main() -> int:
             error = {"ok": False, "code": getattr(exc, "code", "BASELINE_FAILED"), "message": str(exc), "blocking": True}
             print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
             return 1
-        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) if args.json else json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0 if result.get("status") == "EXECUTED" else 1
 
     parser.print_help()

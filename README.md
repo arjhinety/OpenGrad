@@ -412,6 +412,7 @@ There is no completed experiment to reproduce yet. The future baseline workflow 
 | See experiment records | [experiments/](experiments/README.md) |
 | See results | [results/](results/registry.jsonl) |
 | See reports and failures | [reports/](reports/README.md) |
+| Check pre-GPU readiness | [Pre-GPU readiness report](reports/PRE_GPU_READINESS_REPORT.md) and `opengrad readiness --json` |
 | Operate OpenGrad from an agent harness | [Agent / Harness Integration](docs/AGENT_INTEGRATION.md) and [MCP server](integrations/opengrad-mcp/README.md) |
 | Add or challenge a finding | [CONTRIBUTING.md](CONTRIBUTING.md) and [contribution protocols](docs/contributing/README.md) |
 | Cite OpenGrad | [CITATION.cff](CITATION.cff) |

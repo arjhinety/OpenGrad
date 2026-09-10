@@ -195,3 +195,129 @@ def test_baseline_paths_cannot_escape_the_project(tmp_path: Path):
         runner._project_path(tmp_path, "../escape.json", "output")
     with pytest.raises(ValueError):
         runner._project_path(tmp_path, str(tmp_path.parent / "abs.json"), "output")
+
+
+def test_baseline_plumbing_runs_over_a_real_materialized_split(monkeypatch, tmp_path: Path):
+    """End-to-end B0 plumbing over real Parquet, with no mocked manifest loader.
+
+    Only the tokenizer-dependent renderer is stubbed, because it needs the pinned
+    Qwen tokenizer. Everything else is real: manifest contract load, Parquet
+    row/count/ID reads, content-hash verification, canonical example
+    construction, prediction, and artifact writing. This is what pins the
+    materializer and the evaluator to the same content-hash definition -- a
+    one-character drift between them would otherwise only surface on GPU day.
+    """
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from opengrad.data.materialize import materialize_parquet
+    from opengrad.evaluation import runner
+
+    source = tmp_path / "mcq-source.parquet"
+    pa_rows = [
+        {
+            "uuid": f"e{i}",
+            "question": f"Question {i}?",
+            "correct_answer": "direct",
+            "answers": {"direct": "yes", "tool": "no"},
+            "tools": [
+                {
+                    "name": "lookup",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {"q": {"type": "string"}},
+                    },
+                }
+            ],
+        }
+        for i in range(3)
+    ]
+    pq.write_table(pa.Table.from_pylist(pa_rows), source)
+
+    split_dir = tmp_path / "data/processed/normalization-v1/when2call-mcq"
+    materialized = materialize_parquet(
+        source, split_dir, dataset="when2call", split="mcq", mode="evaluation"
+    )
+    assert materialized["manifest"]["counts"]["written"] == 3
+
+    manifest_path = tmp_path / "reports/evaluation/behavioral-heldout-v2.manifest.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "manifest_id": "behavioral-heldout-v2",
+                "frozen": True,
+                "status": "MATERIALIZED",
+                "freeze_revision": runner.PINNED_EVALUATOR_REVISION,
+                "model_renderer_contract": {
+                    "model_revision": runner.PINNED_MODEL_REVISION,
+                    "renderer": "qwen3_5_2b_v1",
+                    "template_hash": runner.PINNED_TEMPLATE_HASH,
+                },
+                "contamination_policy": {
+                    "derived_prompts_excluded": True,
+                    "training_manifests_excluded": [],
+                },
+                "splits": [
+                    {
+                        "id": "when2call-mcq",
+                        "items": 3,
+                        "content_hash": materialized["manifest"]["content_hash"],
+                        "source": "data/processed/normalization-v1/when2call-mcq/manifest.json",
+                        "purpose": "fixture",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    def render(self, example):
+        return RenderedTrainingExample(
+            example.example_id,
+            "fixture prompt",
+            "Qwen/Qwen3.5-2B",
+            self.model_revision,
+            self.renderer_version,
+            self.model_revision,
+            "0" * 64,
+            False,
+        )
+
+    monkeypatch.setattr(runner.Qwen35_2BRenderer, "render_evaluation", render)
+    monkeypatch.setattr(
+        runner.Qwen35_2BRenderer, "text_token_length", lambda self, text: len(text.split())
+    )
+
+    config = yaml.safe_load(BASELINE_CONFIG.read_text())
+    config["outputs"] = {
+        key: str(tmp_path / "out" / f"{key}.json")
+        for key in ("predictions", "metrics", "residual_profile", "environment")
+    }
+    config_path = tmp_path / "baseline.yaml"
+    config_path.write_text(yaml.safe_dump(config))
+
+    result = run_baseline(
+        config_path,
+        root=tmp_path,
+        backend=FakeDeterministicBackend(),
+        limit=3,
+        dry_run=True,
+    )
+    assert result["status"] == "DRY_RUN"
+    assert result["records"] == 3
+
+    # Artifact paths are root-relative by contract; resolve them for assertion.
+    def artifact(name: str) -> Path:
+        path = Path(result["artifacts"][name])
+        return path if path.is_absolute() else tmp_path / path
+
+    predictions = [
+        json.loads(line) for line in artifact("predictions").read_text().splitlines()
+    ]
+    assert {row["example_id"] for row in predictions} == {"e0", "e1", "e2"}
+    assert all(row["parser"]["status"] == "RAW_VALID" for row in predictions)
+    residual = json.loads(artifact("residual_profile").read_text())
+    assert residual["sample_count"] == 3
+    assert residual["manifest_sha256"] == result["manifest_sha256"]

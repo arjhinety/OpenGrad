@@ -10,8 +10,8 @@ import hashlib
 import importlib
 import json
 import math
-import shutil
 import re
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -51,7 +51,7 @@ def _read_yaml(path: Path) -> dict[str, Any]:
     try:
         import yaml
         value = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    except Exception:
+    except Exception:  # noqa: BLE001 - an unreadable config must project as absent, not crash status
         return {}
     return value if isinstance(value, dict) else {}
 
@@ -214,9 +214,9 @@ def _materialized_evaluation_ids(root: Path, manifest: dict[str, Any] | None) ->
                             return None
                         result.add(value)
         return result or None
-    except Exception:
-        # Readiness is a fail-closed projection. Corrupt/missing parquet must
-        # produce an unavailable ID set, never an optimistic empty set.
+    except Exception:  # noqa: BLE001 - readiness is a fail-closed projection
+        # Corrupt/missing parquet must produce an unavailable ID set, never an
+        # optimistic empty set.
         return None
 
 
@@ -275,7 +275,7 @@ def repository_status(root: Path) -> dict[str, Any]:
         import yaml
 
         baseline_config = yaml.safe_load((root / BASELINE_CONFIG).read_text(encoding="utf-8")) or {}
-    except Exception:
+    except Exception:  # noqa: BLE001 - status must degrade to an empty projection, not crash
         baseline_config = {}
     active = experiments[-1] if experiments else None
     if baseline["real"]:
@@ -437,7 +437,7 @@ def _materialized_split_state(root: Path, split: dict[str, Any]) -> tuple[bool, 
                     seen_ids.add(example_id)
                     content_digest.update(json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n")
                     actual_rows += 1
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - unreadable shards must fail the gate, never pass it
         return False, f"split {split.get('id')} shard content cannot be verified: {exc}", set()
     if actual_rows != written:
         return False, f"split {split.get('id')} shard rows {actual_rows} do not match manifest count {written}", set()
@@ -706,7 +706,7 @@ def gpu_smoke(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         torch.cuda.empty_cache()
         checks.append({"name": "cleanup", "status": "PASS"})
         receipt["status"] = "PASS"
-    except Exception as exc:  # bounded smoke must emit an auditable failure, never hide it
+    except Exception as exc:  # noqa: BLE001 - bounded smoke must emit an auditable failure, never hide it
         checks.append({"name": "runtime", "status": "FAIL", "code": "GPU_SMOKE_FAILED", "details": f"{type(exc).__name__}: {exc}"})
         receipt["limitations"].append("Real baseline and SFT are blocked until this boundary passes.")
     receipt["checks"] = checks

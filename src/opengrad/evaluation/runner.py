@@ -137,7 +137,7 @@ def _materialized_rows(root: Path, split: dict[str, Any]) -> list[dict[str, Any]
                 rows.append(row)
     if len(rows) != expected_count:
         raise ValueError(f"split {split.get('id')} has {len(rows)} rows; expected {expected_count}")
-    digest = hashlib.sha256(b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\\n").encode("utf-8") for row in rows)).hexdigest()
+    digest = hashlib.sha256(b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8") for row in rows)).hexdigest()
     if shard_manifest.get("content_hash") != split.get("content_hash") or shard_manifest.get("content_hash") != digest:
         raise ValueError(f"split {split.get('id')} content hash does not match materialized rows")
     return rows
@@ -402,7 +402,7 @@ def _validate_baseline_config(config: dict[str, Any]) -> None:
     if not isinstance(evaluations, dict) or not isinstance(evaluations.get("behavioral_manifest"), str) or evaluations.get("evaluator_revision") not in {None, PINNED_MODEL_REVISION}:
         raise ValueError("baseline evaluation config is malformed")
     if not isinstance(config["provenance"], dict):
-        raise ValueError("baseline provenance must be an object")
+        raise TypeError("baseline provenance must be an object")
     outputs = config["outputs"]
     if not isinstance(outputs, dict) or set(outputs) != {"predictions", "metrics", "residual_profile", "environment"} or not all(isinstance(value, str) and value for value in outputs.values()):
         raise ValueError("baseline must define exactly predictions, metrics, residual_profile, and environment outputs")
@@ -436,7 +436,7 @@ def run_baseline(
     config_path = config_path.resolve()
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     if not isinstance(config, dict):
-        raise ValueError("baseline config must be a YAML object")
+        raise TypeError("baseline config must be a YAML object")
     _validate_baseline_config(config)
     manifest_value = config.get("evaluations", {}).get("behavioral_manifest")
     manifest_path = _project_path(root, manifest_value, "behavioral manifest")
