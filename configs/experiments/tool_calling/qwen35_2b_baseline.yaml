@@ -15,9 +15,10 @@ config: configs/evaluation/tool_calling/qwen35_2b_baseline.yaml
 seed: 0
 hardware: {required: accelerator-later, gpu_used_now: false}
 software:
-  python: '3.11'
-  transformers: 5.16.1
+  python: '3.12'
+  engine: vllm 0.29.0
   torch: 2.13.0
+  transformers: 5.17.0
   evaluator_revision: 2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc
 compute_provider: null
 tool_parser: opengrad.formatting.parser.parse_qwen_native_output@v1

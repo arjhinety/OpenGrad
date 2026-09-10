@@ -10,6 +10,8 @@ from __future__ import annotations
 import hashlib
 import importlib
 import json
+import os
+import sys
 import time
 from collections import Counter
 from collections.abc import Iterable
@@ -33,9 +35,21 @@ PINNED_EVALUATOR_REVISION = "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc"
 CANONICAL_MODEL_ID = "Qwen/Qwen3.5-2B"
 BASELINE_EXPERIMENT_ID = "tool_calling/qwen35_2b/baseline"
 
+# Engines a real run may declare. The engine is part of the measurement: two engines
+# produce different tokens (different kernels, different samplers, different reduction
+# order), so a baseline is only comparable to another run that names the same engine.
+SUPPORTED_ENGINES = ("vllm", "transformers")
+DEFAULT_ENGINE = "vllm"
+
 
 class InferenceBackend(Protocol):
-    """Stable generation interface shared by fake and model-backed runners."""
+    """Stable generation interface shared by fake and model-backed runners.
+
+    ``engine_metadata()`` and ``generate_batch()`` are optional but strongly preferred:
+    the engine that produced a baseline is part of the measurement, and batched generation
+    is what makes an A100 worth using. A backend without them is still valid and falls back
+    to one-prompt-at-a-time generation.
+    """
 
     name: str
 
@@ -309,6 +323,227 @@ class TransformersInferenceBackend:
         self.last_truncated = len(generated) >= int(generation_config.get("max_new_tokens", 0))
         return str(tokenizer.decode(generated, skip_special_tokens=False))
 
+    def engine_metadata(self) -> dict[str, Any]:
+        version = None
+        try:
+            version = importlib.import_module("transformers").__version__
+        except ImportError:
+            pass
+        return {
+            "name": self.name,
+            "version": version,
+            "model_id": self.model_id,
+            "revision": self.revision,
+            "batching": "serial",
+        }
+
+
+class VLLMInferenceBackend:
+    """vLLM engine: continuous batching, and the declared engine of record for B0.
+
+    Prompts are rendered by OpenGrad's pinned Qwen renderer and handed here as raw text, so
+    this backend never re-applies a chat template. That is deliberate: vLLM ships its own
+    tokenizer/template stack, and letting it render the prompt would put the frozen prompt
+    contract in the hands of a component the frozen config does not name. The prompt that
+    was validated is the prompt that is generated from.
+
+    Throughput comes from ``generate_batch``: vLLM schedules the submitted prompts
+    continuously, so the runner's submission chunk bounds memory and progress granularity
+    rather than the engine's utilisation.
+    """
+
+    name = "vllm"
+
+    def __init__(
+        self,
+        *,
+        model_id: str,
+        revision: str,
+        dtype: str = "bfloat16",
+        max_model_len: int = 4096,
+        gpu_memory_utilization: float = 0.90,
+        max_num_seqs: int = 256,
+        tensor_parallel_size: int = 1,
+        enforce_eager: bool = False,
+        seed: int = 0,
+        cache_dir: str | None = None,
+    ) -> None:
+        self.model_id = model_id
+        self.revision = revision
+        self.dtype = dtype
+        self.max_model_len = max_model_len
+        self.gpu_memory_utilization = gpu_memory_utilization
+        self.max_num_seqs = max_num_seqs
+        self.tensor_parallel_size = tensor_parallel_size
+        self.enforce_eager = enforce_eager
+        self.seed = seed
+        self.cache_dir = cache_dir
+        self._llm: Any = None
+        self.last_truncated = False
+        self.last_truncated_flags: list[bool] = []
+
+    def _load(self) -> Any:
+        if self._llm is not None:
+            return self._llm
+        try:
+            vllm = importlib.import_module("vllm")
+        except ImportError as exc:
+            raise RuntimeError(
+                "the vllm engine requires the gpu-vllm extra: pip install '.[gpu-vllm]'"
+            ) from exc
+        self._expose_venv_bin_for_jit()
+        kwargs: dict[str, Any] = {
+            "model": self.model_id,
+            "revision": self.revision,
+            "trust_remote_code": False,
+            "dtype": self.dtype,
+            "max_model_len": self.max_model_len,
+            "gpu_memory_utilization": self.gpu_memory_utilization,
+            "max_num_seqs": self.max_num_seqs,
+            "tensor_parallel_size": self.tensor_parallel_size,
+            "enforce_eager": self.enforce_eager,
+            "seed": self.seed,
+            "disable_log_stats": True,
+        }
+        if self.cache_dir:
+            kwargs["download_dir"] = self.cache_dir
+        self._llm = vllm.LLM(**kwargs)
+        return self._llm
+
+    @staticmethod
+    def _expose_venv_bin_for_jit() -> None:
+        """Put this interpreter's bin directory on PATH.
+
+        vLLM's flashinfer kernels JIT-compile at engine startup and shell out to a `ninja`
+        executable. Invoked as ``.venv/bin/opengrad`` the venv's bin directory is not on
+        PATH, so that build dies with ``FileNotFoundError: 'ninja'`` and surfaces only as
+        the unhelpful "Engine core initialization failed". The venv ships ninja as its own
+        console script, so making its bin directory visible fixes it without touching the
+        host environment.
+        """
+        bin_dir = str(Path(sys.executable).parent)
+        entries = os.environ.get("PATH", "").split(os.pathsep)
+        if bin_dir and bin_dir not in entries:
+            os.environ["PATH"] = os.pathsep.join([bin_dir, *entries])
+
+    def engine_metadata(self) -> dict[str, Any]:
+        metadata: dict[str, Any] = {
+            "name": self.name,
+            "model_id": self.model_id,
+            "revision": self.revision,
+            "dtype": self.dtype,
+            "max_model_len": self.max_model_len,
+            "gpu_memory_utilization": self.gpu_memory_utilization,
+            "max_num_seqs": self.max_num_seqs,
+            "tensor_parallel_size": self.tensor_parallel_size,
+            "enforce_eager": self.enforce_eager,
+            "seed": self.seed,
+            "batching": "continuous",
+        }
+        try:
+            metadata["version"] = importlib.import_module("vllm").__version__
+        except ImportError:
+            metadata["version"] = None
+        return metadata
+
+    def _sampling_params(self, generation_config: dict[str, Any]) -> Any:
+        vllm = importlib.import_module("vllm")
+        # temperature 0.0 is greedy, which is what the frozen do_sample=False asks for.
+        return vllm.SamplingParams(
+            temperature=float(generation_config.get("temperature", 0.0)),
+            top_p=float(generation_config.get("top_p", 1.0)),
+            max_tokens=int(generation_config["max_new_tokens"]),
+            n=1,
+            seed=self.seed,
+        )
+
+    def generate_batch(
+        self,
+        prompts: list[str],
+        *,
+        examples: list[CanonicalEvaluationExample],
+        generation_config: dict[str, Any],
+    ) -> list[str]:
+        llm = self._load()
+        params = self._sampling_params(generation_config)
+        try:
+            outputs = llm.generate(prompts, params, use_tqdm=False)
+        except Exception:  # noqa: BLE001 - identify which example the engine refused
+            # One prompt the engine cannot schedule must not take the run down without
+            # saying which: retry singly so the failure names its example.
+            return self._generate_individually(llm, prompts, examples, params)
+        raws: list[str] = []
+        flags: list[bool] = []
+        for output in outputs:
+            completion = output.outputs[0]
+            raws.append(str(completion.text))
+            flags.append(str(getattr(completion, "finish_reason", "")) == "length")
+        self.last_truncated_flags = flags
+        self.last_truncated = any(flags)
+        return raws
+
+    def _generate_individually(
+        self, llm: Any, prompts: list[str], examples: list[CanonicalEvaluationExample], params: Any
+    ) -> list[str]:
+        raws: list[str] = []
+        flags: list[bool] = []
+        for prompt, example in zip(prompts, examples):
+            try:
+                output = llm.generate([prompt], params, use_tqdm=False)[0]
+            except Exception as exc:
+                raise RuntimeError(
+                    f"vllm could not generate for example {example.example_id}: {exc}"
+                ) from exc
+            completion = output.outputs[0]
+            raws.append(str(completion.text))
+            flags.append(str(getattr(completion, "finish_reason", "")) == "length")
+        self.last_truncated_flags = flags
+        self.last_truncated = any(flags)
+        return raws
+
+    def generate(
+        self,
+        prompt: str,
+        *,
+        example: CanonicalEvaluationExample,
+        generation_config: dict[str, Any],
+    ) -> str:
+        return self.generate_batch(
+            [prompt], examples=[example], generation_config=generation_config
+        )[0]
+
+
+def build_backend(name: str, config: dict[str, Any]) -> InferenceBackend:
+    """Construct the declared engine for a real run."""
+    runtime = config.get("runtime", {}) if isinstance(config.get("runtime"), dict) else {}
+    model_id = str(config.get("model_id", CANONICAL_MODEL_ID))
+    revision = str(config.get("model_revision", PINNED_MODEL_REVISION))
+    common = {
+        "model_id": model_id,
+        "revision": revision,
+    }
+    if name == "vllm":
+        context_length = int(runtime.get("context_length", 4096))
+        # vLLM refuses a request whose prompt plus max_tokens exceeds max_model_len, so the
+        # window must cover the largest in-contract prompt *and* its completion. Prompts
+        # beyond context_length are bucketed as overflow by the frozen policy, not dropped.
+        max_new_tokens = int(
+            (config.get("generation") or {}).get("max_new_tokens", 512)
+        )
+        return VLLMInferenceBackend(
+            **common,
+            dtype=str(runtime.get("precision", "bfloat16")),
+            max_model_len=int(runtime.get("max_model_len") or context_length + max_new_tokens),
+            gpu_memory_utilization=float(runtime.get("gpu_memory_utilization", 0.90)),
+            max_num_seqs=int(runtime.get("max_num_seqs", 256)),
+            tensor_parallel_size=int(runtime.get("tensor_parallel_size", 1)),
+            enforce_eager=bool(runtime.get("enforce_eager", False)),
+            seed=int(config.get("seed", 0)),
+        )
+    if name == "transformers":
+        return TransformersInferenceBackend(**common)
+    raise ValueError(f"unsupported engine: {name} (supported: {', '.join(SUPPORTED_ENGINES)})")
+
 
 def _prediction(
     example: CanonicalEvaluationExample,
@@ -405,8 +640,28 @@ def _validate_baseline_config(config: dict[str, Any]) -> None:
     if not isinstance(generation, dict) or generation.get("max_new_tokens", 0) < 1 or generation.get("do_sample") is not False or generation.get("temperature") != 0.0 or generation.get("top_p") != 1.0:
         raise ValueError("baseline generation config is not deterministic and bounded")
     runtime = config["runtime"]
-    if not isinstance(runtime, dict) or runtime.get("backend") != "transformers" or runtime.get("precision") != "bfloat16" or runtime.get("device_policy") != "accelerator_required" or not isinstance(runtime.get("context_length"), int) or runtime["context_length"] < 1:
-        raise ValueError("baseline runtime config is not the pinned transformers/BF16 contract")
+    if not isinstance(runtime, dict):
+        raise TypeError("baseline runtime must be an object")
+    engine = runtime.get("backend")
+    if engine not in SUPPORTED_ENGINES:
+        raise ValueError(
+            f"baseline runtime must declare a supported engine "
+            f"({', '.join(SUPPORTED_ENGINES)}); got {engine!r}"
+        )
+    if engine == "vllm" and not isinstance(runtime.get("vllm_version"), str):
+        raise ValueError("vllm runtime must pin vllm_version")
+    if engine == "transformers" and not isinstance(runtime.get("transformers_version"), str):
+        raise ValueError("transformers runtime must pin transformers_version")
+    if (
+        runtime.get("precision") != "bfloat16"
+        or runtime.get("device_policy") != "accelerator_required"
+        or not isinstance(runtime.get("context_length"), int)
+        or runtime["context_length"] < 1
+    ):
+        raise ValueError(
+            "baseline runtime must pin BF16 precision, an accelerator requirement, "
+            "and a positive context length"
+        )
     evaluations = config["evaluations"]
     if not isinstance(evaluations, dict) or not isinstance(evaluations.get("behavioral_manifest"), str) or evaluations.get("evaluator_revision") not in {None, PINNED_MODEL_REVISION}:
         raise ValueError("baseline evaluation config is malformed")
@@ -454,31 +709,56 @@ def run_baseline(
         if limit < 1:
             raise ValueError("limit must be positive")
         examples = examples[:limit]
+    engine_name = str(config["runtime"].get("backend", DEFAULT_ENGINE))
     model = backend or (
-        FakeDeterministicBackend()
-        if dry_run
-        else TransformersInferenceBackend(
-            model_id="Qwen/Qwen3.5-2B", revision=str(config["model_revision"])
-        )
+        FakeDeterministicBackend() if dry_run else build_backend(engine_name, config)
     )
     renderer = Qwen35_2BRenderer(
         revision=str(config["model_revision"]), enable_thinking=bool(config.get("thinking", False))
     )
     predictions: list[dict[str, Any]] = []
     context_limit = int(config["runtime"]["context_length"])
+    generation_config = dict(config["generation"])
+    # Submission chunk. A backend with continuous batching schedules these itself, so this
+    # bounds peak memory and gives the run progress granularity rather than setting the
+    # engine's concurrency.
+    batch_size = max(1, int(config["runtime"].get("batch_size", 1)))
+    batch_generate = getattr(model, "generate_batch", None)
     started = time.monotonic()
-    for example in examples:
-        rendered = renderer.render_evaluation(example)
-        input_tokens = renderer.text_token_length(rendered.text)
-        raw = model.generate(
-            rendered.text, example=example, generation_config=dict(config["generation"])
-        )
-        parsed = parse_qwen_native_output(
-            raw, truncated=bool(getattr(model, "last_truncated", False))
-        )
-        predictions.append(
-            _prediction(example, rendered.text, input_tokens, context_limit, raw, parsed)
-        )
+    for index in range(0, len(examples), batch_size):
+        chunk = examples[index : index + batch_size]
+        rendered_chunk = [renderer.render_evaluation(example) for example in chunk]
+        prompts = [rendered.text for rendered in rendered_chunk]
+        if callable(batch_generate) and len(chunk) > 1:
+            raws = batch_generate(prompts, examples=chunk, generation_config=generation_config)
+            flags = list(getattr(model, "last_truncated_flags", None) or [])
+        else:
+            raws = [
+                model.generate(prompt, example=example, generation_config=generation_config)
+                for prompt, example in zip(prompts, chunk)
+            ]
+            flags = [bool(getattr(model, "last_truncated", False))] * len(chunk)
+        if len(raws) != len(chunk):
+            raise RuntimeError(
+                f"engine returned {len(raws)} samples for {len(chunk)} prompts"
+            )
+        # An engine that reports only the batch-wide `last_truncated` (or neither flag) must
+        # not shorten this list: zipping against a short list would silently produce zero
+        # predictions for the whole chunk.
+        if len(flags) != len(chunk):
+            flags = [bool(getattr(model, "last_truncated", False))] * len(chunk)
+        for example, rendered, raw, truncated in zip(chunk, rendered_chunk, raws, flags):
+            parsed = parse_qwen_native_output(raw, truncated=bool(truncated))
+            predictions.append(
+                _prediction(
+                    example,
+                    rendered.text,
+                    renderer.text_token_length(rendered.text),
+                    context_limit,
+                    raw,
+                    parsed,
+                )
+            )
     output_config = config.get("outputs")
     if not isinstance(output_config, dict) or set(output_config) != {"predictions", "metrics", "residual_profile", "environment"}:
         raise ValueError("baseline config must define predictions, metrics, residual_profile, and environment outputs")
@@ -531,13 +811,25 @@ def run_baseline(
     metrics = routing_metrics(actual, predicted) if predictions else {"records": 0}
     parse_counts = Counter(str(row["parser"]["status"]) for row in predictions)
     context_counts = Counter(str(row["context_bucket"]) for row in predictions)
+    engine = None
+    engine_metadata = getattr(model, "engine_metadata", None)
+    if callable(engine_metadata):
+        engine = engine_metadata()
     result = {
         "schema_version": 1,
         "run_id": "tool_calling/qwen35_2b/baseline",
         "status": "DRY_RUN" if dry_run else "EXECUTED",
         "model_id": config["model_id"],
         "model_revision": config["model_revision"],
+        # Readiness requires the tokenizer revision in the metrics artifact, and the
+        # experiment record already carries it. Without this line a perfect run produced
+        # evidence that the baseline gate refused, so real_b0 could never pass.
+        "tokenizer_revision": config["tokenizer_revision"],
         "backend": model.name,
+        # The engine is part of the measurement. Two engines emit different tokens, so a
+        # baseline is only comparable to a run naming the same engine and version.
+        "engine": engine,
+        "generation_batch_size": batch_size,
         "manifest": str(config["evaluations"]["behavioral_manifest"]),
         "manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         "renderer": "qwen3_5_2b_v1",
@@ -569,6 +861,8 @@ def run_baseline(
     environment.update({
         "run_id": result["run_id"],
         "backend": model.name,
+        "engine": engine,
+        "generation_batch_size": batch_size,
         "dry_run": dry_run,
         "model_id": result["model_id"],
         "model_revision": result["model_revision"],

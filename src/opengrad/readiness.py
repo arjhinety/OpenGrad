@@ -30,6 +30,7 @@ from opengrad.contamination.audit import (
     training_corpus_fingerprint,
 )
 from opengrad.env_capture import capture
+from opengrad.evaluation.runner import SUPPORTED_ENGINES
 from opengrad.experiments.preflight import run_experiment_preflight
 from opengrad.experiments.schema import ExperimentConfig
 from opengrad.experiments.store import ExperimentStore
@@ -160,8 +161,22 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         and isinstance(residual_values, dict)
         and all(isinstance(value, (int, float)) and math.isfinite(value) and 0 <= value <= 1 for value in residual_values.values())
     )
+    # The engine that produced the baseline is part of the measurement, so it must be the
+    # engine the frozen config declares, and its version must be recorded. A baseline from
+    # an unnamed or unrecorded engine is not comparable to anything.
+    declared_engine = (config.get("runtime") or {}).get("backend")
+    recorded_engine = metrics.get("engine") if isinstance(metrics, dict) else None
+    engine_contract_ok = bool(
+        isinstance(declared_engine, str)
+        and metrics
+        and metrics.get("backend") == declared_engine
+        and isinstance(recorded_engine, dict)
+        and recorded_engine.get("name") == declared_engine
+        and isinstance(recorded_engine.get("version"), str)
+        and recorded_engine.get("version")
+    )
     artifact_contract_ok = bool(
-        metrics and metrics.get("status") == "EXECUTED" and metrics.get("backend") == "transformers"
+        metrics and metrics.get("status") == "EXECUTED" and engine_contract_ok
         and metrics.get("model_id") == config.get("model_id") == CANONICAL_MODEL_ID
         and metrics.get("model_revision") == config.get("model_revision") == PINNED_MODEL_REVISION
         and metrics.get("tokenizer_revision") == config.get("tokenizer_revision") == PINNED_MODEL_REVISION
@@ -175,6 +190,7 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         and metrics.get("records") == expected_records
         and residual_contract_ok and residuals.get("sample_count") == metrics.get("records")
         and environment and environment.get("backend") == metrics.get("backend")
+        and environment.get("engine") == metrics.get("engine")
         and environment.get("dry_run") is False
         and environment.get("run_id") == metrics.get("run_id")
         and environment.get("model_id") == CANONICAL_MODEL_ID
@@ -374,8 +390,25 @@ def _baseline_config_contract(raw: dict[str, Any], root: Path | None = None) -> 
     if not isinstance(generation, dict) or generation.get("do_sample") is not False or generation.get("temperature") != 0.0 or generation.get("top_p") != 1.0 or not isinstance(generation.get("max_new_tokens"), int) or generation["max_new_tokens"] < 1:
         return False, "baseline generation must be deterministic and bounded"
     runtime = raw.get("runtime")
-    if not isinstance(runtime, dict) or runtime.get("backend") != "transformers" or runtime.get("precision") != "bfloat16" or runtime.get("device_policy") != "accelerator_required" or not isinstance(runtime.get("context_length"), int) or runtime["context_length"] < 1:
-        return False, "baseline runtime must require the pinned transformers/BF16 accelerator path"
+    if not isinstance(runtime, dict):
+        return False, "baseline runtime must be an object"
+    engine = runtime.get("backend")
+    if engine not in SUPPORTED_ENGINES:
+        return False, (
+            f"baseline runtime must declare a supported engine "
+            f"({', '.join(SUPPORTED_ENGINES)}); got {engine!r}"
+        )
+    if engine == "vllm" and not isinstance(runtime.get("vllm_version"), str):
+        return False, "vllm runtime must pin vllm_version"
+    if engine == "transformers" and not isinstance(runtime.get("transformers_version"), str):
+        return False, "transformers runtime must pin transformers_version"
+    if (
+        runtime.get("precision") != "bfloat16"
+        or runtime.get("device_policy") != "accelerator_required"
+        or not isinstance(runtime.get("context_length"), int)
+        or runtime["context_length"] < 1
+    ):
+        return False, "baseline runtime must pin BF16 precision, an accelerator requirement, and a context length"
     evaluations = raw.get("evaluations")
     provenance = raw.get("provenance")
     outputs = raw.get("outputs")
