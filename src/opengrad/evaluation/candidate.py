@@ -30,6 +30,9 @@ from typing import Any
 
 import yaml
 
+from opengrad.data.renderers import Qwen35_2BRenderer
+from opengrad.env_capture import capture
+from opengrad.evaluation.routing import routing_metrics
 from opengrad.evaluation.runner import (
     PINNED_EVALUATOR_REVISION,
     PINNED_MODEL_REVISION,
@@ -38,13 +41,10 @@ from opengrad.evaluation.runner import (
     _residuals,
     _write_json,
     build_backend,
+    load_evaluation_examples,
     measure_predictions,
-    routing_metrics,
 )
-from opengrad.env_capture import capture
 from opengrad.formatting.parser import parse_qwen_native_output  # noqa: F401  (contract marker)
-from opengrad.data.renderers import Qwen35_2BRenderer
-from opengrad.evaluation.runner import load_evaluation_examples
 
 CANDIDATE_STATUS = "CANDIDATE_EVALUATION"
 BASELINE_CONFIG = Path("configs/evaluation/tool_calling/qwen35_2b_baseline.yaml")
@@ -177,7 +177,7 @@ def run_candidate_evaluation(
 
     output_config = config.get("outputs")
     if not isinstance(output_config, dict):
-        raise ValueError("candidate config must define an outputs object")
+        raise TypeError("candidate config must define an outputs object")
     outputs = {
         name: _project_path(root, value, f"{name} output") for name, value in output_config.items()
     }
@@ -261,7 +261,7 @@ def run_candidate_evaluation(
         }
     )
 
-    for name, path in outputs.items():
+    for path in outputs.values():
         path.parent.mkdir(parents=True, exist_ok=True)
     outputs.setdefault("predictions", run_dir / "eval" / "predictions.jsonl")
     # The generator writes concurrently; stream predictions before the aggregate artifacts so a

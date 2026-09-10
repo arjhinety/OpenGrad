@@ -22,6 +22,7 @@ from opengrad.data.audit import coverage_report, load_records, render_human
 from opengrad.data.canonical import ToolConversation
 from opengrad.data.semantic import audit_records, validate_training_trajectory
 from opengrad.env_capture import capture
+from opengrad.evaluation.candidate import CANDIDATE_STATUS, run_candidate_evaluation
 from opengrad.evaluation.runner import run_baseline
 from opengrad.experiments.preflight import run_experiment_preflight
 from opengrad.failures.analyzer import FailureAnalyzer, FailureItem
@@ -57,6 +58,19 @@ def data_audit_cli() -> int:
     return 0
 
 
+def _evaluation_config_status(config_path: Path) -> str | None:
+    """Read just the status field, so an unreadable config still fails in the runner."""
+    import yaml
+
+    try:
+        config = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return None
+    if isinstance(config, dict):
+        return str(config.get("status")) if config.get("status") is not None else None
+    return None
+
+
 def main() -> int:
     if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
         return benchmark_cli(sys.argv[2:])
@@ -71,7 +85,9 @@ def main() -> int:
     status_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
     readiness_p = sub.add_parser("readiness", help="evaluate baseline and SFT readiness gates")
-    readiness_p.add_argument("config", nargs="?", help="optional baseline or experiment config path")
+    readiness_p.add_argument(
+        "config", nargs="?", help="optional baseline or experiment config path"
+    )
     readiness_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
     gpu_p = sub.add_parser("gpu-smoke", help="run the bounded real-model GPU boundary smoke")
@@ -86,13 +102,17 @@ def main() -> int:
     sub.add_parser("benchmark", help="reproducible post-training benchmark system")
 
     # validate-data
-    val_data = sub.add_parser("validate-data", help="strict dataset trajectory and schema validation")
+    val_data = sub.add_parser(
+        "validate-data", help="strict dataset trajectory and schema validation"
+    )
     val_data.add_argument("records", help="JSON or JSONL dataset path")
     val_data.add_argument("--mode", default="sft", choices=["sft", "dpo"], help="dataset mode")
     val_data.add_argument("--json", action="store_true", help="emit JSON output")
 
     # inspect-template
-    ins_temp = sub.add_parser("inspect-template", help="inspect chat template rendering and loss masks")
+    ins_temp = sub.add_parser(
+        "inspect-template", help="inspect chat template rendering and loss masks"
+    )
     ins_temp.add_argument("--record", help="optional path to conversation JSON record")
     ins_temp.add_argument("--thinking", action="store_true", help="enable thinking tokens")
     ins_temp.add_argument("--max-tokens", type=int, default=50, help="max tokens to display")
@@ -101,14 +121,20 @@ def main() -> int:
     # train
     train_p = sub.add_parser("train", help="launch SFT, DPO, or on-policy distillation training")
     train_p.add_argument("config", help="experiment config YAML path")
-    train_p.add_argument("--dry-run", action="store_true", help="execute CPU mock training without GPU")
+    train_p.add_argument(
+        "--dry-run", action="store_true", help="execute CPU mock training without GPU"
+    )
     train_p.add_argument("--json", action="store_true", help="emit JSON output")
 
     # evaluate
     eval_p = sub.add_parser("evaluate", help="evaluate a model or checkpoint on a benchmark suite")
     eval_p.add_argument("target", help="checkpoint path or model identifier")
-    eval_p.add_argument("--suite", default="smoke", help="suite name (smoke, tool_use_core, full_post_training)")
-    eval_p.add_argument("--dry-run", action="store_true", help="force CPU dry-run using mock backend")
+    eval_p.add_argument(
+        "--suite", default="smoke", help="suite name (smoke, tool_use_core, full_post_training)"
+    )
+    eval_p.add_argument(
+        "--dry-run", action="store_true", help="force CPU dry-run using mock backend"
+    )
     eval_p.add_argument("--limit", type=int, help="limit tasks per benchmark")
     eval_p.add_argument("--json", action="store_true", help="emit JSON output")
 
@@ -158,7 +184,9 @@ def main() -> int:
     rej_p.add_argument("--json", action="store_true", help="emit JSON output")
 
     # doctor
-    doc_p = sub.add_parser("doctor", help="diagnose environment, tooling, and on-device testing surfaces")
+    doc_p = sub.add_parser(
+        "doctor", help="diagnose environment, tooling, and on-device testing surfaces"
+    )
     doc_p.add_argument("--json", action="store_true", help="emit JSON output")
 
     # preference
@@ -169,7 +197,9 @@ def main() -> int:
     pref_ins.add_argument("--limit", type=int, default=5, help="limit records to display")
     pref_ins.add_argument("--json", action="store_true", help="emit JSON output")
     pref_gen = pref_sub.add_parser("generate", help="generate synthetic candidate preference pairs")
-    pref_gen.add_argument("--output", default="data/processed/synthetic_dpo_pairs.jsonl", help="output path")
+    pref_gen.add_argument(
+        "--output", default="data/processed/synthetic_dpo_pairs.jsonl", help="output path"
+    )
     pref_gen.add_argument("--count", type=int, default=8, help="number of prompts to generate for")
     pref_gen.add_argument("--candidates", type=int, default=4, help="candidates per prompt")
     pref_gen.add_argument("--json", action="store_true", help="emit JSON output")
@@ -180,18 +210,32 @@ def main() -> int:
     pref_bld.add_argument("--json", action="store_true", help="emit JSON output")
 
     # distill
-    dist_p = sub.add_parser("distill", help="on-policy distillation teacher validation and training")
+    dist_p = sub.add_parser(
+        "distill", help="on-policy distillation teacher validation and training"
+    )
     dist_sub = dist_p.add_subparsers(dest="distill_command")
-    dist_tok = dist_sub.add_parser("validate-teacher", help="verify tokenizer compatibility between student and teacher")
+    dist_tok = dist_sub.add_parser(
+        "validate-teacher", help="verify tokenizer compatibility between student and teacher"
+    )
     dist_tok.add_argument("--student", default="Qwen/Qwen3.5-2B", help="student model ID")
     dist_tok.add_argument("--teacher", default="Qwen/Qwen3.8-27B", help="teacher model ID")
     dist_tok.add_argument("--json", action="store_true", help="emit JSON output")
-    dist_bld = dist_sub.add_parser("build-prompts", help="extract eligible prompt states for on-policy rollouts")
-    dist_bld.add_argument("--output", default="data/processed/toolpolicy_opd_prompts.jsonl", help="output path")
-    dist_bld.add_argument("--profile", default="broad", choices=["broad", "residual"], help="prompt profile")
-    dist_bld.add_argument("--count", type=int, default=10, help="number of prompt states to extract")
+    dist_bld = dist_sub.add_parser(
+        "build-prompts", help="extract eligible prompt states for on-policy rollouts"
+    )
+    dist_bld.add_argument(
+        "--output", default="data/processed/toolpolicy_opd_prompts.jsonl", help="output path"
+    )
+    dist_bld.add_argument(
+        "--profile", default="broad", choices=["broad", "residual"], help="prompt profile"
+    )
+    dist_bld.add_argument(
+        "--count", type=int, default=10, help="number of prompt states to extract"
+    )
     dist_bld.add_argument("--json", action="store_true", help="emit JSON output")
-    dist_smk = dist_sub.add_parser("smoke", help="run distillation smoke preflight checking VRAM and teacher gap")
+    dist_smk = dist_sub.add_parser(
+        "smoke", help="run distillation smoke preflight checking VRAM and teacher gap"
+    )
     dist_smk.add_argument("--json", action="store_true", help="emit JSON output")
     dist_trn = dist_sub.add_parser("train", help="launch on-policy distillation training")
     dist_trn.add_argument("config", help="distillation experiment config YAML path")
@@ -211,21 +255,29 @@ def main() -> int:
 
     # Legacy CLI tools
     data_audit = sub.add_parser("data-audit")
-    data_audit.add_argument("--records", required=True, help="JSON array or JSONL canonical records")
+    data_audit.add_argument(
+        "--records", required=True, help="JSON array or JSONL canonical records"
+    )
     data_audit.add_argument("--config", help="mixture config retained for audit provenance")
     data_audit.add_argument("--json", action="store_true", help="also emit machine-readable JSON")
-    corpus_audit = sub.add_parser("audit-corpus", help="strict semantic audit of canonical training records")
+    corpus_audit = sub.add_parser(
+        "audit-corpus", help="strict semantic audit of canonical training records"
+    )
     corpus_audit.add_argument("--records", required=True, help="canonical JSONL records")
     env = sub.add_parser("env")
     env_capture = env.add_subparsers(dest="env_command").add_parser("capture")
     env_capture.add_argument("--json", action="store_true", help="emit machine-readable JSON")
-    baseline = sub.add_parser("baseline", help="run the frozen baseline end-to-end (use --dry-run before GPU time)")
+    baseline = sub.add_parser(
+        "baseline", help="run the frozen baseline end-to-end (use --dry-run before GPU time)"
+    )
     baseline.add_argument(
         "--config",
         default="configs/evaluation/tool_calling/qwen35_2b_baseline.yaml",
         help="frozen baseline YAML",
     )
-    baseline.add_argument("--dry-run", action="store_true", help="use the CPU deterministic backend")
+    baseline.add_argument(
+        "--dry-run", action="store_true", help="use the CPU deterministic backend"
+    )
     baseline.add_argument("--limit", type=int, help="evaluate only the first N held-out examples")
     baseline.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
@@ -235,7 +287,19 @@ def main() -> int:
     if args.command == "validate":
         errors = validate(root)
         if args.json:
-            print(json.dumps({"ok": not errors, "errors": errors, "code": None if not errors else "CONFIG_INVALID", "message": "registry validation passed" if not errors else "registry validation failed", "blocking": bool(errors)}))
+            print(
+                json.dumps(
+                    {
+                        "ok": not errors,
+                        "errors": errors,
+                        "code": None if not errors else "CONFIG_INVALID",
+                        "message": "registry validation passed"
+                        if not errors
+                        else "registry validation failed",
+                        "blocking": bool(errors),
+                    }
+                )
+            )
         else:
             print("OK" if not errors else "\n".join(errors))
         return int(bool(errors))
@@ -276,9 +340,19 @@ def main() -> int:
 
     if args.command == "evaluate":
         runner = BenchmarkRunner(root)
-        allowed_suites = {"smoke", "tool_use_core", "regression_core", "agent_transfer", "full_post_training", "speculative_decoding"}
+        allowed_suites = {
+            "smoke",
+            "tool_use_core",
+            "regression_core",
+            "agent_transfer",
+            "full_post_training",
+            "speculative_decoding",
+        }
         if args.suite not in allowed_suites:
-            err = {"code": "SUITE_NOT_FOUND", "message": f"Suite must be one of: {', '.join(sorted(allowed_suites))}"}
+            err = {
+                "code": "SUITE_NOT_FOUND",
+                "message": f"Suite must be one of: {', '.join(sorted(allowed_suites))}",
+            }
             print(json.dumps(err) if args.json else f"Error: {err['message']}")
             return 1
         suite_path = root / "configs" / "benchmark_suites" / f"{args.suite}.yaml"
@@ -290,7 +364,9 @@ def main() -> int:
         if args.json:
             print(json.dumps(res_suite, indent=2))
         else:
-            print(f"Evaluated suite '{args.suite}' across {res_suite['benchmarks_run']} benchmarks:")
+            print(
+                f"Evaluated suite '{args.suite}' across {res_suite['benchmarks_run']} benchmarks:"
+            )
             for b_id, b_res in res_suite["results"].items():
                 acc = b_res.get("result", {}).get("overall_accuracy", 0.0)
                 print(f"  - {b_id:<24} {acc:.1f}%")
@@ -314,22 +390,29 @@ def main() -> int:
         fail_data = json.loads(fail_file.read_text(encoding="utf-8"))
         raw_items = fail_data.get("failures", [])
         analyzer = FailureAnalyzer()
-        clusters = analyzer.cluster([
-            FailureItem(
-                benchmark=f.get("benchmark", r_dir.name),
-                sample_id=str(f.get("task_id", f.get("sample_id", f"s_{i}"))),
-                prompt=str(f.get("input", f.get("prompt", ""))),
-                expected=f.get("expected"),
-                actual=f.get("parsed_output", f.get("actual")),
-                score=float(f.get("score", 0.0)),
-                failure_category=str(f.get("failure_category", "unknown")),
-                checkpoint_id="unknown",
-                experiment_id="unknown",
-            )
-            for i, f in enumerate(raw_items)
-        ])
+        clusters = analyzer.cluster(
+            [
+                FailureItem(
+                    benchmark=f.get("benchmark", r_dir.name),
+                    sample_id=str(f.get("task_id", f.get("sample_id", f"s_{i}"))),
+                    prompt=str(f.get("input", f.get("prompt", ""))),
+                    expected=f.get("expected"),
+                    actual=f.get("parsed_output", f.get("actual")),
+                    score=float(f.get("score", 0.0)),
+                    failure_category=str(f.get("failure_category", "unknown")),
+                    checkpoint_id="unknown",
+                    experiment_id="unknown",
+                )
+                for i, f in enumerate(raw_items)
+            ]
+        )
         if args.json:
-            print(json.dumps({"total_clusters": len(clusters), "clusters": [c.to_dict() for c in clusters]}, indent=2))
+            print(
+                json.dumps(
+                    {"total_clusters": len(clusters), "clusters": [c.to_dict() for c in clusters]},
+                    indent=2,
+                )
+            )
         else:
             print(f"Failure Analysis: {len(raw_items)} failures in {len(clusters)} clusters\n")
             for c in clusters:
@@ -381,7 +464,11 @@ def main() -> int:
                     if not isinstance(row, dict):
                         raise TypeError("record must be a JSON object")
                 except (json.JSONDecodeError, TypeError) as exc:
-                    code = "INVALID_JSON" if isinstance(exc, json.JSONDecodeError) else "INVALID_RECORD_TYPE"
+                    code = (
+                        "INVALID_JSON"
+                        if isinstance(exc, json.JSONDecodeError)
+                        else "INVALID_RECORD_TYPE"
+                    )
                     reason_counts[code] = reason_counts.get(code, 0) + 1
                     failures.append({"line": line_number, "reasons": [code], "details": [str(exc)]})
                     continue
@@ -424,14 +511,20 @@ def main() -> int:
 
     if args.command == "env" and args.env_command == "capture":
         value = capture(root)
-        print(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) if getattr(args, "json", False) else value)
+        print(
+            json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True)
+            if getattr(args, "json", False)
+            else value
+        )
         return 0
 
     if args.command == "baseline":
         config_path = root / args.config
         if not args.dry_run:
             gate = readiness(root, config_path)
-            smoke_gate = next((item for item in gate.get("gates", []) if item.get("name") == "gpu_boundary"), {})
+            smoke_gate = next(
+                (item for item in gate.get("gates", []) if item.get("name") == "gpu_boundary"), {}
+            )
             if gate.get("ready_for_baseline") is not True or smoke_gate.get("status") != "PASS":
                 error = {
                     "ok": False,
@@ -442,10 +535,27 @@ def main() -> int:
                 }
                 print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
                 return 1
+        # A candidate evaluation reuses this command rather than introducing a parallel one,
+        # because it is the same measurement against the same frozen held-out set. The config's
+        # status field decides which path runs; run_baseline keeps refusing anything that is not
+        # the pinned canonical model, so B0 stays immutable.
+        candidate_status = _evaluation_config_status(config_path)
         try:
-            result = run_baseline(config_path, root=root, limit=args.limit, dry_run=args.dry_run)
+            if candidate_status == CANDIDATE_STATUS:
+                result = run_candidate_evaluation(
+                    config_path, root=root, limit=args.limit, dry_run=args.dry_run
+                )
+            else:
+                result = run_baseline(
+                    config_path, root=root, limit=args.limit, dry_run=args.dry_run
+                )
         except (OSError, KeyError, TypeError, ValueError, RuntimeError) as exc:
-            error = {"ok": False, "code": getattr(exc, "code", "BASELINE_FAILED"), "message": str(exc), "blocking": True}
+            error = {
+                "ok": False,
+                "code": getattr(exc, "code", "BASELINE_FAILED"),
+                "message": str(exc),
+                "blocking": True,
+            }
             print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
             return 1
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
