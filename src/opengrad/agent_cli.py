@@ -256,8 +256,15 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
     # experiment because the registry is global while checkpoint directory names are only
     # unique within a run.
     ckpt_reg = CheckpointRegistry(root)
+    seen_checkpoints: set[str] = set()
     for c_path in train_res.checkpoints_created:
         path = Path(c_path)
+        # A run may report the same checkpoint path more than once (for example when a
+        # periodic save coincides with the final save). Registering it twice would rewrite
+        # identical weights and trip the registry's provenance guard, so register once.
+        if str(c_path) in seen_checkpoints:
+            continue
+        seen_checkpoints.add(str(c_path))
         lineage: dict[str, Any] = {}
         metadata_path = path / "checkpoint_metadata.json"
         if metadata_path.is_file():
