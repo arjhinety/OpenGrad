@@ -19,6 +19,10 @@ _SOURCE_REPOS = {
     "when2call": "https://huggingface.co/datasets/nvidia/When2Call",
 }
 
+# The card a release is published under follows its config. v1 is the default so
+# that releases which predate this field keep building byte-identically.
+_DEFAULT_CARD_DIRECTORY = "release/huggingface/toolpolicy-canonical-v1"
+
 
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -208,9 +212,8 @@ def build_release(root: Path, config_path: Path, output: Path) -> dict[str, Any]
             {"file": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size}
         )
     (output / "release-manifest.json").write_text(_json(release_manifest) + "\n", encoding="utf-8")
-    card = (root / "release/huggingface/toolpolicy-canonical-v1/README.template.md").read_text(
-        encoding="utf-8"
-    )
+    card_dir = root / config.get("card_directory", _DEFAULT_CARD_DIRECTORY)
+    card = (card_dir / "README.template.md").read_text(encoding="utf-8")
     source_rows: list[str] = []
     for item in sources:
         raw = item.get("raw_manifest_counts", {})
@@ -238,7 +241,7 @@ def build_release(root: Path, config_path: Path, output: Path) -> dict[str, Any]
     )
     (output / "README.md").write_text(card, encoding="utf-8")
     for name in ("source-licenses.md", "CITATIONS.bib"):
-        source = root / "release/huggingface/toolpolicy-canonical-v1" / name
+        source = card_dir / name
         (output / name).write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
     return release_manifest
 
