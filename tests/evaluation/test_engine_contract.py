@@ -60,9 +60,24 @@ def test_vllm_max_model_len_covers_the_largest_in_contract_prompt():
     config = base_config()
     backend = build_backend("vllm", config)
     assert isinstance(backend, VLLMInferenceBackend)
-    assert backend.max_model_len >= (
-        config["runtime"]["context_length"] + config["generation"]["max_new_tokens"]
-    )
+    # The pinned window, not just context_length: the longest held-out prompt measures 5248
+    # tokens, which exceeds the 4096 bucket boundary.
+    assert backend.max_model_len == config["runtime"]["max_model_len"]
+    assert backend.max_model_len > config["runtime"]["context_length"]
+
+
+def test_vllm_window_must_cover_the_completion_budget():
+    config = base_config()
+    config["runtime"]["max_model_len"] = 4096  # equal to context_length, so no room to finish
+    with pytest.raises(ValueError, match="must cover context_length plus the completion"):
+        runner._validate_baseline_config(config)
+
+
+def test_vllm_window_is_required():
+    config = base_config()
+    config["runtime"].pop("max_model_len", None)
+    with pytest.raises(ValueError, match="must pin max_model_len"):
+        runner._validate_baseline_config(config)
 
 
 def test_engine_metadata_names_the_engine_and_its_version():

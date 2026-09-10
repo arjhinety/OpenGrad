@@ -652,6 +652,12 @@ def _validate_baseline_config(config: dict[str, Any]) -> None:
         raise ValueError("vllm runtime must pin vllm_version")
     if engine == "transformers" and not isinstance(runtime.get("transformers_version"), str):
         raise ValueError("transformers runtime must pin transformers_version")
+    if engine == "vllm":
+        window = runtime.get("max_model_len")
+        if not isinstance(window, int):
+            raise ValueError("vllm runtime must pin max_model_len")
+    else:
+        window = None
     if (
         runtime.get("precision") != "bfloat16"
         or runtime.get("device_policy") != "accelerator_required"
@@ -661,6 +667,15 @@ def _validate_baseline_config(config: dict[str, Any]) -> None:
         raise ValueError(
             "baseline runtime must pin BF16 precision, an accelerator requirement, "
             "and a positive context length"
+        )
+    # The engine window has to cover the longest prompt *and* its completion, because the
+    # overflow policy buckets long prompts rather than truncating or dropping them. A window
+    # smaller than this dies mid-run inside the engine instead of failing the contract here.
+    needed = int(config["runtime"]["context_length"]) + int(config["generation"]["max_new_tokens"])
+    if window is not None and window < needed:
+        raise ValueError(
+            f"vllm max_model_len ({window}) must cover context_length plus the completion "
+            f"budget ({needed})"
         )
     evaluations = config["evaluations"]
     if not isinstance(evaluations, dict) or not isinstance(evaluations.get("behavioral_manifest"), str) or evaluations.get("evaluator_revision") not in {None, PINNED_MODEL_REVISION}:

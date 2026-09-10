@@ -402,6 +402,17 @@ def _baseline_config_contract(raw: dict[str, Any], root: Path | None = None) -> 
         return False, "vllm runtime must pin vllm_version"
     if engine == "transformers" and not isinstance(runtime.get("transformers_version"), str):
         return False, "transformers runtime must pin transformers_version"
+    if engine == "vllm":
+        window = runtime.get("max_model_len")
+        if not isinstance(window, int):
+            return False, "vllm runtime must pin max_model_len"
+        if window < int(runtime.get("context_length", 0)) + int(
+            (raw.get("generation") or {}).get("max_new_tokens", 0)
+        ):
+            return False, (
+                "vllm max_model_len must cover context_length plus the completion budget, "
+                "because overflow prompts are bucketed rather than truncated"
+            )
     if (
         runtime.get("precision") != "bfloat16"
         or runtime.get("device_policy") != "accelerator_required"

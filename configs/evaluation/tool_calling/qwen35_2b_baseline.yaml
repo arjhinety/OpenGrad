@@ -38,6 +38,12 @@ runtime:
   device_policy: accelerator_required
   context_length: 4096
   overflow_policy: separate_bucket
+  # Engine window. The frozen policy *buckets* prompts longer than context_length as
+  # `overflow` rather than truncating or dropping them, so the engine must be able to
+  # generate from them. Measured across the frozen held-out set: max prompt 5248 tokens,
+  # median 798, and 7 of 3950 examples (0.18%) exceed the 4096 boundary. This is
+  # 5248 + the 512-token completion budget, so every held-out example is generatable.
+  max_model_len: 5760
   gpu_memory_utilization: 0.9
   max_num_seqs: 256
   tensor_parallel_size: 1
