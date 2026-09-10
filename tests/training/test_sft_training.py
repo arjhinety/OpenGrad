@@ -348,7 +348,8 @@ def test_parameter_report_counts_trainable_share():
 
 
 def test_history_summary_reports_a_curve():
-    history = [{"loss": 1.0}, {"loss": 0.5}, {"loss": 0.25}]
+    # `train_loss` is the key the training loop writes; reading `loss` silently produced nulls.
+    history = [{"train_loss": 1.0}, {"train_loss": 0.5}, {"train_loss": 0.25}]
     summary = summarise_history(history)
     assert summary["steps"] == 3
     assert summary["first_loss"] == 1.0
