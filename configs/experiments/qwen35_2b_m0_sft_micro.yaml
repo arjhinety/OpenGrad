@@ -30,9 +30,12 @@ trainer:
   type: sft
   tuning_method: full
   learning_rate: 1.0e-5
-  micro_batch_size: 4
+  micro_batch_size: 8
+  # Token budget per micro-batch. Activation memory tracks batch width, not sequence count:
+  # a fixed count of long sequences needs far more memory than the same count of short ones.
+  micro_batch_tokens: 4096
   gradient_accumulation_steps: 2
-  max_steps: 20
+  max_steps: 30
   warmup_steps: 2
   max_seq_length: 2048
   scheduler: cosine

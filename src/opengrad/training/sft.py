@@ -453,9 +453,10 @@ def run_real_sft(
             optimizer.zero_grad(set_to_none=True)
             for index_batch in deterministic_batches(
                 lengths,
-                settings.micro_batch_size,
-                settings.seed + settings.shuffle_seed_offset,
-                epoch,
+                max_tokens=settings.micro_batch_tokens,
+                max_sequences=settings.micro_batch_size,
+                seed=settings.seed + settings.shuffle_seed_offset,
+                epoch=epoch,
             ):
                 if world["optimizer_step"] >= settings.max_steps or world["interrupted"]:
                     done = True

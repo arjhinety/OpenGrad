@@ -1,4 +1,4 @@
-experiment_id: qwen35_2b_m0_sft_full_v2
+experiment_id: qwen35_2b_m0_sft_full_v3
 hypothesis: >-
   M0 (full): supervised fine-tuning on the canonical tool-policy corpus should sharpen the
   call/no-call decision boundary that B0 showed to be miscalibrated. B0 reaches call recall
@@ -10,11 +10,12 @@ hypothesis: >-
   corpus: it is a bounded bring-up recipe, not a corpus-scale M0. Its meaning is left intact
   rather than rewritten, and this file is the corpus-scale experiment.
 
-  Version 2 of this identity. The v1 launch OOM'd at optimizer step 11 because a single
-  forward pass over micro_batch_size=8 peaked at 49 GiB on a long sequence draw; the
-  effective batch is unchanged at 8 but split into two micro-batches, and batches are now
-  drawn length-bucketed so a long sequence no longer forces its width on every shorter one
-  in the same batch. v1 wrote no checkpoint and is recorded as FAILED.
+  Version 3 of this identity. v1 OOM'd at step 11 (a single 8-sequence forward pass peaked
+  at 49 GiB). v2 fixed the micro-batch split and added length bucketing, then OOM'd at
+  step 1, because bucketing made maximum-width batches reachable within the first few
+  steps: a 4x2046-token batch needs roughly 80 GiB of activation on this architecture.
+  v3 bounds each micro-batch by a token budget rather than a sequence count. Neither v1
+  nor v2 wrote a checkpoint; both are recorded as FAILED.
 
 model:
   model_id: Qwen/Qwen3.5-2B
@@ -42,7 +43,11 @@ trainer:
   learning_rate: 1.0e-5
   # Batch 8 in one forward pass peaked at 49 GiB and then OOM'd on a long draw. The effective
   # batch is unchanged at 8; it is split into two micro-batches to bound the activation spike.
-  micro_batch_size: 4
+  micro_batch_size: 8
+  # Activation memory tracks batch width, not sequence count. The v2 launch OOM'd on a
+  # 4x2046-token batch: roughly 10 MB of activation per token on this architecture. 4096
+  # tokens per micro-batch leaves headroom against that.
+  micro_batch_tokens: 4096
   gradient_accumulation_steps: 2
   # Measured on this box: ~1.6k supervised tokens/s, so an effective batch of 8 costs about
   # 2s per optimizer step and 2400 steps is ~1.5h. The schedule is sized to fit an

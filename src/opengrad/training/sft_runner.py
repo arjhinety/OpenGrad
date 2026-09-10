@@ -44,6 +44,7 @@ class ResolvedSettings:
     tuning_method: str
     learning_rate: float
     micro_batch_size: int
+    micro_batch_tokens: int
     gradient_accumulation_steps: int
     world_size: int
     effective_global_batch_size: int
@@ -68,6 +69,7 @@ class ResolvedSettings:
             "tuning_method": self.tuning_method,
             "learning_rate": self.learning_rate,
             "micro_batch_size": self.micro_batch_size,
+            "micro_batch_tokens": self.micro_batch_tokens,
             "gradient_accumulation_steps": self.gradient_accumulation_steps,
             "world_size": self.world_size,
             "effective_global_batch_size": self.effective_global_batch_size,
@@ -109,10 +111,16 @@ def resolve_settings(experiment: dict[str, Any], trainer: dict[str, Any]) -> Res
         )
 
     micro_batch = int(trainer.get("micro_batch_size", 1))
+    micro_batch_tokens = int(trainer.get("micro_batch_tokens", 0))
     grad_accum = int(trainer.get("gradient_accumulation_steps", 1))
     world_size = int(trainer.get("world_size", 1))
     if micro_batch < 1 or grad_accum < 1 or world_size < 1:
         raise TrainingConfigError("batch sizes and world_size must be positive")
+    if micro_batch_tokens < 1:
+        raise TrainingConfigError(
+            "trainer.micro_batch_tokens must be set: activation memory scales with batch width, "
+            "not with sequence count, so a sequence cap alone is not a memory bound"
+        )
 
     precision = str(experiment.get("reproducibility", {}).get("precision", "bfloat16"))
     if precision not in {"bfloat16", "float32"}:
@@ -142,6 +150,7 @@ def resolve_settings(experiment: dict[str, Any], trainer: dict[str, Any]) -> Res
         tuning_method=str(tuning_method),
         learning_rate=float(trainer.get("learning_rate", 2e-5)),
         micro_batch_size=micro_batch,
+        micro_batch_tokens=micro_batch_tokens,
         gradient_accumulation_steps=grad_accum,
         world_size=world_size,
         effective_global_batch_size=micro_batch * grad_accum * world_size,
@@ -327,32 +336,51 @@ def prune_checkpoints(
 
 def deterministic_batches(
     lengths: list[int],
-    batch_size: int,
+    *,
+    max_tokens: int,
+    max_sequences: int,
     seed: int,
     epoch: int,
     bucket_window: int = 64,
 ) -> list[list[int]]:
     """Batches of sample indices, shuffled but grouped by length, reproducibly.
 
-    Sequences in this corpus run from 42 to 2046 tokens with a mean near 425, and a batch is
-    padded to its longest member. Drawing batches uniformly therefore means most batches carry
-    one long sequence and pay its width for every shorter one: wasted compute, and activation
-    memory that spikes with the draw. That is what OOM'd the first M0 launch.
+    Batches are bounded by a *token* budget rather than a sequence count, because that is what
+    activation memory actually tracks. Sequences here run from 42 to 2046 tokens, and a batch is
+    padded to its longest member, so both the compute and the peak are set by the total width of
+    the batch. Two launches of this experiment died learning that: a fixed count of long
+    sequences needs far more memory than the same count of short ones, and no sequence-count
+    setting is safe across a corpus with a 50x length range.
+
+    Length grouping and the token budget work together: sorting within a window means a batch is
+    drawn from a narrow length band, so a token budget yields a predictable sequence count
+    instead of one long sequence crowding out the batch.
 
     The shuffle is preserved and the order stays a pure function of (seed, epoch). Sorting
     within a window rather than globally keeps batches from becoming one contiguous length band
-    across an epoch, which would trade a memory problem for a gradient-noise problem. The
-    window is reshuffled each epoch.
+    across an epoch, which would trade a memory problem for a gradient-noise problem.
     """
+    if max_tokens < 1 or max_sequences < 1:
+        raise ValueError("max_tokens and max_sequences must be positive")
     order = list(range(len(lengths)))
     random.Random(seed + epoch * 1_000_003).shuffle(order)
-    window = max(batch_size, bucket_window * batch_size)
+    window = max(max_sequences, bucket_window * max_sequences)
     batches: list[list[int]] = []
     for start in range(0, len(order), window):
         chunk = order[start : start + window]
         chunk.sort(key=lambda index: lengths[index])
-        for offset in range(0, len(chunk), batch_size):
-            batches.append(chunk[offset : offset + batch_size])
+        current: list[int] = []
+        used = 0
+        for index in chunk:
+            width = lengths[index]
+            if current and (used + width > max_tokens or len(current) >= max_sequences):
+                batches.append(current)
+                current = []
+                used = 0
+            current.append(index)
+            used += width
+        if current:
+            batches.append(current)
     return batches
 
 

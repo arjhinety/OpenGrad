@@ -91,6 +91,7 @@ def test_full_tuning_resolves_and_records_every_field():
         _experiment(),
         {
             "type": "sft",
+            "micro_batch_tokens": 4096,
             "tuning_method": "full",
             "micro_batch_size": 3,
             "gradient_accumulation_steps": 5,
@@ -125,22 +126,23 @@ def test_full_tuning_resolves_and_records_every_field():
 def test_unknown_scheduler_is_refused():
     with pytest.raises(TrainingConfigError, match="scheduler"):
         resolve_settings(
-            _experiment(), {"type": "sft", "tuning_method": "full", "scheduler": "warmup"}
+            _experiment(), {"type": "sft", "tuning_method": "full", "micro_batch_tokens": 4096, "scheduler": "warmup"}
         )
 
 
 def test_lora_requires_an_explicit_block_with_targets():
     with pytest.raises(TrainingConfigError, match="lora tuning requires"):
-        resolve_settings(_experiment(), {"type": "sft", "tuning_method": "lora"})
+        resolve_settings(_experiment(), {"type": "sft", "tuning_method": "lora", "micro_batch_tokens": 4096})
     with pytest.raises(TrainingConfigError, match="target_modules"):
         resolve_settings(
             _experiment(),
-            {"type": "sft", "tuning_method": "lora", "lora": {"rank": 8, "alpha": 16}},
+            {"type": "sft", "tuning_method": "lora", "micro_batch_tokens": 4096, "lora": {"rank": 8, "alpha": 16}},
         )
     settings = resolve_settings(
         _experiment(),
         {
             "type": "sft",
+            "micro_batch_tokens": 4096,
             "tuning_method": "lora",
             "lora": {
                 "rank": 8,
@@ -158,14 +160,14 @@ def test_precision_must_be_supported():
     with pytest.raises(TrainingConfigError, match="precision"):
         resolve_settings(
             _experiment(reproducibility={"precision": "int4"}),
-            {"type": "sft", "tuning_method": "full"},
+            {"type": "sft", "tuning_method": "full", "micro_batch_tokens": 4096},
         )
 
 
 def test_batch_sizes_must_be_positive():
     with pytest.raises(TrainingConfigError, match="positive"):
         resolve_settings(
-            _experiment(), {"type": "sft", "tuning_method": "full", "micro_batch_size": 0}
+            _experiment(), {"type": "sft", "tuning_method": "full", "micro_batch_tokens": 4096, "micro_batch_size": 0}
         )
 
 
@@ -264,6 +266,7 @@ def test_learning_rate_warms_up_then_decays():
         _experiment(),
         {
             "type": "sft",
+            "micro_batch_tokens": 4096,
             "tuning_method": "full",
             "learning_rate": 1e-3,
             "max_steps": 10,
@@ -279,7 +282,7 @@ def test_learning_rate_warms_up_then_decays():
 
 def test_checkpoint_lineage_carries_every_required_field():
     settings = resolve_settings(
-        _experiment(), {"type": "sft", "tuning_method": "full", "max_steps": 5}
+        _experiment(), {"type": "sft", "tuning_method": "full", "micro_batch_tokens": 4096, "max_steps": 5}
     )
     lineage = checkpoint_lineage(
         _experiment(),
@@ -623,27 +626,35 @@ def test_default_cache_dir_is_keyed_by_the_rendering_contract(tmp_path):
     )
 
 
-def test_bucketed_batches_are_reproducible_and_cut_padding():
-    """Bucketing must not cost determinism, and must actually reduce padded work."""
+def test_bucketed_batches_are_reproducible_and_bounded_by_tokens():
+    """Bucketing must not cost determinism, and must bound batch width."""
     from opengrad.training.sft_runner import deterministic_batches
 
     lengths = [40, 2000, 60, 1900, 80, 1800, 100, 1700] * 16
-    batch_size = 4
-    a = deterministic_batches(lengths, batch_size, seed=42, epoch=0)
-    b = deterministic_batches(lengths, batch_size, seed=42, epoch=0)
-    c = deterministic_batches(lengths, batch_size, seed=42, epoch=1)
+    kwargs = {"max_tokens": 4096, "max_sequences": 8, "seed": 42, "epoch": 0}
+    a = deterministic_batches(lengths, **kwargs)
+    b = deterministic_batches(lengths, **kwargs)
+    c = deterministic_batches(lengths, **{**kwargs, "epoch": 1})
     assert a == b, "same seed and epoch must give identical batches"
     assert a != c, "a new epoch must reshuffle"
     assert sorted(index for batch in a for index in batch) == list(range(len(lengths)))
-    assert all(0 < len(batch) <= batch_size for batch in a)
+    for batch in a:
+        assert 0 < len(batch) <= 8
+        # The property that keeps activation memory predictable.
+        assert sum(lengths[index] for index in batch) <= 4096
 
     def padded_work(batches):
         return sum(max(lengths[index] for index in batch) * len(batch) for batch in batches)
 
     unbucketed = [
-        list(range(offset, min(offset + batch_size, len(lengths))))
-        for offset in range(0, len(lengths), batch_size)
+        list(range(offset, min(offset + 8, len(lengths)))) for offset in range(0, len(lengths), 8)
     ]
-    # The point of bucketing: far less time spent on pad positions than a length-blind draw.
     assert padded_work(a) < padded_work(unbucketed)
-    assert padded_work(a) <= sum(lengths) * 1.2
+
+
+def test_token_budget_is_refused_when_absent():
+    """A sequence cap alone is not a memory bound, so it is not accepted as one."""
+    with pytest.raises(TrainingConfigError, match="micro_batch_tokens"):
+        resolve_settings(
+            _experiment(), {"type": "sft", "tuning_method": "full", "micro_batch_size": 4}
+        )
