@@ -1,0 +1,33 @@
+schema_version: 1
+benchmark_id: openweights
+benchmark_revision: c593452243d548325a7a8d5f309a473e045ab552
+evaluator_revision: opengrad-openweights-eval-v1
+task_subset: core_18_tools
+split: bare
+model_id: Qwen/Qwen3.5-2B
+model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+tokenizer: Qwen/Qwen3.5-2B
+prompt_template: openweights_minimal
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+  seed: 42
+  do_sample: false
+  stop_sequences: []
+max_context: 4096
+tool_schema_rendering_policy: openweights_bare
+parser: opengrad.benchmarks.adapters.openweights.parse_openweights_reply
+inference_backend: mock
+batch_size: 1
+concurrency: 1
+precision: bfloat16
+device_policy: cpu_or_accelerator
+runtime_details:
+  format_arms: ["bare", "tagged"]
+  lightweight_prompting: true
+  max_prompt_tokens: 200
+metadata:
+  tier: TIER_C
+  domain: on_device_tool_calling
+  downstream_project: openweights

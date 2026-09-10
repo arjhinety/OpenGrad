@@ -3,21 +3,460 @@ status: BOOTSTRAP_NO_SCORES
 benchmarks:
 - id: bfcl-v4
   name: Berkeley Function Calling Leaderboard V4
+  tier: TIER_A
   canonical_repository: https://github.com/ShishirPatil/gorilla
-  reference: null
+  reference: https://gorilla.cs.berkeley.edu/leaderboard.html
   version: V4
+  license: Apache-2.0
   commit_sha: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
   evaluator_version: opengrad-frozen-baseline-v1
-  splits: []
+  splits:
+  - simple
+  - multiple
+  - parallel
+  - parallel_multiple
+  - relevance
+  - irrelevance
+  - multi_turn
+  - agentic
+  - web_search
+  - memory
   metrics:
   - function_call_accuracy
+  - category_accuracy
+  - invalid_call_rate
   contamination_sensitivity: HIGH
+  prohibit_training: true
   parser_requirements: model-native-or-bfcl-adapter
-  generation_settings: null
-  trials: null
-  notes: Pin evaluator and task release before comparison.
+  notes: Primary tool-calling benchmark. Pin evaluator and task release before comparison.
   recommended_repository_revision: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
   revision_source: https://github.com/ShishirPatil/gorilla/commit/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+
+- id: tau3
+  name: tau3-bench
+  tier: TIER_A
+  canonical_repository: https://github.com/sierra-research/tau-bench
+  reference: https://github.com/sierra-research/tau-bench
+  version: tau3-v1
+  license: MIT
+  commit_sha: c3f7943fa1094056a0667e4125b2938cf78b024c
+  evaluator_version: opengrad-tau3-eval-v1
+  splits:
+  - airline
+  - retail
+  - telecom
+  - banking
+  metrics:
+  - task_success
+  - policy_compliance
+  - multi_turn_success
+  - tool_errors
+  - conversation_length
+  - steps_to_completion
+  - invalid_actions
+  - unnecessary_actions
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: tool-environment-specific
+  notes: Primary multi-turn agent benchmark across realistic enterprise text domains.
+  recommended_repository_revision: c3f7943fa1094056a0667e4125b2938cf78b024c
+  revision_source: https://github.com/sierra-research/tau-bench
+
+- id: acebench
+  name: ACEBench
+  tier: TIER_A
+  canonical_repository: https://github.com/ServiceNow/ACEBench
+  reference: arxiv:2410.07164
+  version: v1.0
+  license: Apache-2.0
+  commit_sha: 5e61a684b01e7e45217996c56891ebfe2c29bc96
+  evaluator_version: opengrad-acebench-eval-v1
+  splits:
+  - normal
+  - special
+  - ambiguous
+  - incomplete
+  - impossible
+  - agent_multi_turn
+  metrics:
+  - selection_accuracy
+  - argument_accuracy
+  - clarification_rate
+  - refusal_accuracy
+  - agent_success_rate
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: model-native-or-acebench-adapter
+  notes: Evaluates when to call, what to call, how to call, when NOT to call, and clarification behavior.
+  recommended_repository_revision: 5e61a684b01e7e45217996c56891ebfe2c29bc96
+  revision_source: https://github.com/ServiceNow/ACEBench
+
+- id: ifbench
+  name: IFBench
+  tier: TIER_B
+  canonical_repository: https://github.com/THUDM/IFBench
+  reference: arxiv:2407.03957
+  version: v1.0
+  license: Apache-2.0
+  commit_sha: 7a82b450c60da1ea763e9f4a1376856086f68c31
+  evaluator_version: opengrad-ifbench-eval-v1
+  splits:
+  - overall
+  - constraint_format
+  - constraint_content
+  - constraint_situation
+  metrics:
+  - strict_accuracy
+  - loose_accuracy
+  - constraint_pass_rate
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: deterministic-evaluator
+  notes: Instruction following benchmark with fine-grained constraint verification.
+  recommended_repository_revision: 7a82b450c60da1ea763e9f4a1376856086f68c31
+  revision_source: https://github.com/THUDM/IFBench
+
+- id: ifeval
+  name: IFEval
+  tier: TIER_B
+  canonical_repository: https://github.com/google-research/google-research/tree/master/instruction_following_eval
+  reference: arxiv:2311.07911
+  version: v1.0
+  license: Apache-2.0
+  commit_sha: cb27b233a763806fcf8ff9a3411bcfcae67c87c0
+  evaluator_version: opengrad-ifeval-eval-v1
+  splits:
+  - test
+  metrics:
+  - prompt_level_strict_acc
+  - prompt_level_loose_acc
+  - inst_level_strict_acc
+  - inst_level_loose_acc
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: deterministic-evaluator
+  notes: Deterministic instruction-following regression benchmark.
+  recommended_repository_revision: cb27b233a763806fcf8ff9a3411bcfcae67c87c0
+  revision_source: https://github.com/google-research/google-research
+
+- id: livebench
+  name: LiveBench
+  tier: TIER_B
+  canonical_repository: https://github.com/LiveBench/LiveBench
+  reference: https://livebench.ai
+  version: 2024-11-25
+  license: Apache-2.0
+  commit_sha: c9a008c29013c7eebe3969be863ca3e512ce245b
+  evaluator_version: opengrad-livebench-eval-v1
+  splits:
+  - reasoning
+  - math
+  - coding
+  - language
+  - instruction_following
+  - data_analysis
+  metrics:
+  - accuracy
+  - category_score
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: livebench-evaluator
+  notes: Hard, contamination-minimized benchmark updated monthly.
+  recommended_repository_revision: c9a008c29013c7eebe3969be863ca3e512ce245b
+  revision_source: https://github.com/LiveBench/LiveBench
+
+- id: mmlu-pro
+  name: MMLU-Pro
+  tier: TIER_B
+  canonical_repository: https://github.com/TIGER-AI-Lab/MMLU-Pro
+  reference: arxiv:2406.01574
+  version: v1.0
+  license: MIT
+  commit_sha: 5d15a5eb0092f6b5b5c90b6ef6928e1fc1b1b117
+  evaluator_version: opengrad-mmlupro-eval-v1
+  splits:
+  - biology
+  - business
+  - chemistry
+  - computer_science
+  - economics
+  - engineering
+  - health
+  - history
+  - law
+  - math
+  - philosophy
+  - physics
+  - psychology
+  - other
+  metrics:
+  - accuracy
+  - category_accuracy
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: multiple-choice-extractor
+  notes: Hard general-capability retention check with 10 options per question.
+  recommended_repository_revision: 5d15a5eb0092f6b5b5c90b6ef6928e1fc1b1b117
+  revision_source: https://github.com/TIGER-AI-Lab/MMLU-Pro
+
+- id: gsm8k
+  name: GSM8K
+  tier: TIER_B
+  canonical_repository: https://github.com/openai/grade-school-math
+  reference: arxiv:2110.14168
+  version: main
+  license: MIT
+  commit_sha: b79e5cc092b3ef7753e1a6c0b396b27d42cf3ab8
+  evaluator_version: opengrad-gsm8k-eval-v1
+  splits:
+  - test
+  metrics:
+  - accuracy
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: math-answer-extractor
+  notes: Secondary regression suite for basic math reasoning retention.
+  recommended_repository_revision: b79e5cc092b3ef7753e1a6c0b396b27d42cf3ab8
+  revision_source: https://github.com/openai/grade-school-math
+
+- id: arc-challenge
+  name: ARC-Challenge
+  tier: TIER_B
+  canonical_repository: https://allenai.org/data/arc
+  reference: arxiv:1803.05457
+  version: v1
+  license: CC-BY-SA-4.0
+  commit_sha: null
+  evaluator_version: opengrad-arc-eval-v1
+  splits:
+  - test
+  metrics:
+  - accuracy
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: multiple-choice-extractor
+  notes: Secondary regression suite for scientific question answering retention.
+  recommended_repository_revision: null
+  revision_source: https://allenai.org/data/arc
+
+- id: mcpmark
+  name: MCPMark / MCP-Universe
+  tier: TIER_C
+  canonical_repository: https://github.com/modelcontextprotocol/mcpmark
+  reference: null
+  version: v1.0
+  license: MIT
+  commit_sha: a18a93e5076cfbfb84d4715f168fb9bc20163359
+  evaluator_version: opengrad-mcpmark-eval-v1
+  splits:
+  - filesystem
+  - github
+  - postgresql
+  - browser
+  - notion
+  metrics:
+  - task_completion
+  - tool_call_correctness
+  - step_count
+  - invalid_actions
+  - loops
+  - recoveries
+  - total_latency
+  - token_usage
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: mcp-client
+  notes: Evaluates agent operation in real-world Model Context Protocol tool ecosystems.
+  recommended_repository_revision: a18a93e5076cfbfb84d4715f168fb9bc20163359
+  revision_source: https://github.com/modelcontextprotocol/mcpmark
+
+- id: agentbench-fc
+  name: AgentBench FC
+  tier: TIER_C
+  canonical_repository: https://github.com/THUDM/AgentBench
+  reference: arxiv:2308.03688
+  version: v0.2.0
+  license: Apache-2.0
+  commit_sha: 1b9e31a84f3c05988ad7890f5bca450cf9659b86
+  evaluator_version: opengrad-agentbench-eval-v1
+  splits:
+  - os
+  - db
+  - web
+  - kg
+  metrics:
+  - overall_score
+  - environment_success_rate
+  - round_count
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: agentbench-harness
+  notes: Agentic and function-calling evaluation across multiple simulated environments.
+  recommended_repository_revision: 1b9e31a84f3c05988ad7890f5bca450cf9659b86
+  revision_source: https://github.com/THUDM/AgentBench
+
+- id: terminal-bench
+  name: Terminal-Bench
+  tier: TIER_C
+  canonical_repository: https://github.com/OpenGrad/terminal-bench
+  reference: null
+  version: v1.0
+  license: Apache-2.0
+  commit_sha: 890ef93c563d76b1f2385ea011293e7f91040375
+  evaluator_version: opengrad-terminal-eval-v1
+  splits:
+  - bash_navigation
+  - git_operations
+  - build_automation
+  - system_administration
+  metrics:
+  - task_success
+  - command_efficiency
+  - error_recovery_rate
+  - destructive_action_rate
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: terminal-agent-harness
+  notes: Full agent harness evaluation. Result depends on model + prompt + tool interface + loop + runtime.
+  recommended_repository_revision: 890ef93c563d76b1f2385ea011293e7f91040375
+  revision_source: https://github.com/OpenGrad/terminal-bench
+
+- id: tua-bench
+  name: TUA-Bench
+  tier: TIER_C
+  canonical_repository: https://github.com/OpenGrad/tua-bench
+  reference: null
+  version: v1.0
+  license: Apache-2.0
+  commit_sha: 419ea730fb82a01469e38d47915ceb8a329ef301
+  evaluator_version: opengrad-tua-eval-v1
+  splits:
+  - terminal_use
+  - environment_interaction
+  - failure_diagnosis
+  metrics:
+  - completion_rate
+  - step_efficiency
+  - policy_violations
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: tua-harness
+  notes: Terminal-use and agent interaction evaluation. Full harness configuration recorded.
+  recommended_repository_revision: 419ea730fb82a01469e38d47915ceb8a329ef301
+  revision_source: https://github.com/OpenGrad/tua-bench
+
+- id: openweights
+  name: OpenWeights On-Device Tool Calling Benchmark
+  tier: TIER_C
+  canonical_repository: https://github.com/alpharomercoma/openweights
+  reference: https://github.com/alpharomercoma/openweights
+  version: v1.0
+  license: Apache-2.0
+  commit_sha: c593452243d548325a7a8d5f309a473e045ab552
+  evaluator_version: opengrad-openweights-eval-v1
+  splits:
+  - bare
+  - tagged
+  metrics:
+  - tool_selection_accuracy
+  - direct_answer_accuracy
+  - format_compliance
+  - unnecessary_tool_rate
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: openweights-tool-parser
+  notes: Evaluates on-device tool calling under minimal system prompt without explicit instruction bloating.
+  recommended_repository_revision: c593452243d548325a7a8d5f309a473e045ab552
+  revision_source: https://github.com/alpharomercoma/openweights
+
+- id: gaia
+  name: GAIA
+  tier: TIER_D
+  canonical_repository: https://github.com/GAIA-Benchmark/GAIA
+  reference: arxiv:2311.12983
+  version: v1.0
+  license: CC-BY-4.0
+  commit_sha: 3013de8f0951b697d42cf3ab8a93e5076cfbfb84
+  evaluator_version: opengrad-gaia-eval-v1
+  splits:
+  - level_1
+  - level_2
+  - level_3
+  metrics:
+  - task_success
+  - level_1_success
+  - level_2_success
+  - level_3_success
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: gaia-harness
+  notes: Stretch transfer benchmark. Primary use is base vs trained model delta rather than absolute ~2B score.
+  recommended_repository_revision: 3013de8f0951b697d42cf3ab8a93e5076cfbfb84
+  revision_source: https://github.com/GAIA-Benchmark/GAIA
+
+- id: performance-microsuite
+  name: OpenGrad Internal Performance Microsuite
+  tier: TIER_E
+  canonical_repository: null
+  reference: opengrad-microsuite-v1
+  version: v1.0
+  license: Apache-2.0
+  commit_sha: 5e61a684b01e7e45217996c56891ebfe2c29bc96
+  evaluator_version: opengrad-microsuite-eval-v1
+  splits:
+  - natural_language
+  - long_form
+  - python_coding
+  - json_generation
+  - single_tool_call
+  - parallel_tool_calls
+  - multi_turn_tool
+  - long_context_selection
+  - repetitive_structured
+  - reasoning_heavy
+  metrics:
+  - ttft
+  - inter_token_latency
+  - output_tokens_per_second
+  - total_tokens_per_second
+  - peak_vram
+  - acceptance_rate
+  - accepted_tokens_per_step
+  contamination_sensitivity: INTERNAL_HOLDOUT
+  prohibit_training: true
+  parser_requirements: model-native-or-bfcl-adapter
+  notes: 10 fixed deterministic prompts for controlled systems and speculative decoding benchmarks.
+  recommended_repository_revision: 5e61a684b01e7e45217996c56891ebfe2c29bc96
+  revision_source: internal
+
+- id: speculative-replay
+  name: Speculative Decoding Public Benchmark Replay
+  tier: TIER_E
+  canonical_repository: null
+  reference: opengrad-speculative-replay-v1
+  version: v1.0
+  license: Apache-2.0
+  commit_sha: 5e61a684b01e7e45217996c56891ebfe2c29bc96
+  evaluator_version: opengrad-speculative-eval-v1
+  splits:
+  - bfcl_replay
+  - tau3_replay
+  - acebench_replay
+  metrics:
+  - throughput_speedup
+  - latency_speedup
+  - acceptance_rate
+  - accepted_tokens_per_step
+  - quality_parity_delta
+  - exact_token_match
+  - tool_call_equivalence
+  contamination_sensitivity: HIGH
+  prohibit_training: true
+  parser_requirements: speculative-verifier
+  notes: Replays benchmark subsets under AR vs speculative/MTP decoding to measure quality preservation and speedup.
+  recommended_repository_revision: 5e61a684b01e7e45217996c56891ebfe2c29bc96
+  revision_source: internal
+
 - id: when2call-eval
   name: When2Call evaluation
   canonical_repository: null
@@ -38,6 +477,7 @@ benchmarks:
   notes: Keep preference and test data out of training.
   recommended_repository_revision: null
   revision_source: UNRESOLVED_AFTER_DIRECT_CHECK
+
 - id: tau-bench-tau2
   name: tau-bench / tau2
   canonical_repository: https://github.com/sierra-research/tau-bench
@@ -56,6 +496,7 @@ benchmarks:
   notes: APIGen-MT contamination must be reported separately.
   recommended_repository_revision: 59a200c6d575d595120f1cb70fea53cef0632f6b
   revision_source: https://github.com/sierra-research/tau-bench/commit/59a200c6d575d595120f1cb70fea53cef0632f6b
+
 - id: toolsandbox
   name: ToolSandbox
   canonical_repository: null
@@ -73,6 +514,7 @@ benchmarks:
   notes: Pending authoritative metadata.
   recommended_repository_revision: null
   revision_source: UNRESOLVED_AFTER_DIRECT_CHECK
+
 - id: mcpmark-verified
   name: MCPMark Verified
   canonical_repository: null
@@ -90,6 +532,7 @@ benchmarks:
   notes: Stretch evaluation; metadata pending verification.
   recommended_repository_revision: null
   revision_source: UNRESOLVED_AFTER_DIRECT_CHECK
+
 - id: toolathlon
   name: Toolathlon / Tool Decathlon
   canonical_repository: null
@@ -107,6 +550,7 @@ benchmarks:
   notes: Stretch evaluation; metadata pending verification.
   recommended_repository_revision: null
   revision_source: UNRESOLVED_AFTER_DIRECT_CHECK
+
 - id: internal-no-tool-regression
   name: OpenGrad internal no-tool regression suite
   canonical_repository: null

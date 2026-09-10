@@ -1,0 +1,30 @@
+schema_version: 1
+benchmark_id: agentbench-fc
+benchmark_revision: 1b9e31a84f3c05988ad7890f5bca450cf9659b86
+evaluator_revision: opengrad-agentbench-eval-v1
+task_subset: function_calling_environments
+split: os
+model_id: Qwen/Qwen3.5-2B
+model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+tokenizer: Qwen/Qwen3.5-2B
+prompt_template: qwen3_5_2b_v1
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+  seed: 42
+  do_sample: false
+  stop_sequences: []
+max_context: 8192
+tool_schema_rendering_policy: qwen_native
+parser: opengrad.benchmarks.adapters.agentbench.parse_agentbench_output
+inference_backend: mock
+batch_size: 1
+concurrency: 1
+precision: bfloat16
+device_policy: cpu_or_accelerator
+runtime_details:
+  environments: ["os", "db", "web", "kg"]
+metadata:
+  tier: TIER_C
+  domain: agent_transfer

@@ -1,0 +1,30 @@
+schema_version: 1
+benchmark_id: mcpmark
+benchmark_revision: a18a93e5076cfbfb84d4715f168fb9bc20163359
+evaluator_revision: opengrad-mcpmark-eval-v1
+task_subset: deterministic_environments
+split: filesystem
+model_id: Qwen/Qwen3.5-2B
+model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+tokenizer: Qwen/Qwen3.5-2B
+prompt_template: qwen3_5_2b_v1
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+  seed: 42
+  do_sample: false
+  stop_sequences: []
+max_context: 8192
+tool_schema_rendering_policy: mcp_schema
+parser: opengrad.benchmarks.adapters.mcpmark.parse_mcp_output
+inference_backend: mock
+batch_size: 1
+concurrency: 1
+precision: bfloat16
+device_policy: cpu_or_accelerator
+runtime_details:
+  environments: ["filesystem", "github", "postgresql", "browser", "notion"]
+metadata:
+  tier: TIER_C
+  domain: mcp_agent_transfer

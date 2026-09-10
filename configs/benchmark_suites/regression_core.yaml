@@ -1,0 +1,13 @@
+schema_version: 1
+suite_id: regression_core
+description: Core capability retention and instruction following regression suite
+benchmarks:
+  - ifbench
+  - ifeval
+  - livebench
+  - mmlu_pro
+  - gsm8k
+  - arc_challenge
+metadata:
+  tier: TIER_B
+  purpose: general_capability_retention

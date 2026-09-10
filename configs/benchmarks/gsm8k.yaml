@@ -1,0 +1,30 @@
+schema_version: 1
+benchmark_id: gsm8k
+benchmark_revision: b79e5cc092b3ef7753e1a6c0b396b27d42cf3ab8
+evaluator_revision: opengrad-gsm8k-eval-v1
+task_subset: core
+split: test
+model_id: Qwen/Qwen3.5-2B
+model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+tokenizer: Qwen/Qwen3.5-2B
+prompt_template: qwen3_5_2b_v1
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+  seed: 42
+  do_sample: false
+  stop_sequences: []
+max_context: 4096
+tool_schema_rendering_policy: none
+parser: opengrad.benchmarks.adapters.regression.parse_gsm8k_output
+inference_backend: mock
+batch_size: 1
+concurrency: 1
+precision: bfloat16
+device_policy: cpu_or_accelerator
+runtime_details:
+  extractor: math_boxed_or_number
+metadata:
+  tier: TIER_B
+  domain: basic_math_retention

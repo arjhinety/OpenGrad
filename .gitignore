@@ -20,6 +20,10 @@ data/raw/
 data/processed/
 datasets/
 results/raw/
+reports/benchmarks/
+openweights/
+android-studio/
+prompt*.txt
 *.safetensors
 *.gguf
 *.bin

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from opengrad.data.behavior import capability_ids, validate_weights
 from opengrad.data.stats import analyze as _analyze

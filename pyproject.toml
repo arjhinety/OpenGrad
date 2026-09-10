@@ -15,6 +15,10 @@ evaluation = ["jsonschema>=4.23"]
 training = ["torch", "transformers", "trl", "peft"]
 inference = ["llama-cpp-python"]
 gpu-evaluation = ["torch==2.13.0", "transformers==5.16.1", "pyyaml==6.0.3", "pyarrow>=15.0"]
+benchmark-core = ["pyyaml>=6.0", "jsonschema>=4.23", "pyarrow>=15.0"]
+benchmark-agent = ["pyyaml>=6.0", "jsonschema>=4.23"]
+benchmark-terminal = ["pyyaml>=6.0", "jsonschema>=4.23"]
+benchmark-speculative = ["pyyaml>=6.0", "jsonschema>=4.23", "pyarrow>=15.0"]
 dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11", "pyyaml>=6.0", "jsonschema>=4.23"]
 
 [project.scripts]
@@ -24,6 +28,7 @@ opengrad-validate = "opengrad.registry.validate:main"
 opengrad-contamination = "opengrad.contamination.cli:main"
 opengrad-data-audit = "opengrad.cli:data_audit_cli"
 opengrad-data = "opengrad.data.cli:main"
+opengrad-benchmark = "opengrad.benchmarks.cli:benchmark_cli"
 
 [build-system]
 requires = ["hatchling"]

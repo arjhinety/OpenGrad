@@ -1,0 +1,12 @@
+schema_version: 1
+suite_id: smoke
+description: Rapid CPU dry-run smoke test across Tier A, B, and E benchmarks
+benchmarks:
+  - bfcl_v4
+  - tau3
+  - acebench
+  - ifeval
+  - performance_microsuite
+metadata:
+  purpose: validation_and_ci
+  dry_run_supported: true

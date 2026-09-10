@@ -1,7 +1,9 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 
+from opengrad.benchmarks.cli import benchmark_cli
 from opengrad.data.audit import coverage_report, load_records, render_human
 from opengrad.data.canonical import ToolConversation
 from opengrad.data.semantic import audit_records, validate_training_trajectory
@@ -39,10 +41,14 @@ def data_audit_cli() -> int:
 
 
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
+        return benchmark_cli(sys.argv[2:])
+
     parser = argparse.ArgumentParser(prog="opengrad")
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("validate")
     sub.add_parser("preflight")
+    sub.add_parser("benchmark", help="reproducible post-training benchmark system")
     data_audit = sub.add_parser("data-audit")
     data_audit.add_argument(
         "--records", required=True, help="JSON array or JSONL canonical records"

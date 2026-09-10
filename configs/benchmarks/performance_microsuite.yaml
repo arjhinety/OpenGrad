@@ -1,0 +1,31 @@
+schema_version: 1
+benchmark_id: performance-microsuite
+benchmark_revision: 5e61a684b01e7e45217996c56891ebfe2c29bc96
+evaluator_revision: opengrad-microsuite-eval-v1
+task_subset: deterministic_prompts
+split: natural_language
+model_id: Qwen/Qwen3.5-2B
+model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+tokenizer: Qwen/Qwen3.5-2B
+prompt_template: qwen3_5_2b_v1
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 256
+  seed: 42
+  do_sample: false
+  stop_sequences: []
+max_context: 4096
+tool_schema_rendering_policy: qwen_native
+parser: opengrad.benchmarks.microsuite.parse_microsuite_output
+inference_backend: mock
+batch_size: 1
+concurrency: 1
+precision: bfloat16
+device_policy: cpu_or_accelerator
+runtime_details:
+  warmup_iterations: 3
+  steady_state_iterations: 5
+metadata:
+  tier: TIER_E
+  domain: systems_performance

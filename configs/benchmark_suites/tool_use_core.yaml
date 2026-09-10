@@ -1,0 +1,10 @@
+schema_version: 1
+suite_id: tool_use_core
+description: Core tool-use capability research suite (BFCL V4, tau3, ACEBench)
+benchmarks:
+  - bfcl_v4
+  - tau3
+  - acebench
+metadata:
+  tier: TIER_A
+  purpose: primary_tool_calling_research

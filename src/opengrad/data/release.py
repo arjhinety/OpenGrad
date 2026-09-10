@@ -43,7 +43,7 @@ def _git_commit(root: Path) -> str:
 
 
 def _load_config(path: Path) -> dict[str, Any]:
-    import yaml  # type: ignore[import-untyped]
+    import yaml
 
     value = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):

@@ -1,0 +1,30 @@
+schema_version: 1
+benchmark_id: tau3
+benchmark_revision: c3f7943fa1094056a0667e4125b2938cf78b024c
+evaluator_revision: opengrad-tau3-eval-v1
+task_subset: text_domains
+split: retail
+model_id: Qwen/Qwen3.5-2B
+model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+tokenizer: Qwen/Qwen3.5-2B
+prompt_template: qwen3_5_2b_v1
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+  seed: 42
+  do_sample: false
+  stop_sequences: []
+max_context: 8192
+tool_schema_rendering_policy: qwen_native
+parser: opengrad.benchmarks.adapters.tau3.parse_tau3_output
+inference_backend: mock
+batch_size: 1
+concurrency: 1
+precision: bfloat16
+device_policy: cpu_or_accelerator
+runtime_details:
+  allowed_domains: ["airline", "retail", "telecom", "banking"]
+metadata:
+  tier: TIER_A
+  domain: multi_turn_agent

@@ -1,0 +1,30 @@
+schema_version: 1
+benchmark_id: gaia
+benchmark_revision: 3013de8f0951b697d42cf3ab8a93e5076cfbfb84
+evaluator_revision: opengrad-gaia-eval-v1
+task_subset: text_and_tools
+split: level_1
+model_id: Qwen/Qwen3.5-2B
+model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+tokenizer: Qwen/Qwen3.5-2B
+prompt_template: qwen3_5_2b_v1
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 1024
+  seed: 42
+  do_sample: false
+  stop_sequences: []
+max_context: 8192
+tool_schema_rendering_policy: qwen_native
+parser: opengrad.benchmarks.adapters.gaia.parse_gaia_output
+inference_backend: mock
+batch_size: 1
+concurrency: 1
+precision: bfloat16
+device_policy: cpu_or_accelerator
+runtime_details:
+  levels: ["level_1", "level_2", "level_3"]
+metadata:
+  tier: TIER_D
+  domain: multimodal_stretch

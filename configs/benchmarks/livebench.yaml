@@ -1,0 +1,30 @@
+schema_version: 1
+benchmark_id: livebench
+benchmark_revision: c9a008c29013c7eebe3969be863ca3e512ce245b
+evaluator_revision: opengrad-livebench-eval-v1
+task_subset: core_categories
+split: 2024-11-25
+model_id: Qwen/Qwen3.5-2B
+model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+tokenizer: Qwen/Qwen3.5-2B
+prompt_template: qwen3_5_2b_v1
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 1024
+  seed: 42
+  do_sample: false
+  stop_sequences: []
+max_context: 8192
+tool_schema_rendering_policy: none
+parser: opengrad.benchmarks.adapters.livebench.parse_livebench_output
+inference_backend: mock
+batch_size: 1
+concurrency: 1
+precision: bfloat16
+device_policy: cpu_or_accelerator
+runtime_details:
+  categories: ["reasoning", "math", "coding", "language", "instruction_following", "data_analysis"]
+metadata:
+  tier: TIER_B
+  domain: general_capability

@@ -1,0 +1,12 @@
+schema_version: 1
+suite_id: speculative_decoding
+description: Speculative decoding and native MTP performance, quality parity, and Pareto analysis suite
+benchmarks:
+  - performance_microsuite
+  - bfcl_v4
+  - acebench
+  - tau3
+metadata:
+  tier: TIER_E
+  purpose: speculative_decoding_and_mtp_verification
+  modes: ["MODE_A_AR", "MODE_B_MTP", "MODE_C_DRAFT", "MODE_D_DSPARK"]

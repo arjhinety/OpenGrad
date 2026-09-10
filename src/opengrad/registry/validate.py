@@ -6,7 +6,7 @@ from typing import Any
 
 def load_yaml(path: Path) -> Any:
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
     except ImportError as exc:
         raise RuntimeError("Install the dev extra for YAML validation") from exc
     return yaml.safe_load(path.read_text(encoding="utf-8"))

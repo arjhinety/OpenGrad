@@ -16,7 +16,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any, Protocol
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from opengrad.data.canonical import CanonicalEvaluationExample
 from opengrad.data.renderers import Qwen35_2BRenderer

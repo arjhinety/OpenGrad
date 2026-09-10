@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 DECISIONS = frozenset({"CALL", "ANSWER", "CLARIFY", "UNSUPPORTED"})
 UNCERTAINTY_STATES = frozenset({"known", "derived", "heuristic", "unknown"})

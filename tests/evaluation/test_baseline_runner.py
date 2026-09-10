@@ -32,6 +32,7 @@ def test_native_parser_covers_golden_boundary_cases():
 
 
 def test_dry_run_executes_manifest_to_artifacts(monkeypatch, tmp_path: Path):
+    from opengrad.data.canonical import CanonicalEvaluationExample
     from opengrad.evaluation import runner
 
     def render(self, example):
@@ -46,7 +47,22 @@ def test_dry_run_executes_manifest_to_artifacts(monkeypatch, tmp_path: Path):
             False,
         )
 
+    def mock_examples(root, manifest_path):
+        return [
+            CanonicalEvaluationExample(
+                f"fixture-{i}",
+                {"dataset_id": "when2call-mcq"},
+                "test question",
+                [{"name": "lookup", "parameters": {"type": "object", "properties": {}}}],
+                "CALL" if i % 2 == 0 else "ANSWER",
+                [],
+                {"source": "fixture"},
+            )
+            for i in range(4)
+        ]
+
     monkeypatch.setattr(runner.Qwen35_2BRenderer, "render_evaluation", render)
+    monkeypatch.setattr(runner, "load_evaluation_examples", mock_examples)
     config = yaml.safe_load(
         Path("configs/evaluation/tool_calling/qwen35_2b_baseline.yaml").read_text()
     )

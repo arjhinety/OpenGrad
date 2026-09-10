@@ -1,0 +1,12 @@
+schema_version: 1
+suite_id: agent_transfer
+description: Real-world agent transfer and terminal benchmark suite
+benchmarks:
+  - mcpmark
+  - agentbench_fc
+  - terminal_bench
+  - tua_bench
+  - gaia
+metadata:
+  tier: TIER_C_AND_D
+  purpose: agentic_ecosystem_transfer

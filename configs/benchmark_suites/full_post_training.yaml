@@ -1,0 +1,21 @@
+schema_version: 1
+suite_id: full_post_training
+description: Comprehensive full post-training evaluation suite covering all tiers
+benchmarks:
+  - bfcl_v4
+  - tau3
+  - acebench
+  - ifbench
+  - ifeval
+  - livebench
+  - mmlu_pro
+  - gsm8k
+  - arc_challenge
+  - mcpmark
+  - agentbench_fc
+  - terminal_bench
+  - tua_bench
+  - gaia
+  - performance_microsuite
+metadata:
+  purpose: full_model_checkpoint_evaluation
