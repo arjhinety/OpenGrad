@@ -15,7 +15,7 @@ wandb/
 runs/
 artifacts/
 .release/
-checkpoints/
+/checkpoints/
 data/raw/
 data/processed/
 datasets/
