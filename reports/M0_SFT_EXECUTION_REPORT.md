@@ -167,6 +167,10 @@ This is what makes the stopping decision below possible rather than guessed up f
 be left stuck at `TRAINING` forever, indistinguishable from a live run; the failure is now recorded
 and the status reflects that training completed.
 
+**A corrected Glaive adapter** (`adapt_glaive_v2`, registered as `glaive_v2`), which reads the
+function-call shape this revision actually uses. See §10.1 — this is the single change that restores
+tool-call supervision to the corpus.
+
 ---
 
 ## 5. DPO: blocked, with evidence
@@ -277,9 +281,18 @@ was out of scope and would have buried this change set.
 
 ## 10. Recommended next actions, in order
 
-1. **Fix the glaive adapter.** Parse `<functioncall> {...}` out of the assistant text into
-   `tool_calls`. This alone recovers ~51,000 records and, more importantly, restores tool-call
-   supervision — the single highest-value fix available.
+1. **Fix the glaive adapter — done, as a new version.** `adapt_glaive_v2` parses the marker and the
+   body that follows it. Two deviations had to be handled: the block is never closed by
+   `</functioncall>` (0 of 67,481 blocks have one), and `arguments` is a single-quoted Python-style
+   string holding JSON with lower-case booleans, so the body parses as neither JSON nor a Python
+   literal. Measured against the released corpus, the new extractor reads **66,467 of 67,481
+   unparsed turns (98.5%)** and 49,846 of the 50,851 affected records, against 3% for a
+   terminating-tag-only fix. The remaining 1,014 turns are genuinely malformed and are refused
+   rather than guessed at.
+   It is registered as `glaive_v2` **beside** `adapt_glaive`, not in place of it, so the pinned v1
+   release stays reproducible from the code that produced it. Switching to it is a new corpus
+   version with its own manifest hash. Whether a recovered record then passes the remaining schema
+   and argument gates is not measured here and needs a rebuild.
 2. **Normalise upstream tool schemas at materialization**, not at render time: `type: "dict"` →
    `"object"`, bare property maps → `{type: object, properties: ...}`, drop non-JSON-Schema keys. This
    is ordinary adapter work on the upstream shape, and it unblocks xlam (59,370 records, currently 0%
