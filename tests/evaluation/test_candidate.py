@@ -127,7 +127,9 @@ def test_generated_candidate_config_is_accepted_and_namespaced(tmp_path):
     assert config["model_id"] == str(checkpoint)
     for value in config["outputs"].values():
         assert "qwen35_2b_m0_sft_full_v3" in str(value), value
-        assert not str(value).startswith("reports/"), "a candidate must never write B0 evidence paths"
+        assert not str(value).startswith("reports/"), (
+            "a candidate must never write B0 evidence paths"
+        )
 
 
 def test_comparison_reports_direction_and_verdict():
