@@ -333,9 +333,10 @@ def deterministic_order(count: int, seed: int, epoch: int) -> list[int]:
 
 
 def summarise_history(history: list[dict[str, Any]]) -> dict[str, Any]:
+    """Loss curve summary. Reads ``train_loss``, the key the training loop writes."""
     if not history:
         return {"steps": 0}
-    losses = [entry["loss"] for entry in history if "loss" in entry]
+    losses = [entry["train_loss"] for entry in history if "train_loss" in entry]
     return {
         "steps": len(history),
         "first_loss": losses[0] if losses else None,

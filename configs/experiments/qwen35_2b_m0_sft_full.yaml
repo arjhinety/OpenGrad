@@ -35,9 +35,12 @@ trainer:
   tuning_method: full
   learning_rate: 1.0e-5
   micro_batch_size: 8
-  gradient_accumulation_steps: 4
-  max_steps: 2000
-  warmup_steps: 100
+  gradient_accumulation_steps: 1
+  # Measured on this box: ~1.6k supervised tokens/s, so an effective batch of 8 costs about
+  # 2s per optimizer step and 2400 steps is ~1.5h. The schedule is sized to fit an
+  # evaluation-able curve, not to complete an epoch: one full epoch is ~4h.
+  max_steps: 2400
+  warmup_steps: 120
   max_seq_length: 2048
   scheduler: cosine
   gradient_clipping: 1.0
@@ -66,8 +69,10 @@ generation:
   max_output_tokens: 512
 
 checkpointing:
-  save_steps: 250
-  max_checkpoints: 4
+  # Six checkpointable points across the run. A checkpoint is ~3.8 GiB of weights (the
+  # optimizer state is retained only for the newest one), so this stays inside the disk budget.
+  save_steps: 400
+  max_checkpoints: 6
 
 promotion:
   # Expressed only against evaluations that can actually be run. BFCL V4, tau2, and the other

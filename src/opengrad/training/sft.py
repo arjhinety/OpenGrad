@@ -16,6 +16,7 @@ mismatch fails closed rather than training on a different corpus.
 from __future__ import annotations
 
 import json
+import random
 import time
 from pathlib import Path
 from typing import Any
@@ -327,6 +328,11 @@ def run_real_sft(
     if settings.precision == "bfloat16" and not hardware.bf16_supported:
         raise TrainingConfigError("configured precision is bfloat16 but the device lacks BF16")
 
+    # Resume, if this run directory already holds a checkpoint with optimizer state. Raising
+    # max_steps on the same experiment is therefore a continuation rather than a restart, which
+    # is what lets a training curve be extended once it is evaluated.
+    resume_from = _find_resume_checkpoint(output_dir / "checkpoints")
+
     torch.manual_seed(settings.seed)
     torch.cuda.manual_seed_all(settings.seed)
 
@@ -341,8 +347,8 @@ def run_real_sft(
         raise TrainingConfigError("tokenizer exposes neither pad_token_id nor eos_token_id")
 
     model = transformers.AutoModelForCausalLM.from_pretrained(
-        model_id,
-        revision=str(model_revision),
+        resume_from if resume_from is not None else model_id,
+        revision=None if resume_from is not None else str(model_revision),
         trust_remote_code=False,
         dtype=dtype,
         device_map="auto",
@@ -389,6 +395,34 @@ def run_real_sft(
         "interrupted": False,
         "signal": None,
     }
+    if resume_from is not None:
+        state = torch.load(
+            resume_from / "training_state.pt", map_location="cpu", weights_only=False
+        )
+        optimizer.load_state_dict(state["optimizer"])
+        world["optimizer_step"] = int(state["optimizer_step"])
+        world["examples_seen"] = int(state["examples_seen"])
+        world["supervised_tokens_seen"] = int(state["supervised_tokens_seen"])
+        world["epoch"] = int(state["epoch"])
+        torch.set_rng_state(state["torch_rng"])
+        if state.get("cuda_rng") is not None and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(state["cuda_rng"])
+        random.setstate(state["python_rng"])
+        emit(
+            "resumed",
+            checkpoint=str(resume_from),
+            optimizer_step=world["optimizer_step"],
+            supervised_tokens_seen=world["supervised_tokens_seen"],
+        )
+        print(
+            f"  resumed from {resume_from.name} at step {world['optimizer_step']}",
+            flush=True,
+        )
+        if world["optimizer_step"] >= settings.max_steps:
+            raise TrainingConfigError(
+                f"checkpoint at step {world['optimizer_step']} is already at or past "
+                f"trainer.max_steps={settings.max_steps}; raise max_steps to continue"
+            )
     previous_handlers = install_interrupt_handler(world)
 
     history: list[dict[str, Any]] = []
@@ -504,6 +538,7 @@ def run_real_sft(
                             dataset_ids,
                             dataset_hashes,
                             provenance["sha"],
+                            lineage_parent=str(resume_from) if resume_from is not None else None,
                         )
                         created_checkpoints.append(str(path))
                         last_saved_step = world["optimizer_step"]
@@ -546,6 +581,7 @@ def run_real_sft(
             dataset_hashes,
             provenance["sha"],
             suffix="" if not world["interrupted"] else "interrupted",
+            lineage_parent=str(resume_from) if resume_from is not None else None,
         )
         created_checkpoints.append(str(final_path))
     emit(
@@ -593,6 +629,15 @@ def run_real_sft(
     )
 
 
+def _find_resume_checkpoint(ckpt_dir: Path) -> Path | None:
+    """Newest checkpoint carrying optimizer state, or None when there is nothing to resume."""
+    candidates = sorted(
+        (path for path in ckpt_dir.glob("checkpoint-*") if (path / "training_state.pt").is_file()),
+        key=lambda path: int(path.name.split("-")[-1]) if path.name.split("-")[-1].isdigit() else 0,
+    )
+    return candidates[-1] if candidates else None
+
+
 def _save_checkpoint(
     model: Any,
     optimizer: Any,
@@ -606,6 +651,7 @@ def _save_checkpoint(
     git_commit: str,
     *,
     suffix: str = "",
+    lineage_parent: str | None = None,
 ) -> Path:
     """Persist a resumable checkpoint with the lineage the registry requires."""
     import torch
@@ -641,7 +687,7 @@ def _save_checkpoint(
                 git_commit=git_commit,
                 dataset_manifest_ids=dataset_ids,
                 dataset_hashes=dataset_hashes,
-                parent_checkpoint=None,
+                parent_checkpoint=lineage_parent,
             ),
             indent=2,
             sort_keys=True,
@@ -649,4 +695,11 @@ def _save_checkpoint(
         + "\n",
         encoding="utf-8",
     )
+    # Optimizer state is roughly twice the size of the weights, and only the newest checkpoint
+    # can be resumed from, so older copies are pure storage cost. Measured on this model: a
+    # checkpoint is ~11 GiB with state and ~3.8 GiB without, which is the difference between
+    # being able to keep a usable evaluation curve and filling the disk after three saves.
+    for stale in (output_dir / "checkpoints").glob("checkpoint-*/training_state.pt"):
+        if stale.parent != path:
+            stale.unlink(missing_ok=True)
     return path
