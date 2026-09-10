@@ -17,23 +17,25 @@
     },
     {
       "name": "one_generation",
-      "output_chars": 30,
+      "output_chars": 115,
       "status": "PASS"
     },
     {
-      "decision": "ANSWER",
-      "errors": [
-        "UNCLOSED_TOOL_CALL"
-      ],
+      "decision": "CALL",
+      "errors": [],
       "name": "native_parser",
-      "parser_status": "FORMAT_ERROR",
-      "status": "FAIL"
+      "parser_status": "RAW_VALID",
+      "status": "PASS"
     },
     {
-      "code": "GPU_SMOKE_FAILED",
-      "details": "RuntimeError: native parser rejected smoke output: FORMAT_ERROR: ['UNCLOSED_TOOL_CALL']",
-      "name": "runtime",
-      "status": "FAIL"
+      "allocated_gib": 3.513,
+      "name": "vram",
+      "peak_allocated_gib": 3.573,
+      "status": "PASS"
+    },
+    {
+      "name": "cleanup",
+      "status": "PASS"
     }
   ],
   "hardware": {
@@ -57,11 +59,9 @@
     "vllm_available": false
   },
   "kind": "GPU_BOUNDARY_VERIFIED",
-  "limitations": [
-    "Real baseline and SFT are blocked until this boundary passes."
-  ],
+  "limitations": [],
   "model_id": "Qwen/Qwen3.5-2B",
   "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
   "schema_version": 1,
-  "status": "INCOMPLETE"
+  "status": "PASS"
 }

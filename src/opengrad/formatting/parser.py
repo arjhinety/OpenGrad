@@ -26,12 +26,56 @@ class ParsedNativeOutput:
 
 _TOOL_CALL = re.compile(r"<tool_call>(.*?)</tool_call>", re.DOTALL | re.IGNORECASE)
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
+# Qwen3.5's pinned chat template instructs the model to reply with an XML payload:
+#   <tool_call>
+#   <function=lookup>
+#   <parameter=q>
+#   worker 12
+#   </parameter>
+#   </function>
+#   </tool_call>
+# The template also renders assistant tool calls in exactly this form, so this is the
+# model's native protocol, not an alternative spelling.
+#
+# This grammar is deliberately byte-compatible with OpenWeights' `ToolCallParser.parseTaggedXml`
+# (core/common/src/commonMain/.../model/ToolCallParser.kt), which is the downstream reader for
+# the same model: it falls back to this branch because llama.cpp's built-in parser does not
+# recognise the Qwen3.5 XML form. Keeping the two identical means a checkpoint measured by B0
+# is comparable to the same checkpoint measured on-device.
+_FUNCTION = re.compile(r"<function=([^>]+)>(.*?)</function>", re.DOTALL | re.IGNORECASE)
+_PARAMETER = re.compile(r"<parameter=([^>]+)>(.*?)</parameter>", re.DOTALL | re.IGNORECASE)
 
 
 def _call_values(body: str) -> list[Any]:
-    """Decode one native Qwen payload without repairing malformed JSON."""
+    """Decode one native JSON Qwen payload without repairing malformed JSON."""
     value = json.loads(body.strip())
     return value if isinstance(value, list) else [value]
+
+
+def _xml_call_values(body: str, index: int) -> tuple[list[tuple[str, dict[str, Any]]], list[str]]:
+    """Decode the XML function-call payload emitted by the pinned Qwen3.5 template.
+
+    Parameter values are kept as the strings the model emitted, verbatim except for
+    surrounding whitespace. The template stringifies every argument when rendering, so
+    the original JSON type is not recoverable and is not guessed here; argument
+    comparison is left to the evaluator.
+    """
+    functions = list(_FUNCTION.finditer(body))
+    if not functions:
+        return [], [f"MALFORMED_TOOL_CALL[{index}]: missing <function=...> block"]
+    calls: list[tuple[str, dict[str, Any]]] = []
+    errors: list[str] = []
+    for match in functions:
+        name = match.group(1).strip()
+        inner = match.group(2)
+        arguments: dict[str, Any] = {}
+        for parameter in _PARAMETER.finditer(inner):
+            arguments[parameter.group(1).strip()] = parameter.group(2).strip()
+        if "<parameter=" in inner.casefold() and not arguments:
+            errors.append(f"MALFORMED_ARGUMENTS[{index}]: unclosed <parameter> block")
+            continue
+        calls.append((name, arguments))
+    return calls, errors
 
 
 def parse_qwen_native_output(raw: str, *, truncated: bool = False) -> ParsedNativeOutput:
@@ -71,8 +115,24 @@ def parse_qwen_native_output(raw: str, *, truncated: bool = False) -> ParsedNati
     calls: list[ParsedCall] = []
     errors: list[str] = []
     for index, match in enumerate(matches):
+        body = match.group(1)
+        stripped = body.strip()
+        if "<function=" in body.casefold():
+            # The pinned Qwen3.5 template emits the XML payload. This is the format the
+            # real model produces; the JSON branch below covers older Qwen spellings.
+            xml_calls, xml_errors = _xml_call_values(body, index)
+            errors.extend(xml_errors)
+            for name, arguments in xml_calls:
+                calls.append(ParsedCall(name, arguments))
+            continue
+        if not stripped.startswith(("{", "[")):
+            errors.append(
+                f"MALFORMED_TOOL_CALL[{index}]: payload is neither a JSON object "
+                "nor an XML <function=...> block"
+            )
+            continue
         try:
-            values = _call_values(match.group(1))
+            values = _call_values(body)
         except (json.JSONDecodeError, TypeError) as exc:
             errors.append(
                 f"MALFORMED_TOOL_CALL[{index}]: {exc.msg if isinstance(exc, json.JSONDecodeError) else exc}"

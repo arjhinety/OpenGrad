@@ -125,14 +125,29 @@ def render_openweights_prompt(
 
 def parse_openweights_reply(reply: str) -> tuple[str, str | None, dict[str, Any]]:
     """Parse reply using the OpenWeights ToolPrompting parser logic.
-    
+
     Accepts:
-    1. {"tool": "...", "arguments": {...}}
-    2. {"name": "...", "arguments": {...}}
-    3. <tool_call>{"name": "...", "arguments": {...}}</tool_call>
+    1. {"tool": "...", "arguments": {...}}          (CallFormat.BARE)
+    2. {"name": "...", "arguments": {...}}          (CallFormat.BARE variant)
+    3. <tool_call>{"name": "...", "arguments": {...}}</tool_call>   (CallFormat.TAGGED)
+    4. <tool_call><function=n><parameter=k>v</parameter></function></tool_call>
+
+    Shape 4 is the model's *native* template output, not one of the two arms this benchmark
+    asks for. It is accepted anyway because OpenWeights prefers a model's own template when
+    that template carries tools — and Qwen3.5-2B's does, mandating this XML form — so a model
+    that has learned the native shape will emit it here no matter what the arm's prompt says.
+    Scoring a correct call as FORMAT_ERROR would misreport the model rather than the format.
     """
     cleaned = reply.strip()
-    # Check for TAGGED format first
+
+    # Native XML tool call first: it is unambiguous, and its inner digits and braces would
+    # otherwise be picked up by the BARE JSON scan below.
+    xml_calls = _parse_native_xml(cleaned)
+    if xml_calls is not None:
+        name, arguments = xml_calls[0]
+        return "CALL", name, arguments
+
+    # Check for TAGGED format
     tagged_match = re.search(r"<tool_call>(.*?)</tool_call>", cleaned, re.DOTALL)
     if tagged_match:
         try:
@@ -156,6 +171,18 @@ def parse_openweights_reply(reply: str) -> tuple[str, str | None, dict[str, Any]
             pass
 
     return "ANSWER", None, {}
+
+
+def _parse_native_xml(reply: str) -> list[tuple[str, dict[str, Any]]] | None:
+    """Decode ``<function=...><parameter=...>`` calls, or None when the reply has none."""
+    from opengrad.formatting.parser import parse_qwen_native_output
+
+    if "<function=" not in reply.casefold():
+        return None
+    parsed = parse_qwen_native_output(reply)
+    if parsed.status != "RAW_VALID" or parsed.decision != "CALL" or not parsed.calls:
+        return None
+    return [(call.name, call.arguments) for call in parsed.calls]
 
 
 class OpenWeightsAdapter(BenchmarkAdapter):
