@@ -1,4 +1,5 @@
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -111,6 +112,41 @@ def test_quarantined_examples_are_excluded_from_the_heldout_benchmark():
         sorted(e.metadata["benchmark_splits"]) == ["when2call-llm-judge", "when2call-mcq"]
         for e in shared
     )
+
+
+def test_recorded_commit_must_be_in_this_history_but_may_predate_head():
+    """Evidence must not expire on the next commit, and must not be fabricated.
+
+    Requiring equality with the current HEAD meant any later commit -- including the one that
+    documents the result -- invalidated the baseline, so the gate could never stay green.
+    Ancestry is the meaningful test: the commit is real and in this history.
+    """
+    from opengrad.readiness import _commit_is_ancestor, _git_state
+
+    head = _git_state(ROOT)["commit"]
+    assert head, "these tests assume a git checkout"
+    assert _commit_is_ancestor(ROOT, head, head) is True, "HEAD is trivially an ancestor"
+
+    parent = subprocess.check_output(
+        ["git", "rev-parse", "HEAD~1"], cwd=ROOT, text=True
+    ).strip()
+    assert _commit_is_ancestor(ROOT, parent, head) is True, "a real ancestor must pass"
+
+    # Fabricated, unknown, and malformed revisions all fail closed.
+    assert _commit_is_ancestor(ROOT, "0" * 40, head) is False
+    assert _commit_is_ancestor(ROOT, "not-a-sha", head) is False
+    assert _commit_is_ancestor(ROOT, None, head) is False
+    assert _commit_is_ancestor(ROOT, head, None) is False
+
+
+def test_baseline_evidence_contract_requires_a_clean_tree_and_a_known_commit():
+    import inspect
+
+    from opengrad.readiness import _baseline_state
+
+    source = inspect.getsource(_baseline_state)
+    assert 'metrics.get("git_dirty") is False' in source
+    assert "_commit_is_ancestor(" in source
 
 
 def test_smoke_token_budget_can_complete_a_tool_call():

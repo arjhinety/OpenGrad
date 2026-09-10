@@ -96,6 +96,33 @@ def _git_state(root: Path) -> dict[str, Any]:
     return {"commit": commit, "dirty": dirty}
 
 
+def _commit_is_ancestor(root: Path, recorded: Any, head: Any) -> bool:
+    """Whether ``recorded`` is ``head`` or predates it in this history.
+
+    Evidence must come from a real commit in this repository, but it must not be invalidated
+    by the next commit: results generate documentation, so requiring equality with the
+    current HEAD would expire every baseline the moment anything else was committed. Ancestry
+    plus a clean-tree requirement says what is actually meant -- "produced from a clean
+    checkout of a commit that is in this history" -- and still fails closed on an unknown,
+    rewritten, or fabricated commit.
+    """
+    if not isinstance(recorded, str) or not isinstance(head, str) or not recorded or not head:
+        return False
+    if recorded == head:
+        return True
+    try:
+        result = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", recorded, head],
+            cwd=root,
+            capture_output=True,
+            check=False,
+        )
+    except OSError:
+        return False
+    # 0 = ancestor, 1 = not an ancestor, other = unknown ref/repo -> fail closed.
+    return result.returncode == 0
+
+
 def _min_parse_valid_rate(root: Path) -> float:
     """The pinned native-parse quality bound for the frozen baseline.
 
@@ -231,7 +258,11 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         and environment.get("model_id") == CANONICAL_MODEL_ID
         and environment.get("model_revision") == PINNED_MODEL_REVISION
         and environment.get("manifest_sha256") == manifest_sha256
-        and isinstance(metrics.get("git_commit"), str) and metrics.get("git_commit") == current_commit
+        and isinstance(metrics.get("git_commit"), str)
+        and _commit_is_ancestor(root, metrics.get("git_commit"), current_commit)
+        # Real evidence must come from a clean checkout: a run from a dirty tree cannot be
+        # traced to a code state, which is the point of recording the commit at all.
+        and metrics.get("git_dirty") is False
         and baseline_experiment is not None
         and baseline_experiment.get("status") in {"EVALUATED", "REVIEW", "PROMOTED"}
         and baseline_experiment.get("model_id") == CANONICAL_MODEL_ID
