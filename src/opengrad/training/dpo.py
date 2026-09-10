@@ -111,6 +111,19 @@ class DPOTrainerBackend(TrainerBackend):
                 },
             )
 
-        raise NotImplementedError(
-            "Live DPO training requires accelerator execution. Use dry_run=True for pre-GPU testing."
+        if experiment is None:
+            raise ValueError(
+                "real DPO requires the full experiment configuration (model, datasets, "
+                "checkpointing, reproducibility); it is not inferred from the trainer block"
+            )
+        if root is None:
+            raise ValueError("real DPO requires the repository root")
+        from opengrad.training.dpo_live import run_real_dpo
+
+        return run_real_dpo(
+            experiment_id=experiment_id,
+            experiment=experiment,
+            trainer_config=config,
+            output_dir=output_dir,
+            root=Path(root),
         )
