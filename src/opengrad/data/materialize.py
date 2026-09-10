@@ -131,7 +131,21 @@ def _atomic_json(path: Path, value: dict[str, Any]) -> None:
         temporary.unlink(missing_ok=True)
 
 
-def _adapter(dataset: str, split: str, mode: str) -> Any:
+def _adapter(dataset: str, split: str, mode: str, override: str | None = None) -> Any:
+    """Select the adapter, optionally overridden by name.
+
+    The override exists so a new corpus version can use a corrected adapter without changing what
+    the default produces. A pinned release has to stay reproducible from the code that built it, so
+    switching the default adapter would silently change every future rebuild of v1.
+    """
+    if override is not None:
+        if override not in ADAPTERS:
+            raise ValueError(
+                f"unknown adapter {override!r}; available: {', '.join(sorted(ADAPTERS))}"
+            )
+        if mode != "sft":
+            raise ValueError("the adapter override applies to sft mode only")
+        return ADAPTERS[override]
     if mode == "preference":
         if dataset != "when2call":
             raise ValueError("preference mode is only supported for when2call")
@@ -196,6 +210,7 @@ def materialize_parquet(
     dataset: str,
     split: str,
     mode: str = "sft",
+    adapter_override: str | None = None,
     shard_size: int = 1000,
     batch_size: int = 128,
     max_records: int | None = None,
@@ -218,6 +233,7 @@ def materialize_parquet(
         "split": split,
         "mode": mode,
         "adapter_version": "1.0.2",
+        "adapter_override": adapter_override,
         "shard_size": shard_size,
         "batch_size": batch_size,
         "max_records": max_records,
@@ -270,7 +286,7 @@ def materialize_parquet(
 
     import pyarrow.parquet as pq
 
-    adapter = _adapter(dataset, split, mode)
+    adapter = _adapter(dataset, split, mode, adapter_override)
     seen_hashes: set[str] = set()
     for name in valid_shards:
         for batch in pq.ParquetFile(output_dir / name).iter_batches(batch_size=128):

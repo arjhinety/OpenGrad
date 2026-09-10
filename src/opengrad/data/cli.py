@@ -57,6 +57,11 @@ def main() -> int:
     materialize.add_argument("--output", type=Path, required=True)
     materialize.add_argument("--split", required=True)
     materialize.add_argument("--mode", choices=["sft", "preference", "evaluation"], default="sft")
+    materialize.add_argument(
+        "--adapter",
+        default=None,
+        help="override the adapter by name (for a new corpus version; the default is unchanged)",
+    )
     materialize.add_argument("--shard-size", type=int, default=1000)
     materialize.add_argument("--batch-size", type=int, default=128)
     materialize.add_argument("--max-records", type=int)
@@ -157,6 +162,7 @@ def main() -> int:
             dataset=args.dataset,
             split=args.split,
             mode=args.mode,
+            adapter_override=args.adapter,
             shard_size=args.shard_size,
             batch_size=args.batch_size,
             max_records=args.max_records,
