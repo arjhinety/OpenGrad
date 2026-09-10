@@ -24,7 +24,9 @@ The following sources are part of the v1 release and of the intended v2 composit
 
 Records in this release are modified derivatives of the sources above. OpenGrad modifies them through canonical schema conversion, tool-definition and message normalization, structural validation, invalid-record filtering, deduplication, and metadata augmentation.
 
-The Glaive records in this release additionally use a later adapter than v1 did. The v1 adapter left the source's unterminated `<functioncall>` blocks inside the assistant message as text, producing a tool result with no matching call; the later adapter parses those blocks into structured calls. This is a material modification relative to v1 and is why the two releases are not interchangeable. The canonical record carries the adapter version that produced it, so the two can be told apart per row.
+The Glaive records in this release additionally use a later adapter than v1 did. The v1 adapter left the source's unterminated `<functioncall>` blocks inside the assistant message as text, producing a tool result with no matching call; the later adapter parses those blocks into structured calls. This is a material modification relative to v1 and is why the two releases are not interchangeable.
+
+The two builds can be told apart per row by the `adapter` field, which reads `glaive_function_calling_v2_v1` in v1 and `glaive_function_calling_v2_v2` here. Note that the per-row `adapter_version` field does **not** distinguish them: it reads `1.0.0` in both. The "Adapter version" column in the card is a separate value — the materializer version each source's artifact manifest records — and is not the per-row field of the same name.
 
 ## Attribution
 

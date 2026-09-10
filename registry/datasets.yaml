@@ -330,9 +330,9 @@ datasets:
   exact_revision: null
   source_repository: https://huggingface.co/datasets/Salesforce/APIGen-MT-5k
 - id: canonical_v2
-  display_name: OpenGrad ToolPolicy Canonical v2 (local candidate, partial)
+  display_name: OpenGrad ToolPolicy Canonical v2 (M0 snapshot, partial)
   organization: OpenGrad
-  hf_id: unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial
+  hf_id: arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot
   repository: configs/releases/toolpolicy_canonical_v2.yaml
   papers:
   - apigen
@@ -397,10 +397,31 @@ datasets:
   # the same policy, but the newly recovered Glaive records have not been through the audit.
   contamination_status: NOT_REVIEWED_FOR_V2
   planned_initial_mixture_percent: null
+  # The experiment this corpus was built to enable, and the result it produced. The finding
+  # is the reason the corpus is published: without it this is just a partial rebuild.
+  findings:
+    experiment_id: qwen35_2b_m0_sft_v2corpus
+    experiment_config: configs/experiments/qwen35_2b_m0_sft_v2corpus.yaml
+    report: reports/M0_SFT_EXECUTION_REPORT.md
+    evaluation_split: When2Call held-out, 3650 distinct examples, pinned 0582f7749df63a96fdc3070932e83e72396ace53
+    isolated_variable: corpus (same procedure, hyperparameters, base checkpoint, seed, and evaluation as M0/M1 on v1)
+    conclusion: >-
+      The tool-call collapse seen on v1 is a data-coverage failure, not a training-procedure
+      failure. Under v1 the training signal held 9 tool-call targets in 55719 retained
+      records; call_recall fell to 0.0031 and call_f1 to ~0. On this corpus the same
+      procedure holds call_recall 0.3931-0.5050 and call_f1 0.5247-0.5995, over_call_rate
+      0.0577-0.0989 against the baseline's 0.6425, and call_precision 0.7373-0.7891
+      against the baseline's 0.4542.
+    caveat: >-
+      Best call_f1 (0.5995, step 1200) remains below the B0 baseline's 0.6191. B0 attains
+      that with a degenerate near-always-call policy (recall 0.9722, unsupported_accuracy
+      0.0131, over_call_rate 0.6425), so no claim is made that SFT on this corpus beats
+      the baseline on the headline metric. No checkpoint was promoted.
   notes: 'Locally built candidate, three sources of six: xlam and button are gated upstream
     and looptools source was not located. It exists to test whether the tool-call collapse
-    observed on v1 is caused by the absence of tool-call supervision in the training signal.
-    Not published, and not a drop-in replacement for v1.'
+    observed on v1 is caused by the absence of tool-call supervision in the training signal,
+    and it answered that question in the affirmative. Published as an M0 snapshot; partial
+    by construction, and not a drop-in replacement for v1.'
 
 - id: canonical_v1
   display_name: OpenGrad ToolPolicy Canonical v1

@@ -18,7 +18,7 @@
 # drop-in replacement for v1.
 release_name: OpenGrad ToolPolicy Canonical (v2 candidate, partial)
 release_version: v2.0.0-local-partial
-hub_repository: unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial
+hub_repository: arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot
 # This release is three sources of six, so its card states that rather than inheriting
 # v1's identity and v1's provenance sections.
 card_directory: release/huggingface/toolpolicy-canonical-v2

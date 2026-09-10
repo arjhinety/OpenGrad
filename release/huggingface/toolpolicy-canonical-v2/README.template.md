@@ -34,6 +34,29 @@ The measured state of this snapshot, on the payload as published:
 | Records containing at least one tool call | 9 of 55,719 trainable (0.016%) | 49,423 of 103,036 (48.0%) |
 | Sources | 6 | 3 |
 
+## Findings this corpus produced
+
+This corpus exists to answer one question, and it answered it. One experiment was run on it — M0 SFT, experiment ID `qwen35_2b_m0_sft_v2corpus` — using the **same** procedure, hyperparameters, base checkpoint (`Qwen/Qwen3.5-2B`), seed, and held-out evaluation as the M0 and M1 runs on v1. The corpus was the only variable. Full configuration: [`configs/experiments/qwen35_2b_m0_sft_v2corpus.yaml`](https://github.com/arjhinety/OpenGrad/blob/master/configs/experiments/qwen35_2b_m0_sft_v2corpus.yaml).
+
+Scored on the frozen When2Call held-out split (3,650 distinct examples), best over checkpoints:
+
+| Metric | B0 baseline (untrained) | M0 SFT on v1 | M0 SFT on this corpus |
+|---|---:|---:|---:|
+| `call_f1` | 0.6191 | 0.0000 – 0.0062 | **0.5247 – 0.5995** |
+| `call_precision` | 0.4542 | 0.0000 – 1.0000 | **0.7373 – 0.7891** |
+| `call_recall` | 0.9722 | 0.0000 – 0.0031 | **0.3931 – 0.5050** |
+| `over_call_rate` (lower is better) | 0.6425 | 0.0000 – 0.0008 | **0.0577 – 0.0989** |
+| `unsupported_accuracy` | 0.0131 | 0.5058 – 0.7992 | **0.5923 – 0.6363** |
+| `clarification_accuracy` | 0.1009 | 0.7434 – 0.9538 | **0.7783 – 0.8613** |
+
+**The finding.** On v1, SFT destroyed tool calling: `call_recall` fell to 0.0031 and `call_f1` effectively to zero, while `over_call_rate` collapsed to 0.0000 — the model stopped emitting tool calls almost entirely, monotonically, across every checkpoint. On this corpus, the same procedure preserved the capability: `call_recall` rose roughly 170× (0.0031 → 0.5050) and `over_call_rate` fell from the baseline's 0.6425 to 0.0577, with `call_precision` improving from 0.4542 to 0.7891.
+
+This isolates the cause. The v1 collapse was a **data-coverage failure, not a training-procedure failure**: v1's training signal contained 9 tool-call targets out of 55,719 retained records, so there was nothing to learn the behaviour from. Supplying that supervision — and changing nothing else — produced a model that calls tools without calling them indiscriminately. A further signal that the training procedure behaves normally here: this corpus yields an interior optimum (best `call_f1` at step 1200, with steps 1800 and 2400 declining), whereas on v1 the metric decayed to zero and stayed there.
+
+**What this finding does not claim.** The best `call_f1` on this corpus (0.5995) remains marginally below the B0 baseline's 0.6191, so there is no claim that SFT on this corpus beats the untrained baseline on the headline metric. B0 reaches 0.6191 with a degenerate near-always-call policy — `call_recall` 0.9722 against `unsupported_accuracy` 0.0131 and `over_call_rate` 0.6425 — so its score reflects calling on almost every example rather than deciding when to call. This corpus's contribution is a non-degenerate policy, not a higher headline number. No checkpoint from this run was promoted, and none is distributed with this release.
+
+Training statistics for the run: 2,400 optimizer steps, 27,672 examples, 8,011,435 supervised tokens, 41.9 minutes on one A100-SXM4-80GB, training loss 1.5332 → 0.5582 (min 0.0220, mean 0.4618). Full write-up: [`reports/M0_SFT_EXECUTION_REPORT.md`](https://github.com/arjhinety/OpenGrad/blob/master/reports/M0_SFT_EXECUTION_REPORT.md).
+
 ## Scope limits of this snapshot
 
 This release is incomplete by construction, and the omissions are material:
@@ -59,6 +82,8 @@ The payload is a unified Parquet table. Filter by `source_dataset` and `source_s
 | Source | Role | Upstream | Pinned revision | Raw count | Canonical retained | Published count | License/terms | Adapter version |
 |---|---|---|---|---|---:|---:|---:|---|---|
 {{SOURCE_TABLE}}
+
+"Adapter version" above is the version each source's artifact manifest records for the materializer that ran. It is not the per-row value: every row also carries an `adapter` name and an `adapter_version` field, and for the Glaive records that per-row version reads `1.0.0` in both v1 and this release. The two Glaive builds are distinguished per row by the **`adapter` name**, `glaive_function_calling_v2_v1` (v1) versus `glaive_function_calling_v2_v2` (this release), not by that version field.
 
 ## Record count
 

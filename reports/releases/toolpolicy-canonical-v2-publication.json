@@ -1,0 +1,60 @@
+{
+  "evaluation_rows_in_payload": 0,
+  "preference_rows_in_payload": 0,
+  "excluded_sources": [
+    {
+      "reason": "upstream repository is access-gated; not fetched",
+      "source": "xlam-function-calling-60k"
+    },
+    {
+      "reason": "upstream repository is access-gated; not fetched",
+      "source": "button"
+    },
+    {
+      "reason": "upstream source was not located",
+      "source": "looptool-23k"
+    }
+  ],
+  "hub_repository": "arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot",
+  "hub_revision": "8b43caebf2b96259f8f86611d39f75bcaa3ee130",
+  "manifest_revision_at_payload_upload": "ad70a8ba7a0bb3d9bee6a5a7b5de7433ce019f61",
+  "public": true,
+  "published_record_count": 103036,
+  "published_sources": {
+    "glaive-function-calling-v2": 98339,
+    "toolace": 697,
+    "when2call": 4000
+  },
+  "records_with_tool_calls": 49423,
+  "records_with_tool_calls_fraction": 0.4797,
+  "release_manifest_sha256": "277a0ae43aa0438894d25fea6c9985ee41732735a18aceb1bb9aa77c70354124",
+  "release_name": "OpenGrad ToolPolicy Canonical (v2 candidate, partial)",
+  "release_version": "v2.0.0-local-partial",
+  "v1_for_comparison": {
+    "published_record_count": 213951,
+    "records_with_tool_calls_at_training_boundary": 9,
+    "trained_records_at_training_boundary": 55719,
+    "hub_repository": "arrochi112/OpenGrad-ToolPolicy-Canonical-v1"
+  },
+  "findings": {
+    "experiment_id": "qwen35_2b_m0_sft_v2corpus",
+    "experiment_config": "configs/experiments/qwen35_2b_m0_sft_v2corpus.yaml",
+    "report": "reports/M0_SFT_EXECUTION_REPORT.md",
+    "isolated_variable": "corpus",
+    "best_call_f1": 0.5995,
+    "best_checkpoint_step": 1200,
+    "b0_call_f1": 0.6191,
+    "v1_sft_best_call_f1": 0.0062,
+    "conclusion": "The tool-call collapse observed on v1 is a data-coverage failure, not a training-procedure failure: v1's training boundary retained 9 records containing a tool call out of 55719, against 49423 of 103036 here."
+  },
+  "verification": {
+    "dataset_config": "canonical",
+    "manifest_download": "PASS",
+    "parquet_shards_listed": 104,
+    "public": true,
+    "repo_type": "dataset",
+    "representative_stream_load": "PASS",
+    "split": "train",
+    "provenance_fields_present": "PASS"
+  }
+}
