@@ -160,7 +160,13 @@ flowchart TD
 
 ## Current research status
 
-Gate status: `opengrad readiness` reports `ready_for_baseline: true` and `ready_for_sft: true`. The baseline is real; no SFT has been run. Other evaluation families remain `FROZEN_NOT_EXECUTED`.
+Gate status: `opengrad readiness` reports `PASS` with no blocking gates. The baseline is real, and the readiness contract is satisfied for the SFT config too:
+
+```bash
+opengrad readiness configs/experiments/m0_sft.yaml   # status PASS, blocking_gates [], warnings []
+```
+
+That is a statement about the *contract*, not about work done: no SFT has been run. Because the default `opengrad readiness` evaluates the baseline config — where SFT-specific data gates auto-pass — the SFT config must be named explicitly for its gate to mean anything.
 
 | Stage | Status | Evidence |
 | --- | --- | --- |

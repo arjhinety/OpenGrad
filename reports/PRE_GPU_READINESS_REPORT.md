@@ -186,7 +186,7 @@ The frozen held-out benchmark ran end to end on the A100 with the real model, th
 | `call_recall` / `call_precision` | 0.9722 / 0.4542 |
 | `over_call_rate` | 0.6425 |
 
-Finding: the model has tool-call syntax and tool selection, but not the call/no-call decision — it called a tool on 64.3% of the 2,355 examples whose gold decision was not `CALL`, and correctly refused an unsupported request 17 times out of 1,295. Full write-up, confusion matrix, and scope limits: [B0 result](../reports/baselines/qwen35_2b_baseline/RESULT.md).
+Findings: the model has tool-call syntax and selection but not the call/no-call decision — it called a tool on 64.3% of the 2,355 examples whose gold decision was not CALL, and correctly refused an unsupported request 17 times out of 1,295. Full write-up, confusion matrix, and scope limits: [B0 result](../reports/baselines/qwen35_2b_baseline/RESULT.md).
 
 Two further defects had to be fixed to produce this, both found by the evidence contract rather than by inspection:
 
@@ -194,11 +194,41 @@ Two further defects had to be fixed to produce this, both found by the evidence 
 4. **The contract required 100% parseable output, which is unsatisfiable.** Output that runs past the 512-token completion budget mid-tool-call has no valid parse; the first run had 4 such rows. Requiring zero meant no real run could ever produce passing evidence, so the requirement is now an explicit bound pinned in the frozen config, with the measured rate reported in the artifacts and the gate detail.
 
 
-## 10. SFT readiness — `true` (not acted on)
+## 10. SFT readiness — `true`, and now actually verified
 
-`ready_for_sft: true`. The baseline-first contract is satisfied: a real, complete B0 exists with
-verified artifacts, the contamination review is complete, and the GPU boundary passed. No SFT has
-been launched — it is a separate, explicitly authorized stage and is out of scope for pre-SFT work.
+`ready_for_sft: true` for **the real SFT config**, not just the baseline:
+
+```text
+opengrad readiness configs/experiments/m0_sft.yaml
+status: PASS   blocking_gates: []   warnings: []   (all 21 gates PASS)
+```
+
+This distinction mattered and was initially wrong. The default `opengrad readiness` evaluates
+the *baseline* config, where the SFT-specific data gates auto-pass, so `ready_for_sft: true`
+there said nothing about whether an SFT run could start. Evaluated against the SFT config it
+failed on three gates. Three further unsatisfiable-contract defects were fixed:
+
+5. **The training corpus was not in the dataset registry.** The SFT config pinned
+   `canonical_v1: 181b3fba…` — and that hash is correct, it *is* the release manifest's
+   sha256 — but with no registry entry the two dataset gates could not verify source
+   revision, eligibility, or processed hash, so they failed closed. Registered from the
+   release artifact: `checksum` and `processed_dataset_hash` are the manifest sha256,
+   `source_revision` is the commit that built the release, and the six upstream revisions,
+   licences, and split used are recorded under `derived_from`.
+6. **The SFT data gate tested `forbidden_splits` for evaluation terms — inverted.** Declaring
+   a split forbidden is precisely what makes a corpus safe to train on, so the gate refused
+   the datasets that had done the right thing (it would have rejected `when2call` for
+   correctly forbidding `mcq_test`). It now tests `allowed_splits`. It also normalises the
+   registry's `future_` stage prefix: an exact match on `"preference"` silently missed
+   `future_preference`, letting a preference corpus into SFT.
+7. **Preflight reported `SHA: unknown` for every repository.** It read `env["git"]["sha"]`,
+   but `capture()` returns flat `git_sha`/`git_dirty` keys, so the provenance field carried no
+   information. It also used the whole-tree dirty flag, which is true for any untracked file —
+   and every run creates untracked outputs — so "clean tree" was unsatisfiable. Both now use a
+   shared `tracked_tree_provenance()` helper, the same rule the baseline contract uses.
+
+No SFT has been launched. `ready_for_sft: true` means the contract is satisfied, not that a run
+was started: SFT is a separate, explicitly authorized stage.
 
 ## 11. Remaining blockers
 
