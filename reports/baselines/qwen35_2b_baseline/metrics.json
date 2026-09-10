@@ -1,0 +1,139 @@
+{
+  "artifacts": {
+    "environment": "reports/baselines/qwen35_2b_baseline/environment.json",
+    "metrics": "reports/baselines/qwen35_2b_baseline/metrics.json",
+    "predictions": "reports/baselines/qwen35_2b_baseline/predictions.jsonl",
+    "residual_profile": "reports/failures/qwen35_2b_baseline/residual-profile.json"
+  },
+  "backend": "vllm",
+  "benchmarks": {
+    "bfcl": {
+      "status": "FROZEN_NOT_EXECUTED"
+    },
+    "tau2": {
+      "status": "FROZEN_NOT_EXECUTED"
+    },
+    "when2call": {
+      "metrics": {
+        "call_f1": 0.6191295795426605,
+        "call_precision": 0.4541847041847042,
+        "call_recall": 0.9722007722007722,
+        "clarification_accuracy": 0.1009433962264151,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 19,
+            "CALL": 1259,
+            "CLARIFY": 17,
+            "UNSUPPORTED": 0
+          },
+          "CLARIFY": {
+            "ANSWER": 29,
+            "CALL": 923,
+            "CLARIFY": 107,
+            "UNSUPPORTED": 1
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 419,
+            "CALL": 590,
+            "CLARIFY": 269,
+            "UNSUPPORTED": 17
+          }
+        },
+        "must_call_accuracy": 0.9722007722007722,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.6424628450106157,
+        "under_call_rate": 0.014671814671814672,
+        "unsupported_accuracy": 0.013127413127413128
+      },
+      "status": "EXECUTED_LOCAL_BEHAVIORAL"
+    }
+  },
+  "context_buckets": {
+    "base": 3644,
+    "overflow": 6
+  },
+  "elapsed_seconds": 196.485601,
+  "engine": {
+    "batching": "continuous",
+    "dtype": "bfloat16",
+    "enforce_eager": false,
+    "gpu_memory_utilization": 0.9,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "model_id": "Qwen/Qwen3.5-2B",
+    "name": "vllm",
+    "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "seed": 0,
+    "tensor_parallel_size": 1,
+    "version": "0.29.0"
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 512,
+    "temperature": 0.0,
+    "tool_choice": "auto",
+    "top_p": 1.0
+  },
+  "generation_batch_size": 256,
+  "git_commit": "85ddc99df7a051cb6b462260868eb615ae739620",
+  "git_dirty": false,
+  "manifest": "reports/evaluation/behavioral-heldout-v2.manifest.json",
+  "manifest_sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640",
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parse_valid_rate": 0.998904,
+  "parser_status": {
+    "FORMAT_ERROR": 4,
+    "RAW_VALID": 3646
+  },
+  "records": 3650,
+  "renderer": "qwen3_5_2b_v1",
+  "routing": {
+    "call_f1": 0.6191295795426605,
+    "call_precision": 0.4541847041847042,
+    "call_recall": 0.9722007722007722,
+    "clarification_accuracy": 0.1009433962264151,
+    "confusion_matrix": {
+      "ANSWER": {
+        "ANSWER": 0,
+        "CALL": 0,
+        "CLARIFY": 0,
+        "UNSUPPORTED": 0
+      },
+      "CALL": {
+        "ANSWER": 19,
+        "CALL": 1259,
+        "CLARIFY": 17,
+        "UNSUPPORTED": 0
+      },
+      "CLARIFY": {
+        "ANSWER": 29,
+        "CALL": 923,
+        "CLARIFY": 107,
+        "UNSUPPORTED": 1
+      },
+      "UNSUPPORTED": {
+        "ANSWER": 419,
+        "CALL": 590,
+        "CLARIFY": 269,
+        "UNSUPPORTED": 17
+      }
+    },
+    "must_call_accuracy": 0.9722007722007722,
+    "no_call_accuracy": 0.0,
+    "over_call_rate": 0.6424628450106157,
+    "under_call_rate": 0.014671814671814672,
+    "unsupported_accuracy": 0.013127413127413128
+  },
+  "run_id": "tool_calling/qwen35_2b/baseline",
+  "schema_version": 1,
+  "status": "EXECUTED",
+  "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+}
