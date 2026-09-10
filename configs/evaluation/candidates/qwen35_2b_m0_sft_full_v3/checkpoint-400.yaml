@@ -3,7 +3,7 @@
 # output namespace differ, so the delta is attributable to the checkpoint.
 schema_version: 1
 status: CANDIDATE_EVALUATION
-model_id: /root/OpenGrad/runs/qwen35_2b_m0_sft_full_v3/checkpoints/checkpoint-400
+model_id: runs/qwen35_2b_m0_sft_full_v3/checkpoints/checkpoint-400
 model_revision: null
 tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
 renderer: qwen3_5_2b_v1
