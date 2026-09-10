@@ -15,6 +15,16 @@ datasets:
     - canonical_v1
   hashes:
     canonical_v1: 181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911
+  # Lineage declaration for preflight, matching the full M0 config: the assembled corpus is a
+  # large gitignored build output, so its identity is the release manifest hash above and these
+  # are the registry sources it was assembled from.
+  source_manifests:
+    - xlam-function-calling-60k
+    - glaive-function-calling-v2
+    - looptool-23k
+    - when2call
+    - toolace
+    - button
 
 trainer:
   type: sft
