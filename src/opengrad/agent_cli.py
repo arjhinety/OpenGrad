@@ -246,14 +246,14 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
             return 1
         if existing.status not in {
             ExperimentStatus.TRAINED.value,
-            ExperimentStatus.INTERRUPTED.value,
             ExperimentStatus.FAILED.value,
         }:
             err = {
                 "code": "RESUME_STATE_INVALID",
                 "message": (
                     f"Cannot resume {exp_config.experiment_id}: status is {existing.status}. "
-                    "Only a finished, interrupted, or failed run may be continued."
+                    "Only a finished or failed run may be continued; a run still marked "
+                    "TRAINING would mean two processes writing one run directory."
                 ),
             }
             print(json.dumps(err) if args.json else f"Error: {err['message']}")
