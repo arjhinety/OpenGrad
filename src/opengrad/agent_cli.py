@@ -324,41 +324,64 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
     # Register each checkpoint with its own lineage. The identifier is qualified by the
     # experiment because the registry is global while checkpoint directory names are only
     # unique within a run.
-    ckpt_reg = CheckpointRegistry(root)
-    seen_checkpoints: set[str] = set()
-    for c_path in train_res.checkpoints_created:
-        path = Path(c_path)
-        # A run may report the same checkpoint path more than once (for example when a
-        # periodic save coincides with the final save). Registering it twice would rewrite
-        # identical weights and trip the registry's provenance guard, so register once.
-        if str(c_path) in seen_checkpoints:
-            continue
-        seen_checkpoints.add(str(c_path))
-        lineage: dict[str, Any] = {}
-        metadata_path = path / "checkpoint_metadata.json"
-        if metadata_path.is_file():
-            try:
-                lineage = json.loads(metadata_path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                lineage = {}
-        qualified = f"{exp_config.experiment_id}::{path.name}"
-        ckpt_record = CheckpointRecord(
-            checkpoint_id=qualified,
-            experiment_id=exp_config.experiment_id,
-            path=c_path,
-            global_step=int(lineage.get("training_step", train_res.total_steps)),
-            tokens_seen=int(lineage.get("tokens_seen", train_res.total_tokens_seen)),
-            training_loss=train_res.final_loss,
-            model_id=str(exp_config.model.get("model_id", "Qwen/Qwen3.5-2B")),
-            model_revision=str(exp_config.model.get("model_revision", "")),
-            promotion_status=CheckpointLifecycle.CANDIDATE.value,
+    #
+    # Training has already finished by this point, so a failure here must not leave the
+    # experiment stuck at TRAINING with no way to tell that the weights exist: an exception
+    # escaping this block once did exactly that. The failure is recorded against the run and
+    # the status still reflects the truth, that training completed.
+    registration_errors: list[dict[str, str]] = []
+    c_path = ""
+    try:
+        ckpt_reg = CheckpointRegistry(root)
+        seen_checkpoints: set[str] = set()
+        for c_path in train_res.checkpoints_created:
+            path = Path(c_path)
+            # A run may report the same checkpoint path more than once (for example when a
+            # periodic save coincides with the final save). Registering it twice would rewrite
+            # identical weights and trip the registry's provenance guard, so register once.
+            if str(c_path) in seen_checkpoints:
+                continue
+            seen_checkpoints.add(str(c_path))
+            lineage: dict[str, Any] = {}
+            metadata_path = path / "checkpoint_metadata.json"
+            if metadata_path.is_file():
+                try:
+                    lineage = json.loads(metadata_path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    lineage = {}
+            qualified = f"{exp_config.experiment_id}::{path.name}"
+            ckpt_record = CheckpointRecord(
+                checkpoint_id=qualified,
+                experiment_id=exp_config.experiment_id,
+                path=c_path,
+                global_step=int(lineage.get("training_step", train_res.total_steps)),
+                tokens_seen=int(lineage.get("tokens_seen", train_res.total_tokens_seen)),
+                training_loss=train_res.final_loss,
+                model_id=str(exp_config.model.get("model_id", "Qwen/Qwen3.5-2B")),
+                model_revision=str(exp_config.model.get("model_revision", "")),
+                promotion_status=CheckpointLifecycle.CANDIDATE.value,
+            )
+            ckpt_reg.register_checkpoint(ckpt_record)
+    except Exception as exc:  # noqa: BLE001 - recorded, never allowed to strand the run state
+        registration_errors.append(
+            {"checkpoint": str(c_path), "type": type(exc).__name__, "message": str(exc)[:500]}
         )
-        ckpt_reg.register_checkpoint(ckpt_record)
+        (run_dir / "checkpoint_registration_errors.json").write_text(
+            json.dumps(registration_errors, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        print(
+            f"Warning: training finished but {len(registration_errors)} checkpoint "
+            f"registration(s) failed; see {run_dir / 'checkpoint_registration_errors.json'}"
+        )
 
     store.update_status(
         exp_config.experiment_id,
         ExperimentStatus.TRAINED,
-        {"final_loss": train_res.final_loss, "checkpoint": train_res.final_checkpoint_path},
+        {
+            "final_loss": train_res.final_loss,
+            "checkpoint": train_res.final_checkpoint_path,
+            "checkpoint_registration_errors": registration_errors,
+        },
     )
 
     if args.json:
