@@ -34,6 +34,27 @@ def capture(root: Path) -> dict[str, Any]:
     }
 
 
+def tracked_tree_provenance(root: Path) -> dict[str, Any]:
+    """Commit and *tracked-tree* cleanliness, for deciding whether something is evidence.
+
+    Untracked files are deliberately ignored. Every run creates untracked outputs -- its own
+    predictions, metrics, and record -- so asking `git status` as a whole would report every
+    successful run as dirty and make "produced from a clean checkout" unsatisfiable. What
+    matters is whether the tracked code and configs matched a known commit.
+
+    Fails closed: when git cannot be queried the result is dirty, so an unreadable repository
+    can never be presented as clean provenance.
+    """
+    try:
+        sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+        porcelain = subprocess.check_output(
+            ["git", "status", "--porcelain", "--untracked-files=no"], cwd=root, text=True
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return {"sha": None, "dirty": True}
+    return {"sha": sha or None, "dirty": bool(porcelain.strip())}
+
+
 def write_capture(root: Path, destination: Path) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(capture(root), indent=2) + "\n")

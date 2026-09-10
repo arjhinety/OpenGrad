@@ -82,26 +82,25 @@ def test_vllm_window_is_required():
 
 def test_provenance_ignores_untracked_run_outputs(tmp_path):
     """A run creates untracked files; judging provenance afterwards would call every run dirty."""
-    from opengrad.evaluation.runner import _git_provenance
+    from opengrad.env_capture import tracked_tree_provenance
 
     root = Path(__file__).parents[2]
-    before = _git_provenance(root)
-    assert before["commit"], "these tests assume a git checkout"
+    before = tracked_tree_provenance(root)
+    assert before["sha"], "these tests assume a git checkout"
 
     # An untracked artifact must not change the verdict.
     probe = root / "untracked-probe.txt"
     probe.write_text("probe\n", encoding="utf-8")
     try:
-        assert _git_provenance(root) == before
+        assert tracked_tree_provenance(root) == before
     finally:
         probe.unlink(missing_ok=True)
 
 
 def test_provenance_fails_closed_without_git(tmp_path):
-    from opengrad.evaluation.runner import _git_provenance
+    from opengrad.env_capture import tracked_tree_provenance
 
-    result = _git_provenance(tmp_path)
-    assert result["dirty"] is True, "unknown provenance must never read as clean"
+    assert tracked_tree_provenance(tmp_path)["dirty"] is True, "unknown provenance is never clean"
 
 
 def test_prompt_lengths_are_measured_for_the_full_heldout_set():

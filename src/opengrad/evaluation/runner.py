@@ -11,7 +11,6 @@ import hashlib
 import importlib
 import json
 import os
-import subprocess
 import sys
 import time
 from collections import Counter
@@ -24,7 +23,7 @@ import yaml
 from opengrad.contamination.audit import QUARANTINE_PATH, load_quarantine
 from opengrad.data.canonical import CanonicalEvaluationExample
 from opengrad.data.renderers import Qwen35_2BRenderer
-from opengrad.env_capture import capture
+from opengrad.env_capture import capture, tracked_tree_provenance
 from opengrad.evaluation.routing import routing_metrics
 from opengrad.experiments.schema import ExperimentRecord, ExperimentStatus
 from opengrad.experiments.store import ExperimentStore
@@ -726,24 +725,13 @@ def _write_json(path: Path, value: dict[str, Any]) -> None:
 
 
 def _git_provenance(root: Path) -> dict[str, Any]:
-    """Git state of the *tracked* tree at run start.
+    """Git state of the tracked tree, captured before the run writes its own outputs.
 
-    Captured before the run writes anything, and ignoring untracked files, because a run
-    necessarily creates untracked outputs: its own predictions, metrics, and record. Judging
-    provenance from the tree *after* a run would report every successful run as dirty. What
-    matters is whether the tracked code and configs matched a known commit when it started.
-
-    Fails closed: if git cannot be queried, the run is marked dirty so it cannot be presented
-    as clean evidence.
+    Delegates to the shared helper so the runner, preflight, and any future evidence path
+    agree on what "clean" means. A run necessarily creates untracked outputs, so judging
+    provenance from the tree afterwards would report every successful run as dirty.
     """
-    try:
-        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-        porcelain = subprocess.check_output(
-            ["git", "status", "--porcelain", "--untracked-files=no"], cwd=root, text=True
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return {"commit": None, "dirty": True}
-    return {"commit": commit or None, "dirty": bool(porcelain.strip())}
+    return tracked_tree_provenance(root)
 
 
 def run_baseline(
@@ -945,10 +933,10 @@ def run_baseline(
         "manifest_sha256": result["manifest_sha256"],
         # Start-of-run, tracked-tree provenance. `capture` reads these at the end, by which
         # point the run's own outputs exist and would always look like a dirty tree.
-        "git_sha": git_provenance["commit"],
+        "git_sha": git_provenance["sha"],
         "git_dirty": git_provenance["dirty"],
     })
-    result["git_commit"] = git_provenance["commit"]
+    result["git_commit"] = git_provenance["sha"]
     result["git_dirty"] = git_provenance["dirty"]
     _write_json(output_paths["metrics"], result)
     _write_json(output_paths["residual_profile"], residual)

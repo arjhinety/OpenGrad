@@ -329,3 +329,92 @@ datasets:
     status: pending_dataset_preparation
   exact_revision: null
   source_repository: https://huggingface.co/datasets/Salesforce/APIGen-MT-5k
+- id: canonical_v1
+  display_name: OpenGrad ToolPolicy Canonical v1
+  organization: OpenGrad
+  hf_id: arrochi112/OpenGrad-ToolPolicy-Canonical-v1
+  repository: configs/releases/toolpolicy_canonical_v1.yaml
+  papers:
+  - apigen
+  - button
+  - toolace
+  - when2call
+  - looptool
+  retrieval_date: '2026-09-10'
+  license:
+    value: COMPOSITE_PER_SOURCE
+    verified: true
+    source: .release/hf/toolpolicy-canonical-v1/source-licenses.md
+  redistribution: PER_SOURCE
+  upstream_access_mode: mixed
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: APIGen
+  modifications_disclosed: true
+  original_sample_count: 213951
+  retained_sample_count: 213951
+  preprocessing_version: normalization-v1
+  checksum: 181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911
+  category: tool_use
+  intended_stages:
+  - future_sft
+  allowed_splits:
+  - train
+  forbidden_splits:
+  - evaluation
+  - heldout
+  - preference
+  - mcq_test
+  - llm_judge_test
+  benchmark_overlap_risk: HIGH_IF_TEST_LEAKS
+  known_source_overlap: RECORDED_IN_BEHAVIORAL_HELDOUT_V2_CONTAMINATION_AUDIT
+  contamination_status: SEMANTIC_REVIEW_COMPLETE
+  planned_initial_mixture_percent: null
+  notes: 'Derived, model-independent canonical corpus assembled from six normalized
+    sources; it is the training-side corpus and is not a recommended mixture, a rendered
+    training set, or a model result. Provenance lives in the release manifest, whose sha256
+    is recorded here as both checksum and processed_dataset_hash. Evaluation and preference
+    splits are excluded by construction (When2Call preference, MCQ, and LLM-judge artifacts,
+    plus rendered artifacts); the held-out benchmark is materialized separately from its own
+    pinned revision and is never part of this corpus. `source_revision` is the OpenGrad
+    commit that built the release, which is the revision of this derived artifact; the six
+    upstream source revisions are listed under derived_from. Licensing is per source
+    (CC-BY-4.0 for xLAM/APIGen, BUTTON, and When2Call; Apache-2.0 for ToolACE, LoopTool-23k,
+    and Glaive Function-Calling v2) and upstream terms are never relicensed by the OpenGrad
+    source license.'
+  source_revision:
+    value: ccb1ddb013103e07a390ccd9125a45bc63e4ca91
+    verified: true
+    source: opengrad_git_commit in .release/hf/toolpolicy-canonical-v1/release-manifest.json
+  sample_count:
+    published: 213951
+    verified_from: .release/hf/toolpolicy-canonical-v1/release-manifest.json
+  retained_after_filtering:
+    value: 213951
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: 181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911
+    status: FULL_DATA_VALIDATED
+  exact_revision: ccb1ddb013103e07a390ccd9125a45bc63e4ca91
+  source_repository: https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1
+  derived_from:
+  - id: xlam-function-calling-60k
+    source_revision: 26d14ebfe18b1f7b524bd39b404b50af5dc97866
+    upstream_license: CC-BY-4.0
+  - id: glaive-function-calling-v2
+    source_revision: e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac
+    upstream_license: Apache-2.0
+  - id: looptool-23k
+    source_revision: b6c572d442ed4f2177f23645d8e9a77522e712c3
+    upstream_license: Apache-2.0
+  - id: when2call
+    source_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    upstream_license: CC-BY-4.0
+    split_used: train_sft
+  - id: toolace
+    source_revision: 6bda777c88d21e5a204703c1ee45597a8fa4f734
+    upstream_license: Apache-2.0
+  - id: button
+    source_revision: 47cb720ed223b249a2f1d0a3faf1cb1eb7175622
+    upstream_license: CC-BY-4.0

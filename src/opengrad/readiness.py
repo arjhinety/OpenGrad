@@ -370,9 +370,21 @@ def _training_data_contract(root: Path, raw: dict[str, Any]) -> tuple[bool, str]
     unsafe = []
     for item in ids:
         row = registry[item]
-        intended = {str(value).lower() for value in row.get("intended_stages", [])} if isinstance(row.get("intended_stages"), list) else set()
-        forbidden = {str(value).lower() for value in row.get("forbidden_splits", [])} if isinstance(row.get("forbidden_splits"), list) else set()
-        if "evaluation" in intended or "preference" in intended or forbidden & {"evaluation", "heldout", "mcq_test", "llm_judge_test"}:
+        # Registry stage names are spelled with a `future_` prefix (`future_sft`,
+        # `future_preference`), so an exact match on "preference" missed
+        # `future_preference` entirely and let a preference corpus into SFT. Normalise the
+        # prefix away before testing the stage.
+        intended = {
+            str(value).lower().removeprefix("future_")
+            for value in row.get("intended_stages", [])
+        } if isinstance(row.get("intended_stages"), list) else set()
+        allowed = {str(value).lower() for value in row.get("allowed_splits", [])} if isinstance(row.get("allowed_splits"), list) else set()
+        # A dataset is unsafe for SFT if it is *intended* for evaluation or preference, or if
+        # it *permits* evaluation/held-out splits. The previous test inspected
+        # forbidden_splits, which is inverted: declaring a split forbidden is exactly what
+        # makes a corpus safe to train on, so it refused the datasets that had done the right
+        # thing. A corpus that forbids the held-out tests is fine; one that allows them is not.
+        if "evaluation" in intended or "preference" in intended or allowed & {"evaluation", "heldout", "mcq_test", "llm_judge_test"}:
             unsafe.append(item)
         source_revision = row.get("source_revision", {}).get("value") if isinstance(row.get("source_revision"), dict) else None
         if not _check_revision(source_revision):

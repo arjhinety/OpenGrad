@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from opengrad.env_capture import capture
+from opengrad.env_capture import tracked_tree_provenance
 from opengrad.experiments.schema import ExperimentConfig, TrainingAlgorithm
 
 
@@ -158,15 +158,18 @@ def run_experiment_preflight(
         checks.append(PreflightCheckItem("Disk Capacity", "FAIL", "PATH_NOT_WRITABLE", str(exc)))
 
     # 6. Git state capture
-    env = capture(root_dir)
-    git_sha = env.get("git", {}).get("sha", "unknown")
-    git_dirty = env.get("git_dirty", False)
+    # Tracked-tree provenance, not `capture()`'s whole-tree flag: a run's own untracked
+    # outputs would otherwise make every run report as dirty. `capture()` also returns flat
+    # `git_sha`/`git_dirty` keys, so the previous nested lookup always printed "unknown".
+    provenance = tracked_tree_provenance(root_dir)
+    git_sha = provenance["sha"] or "unknown"
+    git_dirty = provenance["dirty"]
     if git_dirty:
         checks.append(
             PreflightCheckItem(
                 "Git State",
                 "WARN",
-                details=f"SHA: {git_sha[:10]} (dirty working tree)",
+                details=f"SHA: {git_sha[:10]} (uncommitted changes to tracked files)",
             )
         )
     else:
