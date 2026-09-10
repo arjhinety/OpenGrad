@@ -368,12 +368,16 @@ opengrad train <micro config> --dry-run   DRY_RUN
 opengrad gpu-smoke                        PASS (GPU_BOUNDARY_VERIFIED)
 ```
 
-**Known pre-existing issues, not introduced here:** `ruff format --check` fails on 77 files repo-wide
-and `mypy src` reports 26 errors in `contamination/`, `readiness.py`, `cli.py`, and
-`benchmarks/adapters/openweights.py`; both were already failing at `5e882a0`. `causal_conv1d` also
-does not build in this environment, so the convolution falls back to the reference PyTorch kernel
-(`flash-linear-attention` is installed, which is the larger win). Fixing the pre-existing lint debt
-was out of scope and would have buried this change set.
+**Known pre-existing issues, not introduced here:** `mypy src` reports 26 errors in
+`contamination/` (13), `readiness.py` (12), and `cli.py` (1); all were already present at `5e882a0`
+and none are in the modules this work added or changed. `causal_conv1d` also does not build in this
+environment, so the convolution falls back to the reference PyTorch kernel
+(`flash-linear-attention` is installed, which is the larger win).
+
+`ruff format --check` did fail repo-wide at the start of this session (77 files, pre-existing). It
+now passes for all 188 files under `src`, `tests`, and `scripts`: the files touched here were
+formatted as they were written, and the remaining debt was cleared in the same pass. That pass is
+whitespace-only — no token changes — and the full suite was re-run after it.
 
 ---
 
