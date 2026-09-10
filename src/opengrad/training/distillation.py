@@ -53,7 +53,7 @@ class RolloutRecord:
 
 class RolloutProvider(Protocol):
     """Protocol for generating student policy rollouts.
-    
+
     Designed to be reused by future RL (GRPO/PPO/RLOO) without restructuring.
     """
 
@@ -82,12 +82,14 @@ class MockRolloutProvider:
         for idx, p in enumerate(prompts):
             p_id = str(p.get("id", f"p_{idx}"))
             text = str(p.get("prompt", "Sample prompt"))
-            results.append({
-                "prompt_id": p_id,
-                "prompt": text,
-                "student_output": f"<tool_call>{{\"name\": \"lookup\", \"arguments\": {{\"q\": \"{p_id}\"}}}}</tool_call>",
-                "student_checkpoint": checkpoint_id,
-            })
+            results.append(
+                {
+                    "prompt_id": p_id,
+                    "prompt": text,
+                    "student_output": f'<tool_call>{{"name": "lookup", "arguments": {{"q": "{p_id}"}}}}</tool_call>',
+                    "student_checkpoint": checkpoint_id,
+                }
+            )
         return results
 
 
@@ -109,6 +111,8 @@ class OnPolicyDistillationTrainerBackend(TrainerBackend):
         output_dir: Path,
         *,
         dry_run: bool = False,
+        experiment: dict[str, Any] | None = None,
+        root: Path | None = None,
     ) -> TrainingRunResult:
         ckpt_dir = output_dir / "checkpoints"
         ckpt_dir.mkdir(parents=True, exist_ok=True)
@@ -144,7 +148,10 @@ class OnPolicyDistillationTrainerBackend(TrainerBackend):
 
             for iter_idx in range(1, iterations + 1):
                 sample_prompts = [
-                    {"id": f"prompt_iter{iter_idx}_{i}", "prompt": f"Task query {i} for iteration {iter_idx}"}
+                    {
+                        "id": f"prompt_iter{iter_idx}_{i}",
+                        "prompt": f"Task query {i} for iteration {iter_idx}",
+                    }
                     for i in range(prompts_per_iter)
                 ]
 
@@ -169,7 +176,9 @@ class OnPolicyDistillationTrainerBackend(TrainerBackend):
                         teacher_feedback=teacher_res.text,
                         score=teacher_res.score,
                         accepted=is_accepted,
-                        filter_reason=None if is_accepted else f"Score {teacher_res.score:.2f} < {min_score:.2f}",
+                        filter_reason=None
+                        if is_accepted
+                        else f"Score {teacher_res.score:.2f} < {min_score:.2f}",
                         iteration=iter_idx,
                     )
                     rollout_records.append(record)
@@ -189,14 +198,18 @@ class OnPolicyDistillationTrainerBackend(TrainerBackend):
             final_ckpt = ckpt_dir / "distill-checkpoint-final"
             final_ckpt.mkdir(parents=True, exist_ok=True)
             (final_ckpt / "checkpoint_metadata.json").write_text(
-                json.dumps({
-                    "experiment_id": experiment_id,
-                    "algorithm": "on_policy_distillation",
-                    "iterations_completed": iterations,
-                    "rollouts_generated": len(rollout_records),
-                    "rollouts_accepted": accepted_count,
-                    "status": "CANDIDATE",
-                }, indent=2) + "\n",
+                json.dumps(
+                    {
+                        "experiment_id": experiment_id,
+                        "algorithm": "on_policy_distillation",
+                        "iterations_completed": iterations,
+                        "rollouts_generated": len(rollout_records),
+                        "rollouts_accepted": accepted_count,
+                        "status": "CANDIDATE",
+                    },
+                    indent=2,
+                )
+                + "\n",
                 encoding="utf-8",
             )
 

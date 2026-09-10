@@ -1,0 +1,57 @@
+experiment_id: qwen35_2b_m0_sft_micro
+hypothesis: >-
+  Bounded bring-up of the real SFT path. This is not an experiment: it exists to prove that a
+  real forward pass, backward pass, and optimizer step run against the pinned canonical corpus
+  before the full M0 is launched, and that a checkpoint round-trips. Its artifacts are kept
+  under runs/qwen35_2b_m0_sft_micro/ and must never be reported as M0 results.
+
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+
+datasets:
+  manifest_ids:
+    - canonical_v1
+  hashes:
+    canonical_v1: 181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911
+
+trainer:
+  type: sft
+  tuning_method: full
+  learning_rate: 1.0e-5
+  micro_batch_size: 4
+  gradient_accumulation_steps: 2
+  max_steps: 4
+  warmup_steps: 1
+  max_seq_length: 2048
+  scheduler: cosine
+  gradient_clipping: 1.0
+  gradient_checkpointing: true
+  optimizer: adamw_torch
+  optimizer_state: fp32
+
+evaluation:
+  suite: tool_use_core
+  baseline_experiment: tool_calling/qwen35_2b/baseline
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 256
+
+checkpointing:
+  save_steps: 2
+  max_checkpoints: 2
+
+promotion:
+  requires_executed_suite: tool_use_core
+  max_regression:
+    default: 1.0
+
+reproducibility:
+  seed: 42
+  precision: bfloat16
+
+speculative_decoding:
+  enabled: false

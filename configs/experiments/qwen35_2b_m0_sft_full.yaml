@@ -1,0 +1,87 @@
+experiment_id: qwen35_2b_m0_sft_full
+hypothesis: >-
+  M0 (full): supervised fine-tuning on the canonical tool-policy corpus should sharpen the
+  call/no-call decision boundary that B0 showed to be miscalibrated. B0 reaches call recall
+  0.972 but over-calls on 64.3% of examples whose gold decision is not CALL, so the
+  intervention under test is decision calibration, not tool-call syntax.
+
+  This configuration supersedes configs/experiments/m0_sft.yaml, which specifies 50 optimizer
+  steps. At the pinned effective batch that is ~400 examples, roughly 0.8% of the trainable
+  corpus: it is a bounded bring-up recipe, not a corpus-scale M0. Its meaning is left intact
+  rather than rewritten, and this file is the corpus-scale experiment.
+
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+
+datasets:
+  manifest_ids:
+    - canonical_v1
+  hashes:
+    canonical_v1: 181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911
+  source_manifests:
+    - xlam-function-calling-60k
+    - glaive-function-calling-v2
+    - looptool-23k
+    - when2call
+    - toolace
+    - button
+
+trainer:
+  type: sft
+  # Explicit, never inferred: full fine-tuning and PEFT differ enough in what they measure
+  # that an implicit default would change the experiment's meaning.
+  tuning_method: full
+  learning_rate: 1.0e-5
+  micro_batch_size: 8
+  gradient_accumulation_steps: 4
+  max_steps: 2000
+  warmup_steps: 100
+  max_seq_length: 2048
+  scheduler: cosine
+  gradient_clipping: 1.0
+  gradient_checkpointing: true
+  optimizer: adamw_torch
+  optimizer_state: fp32
+
+evaluation:
+  suite: tool_use_core
+  # The comparison that matters for this intervention: the same frozen behavioral held-out
+  # suite B0 was measured on, so the delta is like-for-like.
+  baseline_experiment: tool_calling/qwen35_2b/baseline
+  primary_metrics:
+    - call_precision
+    - call_recall
+    - call_f1
+    - over_call_rate
+    - under_call_rate
+    - clarification_accuracy
+    - unsupported_accuracy
+    - parse_valid_rate
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+
+checkpointing:
+  save_steps: 250
+  max_checkpoints: 4
+
+promotion:
+  # Expressed only against evaluations that can actually be run. BFCL V4, tau2, and the other
+  # external families are still FROZEN_NOT_EXECUTED, so they cannot gate a decision yet and
+  # are deliberately absent rather than pinned to aspirational numbers.
+  requires_executed_suite: tool_use_core
+  must_pass:
+    parse_valid_rate_min: 0.99
+  max_regression:
+    default: 1.0
+
+reproducibility:
+  seed: 42
+  precision: bfloat16
+
+speculative_decoding:
+  enabled: false

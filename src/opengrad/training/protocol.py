@@ -70,7 +70,14 @@ class TrainingRunResult:
 
 
 class TrainerBackend(Protocol):
-    """Stable interface shared by all training algorithms."""
+    """Stable interface shared by all training algorithms.
+
+    ``experiment`` and ``root`` carry the parts of the immutable experiment configuration a
+    real run needs but the ``trainer`` block does not: the pinned model and tokenizer
+    revisions, the dataset identities, the checkpointing policy, and the seed. They are
+    optional so CPU dry-runs stay self-contained, and a real path that cannot find them must
+    refuse rather than infer them.
+    """
 
     name: str
 
@@ -81,4 +88,6 @@ class TrainerBackend(Protocol):
         output_dir: Path,
         *,
         dry_run: bool = False,
+        experiment: dict[str, Any] | None = None,
+        root: Path | None = None,
     ) -> TrainingRunResult: ...

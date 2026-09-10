@@ -51,7 +51,10 @@ def handle_validate_data(args: argparse.Namespace, root: Path) -> int:
                 try:
                     records.append(json.loads(line))
                 except json.JSONDecodeError as exc:
-                    err = {"code": "DATASET_SCHEMA_INVALID", "message": f"Invalid JSON on line: {exc}"}
+                    err = {
+                        "code": "DATASET_SCHEMA_INVALID",
+                        "message": f"Invalid JSON on line: {exc}",
+                    }
                     if args.json:
                         print(json.dumps(err, indent=2))
                     else:
@@ -63,7 +66,9 @@ def handle_validate_data(args: argparse.Namespace, root: Path) -> int:
         print(json.dumps(report.to_dict(), indent=2, sort_keys=True))
     else:
         print(f"Dataset Validation: {report.status}")
-        print(f"Total: {report.total_records} | Valid: {report.valid_records} | Invalid: {report.invalid_records}")
+        print(
+            f"Total: {report.total_records} | Valid: {report.valid_records} | Invalid: {report.invalid_records}"
+        )
         if report.reason_counts:
             print("Errors by category:")
             for code, cnt in report.reason_counts.items():
@@ -80,13 +85,20 @@ def handle_inspect_template(args: argparse.Namespace, root: Path) -> int:
         example = {
             "id": "inspect_demo",
             "source": "openweights",
-            "tools": [{"name": "lookup", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}}}],
+            "tools": [
+                {
+                    "name": "lookup",
+                    "parameters": {"type": "object", "properties": {"q": {"type": "string"}}},
+                }
+            ],
             "messages": [
                 {"role": "user", "content": "Find status for worker 12."},
                 {
                     "role": "assistant",
                     "content": "",
-                    "tool_calls": [{"id": "call_1", "name": "lookup", "arguments": {"q": "worker_12"}}],
+                    "tool_calls": [
+                        {"id": "call_1", "name": "lookup", "arguments": {"q": "worker_12"}}
+                    ],
                 },
                 {"role": "tool", "content": "status: active, healthy", "tool_call_id": "call_1"},
                 {"role": "assistant", "content": "Worker 12 is currently active and healthy."},
@@ -108,7 +120,10 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
         config_path = root / config_path
     config_path = config_path.resolve()
     if not config_path.is_relative_to(root.resolve()):
-        err = {"code": "PATH_OUTSIDE_PROJECT", "message": "Training config must remain inside the OpenGrad repository"}
+        err = {
+            "code": "PATH_OUTSIDE_PROJECT",
+            "message": "Training config must remain inside the OpenGrad repository",
+        }
         print(json.dumps(err) if args.json else f"Error: {err['message']}")
         return 1
     if not config_path.exists():
@@ -121,7 +136,9 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
     # WARN is acceptable only for an explicitly requested CPU plumbing run.
     # A real launch requires a clean preflight and then the stronger readiness
     # contract below; dry-run never creates scientific evidence.
-    if preflight.overall_status == "FAIL" or (preflight.overall_status == "WARN" and not args.dry_run):
+    if preflight.overall_status == "FAIL" or (
+        preflight.overall_status == "WARN" and not args.dry_run
+    ):
         if args.json:
             print(json.dumps(preflight.to_dict(), indent=2))
         else:
@@ -144,7 +161,11 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
                 "blocking": True,
                 "blocking_gates": gate.get("blocking_gates", []),
             }
-            print(json.dumps(error, indent=2) if args.json else f"Error: {error['message']}: {', '.join(error['blocking_gates'])}")
+            print(
+                json.dumps(error, indent=2)
+                if args.json
+                else f"Error: {error['message']}: {', '.join(error['blocking_gates'])}"
+            )
             return 1
     store = ExperimentStore(root)
 
@@ -155,7 +176,10 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
     # directory. Run it in a scratch namespace and label it non-evidence.
     if args.dry_run:
         if trainer is None:
-            err = {"code": "ALGORITHM_UNSUPPORTED", "message": f"Unsupported trainer: {trainer_type}"}
+            err = {
+                "code": "ALGORITHM_UNSUPPORTED",
+                "message": f"Unsupported trainer: {trainer_type}",
+            }
             print(json.dumps(err) if args.json else err["message"])
             return 1
         scratch_dir = root / "runs" / ".dry-run" / exp_config.experiment_id
@@ -174,7 +198,9 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
         if args.json:
             print(json.dumps(payload, indent=2))
         else:
-            print(f"DRY-RUN COMPLETED for '{exp_config.experiment_id}' ({train_res.algorithm.upper()}) - NOT EVIDENCE")
+            print(
+                f"DRY-RUN COMPLETED for '{exp_config.experiment_id}' ({train_res.algorithm.upper()}) - NOT EVIDENCE"
+            )
             print(f"Steps: {train_res.total_steps} | Final Loss: {train_res.final_loss:.4f}")
             print(f"Scratch output: {scratch_dir}")
         return 0
@@ -185,7 +211,10 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
     try:
         store.create_experiment(exp_config)
     except FileExistsError:
-        err = {"code": "EXPERIMENT_ID_COLLISION", "message": f"Experiment already exists: {exp_config.experiment_id}"}
+        err = {
+            "code": "EXPERIMENT_ID_COLLISION",
+            "message": f"Experiment already exists: {exp_config.experiment_id}",
+        }
         print(json.dumps(err) if args.json else f"Error: {err['message']}")
         return 1
 
@@ -198,22 +227,51 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
         store.update_status(exp_config.experiment_id, ExperimentStatus.FAILED, {"error": err})
         return 1
 
-    train_res = trainer.train(
-        exp_config.experiment_id,
-        exp_config.trainer,
-        output_dir=run_dir,
-        dry_run=args.dry_run,
-    )
+    try:
+        train_res = trainer.train(
+            exp_config.experiment_id,
+            exp_config.trainer,
+            output_dir=run_dir,
+            dry_run=args.dry_run,
+            experiment=exp_config.to_dict(),
+            root=root,
+        )
+    except Exception as exc:  # noqa: BLE001 - a failed run is recorded, never discarded
+        # A failed run is evidence. Record the exact failure on the experiment and keep
+        # whatever the run wrote (logs, events, partial checkpoints) in place.
+        error = {
+            "code": getattr(exc, "code", type(exc).__name__),
+            "message": str(exc)[:2000],
+            "type": type(exc).__name__,
+            "blocking": True,
+        }
+        store.update_status(exp_config.experiment_id, ExperimentStatus.FAILED, {"error": error})
+        (run_dir / "failure.json").write_text(
+            json.dumps(error, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        print(json.dumps(error, indent=2) if args.json else f"Training FAILED: {error['message']}")
+        return 1
 
-    # Register checkpoint in CheckpointRegistry
+    # Register each checkpoint with its own lineage. The identifier is qualified by the
+    # experiment because the registry is global while checkpoint directory names are only
+    # unique within a run.
     ckpt_reg = CheckpointRegistry(root)
     for c_path in train_res.checkpoints_created:
+        path = Path(c_path)
+        lineage: dict[str, Any] = {}
+        metadata_path = path / "checkpoint_metadata.json"
+        if metadata_path.is_file():
+            try:
+                lineage = json.loads(metadata_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                lineage = {}
+        qualified = f"{exp_config.experiment_id}::{path.name}"
         ckpt_record = CheckpointRecord(
-            checkpoint_id=Path(c_path).name,
+            checkpoint_id=qualified,
             experiment_id=exp_config.experiment_id,
             path=c_path,
-            global_step=train_res.total_steps,
-            tokens_seen=train_res.total_tokens_seen,
+            global_step=int(lineage.get("training_step", train_res.total_steps)),
+            tokens_seen=int(lineage.get("tokens_seen", train_res.total_tokens_seen)),
             training_loss=train_res.final_loss,
             model_id=str(exp_config.model.get("model_id", "Qwen/Qwen3.5-2B")),
             model_revision=str(exp_config.model.get("model_revision", "")),
@@ -230,8 +288,12 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
     if args.json:
         print(json.dumps(train_res.to_dict(), indent=2))
     else:
-        print(f"Training COMPLETED for experiment '{exp_config.experiment_id}' ({train_res.algorithm.upper()})")
-        print(f"Steps: {train_res.total_steps} | Final Loss: {train_res.final_loss:.4f} | Tokens Seen: {train_res.total_tokens_seen}")
+        print(
+            f"Training COMPLETED for experiment '{exp_config.experiment_id}' ({train_res.algorithm.upper()})"
+        )
+        print(
+            f"Steps: {train_res.total_steps} | Final Loss: {train_res.final_loss:.4f} | Tokens Seen: {train_res.total_tokens_seen}"
+        )
         print(f"Checkpoint: {train_res.final_checkpoint_path}")
     return 0
 
@@ -249,7 +311,9 @@ def handle_checkpoint_cli(args: argparse.Namespace, root: Path) -> int:
             print(f"{'Checkpoint ID':<30} {'Experiment':<24} {'Step':<8} {'Status':<12} {'Loss'}")
             print("-" * 80)
             for c in items:
-                print(f"{c.checkpoint_id:<30} {c.experiment_id:<24} {c.global_step:<8} {c.promotion_status:<12} {c.training_loss:.4f}")
+                print(
+                    f"{c.checkpoint_id:<30} {c.experiment_id:<24} {c.global_step:<8} {c.promotion_status:<12} {c.training_loss:.4f}"
+                )
             print()
         return 0
 
@@ -263,7 +327,9 @@ def handle_checkpoint_cli(args: argparse.Namespace, root: Path) -> int:
                 print(f"Experiment: {item.experiment_id}")
                 print(f"Status: {item.promotion_status}")
                 print(f"Path: {item.path}")
-                print(f"Step: {item.global_step} | Tokens: {item.tokens_seen} | Loss: {item.training_loss:.4f}")
+                print(
+                    f"Step: {item.global_step} | Tokens: {item.tokens_seen} | Loss: {item.training_loss:.4f}"
+                )
             return 0
         except KeyError as exc:
             err = {"code": "CHECKPOINT_NOT_FOUND", "message": str(exc)}
@@ -330,7 +396,9 @@ def handle_promote_reject(args: argparse.Namespace, root: Path, decision: str) -
     ckpt_reg = CheckpointRegistry(root)
     try:
         note = args.reason or f"Action {decision} via CLI"
-        status = CheckpointLifecycle.PROMOTED if decision == "promote" else CheckpointLifecycle.REJECTED
+        status = (
+            CheckpointLifecycle.PROMOTED if decision == "promote" else CheckpointLifecycle.REJECTED
+        )
         rec = ckpt_reg.update_status(args.checkpoint_id, status, note=note)
 
         # Update experiment ledger if experiment is associated
@@ -339,16 +407,24 @@ def handle_promote_reject(args: argparse.Namespace, root: Path, decision: str) -
             try:
                 store.update_status(
                     rec.experiment_id,
-                    ExperimentStatus.PROMOTED if decision == "promote" else ExperimentStatus.REJECTED,
+                    ExperimentStatus.PROMOTED
+                    if decision == "promote"
+                    else ExperimentStatus.REJECTED,
                     {"checkpoint": rec.checkpoint_id, "note": note},
                 )
             except (KeyError, FileNotFoundError, OSError):
                 pass
 
         if args.json:
-            print(json.dumps({"checkpoint_id": rec.checkpoint_id, "decision": decision.upper(), "note": note}))
+            print(
+                json.dumps(
+                    {"checkpoint_id": rec.checkpoint_id, "decision": decision.upper(), "note": note}
+                )
+            )
         else:
-            print(f"Checkpoint '{rec.checkpoint_id}' successfully set to {decision.upper()}. Note: {note}")
+            print(
+                f"Checkpoint '{rec.checkpoint_id}' successfully set to {decision.upper()}. Note: {note}"
+            )
         return 0
     except KeyError as exc:
         err = {"code": "CHECKPOINT_NOT_FOUND", "message": str(exc)}
@@ -368,10 +444,22 @@ def handle_doctor(args: argparse.Namespace, root: Path) -> int:
     checks: dict[str, dict[str, Any]] = {
         "python": {"version": sys.version.split()[0], "status": "PASS"},
         "disk": {"free_gb": free_gb, "status": "PASS" if free_gb >= 5 else "WARN"},
-        "git": {"sha": env.get("git", {}).get("sha", "unknown")[:10], "dirty": env.get("git_dirty", False)},
-        "android_studio": {"path": str(android_studio_path), "status": "INSTALLED" if android_studio_path.exists() else "MISSING"},
-        "android_sdk": {"path": str(android_sdk_path), "status": "INSTALLED" if android_sdk_path.exists() else "MISSING"},
-        "pixel_phone_avd": {"path": str(avd_path), "status": "PROVISIONED" if avd_path.exists() else "NOT_PROVISIONED"},
+        "git": {
+            "sha": env.get("git", {}).get("sha", "unknown")[:10],
+            "dirty": env.get("git_dirty", False),
+        },
+        "android_studio": {
+            "path": str(android_studio_path),
+            "status": "INSTALLED" if android_studio_path.exists() else "MISSING",
+        },
+        "android_sdk": {
+            "path": str(android_sdk_path),
+            "status": "INSTALLED" if android_sdk_path.exists() else "MISSING",
+        },
+        "pixel_phone_avd": {
+            "path": str(avd_path),
+            "status": "PROVISIONED" if avd_path.exists() else "NOT_PROVISIONED",
+        },
         "benchmarks_registry": {"status": "OK"},
     }
 
@@ -395,7 +483,9 @@ def handle_preference_cli(args: argparse.Namespace, root: Path) -> int:
     if sub == "inspect":
         if getattr(args, "records", None) and Path(args.records).exists():
             lines = Path(args.records).read_text(encoding="utf-8").strip().splitlines()
-            pairs = [PreferencePair.from_dict(json.loads(line)) for line in lines[: args.limit or 5]]
+            pairs = [
+                PreferencePair.from_dict(json.loads(line)) for line in lines[: args.limit or 5]
+            ]
         else:
             # Demo representative hard negative pair
             pairs = [
@@ -415,7 +505,9 @@ def handle_preference_cli(args: argparse.Namespace, root: Path) -> int:
             print(json.dumps([p.to_dict() for p in pairs], indent=2))
         else:
             for p in pairs:
-                print(f"[{p.preference_source.upper()}] Prompt ID: {p.prompt_id} (Conf: {p.confidence:.2f})")
+                print(
+                    f"[{p.preference_source.upper()}] Prompt ID: {p.prompt_id} (Conf: {p.confidence:.2f})"
+                )
                 print(f"Prompt:   {p.prompt}")
                 print(f"Chosen:   {p.chosen}")
                 print(f"Rejected: {p.rejected}")
@@ -427,15 +519,25 @@ def handle_preference_cli(args: argparse.Namespace, root: Path) -> int:
         generator = SyntheticPreferenceGenerator(backend)
         out_file = Path(args.output or "data/processed/synthetic_dpo_pairs.jsonl")
         prompts = [
-            {"id": f"p_{i}", "prompt": f"Task query {i} requiring tool execution", "expected_decision": "CALL"}
+            {
+                "id": f"p_{i}",
+                "prompt": f"Task query {i} requiring tool execution",
+                "expected_decision": "CALL",
+            }
             for i in range(args.count or 8)
         ]
-        summary = generator.generate_pairs(prompts, out_file, num_candidates_per_prompt=args.candidates or 4)
+        summary = generator.generate_pairs(
+            prompts, out_file, num_candidates_per_prompt=args.candidates or 4
+        )
         if args.json:
             print(json.dumps(summary.to_dict(), indent=2))
         else:
-            print(f"Generated {summary.pairs_generated} DPO pairs from {summary.total_prompts} prompts.")
-            print(f"Deterministic: {summary.deterministic_pairs} | OpenAI: {summary.openai_pairs} | Rejected: {summary.rejected_pairs}")
+            print(
+                f"Generated {summary.pairs_generated} DPO pairs from {summary.total_prompts} prompts."
+            )
+            print(
+                f"Deterministic: {summary.deterministic_pairs} | OpenAI: {summary.openai_pairs} | Rejected: {summary.rejected_pairs}"
+            )
             print(f"Saved to: {summary.output_file}")
         return 0
 
@@ -450,7 +552,9 @@ def handle_preference_cli(args: argparse.Namespace, root: Path) -> int:
         if args.json:
             print(json.dumps(report.to_dict(), indent=2))
         else:
-            print(f"DPO Validation: {report.status} ({report.valid_records} valid, {report.invalid_records} invalid)")
+            print(
+                f"DPO Validation: {report.status} ({report.valid_records} valid, {report.invalid_records} invalid)"
+            )
         return 0 if report.status == "PASS" else 1
 
     if sub == "build":
@@ -497,19 +601,35 @@ def handle_distill_cli(args: argparse.Namespace, root: Path) -> int:
             {
                 "id": f"canonical_{i}",
                 "source": "arrochi112/OpenGrad-ToolPolicy-Canonical-v1",
-                "tools": [{"name": "lookup", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}}}],
+                "tools": [
+                    {
+                        "name": "lookup",
+                        "parameters": {"type": "object", "properties": {"q": {"type": "string"}}},
+                    }
+                ],
                 "messages": [
                     {"role": "user", "content": f"Lookup order {i}."},
-                    {"role": "assistant", "content": "", "tool_calls": [{"name": "lookup", "arguments": {"q": str(i)}}]},
+                    {
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [{"name": "lookup", "arguments": {"q": str(i)}}],
+                    },
                 ],
                 "metadata": {"behavior_category": "tool_policy"},
             }
             for i in range(args.count or 10)
         ]
         out_file = Path(args.output or "data/processed/toolpolicy_opd_prompts.jsonl")
-        p_states = extract_prompt_states(sample_convs, output_file=out_file, profile=args.profile or "broad")
+        p_states = extract_prompt_states(
+            sample_convs, output_file=out_file, profile=args.profile or "broad"
+        )
         if args.json:
-            print(json.dumps({"prompt_states_extracted": len(p_states), "output_file": str(out_file)}, indent=2))
+            print(
+                json.dumps(
+                    {"prompt_states_extracted": len(p_states), "output_file": str(out_file)},
+                    indent=2,
+                )
+            )
         else:
             print(f"Extracted {len(p_states)} prompt states ({args.profile or 'broad'} profile).")
             print(f"Saved to: {out_file}")
@@ -525,10 +645,19 @@ def handle_distill_cli(args: argparse.Namespace, root: Path) -> int:
             {
                 "id": f"smoke_conv_{i}",
                 "source": "canonical",
-                "tools": [{"name": "lookup", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}}}],
+                "tools": [
+                    {
+                        "name": "lookup",
+                        "parameters": {"type": "object", "properties": {"q": {"type": "string"}}},
+                    }
+                ],
                 "messages": [
                     {"role": "user", "content": "Search query."},
-                    {"role": "assistant", "content": "", "tool_calls": [{"name": "lookup", "arguments": {"q": "query"}}]},
+                    {
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [{"name": "lookup", "arguments": {"q": "query"}}],
+                    },
                 ],
                 "metadata": {"behavior_category": "tool_policy"},
             }
@@ -546,7 +675,9 @@ def handle_distill_cli(args: argparse.Namespace, root: Path) -> int:
         else:
             print("Distillation Smoke Preflight Verification\n")
             print(f"Execution Mode: {mem.mode_selected} | Status: {mem.status}")
-            print(f"VRAM: {mem.a100_vram_gb:.1f} GB (Estimated need: {mem.estimated_vram_gb:.1f} GB)")
+            print(
+                f"VRAM: {mem.a100_vram_gb:.1f} GB (Estimated need: {mem.estimated_vram_gb:.1f} GB)"
+            )
             print(report.render_markdown())
         return 0 if report.gap_sufficient else 1
 

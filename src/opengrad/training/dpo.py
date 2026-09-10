@@ -24,6 +24,8 @@ class DPOTrainerBackend(TrainerBackend):
         output_dir: Path,
         *,
         dry_run: bool = False,
+        experiment: dict[str, Any] | None = None,
+        root: Path | None = None,
     ) -> TrainingRunResult:
         ckpt_dir = output_dir / "checkpoints"
         ckpt_dir.mkdir(parents=True, exist_ok=True)
@@ -63,25 +65,31 @@ class DPOTrainerBackend(TrainerBackend):
             for step in range(1, steps + 1):
                 reward_margin = 0.2 + (step / steps) * 0.6
                 loss = max(0.1, 0.68 - (step / steps) * 0.3)
-                metrics_history.append({
-                    "step": step,
-                    "loss": round(loss, 4),
-                    "reward_margin": round(reward_margin, 4),
-                    "chosen_reward": round(0.4 + (step / steps) * 0.3, 4),
-                    "rejected_reward": round(0.2 - (step / steps) * 0.1, 4),
-                    "accuracy": round(0.55 + (step / steps) * 0.35, 4),
-                })
+                metrics_history.append(
+                    {
+                        "step": step,
+                        "loss": round(loss, 4),
+                        "reward_margin": round(reward_margin, 4),
+                        "chosen_reward": round(0.4 + (step / steps) * 0.3, 4),
+                        "rejected_reward": round(0.2 - (step / steps) * 0.1, 4),
+                        "accuracy": round(0.55 + (step / steps) * 0.35, 4),
+                    }
+                )
 
             final_ckpt = ckpt_dir / f"dpo-checkpoint-{steps}"
             final_ckpt.mkdir(parents=True, exist_ok=True)
             (final_ckpt / "checkpoint_metadata.json").write_text(
-                json.dumps({
-                    "experiment_id": experiment_id,
-                    "algorithm": "dpo",
-                    "step": steps,
-                    "beta": beta,
-                    "status": "CANDIDATE",
-                }, indent=2) + "\n",
+                json.dumps(
+                    {
+                        "experiment_id": experiment_id,
+                        "algorithm": "dpo",
+                        "step": steps,
+                        "beta": beta,
+                        "status": "CANDIDATE",
+                    },
+                    indent=2,
+                )
+                + "\n",
                 encoding="utf-8",
             )
 
