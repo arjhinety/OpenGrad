@@ -1,0 +1,38 @@
+experiment_id: qwen35_2b_m0_sft
+hypothesis: "M0 evaluates baseline tool-calling SFT on normalized canonical datasets to establish the initial tool policy decision boundary."
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+datasets:
+  manifest_ids:
+    - canonical_v1
+  hashes:
+    canonical_v1: 181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911
+trainer:
+  type: sft
+  learning_rate: 2.0e-5
+  micro_batch_size: 2
+  gradient_accumulation_steps: 4
+  max_steps: 50
+  warmup_steps: 5
+  max_seq_length: 2048
+evaluation:
+  suite: tool_use_core
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+checkpointing:
+  save_steps: 25
+  max_checkpoints: 3
+promotion:
+  must_pass:
+    bfcl-v4: 65.0
+  max_regression:
+    default: 1.0
+reproducibility:
+  seed: 42
+  precision: bfloat16
+speculative_decoding:
+  enabled: false
