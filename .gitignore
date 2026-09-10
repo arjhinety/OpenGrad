@@ -30,6 +30,8 @@ prompt*.txt
 *.pth
 *.pt
 *.ckpt
+*.swp
+*.swo
 
 # Personal application materials — local only, never publish
 docs/research/compute-proposal.md
