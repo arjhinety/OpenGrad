@@ -66,21 +66,37 @@ def run_dpo_gpu_smoke(device: torch.device, num_pairs: int = 16) -> dict[str, An
         ref_rejected_logits = ref_policy(rejected_ids)
 
     # Compute sequence log-probs
-    pi_chosen_logp = -nn.functional.cross_entropy(
-        active_chosen_logits.view(-1, vocab_size), chosen_ids.view(-1), reduction="none"
-    ).view(num_pairs, -1).sum(dim=-1)
+    pi_chosen_logp = (
+        -nn.functional.cross_entropy(
+            active_chosen_logits.view(-1, vocab_size), chosen_ids.view(-1), reduction="none"
+        )
+        .view(num_pairs, -1)
+        .sum(dim=-1)
+    )
 
-    pi_rejected_logp = -nn.functional.cross_entropy(
-        active_rejected_logits.view(-1, vocab_size), rejected_ids.view(-1), reduction="none"
-    ).view(num_pairs, -1).sum(dim=-1)
+    pi_rejected_logp = (
+        -nn.functional.cross_entropy(
+            active_rejected_logits.view(-1, vocab_size), rejected_ids.view(-1), reduction="none"
+        )
+        .view(num_pairs, -1)
+        .sum(dim=-1)
+    )
 
-    ref_chosen_logp = -nn.functional.cross_entropy(
-        ref_chosen_logits.view(-1, vocab_size), chosen_ids.view(-1), reduction="none"
-    ).view(num_pairs, -1).sum(dim=-1)
+    ref_chosen_logp = (
+        -nn.functional.cross_entropy(
+            ref_chosen_logits.view(-1, vocab_size), chosen_ids.view(-1), reduction="none"
+        )
+        .view(num_pairs, -1)
+        .sum(dim=-1)
+    )
 
-    ref_rejected_logp = -nn.functional.cross_entropy(
-        ref_rejected_logits.view(-1, vocab_size), rejected_ids.view(-1), reduction="none"
-    ).view(num_pairs, -1).sum(dim=-1)
+    ref_rejected_logp = (
+        -nn.functional.cross_entropy(
+            ref_rejected_logits.view(-1, vocab_size), rejected_ids.view(-1), reduction="none"
+        )
+        .view(num_pairs, -1)
+        .sum(dim=-1)
+    )
 
     # DPO Loss calculation
     pi_logratios = pi_chosen_logp - pi_rejected_logp
@@ -129,8 +145,12 @@ def run_opd_gpu_smoke(device: torch.device, num_prompts: int = 8) -> dict[str, A
 
     # 1. Setup Student & Frozen Teacher Models on CUDA in BF16
     vocab_size = 1000
-    student = TinyQwenPolicy(vocab_size=vocab_size, hidden_size=256, num_layers=2).to(device, dtype=torch.bfloat16)
-    teacher = TinyQwenPolicy(vocab_size=vocab_size, hidden_size=512, num_layers=4).to(device, dtype=torch.bfloat16)
+    student = TinyQwenPolicy(vocab_size=vocab_size, hidden_size=256, num_layers=2).to(
+        device, dtype=torch.bfloat16
+    )
+    teacher = TinyQwenPolicy(vocab_size=vocab_size, hidden_size=512, num_layers=4).to(
+        device, dtype=torch.bfloat16
+    )
     teacher.eval()
     for p in teacher.parameters():
         p.requires_grad = False
@@ -172,7 +192,7 @@ def run_opd_gpu_smoke(device: torch.device, num_prompts: int = 8) -> dict[str, A
         prompt_state_id="prompt_01",
         student_checkpoint=str(ckpt_path),
         student_step=1,
-        student_response="<tool_call>{\"name\": \"test\"}</tool_call>",
+        student_response='<tool_call>{"name": "test"}</tool_call>',
         teacher_id="Qwen/Qwen3.8-27B",
         teacher_revision="pinned_v1",
         distillation_mode="forward_kl",
@@ -205,7 +225,9 @@ def main() -> int:
     device = torch.device("cuda:0")
 
     # 1. Verify tokenizer compatibility gate offline
-    tok_gate = validate_teacher_tokenizer_offline("Qwen/Qwen3.5-2B", "Qwen/Qwen3.8-27B", mock_compatible=True)
+    tok_gate = validate_teacher_tokenizer_offline(
+        "Qwen/Qwen3.5-2B", "Qwen/Qwen3.8-27B", mock_compatible=True
+    )
     assert tok_gate.verdict == "TOKENIZER_COMPATIBLE"
     print("✓ Tokenizer compatibility verified: TOKENIZER_COMPATIBLE")
 

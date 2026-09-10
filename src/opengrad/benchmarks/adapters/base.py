@@ -38,7 +38,9 @@ class BenchmarkAdapter:
         """Render prompt using requested renderer conventions."""
         return task.prompt
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         """Evaluate a single generation output against task expectation."""
         raise NotImplementedError
 

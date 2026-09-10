@@ -106,7 +106,9 @@ class CheckpointRegistry:
             # only valid when it is the exact same artifact/experiment lineage;
             # silently replacing a record would destroy provenance.
             if existing.to_dict() != record.to_dict():
-                raise FileExistsError(f"Checkpoint already registered with different provenance: {record.checkpoint_id}")
+                raise FileExistsError(
+                    f"Checkpoint already registered with different provenance: {record.checkpoint_id}"
+                )
             return existing
         self._checkpoints[record.checkpoint_id] = record
         self._save()
@@ -131,7 +133,9 @@ class CheckpointRegistry:
         self, checkpoint_id: str, new_status: CheckpointLifecycle | str, note: str | None = None
     ) -> CheckpointRecord:
         rec = self.get_checkpoint(checkpoint_id)
-        status_str = new_status.value if isinstance(new_status, CheckpointLifecycle) else str(new_status)
+        status_str = (
+            new_status.value if isinstance(new_status, CheckpointLifecycle) else str(new_status)
+        )
         rec.promotion_status = status_str
         if note:
             rec.metadata["status_note"] = note
@@ -140,7 +144,11 @@ class CheckpointRegistry:
         return rec
 
     def get_promoted_checkpoint(self) -> CheckpointRecord | None:
-        promoted = [c for c in self._checkpoints.values() if c.promotion_status == CheckpointLifecycle.PROMOTED.value]
+        promoted = [
+            c
+            for c in self._checkpoints.values()
+            if c.promotion_status == CheckpointLifecycle.PROMOTED.value
+        ]
         if not promoted:
             return None
         # Pick highest step or newest creation timestamp

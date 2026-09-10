@@ -60,7 +60,9 @@ class TokenizerComparison:
                 lines.append(f"- {d}")
         else:
             lines.append("## Status: All token IDs and representative tokenizations are identical.")
-            lines.append("Safe for direct token-level next-distribution distillation without logit remap.")
+            lines.append(
+                "Safe for direct token-level next-distribution distillation without logit remap."
+            )
         return "\n".join(lines)
 
 
@@ -71,7 +73,7 @@ def compare_tokenizers(
     teacher_model_id: str = "Qwen/Qwen3.8-27B",
 ) -> TokenizerComparison:
     """Strictly verify whether student and teacher tokenizers share identical token IDs.
-    
+
     Fails closed if any token ID, special token, or tool markup token differs.
     """
     discrepancies: list[str] = []
@@ -97,7 +99,9 @@ def compare_tokenizers(
         id_t = teacher_tokenizer.convert_tokens_to_ids(s_tok)
         if id_s != id_t or id_s is None:
             special_match = False
-            discrepancies.append(f"Special token '{s_tok}' ID mismatch: student={id_s} vs teacher={id_t}")
+            discrepancies.append(
+                f"Special token '{s_tok}' ID mismatch: student={id_s} vs teacher={id_t}"
+            )
 
     # 4. Tool markup tokens
     tool_match = True

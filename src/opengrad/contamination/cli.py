@@ -107,7 +107,9 @@ def _show_item(index: int, total: int, item) -> None:
     print("  (Contaminated = exclude from B0 and all later held-out evaluations)")
 
 
-def _run_interactive(artifact, audit_path: Path, quarantine_path: Path, root: Path, reviewer: str) -> int:
+def _run_interactive(
+    artifact, audit_path: Path, quarantine_path: Path, root: Path, reviewer: str
+) -> int:
     unresolved = [item for item in artifact.items if not item.resolved()]
     if not unresolved:
         print("No unresolved findings.")
@@ -161,8 +163,7 @@ def _load_report(root: Path) -> dict:
     path = root / REPORT_PATH
     if not path.is_file():
         raise SystemExit(
-            f"scanner report not found: {path}\n"
-            "Run `opengrad-contamination heldout-screen` first."
+            f"scanner report not found: {path}\nRun `opengrad-contamination heldout-screen` first."
         )
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -209,8 +210,7 @@ def _adjudicate(args: argparse.Namespace) -> int:
         verdict = _VERDICT_ALIASES.get(args.verdict.strip().lower())
         if verdict is None:
             raise SystemExit(
-                "verdict must be one of: contaminated, incidental, pending "
-                "(aliases: c, i, s)"
+                "verdict must be one of: contaminated, incidental, pending (aliases: c, i, s)"
             )
         try:
             item = apply_verdict(
@@ -279,8 +279,18 @@ def main() -> int:
         default=None,
         help="canonical training release directory (default .release/hf/toolpolicy-canonical-v1)",
     )
-    screen.add_argument("--max-df", type=int, default=1000, help="prune shingles above this training document frequency")
-    screen.add_argument("--min-shingles", type=int, default=25, help="minimum held-out prompt length for containment flagging")
+    screen.add_argument(
+        "--max-df",
+        type=int,
+        default=1000,
+        help="prune shingles above this training document frequency",
+    )
+    screen.add_argument(
+        "--min-shingles",
+        type=int,
+        default=25,
+        help="minimum held-out prompt length for containment flagging",
+    )
     screen.add_argument("--jaccard", type=float, default=0.5)
     screen.add_argument("--containment", type=float, default=0.6)
     screen.add_argument("--edit-similarity", type=float, default=0.8)
@@ -295,7 +305,9 @@ def main() -> int:
     adjudicate.add_argument("--id", help="finding id, e.g. when2call-mcq:<uuid> (non-interactive)")
     adjudicate.add_argument("--verdict", help="contaminated | incidental | pending")
     adjudicate.add_argument("--reason", help="short justification stored with the verdict")
-    adjudicate.add_argument("--reviewer", help="reviewer identity (defaults to $OPENGRAD_REVIEWER or $USER)")
+    adjudicate.add_argument(
+        "--reviewer", help="reviewer identity (defaults to $OPENGRAD_REVIEWER or $USER)"
+    )
     adjudicate.add_argument("--status", action="store_true", help="print counts and exit")
     adjudicate.add_argument("--list", action="store_true", help="list findings and verdicts")
 
@@ -304,8 +316,12 @@ def main() -> int:
         help="derive the held-out quarantine list from CONTAMINATED verdicts",
     )
     quarantine.add_argument("--root", type=Path, default=Path.cwd())
-    quarantine.add_argument("--apply", action="store_true", help="regenerate the quarantine artifact")
-    quarantine.add_argument("--status", action="store_true", help="show the current quarantine list")
+    quarantine.add_argument(
+        "--apply", action="store_true", help="regenerate the quarantine artifact"
+    )
+    quarantine.add_argument(
+        "--status", action="store_true", help="show the current quarantine list"
+    )
 
     args = parser.parse_args()
     if args.command == "heldout-screen":

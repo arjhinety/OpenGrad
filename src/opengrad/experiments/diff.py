@@ -25,7 +25,9 @@ class ExperimentDiff:
             "variables_changed_count": self.variables_changed_count,
             "is_single_variable": self.is_single_variable,
             "warning": self.warning,
-            "differences": {k: {"baseline": v[0], "candidate": v[1]} for k, v in self.differences.items()},
+            "differences": {
+                k: {"baseline": v[0], "candidate": v[1]} for k, v in self.differences.items()
+            },
         }
 
     def render_markdown(self) -> str:
@@ -39,7 +41,13 @@ class ExperimentDiff:
         if self.warning:
             lines.append(f"> ⚠️ **Methodological Warning:** {self.warning}\n")
 
-        lines.append("| Dimension | Baseline (`" + self.exp_a_id + "`) | Candidate (`" + self.exp_b_id + "`) |")
+        lines.append(
+            "| Dimension | Baseline (`"
+            + self.exp_a_id
+            + "`) | Candidate (`"
+            + self.exp_b_id
+            + "`) |"
+        )
         lines.append("| :--- | :--- | :--- |")
 
         for key, (val_a, val_b) in sorted(self.differences.items()):
@@ -68,15 +76,20 @@ def diff_experiments(
     trainer_b = data_b.get("trainer", {}) if isinstance(data_b.get("trainer"), dict) else {}
     datasets_a = data_a.get("datasets", {}) if isinstance(data_a.get("datasets"), dict) else {}
     datasets_b = data_b.get("datasets", {}) if isinstance(data_b.get("datasets"), dict) else {}
-    repro_a = data_a.get("reproducibility", {}) if isinstance(data_a.get("reproducibility"), dict) else {}
-    repro_b = data_b.get("reproducibility", {}) if isinstance(data_b.get("reproducibility"), dict) else {}
+    repro_a = (
+        data_a.get("reproducibility", {}) if isinstance(data_a.get("reproducibility"), dict) else {}
+    )
+    repro_b = (
+        data_b.get("reproducibility", {}) if isinstance(data_b.get("reproducibility"), dict) else {}
+    )
 
     norm_a = {
         "model_id": data_a.get("model_id") or model_a.get("model_id"),
         "model_revision": data_a.get("model_revision") or model_a.get("model_revision"),
         "tokenizer_revision": data_a.get("tokenizer_revision") or model_a.get("tokenizer_revision"),
         "training_algorithm": data_a.get("training_algorithm") or trainer_a.get("type"),
-        "dataset_manifest_ids": data_a.get("dataset_manifest_ids") or datasets_a.get("manifest_ids"),
+        "dataset_manifest_ids": data_a.get("dataset_manifest_ids")
+        or datasets_a.get("manifest_ids"),
         "random_seed": data_a.get("random_seed") or repro_a.get("seed"),
         "git_commit": data_a.get("git_commit"),
         "training_config": data_a.get("training_config") or trainer_a,
@@ -87,7 +100,8 @@ def diff_experiments(
         "model_revision": data_b.get("model_revision") or model_b.get("model_revision"),
         "tokenizer_revision": data_b.get("tokenizer_revision") or model_b.get("tokenizer_revision"),
         "training_algorithm": data_b.get("training_algorithm") or trainer_b.get("type"),
-        "dataset_manifest_ids": data_b.get("dataset_manifest_ids") or datasets_b.get("manifest_ids"),
+        "dataset_manifest_ids": data_b.get("dataset_manifest_ids")
+        or datasets_b.get("manifest_ids"),
         "random_seed": data_b.get("random_seed") or repro_b.get("seed"),
         "git_commit": data_b.get("git_commit"),
         "training_config": data_b.get("training_config") or trainer_b,

@@ -72,7 +72,9 @@ def test_deterministic_judge_scoring() -> None:
     # Pair formation
     cand_a = PreferenceCandidate("c_a", valid_call)
     cand_b = PreferenceCandidate("c_b", plain_answer)
-    pair = judge.judge_pair(cand_a, cand_b, "prompt", "prompt_id", expected_decision="CALL", expected_tool="lookup")
+    pair = judge.judge_pair(
+        cand_a, cand_b, "prompt", "prompt_id", expected_decision="CALL", expected_tool="lookup"
+    )
     assert pair is not None
     assert pair.chosen == valid_call
     assert pair.rejected == plain_answer
@@ -109,8 +111,18 @@ def test_synthetic_preference_generator(tmp_path: Path) -> None:
     out_file = tmp_path / "pairs.jsonl"
 
     prompts: list[dict[str, Any]] = [
-        {"id": "p_01", "prompt": "Search order status", "expected_decision": "CALL", "tools": [{"name": "lookup"}]},
-        {"id": "p_02", "prompt": "Direct answer question", "expected_decision": "ANSWER", "tools": []},
+        {
+            "id": "p_01",
+            "prompt": "Search order status",
+            "expected_decision": "CALL",
+            "tools": [{"name": "lookup"}],
+        },
+        {
+            "id": "p_02",
+            "prompt": "Direct answer question",
+            "expected_decision": "ANSWER",
+            "tools": [],
+        },
     ]
 
     summary = generator.generate_pairs(prompts, out_file, num_candidates_per_prompt=3)

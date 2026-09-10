@@ -36,7 +36,7 @@ def analyze_pareto(
     points: list[ParetoPoint], max_acceptable_quality_drop: float = 1.0
 ) -> list[ParetoPoint]:
     """Identify Pareto-optimal and Pareto-dominated configurations.
-    
+
     A configuration X dominates Y if:
     - X has >= speedup AND X has >= quality_delta (less regression)
     - AND at least one metric is strictly superior.

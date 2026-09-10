@@ -168,7 +168,9 @@ class PromotionPolicy:
             decision = PromotionDecision.REJECT.value
         elif not self.min_improvement and regression_report.total_improvements == 0:
             decision = PromotionDecision.REVIEW.value
-            reasons.append("No regressions detected, but no measurable capability improvement observed.")
+            reasons.append(
+                "No regressions detected, but no measurable capability improvement observed."
+            )
         else:
             decision = PromotionDecision.PROMOTE.value
             reasons.append("All promotion policy rules and non-regression constraints satisfied.")

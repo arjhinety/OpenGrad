@@ -35,7 +35,7 @@ class BFCLv4Adapter(BenchmarkAdapter):
             tool_name = f"bfcl_{cat}_tool"
             expected_decision = "ANSWER" if cat == "irrelevance" else "CALL"
             task = BenchmarkTask(
-                task_id=f"bfcl_v4_{cat}_{i+1:03d}",
+                task_id=f"bfcl_v4_{cat}_{i + 1:03d}",
                 category=cat,
                 prompt=f"Execute the required function call for category '{cat}': find user details.",
                 tools=[
@@ -44,21 +44,29 @@ class BFCLv4Adapter(BenchmarkAdapter):
                         "description": f"BFCL {cat} evaluator tool.",
                         "parameters": {
                             "type": "object",
-                            "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
+                            "properties": {
+                                "query": {"type": "string"},
+                                "limit": {"type": "integer"},
+                            },
                             "required": ["query"],
                         },
                     }
                 ],
                 expected={"name": tool_name, "decision": expected_decision},
                 expected_decision=expected_decision,
-                metadata={"category": cat, "benchmark_revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8"},
+                metadata={
+                    "category": cat,
+                    "benchmark_revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+                },
             )
             tasks.append(task)
         if limit is not None:
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         parsed = parse_qwen_native_output(generation.text)
         expected_decision = task.expected_decision
 
@@ -75,7 +83,9 @@ class BFCLv4Adapter(BenchmarkAdapter):
                 failure_category = ToolFailureCategory.MISSED_TOOL.value
             else:
                 called_name = parsed.calls[0].name
-                expected_name = task.expected.get("name") if isinstance(task.expected, dict) else None
+                expected_name = (
+                    task.expected.get("name") if isinstance(task.expected, dict) else None
+                )
                 if expected_name and called_name != expected_name:
                     failure_category = ToolFailureCategory.WRONG_TOOL.value
                 else:
@@ -90,7 +100,11 @@ class BFCLv4Adapter(BenchmarkAdapter):
             task_id=task.task_id,
             input=task.prompt,
             raw_output=generation.text,
-            parsed_output={"decision": parsed.decision, "calls": tool_calls, "content": parsed.content},
+            parsed_output={
+                "decision": parsed.decision,
+                "calls": tool_calls,
+                "content": parsed.content,
+            },
             expected=task.expected,
             score=1.0 if success else 0.0,
             success=success,

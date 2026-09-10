@@ -19,9 +19,24 @@ class GAIAAdapter(BenchmarkAdapter):
     def load_tasks(self, split: str = "level_1", limit: int | None = None) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("gaia_l1_01", "level_1", "What is the capital of Australia according to official government census data?", "Canberra"),
-            ("gaia_l2_01", "level_2", "Calculate the total revenue delta between Q2 and Q3 from the attached spreadsheet.", "142500"),
-            ("gaia_l3_01", "level_3", "Synthesize findings from three scientific papers regarding atmospheric methane concentrations.", "synthesis"),
+            (
+                "gaia_l1_01",
+                "level_1",
+                "What is the capital of Australia according to official government census data?",
+                "Canberra",
+            ),
+            (
+                "gaia_l2_01",
+                "level_2",
+                "Calculate the total revenue delta between Q2 and Q3 from the attached spreadsheet.",
+                "142500",
+            ),
+            (
+                "gaia_l3_01",
+                "level_3",
+                "Synthesize findings from three scientific papers regarding atmospheric methane concentrations.",
+                "synthesis",
+            ),
         ]
         for task_id, lvl, question, expected_ans in specs:
             task = BenchmarkTask(
@@ -41,7 +56,9 @@ class GAIAAdapter(BenchmarkAdapter):
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip()
         expected_ans = str(task.expected.get("answer", ""))
         success = bool(text and (expected_ans.lower() in text.lower() or len(text) > 20))

@@ -263,14 +263,14 @@ def screen(
     """
     excluded = exclude_ids or set()
     heldout = (
-        heldout_records
-        if heldout_records is not None
-        else load_heldout(root, exclude=excluded)
+        heldout_records if heldout_records is not None else load_heldout(root, exclude=excluded)
     )
     if not heldout:
         raise ValueError("no materialized held-out records found")
 
-    def train_source(*, with_evidence: bool = False, needed: set[str] | None = None) -> Iterator[Record]:
+    def train_source(
+        *, with_evidence: bool = False, needed: set[str] | None = None
+    ) -> Iterator[Record]:
         if training_records is not None:
             return iter(
                 record
@@ -391,9 +391,7 @@ def screen(
     queue: dict[str, dict[str, Any]] = {}
 
     def enqueue(heldout_id: str, level: str, match: dict[str, Any]) -> None:
-        entry = queue.setdefault(
-            heldout_id, {"heldout": heldout_id, "levels": [], "matches": []}
-        )
+        entry = queue.setdefault(heldout_id, {"heldout": heldout_id, "levels": [], "matches": []})
         if level not in entry["levels"]:
             entry["levels"].append(level)
         entry["matches"].append({"level": level, **match})
@@ -445,7 +443,9 @@ def screen(
                 if training_id in evidence_map:
                     evidence.append(evidence_map[training_id])
                 elif training_id in train_text_fn:
-                    evidence.append({"record_id": training_id, "prompt": train_text_fn[training_id]})
+                    evidence.append(
+                        {"record_id": training_id, "prompt": train_text_fn[training_id]}
+                    )
         entry["training_evidence"] = evidence
         entry["finding_fingerprint"] = finding_fingerprint(entry)
 
@@ -456,7 +456,9 @@ def screen(
     return {
         "schema_version": 1,
         "manifest_id": MANIFEST_ID,
-        "status": "REVIEW_REQUIRED_LEVEL_5_PENDING" if blocked else "LEVELS_1_4_MEASURED_LEVEL_5_PENDING",
+        "status": "REVIEW_REQUIRED_LEVEL_5_PENDING"
+        if blocked
+        else "LEVELS_1_4_MEASURED_LEVEL_5_PENDING",
         "scan_fingerprint": scan_fingerprint,
         "benchmark_fingerprint": benchmark_fingerprint(root),
         "training_corpus_fingerprint": training_corpus_fingerprint(root, release_dir),

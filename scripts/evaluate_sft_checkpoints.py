@@ -51,6 +51,11 @@ def main() -> int:
         "--limit", type=int, default=None, help="evaluate only the first N examples"
     )
     parser.add_argument("--out", default=None, help="where to write the curve JSON")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="replace an existing measurement for a checkpoint",
+    )
     args = parser.parse_args()
 
     available = discover_checkpoints(args.experiment_id)
@@ -71,6 +76,22 @@ def main() -> int:
     curve: list[dict] = []
     for step, checkpoint in selected:
         config_path = config_dir / f"checkpoint-{step}.yaml"
+        # A measurement is evidence, and overwriting one by accident is easy: a --limit run made
+        # to check the path works writes the same file a full run did, and the curve then carries
+        # a partial point that looks real. Refuse to replace an existing measurement unless asked.
+        measured = (
+            ROOT / "runs" / args.experiment_id / "eval" / f"checkpoint-{step}" / "metrics.json"
+        )
+        if measured.is_file() and not args.force:
+            print(
+                f"--- skipping checkpoint-{step}: {measured.relative_to(ROOT)} already exists "
+                "(pass --force to replace)",
+                flush=True,
+            )
+            existing = json.loads(measured.read_text(encoding="utf-8"))
+            existing["evaluation_seconds"] = None
+            curve.append(existing)
+            continue
         write_candidate_config(
             ROOT,
             checkpoint=checkpoint,

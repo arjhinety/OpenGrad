@@ -17,25 +17,50 @@ class MCPMarkAdapter(BenchmarkAdapter):
 
     ENVIRONMENTS: ClassVar[list[str]] = ["filesystem", "github", "postgresql", "browser", "notion"]
 
-    def load_tasks(self, split: str = "filesystem", limit: int | None = None) -> list[BenchmarkTask]:
+    def load_tasks(
+        self, split: str = "filesystem", limit: int | None = None
+    ) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("filesystem", "Find all files matching '*.py' in directory /project/src.", "mcp__filesystem__list_directory"),
-            ("github", "Create an issue with title 'Bug in tokenizer' in repo 'opengrad/core'.", "mcp__github__create_issue"),
-            ("postgresql", "Query active users from table 'accounts' created in last 7 days.", "mcp__postgres__query"),
-            ("browser", "Navigate to docs page and extract the API endpoint specification.", "mcp__browser__navigate"),
-            ("notion", "Append a bulleted summary to the weekly sprint page.", "mcp__notion__append_block"),
+            (
+                "filesystem",
+                "Find all files matching '*.py' in directory /project/src.",
+                "mcp__filesystem__list_directory",
+            ),
+            (
+                "github",
+                "Create an issue with title 'Bug in tokenizer' in repo 'opengrad/core'.",
+                "mcp__github__create_issue",
+            ),
+            (
+                "postgresql",
+                "Query active users from table 'accounts' created in last 7 days.",
+                "mcp__postgres__query",
+            ),
+            (
+                "browser",
+                "Navigate to docs page and extract the API endpoint specification.",
+                "mcp__browser__navigate",
+            ),
+            (
+                "notion",
+                "Append a bulleted summary to the weekly sprint page.",
+                "mcp__notion__append_block",
+            ),
         ]
         for i, (e_name, prompt, expected_tool) in enumerate(specs):
             task = BenchmarkTask(
-                task_id=f"mcpmark_{e_name}_{i+1:03d}",
+                task_id=f"mcpmark_{e_name}_{i + 1:03d}",
                 category=e_name,
                 prompt=f"MCP Environment: {e_name}.\nTask: {prompt}",
                 tools=[
                     {
                         "name": expected_tool,
                         "description": f"MCP tool for {e_name}",
-                        "parameters": {"type": "object", "properties": {"target": {"type": "string"}}},
+                        "parameters": {
+                            "type": "object",
+                            "properties": {"target": {"type": "string"}},
+                        },
                     }
                 ],
                 expected={"tool": expected_tool, "environment": e_name},
@@ -50,7 +75,9 @@ class MCPMarkAdapter(BenchmarkAdapter):
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         parsed = parse_qwen_native_output(generation.text)
         success = False
         failure_category: str | None = None
@@ -74,7 +101,11 @@ class MCPMarkAdapter(BenchmarkAdapter):
             task_id=task.task_id,
             input=task.prompt,
             raw_output=generation.text,
-            parsed_output={"decision": parsed.decision, "calls": tool_calls, "content": parsed.content},
+            parsed_output={
+                "decision": parsed.decision,
+                "calls": tool_calls,
+                "content": parsed.content,
+            },
             expected=task.expected,
             score=1.0 if success else 0.0,
             success=success,

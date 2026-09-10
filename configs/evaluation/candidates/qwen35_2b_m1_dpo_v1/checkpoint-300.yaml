@@ -3,7 +3,7 @@
 # output namespace differ, so the delta is attributable to the checkpoint.
 schema_version: 1
 status: CANDIDATE_EVALUATION
-model_id: runs/qwen35_2b_m0_sft_full_v3/checkpoints/checkpoint-400
+model_id: runs/qwen35_2b_m1_dpo_v1/checkpoints/dpo-checkpoint-300
 model_revision: null
 tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
 renderer: qwen3_5_2b_v1
@@ -46,18 +46,18 @@ runtime:
   tensor_parallel_size: 1
   batch_size: 256
 outputs:
-  predictions: runs/qwen35_2b_m0_sft_full_v3/eval/checkpoint-400/predictions.jsonl
-  metrics: runs/qwen35_2b_m0_sft_full_v3/eval/checkpoint-400/metrics.json
-  residual_profile: runs/qwen35_2b_m0_sft_full_v3/eval/checkpoint-400/residual-profile.json
-  environment: runs/qwen35_2b_m0_sft_full_v3/eval/checkpoint-400/environment.json
+  predictions: runs/qwen35_2b_m1_dpo_v1/eval/checkpoint-300/predictions.jsonl
+  metrics: runs/qwen35_2b_m1_dpo_v1/eval/checkpoint-300/metrics.json
+  residual_profile: runs/qwen35_2b_m1_dpo_v1/eval/checkpoint-300/residual-profile.json
+  environment: runs/qwen35_2b_m1_dpo_v1/eval/checkpoint-300/environment.json
 provenance:
   dataset_manifests: reports/data/normalization-v1
   evaluator_revision: 2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc
   manifest_status: FROZEN_PRE_GPU
   native_parser: opengrad.formatting.parser.parse_qwen_native_output@v1
   contamination_report: reports/data/behavioral-heldout-v2-contamination.json
-  parent_experiment_id: qwen35_2b_m0_sft_full_v3
-  checkpoint_id: checkpoint-400
-  checkpoint_step: 400
+  parent_experiment_id: qwen35_2b_m1_dpo_v1
+  checkpoint_id: checkpoint-300
+  checkpoint_step: 300
   base_model_id: Qwen/Qwen3.5-2B
   base_model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc

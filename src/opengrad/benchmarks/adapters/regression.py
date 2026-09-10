@@ -18,8 +18,16 @@ class GSM8KAdapter(BenchmarkAdapter):
     def load_tasks(self, split: str = "test", limit: int | None = None) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("gsm8k_01", "Janet buys 3 packs of golf balls for $12 each. How much change does she get from $50?", 14),
-            ("gsm8k_02", "A bakery bakes 120 loaves of bread. In the morning they sell 45 loaves, in the afternoon 50 loaves. How many are left?", 25),
+            (
+                "gsm8k_01",
+                "Janet buys 3 packs of golf balls for $12 each. How much change does she get from $50?",
+                14,
+            ),
+            (
+                "gsm8k_02",
+                "A bakery bakes 120 loaves of bread. In the morning they sell 45 loaves, in the afternoon 50 loaves. How many are left?",
+                25,
+            ),
         ]
         for task_id, question, expected_num in specs:
             task = BenchmarkTask(
@@ -35,7 +43,9 @@ class GSM8KAdapter(BenchmarkAdapter):
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip()
         expected_ans = int(task.expected.get("answer", 0))
 
@@ -71,8 +81,16 @@ class ARCChallengeAdapter(BenchmarkAdapter):
     def load_tasks(self, split: str = "test", limit: int | None = None) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("arc_01", "Which process converts liquid water into water vapor?\n(A) Condensation\n(B) Evaporation\n(C) Precipitation\n(D) Freezing", "B"),
-            ("arc_02", "Which organ is primarily responsible for filtering blood in humans?\n(A) Heart\n(B) Lungs\n(C) Kidneys\n(D) Stomach", "C"),
+            (
+                "arc_01",
+                "Which process converts liquid water into water vapor?\n(A) Condensation\n(B) Evaporation\n(C) Precipitation\n(D) Freezing",
+                "B",
+            ),
+            (
+                "arc_02",
+                "Which organ is primarily responsible for filtering blood in humans?\n(A) Heart\n(B) Lungs\n(C) Kidneys\n(D) Stomach",
+                "C",
+            ),
         ]
         for task_id, question, expected_letter in specs:
             task = BenchmarkTask(
@@ -88,7 +106,9 @@ class ARCChallengeAdapter(BenchmarkAdapter):
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip().upper()
         expected_letter = str(task.expected.get("letter", "A"))
         match = re.search(r"\b([A-D])\b", text)

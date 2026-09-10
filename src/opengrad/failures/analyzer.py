@@ -112,7 +112,9 @@ class FailureDiff:
             lines.append("")
             lines.append("| Failure Category | Count |")
             lines.append("| :--- | :---: |")
-            for cat, cnt in sorted(self.new_failure_breakdown.items(), key=lambda x: x[1], reverse=True):
+            for cat, cnt in sorted(
+                self.new_failure_breakdown.items(), key=lambda x: x[1], reverse=True
+            ):
                 lines.append(f"| `{cat}` | {cnt} |")
             lines.append("")
 

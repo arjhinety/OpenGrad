@@ -13,10 +13,14 @@ DPO or on-policy distillation should follow.
 | --- | --- |
 | Real optimizer steps against the pinned dataset | **YES** — 2400 steps, `qwen35_2b_m0_sft_full_v3` |
 | M0 scientific outcome | **NEGATIVE** — SFT destroys tool calling on this corpus |
-| Best checkpoint vs B0 | call_f1 **0.0046** (step 400) vs B0 **0.6191** |
-| Promotion | **all six checkpoints REJECTED** |
-| DPO | **BLOCKED** — no preference dataset exists |
+| M1 DPO outcome | **NEGATIVE** — DPO also trades tool calling away, and over-optimises |
+| Best trained call_f1 vs B0 | **0.1715** (DPO step 100) vs B0 **0.6191** |
+| Promotion | **all six SFT and all three DPO checkpoints REJECTED** |
 | On-policy distillation | **BLOCKED** — designated teacher does not fit on this disk |
+
+Both trained models beat B0 on balanced decision accuracy and lose badly on call_f1. B0's
+call_f1 is itself produced by a degenerate strategy: it recalls 97% of gold CALLs and 1.3% of
+gold UNSUPPORTEDs. See §3.3 before reading any single number here.
 
 `TRAINING_STARTED` is satisfied: `qwen35_2b_m0_sft_full_v3` took 2400 real optimizer steps against
 `arrochi112/OpenGrad-ToolPolicy-Canonical-v1` at the pinned revision, writing six checkpoints.
@@ -31,6 +35,8 @@ the trainer. Both of those statements are backed by committed configs and run ar
 ```
 opengrad readiness configs/experiments/qwen35_2b_m0_sft_full_v3.yaml   -> PASS, ready_for_sft=true
 opengrad train     configs/experiments/qwen35_2b_m0_sft_full_v3.yaml   -> exit 0
+python scripts/build_when2call_preference_pairs.py                     -> 1741 pairs
+opengrad train     configs/experiments/qwen35_2b_m1_dpo_v1.yaml        -> exit 0
 ```
 
 | Quantity | Value |
@@ -130,6 +136,43 @@ ANSWER-instead-of-CALL. A model that redirects every call to CLARIFY therefore s
 failure mode through that metric; `call_recall` and `call_f1` are what catch it. Worth fixing before
 the metric is used as a promotion gate.
 
+### 3.3 The headline metric and the balanced metric disagree
+
+The suite's headline is `call_f1`. B0 scores 0.6191 on it, and both trained stages score far worse.
+That comparison is misleading on its own, because B0's F1 comes from a degenerate policy. Per-class
+recall, computed from the confusion matrices:
+
+| model | macro over CALL/CLARIFY/UNSUPPORTED | CALL | CLARIFY | UNSUPPORTED | call_f1 | over_call |
+| --- | --- | --- | --- | --- | --- | --- |
+| **B0** | **0.3621** | 0.9722 | 0.1009 | 0.0131 | **0.6191** | 0.6425 |
+| SFT 800 | 0.5053 | 0.0031 | 0.9538 | 0.5591 | 0.0062 | 0.0000 |
+| SFT 1200 | 0.5142 | 0.0000 | 0.7434 | 0.7992 | 0.0000 | 0.0000 |
+| SFT 2400 | 0.5064 | 0.0000 | 0.9415 | 0.5776 | 0.0000 | 0.0000 |
+| **DPO 100** | **0.5436** | 0.0965 | 0.9179 | 0.6162 | 0.1715 | 0.0161 |
+| DPO 200 | 0.5086 | 0.0216 | 0.8726 | 0.6317 | 0.0419 | 0.0055 |
+| DPO 300 | 0.4775 | 0.0131 | 0.9623 | 0.4571 | 0.0258 | 0.0034 |
+
+Read as a balanced three-class problem, **B0 is the worst model here** (0.3621) and every trained
+checkpoint is better, with DPO at step 100 the best (0.5436). B0 recalls 97% of CALLs and 1.3% of
+UNSUPPORTEDs: it has not learned the decision boundary, it has learned to always call, and `call_f1`
+rewards that.
+
+Three consequences, none of which are comfortable:
+
+* A promotion gate keyed on `call_f1` would keep the degenerate policy and reject both attempts to
+  fix it. The metric needs to be balanced across the decision classes before it is used to decide.
+* Even so, **the CALL collapse is real**. A macro average of 0.54 with 9.7% call recall is not a
+  usable tool-calling model, and no choice of metric makes it one.
+* Both stages over-optimise. SFT is flat after step 1200 and DPO degrades from its first measured
+  checkpoint, so neither has an interior optimum above B0 to select.
+
+Two caveats on this table. The SFT step-400 row is the original full measurement, preserved in
+`curve.json`; its per-checkpoint `metrics.json` was later overwritten by an operator error and its
+weights had already been reclaimed, so that one point cannot be re-derived from retained artifacts.
+The driver now refuses to replace an existing measurement unless `--force` is passed, which is the
+guard that should have been there first. And selecting a checkpoint by any metric on this set is
+selection on the evaluation set, so the best point here is optimistic by an unknown amount.
+
 ---
 
 ## 4. What was implemented
@@ -173,34 +216,77 @@ tool-call supervision to the corpus.
 
 ---
 
-## 5. DPO: blocked, with evidence
+## 5. DPO: was blocked, now executed, and also negative
+
+### 5.1 The blocker, and how it was resolved
 
 `configs/experiments/m1_dpo.yaml` pins `when2call_pref_v1` at
-`0582f7749df63a96fdc3070932e83e72396ace53`. That hash is the **When2Call upstream revision**, which the
-baseline evaluation config uses as `when2call-eval-v1@0582f774...` — the *evaluation* source. Training
-on it would contaminate the very comparison M1 exists to make, and the repository's own
-redistribution audit warns to "keep SFT, preference, and evaluation configurations separate".
+`0582f7749df63a96fdc3070932e83e72396ace53`. That hash is the **When2Call upstream revision** — not a
+preference artifact — and no preference file existed locally; the only artifact was
+`data/processed/synthetic_dpo_pairs.jsonl` with 4 placeholder rows. The DPO path is fail-closed on
+this and reported exactly that.
 
-No preference dataset exists locally. The only artifact is
-`data/processed/synthetic_dpo_pairs.jsonl` with **4 rows** and prompts like
-"Task query 0 requiring tool execution".
+The revision does contain a real preference split: `train/when2call_train_pref.jsonl`, 9,000 rows,
+disjoint from the `test` split that B0 measures. Downloaded at the pinned revision and converted by
+`scripts/build_when2call_preference_pairs.py` into pairs rendered by the same pinned renderer SFT and
+evaluation use — 1,741 usable pairs (19.3%). The remainder are skipped, not repaired, because their
+tool schemas use Python type hints (`dict`, `str`, `List[int]`) where JSON Schema is required.
 
-The new DPO path is fail-closed on this, and against the committed M1 config it reports:
+The pairs are genuine decision-calibration data, not a "always call" signal:
+
+| chosen | rejected | pairs |
+| --- | --- | --- |
+| TOOLCALL | ANSWER / UNSUPPORTED | 2,199 |
+| CLARIFY | TOOLCALL / UNSUPPORTED / ANSWER | 2,943 |
+| UNSUPPORTED | CLARIFY / ANSWER / TOOLCALL | 2,858 |
+| TOOLCALL | CLARIFY | 801 |
+
+All four behaviours appear as `chosen` in near-equal numbers, and both `TOOLCALL → CLARIFY` and
+`CLARIFY → TOOLCALL` are present. This is the signal M1's hypothesis calls for.
+
+### 5.2 The run
 
 ```
-trainer.reference must be explicitly one of initial_policy, explicit_checkpoint; got None
-experiment.datasets.preference_path is required for DPO
-load_preference_pairs(...): has 4 usable pairs, need at least 8
+opengrad train configs/experiments/qwen35_2b_m1_dpo_v1.yaml    -> exit 0
 ```
 
-`OPENAI_API_KEY` is present, so the documented synthetic-adjudication route is technically open, but
-generating preferences with an LLM over the SFT corpus would not address the actual defect: the model
-has no tool-call capability to prefer. DPO reweights behaviours the policy can already produce; it
-cannot supply a behaviour that never appears in the training signal.
+300 optimizer steps, 1,741 pairs, `beta` 0.1 against a frozen copy of the initial policy, 10.1 min,
+peak 29.5 GiB. The policy starts from the **base checkpoint**, not from M0: starting from a model
+whose tool calling had already been destroyed would confound the experiment.
 
-**To unblock:** materialize the When2Call *preference* split from the pinned upstream revision into a
-file disjoint from the held-out split, pin its content hash, add `datasets.preference_path` and
-`trainer.reference` to the config. Expect DPO to be premature until the corpus defect in §3.1 is fixed.
+Loss starts at exactly `ln 2 = 0.6931` with margin 0 — the correct value when the policy *is* the
+reference — and the margin then grows to 23.4 with preference accuracy 1.000. That margin is the
+warning sign: with `beta = 0.1` an implicit-reward gap of 23 is enormous, and on 1,741 pairs over
+300 steps (1,200 pair updates) this is severe over-optimisation.
+
+### 5.3 The result
+
+| step | call_f1 | precision | recall | over_call | clar_ok | unsup_ok |
+| --- | --- | --- | --- | --- | --- | --- |
+| 100 | 0.1715 | 0.7669 | 0.0965 | 0.0161 | 0.9179 | 0.6162 |
+| 200 | 0.0419 | 0.6829 | 0.0216 | 0.0055 | 0.8726 | 0.6317 |
+| 300 | 0.0258 | 0.6800 | 0.0131 | 0.0034 | 0.9623 | 0.4571 |
+| **B0** | **0.6191** | 0.4542 | 0.9722 | 0.6425 | 0.1009 | 0.0131 |
+
+DPO does what it was asked to do and then does not stop: over-calling falls from 0.6425 to 0.0034,
+precision rises 0.45 → 0.77, clarification accuracy rises 0.10 → 0.92, and unsupported accuracy rises
+0.013 → 0.62. Call recall falls from 0.9722 to 0.0131, and `call_f1` with it.
+
+The degradation is monotone from the earliest measured checkpoint, so the run never had a better
+point than B0 to stop at. **DPO is a regression on the promotion metric, and all three checkpoints
+were REJECTED.**
+
+### 5.4 Why both stages fail the same way
+
+SFT and DPO are different objectives and they produce the same directional failure: CALL is
+sacrificed for CLARIFY and UNSUPPORTED. The reason is the starting point. B0 is not a balanced
+model — it calls almost always, which is why it has 0.97 call recall and 0.013 unsupported accuracy.
+*Every* signal that moves the model off that degenerate corner reduces call recall, and the
+per-example balance of the preference data cannot prevent it, because the model has far more
+"stop calling" to learn than "keep calling".
+
+DPO reweights behaviours the policy can already produce; it cannot supply a behaviour that never
+appears in the training signal, and after M0's corpus analysis we know CALL is nearly absent from it.
 
 ---
 
@@ -221,22 +307,34 @@ tokenizer-compatibility gate in `docs/TEACHER_SELECTION.md`, and materialize a r
 
 ## 7. Stopping point — the decision that was asked for
 
-The question was where to stop iterating SFT and move on. The measured answer is **at 400 steps, or
-not at all**: SFT here is monotonically harmful.
+The question was where to stop iterating SFT and move on, first to DPO and then to distillation. Both
+stages have now been run, and the measured answer is **stop immediately: at zero steps of either**.
 
-* call_f1 falls 0.6191 → 0.0046 (step 400) → 0.0062 (800) → **0.0000** (≥1200).
-* Every later checkpoint is worse or indistinguishable. There is no plateau where more SFT helps,
-  because the training signal for the target behaviour is 9 records.
-* Continuing to 2400 steps bought a marginal improvement in clarification accuracy and a slightly
-  worse unsupported accuracy, at the cost of all remaining recall.
+**SFT.** `call_f1` falls 0.6191 → 0.0046 (step 400) → 0.0062 (800) → **0.0000** (≥1200). Every
+checkpoint is a regression, the collapse is complete by 1200, and nothing after it changes. Continuing
+to 2400 bought a marginal clarification gain and worse unsupported accuracy, at the cost of all
+remaining recall. The training signal for the target behaviour is 9 records, so there is no schedule
+at which this improves.
 
-The best checkpoint is still an 8× regression against doing nothing, so the correct action was to
-**stop and not promote any of them**, which is what was done. 2400 steps was the right budget to
-establish this — the collapse is complete by 1200 and flat afterwards — but a shorter run would have
-reached the same conclusion at step 400 for a sixth of the GPU time.
+**DPO.** Margin grows 0 → 23.4, preference accuracy 1.000, and `call_f1` falls 0.6191 → 0.1715 (100)
+→ 0.0419 (200) → 0.0258 (300). The degradation is monotone from the first measured checkpoint, so
+there was never a point at which DPO was ahead of doing nothing. It then keeps training past the
+point where the margin stops meaning anything.
 
-DPO would be the wrong next step even if its data existed, for the reason in §5: the model is not
-failing to choose correctly among behaviours it can produce; it is missing a behaviour entirely.
+**Distillation** remains blocked on hardware (§6), and would in any case be distilling a behaviour the
+training signal barely contains.
+
+So the honest stopping rule for this corpus is not "stop at step N" but **stop, and fix the data**.
+Two facts make that concrete rather than a slogan:
+
+* The dominant loss of training records is a parseable adapter defect, now fixed and measured at
+  ~49,800 recoverable records that carry tool-call supervision (§10.1).
+* The second loss is tool schemas written as Python type hints where JSON Schema is required, which
+  is a mechanical mapping and accounts for the 0% yield from xlam (§10.2).
+
+Neither failure is about optimisation. More steps, a different schedule, a different `beta`, or a
+different learning rate would all have produced another point on the same downward curve. The next
+GPU hour is better spent rebuilding the corpus than re-running either stage against this one.
 
 ---
 
@@ -293,14 +391,22 @@ was out of scope and would have buried this change set.
    release stays reproducible from the code that produced it. Switching to it is a new corpus
    version with its own manifest hash. Whether a recovered record then passes the remaining schema
    and argument gates is not measured here and needs a rebuild.
-2. **Normalise upstream tool schemas at materialization**, not at render time: `type: "dict"` →
-   `"object"`, bare property maps → `{type: object, properties: ...}`, drop non-JSON-Schema keys. This
-   is ordinary adapter work on the upstream shape, and it unblocks xlam (59,370 records, currently 0%
-   usable).
-3. **Re-release as canonical v2** with a new manifest hash, and re-run M0 against it. Do not mutate
-   v1: B0 and every existing result are pinned to its hash.
-4. **Verify the mixture before the next SFT run.** A one-line check — what fraction of supervised
-   targets contain `<tool_call>` — would have predicted this outcome before any GPU time was spent.
-   Consider making it a readiness gate.
-5. **Fix `under_call_rate`** so a CLARIFY-redirect collapse is visible to it.
-6. Only then consider DPO, and only with a real, held-out-disjoint preference dataset.
+2. **Normalise upstream tool schemas at materialization**, not at render time. Upstream writes Python
+   type hints where JSON Schema is required, and the mapping is mechanical: `dict` → `object`,
+   `str` → `string`, `int` → `integer`, `float` → `number`, `bool` → `boolean`, `list`/`List[T]` →
+   `array` (with `items` from `T`), a trailing `", optional"` stripped. This is the second-largest
+   loss and it is total for some sources: xlam is 59,370 records and currently yields **0** trainable,
+   and it also caps the preference pairs at 19.3% of the split (1,741 of 9,000). Do it at
+   materialization so the canonical record carries a valid schema, and version it like §10.1.
+3. **Re-release as canonical v2** with a new manifest hash, and re-run M0 and M1 against it. Do not
+   mutate v1: B0 and every existing result are pinned to its hash.
+4. **Verify the mixture before the next training run.** Two cheap checks would have predicted both
+   negative results before any GPU time was spent: what fraction of supervised targets contain
+   `<tool_call>` (9 of 55,719 here), and what per-class recall the starting checkpoint already has
+   (B0: 0.97 CALL, 0.10 CLARIFY, 0.013 UNSUPPORTED). Make the first a readiness gate.
+5. **Balance the promotion metric before trusting it.** See §3.3: `call_f1` alone prefers the
+   degenerate always-call policy over both attempts to fix it. Use a macro average over the decision
+   classes, and fix `under_call_rate`, which counts only ANSWER-instead-of-CALL and so scores a
+   CLARIFY-redirect collapse *better* than B0.
+6. **Then** retry SFT and DPO on the rebuilt corpus. A balanced starting model removes the mechanism
+   that made every intervention here reduce call recall.

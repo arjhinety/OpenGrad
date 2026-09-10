@@ -23,25 +23,43 @@ class IFBenchAdapter(BenchmarkAdapter):
     def load_tasks(self, split: str = "overall", limit: int | None = None) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("constraint_format", "Write a summary in exactly 3 bullet points, each under 10 words.", "3_bullets"),
-            ("constraint_content", "Explain machine learning without using the words 'data', 'algorithm', or 'computer'.", "forbidden_words"),
-            ("constraint_situation", "Respond as a medieval blacksmith discussing iron tempering.", "persona"),
+            (
+                "constraint_format",
+                "Write a summary in exactly 3 bullet points, each under 10 words.",
+                "3_bullets",
+            ),
+            (
+                "constraint_content",
+                "Explain machine learning without using the words 'data', 'algorithm', or 'computer'.",
+                "forbidden_words",
+            ),
+            (
+                "constraint_situation",
+                "Respond as a medieval blacksmith discussing iron tempering.",
+                "persona",
+            ),
         ]
         for i, (cat, prompt, constraint_id) in enumerate(specs):
             task = BenchmarkTask(
-                task_id=f"ifbench_{cat}_{i+1:03d}",
+                task_id=f"ifbench_{cat}_{i + 1:03d}",
                 category=cat,
                 prompt=prompt,
                 expected={"constraint_id": constraint_id, "pass": True},
                 expected_decision="ANSWER",
-                metadata={"category": cat, "constraint_id": constraint_id, "benchmark_revision": "7a82b450c60da1ea763e9f4a1376856086f68c31"},
+                metadata={
+                    "category": cat,
+                    "constraint_id": constraint_id,
+                    "benchmark_revision": "7a82b450c60da1ea763e9f4a1376856086f68c31",
+                },
             )
             tasks.append(task)
         if limit is not None:
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip()
         success = bool(text and len(text) > 10)
         failure_category = None if success else ToolFailureCategory.PARSER_FAILURE.value

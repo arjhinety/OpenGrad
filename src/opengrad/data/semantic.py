@@ -4,6 +4,7 @@ The general IR validator intentionally accepts prompt-only records.  This module
 an explicit training gate: it validates the call/result graph, effective JSON
 Schema, and ordering without silently repairing malformed records.
 """
+
 from __future__ import annotations
 
 import json
@@ -124,7 +125,12 @@ def validate_training_trajectory(example: ToolConversation) -> list[SemanticIssu
                     arguments = call.get("arguments", {})
                     if isinstance(arguments, str):
                         try:
-                            arguments = json.loads(arguments, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+                            arguments = json.loads(
+                                arguments,
+                                parse_constant=lambda value: (_ for _ in ()).throw(
+                                    ValueError(value)
+                                ),
+                            )
                         except (ValueError, json.JSONDecodeError):
                             issues.append(_issue("MALFORMED_TOOL_ARGUMENTS", call_id, index))
                             continue
@@ -144,7 +150,13 @@ def validate_training_trajectory(example: ToolConversation) -> list[SemanticIssu
                 issues.append(_issue("DUPLICATE_TOOL_RESULT", call_id, index))
             else:
                 if not pending or pending[0] != call_id:
-                    issues.append(_issue("INVALID_MESSAGE_SEQUENCE", "tool result violates FIFO call order", index))
+                    issues.append(
+                        _issue(
+                            "INVALID_MESSAGE_SEQUENCE",
+                            "tool result violates FIFO call order",
+                            index,
+                        )
+                    )
                 else:
                     results[call_id] = index
                     pending.pop(0)
@@ -152,9 +164,15 @@ def validate_training_trajectory(example: ToolConversation) -> list[SemanticIssu
             if tool_name is not None and call_id in calls and tool_name != calls[call_id][0]:
                 issues.append(_issue("TOOL_RESULT_NAME_MISMATCH", str(call_id), index))
             if previous_role not in {"assistant", "tool"}:
-                issues.append(_issue("INVALID_MESSAGE_SEQUENCE", "tool result has no preceding call", index))
+                issues.append(
+                    _issue("INVALID_MESSAGE_SEQUENCE", "tool result has no preceding call", index)
+                )
         elif pending:
-            issues.append(_issue("INVALID_MESSAGE_SEQUENCE", "message occurs before required tool result", index))
+            issues.append(
+                _issue(
+                    "INVALID_MESSAGE_SEQUENCE", "message occurs before required tool result", index
+                )
+            )
         previous_role = role
 
     for call_id in sorted(calls):

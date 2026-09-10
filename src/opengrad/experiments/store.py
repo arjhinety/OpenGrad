@@ -65,7 +65,9 @@ class ExperimentStore:
             hypothesis=config.hypothesis,
             model_id=str(config.model.get("model_id", "")),
             model_revision=str(config.model.get("model_revision", "")),
-            tokenizer_revision=str(config.model.get("tokenizer_revision", config.model.get("model_revision", ""))),
+            tokenizer_revision=str(
+                config.model.get("tokenizer_revision", config.model.get("model_revision", ""))
+            ),
             training_algorithm=str(config.trainer.get("type", "sft")),
             training_config=config.trainer,
             dataset_manifest_ids=list(config.datasets.get("manifest_ids", [])),
@@ -95,7 +97,16 @@ class ExperimentStore:
         if target.exists():
             raise FileExistsError(f"Experiment already exists: {record.experiment_id}")
         r_dir.mkdir(parents=True, exist_ok=True)
-        for sub in ["dataset_manifests", "logs", "metrics", "checkpoints", "eval", "failures", "regression", "promotion"]:
+        for sub in [
+            "dataset_manifests",
+            "logs",
+            "metrics",
+            "checkpoints",
+            "eval",
+            "failures",
+            "regression",
+            "promotion",
+        ]:
             (r_dir / sub).mkdir(parents=True, exist_ok=True)
         self._save_record(record)
         local_ledger = ExperimentLedger(r_dir / "ledger.jsonl")
@@ -132,9 +143,15 @@ class ExperimentStore:
         details: dict[str, Any] | None = None,
     ) -> ExperimentRecord:
         record = self.get_experiment(experiment_id)
-        status_str = new_status.value if isinstance(new_status, ExperimentStatus) else str(new_status)
+        status_str = (
+            new_status.value if isinstance(new_status, ExperimentStatus) else str(new_status)
+        )
         record.status = status_str
-        if status_str in {ExperimentStatus.EVALUATED.value, ExperimentStatus.PROMOTED.value, ExperimentStatus.REJECTED.value}:
+        if status_str in {
+            ExperimentStatus.EVALUATED.value,
+            ExperimentStatus.PROMOTED.value,
+            ExperimentStatus.REJECTED.value,
+        }:
             record.completion_timestamp = datetime.now(UTC).isoformat()
 
         self._save_record(record)
@@ -150,5 +167,7 @@ class ExperimentStore:
         r_dir = self.run_dir(record.experiment_id)
         target = r_dir / "experiment.json"
         temp = target.with_name(target.name + ".tmp")
-        temp.write_text(json.dumps(record.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        temp.write_text(
+            json.dumps(record.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         temp.replace(target)

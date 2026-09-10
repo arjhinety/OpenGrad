@@ -195,11 +195,31 @@ class OpenWeightsAdapter(BenchmarkAdapter):
         format_mode = split if split in self.FORMAT_ARMS else "bare"
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("ow_search_needed", "What is the latest release version of the llama.cpp mobile runtime?", "CALL", "web_search"),
-            ("ow_fetch_needed", "Fetch the content of https://alpharomercoma.github.io/openweights/latency.html.", "CALL", "fetch_url"),
-            ("ow_read_needed", "Read the notes from file 'experiment_notes.txt'.", "CALL", "read_file"),
+            (
+                "ow_search_needed",
+                "What is the latest release version of the llama.cpp mobile runtime?",
+                "CALL",
+                "web_search",
+            ),
+            (
+                "ow_fetch_needed",
+                "Fetch the content of https://alpharomercoma.github.io/openweights/latency.html.",
+                "CALL",
+                "fetch_url",
+            ),
+            (
+                "ow_read_needed",
+                "Read the notes from file 'experiment_notes.txt'.",
+                "CALL",
+                "read_file",
+            ),
             ("ow_write_needed", "Save the summary text to 'summary.md'.", "CALL", "write_file"),
-            ("ow_remember_needed", "Remember that I prefer bfloat16 precision over float16.", "CALL", "remember"),
+            (
+                "ow_remember_needed",
+                "Remember that I prefer bfloat16 precision over float16.",
+                "CALL",
+                "remember",
+            ),
             ("ow_recall_needed", "What precision did I say I prefer?", "CALL", "recall"),
             ("ow_answer_direct", "What is the capital city of Japan?", "ANSWER", None),
             ("ow_math_direct", "Calculate 15 * 14.", "ANSWER", None),
@@ -227,7 +247,9 @@ class OpenWeightsAdapter(BenchmarkAdapter):
         format_mode = task.metadata.get("format_arm", "bare")
         return render_openweights_prompt(task.tools, task.prompt, format_mode=format_mode)
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         decision, tool_name, args = parse_openweights_reply(generation.text)
         expected_dec = task.expected_decision
         expected_tool = task.expected.get("tool") if isinstance(task.expected, dict) else None

@@ -29,26 +29,47 @@ class MMLUProAdapter(BenchmarkAdapter):
     def load_tasks(self, split: str = "test", limit: int | None = None) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("computer_science", "What is the amortized time complexity of inserting into a dynamic array that doubles in size?\n(A) O(1) (B) O(N) (C) O(log N) (D) O(N^2) (E) O(sqrt N) (F) O(1/N) (G) O(N log N) (H) None of the above (I) Undefined (J) O(2^N)", "A"),
-            ("math", "What is the derivative of f(x) = e^(2x)?\n(A) e^(2x) (B) 2e^(2x) (C) 2x e^(2x) (D) 4e^(2x) (E) 1/2 e^(2x) (F) ln(2x) (G) 0 (H) None of the above (I) 2e^x (J) e^x", "B"),
-            ("physics", "Which law states that induced electromotive force is proportional to the negative rate of change of magnetic flux?\n(A) Ampere's Law (B) Gauss's Law (C) Faraday's Law (D) Coulomb's Law (E) Ohm's Law (F) Snell's Law (G) Hooke's Law (H) Joule's Law (I) Kepler's Law (J) Newton's Law", "C"),
-            ("economics", "What happens to the equilibrium price when demand shifts right and supply remains constant?\n(A) Decreases (B) Remains unchanged (C) Increases (D) Drops to zero (E) Fluctuates randomly (F) Indeterminate (G) Supply shifts right (H) Inverse relation (I) Negative infinity (J) None of the above", "C"),
+            (
+                "computer_science",
+                "What is the amortized time complexity of inserting into a dynamic array that doubles in size?\n(A) O(1) (B) O(N) (C) O(log N) (D) O(N^2) (E) O(sqrt N) (F) O(1/N) (G) O(N log N) (H) None of the above (I) Undefined (J) O(2^N)",
+                "A",
+            ),
+            (
+                "math",
+                "What is the derivative of f(x) = e^(2x)?\n(A) e^(2x) (B) 2e^(2x) (C) 2x e^(2x) (D) 4e^(2x) (E) 1/2 e^(2x) (F) ln(2x) (G) 0 (H) None of the above (I) 2e^x (J) e^x",
+                "B",
+            ),
+            (
+                "physics",
+                "Which law states that induced electromotive force is proportional to the negative rate of change of magnetic flux?\n(A) Ampere's Law (B) Gauss's Law (C) Faraday's Law (D) Coulomb's Law (E) Ohm's Law (F) Snell's Law (G) Hooke's Law (H) Joule's Law (I) Kepler's Law (J) Newton's Law",
+                "C",
+            ),
+            (
+                "economics",
+                "What happens to the equilibrium price when demand shifts right and supply remains constant?\n(A) Decreases (B) Remains unchanged (C) Increases (D) Drops to zero (E) Fluctuates randomly (F) Indeterminate (G) Supply shifts right (H) Inverse relation (I) Negative infinity (J) None of the above",
+                "C",
+            ),
         ]
         for i, (subject, question, answer) in enumerate(specs):
             task = BenchmarkTask(
-                task_id=f"mmlu_pro_{subject}_{i+1:03d}",
+                task_id=f"mmlu_pro_{subject}_{i + 1:03d}",
                 category=subject,
                 prompt=f"Subject: {subject}.\nQuestion: {question}\nAnswer with the correct option letter directly.",
                 expected={"answer": answer},
                 expected_decision="ANSWER",
-                metadata={"subject": subject, "benchmark_revision": "5d15a5eb0092f6b5b5c90b6ef6928e1fc1b1b117"},
+                metadata={
+                    "subject": subject,
+                    "benchmark_revision": "5d15a5eb0092f6b5b5c90b6ef6928e1fc1b1b117",
+                },
             )
             tasks.append(task)
         if limit is not None:
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip().upper()
         expected_ans = str(task.expected.get("answer", "A"))
 

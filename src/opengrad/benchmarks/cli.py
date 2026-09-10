@@ -20,7 +20,9 @@ from opengrad.benchmarks.runner import BenchmarkRunner
 
 
 def benchmark_cli(args: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="opengrad benchmark", description="OpenGrad Benchmark System")
+    parser = argparse.ArgumentParser(
+        prog="opengrad benchmark", description="OpenGrad Benchmark System"
+    )
     sub = parser.add_subparsers(dest="benchmark_command")
 
     # list
@@ -38,9 +40,13 @@ def benchmark_cli(args: list[str] | None = None) -> int:
     run_group.add_argument("--suite", help="Suite name or path (e.g. smoke, tool_use_core)")
     run_group.add_argument("--benchmark", help="Benchmark ID or path (e.g. bfcl_v4, tau3)")
     run_p.add_argument("--model", help="Optional model identifier override")
-    run_p.add_argument("--backend", default="mock", help="Inference backend (mock, transformers, mtp)")
+    run_p.add_argument(
+        "--backend", default="mock", help="Inference backend (mock, transformers, mtp)"
+    )
     run_p.add_argument("--limit", type=int, help="Limit number of tasks to evaluate")
-    run_p.add_argument("--dry-run", action="store_true", help="Force CPU dry-run using deterministic fake backend")
+    run_p.add_argument(
+        "--dry-run", action="store_true", help="Force CPU dry-run using deterministic fake backend"
+    )
     run_p.add_argument("--output-dir", help="Output directory for run artifacts")
 
     # compare
@@ -54,10 +60,14 @@ def benchmark_cli(args: list[str] | None = None) -> int:
     rep_p.add_argument("run_dir", help="Run directory containing manifest.json and metrics.json")
 
     # contamination-scan
-    cont_p = sub.add_parser("contamination-scan", help="Run multi-level benchmark contamination scan")
+    cont_p = sub.add_parser(
+        "contamination-scan", help="Run multi-level benchmark contamination scan"
+    )
     cont_p.add_argument("--benchmark", default="bfcl-v4", help="Benchmark ID to check")
     cont_p.add_argument("--training-data", help="Optional path to training JSON/JSONL records")
-    cont_p.add_argument("--max-level", type=int, default=5, help="Maximum contamination level (1-5)")
+    cont_p.add_argument(
+        "--max-level", type=int, default=5, help="Maximum contamination level (1-5)"
+    )
 
     parsed = parser.parse_args(args)
     root = Path.cwd()
@@ -70,8 +80,10 @@ def benchmark_cli(args: list[str] | None = None) -> int:
         print("-" * 75)
         for b in sorted(benchmarks, key=lambda x: (str(x.tier), x.id)):
             tier_str = b.tier.value if b.tier else "LEGACY"
-            rev_str = (b.commit_sha[:10] if b.commit_sha else "pinned")
-            print(f"{b.id:<24} {tier_str:<10} {b.version!s:<12} {rev_str:<14} {b.license or 'unknown'}")
+            rev_str = b.commit_sha[:10] if b.commit_sha else "pinned"
+            print(
+                f"{b.id:<24} {tier_str:<10} {b.version!s:<12} {rev_str:<14} {b.license or 'unknown'}"
+            )
         print()
         return 0
 
@@ -99,7 +111,9 @@ def benchmark_cli(args: list[str] | None = None) -> int:
             for err in errors:
                 print(f"  - {err}")
             return 1
-        print(f"All {len(cfg_files)} benchmark configs and {len(suite_files)} suite configs validated successfully.")
+        print(
+            f"All {len(cfg_files)} benchmark configs and {len(suite_files)} suite configs validated successfully."
+        )
         return 0
 
     if parsed.benchmark_command == "dry-run":
@@ -110,7 +124,9 @@ def benchmark_cli(args: list[str] | None = None) -> int:
         print(f"\nDry-run COMPLETED across {res['benchmarks_run']} benchmarks:")
         for b_id, b_res in res["results"].items():
             acc = b_res.get("result", {}).get("overall_accuracy", 0.0)
-            print(f"  - {b_id:<24} {acc:.1f}% accuracy ({b_res.get('result', {}).get('total_tasks', 0)} tasks)")
+            print(
+                f"  - {b_id:<24} {acc:.1f}% accuracy ({b_res.get('result', {}).get('total_tasks', 0)} tasks)"
+            )
         print("\nAll plumbing verified end-to-end without GPU.")
         return 0
 
@@ -136,7 +152,9 @@ def benchmark_cli(args: list[str] | None = None) -> int:
         if parsed.benchmark:
             cfg_file = root / "configs" / "benchmarks" / f"{parsed.benchmark}.yaml"
             if not cfg_file.exists():
-                cfg_file = root / "configs" / "benchmarks" / f"{parsed.benchmark.replace('-', '_')}.yaml"
+                cfg_file = (
+                    root / "configs" / "benchmarks" / f"{parsed.benchmark.replace('-', '_')}.yaml"
+                )
             if not cfg_file.exists():
                 cfg_file = Path(parsed.benchmark)
             if not cfg_file.exists():
@@ -192,8 +210,16 @@ def benchmark_cli(args: list[str] | None = None) -> int:
         if not training_samples:
             # Seed with representative fixture prompts to exercise full pipeline
             training_samples = [
-                {"id": "fixture_train_01", "prompt": "What is the weather today?", "canonical": "weather"},
-                {"id": "fixture_train_02", "prompt": "Write a python script to sort numbers.", "canonical": "sort"},
+                {
+                    "id": "fixture_train_01",
+                    "prompt": "What is the weather today?",
+                    "canonical": "weather",
+                },
+                {
+                    "id": "fixture_train_02",
+                    "prompt": "Write a python script to sort numbers.",
+                    "canonical": "sort",
+                },
             ]
 
         adapter = __import__("opengrad.benchmarks.adapters", fromlist=["get_adapter"]).get_adapter(

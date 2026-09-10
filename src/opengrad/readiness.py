@@ -57,8 +57,12 @@ PINNED_TEMPLATE_HASH = "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5
 PINNED_EVALUATOR_REVISION = "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc"
 CANONICAL_MODEL_ID = "Qwen/Qwen3.5-2B"
 TRAINING_SOURCE_IDS = {
-    "xlam-function-calling-60k", "toolace", "looptool-23k",
-    "glaive-function-calling-v2", "button", "when2call-sft",
+    "xlam-function-calling-60k",
+    "toolace",
+    "looptool-23k",
+    "glaive-function-calling-v2",
+    "button",
+    "when2call-sft",
 }
 TRAINING_SOURCE_MANIFESTS = {
     "data/processed/normalization-v1/xlam",
@@ -73,6 +77,7 @@ TRAINING_SOURCE_MANIFESTS = {
 def _read_yaml(path: Path) -> dict[str, Any]:
     try:
         import yaml
+
         value = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except Exception:  # noqa: BLE001 - an unreadable config must project as absent, not crash status
         return {}
@@ -90,7 +95,9 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 def _git_state(root: Path) -> dict[str, Any]:
     try:
         commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-        dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=root, text=True).strip())
+        dirty = bool(
+            subprocess.check_output(["git", "status", "--porcelain"], cwd=root, text=True).strip()
+        )
     except (OSError, subprocess.CalledProcessError):
         commit, dirty = None, None
     return {"commit": commit, "dirty": dirty}
@@ -156,7 +163,11 @@ def _baseline_state(root: Path) -> dict[str, Any]:
     parse_valid_rate = 0.0
     if predictions_path.exists():
         try:
-            raw_rows = [json.loads(line) for line in predictions_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+            raw_rows = [
+                json.loads(line)
+                for line in predictions_path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
             ids = [row.get("example_id") for row in raw_rows if isinstance(row, dict)]
             decisions = {"CALL", "ANSWER", "CLARIFY", "UNSUPPORTED"}
             # Two separate requirements, because conflating them made the gate unsatisfiable:
@@ -194,7 +205,11 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         except (OSError, json.JSONDecodeError, TypeError):
             prediction_rows = []
     manifest = _read_json(root / BASELINE_MANIFEST)
-    expected_records = sum(_safe_item_count(split) or 0 for split in (manifest or {}).get("splits", []) if isinstance(split, dict))
+    expected_records = sum(
+        _safe_item_count(split) or 0
+        for split in (manifest or {}).get("splits", [])
+        if isinstance(split, dict)
+    )
     expected_ids = _materialized_evaluation_ids(root, manifest)
     # Quarantined examples are excluded from evaluation, so the expected record count
     # must match what the runner actually loads rather than the raw materialized total.
@@ -208,10 +223,20 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         expected_records = len(expected_ids)
     config = _read_yaml(root / BASELINE_CONFIG)
     manifest_file = root / BASELINE_MANIFEST
-    manifest_sha256 = hashlib.sha256(manifest_file.read_bytes()).hexdigest() if manifest_file.exists() else None
+    manifest_sha256 = (
+        hashlib.sha256(manifest_file.read_bytes()).hexdigest() if manifest_file.exists() else None
+    )
     current_commit = _git_state(root).get("commit")
     experiment_records = _experiments(root)
-    baseline_experiment = next((record for record in experiment_records if record.get("experiment_id") in {"tool_calling/qwen35_2b/baseline", "qwen35_2b_baseline"}), None)
+    baseline_experiment = next(
+        (
+            record
+            for record in experiment_records
+            if record.get("experiment_id")
+            in {"tool_calling/qwen35_2b/baseline", "qwen35_2b_baseline"}
+        ),
+        None,
+    )
     residual_values = residuals.get("residuals", {}) if isinstance(residuals, dict) else {}
     residual_contract_ok = bool(
         isinstance(residuals, dict)
@@ -221,7 +246,10 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         and residuals.get("model_revision") == PINNED_MODEL_REVISION
         and residuals.get("manifest_sha256") == manifest_sha256
         and isinstance(residual_values, dict)
-        and all(isinstance(value, (int, float)) and math.isfinite(value) and 0 <= value <= 1 for value in residual_values.values())
+        and all(
+            isinstance(value, (int, float)) and math.isfinite(value) and 0 <= value <= 1
+            for value in residual_values.values()
+        )
     )
     # The engine that produced the baseline is part of the measurement, so it must be the
     # engine the frozen config declares, and its version must be recorded. A baseline from
@@ -238,20 +266,28 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         and recorded_engine.get("version")
     )
     artifact_contract_ok = bool(
-        metrics and metrics.get("status") == "EXECUTED" and engine_contract_ok
+        metrics
+        and metrics.get("status") == "EXECUTED"
+        and engine_contract_ok
         and metrics.get("model_id") == config.get("model_id") == CANONICAL_MODEL_ID
         and metrics.get("model_revision") == config.get("model_revision") == PINNED_MODEL_REVISION
-        and metrics.get("tokenizer_revision") == config.get("tokenizer_revision") == PINNED_MODEL_REVISION
+        and metrics.get("tokenizer_revision")
+        == config.get("tokenizer_revision")
+        == PINNED_MODEL_REVISION
         and metrics.get("manifest") == config.get("evaluations", {}).get("behavioral_manifest")
         and metrics.get("manifest_sha256") == manifest_sha256
         and metrics.get("template_hash") == config.get("template_hash") == PINNED_TEMPLATE_HASH
         and metrics.get("renderer") == "qwen3_5_2b_v1"
         and metrics.get("run_id") == "tool_calling/qwen35_2b/baseline"
         and metrics.get("records", 0) == len(prediction_rows) > 0
-        and predictions_valid and expected_ids is not None and prediction_ids == expected_ids
+        and predictions_valid
+        and expected_ids is not None
+        and prediction_ids == expected_ids
         and metrics.get("records") == expected_records
-        and residual_contract_ok and residuals.get("sample_count") == metrics.get("records")
-        and environment and environment.get("backend") == metrics.get("backend")
+        and residual_contract_ok
+        and residuals.get("sample_count") == metrics.get("records")
+        and environment
+        and environment.get("backend") == metrics.get("backend")
         and environment.get("engine") == metrics.get("engine")
         and environment.get("dry_run") is False
         and environment.get("run_id") == metrics.get("run_id")
@@ -269,10 +305,17 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         and baseline_experiment.get("model_revision") == PINNED_MODEL_REVISION
     )
     real_status = bool(all(artifacts.values()) and artifact_contract_ok)
-    dry_run_complete = bool(metrics and metrics.get("status") == "DRY_RUN" and metrics.get("backend") == "deterministic-mock" and metrics.get("records") == len(prediction_rows) > 0)
+    dry_run_complete = bool(
+        metrics
+        and metrics.get("status") == "DRY_RUN"
+        and metrics.get("backend") == "deterministic-mock"
+        and metrics.get("records") == len(prediction_rows) > 0
+    )
     return {
         "id": "qwen35_2b_baseline",
-        "status": "REAL_COMPLETE" if real_status else ("CPU_DRY_RUN" if dry_run_complete else "PLANNED"),
+        "status": "REAL_COMPLETE"
+        if real_status
+        else ("CPU_DRY_RUN" if dry_run_complete else "PLANNED"),
         "real": real_status,
         "metrics": metrics,
         "residual_profile": residuals,
@@ -282,10 +325,15 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         "parse_valid_rate": round(parse_valid_rate, 6),
         "min_parse_valid_rate": _min_parse_valid_rate(root),
         "expected_records": expected_records,
-        "artifact_paths": {key: str(path) for key, path in {
-            "metrics": metrics_path, "predictions": predictions_path,
-            "residual_profile": residual_path, "environment": env_path,
-        }.items()},
+        "artifact_paths": {
+            key: str(path)
+            for key, path in {
+                "metrics": metrics_path,
+                "predictions": predictions_path,
+                "residual_profile": residual_path,
+                "environment": env_path,
+            }.items()
+        },
     }
 
 
@@ -320,18 +368,26 @@ def _materialized_evaluation_ids(root: Path, manifest: dict[str, Any] | None) ->
         return None
     try:
         import pyarrow.parquet as pq
+
         result: set[str] = set()
         for split in manifest.get("splits", []):
             source = _resolve_project_path(root, split.get("source"), root / "__missing__")
             manifest_path = source if source.name == "manifest.json" else source / "manifest.json"
             data = _read_json(manifest_path)
-            if not data or data.get("finalized") is not True or not isinstance(data.get("shards"), list) or not data["shards"]:
+            if (
+                not data
+                or data.get("finalized") is not True
+                or not isinstance(data.get("shards"), list)
+                or not data["shards"]
+            ):
                 return None
             base = manifest_path.parent
             seen_in_split: set[str] = set()
             for name in data["shards"]:
                 shard = base / str(name)
-                for batch in pq.ParquetFile(shard).iter_batches(batch_size=256, columns=["example_id"]):
+                for batch in pq.ParquetFile(shard).iter_batches(
+                    batch_size=256, columns=["example_id"]
+                ):
                     for row in batch.to_pylist():
                         value = row.get("example_id")
                         if not isinstance(value, str) or not value or value in seen_in_split:
@@ -348,6 +404,7 @@ def _materialized_evaluation_ids(root: Path, manifest: dict[str, Any] | None) ->
 def _read_dataset_registry(root: Path) -> dict[str, dict[str, Any]]:
     try:
         import yaml
+
         raw = yaml.safe_load((root / "registry/datasets.yaml").read_text(encoding="utf-8")) or {}
     except (OSError, TypeError, ValueError):
         return {}
@@ -359,9 +416,17 @@ def _training_data_contract(root: Path, raw: dict[str, Any]) -> tuple[bool, str]
     datasets = raw.get("datasets") if isinstance(raw.get("datasets"), dict) else {}
     ids = datasets.get("manifest_ids")
     hashes = datasets.get("hashes")
-    if not isinstance(ids, list) or not ids or not all(isinstance(item, str) and item.strip() for item in ids):
+    if (
+        not isinstance(ids, list)
+        or not ids
+        or not all(isinstance(item, str) and item.strip() for item in ids)
+    ):
         return False, "SFT dataset manifest IDs are missing or invalid"
-    if not isinstance(hashes, dict) or set(hashes) != set(ids) or not all(_check_revision(value) for value in hashes.values()):
+    if (
+        not isinstance(hashes, dict)
+        or set(hashes) != set(ids)
+        or not all(_check_revision(value) for value in hashes.values())
+    ):
         return False, "SFT dataset hashes must be one pinned SHA revision per manifest ID"
     registry = _read_dataset_registry(root)
     unknown = [item for item in ids if item not in registry]
@@ -374,24 +439,43 @@ def _training_data_contract(root: Path, raw: dict[str, Any]) -> tuple[bool, str]
         # `future_preference`), so an exact match on "preference" missed
         # `future_preference` entirely and let a preference corpus into SFT. Normalise the
         # prefix away before testing the stage.
-        intended = {
-            str(value).lower().removeprefix("future_")
-            for value in row.get("intended_stages", [])
-        } if isinstance(row.get("intended_stages"), list) else set()
-        allowed = {str(value).lower() for value in row.get("allowed_splits", [])} if isinstance(row.get("allowed_splits"), list) else set()
+        intended = (
+            {str(value).lower().removeprefix("future_") for value in row.get("intended_stages", [])}
+            if isinstance(row.get("intended_stages"), list)
+            else set()
+        )
+        allowed = (
+            {str(value).lower() for value in row.get("allowed_splits", [])}
+            if isinstance(row.get("allowed_splits"), list)
+            else set()
+        )
         # A dataset is unsafe for SFT if it is *intended* for evaluation or preference, or if
         # it *permits* evaluation/held-out splits. The previous test inspected
         # forbidden_splits, which is inverted: declaring a split forbidden is exactly what
         # makes a corpus safe to train on, so it refused the datasets that had done the right
         # thing. A corpus that forbids the held-out tests is fine; one that allows them is not.
-        if "evaluation" in intended or "preference" in intended or allowed & {"evaluation", "heldout", "mcq_test", "llm_judge_test"}:
+        if (
+            "evaluation" in intended
+            or "preference" in intended
+            or allowed & {"evaluation", "heldout", "mcq_test", "llm_judge_test"}
+        ):
             unsafe.append(item)
-        source_revision = row.get("source_revision", {}).get("value") if isinstance(row.get("source_revision"), dict) else None
+        source_revision = (
+            row.get("source_revision", {}).get("value")
+            if isinstance(row.get("source_revision"), dict)
+            else None
+        )
         if not _check_revision(source_revision):
             return False, f"SFT dataset source revision is not pinned for {item}"
-        processed = row.get("processed_dataset_hash") if isinstance(row.get("processed_dataset_hash"), dict) else {}
+        processed = (
+            row.get("processed_dataset_hash")
+            if isinstance(row.get("processed_dataset_hash"), dict)
+            else {}
+        )
         processed_value = processed.get("value")
-        if not isinstance(processed_value, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", processed_value):
+        if not isinstance(processed_value, str) or not re.fullmatch(
+            r"[0-9a-fA-F]{64}", processed_value
+        ):
             return False, f"SFT processed dataset hash is not materialized for {item}"
         if hashes.get(item) != processed_value:
             return False, f"SFT dataset hash does not match registry for {item}"
@@ -431,18 +515,27 @@ def repository_status(root: Path) -> dict[str, Any]:
         "environment": env,
         "model": {
             "id": baseline_config.get("model_id", baseline_config.get("model", {}).get("model_id")),
-            "revision": baseline_config.get("model_revision", baseline_config.get("model", {}).get("model_revision")),
+            "revision": baseline_config.get(
+                "model_revision", baseline_config.get("model", {}).get("model_revision")
+            ),
         },
         "dataset": {
-            "manifest": baseline_config.get("dataset_manifest", baseline_config.get("datasets", {}).get("manifest_ids")),
-            "revision": baseline_config.get("dataset_hash", baseline_config.get("datasets", {}).get("hashes")),
+            "manifest": baseline_config.get(
+                "dataset_manifest", baseline_config.get("datasets", {}).get("manifest_ids")
+            ),
+            "revision": baseline_config.get(
+                "dataset_hash", baseline_config.get("datasets", {}).get("hashes")
+            ),
         },
         "baseline": baseline,
         "active_experiment": active,
         "experiments": experiments,
         "checkpoints": checkpoints.get("checkpoints", []),
         "validation": {"status": "PASS" if not errors else "FAIL", "errors": errors},
-        "gpu": {"status": "NOT_RUN", "evidence": "Use opengrad gpu-smoke --json; placeholder config is not evidence."},
+        "gpu": {
+            "status": "NOT_RUN",
+            "evidence": "Use opengrad gpu-smoke --json; placeholder config is not evidence.",
+        },
     }
 
 
@@ -462,21 +555,49 @@ def _resolve_project_path(root: Path, value: Any, default: Path) -> Path:
 
 def _baseline_config_contract(raw: dict[str, Any], root: Path | None = None) -> tuple[bool, str]:
     required = {
-        "schema_version", "status", "model_id", "model_revision", "tokenizer_revision",
-        "renderer", "template_hash", "seed", "generation", "evaluations", "runtime",
-        "outputs", "provenance",
+        "schema_version",
+        "status",
+        "model_id",
+        "model_revision",
+        "tokenizer_revision",
+        "renderer",
+        "template_hash",
+        "seed",
+        "generation",
+        "evaluations",
+        "runtime",
+        "outputs",
+        "provenance",
     }
     missing = sorted(required - set(raw))
     if missing:
         return False, f"baseline config is missing required field(s): {', '.join(missing)}"
     if raw.get("schema_version") != 1 or raw.get("status") != "FROZEN_PRE_GPU":
         return False, "baseline config must use schema 1 and FROZEN_PRE_GPU status"
-    if raw.get("model_id") != CANONICAL_MODEL_ID or raw.get("model_revision") != PINNED_MODEL_REVISION or raw.get("tokenizer_revision") != PINNED_MODEL_REVISION:
-        return False, "baseline config model and tokenizer revisions must match the pinned canonical model"
-    if raw.get("renderer") != "qwen3_5_2b_v1" or raw.get("template_hash") != PINNED_TEMPLATE_HASH or raw.get("seed") != 0:
+    if (
+        raw.get("model_id") != CANONICAL_MODEL_ID
+        or raw.get("model_revision") != PINNED_MODEL_REVISION
+        or raw.get("tokenizer_revision") != PINNED_MODEL_REVISION
+    ):
+        return (
+            False,
+            "baseline config model and tokenizer revisions must match the pinned canonical model",
+        )
+    if (
+        raw.get("renderer") != "qwen3_5_2b_v1"
+        or raw.get("template_hash") != PINNED_TEMPLATE_HASH
+        or raw.get("seed") != 0
+    ):
         return False, "baseline renderer, template hash, or seed is not pinned"
     generation = raw.get("generation")
-    if not isinstance(generation, dict) or generation.get("do_sample") is not False or generation.get("temperature") != 0.0 or generation.get("top_p") != 1.0 or not isinstance(generation.get("max_new_tokens"), int) or generation["max_new_tokens"] < 1:
+    if (
+        not isinstance(generation, dict)
+        or generation.get("do_sample") is not False
+        or generation.get("temperature") != 0.0
+        or generation.get("top_p") != 1.0
+        or not isinstance(generation.get("max_new_tokens"), int)
+        or generation["max_new_tokens"] < 1
+    ):
         return False, "baseline generation must be deterministic and bounded"
     runtime = raw.get("runtime")
     if not isinstance(runtime, dict):
@@ -508,13 +629,24 @@ def _baseline_config_contract(raw: dict[str, Any], root: Path | None = None) -> 
         or not isinstance(runtime.get("context_length"), int)
         or runtime["context_length"] < 1
     ):
-        return False, "baseline runtime must pin BF16 precision, an accelerator requirement, and a context length"
+        return (
+            False,
+            "baseline runtime must pin BF16 precision, an accelerator requirement, and a context length",
+        )
     evaluations = raw.get("evaluations")
     provenance = raw.get("provenance")
     outputs = raw.get("outputs")
-    if not isinstance(evaluations, dict) or not isinstance(provenance, dict) or not isinstance(outputs, dict):
+    if (
+        not isinstance(evaluations, dict)
+        or not isinstance(provenance, dict)
+        or not isinstance(outputs, dict)
+    ):
         return False, "baseline evaluations, outputs, and provenance must be objects"
-    if not isinstance(evaluations.get("behavioral_manifest"), str) or provenance.get("evaluator_revision") != PINNED_EVALUATOR_REVISION or provenance.get("manifest_status") != "FROZEN_PRE_GPU":
+    if (
+        not isinstance(evaluations.get("behavioral_manifest"), str)
+        or provenance.get("evaluator_revision") != PINNED_EVALUATOR_REVISION
+        or provenance.get("manifest_status") != "FROZEN_PRE_GPU"
+    ):
         return False, "baseline evaluation provenance is not pinned"
     quality = evaluations.get("quality")
     if not isinstance(quality, dict):
@@ -522,9 +654,14 @@ def _baseline_config_contract(raw: dict[str, Any], root: Path | None = None) -> 
     rate = quality.get("min_parse_valid_rate")
     if not isinstance(rate, (int, float)) or isinstance(rate, bool) or not 0 < float(rate) <= 1:
         return False, "min_parse_valid_rate must be a number in (0, 1]"
-    if set(outputs) != {"predictions", "metrics", "residual_profile", "environment"} or not all(isinstance(value, str) and value for value in outputs.values()):
+    if set(outputs) != {"predictions", "metrics", "residual_profile", "environment"} or not all(
+        isinstance(value, str) and value for value in outputs.values()
+    ):
         return False, "baseline outputs must name all four artifact paths"
-    return True, "frozen baseline model, renderer, generation, runtime, and provenance contract match"
+    return (
+        True,
+        "frozen baseline model, renderer, generation, runtime, and provenance contract match",
+    )
 
 
 def _is_baseline_config(raw: dict[str, Any]) -> bool:
@@ -532,14 +669,30 @@ def _is_baseline_config(raw: dict[str, Any]) -> bool:
 
 
 def _is_experiment_config(raw: dict[str, Any]) -> bool:
-    required = {"experiment_id", "hypothesis", "model", "datasets", "trainer", "evaluation", "checkpointing", "promotion", "reproducibility"}
+    required = {
+        "experiment_id",
+        "hypothesis",
+        "model",
+        "datasets",
+        "trainer",
+        "evaluation",
+        "checkpointing",
+        "promotion",
+        "reproducibility",
+    }
     return required.issubset(raw)
 
 
-def _manifest_contract_ok(root: Path, manifest: dict[str, Any] | None, expected_revision: Any, expected_template: Any) -> tuple[bool, str]:
+def _manifest_contract_ok(
+    root: Path, manifest: dict[str, Any] | None, expected_revision: Any, expected_template: Any
+) -> tuple[bool, str]:
     if not manifest:
         return False, "evaluation manifest is missing or invalid JSON"
-    if manifest.get("schema_version") != 1 or manifest.get("frozen") is not True or manifest.get("status") not in {"FROZEN_PRE_GPU", "MATERIALIZED", "EXECUTED"}:
+    if (
+        manifest.get("schema_version") != 1
+        or manifest.get("frozen") is not True
+        or manifest.get("status") not in {"FROZEN_PRE_GPU", "MATERIALIZED", "EXECUTED"}
+    ):
         return False, "manifest must use schema 1 and be frozen with a supported status"
     if manifest.get("manifest_id") != "behavioral-heldout-v2":
         return False, "manifest ID does not match the frozen behavioral evaluation contract"
@@ -548,21 +701,35 @@ def _manifest_contract_ok(root: Path, manifest: dict[str, Any] | None, expected_
     contract = manifest.get("model_renderer_contract")
     if not isinstance(contract, dict):
         return False, "manifest model_renderer_contract is missing"
-    if contract.get("model_revision") != PINNED_MODEL_REVISION or expected_revision != PINNED_MODEL_REVISION:
+    if (
+        contract.get("model_revision") != PINNED_MODEL_REVISION
+        or expected_revision != PINNED_MODEL_REVISION
+    ):
         return False, "model revision does not match the pinned baseline revision"
     if contract.get("renderer") != "qwen3_5_2b_v1":
         return False, "manifest renderer does not match the pinned native renderer"
-    if contract.get("template_hash") != PINNED_TEMPLATE_HASH or expected_template != PINNED_TEMPLATE_HASH:
+    if (
+        contract.get("template_hash") != PINNED_TEMPLATE_HASH
+        or expected_template != PINNED_TEMPLATE_HASH
+    ):
         return False, "template hash does not match the pinned baseline template"
     splits = manifest.get("splits")
     if not isinstance(splits, list) or not splits:
         return False, "manifest has no valid split contract"
     ids = set()
     for split in splits:
-        if not isinstance(split, dict) or not isinstance(split.get("id"), str) or not split["id"] or split["id"] in ids or _safe_item_count(split) is None:
+        if (
+            not isinstance(split, dict)
+            or not isinstance(split.get("id"), str)
+            or not split["id"]
+            or split["id"] in ids
+            or _safe_item_count(split) is None
+        ):
             return False, "manifest has an invalid or duplicate split item contract"
         ids.add(split["id"])
-        if not isinstance(split.get("content_hash"), str) or not re.fullmatch(r"[0-9a-f]{64}", split["content_hash"]):
+        if not isinstance(split.get("content_hash"), str) or not re.fullmatch(
+            r"[0-9a-f]{64}", split["content_hash"]
+        ):
             return False, f"split {split.get('id')} has no pinned content hash"
         if not isinstance(split.get("source"), str) or not split["source"]:
             return False, f"split {split.get('id')} has no materialization source"
@@ -573,13 +740,26 @@ def _materialized_split_state(root: Path, split: dict[str, Any]) -> tuple[bool, 
     source = _resolve_project_path(root, split.get("source"), root / "__missing__")
     manifest_path = source if source.name == "manifest.json" else source / "manifest.json"
     data = _read_json(manifest_path)
-    if not data or data.get("finalized") is not True or not isinstance(data.get("shards"), list) or not data["shards"]:
-        return False, f"split {split.get('id')} materialization manifest is missing, unfinished, or empty", set()
+    if (
+        not data
+        or data.get("finalized") is not True
+        or not isinstance(data.get("shards"), list)
+        or not data["shards"]
+    ):
+        return (
+            False,
+            f"split {split.get('id')} materialization manifest is missing, unfinished, or empty",
+            set(),
+        )
     counts = data.get("counts") if isinstance(data.get("counts"), dict) else {}
     written = _safe_item_count({"items": counts.get("written")})
     expected = _safe_item_count(split)
     if written != expected:
-        return False, f"split {split.get('id')} materialized count {written} does not match frozen count {expected}", set()
+        return (
+            False,
+            f"split {split.get('id')} materialized count {written} does not match frozen count {expected}",
+            set(),
+        )
     actual_hash = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
     declared_hash = data.get("content_hash") or data.get("manifest_sha256")
     # A split content hash is a data-contract hash, not necessarily the JSON
@@ -593,6 +773,7 @@ def _materialized_split_state(root: Path, split: dict[str, Any]) -> tuple[bool, 
     content_digest = hashlib.sha256()
     try:
         import pyarrow.parquet as pq
+
         for name in data["shards"]:
             if not isinstance(name, str) or not name or name in shards:
                 return False, f"split {split.get('id')} has invalid shard names", set()
@@ -604,17 +785,34 @@ def _materialized_split_state(root: Path, split: dict[str, Any]) -> tuple[bool, 
                 for row in batch.to_pylist():
                     example_id = row.get("example_id") if isinstance(row, dict) else None
                     if not isinstance(example_id, str) or not example_id or example_id in seen_ids:
-                        return False, f"split {split.get('id')} contains missing or duplicate example_id", set()
+                        return (
+                            False,
+                            f"split {split.get('id')} contains missing or duplicate example_id",
+                            set(),
+                        )
                     seen_ids.add(example_id)
-                    content_digest.update(json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n")
+                    content_digest.update(
+                        json.dumps(
+                            row, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+                        ).encode("utf-8")
+                        + b"\n"
+                    )
                     actual_rows += 1
     except Exception as exc:  # noqa: BLE001 - unreadable shards must fail the gate, never pass it
         return False, f"split {split.get('id')} shard content cannot be verified: {exc}", set()
     if actual_rows != written:
-        return False, f"split {split.get('id')} shard rows {actual_rows} do not match manifest count {written}", set()
+        return (
+            False,
+            f"split {split.get('id')} shard rows {actual_rows} do not match manifest count {written}",
+            set(),
+        )
     if content_digest.hexdigest() != split.get("content_hash"):
         return False, f"split {split.get('id')} content hash does not match shard rows", set()
-    return True, f"split {split.get('id')} is materialized ({written} records; manifest {actual_hash[:12]})", shards
+    return (
+        True,
+        f"split {split.get('id')} is materialized ({written} records; manifest {actual_hash[:12]})",
+        shards,
+    )
 
 
 def _contamination_state(root: Path, report: dict[str, Any] | None) -> tuple[bool, str]:
@@ -627,15 +825,28 @@ def _contamination_state(root: Path, report: dict[str, Any] | None) -> tuple[boo
     if not report or report.get("manifest_id") != "behavioral-heldout-v2":
         return True, "contamination report is missing or bound to the wrong evaluation manifest"
     levels = report.get("levels") if isinstance(report.get("levels"), dict) else {}
-    required = {"1_exact_canonical_conversation_hash", "2_normalized_prompt_hash", "3_near_duplicate_ngram_minhash", "4_semantic_similarity", "5_manual_audit"}
+    required = {
+        "1_exact_canonical_conversation_hash",
+        "2_normalized_prompt_hash",
+        "3_near_duplicate_ngram_minhash",
+        "4_semantic_similarity",
+        "5_manual_audit",
+    }
     machine_levels = required - {"5_manual_audit"}
     level_ok = {"MEASURED", "CLEAN", "PASSED", "COMPLETE"}
     missing = sorted(required - set(levels))
     machine_pending = [
         name for name in sorted(machine_levels) if str(levels.get(name, "")).upper() not in level_ok
     ]
-    sources = {str(value) for value in report.get("training_sources_checked", [])} if isinstance(report.get("training_sources_checked"), list) else set()
-    source_ok = sources == {item.rsplit("/", 1)[-1] for item in TRAINING_SOURCE_MANIFESTS} or sources == TRAINING_SOURCE_IDS
+    sources = (
+        {str(value) for value in report.get("training_sources_checked", [])}
+        if isinstance(report.get("training_sources_checked"), list)
+        else set()
+    )
+    source_ok = (
+        sources == {item.rsplit("/", 1)[-1] for item in TRAINING_SOURCE_MANIFESTS}
+        or sources == TRAINING_SOURCE_IDS
+    )
 
     audit = load_audit(root / CONTAMINATION_AUDIT_PATH)
     quarantine = load_quarantine(root / CONTAMINATION_QUARANTINE_PATH)
@@ -674,32 +885,78 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         gate_map[name] = gate
 
     errors = validate_registry(root)
-    add("repository_validation", "PASS" if not errors else "FAIL", "All registries validate" if not errors else "; ".join(errors), "CONFIG_INVALID" if errors else None)
+    add(
+        "repository_validation",
+        "PASS" if not errors else "FAIL",
+        "All registries validate" if not errors else "; ".join(errors),
+        "CONFIG_INVALID" if errors else None,
+    )
     raw = _read_yaml(config_path)
     if not raw:
-        add("config_validation", "FAIL", f"Config missing or invalid: {config_path}", "CONFIG_INVALID")
+        add(
+            "config_validation",
+            "FAIL",
+            f"Config missing or invalid: {config_path}",
+            "CONFIG_INVALID",
+        )
     elif _is_baseline_config(raw):
-        add("config_validation", "PASS", f"Valid frozen baseline config: {config_path.relative_to(root) if config_path.is_relative_to(root) else config_path}")
+        add(
+            "config_validation",
+            "PASS",
+            f"Valid frozen baseline config: {config_path.relative_to(root) if config_path.is_relative_to(root) else config_path}",
+        )
     elif _is_experiment_config(raw):
         try:
             ExperimentConfig.from_file(config_path)
-            add("config_validation", "PASS", f"Valid experiment config: {config_path.relative_to(root) if config_path.is_relative_to(root) else config_path}")
+            add(
+                "config_validation",
+                "PASS",
+                f"Valid experiment config: {config_path.relative_to(root) if config_path.is_relative_to(root) else config_path}",
+            )
         except (OSError, ValueError, TypeError) as exc:
             add("config_validation", "FAIL", str(exc), "CONFIG_INVALID")
     else:
-        add("config_validation", "FAIL", "Config is neither a frozen baseline evaluation contract nor a complete experiment config", "CONFIG_INVALID")
+        add(
+            "config_validation",
+            "FAIL",
+            "Config is neither a frozen baseline evaluation contract nor a complete experiment config",
+            "CONFIG_INVALID",
+        )
 
     revision = raw.get("model_revision", raw.get("model", {}).get("model_revision"))
     revision_ok = revision == PINNED_MODEL_REVISION
-    add("model_revision", "PASS" if revision_ok else "FAIL", f"Pinned model revision: {revision}", "TOKENIZER_MISMATCH" if not revision_ok else None)
+    add(
+        "model_revision",
+        "PASS" if revision_ok else "FAIL",
+        f"Pinned model revision: {revision}",
+        "TOKENIZER_MISMATCH" if not revision_ok else None,
+    )
     model_id = raw.get("model_id", raw.get("model", {}).get("model_id"))
     model_id_ok = model_id == CANONICAL_MODEL_ID
-    add("model_identity", "PASS" if model_id_ok else "FAIL", f"Canonical model ID: {model_id}", "MODEL_INVALID" if not model_id_ok else None)
-    tokenizer_revision = raw.get("tokenizer_revision", raw.get("model", {}).get("tokenizer_revision"))
-    tokenizer_ok = _check_revision(tokenizer_revision) and tokenizer_revision == PINNED_MODEL_REVISION
-    add("tokenizer_revision", "PASS" if tokenizer_ok else "FAIL", f"Pinned tokenizer revision: {tokenizer_revision}", "TOKENIZER_MISMATCH" if not tokenizer_ok else None)
+    add(
+        "model_identity",
+        "PASS" if model_id_ok else "FAIL",
+        f"Canonical model ID: {model_id}",
+        "MODEL_INVALID" if not model_id_ok else None,
+    )
+    tokenizer_revision = raw.get(
+        "tokenizer_revision", raw.get("model", {}).get("tokenizer_revision")
+    )
+    tokenizer_ok = (
+        _check_revision(tokenizer_revision) and tokenizer_revision == PINNED_MODEL_REVISION
+    )
+    add(
+        "tokenizer_revision",
+        "PASS" if tokenizer_ok else "FAIL",
+        f"Pinned tokenizer revision: {tokenizer_revision}",
+        "TOKENIZER_MISMATCH" if not tokenizer_ok else None,
+    )
     config_is_baseline = _is_baseline_config(raw)
-    model_contract = raw.get("model_renderer_contract") if isinstance(raw.get("model_renderer_contract"), dict) else {}
+    model_contract = (
+        raw.get("model_renderer_contract")
+        if isinstance(raw.get("model_renderer_contract"), dict)
+        else {}
+    )
     template_hash = raw.get("template_hash", model_contract.get("template_hash"))
     if config_is_baseline:
         template_ok = template_hash == PINNED_TEMPLATE_HASH
@@ -708,15 +965,32 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         # Experiment configs do not own the evaluation renderer contract; the
         # frozen held-out manifest remains the authority for evaluation.
         template_ok = True
-        template_detail = "Experiment config delegates renderer contract to the frozen evaluation manifest"
-    add("chat_template_contract", "PASS" if template_ok else "FAIL", template_detail, "TOKENIZER_MISMATCH" if not template_ok else None)
+        template_detail = (
+            "Experiment config delegates renderer contract to the frozen evaluation manifest"
+        )
+    add(
+        "chat_template_contract",
+        "PASS" if template_ok else "FAIL",
+        template_detail,
+        "TOKENIZER_MISMATCH" if not template_ok else None,
+    )
 
-    manifest_rel = raw.get("dataset_manifest", raw.get("evaluations", {}).get("behavioral_manifest", BASELINE_MANIFEST.as_posix()))
+    manifest_rel = raw.get(
+        "dataset_manifest",
+        raw.get("evaluations", {}).get("behavioral_manifest", BASELINE_MANIFEST.as_posix()),
+    )
     manifest_path = _resolve_project_path(root, manifest_rel, root / BASELINE_MANIFEST)
     manifest = _read_json(manifest_path)
     expected_template = template_hash if config_is_baseline else PINNED_TEMPLATE_HASH
-    manifest_ok, manifest_detail = _manifest_contract_ok(root, manifest, revision, expected_template)
-    add("evaluation_manifest", "PASS" if manifest_ok else "FAIL", manifest_detail, "CHECKSUM_MISMATCH" if not manifest_ok else None)
+    manifest_ok, manifest_detail = _manifest_contract_ok(
+        root, manifest, revision, expected_template
+    )
+    add(
+        "evaluation_manifest",
+        "PASS" if manifest_ok else "FAIL",
+        manifest_detail,
+        "CHECKSUM_MISMATCH" if not manifest_ok else None,
+    )
     materialization_errors = []
     if manifest:
         for split in manifest.get("splits", []):
@@ -725,29 +999,68 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
                 materialization_errors.append(detail)
     else:
         materialization_errors.append("evaluation manifest is unavailable")
-    add("evaluation_materialization", "PASS" if not materialization_errors else "FAIL", "All frozen evaluation split manifests are materialized" if not materialization_errors else "; ".join(materialization_errors), "DATASET_NOT_FOUND" if materialization_errors else None)
+    add(
+        "evaluation_materialization",
+        "PASS" if not materialization_errors else "FAIL",
+        "All frozen evaluation split manifests are materialized"
+        if not materialization_errors
+        else "; ".join(materialization_errors),
+        "DATASET_NOT_FOUND" if materialization_errors else None,
+    )
     if _is_experiment_config(raw):
         training_ok, training_detail = _training_data_contract(root, raw)
-        add("dataset_revision", "PASS" if training_ok else "FAIL", training_detail, "NO_FLOATING_DATASET_REVISION" if not training_ok else None)
-        add("dataset_snapshot", "PASS" if training_ok else "FAIL", training_detail, "DATASET_NOT_FOUND" if not training_ok else None)
+        add(
+            "dataset_revision",
+            "PASS" if training_ok else "FAIL",
+            training_detail,
+            "NO_FLOATING_DATASET_REVISION" if not training_ok else None,
+        )
+        add(
+            "dataset_snapshot",
+            "PASS" if training_ok else "FAIL",
+            training_detail,
+            "DATASET_NOT_FOUND" if not training_ok else None,
+        )
     else:
-        add("dataset_revision", "PASS", "Baseline dataset contract is represented by the frozen evaluation manifest")
+        add(
+            "dataset_revision",
+            "PASS",
+            "Baseline dataset contract is represented by the frozen evaluation manifest",
+        )
         add("dataset_snapshot", "PASS", "Baseline uses the frozen evaluation manifest")
     contamination = _read_json(root / "reports/data/behavioral-heldout-v2-contamination.json")
     contamination_blocked, contamination_detail = _contamination_state(root, contamination)
-    add("contamination_gate", "FAIL" if contamination_blocked else "PASS", contamination_detail, "CONTAMINATION_FAILURE" if contamination_blocked else None)
+    add(
+        "contamination_gate",
+        "FAIL" if contamination_blocked else "PASS",
+        contamination_detail,
+        "CONTAMINATION_FAILURE" if contamination_blocked else None,
+    )
     policy = manifest.get("contamination_policy", {}) if isinstance(manifest, dict) else {}
     excluded = policy.get("training_manifests_excluded")
     heldout_source_ok = bool(
         policy.get("derived_prompts_excluded") is True
         and isinstance(excluded, list)
-        and {str(value).rstrip("/") for value in excluded} == {value.rstrip("/") for value in TRAINING_SOURCE_MANIFESTS}
+        and {str(value).rstrip("/") for value in excluded}
+        == {value.rstrip("/") for value in TRAINING_SOURCE_MANIFESTS}
     )
-    add("evaluation_leakage", "PASS" if heldout_source_ok else "FAIL", "Evaluation-only manifest excludes exactly the training manifests" if heldout_source_ok else "Manifest leakage policy is missing or does not cover the training manifests", "CONTAMINATION_FAILURE" if not heldout_source_ok else None)
+    add(
+        "evaluation_leakage",
+        "PASS" if heldout_source_ok else "FAIL",
+        "Evaluation-only manifest excludes exactly the training manifests"
+        if heldout_source_ok
+        else "Manifest leakage policy is missing or does not cover the training manifests",
+        "CONTAMINATION_FAILURE" if not heldout_source_ok else None,
+    )
 
     disk = shutil.disk_usage(root)
     free_gib = disk.free / 2**30
-    add("disk_capacity", "PASS" if free_gib >= 2 else ("WARN" if free_gib >= 1 else "FAIL"), f"{free_gib:.2f} GiB free", "PATH_NOT_WRITABLE" if free_gib < 1 else None)
+    add(
+        "disk_capacity",
+        "PASS" if free_gib >= 2 else ("WARN" if free_gib >= 1 else "FAIL"),
+        f"{free_gib:.2f} GiB free",
+        "PATH_NOT_WRITABLE" if free_gib < 1 else None,
+    )
     runs = root / "runs"
     storage_error = ""
     try:
@@ -758,30 +1071,76 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         storage_status = "PASS"
     except OSError as exc:
         storage_status, storage_error = "FAIL", str(exc)
-    add("artifact_storage", storage_status, "runs/ is writable" if storage_status == "PASS" else storage_error, "PATH_NOT_WRITABLE" if storage_status != "PASS" else None)
+    add(
+        "artifact_storage",
+        storage_status,
+        "runs/ is writable" if storage_status == "PASS" else storage_error,
+        "PATH_NOT_WRITABLE" if storage_status != "PASS" else None,
+    )
     parser_exists = (root / "src/opengrad/formatting/parser.py").exists()
-    add("native_parser", "PASS" if parser_exists else "FAIL", "Qwen native parser is present" if parser_exists else "Qwen native parser is missing", "TOKENIZER_MISMATCH" if not parser_exists else None)
+    add(
+        "native_parser",
+        "PASS" if parser_exists else "FAIL",
+        "Qwen native parser is present" if parser_exists else "Qwen native parser is missing",
+        "TOKENIZER_MISMATCH" if not parser_exists else None,
+    )
 
     hw = probe_hardware()
     gpu_status = "PASS" if hw.gpu_available and hw.bf16_supported else "FAIL"
-    add("gpu_probe", gpu_status, f"{hw.gpu_name or 'no accelerator detected'}; VRAM={hw.total_vram_gb:.2f} GiB; BF16={hw.bf16_supported}", "GPU_UNAVAILABLE" if not hw.gpu_available else None)
+    add(
+        "gpu_probe",
+        gpu_status,
+        f"{hw.gpu_name or 'no accelerator detected'}; VRAM={hw.total_vram_gb:.2f} GiB; BF16={hw.bf16_supported}",
+        "GPU_UNAVAILABLE" if not hw.gpu_available else None,
+    )
     smoke_path = root / "reports/hardware/qwen_gpu_smoke.json"
     smoke = _read_json(smoke_path)
     smoke_checks = smoke.get("checks", []) if smoke else []
-    required_smoke_checks = {"model_access", "native_template", "model_load", "one_generation", "native_parser", "vram", "cleanup"}
-    smoke_names = {check.get("name") for check in smoke_checks if isinstance(check, dict) and check.get("status") == "PASS"}
-    smoke_parser_ok = any(check.get("name") == "native_parser" and check.get("parser_status") == "RAW_VALID" for check in smoke_checks if isinstance(check, dict) and check.get("status") == "PASS")
-    boundary_ok = bool(
-        smoke and smoke.get("status") == "PASS" and smoke.get("kind") == "GPU_BOUNDARY_VERIFIED"
-        and smoke.get("model_id") == "Qwen/Qwen3.5-2B" and smoke.get("model_revision") == PINNED_MODEL_REVISION
-        and smoke.get("hardware", {}).get("gpu_available") is True
-        and required_smoke_checks.issubset(smoke_names) and smoke_parser_ok
+    required_smoke_checks = {
+        "model_access",
+        "native_template",
+        "model_load",
+        "one_generation",
+        "native_parser",
+        "vram",
+        "cleanup",
+    }
+    smoke_names = {
+        check.get("name")
+        for check in smoke_checks
+        if isinstance(check, dict) and check.get("status") == "PASS"
+    }
+    smoke_parser_ok = any(
+        check.get("name") == "native_parser" and check.get("parser_status") == "RAW_VALID"
+        for check in smoke_checks
+        if isinstance(check, dict) and check.get("status") == "PASS"
     )
-    add("gpu_boundary", "PASS" if boundary_ok else "FAIL", "Bounded Qwen smoke receipt has complete valid evidence" if boundary_ok else "GPU boundary is not verified with complete RAW_VALID smoke evidence", "GPU_SMOKE_FAILED" if not boundary_ok else None)
+    boundary_ok = bool(
+        smoke
+        and smoke.get("status") == "PASS"
+        and smoke.get("kind") == "GPU_BOUNDARY_VERIFIED"
+        and smoke.get("model_id") == "Qwen/Qwen3.5-2B"
+        and smoke.get("model_revision") == PINNED_MODEL_REVISION
+        and smoke.get("hardware", {}).get("gpu_available") is True
+        and required_smoke_checks.issubset(smoke_names)
+        and smoke_parser_ok
+    )
+    add(
+        "gpu_boundary",
+        "PASS" if boundary_ok else "FAIL",
+        "Bounded Qwen smoke receipt has complete valid evidence"
+        if boundary_ok
+        else "GPU boundary is not verified with complete RAW_VALID smoke evidence",
+        "GPU_SMOKE_FAILED" if not boundary_ok else None,
+    )
 
     baseline = _baseline_state(root)
-    required_artifacts = all(baseline["artifacts"].values()) and baseline.get("artifact_contract_ok") is True
-    is_sft_config = _is_experiment_config(raw) and str(raw.get("trainer", {}).get("type", "")).lower() == "sft"
+    required_artifacts = (
+        all(baseline["artifacts"].values()) and baseline.get("artifact_contract_ok") is True
+    )
+    is_sft_config = (
+        _is_experiment_config(raw) and str(raw.get("trainer", {}).get("type", "")).lower() == "sft"
+    )
     if is_sft_config:
         try:
             preflight = run_experiment_preflight(config_path, root=root)
@@ -790,17 +1149,46 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         except (OSError, TypeError, ValueError) as exc:
             preflight_ok = False
             preflight_detail = f"OpenGrad experiment preflight failed: {exc}"
-        add("experiment_preflight", "PASS" if preflight_ok else "FAIL", preflight_detail, "PREFLIGHT_FAILED" if not preflight_ok else None)
+        add(
+            "experiment_preflight",
+            "PASS" if preflight_ok else "FAIL",
+            preflight_detail,
+            "PREFLIGHT_FAILED" if not preflight_ok else None,
+        )
     else:
-        add("experiment_preflight", "PASS", "Baseline contract does not require SFT experiment preflight")
+        add(
+            "experiment_preflight",
+            "PASS",
+            "Baseline contract does not require SFT experiment preflight",
+        )
     if is_sft_config:
         dataset_ids = raw.get("datasets", {}).get("manifest_ids", [])
         eval_terms = {"heldout", "evaluation", "mcq", "judge", "preference", "bfcl", "tau2"}
-        unsafe_ids = [str(item) for item in dataset_ids if any(term in str(item).lower() for term in eval_terms)]
-        add("training_data_policy", "FAIL" if unsafe_ids else "PASS", f"Evaluation-only dataset IDs are excluded: {unsafe_ids}" if unsafe_ids else "SFT dataset manifest IDs contain no evaluation-only names", "NO_TRAINING_ON_EVAL_DATA" if unsafe_ids else None)
+        unsafe_ids = [
+            str(item)
+            for item in dataset_ids
+            if any(term in str(item).lower() for term in eval_terms)
+        ]
+        add(
+            "training_data_policy",
+            "FAIL" if unsafe_ids else "PASS",
+            f"Evaluation-only dataset IDs are excluded: {unsafe_ids}"
+            if unsafe_ids
+            else "SFT dataset manifest IDs contain no evaluation-only names",
+            "NO_TRAINING_ON_EVAL_DATA" if unsafe_ids else None,
+        )
     else:
-        add("training_data_policy", "PASS", "Not an SFT configuration; training data policy deferred")
-    add("real_b0", "PASS" if baseline["real"] else "FAIL", baseline["status"], "BASELINE_NOT_FOUND" if not baseline["real"] else None)
+        add(
+            "training_data_policy",
+            "PASS",
+            "Not an SFT configuration; training data policy deferred",
+        )
+    add(
+        "real_b0",
+        "PASS" if baseline["real"] else "FAIL",
+        baseline["status"],
+        "BASELINE_NOT_FOUND" if not baseline["real"] else None,
+    )
     add(
         "baseline_artifacts",
         "PASS" if required_artifacts else "FAIL",
@@ -817,13 +1205,30 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
     # require its own post-run artifacts or a prior GPU receipt. The receipt is
     # produced by the immediately preceding smoke stage in B0_WORKFLOW.
     baseline_prerequisites = {
-        "repository_validation", "config_validation", "model_revision", "tokenizer_revision",
-        "chat_template_contract", "evaluation_manifest", "evaluation_materialization",
-        "contamination_gate", "evaluation_leakage", "disk_capacity", "artifact_storage",
-        "native_parser", "gpu_probe",
+        "repository_validation",
+        "config_validation",
+        "model_revision",
+        "tokenizer_revision",
+        "chat_template_contract",
+        "evaluation_manifest",
+        "evaluation_materialization",
+        "contamination_gate",
+        "evaluation_leakage",
+        "disk_capacity",
+        "artifact_storage",
+        "native_parser",
+        "gpu_probe",
     }
     ready_for_baseline = all(gate_map[name]["status"] == "PASS" for name in baseline_prerequisites)
-    sft_names = baseline_prerequisites | {"gpu_boundary", "real_b0", "baseline_artifacts", "training_data_policy", "dataset_revision", "dataset_snapshot", "experiment_preflight"}
+    sft_names = baseline_prerequisites | {
+        "gpu_boundary",
+        "real_b0",
+        "baseline_artifacts",
+        "training_data_policy",
+        "dataset_revision",
+        "dataset_snapshot",
+        "experiment_preflight",
+    }
     ready_for_sft = all(gate_map[name]["status"] == "PASS" for name in sft_names)
     blocking = [gate["name"] for gate in gates if gate["status"] == "FAIL"]
     warnings = [gate["name"] for gate in gates if gate["status"] == "WARN"]
@@ -842,7 +1247,9 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "git_commit": _git_state(root)["commit"],
         "baseline": baseline,
         "gpu": hw.to_dict(),
-        "config": str(config_path.relative_to(root)) if config_path.is_relative_to(root) else str(config_path),
+        "config": str(config_path.relative_to(root))
+        if config_path.is_relative_to(root)
+        else str(config_path),
     }
 
 
@@ -860,7 +1267,14 @@ def gpu_smoke(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "limitations": [],
     }
     if not hw.gpu_available:
-        receipt["checks"] = [{"name": "hardware", "status": "FAIL", "code": "GPU_UNAVAILABLE", "details": "No CUDA accelerator detected."}]
+        receipt["checks"] = [
+            {
+                "name": "hardware",
+                "status": "FAIL",
+                "code": "GPU_UNAVAILABLE",
+                "details": "No CUDA accelerator detected.",
+            }
+        ]
         receipt["limitations"].append("No model load or generation attempted.")
         return _write_gpu_receipt(root, receipt)
     checks: list[dict[str, Any]] = []
@@ -868,7 +1282,14 @@ def gpu_smoke(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         torch = importlib.import_module("torch")
         transformers = importlib.import_module("transformers")
     except ImportError as exc:
-        receipt["checks"] = [{"name": "dependencies", "status": "FAIL", "code": "GPU_SMOKE_FAILED", "details": str(exc)}]
+        receipt["checks"] = [
+            {
+                "name": "dependencies",
+                "status": "FAIL",
+                "code": "GPU_SMOKE_FAILED",
+                "details": str(exc),
+            }
+        ]
         receipt["limitations"].append("Install the pinned gpu-evaluation extra before retrying.")
         return _write_gpu_receipt(root, receipt)
 
@@ -881,15 +1302,42 @@ def gpu_smoke(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         model_id = {"qwen3.5-2b": "Qwen/Qwen3.5-2B"}.get(model_id.lower(), model_id)
         revision = str(raw.get("model_revision", ""))
         template_hash = raw.get("template_hash")
-        if model_id != "Qwen/Qwen3.5-2B" or revision != PINNED_MODEL_REVISION or template_hash != PINNED_TEMPLATE_HASH:
+        if (
+            model_id != "Qwen/Qwen3.5-2B"
+            or revision != PINNED_MODEL_REVISION
+            or template_hash != PINNED_TEMPLATE_HASH
+        ):
             raise ValueError("GPU smoke requires the pinned Qwen model revision and template hash")
         kwargs = {"revision": revision, "trust_remote_code": False}
         tokenizer = transformers.AutoTokenizer.from_pretrained(model_id, **kwargs)
         checks.append({"name": "model_access", "status": "PASS", "details": model_id})
-        tools = [{"type": "function", "function": {"name": "lookup", "description": "Lookup a value", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}}}]
-        rendered = tokenizer.apply_chat_template([{"role": "user", "content": "Look up worker 12."}], tools=tools, add_generation_prompt=True, tokenize=False, enable_thinking=False)
-        checks.append({"name": "native_template", "status": "PASS", "characters": len(str(rendered))})
-        model = transformers.AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.bfloat16, device_map="auto", **kwargs)
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "lookup",
+                    "description": "Lookup a value",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {"q": {"type": "string"}},
+                        "required": ["q"],
+                    },
+                },
+            }
+        ]
+        rendered = tokenizer.apply_chat_template(
+            [{"role": "user", "content": "Look up worker 12."}],
+            tools=tools,
+            add_generation_prompt=True,
+            tokenize=False,
+            enable_thinking=False,
+        )
+        checks.append(
+            {"name": "native_template", "status": "PASS", "characters": len(str(rendered))}
+        )
+        model = transformers.AutoModelForCausalLM.from_pretrained(
+            model_id, torch_dtype=torch.bfloat16, device_map="auto", **kwargs
+        )
         model.eval()
         device = next(model.parameters()).device
         if getattr(device, "type", None) != "cuda":
@@ -900,26 +1348,59 @@ def gpu_smoke(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         encoded = {key: value.to(device) for key, value in encoded.items()}
         with torch.inference_mode():
             output = model.generate(**encoded, max_new_tokens=SMOKE_MAX_NEW_TOKENS, do_sample=False)
-        generated = tokenizer.decode(output[0, encoded["input_ids"].shape[1]:], skip_special_tokens=False)
+        generated = tokenizer.decode(
+            output[0, encoded["input_ids"].shape[1] :], skip_special_tokens=False
+        )
         checks.append({"name": "one_generation", "status": "PASS", "output_chars": len(generated)})
         from opengrad.formatting.parser import parse_qwen_native_output
 
         parsed = parse_qwen_native_output(generated)
-        parser_ok = parsed.status == "RAW_VALID" and parsed.decision in {"CALL", "ANSWER", "CLARIFY", "UNSUPPORTED"}
-        checks.append({"name": "native_parser", "status": "PASS" if parser_ok else "FAIL", "parser_status": parsed.status, "decision": parsed.decision, "errors": parsed.errors or []})
+        parser_ok = parsed.status == "RAW_VALID" and parsed.decision in {
+            "CALL",
+            "ANSWER",
+            "CLARIFY",
+            "UNSUPPORTED",
+        }
+        checks.append(
+            {
+                "name": "native_parser",
+                "status": "PASS" if parser_ok else "FAIL",
+                "parser_status": parsed.status,
+                "decision": parsed.decision,
+                "errors": parsed.errors or [],
+            }
+        )
         if not parser_ok:
-            raise RuntimeError(f"native parser rejected smoke output: {parsed.status}: {parsed.errors or []}")
+            raise RuntimeError(
+                f"native parser rejected smoke output: {parsed.status}: {parsed.errors or []}"
+            )
         torch.cuda.synchronize()
         allocated = torch.cuda.memory_allocated() / 2**30
         peak = torch.cuda.max_memory_allocated() / 2**30
-        checks.append({"name": "vram", "status": "PASS", "allocated_gib": round(allocated, 3), "peak_allocated_gib": round(peak, 3)})
+        checks.append(
+            {
+                "name": "vram",
+                "status": "PASS",
+                "allocated_gib": round(allocated, 3),
+                "peak_allocated_gib": round(peak, 3),
+            }
+        )
         del model, tokenizer
         torch.cuda.empty_cache()
         checks.append({"name": "cleanup", "status": "PASS"})
         receipt["status"] = "PASS"
     except Exception as exc:  # noqa: BLE001 - bounded smoke must emit an auditable failure, never hide it
-        checks.append({"name": "runtime", "status": "FAIL", "code": "GPU_SMOKE_FAILED", "details": f"{type(exc).__name__}: {exc}"})
-        receipt["limitations"].append("Real baseline and SFT are blocked until this boundary passes.")
+        checks.append(
+            {
+                "name": "runtime",
+                "status": "FAIL",
+                "code": "GPU_SMOKE_FAILED",
+                "details": f"{type(exc).__name__}: {exc}",
+            }
+        )
+        receipt["limitations"].append(
+            "Real baseline and SFT are blocked until this boundary passes."
+        )
     receipt["checks"] = checks
     return _write_gpu_receipt(root, receipt)
 

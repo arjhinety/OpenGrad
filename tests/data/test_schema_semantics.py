@@ -194,8 +194,7 @@ def test_shared_state_machine_rejects_reversed_results_and_interleaved_calls():
     ]
     example = conversation(messages)
     assert any(
-        issue.code == "INVALID_MESSAGE_SEQUENCE"
-        for issue in validate_training_trajectory(example)
+        issue.code == "INVALID_MESSAGE_SEQUENCE" for issue in validate_training_trajectory(example)
     )
     with pytest.raises(ValueError, match="SEM_RESULT_ORDER"):
         example.validate_training_semantics()
@@ -215,7 +214,10 @@ def test_shared_state_machine_rejects_reversed_results_and_interleaved_calls():
             },
         ]
     )
-    assert any(issue.code == "INVALID_MESSAGE_SEQUENCE" for issue in validate_training_trajectory(interleaved))
+    assert any(
+        issue.code == "INVALID_MESSAGE_SEQUENCE"
+        for issue in validate_training_trajectory(interleaved)
+    )
     with pytest.raises(ValueError, match="SEM_RESULT_ORDER"):
         interleaved.validate_training_semantics()
 

@@ -33,7 +33,9 @@ class HardwareProbeResult:
             "is_a100": self.is_a100,
             "a100_variant": self.a100_variant,
             "total_vram_gb": round(self.total_vram_gb, 2),
-            "compute_capability": list(self.compute_capability) if self.compute_capability else None,
+            "compute_capability": list(self.compute_capability)
+            if self.compute_capability
+            else None,
             "cuda_driver_version": self.cuda_driver_version,
             "cuda_runtime_version": self.cuda_runtime_version,
             "bf16_supported": self.bf16_supported,
@@ -53,7 +55,9 @@ class HardwareProbeResult:
             f"- **Device Name:** {self.gpu_name or 'N/A'}",
             f"- **A100 Variant:** {self.a100_variant or ('Not an A100' if self.gpu_available else 'N/A')}",
             f"- **Total VRAM:** {self.total_vram_gb:.1f} GB",
-            f"- **Compute Capability:** {self.compute_capability[0]}.{self.compute_capability[1]}" if self.compute_capability else "- **Compute Capability:** N/A",
+            f"- **Compute Capability:** {self.compute_capability[0]}.{self.compute_capability[1]}"
+            if self.compute_capability
+            else "- **Compute Capability:** N/A",
             f"- **CUDA Driver:** {self.cuda_driver_version or 'N/A'}",
             f"- **BF16 Support:** {'YES (Native hardware)' if self.bf16_supported else 'NO'}",
             f"- **Native FP8 Support:** {'YES (Hopper+)' if self.fp8_native_supported else 'NO (Ampere architecture)'}",
@@ -92,14 +96,18 @@ def probe_hardware() -> HardwareProbeResult:
             vram_gb = vram_bytes / (1024**3)
             cuda_runtime = getattr(torch_mod.version, "cuda", None)
             bf16_support = bool(compute_cap[0] >= 8)  # Ampere (sm_80+) supports BF16
-            fp8_support = bool(compute_cap[0] >= 9)   # Hopper (sm_90+) supports FP8
+            fp8_support = bool(compute_cap[0] >= 9)  # Hopper (sm_90+) supports FP8
     except (ImportError, AttributeError, RuntimeError):
         pass
 
     # If torch was unable to get device info, probe via nvidia-smi
     if not gpu_available:
         try:
-            cmd = ["nvidia-smi", "--query-gpu=name,memory.total,driver_version", "--format=csv,noheader,nounits"]
+            cmd = [
+                "nvidia-smi",
+                "--query-gpu=name,memory.total,driver_version",
+                "--format=csv,noheader,nounits",
+            ]
             res = subprocess.check_output(cmd, text=True).strip()
             if res:
                 parts = [p.strip() for p in res.splitlines()[0].split(",")]

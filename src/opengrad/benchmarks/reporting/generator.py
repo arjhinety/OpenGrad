@@ -14,10 +14,20 @@ def generate_run_readme(output_dir: Path) -> str:
     failures_file = output_dir / "failures.json"
     speculative_file = output_dir / "speculative.json"
 
-    manifest: dict[str, Any] = json.loads(manifest_file.read_text(encoding="utf-8")) if manifest_file.exists() else {}
-    metrics: dict[str, Any] = json.loads(metrics_file.read_text(encoding="utf-8")) if metrics_file.exists() else {}
-    failures: dict[str, Any] = json.loads(failures_file.read_text(encoding="utf-8")) if failures_file.exists() else {}
-    speculative: dict[str, Any] = json.loads(speculative_file.read_text(encoding="utf-8")) if speculative_file.exists() else {}
+    manifest: dict[str, Any] = (
+        json.loads(manifest_file.read_text(encoding="utf-8")) if manifest_file.exists() else {}
+    )
+    metrics: dict[str, Any] = (
+        json.loads(metrics_file.read_text(encoding="utf-8")) if metrics_file.exists() else {}
+    )
+    failures: dict[str, Any] = (
+        json.loads(failures_file.read_text(encoding="utf-8")) if failures_file.exists() else {}
+    )
+    speculative: dict[str, Any] = (
+        json.loads(speculative_file.read_text(encoding="utf-8"))
+        if speculative_file.exists()
+        else {}
+    )
 
     lines = [
         f"# Benchmark Run Report: {manifest.get('run_id', 'unknown')}",
@@ -59,8 +69,12 @@ def generate_run_readme(output_dir: Path) -> str:
         lines.append("| Metric | Value |")
         lines.append("| :--- | :---: |")
         lines.append(f"| **Mean Latency** | {sys_metrics.get('mean_latency_sec', 0.0):.4f} s |")
-        lines.append(f"| **Output Throughput** | {sys_metrics.get('output_tokens_per_second', 0.0):.2f} tok/s |")
-        lines.append(f"| **Total Completion Tokens** | {sys_metrics.get('total_completion_tokens', 0)} |")
+        lines.append(
+            f"| **Output Throughput** | {sys_metrics.get('output_tokens_per_second', 0.0):.2f} tok/s |"
+        )
+        lines.append(
+            f"| **Total Completion Tokens** | {sys_metrics.get('total_completion_tokens', 0)} |"
+        )
         lines.append("")
 
     if speculative:
@@ -68,8 +82,12 @@ def generate_run_readme(output_dir: Path) -> str:
         lines.append("")
         lines.append("| Metric | Value |")
         lines.append("| :--- | :---: |")
-        lines.append(f"| **Mean Acceptance Rate** | {speculative.get('mean_acceptance_rate', 0.0) * 100:.1f}% |")
-        lines.append(f"| **Accepted Tokens / Step** | {speculative.get('mean_accepted_tokens_per_step', 0.0):.2f} |")
+        lines.append(
+            f"| **Mean Acceptance Rate** | {speculative.get('mean_acceptance_rate', 0.0) * 100:.1f}% |"
+        )
+        lines.append(
+            f"| **Accepted Tokens / Step** | {speculative.get('mean_accepted_tokens_per_step', 0.0):.2f} |"
+        )
         lines.append(f"| **Samples Evaluated** | {speculative.get('samples_evaluated', 0)} |")
         lines.append("")
 

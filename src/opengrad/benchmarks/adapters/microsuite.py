@@ -25,14 +25,19 @@ class MicrosuiteAdapter(BenchmarkAdapter):
                 tools=list(prompt_def.tools),
                 expected={"type": prompt_def.expected_type, "sha256": prompt_def.sha256},
                 expected_decision="CALL" if prompt_def.tools else "ANSWER",
-                metadata={"prompt_sha256": prompt_def.sha256, "expected_type": prompt_def.expected_type},
+                metadata={
+                    "prompt_sha256": prompt_def.sha256,
+                    "expected_type": prompt_def.expected_type,
+                },
             )
             tasks.append(task)
         if limit is not None:
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip()
         success = bool(text)
         failure_category = None if success else ToolFailureCategory.RUNTIME_FAILURE.value

@@ -83,9 +83,15 @@ class MTPDepthMetrics:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "per_depth_acceptance": {f"depth_{k}": round(v, 4) for k, v in sorted(self.per_depth_acceptance.items())},
-            "conditional_acceptance": {f"depth_{k}": round(v, 4) for k, v in sorted(self.conditional_acceptance.items())},
-            "head_confidence": {f"head_{k}": round(v, 4) for k, v in sorted(self.head_confidence.items())},
+            "per_depth_acceptance": {
+                f"depth_{k}": round(v, 4) for k, v in sorted(self.per_depth_acceptance.items())
+            },
+            "conditional_acceptance": {
+                f"depth_{k}": round(v, 4) for k, v in sorted(self.conditional_acceptance.items())
+            },
+            "head_confidence": {
+                f"head_{k}": round(v, 4) for k, v in sorted(self.head_confidence.items())
+            },
             "useful_speculation_depth": self.useful_speculation_depth,
             "wasted_speculative_computation_pct": round(self.wasted_speculative_computation_pct, 2),
             "average_accepted_prefix_length": round(self.average_accepted_prefix_length, 2),
@@ -123,7 +129,7 @@ def compute_speedup(
     spec_vram_mb: float = 0.0,
 ) -> SpeedupAccounting:
     """Calculate speedup strictly according to Section 14.
-    
+
     Never infers speedup from acceptance rate alone.
     """
     throughput_speedup = round(spec_tokens_per_sec / max(1e-6, ar_tokens_per_sec), 3)

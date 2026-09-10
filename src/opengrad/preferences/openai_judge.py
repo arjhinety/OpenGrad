@@ -22,7 +22,9 @@ class JudgeBudget:
     estimated_cost_usd: float = 0.0
 
     def is_exceeded(self) -> bool:
-        return self.requests_made >= self.max_requests or self.estimated_cost_usd >= self.max_cost_usd
+        return (
+            self.requests_made >= self.max_requests or self.estimated_cost_usd >= self.max_cost_usd
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -45,7 +47,9 @@ class OpenAIJudge:
     ) -> None:
         self.model = model or os.environ.get("OPENAI_JUDGE_MODEL", "gpt-4o-mini")
         self.budget = budget or JudgeBudget()
-        self.cache_dir = (cache_dir or Path.cwd() / ".cache" / "openai_judge") / self.model.replace("/", "_")
+        self.cache_dir = (cache_dir or Path.cwd() / ".cache" / "openai_judge") / self.model.replace(
+            "/", "_"
+        )
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_api_key(self) -> str | None:

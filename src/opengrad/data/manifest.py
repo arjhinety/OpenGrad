@@ -90,7 +90,9 @@ class DatasetManifest:
 
     def write(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        path.write_text(
+            json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
 
 
 def compute_dataset_fingerprint(record_hashes: list[str]) -> str:

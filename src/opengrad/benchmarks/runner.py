@@ -90,7 +90,9 @@ class BenchmarkRunner:
         ]
         if spec_entries:
             acceptance_sum = sum(float(s.get("acceptance_rate", 0.0)) for s in spec_entries)
-            tokens_step_sum = sum(float(s.get("accepted_tokens_per_step", 1.0)) for s in spec_entries)
+            tokens_step_sum = sum(
+                float(s.get("accepted_tokens_per_step", 1.0)) for s in spec_entries
+            )
             mean_acceptance = round(acceptance_sum / len(spec_entries), 4)
             mean_tokens_step = round(tokens_step_sum / len(spec_entries), 2)
             metrics["speculative"] = {
@@ -108,7 +110,9 @@ class BenchmarkRunner:
         run_id = f"{config.benchmark_id}/{config.model_id.replace('/', '_')}_{int(time.time())}"
         experiment_id = f"exp_{config.benchmark_id}"
         prompt_fp = hashlib.sha256(config.prompt_template.encode()).hexdigest()[:16]
-        dataset_fp = hashlib.sha256(f"{config.benchmark_id}_{config.split}".encode()).hexdigest()[:16]
+        dataset_fp = hashlib.sha256(f"{config.benchmark_id}_{config.split}".encode()).hexdigest()[
+            :16
+        ]
 
         run_result = NormalizedRunResult(
             run_id=run_id,
@@ -147,13 +151,16 @@ class BenchmarkRunner:
             # Resolve config path
             cfg_file = self.root / "configs" / "benchmarks" / f"{benchmark_name}.yaml"
             if not cfg_file.exists():
-                cfg_file = self.root / "configs" / "benchmarks" / f"{benchmark_name.replace('-', '_')}.yaml"
+                cfg_file = (
+                    self.root
+                    / "configs"
+                    / "benchmarks"
+                    / f"{benchmark_name.replace('-', '_')}.yaml"
+                )
             if not cfg_file.exists():
                 cfg_file = Path(benchmark_name)
             if not cfg_file.exists():
-                raise FileNotFoundError(
-                    f"Could not locate benchmark config for '{benchmark_name}'"
-                )
+                raise FileNotFoundError(f"Could not locate benchmark config for '{benchmark_name}'")
 
             cfg = BenchmarkConfig.from_file(cfg_file)
             run_res = self.run_benchmark(
@@ -161,11 +168,7 @@ class BenchmarkRunner:
                 backend=backend,
                 dry_run=dry_run,
                 limit=limit,
-                output_dir=(
-                    output_base_dir / cfg.benchmark_id
-                    if output_base_dir
-                    else None
-                ),
+                output_dir=(output_base_dir / cfg.benchmark_id if output_base_dir else None),
             )
             results[cfg.benchmark_id] = run_res.to_dict()
 

@@ -22,7 +22,9 @@ def test_repository_status_is_machine_readable_and_reports_the_real_baseline():
 
     has_artifacts = (ROOT / BASELINE_METRICS).is_file()
     assert real is has_artifacts
-    assert status["state"] == ("BASELINE" if real else "PRE_BASELINE") or status["state"] == "REVIEW"
+    assert (
+        status["state"] == ("BASELINE" if real else "PRE_BASELINE") or status["state"] == "REVIEW"
+    )
 
 
 def test_readiness_keeps_the_baseline_first_invariant_consistent_with_the_evidence():
@@ -34,7 +36,10 @@ def test_readiness_keeps_the_baseline_first_invariant_consistent_with_the_eviden
     """
     result = readiness(ROOT)
     gate_by_name = {gate["name"]: gate for gate in result["gates"]}
-    assert any(gate["name"] == "evaluation_leakage" and gate["status"] == "PASS" for gate in result["gates"])
+    assert any(
+        gate["name"] == "evaluation_leakage" and gate["status"] == "PASS"
+        for gate in result["gates"]
+    )
 
     blocked = {name for name, gate in gate_by_name.items() if gate["status"] == "FAIL"}
     assert set(result["blocking_gates"]) == blocked
@@ -127,9 +132,7 @@ def test_recorded_commit_must_be_in_this_history_but_may_predate_head():
     assert head, "these tests assume a git checkout"
     assert _commit_is_ancestor(ROOT, head, head) is True, "HEAD is trivially an ancestor"
 
-    parent = subprocess.check_output(
-        ["git", "rev-parse", "HEAD~1"], cwd=ROOT, text=True
-    ).strip()
+    parent = subprocess.check_output(["git", "rev-parse", "HEAD~1"], cwd=ROOT, text=True).strip()
     assert _commit_is_ancestor(ROOT, parent, head) is True, "a real ancestor must pass"
 
     # Fabricated, unknown, and malformed revisions all fail closed.

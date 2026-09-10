@@ -64,7 +64,7 @@ def extract_prompt_states(
     held_out_ids: set[str] | None = None,
 ) -> list[PromptState]:
     """Extract valid prompt states immediately preceding an assistant action decision.
-    
+
     Firewalled from held-out evaluation examples and quarantined rows (Section 21).
     """
     excluded = held_out_ids or set()
@@ -75,11 +75,17 @@ def extract_prompt_states(
         if c_id in excluded:
             continue
 
-        c_source = conv.source if isinstance(conv, ToolConversation) else conv.get("source", "unknown")
-        c_source_id = c_source.get("dataset_id", "source") if isinstance(c_source, dict) else str(c_source)
+        c_source = (
+            conv.source if isinstance(conv, ToolConversation) else conv.get("source", "unknown")
+        )
+        c_source_id = (
+            c_source.get("dataset_id", "source") if isinstance(c_source, dict) else str(c_source)
+        )
         c_rev = c_source.get("revision", "pinned") if isinstance(c_source, dict) else "pinned"
         c_tools = conv.tools if isinstance(conv, ToolConversation) else conv.get("tools", [])
-        c_messages = conv.messages if isinstance(conv, ToolConversation) else conv.get("messages", [])
+        c_messages = (
+            conv.messages if isinstance(conv, ToolConversation) else conv.get("messages", [])
+        )
         c_meta = conv.metadata if isinstance(conv, ToolConversation) else conv.get("metadata", {})
 
         # Walk conversation prefix to find assistant turns

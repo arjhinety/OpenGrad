@@ -72,7 +72,9 @@ class TransformersInferenceBackend:
         prompt_tokens = int(encoded["input_ids"].shape[1])
 
         kwargs: dict[str, Any] = {
-            "max_new_tokens": int(config.get("max_output_tokens", config.get("max_new_tokens", 512))),
+            "max_new_tokens": int(
+                config.get("max_output_tokens", config.get("max_new_tokens", 512))
+            ),
             "do_sample": bool(config.get("do_sample", False)),
         }
         if config.get("temperature") is not None and float(config["temperature"]) > 0:

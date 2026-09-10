@@ -127,33 +127,52 @@ def _materialized_rows(root: Path, split: dict[str, Any]) -> list[dict[str, Any]
     if not manifest_path.is_file():
         raise FileNotFoundError(f"evaluation materialization manifest is missing: {manifest_path}")
     shard_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if shard_manifest.get("finalized") is not True or not isinstance(shard_manifest.get("shards"), list) or not shard_manifest["shards"]:
+    if (
+        shard_manifest.get("finalized") is not True
+        or not isinstance(shard_manifest.get("shards"), list)
+        or not shard_manifest["shards"]
+    ):
         raise ValueError(f"evaluation materialization is not finalized: {manifest_path}")
     expected_count = split.get("items")
     if not isinstance(expected_count, int) or expected_count < 1:
         raise ValueError(f"split {split.get('id')} has an invalid item count")
     rows: list[dict[str, Any]] = []
     import pyarrow.parquet as pq  # type: ignore[import-untyped]
+
     seen_shards: set[str] = set()
     seen_ids: set[str] = set()
     for shard_name in shard_manifest["shards"]:
         if not isinstance(shard_name, str) or not shard_name or shard_name in seen_shards:
             raise ValueError(f"split {split.get('id')} has invalid shard names")
         seen_shards.add(shard_name)
-        shard_path = _resolve_inside(manifest_path.parent, shard_name, f"split {split.get('id')} shard")
+        shard_path = _resolve_inside(
+            manifest_path.parent, shard_name, f"split {split.get('id')} shard"
+        )
         if not shard_path.is_file():
             raise FileNotFoundError(f"evaluation shard is missing: {shard_path}")
         for batch in pq.ParquetFile(shard_path).iter_batches(batch_size=128):
             for row in batch.to_pylist():
                 example_id = row.get("example_id") if isinstance(row, dict) else None
                 if not isinstance(example_id, str) or not example_id or example_id in seen_ids:
-                    raise ValueError(f"split {split.get('id')} contains missing or duplicate example_id")
+                    raise ValueError(
+                        f"split {split.get('id')} contains missing or duplicate example_id"
+                    )
                 seen_ids.add(example_id)
                 rows.append(row)
     if len(rows) != expected_count:
         raise ValueError(f"split {split.get('id')} has {len(rows)} rows; expected {expected_count}")
-    digest = hashlib.sha256(b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8") for row in rows)).hexdigest()
-    if shard_manifest.get("content_hash") != split.get("content_hash") or shard_manifest.get("content_hash") != digest:
+    digest = hashlib.sha256(
+        b"".join(
+            (
+                json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
+            ).encode("utf-8")
+            for row in rows
+        )
+    ).hexdigest()
+    if (
+        shard_manifest.get("content_hash") != split.get("content_hash")
+        or shard_manifest.get("content_hash") != digest
+    ):
         raise ValueError(f"split {split.get('id')} content hash does not match materialized rows")
     return rows
 
@@ -179,10 +198,19 @@ def load_evaluation_examples(root: Path, manifest_path: Path) -> list[CanonicalE
         manifest_value = str(manifest_path)
     manifest_path = _resolve_inside(root, manifest_value, "evaluation manifest")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("schema_version") != 1 or manifest.get("manifest_id") != "behavioral-heldout-v2" or manifest.get("frozen") is not True or manifest.get("status") not in {"FROZEN_PRE_GPU", "MATERIALIZED", "EXECUTED"}:
+    if (
+        manifest.get("schema_version") != 1
+        or manifest.get("manifest_id") != "behavioral-heldout-v2"
+        or manifest.get("frozen") is not True
+        or manifest.get("status") not in {"FROZEN_PRE_GPU", "MATERIALIZED", "EXECUTED"}
+    ):
         raise ValueError("evaluation manifest is not the pinned frozen contract")
     contract = manifest.get("model_renderer_contract", {})
-    if contract.get("model_revision") != PINNED_MODEL_REVISION or contract.get("renderer") != "qwen3_5_2b_v1" or contract.get("template_hash") != PINNED_TEMPLATE_HASH:
+    if (
+        contract.get("model_revision") != PINNED_MODEL_REVISION
+        or contract.get("renderer") != "qwen3_5_2b_v1"
+        or contract.get("template_hash") != PINNED_TEMPLATE_HASH
+    ):
         raise ValueError("evaluation manifest renderer contract is not pinned")
     quarantined = load_quarantine(root / QUARANTINE_PATH).by_split()
     examples: list[CanonicalEvaluationExample] = []
@@ -208,9 +236,13 @@ def load_evaluation_examples(root: Path, manifest_path: Path) -> list[CanonicalE
             metadata = dict(row["metadata"]) if isinstance(row["metadata"], dict) else {}
             metadata["benchmark_splits"] = [split_id]
             example = CanonicalEvaluationExample(
-                example_id, row["source"], str(row["question"]),
-                [_qwen_tool(tool) for tool in row["tools"]], str(row["expected_decision"]),
-                row["candidates"], metadata,
+                example_id,
+                row["source"],
+                str(row["question"]),
+                [_qwen_tool(tool) for tool in row["tools"]],
+                str(row["expected_decision"]),
+                row["candidates"],
+                metadata,
             )
             example.validate()
             seen[example_id] = len(examples)
@@ -547,9 +579,7 @@ def build_backend(name: str, config: dict[str, Any]) -> InferenceBackend:
         # vLLM refuses a request whose prompt plus max_tokens exceeds max_model_len, so the
         # window must cover the largest in-contract prompt *and* its completion. Prompts
         # beyond context_length are bucketed as overflow by the frozen policy, not dropped.
-        max_new_tokens = int(
-            (config.get("generation") or {}).get("max_new_tokens", 512)
-        )
+        max_new_tokens = int((config.get("generation") or {}).get("max_new_tokens", 512))
         return VLLMInferenceBackend(
             **common,
             dtype=str(runtime.get("precision", "bfloat16")),
@@ -641,23 +671,61 @@ def _project_path(root: Path, value: Any, label: str) -> Path:
 
 
 def _validate_baseline_config(config: dict[str, Any]) -> None:
-    required = {"schema_version", "status", "model_id", "model_revision", "tokenizer_revision", "renderer", "template_hash", "seed", "generation", "evaluations", "runtime", "outputs", "provenance"}
+    required = {
+        "schema_version",
+        "status",
+        "model_id",
+        "model_revision",
+        "tokenizer_revision",
+        "renderer",
+        "template_hash",
+        "seed",
+        "generation",
+        "evaluations",
+        "runtime",
+        "outputs",
+        "provenance",
+    }
     missing = sorted(required - set(config))
     if missing:
         raise ValueError(f"baseline config is missing required field(s): {', '.join(missing)}")
     if config["schema_version"] != 1 or config["status"] != "FROZEN_PRE_GPU":
         raise ValueError("baseline config must be schema 1 and FROZEN_PRE_GPU")
-    if config["model_id"] != CANONICAL_MODEL_ID or config["model_revision"] != PINNED_MODEL_REVISION or config["tokenizer_revision"] != PINNED_MODEL_REVISION:
-        raise ValueError("baseline config must pin the canonical model, model revision, and tokenizer revision")
-    if config["renderer"] != "qwen3_5_2b_v1" or config["template_hash"] != PINNED_TEMPLATE_HASH or config["seed"] != 0:
+    if (
+        config["model_id"] != CANONICAL_MODEL_ID
+        or config["model_revision"] != PINNED_MODEL_REVISION
+        or config["tokenizer_revision"] != PINNED_MODEL_REVISION
+    ):
+        raise ValueError(
+            "baseline config must pin the canonical model, model revision, and tokenizer revision"
+        )
+    if (
+        config["renderer"] != "qwen3_5_2b_v1"
+        or config["template_hash"] != PINNED_TEMPLATE_HASH
+        or config["seed"] != 0
+    ):
         raise ValueError("baseline config renderer, template, or seed is not the frozen contract")
-    if config.get("evaluations", {}).get("behavioral_manifest") != "reports/evaluation/behavioral-heldout-v2.manifest.json":
+    if (
+        config.get("evaluations", {}).get("behavioral_manifest")
+        != "reports/evaluation/behavioral-heldout-v2.manifest.json"
+    ):
         raise ValueError("baseline config must use the pinned behavioral-heldout-v2 manifest")
     provenance = config["provenance"]
-    if provenance.get("evaluator_revision") != PINNED_EVALUATOR_REVISION or provenance.get("manifest_status") != "FROZEN_PRE_GPU":
-        raise ValueError("baseline provenance must pin the evaluator revision and frozen manifest status")
+    if (
+        provenance.get("evaluator_revision") != PINNED_EVALUATOR_REVISION
+        or provenance.get("manifest_status") != "FROZEN_PRE_GPU"
+    ):
+        raise ValueError(
+            "baseline provenance must pin the evaluator revision and frozen manifest status"
+        )
     generation = config["generation"]
-    if not isinstance(generation, dict) or generation.get("max_new_tokens", 0) < 1 or generation.get("do_sample") is not False or generation.get("temperature") != 0.0 or generation.get("top_p") != 1.0:
+    if (
+        not isinstance(generation, dict)
+        or generation.get("max_new_tokens", 0) < 1
+        or generation.get("do_sample") is not False
+        or generation.get("temperature") != 0.0
+        or generation.get("top_p") != 1.0
+    ):
         raise ValueError("baseline generation config is not deterministic and bounded")
     runtime = config["runtime"]
     if not isinstance(runtime, dict):
@@ -698,7 +766,11 @@ def _validate_baseline_config(config: dict[str, Any]) -> None:
             f"budget ({needed})"
         )
     evaluations = config["evaluations"]
-    if not isinstance(evaluations, dict) or not isinstance(evaluations.get("behavioral_manifest"), str) or evaluations.get("evaluator_revision") not in {None, PINNED_MODEL_REVISION}:
+    if (
+        not isinstance(evaluations, dict)
+        or not isinstance(evaluations.get("behavioral_manifest"), str)
+        or evaluations.get("evaluator_revision") not in {None, PINNED_MODEL_REVISION}
+    ):
         raise ValueError("baseline evaluation config is malformed")
     quality = evaluations.get("quality")
     if not isinstance(quality, dict):
@@ -711,8 +783,14 @@ def _validate_baseline_config(config: dict[str, Any]) -> None:
     if not isinstance(config["provenance"], dict):
         raise TypeError("baseline provenance must be an object")
     outputs = config["outputs"]
-    if not isinstance(outputs, dict) or set(outputs) != {"predictions", "metrics", "residual_profile", "environment"} or not all(isinstance(value, str) and value for value in outputs.values()):
-        raise ValueError("baseline must define exactly predictions, metrics, residual_profile, and environment outputs")
+    if (
+        not isinstance(outputs, dict)
+        or set(outputs) != {"predictions", "metrics", "residual_profile", "environment"}
+        or not all(isinstance(value, str) and value for value in outputs.values())
+    ):
+        raise ValueError(
+            "baseline must define exactly predictions, metrics, residual_profile, and environment outputs"
+        )
 
 
 def _write_json(path: Path, value: dict[str, Any]) -> None:
@@ -769,9 +847,7 @@ def measure_predictions(
             ]
             flags = [bool(getattr(model, "last_truncated", False))] * len(chunk)
         if len(raws) != len(chunk):
-            raise RuntimeError(
-                f"engine returned {len(raws)} samples for {len(chunk)} prompts"
-            )
+            raise RuntimeError(f"engine returned {len(raws)} samples for {len(chunk)} prompts")
         # An engine that reports only the batch-wide `last_truncated` (or neither flag) must
         # not shorten this list: zipping against a short list would silently produce zero
         # predictions for the whole chunk.
@@ -790,6 +866,7 @@ def measure_predictions(
                 )
             )
     return predictions
+
 
 def run_baseline(
     config_path: Path,
@@ -832,8 +909,15 @@ def run_baseline(
     predictions = measure_predictions(config, examples, model, renderer)
     batch_size = max(1, int(config["runtime"].get("batch_size", 1)))
     output_config = config.get("outputs")
-    if not isinstance(output_config, dict) or set(output_config) != {"predictions", "metrics", "residual_profile", "environment"}:
-        raise ValueError("baseline config must define predictions, metrics, residual_profile, and environment outputs")
+    if not isinstance(output_config, dict) or set(output_config) != {
+        "predictions",
+        "metrics",
+        "residual_profile",
+        "environment",
+    }:
+        raise ValueError(
+            "baseline config must define predictions, metrics, residual_profile, and environment outputs"
+        )
     output_paths = {}
     for name in output_config:
         value = output_config[name]
@@ -857,17 +941,25 @@ def run_baseline(
         "residual_profile": "reports/failures/qwen35_2b_baseline/residual-profile.json",
         "environment": "reports/baselines/qwen35_2b_baseline/environment.json",
     }
-    if not dry_run and {name: str(path.relative_to(root)) for name, path in output_paths.items()} != canonical_outputs:
+    if (
+        not dry_run
+        and {name: str(path.relative_to(root)) for name, path in output_paths.items()}
+        != canonical_outputs
+    ):
         raise ValueError("real baseline must write the canonical evidence paths")
     if not dry_run:
         if any(path.exists() for path in output_paths.values()):
-            raise FileExistsError("real baseline evidence already exists; use a new immutable run identity")
+            raise FileExistsError(
+                "real baseline evidence already exists; use a new immutable run identity"
+            )
         try:
             ExperimentStore(root).get_experiment(BASELINE_EXPERIMENT_ID)
         except FileNotFoundError:
             pass
         else:
-            raise FileExistsError("real baseline experiment record already exists; refusing to overwrite")
+            raise FileExistsError(
+                "real baseline experiment record already exists; refusing to overwrite"
+            )
     prediction_path = output_paths["predictions"]
     prediction_path.parent.mkdir(parents=True, exist_ok=True)
     prediction_temporary = prediction_path.with_name(prediction_path.name + ".tmp")
@@ -939,20 +1031,22 @@ def run_baseline(
         manifest_sha256=str(result["manifest_sha256"]),
     )
     environment = capture(root)
-    environment.update({
-        "run_id": result["run_id"],
-        "backend": model.name,
-        "engine": engine,
-        "generation_batch_size": batch_size,
-        "dry_run": dry_run,
-        "model_id": result["model_id"],
-        "model_revision": result["model_revision"],
-        "manifest_sha256": result["manifest_sha256"],
-        # Start-of-run, tracked-tree provenance. `capture` reads these at the end, by which
-        # point the run's own outputs exist and would always look like a dirty tree.
-        "git_sha": git_provenance["sha"],
-        "git_dirty": git_provenance["dirty"],
-    })
+    environment.update(
+        {
+            "run_id": result["run_id"],
+            "backend": model.name,
+            "engine": engine,
+            "generation_batch_size": batch_size,
+            "dry_run": dry_run,
+            "model_id": result["model_id"],
+            "model_revision": result["model_revision"],
+            "manifest_sha256": result["manifest_sha256"],
+            # Start-of-run, tracked-tree provenance. `capture` reads these at the end, by which
+            # point the run's own outputs exist and would always look like a dirty tree.
+            "git_sha": git_provenance["sha"],
+            "git_dirty": git_provenance["dirty"],
+        }
+    )
     result["git_commit"] = git_provenance["sha"]
     result["git_dirty"] = git_provenance["dirty"]
     _write_json(output_paths["metrics"], result)
@@ -969,7 +1063,9 @@ def run_baseline(
             training_algorithm="evaluation",
             training_config={},
             dataset_manifest_ids=[str(config["evaluations"]["behavioral_manifest"])],
-            dataset_hashes={str(config["evaluations"]["behavioral_manifest"]): str(result["manifest_sha256"])},
+            dataset_hashes={
+                str(config["evaluations"]["behavioral_manifest"]): str(result["manifest_sha256"])
+            },
             git_commit=str(result.get("git_commit") or "unknown"),
             git_dirty=bool(result.get("git_dirty")),
             environment=environment,
@@ -980,13 +1076,21 @@ def run_baseline(
                 "kind": "REAL_BASELINE",
                 "manifest": result["manifest"],
                 "manifest_sha256": result["manifest_sha256"],
-                "metrics": str(output_paths["metrics"].relative_to(root)) if output_paths["metrics"].is_relative_to(root) else str(output_paths["metrics"]),
-                "predictions": str(output_paths["predictions"].relative_to(root)) if output_paths["predictions"].is_relative_to(root) else str(output_paths["predictions"]),
-                "residual_profile": str(output_paths["residual_profile"].relative_to(root)) if output_paths["residual_profile"].is_relative_to(root) else str(output_paths["residual_profile"]),
+                "metrics": str(output_paths["metrics"].relative_to(root))
+                if output_paths["metrics"].is_relative_to(root)
+                else str(output_paths["metrics"]),
+                "predictions": str(output_paths["predictions"].relative_to(root))
+                if output_paths["predictions"].is_relative_to(root)
+                else str(output_paths["predictions"]),
+                "residual_profile": str(output_paths["residual_profile"].relative_to(root))
+                if output_paths["residual_profile"].is_relative_to(root)
+                else str(output_paths["residual_profile"]),
             },
         )
         try:
             store.register_record(record)
         except FileExistsError as exc:
-            raise FileExistsError("real baseline experiment record already exists; refusing to overwrite") from exc
+            raise FileExistsError(
+                "real baseline experiment record already exists; refusing to overwrite"
+            ) from exc
     return result

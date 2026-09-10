@@ -66,9 +66,7 @@ def default_reviewer() -> str:
 def validate_verdict(verdict: str) -> str:
     """Reject anything that is not an exact supported verdict."""
     if not isinstance(verdict, str) or verdict not in VERDICT_VALUES:
-        raise ValueError(
-            f"verdict must be one of {', '.join(VERDICT_VALUES)} (got {verdict!r})"
-        )
+        raise ValueError(f"verdict must be one of {', '.join(VERDICT_VALUES)} (got {verdict!r})")
     return verdict
 
 
@@ -97,7 +95,9 @@ def benchmark_fingerprint(root: Path) -> str | None:
         if isinstance(split, dict)
     ]
     identity.sort(key=lambda item: str(item["id"]))
-    return _sha256_text(_canonical({"manifest_id": manifest.get("manifest_id"), "splits": identity}))
+    return _sha256_text(
+        _canonical({"manifest_id": manifest.get("manifest_id"), "splits": identity})
+    )
 
 
 def training_corpus_fingerprint(root: Path, release_dir: Path | None = None) -> str | None:
@@ -127,7 +127,9 @@ def finding_fingerprint(entry: dict[str, Any]) -> str:
     canonical_matches = sorted(
         (
             str(match.get("level")),
-            _canonical(match.get("training")) if isinstance(match.get("training"), list) else str(match.get("training")),
+            _canonical(match.get("training"))
+            if isinstance(match.get("training"), list)
+            else str(match.get("training")),
         )
         for match in matches
         if isinstance(match, dict)
@@ -323,9 +325,7 @@ class Quarantine:
             ),
             "generated_from_audit": self.generated_from_audit,
             "updated_at": self.updated_at,
-            "excluded": sorted(
-                self.excluded, key=lambda entry: str(entry.get("record_id"))
-            ),
+            "excluded": sorted(self.excluded, key=lambda entry: str(entry.get("record_id"))),
         }
 
     @classmethod
@@ -583,9 +583,7 @@ def evaluate_audit(
             )
         blocked_problems: list[str] = []
         if total:
-            blocked_problems.append(
-                f"{total} finding(s) have no human adjudication artifact"
-            )
+            blocked_problems.append(f"{total} finding(s) have no human adjudication artifact")
         if quarantined_ids:
             blocked_problems.append("a quarantine list exists without an audit artifact")
         return AuditEvaluation(

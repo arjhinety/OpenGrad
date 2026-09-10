@@ -115,8 +115,15 @@ class ToolConversation:
                 "MISSING_TOOL_RESULT": "SEM_UNRESOLVED_CALL",
                 "INVALID_MESSAGE_SEQUENCE": "SEM_RESULT_ORDER",
             }
-            code = aliases.get(issue.code, "SEM_ARGUMENT_INVALID" if issue.code.startswith("ARG_") else f"SEM_{issue.code}")
-            detail = f"unknown tool: {issue.message}" if issue.code == "UNDECLARED_TOOL" else issue.message
+            code = aliases.get(
+                issue.code,
+                "SEM_ARGUMENT_INVALID" if issue.code.startswith("ARG_") else f"SEM_{issue.code}",
+            )
+            detail = (
+                f"unknown tool: {issue.message}"
+                if issue.code == "UNDECLARED_TOOL"
+                else issue.message
+            )
             raise ValueError(f"{code}: {detail}")
 
 

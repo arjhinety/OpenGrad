@@ -63,7 +63,11 @@ class RegressionReport:
             "| :--- | :---: | :---: | :---: | :---: |",
         ]
         for d in sorted(self.deltas, key=lambda x: x.delta, reverse=True):
-            status_icon = "🟢 IMPROVED" if d.status == "IMPROVED" else ("🔴 REGRESSED" if d.status == "REGRESSED" else "⚪ PRESERVED")
+            status_icon = (
+                "🟢 IMPROVED"
+                if d.status == "IMPROVED"
+                else ("🔴 REGRESSED" if d.status == "REGRESSED" else "⚪ PRESERVED")
+            )
             lines.append(
                 f"| `{d.benchmark_id}` | {d.baseline_score:.1f} | {d.candidate_score:.1f} | {d.delta:+.1f} | {status_icon} |"
             )

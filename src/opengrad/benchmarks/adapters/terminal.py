@@ -23,12 +23,26 @@ class TerminalBenchAdapter(BenchmarkAdapter):
         "tracked_signals": ["command_exit_code", "stdout", "stderr", "duration"],
     }
 
-    def load_tasks(self, split: str = "bash_navigation", limit: int | None = None) -> list[BenchmarkTask]:
+    def load_tasks(
+        self, split: str = "bash_navigation", limit: int | None = None
+    ) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("terminal_01", "Find all files in /tmp ending in .log older than 7 days and delete them.", "find /tmp -name '*.log' -mtime +7 -delete"),
-            ("terminal_02", "Clone repository https://github.com/example/repo and checkout tag v1.2.0.", "git clone https://github.com/example/repo && cd repo && git checkout v1.2.0"),
-            ("terminal_03", "Build the CMake project in Release mode and install to /usr/local.", "cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build && cmake --install build"),
+            (
+                "terminal_01",
+                "Find all files in /tmp ending in .log older than 7 days and delete them.",
+                "find /tmp -name '*.log' -mtime +7 -delete",
+            ),
+            (
+                "terminal_02",
+                "Clone repository https://github.com/example/repo and checkout tag v1.2.0.",
+                "git clone https://github.com/example/repo && cd repo && git checkout v1.2.0",
+            ),
+            (
+                "terminal_03",
+                "Build the CMake project in Release mode and install to /usr/local.",
+                "cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build && cmake --install build",
+            ),
         ]
         for task_id, instruction, expected_cmd in specs:
             task = BenchmarkTask(
@@ -47,9 +61,13 @@ class TerminalBenchAdapter(BenchmarkAdapter):
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip()
-        success = bool(text and ("find" in text or "git" in text or "cmake" in text or "echo" in text))
+        success = bool(
+            text and ("find" in text or "git" in text or "cmake" in text or "echo" in text)
+        )
         failure_category = None if success else ToolFailureCategory.PARSER_FAILURE.value
 
         return NormalizedTaskResult(
@@ -83,11 +101,21 @@ class TUABenchAdapter(BenchmarkAdapter):
         "max_steps": 20,
     }
 
-    def load_tasks(self, split: str = "terminal_use", limit: int | None = None) -> list[BenchmarkTask]:
+    def load_tasks(
+        self, split: str = "terminal_use", limit: int | None = None
+    ) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("tua_01", "Inspect failing service logs and identify root cause exception.", "journalctl -u api-service -n 50"),
-            ("tua_02", "Configure iptables firewall to drop incoming traffic on port 8080.", "iptables -A INPUT -p tcp --dport 8080 -j DROP"),
+            (
+                "tua_01",
+                "Inspect failing service logs and identify root cause exception.",
+                "journalctl -u api-service -n 50",
+            ),
+            (
+                "tua_02",
+                "Configure iptables firewall to drop incoming traffic on port 8080.",
+                "iptables -A INPUT -p tcp --dport 8080 -j DROP",
+            ),
         ]
         for task_id, instruction, expected_cmd in specs:
             task = BenchmarkTask(
@@ -106,7 +134,9 @@ class TUABenchAdapter(BenchmarkAdapter):
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip()
         success = bool(text and len(text) > 5)
         failure_category = None if success else ToolFailureCategory.PARSER_FAILURE.value

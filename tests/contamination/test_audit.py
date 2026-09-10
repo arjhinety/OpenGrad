@@ -32,7 +32,9 @@ BENCHMARK_FP = "benchmark-fingerprint-aaa"
 TRAINING_FP = "training-fingerprint-bbb"
 
 
-def make_entry(record_id: str, *, text: str = "What is the current time?", training=("toolace:aaa",)):
+def make_entry(
+    record_id: str, *, text: str = "What is the current time?", training=("toolace:aaa",)
+):
     return {
         "heldout": record_id,
         "split": record_id.split(":", 1)[0],
@@ -43,8 +45,14 @@ def make_entry(record_id: str, *, text: str = "What is the current time?", train
         "levels": [LEVEL_1, LEVEL_2],
         "matches": [{"level": LEVEL_1, "training": list(training)}],
         "training_evidence": [
-            {"record_id": tid, "source": tid.split(":", 1)[0], "behavior_decision": "CALL",
-             "prompt": text, "assistant": "tool call", "tool_calls": []}
+            {
+                "record_id": tid,
+                "source": tid.split(":", 1)[0],
+                "behavior_decision": "CALL",
+                "prompt": text,
+                "assistant": "tool call",
+                "tool_calls": [],
+            }
             for tid in training
         ],
     }
@@ -59,10 +67,21 @@ def make_report(entries, *, sources=None):
         "benchmark_fingerprint": BENCHMARK_FP,
         "training_corpus_fingerprint": TRAINING_FP,
         "training_sources_checked": sources
-        or ["button", "glaive-function-calling-v2", "looptool-23k", "toolace",
-            "when2call-sft", "xlam-function-calling-60k"],
-        "levels": {LEVEL_1: "MEASURED", LEVEL_2: "MEASURED", LEVEL_3: "MEASURED",
-                   LEVEL_4: "MEASURED", LEVEL_5: "NOT_RUN"},
+        or [
+            "button",
+            "glaive-function-calling-v2",
+            "looptool-23k",
+            "toolace",
+            "when2call-sft",
+            "xlam-function-calling-60k",
+        ],
+        "levels": {
+            LEVEL_1: "MEASURED",
+            LEVEL_2: "MEASURED",
+            LEVEL_3: "MEASURED",
+            LEVEL_4: "MEASURED",
+            LEVEL_5: "NOT_RUN",
+        },
         "counts": {"heldout_records": 10, "training_records": 10},
         "findings": {},
         "audit_queue": entries,
@@ -132,7 +151,12 @@ def test_scanner_rerun_preserves_human_judgments():
     report = make_report([make_entry("when2call-mcq:a")])
     first = sync_audit(report, benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0")
     apply_verdict(
-        first, "when2call-mcq:a", VERDICT_CONTAMINATED, reason="identical prompt", reviewer="r", now="T1"
+        first,
+        "when2call-mcq:a",
+        VERDICT_CONTAMINATED,
+        reason="identical prompt",
+        reviewer="r",
+        now="T1",
     )
     # A second scan producing the same finding must not erase the verdict.
     second = sync_audit(
@@ -149,12 +173,19 @@ def test_scanner_rerun_preserves_human_judgments():
 def test_scanner_rerun_adds_new_findings_as_pending():
     first = sync_audit(
         make_report([make_entry("when2call-mcq:a")]),
-        benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0",
+        benchmark_fp=BENCHMARK_FP,
+        training_fp=TRAINING_FP,
+        now="T0",
     )
-    apply_verdict(first, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="generic", reviewer="r", now="T1")
+    apply_verdict(
+        first, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="generic", reviewer="r", now="T1"
+    )
     second = sync_audit(
         make_report([make_entry("when2call-mcq:a"), make_entry("when2call-mcq:new")]),
-        existing=first, benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T2",
+        existing=first,
+        benchmark_fp=BENCHMARK_FP,
+        training_fp=TRAINING_FP,
+        now="T2",
     )
     assert second.by_id()["when2call-mcq:a"].verdict == VERDICT_INCIDENTAL
     assert second.by_id()["when2call-mcq:new"].verdict == VERDICT_PENDING
@@ -164,9 +195,13 @@ def test_quarantined_findings_keep_their_adjudication_across_rescans():
     """Quarantine removes the item from the queue; the judgment must survive."""
     first = sync_audit(
         make_report([make_entry("when2call-mcq:a")]),
-        benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0",
+        benchmark_fp=BENCHMARK_FP,
+        training_fp=TRAINING_FP,
+        now="T0",
     )
-    apply_verdict(first, "when2call-mcq:a", VERDICT_CONTAMINATED, reason="leak", reviewer="r", now="T1")
+    apply_verdict(
+        first, "when2call-mcq:a", VERDICT_CONTAMINATED, reason="leak", reviewer="r", now="T1"
+    )
     quarantined = build_quarantine(first).record_ids()
     assert quarantined == {"when2call-mcq:a"}
 
@@ -213,7 +248,14 @@ def test_missing_audit_artifact_blocks_level_5():
 def test_completed_incidental_overlap_passes_level_5():
     report = make_report([make_entry("when2call-mcq:a")])
     artifact = sync_audit(report, benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0")
-    apply_verdict(artifact, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="generic phrase", reviewer="r", now="T1")
+    apply_verdict(
+        artifact,
+        "when2call-mcq:a",
+        VERDICT_INCIDENTAL,
+        reason="generic phrase",
+        reviewer="r",
+        now="T1",
+    )
     evaluation = evaluate(report, artifact, load_quarantine(Path("/nonexistent")))
     assert evaluation.complete is True
     assert evaluation.level_5 == "COMPLETE"
@@ -230,7 +272,9 @@ def test_clean_corpus_with_no_findings_is_clean():
 def test_contaminated_verdict_blocks_until_quarantined():
     report = make_report([make_entry("when2call-mcq:a")])
     artifact = sync_audit(report, benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0")
-    apply_verdict(artifact, "when2call-mcq:a", VERDICT_CONTAMINATED, reason="leak", reviewer="r", now="T1")
+    apply_verdict(
+        artifact, "when2call-mcq:a", VERDICT_CONTAMINATED, reason="leak", reviewer="r", now="T1"
+    )
 
     blocked = evaluate(report, artifact, load_quarantine(Path("/nonexistent")))
     assert blocked.complete is False
@@ -252,7 +296,9 @@ def test_contaminated_verdict_blocks_until_quarantined():
 def test_stale_detection_when_finding_changes():
     report = make_report([make_entry("when2call-mcq:a", training=("toolace:aaa",))])
     artifact = sync_audit(report, benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0")
-    apply_verdict(artifact, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="ok", reviewer="r", now="T1")
+    apply_verdict(
+        artifact, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="ok", reviewer="r", now="T1"
+    )
     assert evaluate(report, artifact, load_quarantine(Path("/nonexistent"))).complete is True
 
     # The scanner now reports a different matched training record for the same item.
@@ -269,14 +315,20 @@ def test_stale_detection_when_finding_changes():
 def test_stale_detection_when_benchmark_or_corpus_fingerprint_changes():
     report = make_report([make_entry("when2call-mcq:a")])
     artifact = sync_audit(report, benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0")
-    apply_verdict(artifact, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="ok", reviewer="r", now="T1")
+    apply_verdict(
+        artifact, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="ok", reviewer="r", now="T1"
+    )
     assert evaluate(report, artifact, load_quarantine(Path("/nonexistent"))).complete is True
 
-    moved_benchmark = evaluate(report, artifact, load_quarantine(Path("/nonexistent")), benchmark_fp="different")
+    moved_benchmark = evaluate(
+        report, artifact, load_quarantine(Path("/nonexistent")), benchmark_fp="different"
+    )
     assert moved_benchmark.complete is False
     assert any("benchmark fingerprint" in problem for problem in moved_benchmark.problems)
 
-    moved_corpus = evaluate(report, artifact, load_quarantine(Path("/nonexistent")), training_fp="different")
+    moved_corpus = evaluate(
+        report, artifact, load_quarantine(Path("/nonexistent")), training_fp="different"
+    )
     assert moved_corpus.complete is False
     assert any("training corpus fingerprint" in problem for problem in moved_corpus.problems)
 
@@ -287,7 +339,9 @@ def test_re_adjudication_clears_staleness():
     item = artifact.by_id()["when2call-mcq:a"]
     item.stale = True
     item.stale_reason = "scanner finding changed"
-    apply_verdict(artifact, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="rechecked", reviewer="r", now="T3")
+    apply_verdict(
+        artifact, "when2call-mcq:a", VERDICT_INCIDENTAL, reason="rechecked", reviewer="r", now="T3"
+    )
     assert item.stale is False
     assert evaluate(report, artifact, load_quarantine(Path("/nonexistent"))).complete is True
 
@@ -299,7 +353,9 @@ def test_orphaned_audit_entry_is_reported():
     artifact.items.append(
         sync_audit(
             make_report([make_entry("when2call-mcq:ghost")]),
-            benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0",
+            benchmark_fp=BENCHMARK_FP,
+            training_fp=TRAINING_FP,
+            now="T0",
         ).items[0]
     )
     evaluation = evaluate(report, artifact, load_quarantine(Path("/nonexistent")))
@@ -308,10 +364,16 @@ def test_orphaned_audit_entry_is_reported():
 
 
 def test_finding_fingerprint_is_order_independent():
-    a = {"heldout": "x", "levels": [LEVEL_2, LEVEL_1], "matches": [
-        {"level": LEVEL_1, "training": ["t1"]}, {"level": LEVEL_2, "training": ["t2"]}]}
-    b = {"heldout": "x", "levels": [LEVEL_1, LEVEL_2], "matches": [
-        {"level": LEVEL_2, "training": ["t2"]}, {"level": LEVEL_1, "training": ["t1"]}]}
+    a = {
+        "heldout": "x",
+        "levels": [LEVEL_2, LEVEL_1],
+        "matches": [{"level": LEVEL_1, "training": ["t1"]}, {"level": LEVEL_2, "training": ["t2"]}],
+    }
+    b = {
+        "heldout": "x",
+        "levels": [LEVEL_1, LEVEL_2],
+        "matches": [{"level": LEVEL_2, "training": ["t2"]}, {"level": LEVEL_1, "training": ["t1"]}],
+    }
     assert finding_fingerprint(a) == finding_fingerprint(b)
 
 
@@ -336,8 +398,17 @@ def test_cli_non_interactive_adjudication_records_verdict(tmp_path: Path, monkey
     write_report(tmp_path, make_report([make_entry("when2call-mcq:a")]))
     code = run_cli(
         monkeypatch,
-        ["adjudicate", "--root", str(tmp_path), "--id", "when2call-mcq:a",
-         "--verdict", "contaminated", "--reason", "exact prompt"],
+        [
+            "adjudicate",
+            "--root",
+            str(tmp_path),
+            "--id",
+            "when2call-mcq:a",
+            "--verdict",
+            "contaminated",
+            "--reason",
+            "exact prompt",
+        ],
     )
     assert code == 0
     capsys.readouterr()
@@ -354,7 +425,15 @@ def test_cli_non_interactive_rejects_bad_verdict(tmp_path: Path, monkeypatch):
     with pytest.raises(SystemExit):
         run_cli(
             monkeypatch,
-            ["adjudicate", "--root", str(tmp_path), "--id", "when2call-mcq:a", "--verdict", "maybe"],
+            [
+                "adjudicate",
+                "--root",
+                str(tmp_path),
+                "--id",
+                "when2call-mcq:a",
+                "--verdict",
+                "maybe",
+            ],
         )
 
 
@@ -363,8 +442,15 @@ def test_cli_non_interactive_rejects_unknown_id(tmp_path: Path, monkeypatch):
     with pytest.raises(SystemExit):
         run_cli(
             monkeypatch,
-            ["adjudicate", "--root", str(tmp_path), "--id", "when2call-mcq:nope",
-             "--verdict", "incidental"],
+            [
+                "adjudicate",
+                "--root",
+                str(tmp_path),
+                "--id",
+                "when2call-mcq:nope",
+                "--verdict",
+                "incidental",
+            ],
         )
 
 
@@ -407,15 +493,26 @@ def test_cli_adjudication_never_rewrites_the_generated_report(tmp_path: Path, mo
     before = report_path.read_bytes()
     run_cli(
         monkeypatch,
-        ["adjudicate", "--root", str(tmp_path), "--id", "when2call-mcq:a",
-         "--verdict", "incidental", "--reason", "ok"],
+        [
+            "adjudicate",
+            "--root",
+            str(tmp_path),
+            "--id",
+            "when2call-mcq:a",
+            "--verdict",
+            "incidental",
+            "--reason",
+            "ok",
+        ],
     )
     capsys.readouterr()
     assert report_path.read_bytes() == before, "the machine-generated report must not be edited"
 
 
 def test_cli_status_reports_remaining_items(tmp_path: Path, monkeypatch, capsys):
-    write_report(tmp_path, make_report([make_entry("when2call-mcq:a"), make_entry("when2call-mcq:b")]))
+    write_report(
+        tmp_path, make_report([make_entry("when2call-mcq:a"), make_entry("when2call-mcq:b")])
+    )
     assert run_cli(monkeypatch, ["adjudicate", "--root", str(tmp_path), "--status"]) == 0
     output = capsys.readouterr().out
     assert "scanner findings      : 2" in output
@@ -428,8 +525,17 @@ def test_cli_quarantine_apply_and_status(tmp_path: Path, monkeypatch, capsys):
     write_report(tmp_path, make_report([make_entry("when2call-mcq:a")]))
     run_cli(
         monkeypatch,
-        ["adjudicate", "--root", str(tmp_path), "--id", "when2call-mcq:a",
-         "--verdict", "contaminated", "--reason", "leak"],
+        [
+            "adjudicate",
+            "--root",
+            str(tmp_path),
+            "--id",
+            "when2call-mcq:a",
+            "--verdict",
+            "contaminated",
+            "--reason",
+            "leak",
+        ],
     )
     capsys.readouterr()
     assert run_cli(monkeypatch, ["quarantine", "--root", str(tmp_path), "--apply"]) == 0
@@ -453,8 +559,17 @@ def test_cli_status_and_list_do_not_write_the_audit_artifact(tmp_path: Path, mon
     # Once a judgment is recorded, further queries leave it byte-identical.
     run_cli(
         monkeypatch,
-        ["adjudicate", "--root", str(tmp_path), "--id", "when2call-mcq:a",
-         "--verdict", "incidental", "--reason", "ok"],
+        [
+            "adjudicate",
+            "--root",
+            str(tmp_path),
+            "--id",
+            "when2call-mcq:a",
+            "--verdict",
+            "incidental",
+            "--reason",
+            "ok",
+        ],
     )
     capsys.readouterr()
     recorded = audit_path.read_bytes()
@@ -472,8 +587,12 @@ def test_cli_requires_the_scanner_report(tmp_path: Path, monkeypatch):
 def test_saved_quarantine_is_deterministic(tmp_path: Path):
     report = make_report([make_entry("when2call-mcq:b"), make_entry("when2call-mcq:a")])
     artifact = sync_audit(report, benchmark_fp=BENCHMARK_FP, training_fp=TRAINING_FP, now="T0")
-    apply_verdict(artifact, "when2call-mcq:a", VERDICT_CONTAMINATED, reason="x", reviewer="r", now="T1")
-    apply_verdict(artifact, "when2call-mcq:b", VERDICT_CONTAMINATED, reason="y", reviewer="r", now="T1")
+    apply_verdict(
+        artifact, "when2call-mcq:a", VERDICT_CONTAMINATED, reason="x", reviewer="r", now="T1"
+    )
+    apply_verdict(
+        artifact, "when2call-mcq:b", VERDICT_CONTAMINATED, reason="y", reviewer="r", now="T1"
+    )
     quarantine = build_quarantine(artifact, now="T2")
     first, second = tmp_path / "q1.json", tmp_path / "q2.json"
     save_quarantine(first, quarantine)

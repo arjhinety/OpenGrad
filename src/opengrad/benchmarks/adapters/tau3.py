@@ -22,13 +22,21 @@ class Tau3Adapter(BenchmarkAdapter):
         tasks: list[BenchmarkTask] = []
         domain_scenarios = [
             ("order_cancellation", "Cancel order ORD-9912 per store refund policy", "modify_order"),
-            ("policy_inquiry", "Check baggage allowance policy for domestic flights", "lookup_policy"),
+            (
+                "policy_inquiry",
+                "Check baggage allowance policy for domestic flights",
+                "lookup_policy",
+            ),
             ("account_update", "Update user billing address after verification", "update_account"),
-            ("dispute_handling", "Report an unrecognized transaction on credit card", "initiate_dispute"),
+            (
+                "dispute_handling",
+                "Report an unrecognized transaction on credit card",
+                "initiate_dispute",
+            ),
         ]
         for i, (task_type, instruction, expected_tool) in enumerate(domain_scenarios):
             task = BenchmarkTask(
-                task_id=f"tau3_{domain}_{task_type}_{i+1:03d}",
+                task_id=f"tau3_{domain}_{task_type}_{i + 1:03d}",
                 category=domain,
                 prompt=f"Domain: {domain.upper()}. Instruction: {instruction}.",
                 tools=[
@@ -37,7 +45,10 @@ class Tau3Adapter(BenchmarkAdapter):
                         "description": f"Domain tool for {domain}.",
                         "parameters": {
                             "type": "object",
-                            "properties": {"action_id": {"type": "string"}, "confirmed": {"type": "boolean"}},
+                            "properties": {
+                                "action_id": {"type": "string"},
+                                "confirmed": {"type": "boolean"},
+                            },
                             "required": ["action_id"],
                         },
                     }
@@ -55,7 +66,9 @@ class Tau3Adapter(BenchmarkAdapter):
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         parsed = parse_qwen_native_output(generation.text)
         success = False
         failure_category: str | None = None
@@ -87,7 +100,11 @@ class Tau3Adapter(BenchmarkAdapter):
             task_id=task.task_id,
             input=task.prompt,
             raw_output=generation.text,
-            parsed_output={"decision": parsed.decision, "calls": tool_calls, "content": parsed.content},
+            parsed_output={
+                "decision": parsed.decision,
+                "calls": tool_calls,
+                "content": parsed.content,
+            },
             expected=task.expected,
             score=1.0 if success else 0.0,
             success=success,

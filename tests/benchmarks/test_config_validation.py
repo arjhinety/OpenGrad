@@ -26,10 +26,12 @@ def test_benchmark_config_validation_succeeds_on_valid() -> None:
 
 def test_benchmark_config_missing_critical_param_raises() -> None:
     with pytest.raises(ValueError, match="missing research-critical parameter"):
-        BenchmarkConfig.from_dict({
-            "benchmark_id": "test",
-            "model_id": "test",
-        })
+        BenchmarkConfig.from_dict(
+            {
+                "benchmark_id": "test",
+                "model_id": "test",
+            }
+        )
 
 
 def test_suite_config_validation() -> None:

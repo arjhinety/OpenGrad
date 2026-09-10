@@ -37,7 +37,12 @@ def test_dataset_manifest_roundtrip(tmp_path: Path) -> None:
 
 def test_validator_detects_invalid_dpo_pair() -> None:
     dpo_records = [
-        {"id": "d1", "prompt": "Hello", "chosen": "Hi there!", "rejected": "Hi there!"},  # chosen == rejected
+        {
+            "id": "d1",
+            "prompt": "Hello",
+            "chosen": "Hi there!",
+            "rejected": "Hi there!",
+        },  # chosen == rejected
         {"id": "d2", "prompt": "2+2?", "chosen": "4", "rejected": "5"},  # valid
     ]
     report = validate_records(dpo_records, dataset_name="dpo_test", mode="dpo")
@@ -51,7 +56,12 @@ def test_validator_passes_valid_sft_record() -> None:
         {
             "id": "r1",
             "source": {"dataset_id": "test"},
-            "tools": [{"name": "lookup", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}}}],
+            "tools": [
+                {
+                    "name": "lookup",
+                    "parameters": {"type": "object", "properties": {"q": {"type": "string"}}},
+                }
+            ],
             "messages": [
                 {"role": "user", "content": "Search for x"},
                 {

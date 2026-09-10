@@ -60,7 +60,10 @@ def _storage_row(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def _write_shard(
-    rows: list[dict[str, Any]], destination: Path, checksum: str, source_end: int,
+    rows: list[dict[str, Any]],
+    destination: Path,
+    checksum: str,
+    source_end: int,
     source_prefix_checksum: str,
 ) -> None:
     import pyarrow as pa  # type: ignore[import-untyped]
@@ -99,7 +102,9 @@ def _read_valid_shard(path: Path) -> tuple[int, int, str, str] | None:
         expected = metadata.get(b"opengrad_row_checksum", b"").decode("ascii")
         expected_count = int(metadata.get(b"opengrad_row_count", b"-1"))
         source_end = int(metadata.get(b"opengrad_source_end", b"-1"))
-        source_prefix_checksum = metadata.get(b"opengrad_source_prefix_checksum", b"").decode("ascii")
+        source_prefix_checksum = metadata.get(b"opengrad_source_prefix_checksum", b"").decode(
+            "ascii"
+        )
         rows = table.to_pylist()
         digest = hashlib.sha256(b"".join(_row_bytes(row) for row in rows)).hexdigest()
         if (
@@ -224,7 +229,9 @@ def materialize_parquet(
         try:
             old_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
-            raise ValueError(f"resume manifest is invalid; use a new output directory: {manifest_path}") from exc
+            raise ValueError(
+                f"resume manifest is invalid; use a new output directory: {manifest_path}"
+            ) from exc
     compatible = old_manifest.get("config") == config
     existing_shards = list(output_dir.glob("shard-*.parquet"))
     if not compatible and existing_shards:
@@ -257,7 +264,9 @@ def materialize_parquet(
         if listed != valid_shards:
             raise ValueError("resume manifest and committed shards do not reconcile")
     elif existing_shards:
-        raise ValueError("existing shards require a compatible manifest; use a new output directory")
+        raise ValueError(
+            "existing shards require a compatible manifest; use a new output directory"
+        )
 
     import pyarrow.parquet as pq
 
@@ -275,12 +284,18 @@ def materialize_parquet(
     counts["rejected"] = 0
     counts["duplicates"] = 0
     counts["written"] = 0
-    def disposition(raw: dict[str, Any], seen: set[str]) -> tuple[str, dict[str, Any] | None, str | None]:
+
+    def disposition(
+        raw: dict[str, Any], seen: set[str]
+    ) -> tuple[str, dict[str, Any] | None, str | None]:
         try:
             if mode == "sft":
                 item = canonical_dict(adapter(raw, split))
                 item_metadata = item.get("metadata", {})
-                if isinstance(item_metadata, dict) and item_metadata.get("eligibility") == "evaluation_only":
+                if (
+                    isinstance(item_metadata, dict)
+                    and item_metadata.get("eligibility") == "evaluation_only"
+                ):
                     raise ValueError("evaluation-only record cannot enter SFT materialization")
             else:
                 item = _jsonable(adapter(raw, split))
@@ -304,7 +319,11 @@ def materialize_parquet(
                 break
             replay_consumed += 1
             decision, _, reason = disposition(raw, replay_seen)
-            counts[{"accepted": "accepted", "rejected": "rejected", "duplicate": "duplicates"}[decision]] += 1
+            counts[
+                {"accepted": "accepted", "rejected": "rejected", "duplicate": "duplicates"}[
+                    decision
+                ]
+            ] += 1
             if reason is not None:
                 counts["parse_failed"] += 1
                 counts[f"rejected_{reason.split(':', 1)[0]}"] += 1
@@ -334,7 +353,11 @@ def materialize_parquet(
             source_index += 1
             counts["source_rows"] += 1
             decision, stored, reason = disposition(raw, seen_hashes)
-            counts[{"accepted": "accepted", "rejected": "rejected", "duplicate": "duplicates"}[decision]] += 1
+            counts[
+                {"accepted": "accepted", "rejected": "rejected", "duplicate": "duplicates"}[
+                    decision
+                ]
+            ] += 1
             if reason is not None:
                 counts["parse_failed"] += 1
                 counts[f"rejected_{reason.split(':', 1)[0]}"] += 1
@@ -344,7 +367,13 @@ def materialize_parquet(
             if len(rows) >= shard_size:
                 digest = hashlib.sha256(b"".join(_row_bytes(row) for row in rows)).hexdigest()
                 name = f"shard-{shard_index:06d}.parquet"
-                _write_shard(rows, output_dir / name, digest, source_index, _source_prefix_checksum(input_path, source_index))
+                _write_shard(
+                    rows,
+                    output_dir / name,
+                    digest,
+                    source_index,
+                    _source_prefix_checksum(input_path, source_index),
+                )
                 valid_shards.append(name)
                 shard_index += 1
                 checkpoint = {
@@ -363,7 +392,13 @@ def materialize_parquet(
     if rows:
         digest = hashlib.sha256(b"".join(_row_bytes(row) for row in rows)).hexdigest()
         name = f"shard-{shard_index:06d}.parquet"
-        _write_shard(rows, output_dir / name, digest, source_index, _source_prefix_checksum(input_path, source_index))
+        _write_shard(
+            rows,
+            output_dir / name,
+            digest,
+            source_index,
+            _source_prefix_checksum(input_path, source_index),
+        )
         valid_shards.append(name)
 
     written = 0

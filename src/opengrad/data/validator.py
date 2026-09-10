@@ -63,9 +63,13 @@ def validate_dpo_record(record: dict[str, Any], index: int) -> list[DataValidati
     if not prompt:
         errors.append(DataValidationError("EMPTY_PROMPT", "DPO prompt is empty", rec_id, index))
     if not chosen:
-        errors.append(DataValidationError("EMPTY_CHOSEN", "DPO chosen response is empty", rec_id, index))
+        errors.append(
+            DataValidationError("EMPTY_CHOSEN", "DPO chosen response is empty", rec_id, index)
+        )
     if not rejected:
-        errors.append(DataValidationError("EMPTY_REJECTED", "DPO rejected response is empty", rec_id, index))
+        errors.append(
+            DataValidationError("EMPTY_REJECTED", "DPO rejected response is empty", rec_id, index)
+        )
 
     if chosen and rejected and chosen == rejected:
         errors.append(
@@ -128,7 +132,11 @@ def validate_records(
             if total_chars > 32000:
                 code = "EXTREME_SEQUENCE_LENGTH"
                 reason_counts[code] += 1
-                errors.append(DataValidationError(code, f"Extreme character length: {total_chars}", rec_id, idx))
+                errors.append(
+                    DataValidationError(
+                        code, f"Extreme character length: {total_chars}", rec_id, idx
+                    )
+                )
 
             # Semantic trajectory issues
             issues = validate_training_trajectory(example)

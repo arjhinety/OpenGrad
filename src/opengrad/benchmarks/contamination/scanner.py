@@ -30,10 +30,14 @@ class ContaminationMatch:
             "training_sample_id": self.training_sample_id,
             "similarity_score": round(self.similarity_score, 4),
             "benchmark_text_preview": (
-                self.benchmark_text[:120] + "..." if len(self.benchmark_text) > 120 else self.benchmark_text
+                self.benchmark_text[:120] + "..."
+                if len(self.benchmark_text) > 120
+                else self.benchmark_text
             ),
             "training_text_preview": (
-                self.training_text[:120] + "..." if len(self.training_text) > 120 else self.training_text
+                self.training_text[:120] + "..."
+                if len(self.training_text) > 120
+                else self.training_text
             ),
             "reason": self.reason,
         }
@@ -107,7 +111,9 @@ class ContaminationScanReport:
                 lines.append("")
         else:
             lines.append("## Result: No Contamination Detected")
-            lines.append("No exact, near-duplicate, or semantic matches were found between the benchmark and training samples.")
+            lines.append(
+                "No exact, near-duplicate, or semantic matches were found between the benchmark and training samples."
+            )
 
         return "\n".join(lines)
 
@@ -126,8 +132,12 @@ class MultiLevelContaminationScanner:
     def scan(
         self,
         benchmark_id: str,
-        benchmark_samples: list[dict[str, Any]],  # list of {"id": str, "prompt": str, "expected": str, "canonical": str}
-        training_samples: list[dict[str, Any]],   # list of {"id": str, "prompt": str, "response": str, "canonical": str}
+        benchmark_samples: list[
+            dict[str, Any]
+        ],  # list of {"id": str, "prompt": str, "expected": str, "canonical": str}
+        training_samples: list[
+            dict[str, Any]
+        ],  # list of {"id": str, "prompt": str, "response": str, "canonical": str}
         corpus_fingerprint: str = "unspecified",
         max_level: int = 5,
     ) -> ContaminationScanReport:
@@ -180,7 +190,10 @@ class MultiLevelContaminationScanner:
                 if bm_hash in training_norm_prompt_map:
                     tr_id = training_norm_prompt_map[bm_hash]
                     # Avoid duplicate if already caught in L1
-                    if not any(m.benchmark_task_id == bm_id and m.training_sample_id == tr_id for m in audit_queue):
+                    if not any(
+                        m.benchmark_task_id == bm_id and m.training_sample_id == tr_id
+                        for m in audit_queue
+                    ):
                         match = ContaminationMatch(
                             level=2,
                             level_name="normalized_prompt_hash",
@@ -207,23 +220,23 @@ class MultiLevelContaminationScanner:
                     tr_id = str(tr.get("id", ""))
                     tr_text = str(tr.get("prompt", ""))
                     score = jaccard(bm_text, tr_text, n=5)
-                    if (
-                        self.ngram_threshold <= score < 1.0
-                        and not any(m.benchmark_task_id == bm_id and m.training_sample_id == tr_id for m in audit_queue)
+                    if self.ngram_threshold <= score < 1.0 and not any(
+                        m.benchmark_task_id == bm_id and m.training_sample_id == tr_id
+                        for m in audit_queue
                     ):
-                            match = ContaminationMatch(
-                                level=3,
-                                level_name="ngram_minhash_near_duplicate",
-                                benchmark_id=benchmark_id,
-                                benchmark_task_id=bm_id,
-                                training_sample_id=tr_id,
-                                similarity_score=score,
-                                benchmark_text=bm_text,
-                                training_text=tr_text,
-                                reason=f"N-gram 5-gram Jaccard overlap ({score:.2f} >= {self.ngram_threshold})",
-                            )
-                            audit_queue.append(match)
-                            matches_by_level[3] += 1
+                        match = ContaminationMatch(
+                            level=3,
+                            level_name="ngram_minhash_near_duplicate",
+                            benchmark_id=benchmark_id,
+                            benchmark_task_id=bm_id,
+                            training_sample_id=tr_id,
+                            similarity_score=score,
+                            benchmark_text=bm_text,
+                            training_text=tr_text,
+                            reason=f"N-gram 5-gram Jaccard overlap ({score:.2f} >= {self.ngram_threshold})",
+                        )
+                        audit_queue.append(match)
+                        matches_by_level[3] += 1
 
         # LEVEL 4: Semantic similarity candidate generation
         if max_level >= 4:
@@ -237,23 +250,23 @@ class MultiLevelContaminationScanner:
                     tr_id = str(tr.get("id", ""))
                     tr_text = normalize(str(tr.get("prompt", "")))
                     ratio = SequenceMatcher(None, bm_text, tr_text).ratio()
-                    if (
-                        self.semantic_threshold <= ratio < 1.0
-                        and not any(m.benchmark_task_id == bm_id and m.training_sample_id == tr_id for m in audit_queue)
+                    if self.semantic_threshold <= ratio < 1.0 and not any(
+                        m.benchmark_task_id == bm_id and m.training_sample_id == tr_id
+                        for m in audit_queue
                     ):
-                            match = ContaminationMatch(
-                                level=4,
-                                level_name="semantic_similarity_candidate",
-                                benchmark_id=benchmark_id,
-                                benchmark_task_id=bm_id,
-                                training_sample_id=tr_id,
-                                similarity_score=ratio,
-                                benchmark_text=bm_text,
-                                training_text=tr_text,
-                                reason=f"SequenceMatcher ratio ({ratio:.2f} >= {self.semantic_threshold})",
-                            )
-                            audit_queue.append(match)
-                            matches_by_level[4] += 1
+                        match = ContaminationMatch(
+                            level=4,
+                            level_name="semantic_similarity_candidate",
+                            benchmark_id=benchmark_id,
+                            benchmark_task_id=bm_id,
+                            training_sample_id=tr_id,
+                            similarity_score=ratio,
+                            benchmark_text=bm_text,
+                            training_text=tr_text,
+                            reason=f"SequenceMatcher ratio ({ratio:.2f} >= {self.semantic_threshold})",
+                        )
+                        audit_queue.append(match)
+                        matches_by_level[4] += 1
 
         # LEVEL 5: Manual audit queue verification
         level_status["level_5"] = "COMPLETED" if max_level >= 5 else "SKIPPED"

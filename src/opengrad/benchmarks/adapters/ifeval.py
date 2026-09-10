@@ -17,26 +17,47 @@ class IFEvalAdapter(BenchmarkAdapter):
     def load_tasks(self, split: str = "test", limit: int | None = None) -> list[BenchmarkTask]:
         tasks: list[BenchmarkTask] = []
         specs = [
-            ("ifeval_word_count", "Write a short paragraph about Mars with at least 30 words.", lambda t: len(t.split()) >= 30),
-            ("ifeval_capital_letters", "Write a sentence entirely in capital letters about space exploration.", lambda t: t.isupper()),
-            ("ifeval_json_format", "Respond strictly with a JSON array of three colors.", lambda t: t.strip().startswith("[") and t.strip().endswith("]")),
-            ("ifeval_section_header", "Write an article containing a section titled '## Background'.", lambda t: "## Background" in t),
+            (
+                "ifeval_word_count",
+                "Write a short paragraph about Mars with at least 30 words.",
+                lambda t: len(t.split()) >= 30,
+            ),
+            (
+                "ifeval_capital_letters",
+                "Write a sentence entirely in capital letters about space exploration.",
+                lambda t: t.isupper(),
+            ),
+            (
+                "ifeval_json_format",
+                "Respond strictly with a JSON array of three colors.",
+                lambda t: t.strip().startswith("[") and t.strip().endswith("]"),
+            ),
+            (
+                "ifeval_section_header",
+                "Write an article containing a section titled '## Background'.",
+                lambda t: "## Background" in t,
+            ),
         ]
         for i, (task_id, prompt, checker) in enumerate(specs):
             task = BenchmarkTask(
-                task_id=f"{task_id}_{i+1:03d}",
+                task_id=f"{task_id}_{i + 1:03d}",
                 category="deterministic_rule",
                 prompt=prompt,
                 expected={"deterministic_rule": task_id},
                 expected_decision="ANSWER",
-                metadata={"checker": task_id, "benchmark_revision": "cb27b233a763806fcf8ff9a3411bcfcae67c87c0"},
+                metadata={
+                    "checker": task_id,
+                    "benchmark_revision": "cb27b233a763806fcf8ff9a3411bcfcae67c87c0",
+                },
             )
             tasks.append(task)
         if limit is not None:
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         text = generation.text.strip()
         checker_id = task.metadata.get("checker", "")
         success = False

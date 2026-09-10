@@ -17,7 +17,9 @@ class SpeculativeReplayAdapter(BenchmarkAdapter):
 
     REPLAY_BENCHMARKS: ClassVar[list[str]] = ["bfcl_replay", "tau3_replay", "acebench_replay"]
 
-    def load_tasks(self, split: str = "bfcl_replay", limit: int | None = None) -> list[BenchmarkTask]:
+    def load_tasks(
+        self, split: str = "bfcl_replay", limit: int | None = None
+    ) -> list[BenchmarkTask]:
         target_split = split if split in self.REPLAY_BENCHMARKS else "bfcl_replay"
         tasks: list[BenchmarkTask] = []
         specs = [
@@ -27,14 +29,17 @@ class SpeculativeReplayAdapter(BenchmarkAdapter):
         ]
         for i, (task_id, tool_name, prompt, expected_dec) in enumerate(specs):
             task = BenchmarkTask(
-                task_id=f"{target_split}_{task_id}_{i+1:03d}",
+                task_id=f"{target_split}_{task_id}_{i + 1:03d}",
                 category=target_split,
                 prompt=f"Replay task [{target_split}]: {prompt}",
                 tools=[
                     {
                         "name": tool_name,
                         "description": "Replay evaluation tool.",
-                        "parameters": {"type": "object", "properties": {"query": {"type": "string"}}},
+                        "parameters": {
+                            "type": "object",
+                            "properties": {"query": {"type": "string"}},
+                        },
                     }
                 ],
                 expected={"tool": tool_name, "decision": expected_dec},
@@ -46,7 +51,9 @@ class SpeculativeReplayAdapter(BenchmarkAdapter):
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         parsed = parse_qwen_native_output(generation.text)
         success = False
         failure_category: str | None = None
@@ -78,7 +85,11 @@ class SpeculativeReplayAdapter(BenchmarkAdapter):
             task_id=task.task_id,
             input=task.prompt,
             raw_output=generation.text,
-            parsed_output={"decision": parsed.decision, "calls": tool_calls, "content": parsed.content},
+            parsed_output={
+                "decision": parsed.decision,
+                "calls": tool_calls,
+                "content": parsed.content,
+            },
             expected=task.expected,
             score=1.0 if success else 0.0,
             success=success,

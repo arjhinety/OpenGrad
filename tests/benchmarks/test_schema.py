@@ -8,7 +8,7 @@ def test_normalized_task_result_roundtrip() -> None:
     task = NormalizedTaskResult(
         task_id="test_01",
         input="Find the temperature in Paris.",
-        raw_output="<tool_call>{\"name\": \"get_temp\", \"arguments\": {\"city\": \"Paris\"}}</tool_call>",
+        raw_output='<tool_call>{"name": "get_temp", "arguments": {"city": "Paris"}}</tool_call>',
         parsed_output={"name": "get_temp", "arguments": {"city": "Paris"}},
         expected={"name": "get_temp"},
         score=1.0,

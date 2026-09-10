@@ -62,7 +62,9 @@ def test_provenance_fails_closed_outside_a_repository(tmp_path: Path):
 def _contract_with_registry(monkeypatch, entry: dict) -> tuple[bool, str]:
     from opengrad import readiness as readiness_module
 
-    monkeypatch.setattr(readiness_module, "_read_dataset_registry", lambda root: {"canonical_v1": entry})
+    monkeypatch.setattr(
+        readiness_module, "_read_dataset_registry", lambda root: {"canonical_v1": entry}
+    )
     return readiness_module._training_data_contract(
         ROOT,
         {"datasets": {"manifest_ids": ["canonical_v1"], "hashes": {"canonical_v1": "b" * 64}}},
@@ -88,9 +90,7 @@ def test_sft_gate_accepts_a_corpus_that_forbids_evaluation_splits(monkeypatch):
 
 
 def test_sft_gate_rejects_a_corpus_that_allows_evaluation_splits(monkeypatch):
-    ok, detail = _contract_with_registry(
-        monkeypatch, _entry(allowed_splits=["train", "mcq_test"])
-    )
+    ok, detail = _contract_with_registry(monkeypatch, _entry(allowed_splits=["train", "mcq_test"]))
     assert ok is False
     assert "cannot enter SFT" in detail
 
@@ -106,7 +106,9 @@ def test_sft_gate_rejects_a_preference_intended_corpus(monkeypatch):
 
 
 def test_sft_gate_requires_a_pinned_source_revision(monkeypatch):
-    ok, detail = _contract_with_registry(monkeypatch, _entry(source_revision={"value": "not-a-sha"}))
+    ok, detail = _contract_with_registry(
+        monkeypatch, _entry(source_revision={"value": "not-a-sha"})
+    )
     assert ok is False
     assert "source revision is not pinned" in detail
 
@@ -145,4 +147,6 @@ def test_canonical_entry_hash_matches_the_release_manifest():
     digest = hashlib.sha256(manifest.read_bytes()).hexdigest()
     assert entry["checksum"] == digest
     assert entry["processed_dataset_hash"]["value"] == digest
-    assert entry["source_revision"]["value"] == json.loads(manifest.read_text())["opengrad_git_commit"]
+    assert (
+        entry["source_revision"]["value"] == json.loads(manifest.read_text())["opengrad_git_commit"]
+    )

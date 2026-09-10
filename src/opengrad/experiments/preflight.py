@@ -63,13 +63,17 @@ def run_experiment_preflight(
     if isinstance(config, (str, Path)):
         try:
             exp_config = ExperimentConfig.from_file(config)
-            checks.append(PreflightCheckItem("Config Schema", "PASS", details="Valid experiment schema"))
+            checks.append(
+                PreflightCheckItem("Config Schema", "PASS", details="Valid experiment schema")
+            )
         except (OSError, ValueError, TypeError) as exc:
             checks.append(PreflightCheckItem("Config Schema", "FAIL", "CONFIG_INVALID", str(exc)))
             return PreflightResult("unknown", "FAIL", checks)
     else:
         exp_config = config
-        checks.append(PreflightCheckItem("Config Schema", "PASS", details="Valid experiment schema"))
+        checks.append(
+            PreflightCheckItem("Config Schema", "PASS", details="Valid experiment schema")
+        )
 
     # 2. Algorithm compatibility
     trainer_type = exp_config.trainer.get("type", "sft")
@@ -134,7 +138,9 @@ def run_experiment_preflight(
                 )
             )
         else:
-            checks.append(PreflightCheckItem("Dataset Manifests", "PASS", details="Manifest files verified"))
+            checks.append(
+                PreflightCheckItem("Dataset Manifests", "PASS", details="Manifest files verified")
+            )
 
     # 5. Output directory & disk capacity
     out_dir = root_dir / "runs" / exp_config.experiment_id
@@ -181,7 +187,9 @@ def run_experiment_preflight(
     seed = exp_config.reproducibility.get("seed")
     if seed is None:
         checks.append(
-            PreflightCheckItem("Seed Configuration", "FAIL", "SEED_MISSING", "Random seed must be explicit")
+            PreflightCheckItem(
+                "Seed Configuration", "FAIL", "SEED_MISSING", "Random seed must be explicit"
+            )
         )
     else:
         checks.append(PreflightCheckItem("Seed Configuration", "PASS", details=f"Seed {seed}"))

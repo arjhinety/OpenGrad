@@ -8,8 +8,16 @@ from opengrad.benchmarks.backends.protocol import GenerationResult
 
 def test_openweights_prompt_rendering_is_compact() -> None:
     tools = [
-        {"name": "web_search", "description": "Search web.", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}}},
-        {"name": "read_file", "description": "Read file.", "parameters": {"type": "object", "properties": {"path": {"type": "string"}}}},
+        {
+            "name": "web_search",
+            "description": "Search web.",
+            "parameters": {"type": "object", "properties": {"q": {"type": "string"}}},
+        },
+        {
+            "name": "read_file",
+            "description": "Read file.",
+            "parameters": {"type": "object", "properties": {"path": {"type": "string"}}},
+        },
     ]
     prompt_bare = render_openweights_prompt(tools, "Find weather in Tokyo", format_mode="bare")
     assert '{"tool": "name", "arguments": {"argument": "value"}}' in prompt_bare
@@ -22,13 +30,17 @@ def test_openweights_prompt_rendering_is_compact() -> None:
 
 def test_openweights_reply_parser() -> None:
     # 1. Bare JSON format
-    dec1, name1, args1 = parse_openweights_reply('{"tool": "web_search", "arguments": {"query": "OpenWeights"}}')
+    dec1, name1, args1 = parse_openweights_reply(
+        '{"tool": "web_search", "arguments": {"query": "OpenWeights"}}'
+    )
     assert dec1 == "CALL"
     assert name1 == "web_search"
     assert args1 == {"query": "OpenWeights"}
 
     # 2. Tagged format
-    dec2, name2, args2 = parse_openweights_reply('<tool_call>{"name": "fetch_url", "arguments": {"url": "https://example.com"}}</tool_call>')
+    dec2, name2, args2 = parse_openweights_reply(
+        '<tool_call>{"name": "fetch_url", "arguments": {"url": "https://example.com"}}</tool_call>'
+    )
     assert dec2 == "CALL"
     assert name2 == "fetch_url"
     assert args2 == {"url": "https://example.com"}

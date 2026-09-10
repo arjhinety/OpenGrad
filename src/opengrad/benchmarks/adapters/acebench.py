@@ -29,34 +29,64 @@ class ACEBenchAdapter(BenchmarkAdapter):
         spec = [
             ("normal", "Fetch stock price for AAPL.", "CALL", "get_stock_price"),
             ("special", "Send an email to user without recipient address.", "CLARIFY", None),
-            ("ambiguous", "Book a flight to Springfield (multiple cities named Springfield exist).", "CLARIFY", None),
-            ("incomplete", "Transfer funds from checking account but amount is omitted.", "CLARIFY", None),
-            ("impossible", "Predict the winning lottery numbers for tomorrow night.", "ANSWER", None),
-            ("agent_multi_turn", "First check database record, then update if valid.", "CALL", "db_check"),
+            (
+                "ambiguous",
+                "Book a flight to Springfield (multiple cities named Springfield exist).",
+                "CLARIFY",
+                None,
+            ),
+            (
+                "incomplete",
+                "Transfer funds from checking account but amount is omitted.",
+                "CLARIFY",
+                None,
+            ),
+            (
+                "impossible",
+                "Predict the winning lottery numbers for tomorrow night.",
+                "ANSWER",
+                None,
+            ),
+            (
+                "agent_multi_turn",
+                "First check database record, then update if valid.",
+                "CALL",
+                "db_check",
+            ),
         ]
         for i, (cls_name, prompt, expected_dec, expected_tool) in enumerate(spec):
             tools = []
             if expected_tool:
-                tools.append({
-                    "name": expected_tool,
-                    "description": f"Tool for {cls_name}",
-                    "parameters": {"type": "object", "properties": {"target": {"type": "string"}}},
-                })
+                tools.append(
+                    {
+                        "name": expected_tool,
+                        "description": f"Tool for {cls_name}",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {"target": {"type": "string"}},
+                        },
+                    }
+                )
             task = BenchmarkTask(
-                task_id=f"acebench_{cls_name}_{i+1:03d}",
+                task_id=f"acebench_{cls_name}_{i + 1:03d}",
                 category=cls_name,
                 prompt=prompt,
                 tools=tools,
                 expected={"decision": expected_dec, "tool": expected_tool},
                 expected_decision=expected_dec,
-                metadata={"evaluation_class": cls_name, "benchmark_revision": "5e61a684b01e7e45217996c56891ebfe2c29bc96"},
+                metadata={
+                    "evaluation_class": cls_name,
+                    "benchmark_revision": "5e61a684b01e7e45217996c56891ebfe2c29bc96",
+                },
             )
             tasks.append(task)
         if limit is not None:
             tasks = tasks[:limit]
         return tasks
 
-    def evaluate_task(self, task: BenchmarkTask, generation: GenerationResult) -> NormalizedTaskResult:
+    def evaluate_task(
+        self, task: BenchmarkTask, generation: GenerationResult
+    ) -> NormalizedTaskResult:
         parsed = parse_qwen_native_output(generation.text)
         expected_dec = task.expected_decision
         success = False
@@ -72,7 +102,9 @@ class ACEBenchAdapter(BenchmarkAdapter):
             if parsed.decision != "CALL":
                 failure_category = ToolFailureCategory.MISSED_TOOL.value
             else:
-                expected_tool = task.expected.get("tool") if isinstance(task.expected, dict) else None
+                expected_tool = (
+                    task.expected.get("tool") if isinstance(task.expected, dict) else None
+                )
                 if expected_tool and parsed.calls[0].name != expected_tool:
                     failure_category = ToolFailureCategory.WRONG_TOOL.value
                 else:
@@ -94,7 +126,11 @@ class ACEBenchAdapter(BenchmarkAdapter):
             task_id=task.task_id,
             input=task.prompt,
             raw_output=generation.text,
-            parsed_output={"decision": parsed.decision, "calls": tool_calls, "content": parsed.content},
+            parsed_output={
+                "decision": parsed.decision,
+                "calls": tool_calls,
+                "content": parsed.content,
+            },
             expected=task.expected,
             score=1.0 if success else 0.0,
             success=success,

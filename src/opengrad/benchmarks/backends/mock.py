@@ -195,7 +195,9 @@ class DeterministicFakeBackend:
             return text, 48, 16
 
         if scenario == "refusal":
-            text = "I cannot help with that unsupported request because it violates safety guidelines."
+            text = (
+                "I cannot help with that unsupported request because it violates safety guidelines."
+            )
             return text, 52, 14
 
         if scenario == "truncated":

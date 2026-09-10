@@ -43,7 +43,7 @@ def test_deterministic_fake_backend_scenarios() -> None:
     # 5. Explicit scenario: truncated
     backend_trunc = DeterministicFakeBackend(scenarios={"t_task": "truncated"})
     res_t = backend_trunc.generate("query", metadata={"task_id": "t_task"})
-    assert res_t.text.endswith("query\": ")
+    assert res_t.text.endswith('query": ')
 
 
 def test_speculative_telemetry_in_fake_backend() -> None:

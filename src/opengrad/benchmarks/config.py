@@ -208,7 +208,7 @@ def check_run_compatibility(
     baseline_config: BenchmarkConfig, candidate_config: BenchmarkConfig
 ) -> list[str]:
     """Verify that two runs share identical research-critical evaluation parameters.
-    
+
     Returns a list of incompatibility reasons. If empty, the runs are strictly comparable.
     """
     incompatibilities: list[str] = []
@@ -237,7 +237,10 @@ def check_run_compatibility(
         incompatibilities.append(
             f"Prompt template mismatch: '{baseline_config.prompt_template}' vs '{candidate_config.prompt_template}'"
         )
-    if baseline_config.tool_schema_rendering_policy != candidate_config.tool_schema_rendering_policy:
+    if (
+        baseline_config.tool_schema_rendering_policy
+        != candidate_config.tool_schema_rendering_policy
+    ):
         incompatibilities.append(
             f"Tool schema rendering policy mismatch: '{baseline_config.tool_schema_rendering_policy}' vs '{candidate_config.tool_schema_rendering_policy}'"
         )

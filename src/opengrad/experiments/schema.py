@@ -145,7 +145,9 @@ class ExperimentConfig:
         ]
         missing = [k for k in required if k not in data]
         if missing:
-            raise ValueError(f"Experiment configuration missing required field(s): {', '.join(missing)}")
+            raise ValueError(
+                f"Experiment configuration missing required field(s): {', '.join(missing)}"
+            )
 
         return cls(
             experiment_id=str(data["experiment_id"]),

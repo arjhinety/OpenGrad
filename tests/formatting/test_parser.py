@@ -59,7 +59,9 @@ def test_native_xml_without_function_block_is_a_format_error():
 
 
 def test_native_xml_unclosed_parameter_is_a_format_error():
-    parsed = parse_qwen_native_output("<tool_call>\n<function=a>\n<parameter=x>\n1\n</function>\n</tool_call>")
+    parsed = parse_qwen_native_output(
+        "<tool_call>\n<function=a>\n<parameter=x>\n1\n</function>\n</tool_call>"
+    )
     assert parsed.status == "FORMAT_ERROR"
     assert any("unclosed <parameter>" in error for error in parsed.errors)
 

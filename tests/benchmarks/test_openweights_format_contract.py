@@ -18,8 +18,7 @@ from opengrad.formatting.parser import parse_qwen_native_output
 # Verbatim from OpenWeights' parser test (PortableTest.kt): the XML branch, including
 # control characters that must survive into the argument value.
 OPENWEIGHTS_XML_FIXTURE = (
-    "<tool_call><function=write><parameter=text>a\u0007b\u001Fc</parameter>"
-    "</function></tool_call>"
+    "<tool_call><function=write><parameter=text>a\u0007b\u001fc</parameter></function></tool_call>"
 )
 
 # The XML shape OpenWeights documents in ToolCallParser.parseTaggedXml.
@@ -40,7 +39,7 @@ def test_shared_xml_fixture_parses_in_both_readers():
     assert parsed.status == "RAW_VALID" and parsed.decision == "CALL"
     assert parsed.calls[0].name == "write"
     # Control characters are preserved rather than stripped or escaped away.
-    assert parsed.calls[0].arguments == {"text": "a\u0007b\u001Fc"}
+    assert parsed.calls[0].arguments == {"text": "a\u0007b\u001fc"}
 
 
 def test_openweights_documented_xml_shape_parses():

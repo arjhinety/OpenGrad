@@ -73,11 +73,17 @@ PROMPTS: list[MicrosuitePrompt] = [
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "container_id": {"type": "string", "description": "The target container ID or name"},
-                        "include_metrics": {"type": "boolean", "description": "Whether to include memory/CPU usage"}
+                        "container_id": {
+                            "type": "string",
+                            "description": "The target container ID or name",
+                        },
+                        "include_metrics": {
+                            "type": "boolean",
+                            "description": "Whether to include memory/CPU usage",
+                        },
                     },
-                    "required": ["container_id"]
-                }
+                    "required": ["container_id"],
+                },
             }
         ],
         sha256="676ba96eb1bd73901fb67af13404c963ac41e19151d17e91a43fbe23a9acf517",
@@ -95,8 +101,8 @@ PROMPTS: list[MicrosuitePrompt] = [
                 "parameters": {
                     "type": "object",
                     "properties": {"city": {"type": "string"}},
-                    "required": ["city"]
-                }
+                    "required": ["city"],
+                },
             }
         ],
         sha256="c2a612c173770ebbfa74fe8a259c87bed4725cb8fb77f2b6386008f92fa0555a",
@@ -106,7 +112,7 @@ PROMPTS: list[MicrosuitePrompt] = [
         id="micro_07_multi_turn_tool",
         name="Multi-Turn Tool Interaction",
         category="multi_turn_tool",
-        prompt="User: Query order #84920.\nAssistant: <tool_call>{\"name\":\"lookup_order\",\"arguments\":{\"order_id\":\"84920\"}}</tool_call>\nObservation: {\"status\":\"shipped\",\"tracking\":\"TRK9921\"}\nUser: When is it expected to arrive?",
+        prompt='User: Query order #84920.\nAssistant: <tool_call>{"name":"lookup_order","arguments":{"order_id":"84920"}}</tool_call>\nObservation: {"status":"shipped","tracking":"TRK9921"}\nUser: When is it expected to arrive?',
         tools=[
             {
                 "name": "lookup_tracking_estimate",
@@ -114,8 +120,8 @@ PROMPTS: list[MicrosuitePrompt] = [
                 "parameters": {
                     "type": "object",
                     "properties": {"tracking_number": {"type": "string"}},
-                    "required": ["tracking_number"]
-                }
+                    "required": ["tracking_number"],
+                },
             }
         ],
         sha256="b19eb367b406153c9ab84cce19d218b057d181d66d818454288179fabbf3b75e",
@@ -129,18 +135,16 @@ PROMPTS: list[MicrosuitePrompt] = [
         tools=[
             {"name": f"service_endpoint_{i}", "parameters": {"type": "object", "properties": {}}}
             for i in range(10)
-        ] + [
+        ]
+        + [
             {
                 "name": "process_refund",
                 "description": "Refund an existing payment.",
                 "parameters": {
                     "type": "object",
-                    "properties": {
-                        "payment_id": {"type": "string"},
-                        "amount": {"type": "number"}
-                    },
-                    "required": ["payment_id", "amount"]
-                }
+                    "properties": {"payment_id": {"type": "string"}, "amount": {"type": "number"}},
+                    "required": ["payment_id", "amount"],
+                },
             }
         ],
         sha256="ef1e6d565864e9e523c628a1f84411b88e6b9ad588f4f5eea1e75c1cdc9a0700",

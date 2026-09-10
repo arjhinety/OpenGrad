@@ -14,7 +14,9 @@ def load_run_artifacts(run_dir: Path) -> dict[str, Any]:
     manifest_file = run_dir / "manifest.json"
     metrics_file = run_dir / "metrics.json"
     if not manifest_file.exists() or not metrics_file.exists():
-        raise FileNotFoundError(f"Run directory is missing manifest.json or metrics.json: {run_dir}")
+        raise FileNotFoundError(
+            f"Run directory is missing manifest.json or metrics.json: {run_dir}"
+        )
 
     manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
     metrics = json.loads(metrics_file.read_text(encoding="utf-8"))
@@ -103,7 +105,9 @@ def render_comparison_markdown(comparison: dict[str, Any]) -> str:
     lines.append("| Run | Overall Accuracy | Delta |")
     lines.append("| :--- | :---: | :---: |")
     lines.append(f"| **Baseline** | {acc.get('baseline', 0.0):.1f}% | - |")
-    lines.append(f"| **Candidate** | {acc.get('candidate', 0.0):.1f}% | {acc.get('delta', 0.0):+.1f}% |")
+    lines.append(
+        f"| **Candidate** | {acc.get('candidate', 0.0):.1f}% | {acc.get('delta', 0.0):+.1f}% |"
+    )
     lines.append("")
 
     cat_deltas = comparison.get("category_deltas", {})
@@ -113,7 +117,9 @@ def render_comparison_markdown(comparison: dict[str, Any]) -> str:
         lines.append("| Category | Baseline | Candidate | Delta |")
         lines.append("| :--- | :---: | :---: | :---: |")
         for cat, vals in sorted(cat_deltas.items()):
-            lines.append(f"| `{cat}` | {vals['baseline']:.1f}% | {vals['candidate']:.1f}% | {vals['delta']:+.1f}% |")
+            lines.append(
+                f"| `{cat}` | {vals['baseline']:.1f}% | {vals['candidate']:.1f}% | {vals['delta']:+.1f}% |"
+            )
         lines.append("")
 
     speedup = comparison.get("speedup", {})
@@ -122,7 +128,9 @@ def render_comparison_markdown(comparison: dict[str, Any]) -> str:
         lines.append("")
         lines.append("| Metric | Value |")
         lines.append("| :--- | :---: |")
-        lines.append(f"| **Throughput Speedup** | **{speedup.get('throughput_speedup', 1.0):.2f}x** |")
+        lines.append(
+            f"| **Throughput Speedup** | **{speedup.get('throughput_speedup', 1.0):.2f}x** |"
+        )
         lines.append(f"| **Latency Speedup** | **{speedup.get('latency_speedup', 1.0):.2f}x** |")
         lines.append(f"| **TTFT Delta** | {speedup.get('ttft_delta_ms', 0.0):+.2f} ms |")
         lines.append(f"| **p95 ITL Delta** | {speedup.get('p95_itl_delta_ms', 0.0):+.2f} ms |")
@@ -148,7 +156,9 @@ def compare_multi_runs(run_dirs: list[Path]) -> str:
     ]
 
     # Accuracy row
-    acc_row = ["Overall Accuracy"] + [f"{l['metrics'].get('overall_accuracy', 0.0):.1f}%" for l in loaded]
+    acc_row = ["Overall Accuracy"] + [
+        f"{l['metrics'].get('overall_accuracy', 0.0):.1f}%" for l in loaded
+    ]
     lines.append("| " + " | ".join(acc_row) + " |")
 
     # Throughput row

@@ -53,7 +53,7 @@ def test_quality_parity_evaluation() -> None:
     ar_task = NormalizedTaskResult(
         task_id="t1",
         input="call",
-        raw_output="<tool_call>{\"name\":\"lookup\",\"arguments\":{\"q\":\"1\"}}</tool_call>",
+        raw_output='<tool_call>{"name":"lookup","arguments":{"q":"1"}}</tool_call>',
         parsed_output={"decision": "CALL", "name": "lookup", "arguments": {"q": "1"}},
         expected={},
         score=1.0,
@@ -63,7 +63,7 @@ def test_quality_parity_evaluation() -> None:
     spec_task_exact = NormalizedTaskResult(
         task_id="t1",
         input="call",
-        raw_output="<tool_call>{\"name\":\"lookup\",\"arguments\":{\"q\":\"1\"}}</tool_call>",
+        raw_output='<tool_call>{"name":"lookup","arguments":{"q":"1"}}</tool_call>',
         parsed_output={"decision": "CALL", "name": "lookup", "arguments": {"q": "1"}},
         expected={},
         score=1.0,

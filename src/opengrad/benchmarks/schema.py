@@ -147,7 +147,10 @@ class NormalizedRunResult:
         )
 
     def write_artifacts(
-        self, output_dir: Path, tasks: list[NormalizedTaskResult], raw_benchmark_artifacts: dict[str, Any] | None = None
+        self,
+        output_dir: Path,
+        tasks: list[NormalizedTaskResult],
+        raw_benchmark_artifacts: dict[str, Any] | None = None,
     ) -> None:
         """Write all machine-readable artifacts into reports/benchmarks/<run-id>/."""
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -188,9 +191,7 @@ class NormalizedRunResult:
         )
 
         # 4. failures.json
-        failure_records = [
-            t.to_dict() for t in tasks if not t.success and t.failure_category
-        ]
+        failure_records = [t.to_dict() for t in tasks if not t.success and t.failure_category]
         failure_summary = {
             "total_tasks": len(tasks),
             "failed_tasks": len([t for t in tasks if not t.success]),
