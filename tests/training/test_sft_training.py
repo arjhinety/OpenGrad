@@ -621,3 +621,29 @@ def test_default_cache_dir_is_keyed_by_the_rendering_contract(tmp_path):
     assert default_cache_dir(tmp_path, "Qwen/Qwen3.5-2B", 4096) != default_cache_dir(
         tmp_path, "Qwen/Qwen3.5-2B", 2048
     )
+
+
+def test_bucketed_batches_are_reproducible_and_cut_padding():
+    """Bucketing must not cost determinism, and must actually reduce padded work."""
+    from opengrad.training.sft_runner import deterministic_batches
+
+    lengths = [40, 2000, 60, 1900, 80, 1800, 100, 1700] * 16
+    batch_size = 4
+    a = deterministic_batches(lengths, batch_size, seed=42, epoch=0)
+    b = deterministic_batches(lengths, batch_size, seed=42, epoch=0)
+    c = deterministic_batches(lengths, batch_size, seed=42, epoch=1)
+    assert a == b, "same seed and epoch must give identical batches"
+    assert a != c, "a new epoch must reshuffle"
+    assert sorted(index for batch in a for index in batch) == list(range(len(lengths)))
+    assert all(0 < len(batch) <= batch_size for batch in a)
+
+    def padded_work(batches):
+        return sum(max(lengths[index] for index in batch) * len(batch) for batch in batches)
+
+    unbucketed = [
+        list(range(offset, min(offset + batch_size, len(lengths))))
+        for offset in range(0, len(lengths), batch_size)
+    ]
+    # The point of bucketing: far less time spent on pad positions than a length-blind draw.
+    assert padded_work(a) < padded_work(unbucketed)
+    assert padded_work(a) <= sum(lengths) * 1.2

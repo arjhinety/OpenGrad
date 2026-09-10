@@ -16,6 +16,7 @@ mismatch fails closed rather than training on a different corpus.
 from __future__ import annotations
 
 import json
+import os
 import random
 import time
 from pathlib import Path
@@ -29,7 +30,7 @@ from opengrad.training.sft_runner import (
     TrainingConfigError,
     build_batch,
     checkpoint_lineage,
-    deterministic_order,
+    deterministic_batches,
     install_interrupt_handler,
     learning_rate_at,
     parameter_report,
@@ -191,6 +192,10 @@ def run_real_sft(
     """The real GPU fine-tuning loop."""
     import importlib
 
+    # Variable-length batches into a caching allocator fragment badly: the allocator holds
+    # blocks sized for the longest sequence seen and cannot reuse them for a shorter one. This
+    # must be set before the first CUDA allocation, so it is done before torch is imported.
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
     try:
         torch = importlib.import_module("torch")
         transformers = importlib.import_module("transformers")
@@ -441,21 +446,22 @@ def run_real_sft(
     try:
         epoch = 0
         done = False
+        lengths = [len(row["tokens"]) for row in rows]
+        device = next(model.parameters()).device
         while not done:
-            order = deterministic_order(
-                len(rows), settings.seed + settings.shuffle_seed_offset, epoch
-            )
             micro_in_window = 0
             optimizer.zero_grad(set_to_none=True)
-            for position in range(0, len(order), settings.micro_batch_size):
+            for index_batch in deterministic_batches(
+                lengths,
+                settings.micro_batch_size,
+                settings.seed + settings.shuffle_seed_offset,
+                epoch,
+            ):
                 if world["optimizer_step"] >= settings.max_steps or world["interrupted"]:
                     done = True
                     break
-                index_batch = order[position : position + settings.micro_batch_size]
                 batch_rows = [rows[i] for i in index_batch]
-                batch = build_batch(
-                    batch_rows, pad_token_id, next(model.parameters()).device, torch
-                )
+                batch = build_batch(batch_rows, pad_token_id, device, torch)
                 outputs = model(**batch)
                 loss = outputs.loss
                 if not torch.isfinite(loss):

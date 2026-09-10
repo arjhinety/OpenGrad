@@ -325,6 +325,37 @@ def prune_checkpoints(
     return removed
 
 
+def deterministic_batches(
+    lengths: list[int],
+    batch_size: int,
+    seed: int,
+    epoch: int,
+    bucket_window: int = 64,
+) -> list[list[int]]:
+    """Batches of sample indices, shuffled but grouped by length, reproducibly.
+
+    Sequences in this corpus run from 42 to 2046 tokens with a mean near 425, and a batch is
+    padded to its longest member. Drawing batches uniformly therefore means most batches carry
+    one long sequence and pay its width for every shorter one: wasted compute, and activation
+    memory that spikes with the draw. That is what OOM'd the first M0 launch.
+
+    The shuffle is preserved and the order stays a pure function of (seed, epoch). Sorting
+    within a window rather than globally keeps batches from becoming one contiguous length band
+    across an epoch, which would trade a memory problem for a gradient-noise problem. The
+    window is reshuffled each epoch.
+    """
+    order = list(range(len(lengths)))
+    random.Random(seed + epoch * 1_000_003).shuffle(order)
+    window = max(batch_size, bucket_window * batch_size)
+    batches: list[list[int]] = []
+    for start in range(0, len(order), window):
+        chunk = order[start : start + window]
+        chunk.sort(key=lambda index: lengths[index])
+        for offset in range(0, len(chunk), batch_size):
+            batches.append(chunk[offset : offset + batch_size])
+    return batches
+
+
 def deterministic_order(count: int, seed: int, epoch: int) -> list[int]:
     """A reproducible permutation: same seed and epoch give the same order everywhere."""
     order = list(range(count))

@@ -734,6 +734,63 @@ def _git_provenance(root: Path) -> dict[str, Any]:
     return tracked_tree_provenance(root)
 
 
+def measure_predictions(
+    config: dict[str, Any],
+    examples: list[Any],
+    model: Any,
+    renderer: Any,
+) -> list[dict[str, Any]]:
+    """Generate, parse, and score one prediction per example.
+
+    Extracted so a candidate evaluation measures with exactly the code the baseline used. The
+    frozen comparison is only meaningful if the engine, renderer, parser, generation settings,
+    and context bucketing are identical between the two runs, so they must not be able to
+    drift apart into two implementations.
+    """
+    context_limit = int(config["runtime"]["context_length"])
+    generation_config = dict(config["generation"])
+    # Submission chunk. A backend with continuous batching schedules these itself, so this
+    # bounds peak memory and gives the run progress granularity rather than setting the
+    # engine's concurrency.
+    batch_size = max(1, int(config["runtime"].get("batch_size", 1)))
+    batch_generate = getattr(model, "generate_batch", None)
+    predictions: list[dict[str, Any]] = []
+    for index in range(0, len(examples), batch_size):
+        chunk = examples[index : index + batch_size]
+        rendered_chunk = [renderer.render_evaluation(example) for example in chunk]
+        prompts = [rendered.text for rendered in rendered_chunk]
+        if callable(batch_generate) and len(chunk) > 1:
+            raws = batch_generate(prompts, examples=chunk, generation_config=generation_config)
+            flags = list(getattr(model, "last_truncated_flags", None) or [])
+        else:
+            raws = [
+                model.generate(prompt, example=example, generation_config=generation_config)
+                for prompt, example in zip(prompts, chunk)
+            ]
+            flags = [bool(getattr(model, "last_truncated", False))] * len(chunk)
+        if len(raws) != len(chunk):
+            raise RuntimeError(
+                f"engine returned {len(raws)} samples for {len(chunk)} prompts"
+            )
+        # An engine that reports only the batch-wide `last_truncated` (or neither flag) must
+        # not shorten this list: zipping against a short list would silently produce zero
+        # predictions for the whole chunk.
+        if len(flags) != len(chunk):
+            flags = [bool(getattr(model, "last_truncated", False))] * len(chunk)
+        for example, rendered, raw, truncated in zip(chunk, rendered_chunk, raws, flags):
+            parsed = parse_qwen_native_output(raw, truncated=bool(truncated))
+            predictions.append(
+                _prediction(
+                    example,
+                    rendered.text,
+                    renderer.text_token_length(rendered.text),
+                    context_limit,
+                    raw,
+                    parsed,
+                )
+            )
+    return predictions
+
 def run_baseline(
     config_path: Path,
     *,
@@ -771,49 +828,9 @@ def run_baseline(
     renderer = Qwen35_2BRenderer(
         revision=str(config["model_revision"]), enable_thinking=bool(config.get("thinking", False))
     )
-    predictions: list[dict[str, Any]] = []
-    context_limit = int(config["runtime"]["context_length"])
-    generation_config = dict(config["generation"])
-    # Submission chunk. A backend with continuous batching schedules these itself, so this
-    # bounds peak memory and gives the run progress granularity rather than setting the
-    # engine's concurrency.
-    batch_size = max(1, int(config["runtime"].get("batch_size", 1)))
-    batch_generate = getattr(model, "generate_batch", None)
     started = time.monotonic()
-    for index in range(0, len(examples), batch_size):
-        chunk = examples[index : index + batch_size]
-        rendered_chunk = [renderer.render_evaluation(example) for example in chunk]
-        prompts = [rendered.text for rendered in rendered_chunk]
-        if callable(batch_generate) and len(chunk) > 1:
-            raws = batch_generate(prompts, examples=chunk, generation_config=generation_config)
-            flags = list(getattr(model, "last_truncated_flags", None) or [])
-        else:
-            raws = [
-                model.generate(prompt, example=example, generation_config=generation_config)
-                for prompt, example in zip(prompts, chunk)
-            ]
-            flags = [bool(getattr(model, "last_truncated", False))] * len(chunk)
-        if len(raws) != len(chunk):
-            raise RuntimeError(
-                f"engine returned {len(raws)} samples for {len(chunk)} prompts"
-            )
-        # An engine that reports only the batch-wide `last_truncated` (or neither flag) must
-        # not shorten this list: zipping against a short list would silently produce zero
-        # predictions for the whole chunk.
-        if len(flags) != len(chunk):
-            flags = [bool(getattr(model, "last_truncated", False))] * len(chunk)
-        for example, rendered, raw, truncated in zip(chunk, rendered_chunk, raws, flags):
-            parsed = parse_qwen_native_output(raw, truncated=bool(truncated))
-            predictions.append(
-                _prediction(
-                    example,
-                    rendered.text,
-                    renderer.text_token_length(rendered.text),
-                    context_limit,
-                    raw,
-                    parsed,
-                )
-            )
+    predictions = measure_predictions(config, examples, model, renderer)
+    batch_size = max(1, int(config["runtime"].get("batch_size", 1)))
     output_config = config.get("outputs")
     if not isinstance(output_config, dict) or set(output_config) != {"predictions", "metrics", "residual_profile", "environment"}:
         raise ValueError("baseline config must define predictions, metrics, residual_profile, and environment outputs")
