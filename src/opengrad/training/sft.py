@@ -393,6 +393,9 @@ def run_real_sft(
 
     history: list[dict[str, Any]] = []
     created_checkpoints: list[str] = []
+    # Tracks the step of the most recent checkpoint write, so the final save can reuse it
+    # instead of rewriting the same directory under the same name.
+    last_saved_step: int | None = None
     grad_accum = settings.gradient_accumulation_steps
     started = time.monotonic()
     running_loss = 0.0
@@ -503,6 +506,7 @@ def run_real_sft(
                             provenance["sha"],
                         )
                         created_checkpoints.append(str(path))
+                        last_saved_step = world["optimizer_step"]
                         removed = prune_checkpoints(
                             output_dir / "checkpoints", settings.max_checkpoints
                         )
@@ -525,20 +529,25 @@ def run_real_sft(
     if world["interrupted"]:
         stop_reason = "interrupted"
 
-    final_path = _save_checkpoint(
-        model,
-        optimizer,
-        tokenizer,
-        output_dir,
-        world,
-        settings,
-        experiment,
-        dataset_ids,
-        dataset_hashes,
-        provenance["sha"],
-        suffix="" if not world["interrupted"] else "interrupted",
-    )
-    created_checkpoints.append(str(final_path))
+    # A periodic save that already landed on the final step produced this checkpoint, so
+    # rewriting it would register the same path twice and write identical weights again.
+    if not world["interrupted"] and last_saved_step == world["optimizer_step"]:
+        final_path = output_dir / "checkpoints" / f"checkpoint-{world['optimizer_step']}"
+    else:
+        final_path = _save_checkpoint(
+            model,
+            optimizer,
+            tokenizer,
+            output_dir,
+            world,
+            settings,
+            experiment,
+            dataset_ids,
+            dataset_hashes,
+            provenance["sha"],
+            suffix="" if not world["interrupted"] else "interrupted",
+        )
+        created_checkpoints.append(str(final_path))
     emit(
         "run_end",
         stop_reason=stop_reason,
