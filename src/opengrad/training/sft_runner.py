@@ -277,7 +277,9 @@ def checkpoint_lineage(
         "examples_seen": examples_seen,
         "seed": settings.seed,
         "precision": settings.precision,
-        "tuning_method": settings.tuning_method,
+        # DPO has no tuning_method (it is not a parameterisation of the same choice), so the
+        # field is read defensively rather than forcing a meaningless value onto that backend.
+        "tuning_method": getattr(settings, "tuning_method", None),
         "parent_checkpoint": parent_checkpoint,
         "status": "CANDIDATE",
     }

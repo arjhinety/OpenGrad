@@ -77,6 +77,27 @@ def preference_path_for(experiment: dict[str, Any], root: Path) -> Path:
     return path
 
 
+PROMPT_FORMATS = ("raw", "rendered")
+
+
+def resolve_prompt_format(experiment: dict[str, Any]) -> str:
+    """Whether a pair's prompt still needs rendering, or already is model-ready text.
+
+    A prompt produced by the same pinned renderer that SFT and evaluation use must not be
+    rendered a second time -- wrapping it in another user turn would score the pair on a prompt
+    the model never sees at inference. The dataset declares which it is, because guessing from
+    the text is exactly the kind of inference that silently corrupts a preference run.
+    """
+    datasets = experiment.get("datasets") or {}
+    value = str(datasets.get("preference_prompt_format", "raw"))
+    if value not in PROMPT_FORMATS:
+        raise PreferenceDataError(
+            f"datasets.preference_prompt_format must be one of {', '.join(PROMPT_FORMATS)}; "
+            f"got {value!r}"
+        )
+    return value
+
+
 def build_prompt(tokenizer: Any, pair: dict[str, Any]) -> str:
     """Render the pair's prompt with the pinned template and a generation prompt.
 
@@ -196,10 +217,15 @@ def run_real_dpo(
     )
     device = next(model.parameters()).device
 
+    prompt_format = resolve_prompt_format(experiment)
+    emit("prompt_format", prompt_format=prompt_format)
+
     encoded: list[tuple[list[int], list[int], list[int], list[int]]] = []
     rejected_pairs = 0
     for pair in raw_pairs:
-        prompt = build_prompt(tokenizer, pair.as_dict())
+        prompt = (
+            pair.prompt if prompt_format == "rendered" else build_prompt(tokenizer, pair.as_dict())
+        )
         try:
             chosen_ids, chosen_mask = encode_pair(
                 tokenizer, prompt, pair.chosen, settings.max_seq_length
