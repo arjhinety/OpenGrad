@@ -359,6 +359,26 @@ datasets:
     verified: true
     source: opengrad_git_commit in .release/hf/toolpolicy-canonical-v2/release-manifest.json
   exact_revision: 7a2a8e7b069bfac8eb98809eff8d24df3eb26e64
+  processed_dataset_hash:
+    status: FULL_DATA_VALIDATED
+    value: 09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1
+  source_repository: .release/hf/toolpolicy-canonical-v2/release-manifest.json
+  sample_count:
+    published: 103036
+    verified_from: .release/hf/toolpolicy-canonical-v2/release-manifest.json
+  retained_after_filtering:
+    status: FULL_DATA_VALIDATED
+    value: 103036
+  derived_from:
+  - id: glaive-function-calling-v2
+    source_revision: 7e7e32f0466699513b38923bc4991858e192c9274df22e243b9e77eb2775b6e8
+    upstream_license: Apache-2.0
+  - id: toolace
+    source_revision: 7a7a6a2c3b1003c7
+    upstream_license: Apache-2.0
+  - id: when2call
+    source_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    upstream_license: CC-BY-4.0
   category: tool_use
   intended_stages:
   - future_sft
