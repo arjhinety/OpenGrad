@@ -14,6 +14,7 @@ from opengrad.data.inspector import inspect_template
 from opengrad.data.validator import validate_records
 from opengrad.env_capture import capture
 from opengrad.experiments.diff import diff_experiments
+from opengrad.experiments.ledger import ExperimentLedger, LedgerEventType
 from opengrad.experiments.preflight import run_experiment_preflight
 from opengrad.experiments.schema import ExperimentConfig, ExperimentStatus
 from opengrad.experiments.store import ExperimentStore
@@ -114,6 +115,27 @@ def handle_inspect_template(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def _newest_resumable_checkpoint(run_dir: Path) -> Path | None:
+    """Newest checkpoint under a run that carries optimizer state, or None.
+
+    Optimizer state is what makes a checkpoint resumable rather than merely loadable, and this
+    repository keeps it only for the newest save to bound disk use.
+    """
+    candidates = [
+        path
+        for path in (run_dir / "checkpoints").glob("checkpoint-*")
+        if (path / "training_state.pt").is_file()
+    ]
+    if not candidates:
+        return None
+
+    def step_of(path: Path) -> int:
+        suffix = path.name.split("-")[-1]
+        return int(suffix) if suffix.isdigit() else -1
+
+    return max(candidates, key=step_of)
+
+
 def handle_train(args: argparse.Namespace, root: Path) -> int:
     config_path = Path(args.config)
     if not config_path.is_absolute():
@@ -207,19 +229,66 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
 
     # Experiment identity is immutable. A second launch with the same ID must
     # create an explicit new experiment/config rather than silently resuming or
-    # mutating an existing ledger entry.
-    try:
-        store.create_experiment(exp_config)
-    except FileExistsError:
-        err = {
-            "code": "EXPERIMENT_ID_COLLISION",
-            "message": f"Experiment already exists: {exp_config.experiment_id}",
-        }
-        print(json.dumps(err) if args.json else f"Error: {err['message']}")
-        return 1
+    # mutating an existing ledger entry. Resuming is therefore an explicit act, and it is only
+    # allowed on a run that already finished or was interrupted -- never on one still marked
+    # TRAINING, which would mean two processes writing the same run directory.
+    run_dir = store.run_dir(exp_config.experiment_id)
+    resuming = bool(getattr(args, "resume", False))
+    if resuming:
+        try:
+            existing = store.get_experiment(exp_config.experiment_id)
+        except FileNotFoundError:
+            err = {
+                "code": "RESUME_WITHOUT_EXPERIMENT",
+                "message": f"Cannot resume {exp_config.experiment_id}: no such experiment",
+            }
+            print(json.dumps(err) if args.json else f"Error: {err['message']}")
+            return 1
+        if existing.status not in {
+            ExperimentStatus.TRAINED.value,
+            ExperimentStatus.INTERRUPTED.value,
+            ExperimentStatus.FAILED.value,
+        }:
+            err = {
+                "code": "RESUME_STATE_INVALID",
+                "message": (
+                    f"Cannot resume {exp_config.experiment_id}: status is {existing.status}. "
+                    "Only a finished, interrupted, or failed run may be continued."
+                ),
+            }
+            print(json.dumps(err) if args.json else f"Error: {err['message']}")
+            return 1
+        resume_checkpoint = _newest_resumable_checkpoint(run_dir)
+        if resume_checkpoint is None:
+            err = {
+                "code": "RESUME_WITHOUT_CHECKPOINT",
+                "message": (
+                    f"Cannot resume {exp_config.experiment_id}: no checkpoint with optimizer "
+                    "state under its run directory"
+                ),
+            }
+            print(json.dumps(err) if args.json else f"Error: {err['message']}")
+            return 1
+        ExperimentLedger(run_dir / "ledger.jsonl").record(
+            LedgerEventType.EXPERIMENT_RESUMED,
+            exp_config.experiment_id,
+            {"checkpoint": str(resume_checkpoint), "previous_status": existing.status},
+        )
+    else:
+        try:
+            store.create_experiment(exp_config)
+        except FileExistsError:
+            err = {
+                "code": "EXPERIMENT_ID_COLLISION",
+                "message": (
+                    f"Experiment already exists: {exp_config.experiment_id}. Pass --resume to "
+                    "continue it from its newest checkpoint."
+                ),
+            }
+            print(json.dumps(err) if args.json else f"Error: {err['message']}")
+            return 1
 
     store.update_status(exp_config.experiment_id, ExperimentStatus.TRAINING)
-    run_dir = store.run_dir(exp_config.experiment_id)
 
     if trainer is None:
         err = {"code": "ALGORITHM_UNSUPPORTED", "message": f"Unsupported trainer: {trainer_type}"}

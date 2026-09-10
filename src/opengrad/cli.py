@@ -124,6 +124,11 @@ def main() -> int:
     train_p.add_argument(
         "--dry-run", action="store_true", help="execute CPU mock training without GPU"
     )
+    train_p.add_argument(
+        "--resume",
+        action="store_true",
+        help="continue an existing run from its newest checkpoint (max_steps may be raised)",
+    )
     train_p.add_argument("--json", action="store_true", help="emit JSON output")
 
     # evaluate
