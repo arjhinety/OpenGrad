@@ -20,6 +20,27 @@ runs/**
 !runs/**/
 !runs/**/experiment.json
 !runs/**/ledger.jsonl
+# Summary evidence. These are KB-scale derived artifacts that carry the numbers reported in
+# reports/, so committing them lets a reader verify a claim from a fresh clone instead of
+# having to re-run the GPU work. Bulk outputs stay ignored: per-checkpoint predictions.jsonl
+# is ~2.5 MB each and the weights are gigabytes.
+!runs/**/failure.json
+!runs/**/checkpoint_registration_errors.json
+!runs/**/rendering_report.json
+!runs/**/overflow_report.json
+!runs/**/training_metadata.json
+!runs/**/dpo_training_metadata.json
+!runs/**/dataset_manifest.json
+!runs/**/preference_dataset.json
+!runs/**/events.jsonl
+!runs/**/resolved_config.yaml
+!runs/**/eval/curve.json
+!runs/**/eval/checkpoint-*/metrics.json
+!runs/**/metrics/*.jsonl
+runs/**/predictions.jsonl
+runs/**/training_state.pt
+runs/**/model.safetensors
+runs/**/*.tmp
 artifacts/
 .release/
 /checkpoints/
@@ -48,3 +69,6 @@ docs/research/runpod-application-draft.md
 # Portable config lives in integrations/opengrad-mcp/mcp.example.json.
 .mcp.json
 .commandcode/taste/
+
+# Dry-run scratch: never evidence.
+runs/.dry-run/

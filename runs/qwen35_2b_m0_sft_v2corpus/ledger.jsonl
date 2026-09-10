@@ -1,0 +1,3 @@
+{"timestamp": "2026-09-10T21:56:25.652122+00:00", "event_type": "EXPERIMENT_CREATED", "experiment_id": "qwen35_2b_m0_sft_v2corpus", "details": {}}
+{"timestamp": "2026-09-10T21:56:25.652804+00:00", "event_type": "TRAINING", "experiment_id": "qwen35_2b_m0_sft_v2corpus", "details": {}}
+{"timestamp": "2026-09-10T22:40:29.084390+00:00", "event_type": "TRAINED", "experiment_id": "qwen35_2b_m0_sft_v2corpus", "details": {"final_loss": 0.5582437217235565, "checkpoint": "/root/OpenGrad/runs/qwen35_2b_m0_sft_v2corpus/checkpoints/checkpoint-2400", "checkpoint_registration_errors": []}}

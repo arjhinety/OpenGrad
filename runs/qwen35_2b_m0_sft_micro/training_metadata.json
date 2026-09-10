@@ -1,0 +1,14 @@
+{
+  "effective_global_batch_size": 16,
+  "estimated_total_tokens": 983040,
+  "gradient_accumulation_steps": 2,
+  "learning_rate": 1e-05,
+  "max_steps": 30,
+  "micro_batch_size": 8,
+  "optimizer": "AdamW",
+  "precision": "bfloat16",
+  "scheduler": "cosine",
+  "tokens_per_update": 32768,
+  "warmup_steps": 2,
+  "world_size": 1
+}

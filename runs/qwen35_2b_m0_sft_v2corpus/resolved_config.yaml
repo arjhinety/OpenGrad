@@ -1,0 +1,46 @@
+experiment_id: qwen35_2b_m0_sft_v2corpus
+algorithm: sft
+resolved_settings:
+  tuning_method: full
+  learning_rate: 1.0e-05
+  micro_batch_size: 8
+  micro_batch_tokens: 4096
+  gradient_accumulation_steps: 2
+  world_size: 1
+  effective_global_batch_size: 16
+  max_steps: 2400
+  warmup_steps: 120
+  max_seq_length: 2048
+  precision: bfloat16
+  optimizer: adamw_torch
+  optimizer_state: fp32
+  scheduler: cosine
+  gradient_clipping: 1.0
+  gradient_checkpointing: true
+  activation_checkpointing: gradient_checkpointing
+  seed: 42
+  save_steps: 600
+  max_checkpoints: 4
+  lora: null
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+datasets:
+  manifest_ids:
+  - canonical_v2
+  hashes:
+    canonical_v2: 09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1
+corpus:
+  release_dir: .release/hf/toolpolicy-canonical-v2
+  hub_repository: unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial
+  release_version: v2.0.0-local-partial
+  record_count: 103036
+  shards: 104
+  manifest_sha256: 09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1
+  build_commit: 7a2a8e7b069bfac8eb98809eff8d24df3eb26e64
+  evaluation_exclusion_policy: When2Call preference, MCQ, and LLM-judge artifacts
+    are excluded
+rendered_records_trainable: 101785
+git_commit_at_start: 9213d4d91258b0da4e43e9181a1c94fa0550c2bc
+git_dirty_at_start: false

@@ -1,0 +1,25 @@
+{
+  "corpus": {
+    "build_commit": "7a2a8e7b069bfac8eb98809eff8d24df3eb26e64",
+    "evaluation_exclusion_policy": "When2Call preference, MCQ, and LLM-judge artifacts are excluded",
+    "hub_repository": "unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial",
+    "manifest_sha256": "09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1",
+    "record_count": 103036,
+    "release_dir": ".release/hf/toolpolicy-canonical-v2",
+    "release_version": "v2.0.0-local-partial",
+    "shards": 104
+  },
+  "dropped_records": 1251,
+  "hashes": {
+    "canonical_v2": "09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1"
+  },
+  "manifest_ids": [
+    "canonical_v2"
+  ],
+  "source_trainable": {
+    "glaive-function-calling-v2": 97112,
+    "toolace": 673,
+    "when2call": 4000
+  },
+  "trainable_records": 101785
+}

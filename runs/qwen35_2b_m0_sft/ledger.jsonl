@@ -1,0 +1,4 @@
+{"timestamp": "2026-09-10T05:00:07.710783+00:00", "event_type": "EXPERIMENT_CREATED", "experiment_id": "qwen35_2b_m0_sft", "details": {}}
+{"timestamp": "2026-09-10T05:00:07.711407+00:00", "event_type": "TRAINING", "experiment_id": "qwen35_2b_m0_sft", "details": {}}
+{"timestamp": "2026-09-10T05:00:07.713088+00:00", "event_type": "TRAINED", "experiment_id": "qwen35_2b_m0_sft", "details": {"final_loss": 0.9, "checkpoint": "/root/OpenGrad/runs/qwen35_2b_m0_sft/checkpoints/checkpoint-5"}}
+{"timestamp": "2026-09-10T05:00:17.236267+00:00", "event_type": "PROMOTED", "experiment_id": "qwen35_2b_m0_sft", "details": {"checkpoint": "checkpoint-5", "note": "M0 baseline meets candidate criteria"}}

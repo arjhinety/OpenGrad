@@ -1,0 +1,90 @@
+{
+  "behavior_trainable": {
+    "ANSWER": 53062,
+    "CALL": 48723
+  },
+  "corpus": {
+    "build_commit": "7a2a8e7b069bfac8eb98809eff8d24df3eb26e64",
+    "evaluation_exclusion_policy": "When2Call preference, MCQ, and LLM-judge artifacts are excluded",
+    "hub_repository": "unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial",
+    "manifest_sha256": "09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1",
+    "record_count": 103036,
+    "release_dir": ".release/hf/toolpolicy-canonical-v2",
+    "release_version": "v2.0.0-local-partial",
+    "shards": 104
+  },
+  "dispositions": {
+    "CONTEXT_TAIL_TRUNCATED": 2,
+    "OK": 101783,
+    "TARGET_TRUNCATED": 387,
+    "UNRENDERABLE": 864
+  },
+  "dropped_fraction": 0.012141,
+  "dropped_records": 1251,
+  "identity": {
+    "cache_version": 1,
+    "corpus_manifest_sha256": "09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1",
+    "max_seq_length": 2048,
+    "model_id": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "renderer": "qwen3_5_2b_v1",
+    "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+  },
+  "note": "Records failing the canonical schema or training-trajectory contract are quarantined, never repaired: training on a tool schema the canonical contract rejects, or on a trajectory whose tool results do not resolve, would be corrupted supervision.",
+  "records_considered": 103036,
+  "rendered_token_statistics": {
+    "fraction_gt_2048": 0.0,
+    "fraction_gt_4096": 0.0,
+    "fraction_le_2048": 1.0,
+    "max": 2048,
+    "mean": 605.45,
+    "min": 42,
+    "p50": 535,
+    "p90": 991,
+    "p95": 1210,
+    "p99": 1605,
+    "records": 101785
+  },
+  "schema_version": 1,
+  "source_counts": {
+    "glaive-function-calling-v2": 98339,
+    "toolace": 697,
+    "when2call": 4000
+  },
+  "source_trainable": {
+    "glaive-function-calling-v2": 97112,
+    "toolace": 673,
+    "when2call": 4000
+  },
+  "supervised_tokens": 29379307,
+  "top_exclusion_reasons": {
+    "TARGET_TRUNCATED": 387,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.author": 5,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.dimensions.base": 25,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.dimensions.length": 46,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.dimensions.radius": 284,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.dimensions.side": 17,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.dimensions.side_length": 28,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.dimensions.width": 6,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.discount_percentage": 5,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.genre": 5,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.keyword": 21,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.keywords": 22,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.measurements.radius": 10,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.name": 4,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.query": 38,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.search_query": 3,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.song": 7,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.song_name": 3,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.song_title": 5,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_REQUIRED: arguments.title": 48,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_TYPE: arguments": 55,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_TYPE: arguments.items[0]": 3,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_TYPE: arguments.salary_range.max": 2,
+    "ValueError: SEM_ARGUMENT_INVALID: ARG_TYPE: arguments.year": 29,
+    "ValueError: SEM_ORPHAN_RESULT: call_0000": 163
+  },
+  "total_tokens": 61625440,
+  "trainable_records": 101785
+}

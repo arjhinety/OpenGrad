@@ -1,0 +1,49 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": null,
+  "dataset_hashes": {
+    "onpolicy_prompts_v1": "47cb720ed223b249a2f1d0a3faf1cb1eb7175622"
+  },
+  "dataset_manifest_ids": [
+    "onpolicy_prompts_v1"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": true,
+    "git_sha": "058ca4d95a8dc28cff9f2a710d8955ee08741de3",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-10T05:00:32.281777+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "qwen35_2b_m2_distill",
+  "git_commit": "unknown",
+  "git_dirty": true,
+  "hardware_info": {},
+  "hypothesis": "M2 tests on-policy distillation using teacher feedback to resolve hard boundary ambiguities in multi-turn agent tool execution.",
+  "launch_timestamp": "2026-09-10T05:00:32.284424+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": "qwen35_2b_m1_dpo",
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "TRAINED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "on_policy_distillation",
+  "training_config": {
+    "gradient_accumulation_steps": 4,
+    "iterations": 3,
+    "learning_rate": 1e-05,
+    "min_teacher_score": 0.7,
+    "per_device_train_batch_size": 2,
+    "prompts_per_iteration": 5,
+    "type": "on_policy_distillation"
+  }
+}

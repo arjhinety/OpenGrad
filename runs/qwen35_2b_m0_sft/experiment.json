@@ -1,0 +1,49 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": "2026-09-10T05:00:17.235808+00:00",
+  "dataset_hashes": {
+    "canonical_v1": "181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911"
+  },
+  "dataset_manifest_ids": [
+    "canonical_v1"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": true,
+    "git_sha": "058ca4d95a8dc28cff9f2a710d8955ee08741de3",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-10T05:00:07.707761+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "qwen35_2b_m0_sft",
+  "git_commit": "unknown",
+  "git_dirty": true,
+  "hardware_info": {},
+  "hypothesis": "M0 evaluates baseline tool-calling SFT on normalized canonical datasets to establish the initial tool policy decision boundary.",
+  "launch_timestamp": "2026-09-10T05:00:07.710499+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": null,
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "PROMOTED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "sft",
+  "training_config": {
+    "gradient_accumulation_steps": 4,
+    "learning_rate": 2e-05,
+    "max_seq_length": 2048,
+    "max_steps": 50,
+    "micro_batch_size": 2,
+    "type": "sft",
+    "warmup_steps": 5
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "blocking": false,
+  "code": "CHECKPOINT_REGISTRATION_FAILED",
+  "message": "Bring-up probe: training completed all 30 steps, then checkpoint registration was rejected because an earlier deleted probe had left a stale registration for the same checkpoint id. The weights were discarded with the probe directory; this run was never evidence.",
+  "type": "FileExistsError"
+}

@@ -1,0 +1,55 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": null,
+  "dataset_hashes": {
+    "canonical_v1": "181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911"
+  },
+  "dataset_manifest_ids": [
+    "canonical_v1"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": true,
+    "git_sha": "681ee7c7a49df0c6b9549e8c0fcbfd1ca424c0ed",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-10T18:07:07.459559+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "qwen35_2b_m0_sft_full",
+  "git_commit": "unknown",
+  "git_dirty": true,
+  "hardware_info": {},
+  "hypothesis": "M0 (full): supervised fine-tuning on the canonical tool-policy corpus should sharpen the call/no-call decision boundary that B0 showed to be miscalibrated. B0 reaches call recall 0.972 but over-calls on 64.3% of examples whose gold decision is not CALL, so the intervention under test is decision calibration, not tool-call syntax.\nThis configuration supersedes configs/experiments/m0_sft.yaml, which specifies 50 optimizer steps. At the pinned effective batch that is ~400 examples, roughly 0.8% of the trainable corpus: it is a bounded bring-up recipe, not a corpus-scale M0. Its meaning is left intact rather than rewritten, and this file is the corpus-scale experiment.",
+  "launch_timestamp": "2026-09-10T18:07:07.463806+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": null,
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "FAILED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "sft",
+  "training_config": {
+    "gradient_accumulation_steps": 1,
+    "gradient_checkpointing": true,
+    "gradient_clipping": 1.0,
+    "learning_rate": 1e-05,
+    "max_seq_length": 2048,
+    "max_steps": 2400,
+    "micro_batch_size": 8,
+    "optimizer": "adamw_torch",
+    "optimizer_state": "fp32",
+    "scheduler": "cosine",
+    "tuning_method": "full",
+    "type": "sft",
+    "warmup_steps": 120
+  }
+}

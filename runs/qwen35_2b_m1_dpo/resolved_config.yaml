@@ -1,0 +1,41 @@
+experiment_id: qwen35_2b_m1_dpo
+parent_experiment_id: qwen35_2b_m0_sft
+hypothesis: M1 tests whether DPO on preference pairs eliminates unnecessary-tool calls
+  and format errors without regressing instruction following.
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+datasets:
+  manifest_ids:
+  - when2call_pref_v1
+  hashes:
+    when2call_pref_v1: 0582f7749df63a96fdc3070932e83e72396ace53
+trainer:
+  type: dpo
+  learning_rate: 5.0e-06
+  beta: 0.1
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 4
+  max_steps: 40
+  warmup_steps: 5
+evaluation:
+  suite: full_post_training
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+checkpointing:
+  save_steps: 20
+  max_checkpoints: 2
+promotion:
+  must_pass:
+    bfcl-v4: 70.0
+  max_regression:
+    ifeval: 1.0
+    mmlu-pro: 1.0
+reproducibility:
+  seed: 42
+  precision: bfloat16
+speculative_decoding:
+  enabled: false

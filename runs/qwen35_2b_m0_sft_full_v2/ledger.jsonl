@@ -1,0 +1,3 @@
+{"timestamp": "2026-09-10T18:11:01.834607+00:00", "event_type": "EXPERIMENT_CREATED", "experiment_id": "qwen35_2b_m0_sft_full_v2", "details": {}}
+{"timestamp": "2026-09-10T18:11:01.835268+00:00", "event_type": "TRAINING", "experiment_id": "qwen35_2b_m0_sft_full_v2", "details": {}}
+{"timestamp": "2026-09-10T18:11:19.890772+00:00", "event_type": "FAILED", "experiment_id": "qwen35_2b_m0_sft_full_v2", "details": {"error": {"code": "AcceleratorError", "message": "CUDA error: out of memory\nSearch for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nFor more detailed error information, run with CUDA_LOG_FILE=stderr\n", "type": "AcceleratorError", "blocking": true}}}

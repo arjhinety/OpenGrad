@@ -1,0 +1,668 @@
+{
+  "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+  "experiment_id": "qwen35_2b_m0_sft_full_v3",
+  "limit": null,
+  "points": [
+    {
+      "baseline_comparison": {
+        "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+        "candidate_run_id": null,
+        "improved": [
+          "call_precision",
+          "clarification_accuracy",
+          "over_call_rate",
+          "unsupported_accuracy"
+        ],
+        "metrics": {
+          "call_f1": {
+            "baseline": 0.61913,
+            "candidate": 0.004615,
+            "delta": -0.614514,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_precision": {
+            "baseline": 0.454185,
+            "candidate": 0.6,
+            "delta": 0.145815,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "call_recall": {
+            "baseline": 0.972201,
+            "candidate": 0.002317,
+            "delta": -0.969884,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "clarification_accuracy": {
+            "baseline": 0.100943,
+            "candidate": 0.929245,
+            "delta": 0.828302,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "over_call_rate": {
+            "baseline": 0.642463,
+            "candidate": 0.000849,
+            "delta": -0.641614,
+            "direction": "lower_is_better",
+            "verdict": "IMPROVED"
+          },
+          "under_call_rate": {
+            "baseline": 0.014672,
+            "candidate": 0.034749,
+            "delta": 0.020077,
+            "direction": "lower_is_better",
+            "verdict": "REGRESSED"
+          },
+          "unsupported_accuracy": {
+            "baseline": 0.013127,
+            "candidate": 0.505792,
+            "delta": 0.492664,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          }
+        },
+        "regressed": [
+          "call_f1",
+          "call_recall",
+          "under_call_rate"
+        ]
+      },
+      "checkpoint_id": "checkpoint-400",
+      "checkpoint_step": 400,
+      "evaluation_seconds": 120.2,
+      "parse_valid_rate": 1.0,
+      "records": 3650,
+      "routing": {
+        "call_f1": 0.004615384615384615,
+        "call_precision": 0.6,
+        "call_recall": 0.0023166023166023165,
+        "clarification_accuracy": 0.9292452830188679,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 45,
+            "CALL": 3,
+            "CLARIFY": 1118,
+            "UNSUPPORTED": 129
+          },
+          "CLARIFY": {
+            "ANSWER": 19,
+            "CALL": 2,
+            "CLARIFY": 985,
+            "UNSUPPORTED": 54
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 61,
+            "CALL": 0,
+            "CLARIFY": 579,
+            "UNSUPPORTED": 655
+          }
+        },
+        "must_call_accuracy": 0.0023166023166023165,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.0008492569002123143,
+        "under_call_rate": 0.03474903474903475,
+        "unsupported_accuracy": 0.5057915057915058
+      }
+    },
+    {
+      "baseline_comparison": {
+        "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+        "candidate_run_id": null,
+        "improved": [
+          "call_precision",
+          "clarification_accuracy",
+          "over_call_rate",
+          "unsupported_accuracy"
+        ],
+        "metrics": {
+          "call_f1": {
+            "baseline": 0.61913,
+            "candidate": 0.006159,
+            "delta": -0.612971,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_precision": {
+            "baseline": 0.454185,
+            "candidate": 1.0,
+            "delta": 0.545815,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "call_recall": {
+            "baseline": 0.972201,
+            "candidate": 0.003089,
+            "delta": -0.969112,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "clarification_accuracy": {
+            "baseline": 0.100943,
+            "candidate": 0.953774,
+            "delta": 0.85283,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "over_call_rate": {
+            "baseline": 0.642463,
+            "candidate": 0.0,
+            "delta": -0.642463,
+            "direction": "lower_is_better",
+            "verdict": "IMPROVED"
+          },
+          "under_call_rate": {
+            "baseline": 0.014672,
+            "candidate": 0.019305,
+            "delta": 0.004633,
+            "direction": "lower_is_better",
+            "verdict": "REGRESSED"
+          },
+          "unsupported_accuracy": {
+            "baseline": 0.013127,
+            "candidate": 0.559073,
+            "delta": 0.545946,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          }
+        },
+        "regressed": [
+          "call_f1",
+          "call_recall",
+          "under_call_rate"
+        ]
+      },
+      "checkpoint_id": "checkpoint-800",
+      "checkpoint_step": 800,
+      "evaluation_seconds": null,
+      "parse_valid_rate": 1.0,
+      "records": 3650,
+      "routing": {
+        "call_f1": 0.006158583525789069,
+        "call_precision": 1.0,
+        "call_recall": 0.003088803088803089,
+        "clarification_accuracy": 0.9537735849056603,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 25,
+            "CALL": 4,
+            "CLARIFY": 1202,
+            "UNSUPPORTED": 64
+          },
+          "CLARIFY": {
+            "ANSWER": 5,
+            "CALL": 0,
+            "CLARIFY": 1011,
+            "UNSUPPORTED": 44
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 38,
+            "CALL": 0,
+            "CLARIFY": 533,
+            "UNSUPPORTED": 724
+          }
+        },
+        "must_call_accuracy": 0.003088803088803089,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.0,
+        "under_call_rate": 0.019305019305019305,
+        "unsupported_accuracy": 0.5590733590733591
+      }
+    },
+    {
+      "baseline_comparison": {
+        "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+        "candidate_run_id": null,
+        "improved": [
+          "clarification_accuracy",
+          "over_call_rate",
+          "unsupported_accuracy"
+        ],
+        "metrics": {
+          "call_f1": {
+            "baseline": 0.61913,
+            "candidate": 0.0,
+            "delta": -0.61913,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_precision": {
+            "baseline": 0.454185,
+            "candidate": 0.0,
+            "delta": -0.454185,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_recall": {
+            "baseline": 0.972201,
+            "candidate": 0.0,
+            "delta": -0.972201,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "clarification_accuracy": {
+            "baseline": 0.100943,
+            "candidate": 0.743396,
+            "delta": 0.642453,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "over_call_rate": {
+            "baseline": 0.642463,
+            "candidate": 0.0,
+            "delta": -0.642463,
+            "direction": "lower_is_better",
+            "verdict": "IMPROVED"
+          },
+          "under_call_rate": {
+            "baseline": 0.014672,
+            "candidate": 0.026255,
+            "delta": 0.011583,
+            "direction": "lower_is_better",
+            "verdict": "REGRESSED"
+          },
+          "unsupported_accuracy": {
+            "baseline": 0.013127,
+            "candidate": 0.799228,
+            "delta": 0.7861,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          }
+        },
+        "regressed": [
+          "call_f1",
+          "call_precision",
+          "call_recall",
+          "under_call_rate"
+        ]
+      },
+      "checkpoint_id": "checkpoint-1200",
+      "checkpoint_step": 1200,
+      "evaluation_seconds": null,
+      "parse_valid_rate": 1.0,
+      "records": 3650,
+      "routing": {
+        "call_f1": 0.0,
+        "call_precision": 0.0,
+        "call_recall": 0.0,
+        "clarification_accuracy": 0.7433962264150943,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 34,
+            "CALL": 0,
+            "CLARIFY": 658,
+            "UNSUPPORTED": 603
+          },
+          "CLARIFY": {
+            "ANSWER": 22,
+            "CALL": 0,
+            "CLARIFY": 788,
+            "UNSUPPORTED": 250
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 78,
+            "CALL": 0,
+            "CLARIFY": 182,
+            "UNSUPPORTED": 1035
+          }
+        },
+        "must_call_accuracy": 0.0,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.0,
+        "under_call_rate": 0.026254826254826256,
+        "unsupported_accuracy": 0.7992277992277992
+      }
+    },
+    {
+      "baseline_comparison": {
+        "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+        "candidate_run_id": null,
+        "improved": [
+          "clarification_accuracy",
+          "over_call_rate",
+          "unsupported_accuracy"
+        ],
+        "metrics": {
+          "call_f1": {
+            "baseline": 0.61913,
+            "candidate": 0.0,
+            "delta": -0.61913,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_precision": {
+            "baseline": 0.454185,
+            "candidate": 0.0,
+            "delta": -0.454185,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_recall": {
+            "baseline": 0.972201,
+            "candidate": 0.0,
+            "delta": -0.972201,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "clarification_accuracy": {
+            "baseline": 0.100943,
+            "candidate": 0.95,
+            "delta": 0.849057,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "over_call_rate": {
+            "baseline": 0.642463,
+            "candidate": 0.0,
+            "delta": -0.642463,
+            "direction": "lower_is_better",
+            "verdict": "IMPROVED"
+          },
+          "under_call_rate": {
+            "baseline": 0.014672,
+            "candidate": 0.016988,
+            "delta": 0.002317,
+            "direction": "lower_is_better",
+            "verdict": "REGRESSED"
+          },
+          "unsupported_accuracy": {
+            "baseline": 0.013127,
+            "candidate": 0.559073,
+            "delta": 0.545946,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          }
+        },
+        "regressed": [
+          "call_f1",
+          "call_precision",
+          "call_recall",
+          "under_call_rate"
+        ]
+      },
+      "checkpoint_id": "checkpoint-1600",
+      "checkpoint_step": 1600,
+      "evaluation_seconds": null,
+      "parse_valid_rate": 1.0,
+      "records": 3650,
+      "routing": {
+        "call_f1": 0.0,
+        "call_precision": 0.0,
+        "call_recall": 0.0,
+        "clarification_accuracy": 0.95,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 22,
+            "CALL": 0,
+            "CLARIFY": 1198,
+            "UNSUPPORTED": 75
+          },
+          "CLARIFY": {
+            "ANSWER": 8,
+            "CALL": 0,
+            "CLARIFY": 1007,
+            "UNSUPPORTED": 45
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 54,
+            "CALL": 0,
+            "CLARIFY": 517,
+            "UNSUPPORTED": 724
+          }
+        },
+        "must_call_accuracy": 0.0,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.0,
+        "under_call_rate": 0.01698841698841699,
+        "unsupported_accuracy": 0.5590733590733591
+      }
+    },
+    {
+      "baseline_comparison": {
+        "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+        "candidate_run_id": null,
+        "improved": [
+          "clarification_accuracy",
+          "over_call_rate",
+          "unsupported_accuracy"
+        ],
+        "metrics": {
+          "call_f1": {
+            "baseline": 0.61913,
+            "candidate": 0.0,
+            "delta": -0.61913,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_precision": {
+            "baseline": 0.454185,
+            "candidate": 0.0,
+            "delta": -0.454185,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_recall": {
+            "baseline": 0.972201,
+            "candidate": 0.0,
+            "delta": -0.972201,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "clarification_accuracy": {
+            "baseline": 0.100943,
+            "candidate": 0.941509,
+            "delta": 0.840566,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "over_call_rate": {
+            "baseline": 0.642463,
+            "candidate": 0.0,
+            "delta": -0.642463,
+            "direction": "lower_is_better",
+            "verdict": "IMPROVED"
+          },
+          "under_call_rate": {
+            "baseline": 0.014672,
+            "candidate": 0.019305,
+            "delta": 0.004633,
+            "direction": "lower_is_better",
+            "verdict": "REGRESSED"
+          },
+          "unsupported_accuracy": {
+            "baseline": 0.013127,
+            "candidate": 0.583784,
+            "delta": 0.570656,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          }
+        },
+        "regressed": [
+          "call_f1",
+          "call_precision",
+          "call_recall",
+          "under_call_rate"
+        ]
+      },
+      "checkpoint_id": "checkpoint-2000",
+      "checkpoint_step": 2000,
+      "evaluation_seconds": null,
+      "parse_valid_rate": 1.0,
+      "records": 3650,
+      "routing": {
+        "call_f1": 0.0,
+        "call_precision": 0.0,
+        "call_recall": 0.0,
+        "clarification_accuracy": 0.9415094339622642,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 25,
+            "CALL": 0,
+            "CLARIFY": 1176,
+            "UNSUPPORTED": 94
+          },
+          "CLARIFY": {
+            "ANSWER": 7,
+            "CALL": 0,
+            "CLARIFY": 998,
+            "UNSUPPORTED": 55
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 59,
+            "CALL": 0,
+            "CLARIFY": 480,
+            "UNSUPPORTED": 756
+          }
+        },
+        "must_call_accuracy": 0.0,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.0,
+        "under_call_rate": 0.019305019305019305,
+        "unsupported_accuracy": 0.5837837837837838
+      }
+    },
+    {
+      "baseline_comparison": {
+        "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+        "candidate_run_id": null,
+        "improved": [
+          "clarification_accuracy",
+          "over_call_rate",
+          "unsupported_accuracy"
+        ],
+        "metrics": {
+          "call_f1": {
+            "baseline": 0.61913,
+            "candidate": 0.0,
+            "delta": -0.61913,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_precision": {
+            "baseline": 0.454185,
+            "candidate": 0.0,
+            "delta": -0.454185,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_recall": {
+            "baseline": 0.972201,
+            "candidate": 0.0,
+            "delta": -0.972201,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "clarification_accuracy": {
+            "baseline": 0.100943,
+            "candidate": 0.941509,
+            "delta": 0.840566,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "over_call_rate": {
+            "baseline": 0.642463,
+            "candidate": 0.0,
+            "delta": -0.642463,
+            "direction": "lower_is_better",
+            "verdict": "IMPROVED"
+          },
+          "under_call_rate": {
+            "baseline": 0.014672,
+            "candidate": 0.018533,
+            "delta": 0.003861,
+            "direction": "lower_is_better",
+            "verdict": "REGRESSED"
+          },
+          "unsupported_accuracy": {
+            "baseline": 0.013127,
+            "candidate": 0.577606,
+            "delta": 0.564479,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          }
+        },
+        "regressed": [
+          "call_f1",
+          "call_precision",
+          "call_recall",
+          "under_call_rate"
+        ]
+      },
+      "checkpoint_id": "checkpoint-2400",
+      "checkpoint_step": 2400,
+      "evaluation_seconds": 110.9,
+      "parse_valid_rate": 1.0,
+      "records": 3650,
+      "routing": {
+        "call_f1": 0.0,
+        "call_precision": 0.0,
+        "call_recall": 0.0,
+        "clarification_accuracy": 0.9415094339622642,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 24,
+            "CALL": 0,
+            "CLARIFY": 1176,
+            "UNSUPPORTED": 95
+          },
+          "CLARIFY": {
+            "ANSWER": 7,
+            "CALL": 0,
+            "CLARIFY": 998,
+            "UNSUPPORTED": 55
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 64,
+            "CALL": 0,
+            "CLARIFY": 483,
+            "UNSUPPORTED": 748
+          }
+        },
+        "must_call_accuracy": 0.0,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.0,
+        "under_call_rate": 0.018532818532818532,
+        "unsupported_accuracy": 0.5776061776061776
+      }
+    }
+  ],
+  "schema_version": 1
+}

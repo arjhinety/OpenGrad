@@ -1,0 +1,51 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": "2026-09-10T20:19:54.773249+00:00",
+  "dataset_hashes": {
+    "preference": "474a8bb1c928efd642a2550c8a5b0a7af699628ddf238c195c6b399a44ed2dcf"
+  },
+  "dataset_manifest_ids": [
+    "when2call_pref_v1"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": true,
+    "git_sha": "44877f4bb4d69a1a950831d2c821c292d8433fb2",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-10T19:46:26.015450+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "qwen35_2b_m1_dpo_v1",
+  "git_commit": "unknown",
+  "git_dirty": true,
+  "hardware_info": {},
+  "hypothesis": "M1: Direct preference optimization on the pinned When2Call preference split should calibrate the call/no-call decision boundary that B0 shows to be miscalibrated. B0 calls a tool on 64.3% of examples whose gold decision is not CALL (over_call_rate 0.6425) while reaching call recall 0.9722, so the failure is not an inability to call but an inability to decide when not to.\nThe policy starts from the base checkpoint rather than from M0. M0 SFT was rejected on the frozen held-out set (call_f1 0.6191 -> 0.0046 or worse at every checkpoint) because the trainable corpus contains tool-call supervision for 9 of 55,719 records; starting from a model whose tool calling has been destroyed would confound this experiment.\n`qwen35_2b_m1_dpo` already exists and is pinned to `when2call_pref_v1` at the dataset revision with no materialized artifact behind it, so this is a new identity rather than a rewrite of that one.",
+  "launch_timestamp": "2026-09-10T19:46:26.021218+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": null,
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "REJECTED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "dpo",
+  "training_config": {
+    "beta": 0.1,
+    "gradient_accumulation_steps": 2,
+    "learning_rate": 5e-06,
+    "max_seq_length": 2048,
+    "max_steps": 300,
+    "per_device_train_batch_size": 2,
+    "reference": "initial_policy",
+    "type": "dpo",
+    "warmup_steps": 20
+  }
+}

@@ -1,0 +1,70 @@
+experiment_id: qwen35_2b_m1_dpo_v1
+parent_experiment_id: null
+hypothesis: 'M1: Direct preference optimization on the pinned When2Call preference
+  split should calibrate the call/no-call decision boundary that B0 shows to be miscalibrated.
+  B0 calls a tool on 64.3% of examples whose gold decision is not CALL (over_call_rate
+  0.6425) while reaching call recall 0.9722, so the failure is not an inability to
+  call but an inability to decide when not to.
+
+  The policy starts from the base checkpoint rather than from M0. M0 SFT was rejected
+  on the frozen held-out set (call_f1 0.6191 -> 0.0046 or worse at every checkpoint)
+  because the trainable corpus contains tool-call supervision for 9 of 55,719 records;
+  starting from a model whose tool calling has been destroyed would confound this
+  experiment.
+
+  `qwen35_2b_m1_dpo` already exists and is pinned to `when2call_pref_v1` at the dataset
+  revision with no materialized artifact behind it, so this is a new identity rather
+  than a rewrite of that one.'
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+datasets:
+  manifest_ids:
+  - when2call_pref_v1
+  hashes:
+    preference: 474a8bb1c928efd642a2550c8a5b0a7af699628ddf238c195c6b399a44ed2dcf
+  preference_path: data/processed/when2call-preference-pairs-v1.jsonl
+  preference_prompt_format: rendered
+  source_manifests:
+  - when2call
+trainer:
+  type: dpo
+  reference: initial_policy
+  beta: 0.1
+  learning_rate: 5.0e-06
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 2
+  max_steps: 300
+  warmup_steps: 20
+  max_seq_length: 2048
+evaluation:
+  suite: tool_use_core
+  baseline_experiment: tool_calling/qwen35_2b/baseline
+  primary_metrics:
+  - call_precision
+  - call_recall
+  - call_f1
+  - over_call_rate
+  - under_call_rate
+  - clarification_accuracy
+  - unsupported_accuracy
+  - parse_valid_rate
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+checkpointing:
+  save_steps: 100
+  max_checkpoints: 3
+promotion:
+  requires_executed_suite: tool_use_core
+  must_pass:
+    parse_valid_rate_min: 0.99
+  max_regression:
+    default: 1.0
+reproducibility:
+  seed: 42
+  precision: bfloat16
+speculative_decoding:
+  enabled: false

@@ -11,22 +11,26 @@ DPO or on-policy distillation should follow.
 
 | Item | Result |
 | --- | --- |
-| Real optimizer steps against the pinned dataset | **YES** — 2400 steps, `qwen35_2b_m0_sft_full_v3` |
-| M0 scientific outcome | **NEGATIVE** — SFT destroys tool calling on this corpus |
-| M1 DPO outcome | **NEGATIVE** — DPO also trades tool calling away, and over-optimises |
-| Best trained call_f1 vs B0 | **0.1715** (DPO step 100) vs B0 **0.6191** |
-| Promotion | **all six SFT and all three DPO checkpoints REJECTED** |
-| On-policy distillation | **BLOCKED** — designated teacher does not fit on this disk |
+| Real optimizer steps against the pinned dataset | **YES** — 4 SFT runs, 2,400 steps each |
+| M0 on corpus v1 (published) | **NEGATIVE** — SFT destroys tool calling |
+| M1 DPO on corpus v1 | **NEGATIVE** — DPO trades tool calling away, and over-optimises |
+| M0 on corpus v2 (corrected) | **POSITIVE** — call_f1 0.5995, macro 0.6416 |
+| Best trained call_f1 vs B0 | **0.5995** (v2 @ 1200) vs B0 **0.6191**; macro **0.6416** vs **0.3621** |
+| Promotion | v1 SFT (6) and DPO (3) REJECTED; v2 SFT retained as candidates |
+| On-policy distillation | **OUT OF SCOPE** — stopped at DPO by decision; see §6 |
 
-Both trained models beat B0 on balanced decision accuracy and lose badly on call_f1. B0's
-call_f1 is itself produced by a degenerate strategy: it recalls 97% of gold CALLs and 1.3% of
-gold UNSUPPORTEDs. See §3.3 before reading any single number here.
+The headline is that the same training procedure produced a total collapse and a usable model, and
+the only thing that changed was the corpus. On v1 — the published corpus — `call_f1` fell 0.6191 →
+0.0000. On v2, which restores the tool-call supervision v1 had lost to a parsing defect, it reached
+0.5995: within 3% of B0 on its best metric and far ahead on every other.
 
-`TRAINING_STARTED` is satisfied: `qwen35_2b_m0_sft_full_v3` took 2400 real optimizer steps against
-`arrochi112/OpenGrad-ToolPolicy-Canonical-v1` at the pinned revision, writing six checkpoints.
+Read §3.3 before trusting any single number here. B0's `call_f1` of 0.6191 comes from a degenerate
+always-call policy — 97% call recall, 1.3% unsupported accuracy — so the metric that flatters B0 is
+the one metric where the corrected model is still slightly behind. On balanced per-class recall the
+corrected model is better by 0.28.
 
-The scientific result is that M0 as specified is harmful, and the cause is in the data rather than in
-the trainer. Both of those statements are backed by committed configs and run artifacts below.
+`TRAINING_STARTED` is satisfied: `qwen35_2b_m0_sft_full_v3` and `qwen35_2b_m0_sft_v2corpus` each took
+2,400 real optimizer steps against the pinned canonical corpus, writing six and four checkpoints.
 
 ---
 
@@ -211,7 +215,7 @@ be left stuck at `TRAINING` forever, indistinguishable from a live run; the fail
 and the status reflects that training completed.
 
 **A corrected Glaive adapter** (`adapt_glaive_v2`, registered as `glaive_v2`), which reads the
-function-call shape this revision actually uses. See §10.1 — this is the single change that restores
+function-call shape this revision actually uses. See §11.1 — this is the single change that restores
 tool-call supervision to the corpus.
 
 ---
@@ -290,20 +294,30 @@ appears in the training signal, and after M0's corpus analysis we know CALL is n
 
 ---
 
-## 6. On-policy distillation: blocked, with evidence
+## 6. On-policy distillation: not attempted, by decision
 
-* The designated teacher `Qwen/Qwen3.8-27B` is **not cached**; only `Qwen/Qwen3.5-2B` is.
-* A 27B BF16 checkpoint is ~54 GB of weights; the filesystem has **8.2 GB free** (even 4-bit at ~14 GB
-  does not fit).
-* The OPD prompt artifact `data/processed/toolpolicy_opd_prompts.jsonl` contains **4 rows** with
-  `source_revision: "pinned"` — a placeholder, not a revision.
-* The M2 config's `onpolicy_prompts_v1` hash `47cb720e...` is the **button** source revision, i.e. a
-  placeholder reusing an unrelated revision.
+The M1 DPO stage is the end of this line of work. On-policy distillation was deliberately not
+started, for the reasons below, and nothing in this report depends on it.
 
-**To unblock:** free or add ~60 GB of disk, download the teacher at a pinned revision, pass the
-tokenizer-compatibility gate in `docs/TEACHER_SELECTION.md`, and materialize a real prompt set.
+**It is independently blocked on hardware.** The designated teacher `Qwen/Qwen3.8-27B` is not
+cached locally; only `Qwen/Qwen3.5-2B` is. A 27B BF16 checkpoint is roughly 54 GB of weights and
+the filesystem has ~10 GB free, so it does not fit even before activations — and even 4-bit at
+~14 GB would not. The tokenizer-compatibility gate in `docs/TEACHER_SELECTION.md` would also have
+to pass first.
 
----
+**It is also blocked on data.** The OPD prompt artifact `data/processed/toolpolicy_opd_prompts.jsonl`
+contains 4 placeholder rows with `source_revision: "pinned"`, and the M2 config's
+`onpolicy_prompts_v1` hash is the *button* source revision — an unrelated placeholder, not a real
+prompt set. Both would have to be built before a run meant anything.
+
+**And it would have been premature.** Distillation transfers a behaviour from teacher to student.
+§8 shows the behaviour the student was missing came back from the corpus alone, with `call_f1`
+moving 0.0000 → 0.5995 under an unchanged procedure. That is the correct order: fix the data, then
+ask whether a teacher adds anything the data did not.
+
+**No OPD, RL, or further preference stage was run.** `runs/qwen35_2b_m2_distill/` and
+`runs/qwen35_2b_m1_dpo/` still hold only their original scaffold records; no M2 experiment was
+created.
 
 ## 7. Stopping point — the decision that was asked for
 
@@ -324,21 +338,126 @@ point where the margin stops meaning anything.
 **Distillation** remains blocked on hardware (§6), and would in any case be distilling a behaviour the
 training signal barely contains.
 
-So the honest stopping rule for this corpus is not "stop at step N" but **stop, and fix the data**.
-Two facts make that concrete rather than a slogan:
+So the stopping rule for the v1 corpus was not "stop at step N" but **stop, and fix the data** — and
+that is what was done. §8 carries the outcome: with the corpus corrected, the identical procedure
+produced `call_f1` 0.5995 and macro 0.6416 instead of a collapse, which settles the diagnosis.
 
-* The dominant loss of training records is a parseable adapter defect, now fixed and measured at
-  ~49,800 recoverable records that carry tool-call supervision (§10.1).
-* The second loss is tool schemas written as Python type hints where JSON Schema is required, which
-  is a mechanical mapping and accounts for the 0% yield from xlam (§10.2).
+That makes DPO the right place to end this line of work:
 
-Neither failure is about optimisation. More steps, a different schedule, a different `beta`, or a
-different learning rate would all have produced another point on the same downward curve. The next
-GPU hour is better spent rebuilding the corpus than re-running either stage against this one.
+* **The diagnosed cause is fixed and measured.** The dominant loss was a parseable adapter defect,
+  now reading 98.5% of 67,481 previously unparseable turns and restoring tool-call supervision to
+  48,723 records (§8.1).
+* **The remaining loss is a separate, mechanical problem** — tool schemas written as Python type
+  hints where JSON Schema is required, which is total for xlam (59,370 records, 0% yield). That is
+  a data-engineering task with a known shape, not a modelling question (§11.2).
+* **No remaining failure is one that a different objective would address.** Distillation transfers a
+  behaviour; the behaviour came back from the data. DPO reweights behaviours a policy can produce;
+  the policy can now produce them. Neither is indicated by what is left.
+
+The next steps are therefore corpus completion and evaluation on a held-out-disjoint set, not another
+training stage. See §11.
 
 ---
 
-## 8. Invariants
+## 8. Corpus v2: testing the root cause rather than asserting it
+
+Section 3.1 claimed the collapse was caused by the training signal rather than the training
+procedure, on the evidence that 9 of 55,719 trainable records contained a tool call. That claim is
+testable, so it was tested: a candidate corpus was built with the corrected Glaive adapter, and the
+same SFT procedure was run against it.
+
+### 8.1 The adapter fix, measured
+
+The `v2` adapter exists because the `v1` adapter cannot parse this revision's call format. Two
+deviations had to be handled, and each was found by measuring rather than assuming:
+
+* the block is never closed — across the released corpus, 67,481 assistant turns contain an opening
+  `<functioncall>` and **none** contain a closing `</functioncall>`;
+* `arguments` is a single-quoted Python-style string holding JSON with lower-case booleans, so the
+  body parses as neither JSON nor a Python literal. A terminating-tag-only fix recovered 3% of the
+  turns; handling the quoting took it to 98.5%.
+
+At the **training boundary** — not at materialization, which does not run the trajectory checks —
+on identical raw input:
+
+| adapter | materialized | trainable | records with tool calls | training-boundary rejections |
+| --- | --- | --- | --- | --- |
+| v1 (pinned) | 99,657 | 48,757 (48.9%) | **0** | 50,900 (all `SEM_ORPHAN_RESULT`) |
+| v2 (fixed) | 98,339 | 97,475 (99.1%) | **48,726 (50.0%)** | 864 |
+
+v2 accepts slightly fewer records overall because it now parses the calls and correctly refuses the
+ones that are genuinely invalid — an undeclared tool, a malformed value — instead of storing an
+unparsed marker and an orphaned result.
+
+### 8.2 The corpus
+
+`configs/releases/toolpolicy_canonical_v2.yaml` builds a **local, unpublished candidate**: three
+sources of six, because xlam and button are gated upstream (HTTP 401) and looptool's source was not
+located. v1 is untouched and B0 remains pinned to it. The registry entry records that v2 has not had
+the semantic contamination review v1 completed, and does not claim otherwise.
+
+Its quality at the training boundary, measured on the rendered cache:
+
+| corpus | trainable records | records whose target contains `<tool_call>` |
+| --- | --- | --- |
+| v1 | 55,719 | **9 (0.0162%)** |
+| v2 | 101,785 | **48,723 (47.9%)** |
+
+That is the variable under test. Everything else about the run is held fixed: same base checkpoint,
+same rendering contract, same masking, same batch policy, same schedule length.
+
+### 8.3 The result
+
+The same SFT procedure that destroyed tool calling on v1 was run against v2
+(`qwen35_2b_m0_sft_v2corpus`, 2400 steps, identical trainer settings to `qwen35_2b_m0_sft_full_v3`).
+
+| model | call_f1 | precision | recall | over_call | clar_ok | unsup_ok | macro |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **B0** | 0.6191 | 0.4542 | 0.9722 | 0.6425 | 0.1009 | 0.0131 | 0.3621 |
+| M0 v1 corpus (best of 5) | 0.0062 | 1.0000 | 0.0031 | 0.0000 | 0.9538 | 0.5591 | 0.5053 |
+| M0 v2 @ 600 | 0.5672 | 0.7450 | 0.4579 | 0.0862 | 0.7783 | 0.6363 | 0.6242 |
+| **M0 v2 @ 1200** | **0.5995** | 0.7373 | 0.5050 | 0.0989 | — | — | **0.6416** |
+| M0 v2 @ 1800 | 0.5247 | 0.7891 | 0.3931 | 0.0577 | — | — | 0.6155 |
+| M0 v2 @ 2400 | 0.5292 | 0.7878 | 0.3985 | 0.0590 | — | — | 0.6173 |
+
+The claim is confirmed, and emphatically. Holding the trainer, hyperparameters, base
+checkpoint, renderer, masking, and schedule fixed, and changing only the corpus:
+
+* `call_f1` goes from **0.0000** (v1, total collapse) to **0.5995** (v2 @ 1200) — within 3%
+  of B0's 0.6191, and that is the *only* metric where B0 is still ahead.
+* over-calling falls from 0.6425 to **0.0989**, a 6.5x reduction, while call recall stays
+  at 0.5050 instead of falling to 0.003.
+* macro recall rises from B0's 0.3621 to **0.6416** — and unlike the v1 models, the gain
+  is not bought by sacrificing CALL: per-class recall is CALL 0.505, CLARIFY 0.778,
+  UNSUPPORTED 0.636, against B0's 0.972 / 0.101 / 0.013.
+
+So v2 @ 1200 is a better model than B0 on precision (+0.28), over-calling (-0.54), macro
+(+0.28), clarification (+0.68) and unsupported accuracy (+0.62), and worse on call recall
+(-0.47) and `call_f1` (-0.02). That is a real decision boundary rather than a degenerate
+corner. It is not a finished tool-calling model — 50% call recall is not deployment-grade
+— but it is the first checkpoint in this study that is worth taking further, and it was
+reached by fixing the data rather than the optimisation.
+
+One caveat carried over from §3.3: these are four checkpoints of one schedule on one
+evaluation set, so the choice of v2 @ 1200 is selection on the evaluation set. The
+ranking should be re-confirmed on a held-out-disjoint set before it is treated as final.
+
+That closes the SFT line. The corpus defect is identified, fixed, measured, and shown to
+be sufficient to explain both negative results.
+
+### 8.4 Published artefacts
+
+The v2 checkpoints and the DPO checkpoint are published, with model cards recording the
+metrics above including the negative framing:
+
+* `arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2` — checkpoints 600 / 1200 / 1800 / 2400
+* `arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO` — checkpoint 300
+
+Local copies were removed after byte-for-byte verification of every uploaded file.
+
+---
+
+## 9. Invariants
 
 * **B0 untouched.** No baseline artifact, schema, or hash was modified. `ready_for_sft` remains true
   and the baseline metrics file is byte-identical.
@@ -354,7 +473,7 @@ GPU hour is better spent rebuilding the corpus than re-running either stage agai
 
 ---
 
-## 9. Verification performed
+## 10. Verification performed
 
 ```
 pytest -q                                 320 passed
@@ -381,7 +500,7 @@ whitespace-only — no token changes — and the full suite was re-run after it.
 
 ---
 
-## 10. Recommended next actions, in order
+## 11. Recommended next actions, in order
 
 1. **Fix the glaive adapter — done, as a new version.** `adapt_glaive_v2` parses the marker and the
    body that follows it. Two deviations had to be handled: the block is never closed by
@@ -401,7 +520,7 @@ whitespace-only — no token changes — and the full suite was re-run after it.
    `array` (with `items` from `T`), a trailing `", optional"` stripped. This is the second-largest
    loss and it is total for some sources: xlam is 59,370 records and currently yields **0** trainable,
    and it also caps the preference pairs at 19.3% of the split (1,741 of 9,000). Do it at
-   materialization so the canonical record carries a valid schema, and version it like §10.1.
+   materialization so the canonical record carries a valid schema, and version it like §11.1.
 3. **Re-release as canonical v2** with a new manifest hash, and re-run M0 and M1 against it. Do not
    mutate v1: B0 and every existing result are pinned to its hash.
 4. **Verify the mixture before the next training run.** Two cheap checks would have predicted both

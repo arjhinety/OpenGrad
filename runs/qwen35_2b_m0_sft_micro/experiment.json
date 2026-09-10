@@ -1,0 +1,56 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": null,
+  "dataset_hashes": {
+    "canonical_v1": "181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911"
+  },
+  "dataset_manifest_ids": [
+    "canonical_v1"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": true,
+    "git_sha": "ab5ff2dad292c576d24a5bf8b99d78208e7be043",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-10T18:14:13.088022+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "qwen35_2b_m0_sft_micro",
+  "git_commit": "unknown",
+  "git_dirty": true,
+  "hardware_info": {},
+  "hypothesis": "Bounded bring-up of the real SFT path. This is not an experiment: it exists to prove that a real forward pass, backward pass, and optimizer step run against the pinned canonical corpus before the full M0 is launched, and that a checkpoint round-trips. Its artifacts are kept under runs/qwen35_2b_m0_sft_micro/ and must never be reported as M0 results.",
+  "launch_timestamp": "2026-09-10T18:14:13.091651+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": null,
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "FAILED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "sft",
+  "training_config": {
+    "gradient_accumulation_steps": 2,
+    "gradient_checkpointing": true,
+    "gradient_clipping": 1.0,
+    "learning_rate": 1e-05,
+    "max_seq_length": 2048,
+    "max_steps": 30,
+    "micro_batch_size": 8,
+    "micro_batch_tokens": 4096,
+    "optimizer": "adamw_torch",
+    "optimizer_state": "fp32",
+    "scheduler": "cosine",
+    "tuning_method": "full",
+    "type": "sft",
+    "warmup_steps": 2
+  }
+}

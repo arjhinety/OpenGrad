@@ -1,0 +1,166 @@
+{
+  "artifacts": {
+    "environment": "runs/qwen35_2b_m1_dpo_v1/eval/checkpoint-200/environment.json",
+    "metrics": "runs/qwen35_2b_m1_dpo_v1/eval/checkpoint-200/metrics.json",
+    "predictions": "runs/qwen35_2b_m1_dpo_v1/eval/checkpoint-200/predictions.jsonl",
+    "residual_profile": "runs/qwen35_2b_m1_dpo_v1/eval/checkpoint-200/residual-profile.json"
+  },
+  "backend": "vllm",
+  "baseline_comparison": {
+    "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+    "candidate_run_id": null,
+    "improved": [
+      "call_precision",
+      "clarification_accuracy",
+      "over_call_rate",
+      "unsupported_accuracy"
+    ],
+    "metrics": {
+      "call_f1": {
+        "baseline": 0.61913,
+        "candidate": 0.041916,
+        "delta": -0.577213,
+        "direction": "higher_is_better",
+        "verdict": "REGRESSED"
+      },
+      "call_precision": {
+        "baseline": 0.454185,
+        "candidate": 0.682927,
+        "delta": 0.228742,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      },
+      "call_recall": {
+        "baseline": 0.972201,
+        "candidate": 0.021622,
+        "delta": -0.950579,
+        "direction": "higher_is_better",
+        "verdict": "REGRESSED"
+      },
+      "clarification_accuracy": {
+        "baseline": 0.100943,
+        "candidate": 0.872642,
+        "delta": 0.771698,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      },
+      "over_call_rate": {
+        "baseline": 0.642463,
+        "candidate": 0.00552,
+        "delta": -0.636943,
+        "direction": "lower_is_better",
+        "verdict": "IMPROVED"
+      },
+      "under_call_rate": {
+        "baseline": 0.014672,
+        "candidate": 0.057915,
+        "delta": 0.043243,
+        "direction": "lower_is_better",
+        "verdict": "REGRESSED"
+      },
+      "unsupported_accuracy": {
+        "baseline": 0.013127,
+        "candidate": 0.63166,
+        "delta": 0.618533,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      }
+    },
+    "regressed": [
+      "call_f1",
+      "call_recall",
+      "under_call_rate"
+    ]
+  },
+  "context_buckets": {
+    "base": 3644,
+    "overflow": 6
+  },
+  "elapsed_seconds": 276.915318,
+  "engine": {
+    "batching": "continuous",
+    "dtype": "bfloat16",
+    "enforce_eager": false,
+    "gpu_memory_utilization": 0.9,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "model_id": "runs/qwen35_2b_m1_dpo_v1/checkpoints/dpo-checkpoint-200",
+    "name": "vllm",
+    "revision": "None",
+    "seed": 0,
+    "tensor_parallel_size": 1,
+    "version": "0.29.0"
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 512,
+    "temperature": 0.0,
+    "tool_choice": "auto",
+    "top_p": 1.0
+  },
+  "kind": "CANDIDATE_EVALUATION",
+  "lineage": {
+    "base_model_id": "Qwen/Qwen3.5-2B",
+    "base_model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "checkpoint_id": "checkpoint-200",
+    "checkpoint_step": 200,
+    "contamination_report": "reports/data/behavioral-heldout-v2-contamination.json",
+    "dataset_manifests": "reports/data/normalization-v1",
+    "evaluator_revision": "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc",
+    "manifest_status": "FROZEN_PRE_GPU",
+    "native_parser": "opengrad.formatting.parser.parse_qwen_native_output@v1",
+    "parent_experiment_id": "qwen35_2b_m1_dpo_v1"
+  },
+  "manifest": "reports/evaluation/behavioral-heldout-v2.manifest.json",
+  "manifest_sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640",
+  "model_id": "runs/qwen35_2b_m1_dpo_v1/checkpoints/dpo-checkpoint-200",
+  "model_revision": null,
+  "parse_valid_rate": 1.0,
+  "parser_status": {
+    "RAW_VALID": 3650
+  },
+  "records": 3650,
+  "renderer": "qwen3_5_2b_v1",
+  "routing": {
+    "call_f1": 0.04191616766467066,
+    "call_precision": 0.6829268292682927,
+    "call_recall": 0.021621621621621623,
+    "clarification_accuracy": 0.8726415094339622,
+    "confusion_matrix": {
+      "ANSWER": {
+        "ANSWER": 0,
+        "CALL": 0,
+        "CLARIFY": 0,
+        "UNSUPPORTED": 0
+      },
+      "CALL": {
+        "ANSWER": 75,
+        "CALL": 28,
+        "CLARIFY": 1140,
+        "UNSUPPORTED": 52
+      },
+      "CLARIFY": {
+        "ANSWER": 74,
+        "CALL": 5,
+        "CLARIFY": 925,
+        "UNSUPPORTED": 56
+      },
+      "UNSUPPORTED": {
+        "ANSWER": 85,
+        "CALL": 8,
+        "CLARIFY": 384,
+        "UNSUPPORTED": 818
+      }
+    },
+    "must_call_accuracy": 0.021621621621621623,
+    "no_call_accuracy": 0.0,
+    "over_call_rate": 0.005520169851380042,
+    "under_call_rate": 0.05791505791505792,
+    "unsupported_accuracy": 0.6316602316602317
+  },
+  "run_id": "qwen35_2b_m1_dpo_v1/eval/checkpoint-200",
+  "schema_version": 1,
+  "status": "EXECUTED",
+  "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+}

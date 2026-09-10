@@ -1,0 +1,49 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": null,
+  "dataset_hashes": {
+    "when2call_pref_v1": "0582f7749df63a96fdc3070932e83e72396ace53"
+  },
+  "dataset_manifest_ids": [
+    "when2call_pref_v1"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": true,
+    "git_sha": "058ca4d95a8dc28cff9f2a710d8955ee08741de3",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-10T05:00:24.713893+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "qwen35_2b_m1_dpo",
+  "git_commit": "unknown",
+  "git_dirty": true,
+  "hardware_info": {},
+  "hypothesis": "M1 tests whether DPO on preference pairs eliminates unnecessary-tool calls and format errors without regressing instruction following.",
+  "launch_timestamp": "2026-09-10T05:00:24.716589+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": "qwen35_2b_m0_sft",
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "TRAINED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "dpo",
+  "training_config": {
+    "beta": 0.1,
+    "gradient_accumulation_steps": 4,
+    "learning_rate": 5e-06,
+    "max_steps": 40,
+    "per_device_train_batch_size": 1,
+    "type": "dpo",
+    "warmup_steps": 5
+  }
+}
