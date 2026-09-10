@@ -80,7 +80,44 @@ def test_vllm_window_is_required():
         runner._validate_baseline_config(config)
 
 
-def test_engine_metadata_names_the_engine_and_its_version():
+def test_provenance_ignores_untracked_run_outputs(tmp_path):
+    """A run creates untracked files; judging provenance afterwards would call every run dirty."""
+    from opengrad.evaluation.runner import _git_provenance
+
+    root = Path(__file__).parents[2]
+    before = _git_provenance(root)
+    assert before["commit"], "these tests assume a git checkout"
+
+    # An untracked artifact must not change the verdict.
+    probe = root / "untracked-probe.txt"
+    probe.write_text("probe\n", encoding="utf-8")
+    try:
+        assert _git_provenance(root) == before
+    finally:
+        probe.unlink(missing_ok=True)
+
+
+def test_provenance_fails_closed_without_git(tmp_path):
+    from opengrad.evaluation.runner import _git_provenance
+
+    result = _git_provenance(tmp_path)
+    assert result["dirty"] is True, "unknown provenance must never read as clean"
+
+
+def test_prompt_lengths_are_measured_for_the_full_heldout_set():
+    """The window is pinned from a measurement, not a guess.
+
+    Longest prompt across the frozen held-out set is 5,248 tokens, so a window equal to
+    context_length (4,096) cannot generate from it. This asserts the pinned relationship
+    without needing the parquet materialization.
+    """
+    import yaml
+
+    config = yaml.safe_load(BASELINE_CONFIG.read_text())
+    runtime = config["runtime"]
+    assert runtime["max_model_len"] > runtime["context_length"]
+    assert runtime["overflow_policy"] == "separate_bucket"
+
     backend = VLLMInferenceBackend(model_id="Qwen/Qwen3.5-2B", revision="a" * 40)
     metadata = backend.engine_metadata()
     assert metadata["name"] == "vllm"
