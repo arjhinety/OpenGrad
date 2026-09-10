@@ -30,7 +30,7 @@
     {
       "allocated_gib": 3.513,
       "name": "vram",
-      "peak_allocated_gib": 3.573,
+      "peak_allocated_gib": 3.574,
       "status": "PASS"
     },
     {
@@ -46,17 +46,17 @@
       0
     ],
     "cuda_driver_version": null,
-    "cuda_runtime_version": "12.4",
+    "cuda_runtime_version": "13.0",
     "details": {},
     "fp8_native_supported": false,
     "gpu_available": true,
     "gpu_name": "NVIDIA A100-SXM4-80GB",
     "is_a100": true,
-    "pytorch_version": "2.6.0+cu124",
+    "pytorch_version": "2.13.0+cu130",
     "total_vram_gb": 79.25,
     "transformers_version": "5.17.0",
     "trl_version": "1.13.0",
-    "vllm_available": false
+    "vllm_available": true
   },
   "kind": "GPU_BOUNDARY_VERIFIED",
   "limitations": [],

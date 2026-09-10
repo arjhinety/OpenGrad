@@ -13,7 +13,13 @@ dist/
 node_modules/
 build/
 wandb/
-runs/
+# Experiment run directories. Bulk artifacts (checkpoints, shards, logs, predictions) stay
+# out of Git; the canonical record and its ledger are small metadata and are committed, so
+# the evidence under reports/ can be validated from a fresh clone.
+runs/**
+!runs/**/
+!runs/**/experiment.json
+!runs/**/ledger.jsonl
 artifacts/
 .release/
 /checkpoints/

@@ -59,7 +59,7 @@ Connecting direct post-training research to consumer mobile devices:
 | What happens after the baseline? | Controlled SFT, diagnosis, conditional preference optimization, distillation, replication, and later systems studies. |
 | How is improvement judged? | Capability, regression, reliability, efficiency, cost, and reproducibility—not one headline score. |
 | Are failures publishable? | Yes. Failed, null, rejected, and non-reproducible runs are evidence. |
-| Are results available now? | No empirical OpenGrad result exists yet. |
+| Are results available now? | Yes, the **B0 baseline** only — no intervention result yet. See [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md). |
 
 ## Why OpenGrad?
 
@@ -136,7 +136,7 @@ The study will cover, when the corresponding evaluation is implemented:
 - consuming tool observations and handling tool failure;
 - maintaining state across multi-turn tasks.
 
-The first baseline is [`Qwen/Qwen3.5-2B`](registry/models.yaml), recorded as `qwen3.5-2b` at an immutable revision in the [experiment definition](configs/experiments/tool_calling/qwen35_2b_baseline.yaml). It is **READY / NOT RUN**. No model has been downloaded, loaded, trained, or evaluated by OpenGrad.
+The first baseline is [`Qwen/Qwen3.5-2B`](registry/models.yaml), recorded as `qwen3.5-2b` at an immutable revision in the [experiment definition](configs/experiments/tool_calling/qwen35_2b_baseline.yaml). It has been **measured on the frozen held-out set** (3,650 distinct examples, engine vLLM 0.29.0 on an A100): the model calls a tool on 97% of gold-`CALL` items but also on 64% of items that should be answered, clarified, or refused. See the [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md). No post-training intervention has been run.
 
 ## Experimental decision pipeline
 
@@ -160,13 +160,13 @@ flowchart TD
 
 ## Current research status
 
-Pre-GPU preparation: DATA_READY / BASELINE_PIPELINE_HARDENING. B0 plumbing is executable end-to-end with a CPU deterministic backend; no real model result exists yet.
+Gate status: `opengrad readiness` reports `ready_for_baseline: true` and `ready_for_sft: true`. The baseline is real; no SFT has been run. Other evaluation families remain `FROZEN_NOT_EXECUTED`.
 
 | Stage | Status | Evidence |
 | --- | --- | --- |
 | Repository and research infrastructure | VALIDATED | [Bootstrap report](BOOTSTRAP_REPORT.md) |
 | CPU fixture and preflight validation | VALIDATED | [Phase 0.5 report](PRE_EXPERIMENT_REPORT.md) |
-| Qwen3.5-2B baseline reproduction | PIPELINE READY / GPU NOT RUN | [Baseline record](configs/experiments/tool_calling/qwen35_2b_baseline.yaml); `opengrad baseline --dry-run` |
+| Qwen3.5-2B baseline reproduction | **EXECUTED — REAL RESULT** | [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md); `runs/tool_calling/qwen35_2b/baseline/experiment.json` |
 | Dataset materialization and audit | COMPLETE for current accessible pinned corpora; BUTTON and xLAM included | [Normalization report](reports/data-normalization-v1.md) |
 | Tool-use SFT | NOT STARTED | [Roadmap](ROADMAP.md) |
 | Preference optimization | CONDITIONAL | Only if full evaluation justifies it |
@@ -181,7 +181,9 @@ Pre-GPU preparation: DATA_READY / BASELINE_PIPELINE_HARDENING. B0 plumbing is ex
 
 OpenGrad publishes large normalized research artifacts on Hugging Face while GitHub remains the canonical home for normalization code, schemas, manifests, audits, provenance, and experiment definitions. The prepared release is [`arrochi112/OpenGrad-ToolPolicy-Canonical-v1`](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1) and is now publicly published and verified at Hub commit `bb295d8a4ad64f7e8161044ad2fa34f873ede418`. It is a model-independent pre-training canonical candidate corpus, not a recommended mixture, Qwen-rendered training data, M0, M1, M2, or a model result. The release includes xLAM under CC BY 4.0 with attribution, APIGen citation, and modification disclosure.
 
-The release includes 59,370 normalized xLAM/APIGen records under CC BY 4.0 with attribution, APIGen citation, and modification disclosure. The upstream Hugging Face repository remains gated for access, but the OpenGrad derivative is public; upstream access mode and downstream redistribution permission are modeled independently.
+The release contains **213,951 normalized canonical records** across six sources — xLAM/APIGen 59,370 · Glaive Function-Calling v2 99,794 · LoopTool-23k 20,827 · ToolACE 11,190 · When2Call SFT 14,829 · BUTTON 7,941 — published as 216 hash-verified Parquet shards. Attribution, citations, and modification disclosure are included per source. The xLAM upstream Hugging Face repository remains gated for access, but the OpenGrad derivative is public; upstream access mode and downstream redistribution permission are modeled independently.
+
+The release deliberately **excludes** every evaluation and preference split (When2Call preference, MCQ, and LLM-judge, plus rendered artifacts), so it is the training-side corpus and never the held-out set. The held-out benchmark is materialized separately from its own pinned upstream revision; see the [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md).
 
 The dataset registry records source identity, revisions, intended stages, split restrictions, contamination risk, and processing state. All currently accessible pinned corpora have now been materialized or normalized through bounded, resumable canonical artifacts; BUTTON has been normalized with 59 duplicate-tool failures quarantined. OpenGrad preserves two axes: where an example came from (source provenance) and what it trains (behavioral capability). Datasets are sources of evidence, not capabilities by themselves.
 
@@ -218,7 +220,7 @@ OpenGrad has deterministic mock smoke harnesses for the following configured eva
 | MCPMark Verified | Task success | Mock smoke harness | **No** | Stretch evaluation; metadata pending |
 | Toolathlon | Task success | Mock smoke harness | **No** | Stretch evaluation; metadata pending |
 
-The full benchmark registry is [`registry/benchmarks.yaml`](registry/benchmarks.yaml). The current checkout reports `BOOTSTRAP_NO_SCORES`; **no real OpenGrad benchmark score exists**.
+The full benchmark registry is [`registry/benchmarks.yaml`](registry/benchmarks.yaml). The behavioral held-out baseline is a real, executed measurement; every external benchmark family remains `FROZEN_NOT_EXECUTED`, so **no external benchmark score exists**.
 
 ### Baseline execution gate
 
@@ -341,14 +343,16 @@ OpenGrad result
 
 ## Results
 
-> **No empirical OpenGrad result has been published yet.**
+> **One empirical OpenGrad result exists: the B0 baseline.** No post-training intervention has been run or reported.
 
-The stable results namespace is ready for future records. The empty table is intentional.
+The stable results namespace is ready for future records. It lists interventions; the baseline is recorded by the experiment store instead.
 
 | Experiment | Model | Change | Capability Δ | Regression | Efficiency Δ | Reproduced | Report |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 
-`results/registry.jsonl` is currently empty. Do not confuse the 63 passing CPU tests reported by the pre-GPU validation with ML evidence: they validate infrastructure and fixtures, not model quality.
+Baseline (not an intervention): [`Qwen/Qwen3.5-2B` baseline, 3,650 held-out examples, engine vLLM 0.29.0](reports/baselines/qwen35_2b_baseline/RESULT.md).
+
+`results/registry.jsonl` is currently empty. Do not confuse passing CPU tests with ML evidence: they validate infrastructure and fixtures, not model quality. Conversely, the B0 numbers above are a real measurement of a real model, but of a *baseline* — they say nothing yet about whether any intervention improves it.
 
 ### Illustrative future record
 

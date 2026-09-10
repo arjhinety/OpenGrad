@@ -8,21 +8,41 @@ from opengrad.readiness import readiness, repository_status
 ROOT = Path(__file__).parents[2]
 
 
-def test_repository_status_is_machine_readable_and_does_not_claim_real_b0():
+def test_repository_status_is_machine_readable_and_reports_the_real_baseline():
     status = repository_status(ROOT)
     assert status["schema_version"] == 1
-    assert status["baseline"]["real"] is False
-    assert status["state"] in {"PRE_BASELINE", "REVIEW"}
     assert status["validation"]["status"] == "PASS"
+    # The baseline is now real, so status must say so. This asserts consistency between the
+    # projection and the evidence rather than a fixed phase: if the artifacts were removed,
+    # `real` must go back to False instead of the projection still claiming a baseline.
+    real = status["baseline"]["real"]
+    assert isinstance(real, bool)
+    from opengrad.readiness import BASELINE_METRICS
+
+    has_artifacts = (ROOT / BASELINE_METRICS).is_file()
+    assert real is has_artifacts
+    assert status["state"] == ("BASELINE" if real else "PRE_BASELINE") or status["state"] == "REVIEW"
 
 
-def test_readiness_preserves_baseline_first_invariant():
+def test_readiness_keeps_the_baseline_first_invariant_consistent_with_the_evidence():
+    """Ready-for-SFT must follow the real gates, whichever way they currently fall.
+
+    The invariant is that SFT is gated on a real B0 plus verified artifacts -- not that any
+    particular gate is failing. This recomputes the expectation from the gate list so it
+    stays true as the project moves from pre-baseline to post-baseline.
+    """
     result = readiness(ROOT)
-    assert result["status"] == "FAIL"
-    assert result["ready_for_sft"] is False
-    assert "real_b0" in result["blocking_gates"]
-    assert "baseline_artifacts" in result["blocking_gates"]
+    gate_by_name = {gate["name"]: gate for gate in result["gates"]}
     assert any(gate["name"] == "evaluation_leakage" and gate["status"] == "PASS" for gate in result["gates"])
+
+    blocked = {name for name, gate in gate_by_name.items() if gate["status"] == "FAIL"}
+    assert set(result["blocking_gates"]) == blocked
+    assert result["ready_for_sft"] is (not blocked)
+    assert result["status"] == ("FAIL" if blocked else "PASS")
+    # A real B0 and its artifacts are prerequisites for SFT in both directions.
+    if result["ready_for_sft"]:
+        assert gate_by_name["real_b0"]["status"] == "PASS"
+        assert gate_by_name["baseline_artifacts"]["status"] == "PASS"
 
 
 def test_contamination_gate_agrees_with_the_committed_audit_artifact():
