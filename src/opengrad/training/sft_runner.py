@@ -394,10 +394,14 @@ def deterministic_order(count: int, seed: int, epoch: int) -> list[int]:
 
 
 def summarise_history(history: list[dict[str, Any]]) -> dict[str, Any]:
-    """Loss curve summary. Reads ``train_loss``, the key the training loop writes."""
+    """Loss curve summary, reading whichever loss key the backend writes.
+
+    SFT records ``train_loss`` and DPO records ``loss``; reading only one of them silently
+    reported a null curve for the other backend.
+    """
     if not history:
         return {"steps": 0}
-    losses = [entry["train_loss"] for entry in history if "train_loss" in entry]
+    losses = [entry[key] for entry in history for key in ("train_loss", "loss") if key in entry]
     return {
         "steps": len(history),
         "first_loss": losses[0] if losses else None,

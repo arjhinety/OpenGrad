@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -33,10 +34,12 @@ from opengrad.evaluation.candidate import (
 def discover_checkpoints(experiment_id: str) -> list[tuple[int, Path]]:
     ckpt_dir = ROOT / "runs" / experiment_id / "checkpoints"
     found: list[tuple[int, Path]] = []
-    for path in sorted(ckpt_dir.glob("checkpoint-*")):
-        suffix = path.name.split("-")[-1]
-        if suffix.isdigit() and (path / "config.json").is_file():
-            found.append((int(suffix), path))
+    # DPO names its checkpoints `dpo-checkpoint-N`, so match on the trailing step rather than on
+    # a fixed prefix.
+    for path in sorted(ckpt_dir.glob("*checkpoint-*")):
+        match = re.search(r"checkpoint-(\d+)$", path.name)
+        if match and (path / "config.json").is_file():
+            found.append((int(match.group(1)), path))
     return sorted(found)
 
 
