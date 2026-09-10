@@ -77,6 +77,12 @@ Before freezing any training corpus or claiming generalization, OpenGrad require
 
 > **Rule:** OpenGrad never silently deletes benchmark examples. Matches are queued for human audit and recorded in `reports/data/benchmark_contamination_registry.json`.
 
+Levels 1–4 are machine-measured for the behavioral held-out namespace by
+`opengrad-contamination heldout-screen`. Level 5 is a durable human adjudication stored separately
+from the generated report, and any `CONTAMINATED` verdict must be quarantined from evaluation before
+the readiness gate can pass. The exact workflow is in
+[Contamination adjudication (Level 5)](./CONTAMINATION_ADJUDICATION.md).
+
 ---
 
 ## 5. Post-Training Evaluation Workflow

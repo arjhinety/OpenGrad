@@ -16,6 +16,19 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from opengrad.contamination.audit import (
+    AUDIT_PATH as CONTAMINATION_AUDIT_PATH,
+)
+from opengrad.contamination.audit import (
+    QUARANTINE_PATH as CONTAMINATION_QUARANTINE_PATH,
+)
+from opengrad.contamination.audit import (
+    benchmark_fingerprint,
+    evaluate_audit,
+    load_audit,
+    load_quarantine,
+    training_corpus_fingerprint,
+)
 from opengrad.env_capture import capture
 from opengrad.experiments.preflight import run_experiment_preflight
 from opengrad.experiments.schema import ExperimentConfig
@@ -111,6 +124,16 @@ def _baseline_state(root: Path) -> dict[str, Any]:
     manifest = _read_json(root / BASELINE_MANIFEST)
     expected_records = sum(_safe_item_count(split) or 0 for split in (manifest or {}).get("splits", []) if isinstance(split, dict))
     expected_ids = _materialized_evaluation_ids(root, manifest)
+    # Quarantined examples are excluded from evaluation, so the expected record count
+    # must match what the runner actually loads rather than the raw materialized total.
+    quarantined_ids = {
+        example_id
+        for ids in load_quarantine(root / CONTAMINATION_QUARANTINE_PATH).by_split().values()
+        for example_id in ids
+    }
+    if expected_ids is not None:
+        expected_ids = expected_ids - quarantined_ids
+        expected_records = len(expected_ids)
     config = _read_yaml(root / BASELINE_CONFIG)
     manifest_file = root / BASELINE_MANIFEST
     manifest_sha256 = hashlib.sha256(manifest_file.read_bytes()).hexdigest() if manifest_file.exists() else None
@@ -446,17 +469,48 @@ def _materialized_split_state(root: Path, split: dict[str, Any]) -> tuple[bool, 
     return True, f"split {split.get('id')} is materialized ({written} records; manifest {actual_hash[:12]})", shards
 
 
-def _contamination_state(report: dict[str, Any] | None) -> tuple[bool, str]:
+def _contamination_state(root: Path, report: dict[str, Any] | None) -> tuple[bool, str]:
+    """Combine machine-measured levels 1-4 with the human Level-5 adjudication artifact.
+
+    The generated report is never trusted for Level 5: its verdict is recomputed from the
+    durable audit artifact and the quarantine list, so a hand-edited report cannot pass the
+    gate and a stale judgment cannot survive a change in the evidence.
+    """
     if not report or report.get("manifest_id") != "behavioral-heldout-v2":
         return True, "contamination report is missing or bound to the wrong evaluation manifest"
     levels = report.get("levels") if isinstance(report.get("levels"), dict) else {}
     required = {"1_exact_canonical_conversation_hash", "2_normalized_prompt_hash", "3_near_duplicate_ngram_minhash", "4_semantic_similarity", "5_manual_audit"}
+    machine_levels = required - {"5_manual_audit"}
+    level_ok = {"MEASURED", "CLEAN", "PASSED", "COMPLETE"}
     missing = sorted(required - set(levels))
-    pending = [str(name) for name in sorted(required) if str(levels.get(name, "")).upper() not in {"MEASURED", "CLEAN", "PASSED", "COMPLETE"}]
+    machine_pending = [
+        name for name in sorted(machine_levels) if str(levels.get(name, "")).upper() not in level_ok
+    ]
     sources = {str(value) for value in report.get("training_sources_checked", [])} if isinstance(report.get("training_sources_checked"), list) else set()
     source_ok = sources == {item.rsplit("/", 1)[-1] for item in TRAINING_SOURCE_MANIFESTS} or sources == TRAINING_SOURCE_IDS
-    blocked = str(report.get("status", "UNKNOWN")).upper() not in {"CLEAN", "SEMANTIC_REVIEW_COMPLETE"} or bool(missing or pending) or not source_ok
-    detail = f"status={report.get('status', 'UNKNOWN')}; missing_levels={missing or 'none'}; pending_levels={pending or 'none'}; sources_ok={source_ok}"
+
+    audit = load_audit(root / CONTAMINATION_AUDIT_PATH)
+    quarantine = load_quarantine(root / CONTAMINATION_QUARANTINE_PATH)
+    evaluation = evaluate_audit(
+        report,
+        audit,
+        quarantine,
+        benchmark_fp=benchmark_fingerprint(root),
+        training_fp=training_corpus_fingerprint(root),
+    )
+
+    machine_ok = not missing and not machine_pending and source_ok
+    blocked = not machine_ok or not evaluation.complete
+    # The effective status comes from the audit evaluation, which owns the CLEAN vs
+    # SEMANTIC_REVIEW_COMPLETE distinction: quarantining a contaminated example is a
+    # completed review, not evidence of a clean corpus.
+    status = "REVIEW_REQUIRED_LEVEL_5_PENDING" if blocked else evaluation.effective_status
+
+    detail = (
+        f"status={status}; missing_levels={missing or 'none'}; "
+        f"pending_levels={machine_pending or 'none'}; sources_ok={source_ok}; "
+        f"level_5={evaluation.level_5}; audit[{evaluation.detail()}]"
+    )
     return blocked, detail
 
 
@@ -532,7 +586,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         add("dataset_revision", "PASS", "Baseline dataset contract is represented by the frozen evaluation manifest")
         add("dataset_snapshot", "PASS", "Baseline uses the frozen evaluation manifest")
     contamination = _read_json(root / "reports/data/behavioral-heldout-v2-contamination.json")
-    contamination_blocked, contamination_detail = _contamination_state(contamination)
+    contamination_blocked, contamination_detail = _contamination_state(root, contamination)
     add("contamination_gate", "FAIL" if contamination_blocked else "PASS", contamination_detail, "CONTAMINATION_FAILURE" if contamination_blocked else None)
     policy = manifest.get("contamination_policy", {}) if isinstance(manifest, dict) else {}
     excluded = policy.get("training_manifests_excluded")

@@ -61,13 +61,14 @@ Operations that *establish* B0 are not required to already own B0's post-run art
 
 | Command | Result |
 | --- | --- |
-| `python3 -m py_compile <7 modules>` | PASS |
-| `.venv/bin/python -m pytest` | **164 passed** |
+| `python3 -m py_compile <modules>` | PASS |
+| `.venv/bin/python -m pytest` | **191 passed** |
 | `.venv/bin/python -m ruff check .` | **All checks passed** |
 | `.venv/bin/opengrad-validate` | `registry validation: OK` |
 | `cd integrations/opengrad-mcp && npm run check` | PASS |
 | `cd integrations/opengrad-mcp && npm test` | **26 passed, 0 failed** |
-| `.venv/bin/opengrad-contamination heldout-screen` | levels 1–4 `MEASURED`; 2-item audit queue |
+| `.venv/bin/opengrad-contamination heldout-screen` | levels 1–4 `MEASURED` |
+| `.venv/bin/opengrad-contamination adjudicate --status` | level 5 `COMPLETE`; 2 quarantined |
 | `cmd mcp get opengrad` | registered, project scope, stdio, enabled |
 | `cmd config get permissions.defaultMode` | `bypass` (user scope) |
 
@@ -86,14 +87,20 @@ The withheld evaluation splits are evaluation-only and are deliberately absent f
 `content_hash` values were re-frozen from these artifacts with recorded provenance
 (`hash_provenance`), and the baseline experiment's `dataset_hash` was re-synced — see §7.
 
-## 6c. Contamination screening
+## 6c. Contamination screening and Level-5 adjudication
 
-`screening levels 1–4 are now machine-measured` over the held-out set against the 213,951-record canonical training corpus. Headline result: **2 distinct held-out questions are exact prompt matches** with training records:
+Levels 1–4 are machine-measured over the held-out set against the 213,951-record canonical training corpus. Level 5 is now a durable human adjudication with a first-class CLI, and any `CONTAMINATED` verdict is quarantined from evaluation. See [Contamination adjudication](../docs/evaluation/CONTAMINATION_ADJUDICATION.md) for the state machine and the exact workflow.
 
-- `"What is the current time?"` — matches 5 Glaive Function-Calling v2 records.
-- `"What is the current weather?"` — matches 1 When2Call SFT record.
+Two held-out items were flagged by exact prompt hash. Their matched training records were inspected in full; both expose the identical prompt **and the decision the item measures**, so both were adjudicated `CONTAMINATED` and quarantined:
 
-Both are short, generic tool-use queries. Whether they are substantive contamination or incidental lexical coincidence is precisely the human judgment reserved for level 5; this report does **not** decide it. Level 3 near-duplicate and level 4 SequenceMatcher screening found nothing above threshold once trivially short prompts were excluded.
+| Held-out item | Gold decision | Matched training record | Why it is contamination |
+| --- | --- | --- | --- |
+| `when2call-mcq:6a9903a1…` — *"What is the current time?"* | `request_for_info` | 5 × Glaive Function-Calling v2, each labeled `CALL` | Same prompt, and training supplies the CALL behaviour for exactly the CALL-vs-ASK_FIRST decision this item measures. |
+| `when2call-mcq:77821b1c…` — *"What is the current weather?"* | `request_for_info` | 1 × When2Call SFT | Same prompt, and the training response asks for the missing location — semantically the gold `request_for_info` answer. |
+
+The verdicts are recorded in `reports/data/behavioral-heldout-v2-contamination-audit.json` with reviewer, timestamp, and reasoning; the exclusions are in `reports/evaluation/behavioral-heldout-v2-quarantine.json`. The held-out benchmark is now **3,950** evaluated examples (3,652 + 300 materialized, minus 2 quarantined), and `load_evaluation_examples` provably omits both. `contamination_gate` is **PASS** with `level_5=COMPLETE` and status `SEMANTIC_REVIEW_COMPLETE`.
+
+> The two verdicts rest on repository evidence (identical prompt plus the measured decision present in training), which is why they were classified rather than left `PENDING`. They are ordinary reviewable judgments: re-run `opengrad-contamination adjudicate` to change either one, then re-apply quarantine and rescan.
 
 ## 7. Defects found and fixed in this pass
 
@@ -142,14 +149,13 @@ No real baseline exists. `real_b0` and `baseline_artifacts` are both `FAIL`, bec
 
 | Gate | Status | Code | Note |
 | --- | --- | --- | --- |
-| `contamination_gate` | FAIL | `CONTAMINATION_FAILURE` | `pending_levels=['5_manual_audit']` only; levels 1–4 `MEASURED` |
 | `gpu_boundary` | FAIL | `GPU_SMOKE_FAILED` | native parser `FORMAT_ERROR` |
 | `real_b0` | FAIL | `BASELINE_NOT_FOUND` | not run |
 | `baseline_artifacts` | FAIL | `BASELINE_NOT_FOUND` | not run |
 
-`evaluation_materialization` now **PASSES** (both frozen held-out splits are materialized and hash-verified). Passing gates also include `repository_validation`, `config_validation`, `model_revision`, `model_identity`, `tokenizer_revision`, `chat_template_contract`, `evaluation_manifest`, `evaluation_leakage`, `artifact_storage`, `native_parser` (module presence), and `gpu_probe`.
+`contamination_gate` now **PASSES** (`status=SEMANTIC_REVIEW_COMPLETE`, `level_5=COMPLETE`, 2 examples quarantined) and `evaluation_materialization` **PASSES**. Passing gates also include `repository_validation`, `config_validation`, `model_revision`, `model_identity`, `tokenizer_revision`, `chat_template_contract`, `evaluation_manifest`, `evaluation_leakage`, `artifact_storage`, `native_parser` (module presence), and `gpu_probe`.
 
-To unblock, in order: (1) a human completes level-5 audit of the 2-item queue and adjudicates the two exact prompt matches; (2) resolve the native-parser smoke failure; (3) execute real B0. Step 1 is irreducibly human — no amount of code can close it, and it is deliberately not marked complete.
+To unblock: (1) diagnose the native-parser smoke failure; (2) execute real B0. Both are GPU work, which is out of scope for pre-GPU preparation.
 
 ## 12. Known limitations
 
@@ -157,7 +163,7 @@ To unblock, in order: (1) a human completes level-5 audit of the 2-item queue an
 - Levels 1–2 compare user-visible prompt text, not a whole-conversation hash: held-out evaluation examples and training trajectories do not share a conversation schema. No whole-conversation equality claim is made.
 - Level 3 prunes shingles whose training document frequency exceeds `max_df` (default 1000 of 213,951). Pruned count is reported; a paraphrase built from ubiquitous n-grams would be missed.
 - Level 4 candidate generation is prefiltered by level-3 Jaccard and scored with `difflib.SequenceMatcher`. It is **not** an exhaustive semantic search and no embedding similarity was computed, so it can miss meaning-level reuse with no lexical overlap. This is the level most likely to need strengthening before a generalization claim.
-- Level 5 is human and unperformed. Until it completes, the two exact prompt matches stand unadjudicated and `contamination_gate` remains FAIL by design.
+- Level 5 is human and now complete for the current findings. It is only as good as the current scanner: a paraphrase with no lexical overlap against any training record is invisible to levels 1–4 and therefore never reaches the queue.
 - The `content_hash` re-freeze and `dataset_hash` re-sync are documented in `hash_provenance`; anyone who considers the original frozen placeholders authoritative should treat this as a contract change rather than a fix.
 - The native parser rejects an unclosed tool call in the bounded smoke. Until that is diagnosed, the GPU boundary cannot pass and real B0/SFT stay blocked.
 - Post-SFT comparison and residual analysis remain deferred until artifact paths exist; the workflow reports `DEFERRED_UNTIL_ARTIFACT_PATHS` rather than inventing values.

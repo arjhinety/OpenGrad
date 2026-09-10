@@ -18,6 +18,7 @@ from typing import Any, Protocol
 
 import yaml
 
+from opengrad.contamination.audit import QUARANTINE_PATH, load_quarantine
 from opengrad.data.canonical import CanonicalEvaluationExample
 from opengrad.data.renderers import Qwen35_2BRenderer
 from opengrad.env_capture import capture
@@ -144,7 +145,11 @@ def _materialized_rows(root: Path, split: dict[str, Any]) -> list[dict[str, Any]
 
 
 def load_evaluation_examples(root: Path, manifest_path: Path) -> list[CanonicalEvaluationExample]:
-    """Load exactly the finalized, hash-bound materialized splits."""
+    """Load exactly the finalized, hash-bound materialized splits.
+
+    Examples quarantined after a CONTAMINATED Level-5 contamination verdict are excluded:
+    a quarantined benchmark item must not be measured by B0 or any later held-out run.
+    """
     root = root.resolve()
     if manifest_path.is_absolute():
         if not manifest_path.resolve().is_relative_to(root):
@@ -159,9 +164,13 @@ def load_evaluation_examples(root: Path, manifest_path: Path) -> list[CanonicalE
     contract = manifest.get("model_renderer_contract", {})
     if contract.get("model_revision") != PINNED_MODEL_REVISION or contract.get("renderer") != "qwen3_5_2b_v1" or contract.get("template_hash") != PINNED_TEMPLATE_HASH:
         raise ValueError("evaluation manifest renderer contract is not pinned")
+    quarantined = load_quarantine(root / QUARANTINE_PATH).by_split()
     examples: list[CanonicalEvaluationExample] = []
     for split in manifest.get("splits", []):
+        excluded = quarantined.get(str(split.get("id")), set())
         for raw in _materialized_rows(root, split):
+            if excluded and str(raw.get("example_id")) in excluded:
+                continue
             row = dict(raw)
             for key in ("source", "tools", "candidates", "metadata"):
                 row[key] = _json(row[key])

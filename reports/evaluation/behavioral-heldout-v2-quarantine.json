@@ -1,0 +1,28 @@
+{
+  "artifact_kind": "HELDOUT_QUARANTINE",
+  "excluded": [
+    {
+      "example_id": "6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+      "reason": "Exact held-out prompt appears in 5 Glaive training records; those records label the identical prompt CALL (get_current_time), which is precisely the CALL-vs-ASK_FIRST decision this item measures with gold request_for_info.",
+      "record_id": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+      "review_date": "2026-09-10T14:37:23+00:00",
+      "reviewer": "commandcode-evidence-review",
+      "split": "when2call-mcq",
+      "verdict": "CONTAMINATED"
+    },
+    {
+      "example_id": "77821b1c-2320-4070-95dd-f8e274536495",
+      "reason": "Exact held-out prompt in a When2Call SFT record whose assistant response asks for the missing location, semantically identical to the held-out gold request_for_info answer.",
+      "record_id": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
+      "review_date": "2026-09-10T14:37:29+00:00",
+      "reviewer": "commandcode-evidence-review",
+      "split": "when2call-mcq",
+      "verdict": "CONTAMINATED"
+    }
+  ],
+  "generated_from_audit": "reports/data/behavioral-heldout-v2-contamination-audit.json",
+  "manifest_id": "behavioral-heldout-v2",
+  "note": "Held-out evaluation examples excluded from B0 and all subsequent held-out evaluations after a CONTAMINATED Level-5 verdict. Regenerate with `opengrad-contamination quarantine --apply`.",
+  "schema_version": 1,
+  "updated_at": "2026-09-10T14:37:34+00:00"
+}

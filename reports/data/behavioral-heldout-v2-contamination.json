@@ -1,105 +1,22 @@
 {
-  "audit_queue": [
-    {
-      "heldout": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
-      "levels": [
-        "1_exact_canonical_conversation_hash",
-        "2_normalized_prompt_hash"
-      ],
-      "matches": [
-        {
-          "level": "1_exact_canonical_conversation_hash",
-          "training": [
-            "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
-            "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
-            "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
-            "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
-            "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
-          ]
-        },
-        {
-          "level": "2_normalized_prompt_hash",
-          "training": [
-            "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
-            "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
-            "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
-            "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
-            "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
-          ]
-        }
-      ]
-    },
-    {
-      "heldout": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
-      "levels": [
-        "1_exact_canonical_conversation_hash",
-        "2_normalized_prompt_hash"
-      ],
-      "matches": [
-        {
-          "level": "1_exact_canonical_conversation_hash",
-          "training": [
-            "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
-          ]
-        },
-        {
-          "level": "2_normalized_prompt_hash",
-          "training": [
-            "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
-          ]
-        }
-      ]
-    }
-  ],
-  "audit_queue_size": 2,
+  "audit_artifact": "reports/data/behavioral-heldout-v2-contamination-audit.json",
+  "audit_queue": [],
+  "audit_queue_size": 0,
+  "benchmark_fingerprint": "132786086b94196a5ea7f371620809c8139c0dbb8eeae260c2bb4452dc6f77ee",
   "counts": {
-    "heldout_records": 3952,
+    "heldout_records": 3950,
     "heldout_universe_shingles": 34858,
     "pruned_shingles": 5781,
-    "scored_pairs": 25501815,
+    "scored_pairs": 25499697,
     "training_records": 213951
   },
   "findings": {
-    "level_1_exact_prompt_matches": [
-      {
-        "heldout": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
-        "training": [
-          "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
-        ]
-      },
-      {
-        "heldout": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
-        "training": [
-          "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
-          "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
-          "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
-          "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
-          "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
-        ]
-      }
-    ],
-    "level_2_normalized_prompt_matches": [
-      {
-        "heldout": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
-        "training": [
-          "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
-        ]
-      },
-      {
-        "heldout": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
-        "training": [
-          "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
-          "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
-          "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
-          "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
-          "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
-        ]
-      }
-    ],
+    "level_1_exact_prompt_matches": [],
+    "level_2_normalized_prompt_matches": [],
     "level_3_near_duplicates": [],
     "level_4_semantic_matches": []
   },
-  "interpretation": "Levels 1-4 are machine-measured. Level 5 is a human audit of audit_queue and is deliberately NOT_RUN; no clean or generalization claim is made until it completes.",
+  "interpretation": "Levels 1-4 are machine-measured. Level 5 is a human adjudication of audit_queue recorded in the separate audit artifact; this generated report is an input to that review and must never be hand-edited. No clean or generalization claim is made until Level 5 completes.",
   "levels": {
     "1_exact_canonical_conversation_hash": "MEASURED",
     "2_normalized_prompt_hash": "MEASURED",
@@ -121,8 +38,14 @@
       "min_shingles": 25
     }
   },
+  "quarantined_record_ids": [
+    "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+    "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495"
+  ],
+  "scan_fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
   "schema_version": 1,
-  "status": "REVIEW_REQUIRED_LEVEL_5_PENDING",
+  "status": "LEVELS_1_4_MEASURED_LEVEL_5_PENDING",
+  "training_corpus_fingerprint": "848dc86bf6f1959a9a1b6c28858dabca8a7840519c04e9d70a9e9d5dba74b667",
   "training_source_labels_seen": [
     "button",
     "glaive-function-calling-v2",

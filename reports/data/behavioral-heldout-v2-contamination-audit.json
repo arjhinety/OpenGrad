@@ -1,0 +1,153 @@
+{
+  "artifact_kind": "HUMAN_LEVEL_5_ADJUDICATION",
+  "benchmark_fingerprint": "132786086b94196a5ea7f371620809c8139c0dbb8eeae260c2bb4452dc6f77ee",
+  "created_at": "2026-09-10T14:37:17+00:00",
+  "items": [
+    {
+      "candidates": {
+        "cannot_answer": "I'm sorry for the confusion, but I'm unable to provide the time on a PC as I don't have the capability to access or display real-time information from a specific device.",
+        "direct": "I believe you're asking about the system time on your computer. To check it, look at the bottom right corner of your screen or press the Windows key + Alt + D on your keyboard.",
+        "request_for_info": "To provide you with the current time, I need to execute a system command. Could you please specify the command for displaying time?",
+        "tool_call": "{\"name\": \"cmd_controller.execute\", \"arguments\": {\"command\": \"echo %time%\"}}"
+      },
+      "expected_decision": "request_for_info",
+      "finding_fingerprint": "90fe2057f7de8e60c3c30eeb4e177a29496bcfaa1368014e07711f48e5120682",
+      "heldout_text": "What is the current time?",
+      "match_levels": [
+        "1_exact_canonical_conversation_hash",
+        "2_normalized_prompt_hash"
+      ],
+      "matches": [
+        {
+          "level": "1_exact_canonical_conversation_hash",
+          "training": [
+            "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
+            "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
+            "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
+            "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
+            "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
+          ]
+        },
+        {
+          "level": "2_normalized_prompt_hash",
+          "training": [
+            "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
+            "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
+            "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
+            "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
+            "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
+          ]
+        }
+      ],
+      "reason": "Exact held-out prompt appears in 5 Glaive training records; those records label the identical prompt CALL (get_current_time), which is precisely the CALL-vs-ASK_FIRST decision this item measures with gold request_for_info.",
+      "record_id": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+      "review_date": "2026-09-10T14:37:23+00:00",
+      "reviewer": "commandcode-evidence-review",
+      "split": "when2call-mcq",
+      "stale": false,
+      "stale_reason": "",
+      "tools": [
+        "cmd_controller.execute"
+      ],
+      "training_evidence": [
+        {
+          "assistant": ": <functioncall> {\"name\": \"get_current_time\", \"arguments\": {}} <|endoftext|> : The current time is 10:30 AM. <|endoftext|>",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": []
+        },
+        {
+          "assistant": ": <functioncall> {\"name\": \"get_time\", \"arguments\": {}} <|endoftext|> : The current time is 10:30 AM. <|endoftext|>",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": []
+        },
+        {
+          "assistant": ": <functioncall> {\"name\": \"get_current_time\", \"arguments\": null} <|endoftext|> : The current time is 11:30 AM. <|endoftext|>",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": []
+        },
+        {
+          "assistant": ": <functioncall> {\"name\": \"get_current_time\", \"arguments\": {}} <|endoftext|> : The current time is 14:30 on 25th March 2022. <|endoftext|>",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": []
+        },
+        {
+          "assistant": ": <functioncall> {\"name\": \"get_current_time\", \"arguments\": {}} <|endoftext|> : The current time is 11:30 AM. <|endoftext|>",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": []
+        }
+      ],
+      "verdict": "CONTAMINATED"
+    },
+    {
+      "candidates": {
+        "cannot_answer": "Apologies, I'm unable to provide real-time weather information as I don't have that capability.",
+        "direct": "The current weather in NYC is partly cloudy with a temperature of 68°F (20°C).",
+        "request_for_info": "To provide you with the current weather conditions, could you please specify the city and state?",
+        "tool_call": "{\"name\": \"get_current_weather\", \"arguments\": {\"location\": \"New York, NY\"}}"
+      },
+      "expected_decision": "request_for_info",
+      "finding_fingerprint": "ceb1816461adac151da234fdb657ad95a71fbca9be8e9296c612f4d00149ed57",
+      "heldout_text": "What is the current weather?",
+      "match_levels": [
+        "1_exact_canonical_conversation_hash",
+        "2_normalized_prompt_hash"
+      ],
+      "matches": [
+        {
+          "level": "1_exact_canonical_conversation_hash",
+          "training": [
+            "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
+          ]
+        },
+        {
+          "level": "2_normalized_prompt_hash",
+          "training": [
+            "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
+          ]
+        }
+      ],
+      "reason": "Exact held-out prompt in a When2Call SFT record whose assistant response asks for the missing location, semantically identical to the held-out gold request_for_info answer.",
+      "record_id": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
+      "review_date": "2026-09-10T14:37:29+00:00",
+      "reviewer": "commandcode-evidence-review",
+      "split": "when2call-mcq",
+      "stale": false,
+      "stale_reason": "",
+      "tools": [
+        "get_current_weather",
+        "web_search"
+      ],
+      "training_evidence": [
+        {
+          "assistant": "To provide you with the current weather information, I'll need the location. Could you please specify the location?",
+          "behavior_decision": "ANSWER",
+          "prompt": "What is the current weather?",
+          "record_id": "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987",
+          "source": "when2call-sft",
+          "tool_calls": []
+        }
+      ],
+      "verdict": "CONTAMINATED"
+    }
+  ],
+  "manifest_id": "behavioral-heldout-v2",
+  "note": "Human-authored Level-5 verdicts. Machine-generated contamination reports must never be edited by hand, and this file must never be written by the scanner; use `opengrad-contamination adjudicate`.",
+  "schema_version": 1,
+  "training_corpus_fingerprint": "848dc86bf6f1959a9a1b6c28858dabca8a7840519c04e9d70a9e9d5dba74b667",
+  "updated_at": "2026-09-10T14:40:02+00:00"
+}

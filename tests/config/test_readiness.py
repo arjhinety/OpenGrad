@@ -25,12 +25,60 @@ def test_readiness_preserves_baseline_first_invariant():
     assert any(gate["name"] == "evaluation_leakage" and gate["status"] == "PASS" for gate in result["gates"])
 
 
-def test_pending_contamination_review_is_a_real_blocker():
+def test_contamination_gate_agrees_with_the_committed_audit_artifact():
+    """The gate must reflect the durable audit + quarantine, not the report's own status.
+
+    This deliberately computes the expected outcome from the committed artifacts instead
+    of hardcoding it, so changing a verdict does not silently invalidate the test — a
+    disagreement between the gate and the audit is what fails.
+    """
+    from opengrad.contamination.audit import (
+        AUDIT_PATH,
+        QUARANTINE_PATH,
+        benchmark_fingerprint,
+        evaluate_audit,
+        load_audit,
+        load_quarantine,
+        training_corpus_fingerprint,
+    )
+
+    report = json.loads(
+        (ROOT / "reports/data/behavioral-heldout-v2-contamination.json").read_text(encoding="utf-8")
+    )
+    expected = evaluate_audit(
+        report,
+        load_audit(ROOT / AUDIT_PATH),
+        load_quarantine(ROOT / QUARANTINE_PATH),
+        benchmark_fp=benchmark_fingerprint(ROOT),
+        training_fp=training_corpus_fingerprint(ROOT),
+    )
     result = readiness(ROOT)
-    contamination = next(gate for gate in result["gates"] if gate["name"] == "contamination_gate")
-    assert contamination["status"] == "FAIL"
-    assert "contamination_gate" in result["blocking_gates"]
-    assert result["ready_for_sft"] is False
+    gate = next(gate for gate in result["gates"] if gate["name"] == "contamination_gate")
+    assert (gate["status"] == "PASS") is expected.complete
+    assert f"level_5={expected.level_5}" in gate["details"]
+    assert f"quarantined={expected.quarantined}" in gate["details"]
+
+
+def test_quarantined_examples_are_excluded_from_the_heldout_benchmark():
+    """A CONTAMINATED verdict must be demonstrably excluded from evaluation."""
+    from opengrad.contamination.audit import QUARANTINE_PATH, load_quarantine
+    from opengrad.evaluation.runner import load_evaluation_examples
+
+    quarantine = load_quarantine(ROOT / QUARANTINE_PATH)
+    excluded = quarantine.record_ids()
+    if not excluded:
+        pytest.skip("no quarantined examples in this checkout")
+
+    manifest = ROOT / "reports/evaluation/behavioral-heldout-v2.manifest.json"
+    examples = load_evaluation_examples(ROOT, manifest)
+    loaded = {example.example_id for example in examples}
+    for record_id in excluded:
+        assert record_id.split(":", 1)[-1] not in loaded, f"{record_id} still evaluated"
+
+    declared = sum(
+        split["items"] for split in json.loads(manifest.read_text(encoding="utf-8"))["splits"]
+    )
+    assert len(examples) == declared - len(excluded)
 
 
 def test_gpu_smoke_receipt_is_bounded_and_never_runs_training(
