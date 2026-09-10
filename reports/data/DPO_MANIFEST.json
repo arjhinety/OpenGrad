@@ -1,0 +1,9 @@
+{
+  "mixture_id": "toolpolicy_dpo_v1",
+  "sources": [
+    "when2call_preference",
+    "synthetic_residual_dpo"
+  ],
+  "quality_gates": "PASS",
+  "verified": true
+}

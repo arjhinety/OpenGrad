@@ -1,0 +1,22 @@
+schema_version: 1
+mixture_id: toolpolicy_dpo_v1
+description: Versioned DPO preference mixture combining When2Call preference data with synthetic hard negatives
+sources:
+  - source_id: when2call_preference
+    type: curated_preference
+    source_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    intended_split: train
+    weight: 0.60
+  - source_id: synthetic_residual_dpo
+    type: student_hard_negatives
+    student_checkpoint: qwen35_2b_m0_sft
+    generation_method: deterministic_and_openai_adjudicated
+    weight: 0.40
+quality_gates:
+  chosen_not_equals_rejected: true
+  min_token_length: 5
+  exclude_held_out_namespaces:
+    - reports/evaluation/behavioral-heldout-v2.manifest.json
+    - bfcl_v4
+    - tau3
+    - acebench

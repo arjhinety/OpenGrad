@@ -1,0 +1,45 @@
+experiment_id: qwen35_2b_dpo_a100
+hypothesis: "DPO on A100 targets the tool decision boundary, eliminating unnecessary tool calls and format violations while maintaining strict non-regression on IFEval."
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+datasets:
+  manifest_ids:
+    - toolpolicy_dpo_v1
+  manifest_paths:
+    - configs/data/preferences/toolpolicy_dpo_v1.yaml
+trainer:
+  type: dpo
+  beta: 0.1
+  loss_type: sigmoid
+  learning_rate: 5.0e-6
+  epochs: 2
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 4
+  max_length: 2048
+  max_prompt_length: 1024
+  reference_checkpoint: checkpoints/qwen35_2b_m0_sft
+  seed: 42
+  precision: bfloat16
+evaluation:
+  suite: full_post_training
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+checkpointing:
+  save_steps: 25
+  max_checkpoints: 3
+promotion:
+  must_pass:
+    bfcl-v4: 72.0
+  max_regression:
+    ifeval: 1.0
+    mmlu-pro: 0.5
+reproducibility:
+  seed: 42
+  precision: bfloat16
+  hardware: NVIDIA_A100_80GB
+speculative_decoding:
+  enabled: false

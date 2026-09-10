@@ -1,0 +1,15 @@
+provider_id: openai_dpo_judge
+description: OpenAI judge configuration for ambiguous DPO preference adjudication (Section 11 & 13)
+model: gpt-4o-mini
+temperature: 0.0
+budget:
+  max_requests: 500
+  max_cost_usd: 10.0
+  max_input_tokens: 500000
+  max_output_tokens: 50000
+caching:
+  enabled: true
+  cache_dir: .cache/openai_judge
+rubric_version: opengrad_tool_policy_v1
+output_format: json_object
+disagreement_policy: skip_questionable_pairs
