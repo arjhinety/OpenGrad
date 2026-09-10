@@ -19,7 +19,7 @@ OpenGrad studies how much capability can be extracted from small open-weight lan
 
 Model changes are hypotheses, not improvements. Every intervention is measured. Every regression matters. Failed experiments remain part of the record, and every reported result must be reproducible.
 
-> **Building in Public:** OpenGrad documents all research journeys, whether successful or failed. The repository provides a complete post-training experiment operating system covering SFT, DPO, On-Policy Distillation, a 16-benchmark evaluation system (Tiers A–E), native MTP/speculative decoding, on-device mobile tool calling with OpenWeights and Android Studio, and clean extension boundaries for future Reinforcement Learning (RL).
+> OpenGrad documents all research journeys, whether successful or failed. The repository provides a complete post-training experiment operating system covering SFT, DPO, On-Policy Distillation, a 16-benchmark evaluation system (Tiers A–E), native MTP/speculative decoding, on-device mobile tool calling with OpenWeights and Android Studio, and clean extension boundaries for future Reinforcement Learning (RL).
 
 ---
 
