@@ -139,6 +139,12 @@ checkpoint can be resumed from, so older optimizer states are deleted on each sa
 checkpoint then costs 3.8 GiB. Without this the disk filled after three saves and no evaluation
 curve was affordable at all.
 
+> **Upload every retained checkpoint before deleting anything.** Disk pressure is the common
+> reason this rule gets broken, and it is not a good reason: the retained set is small and its
+> size is known in advance. Weights are not reproducible byte-for-byte, so a deleted checkpoint
+> is gone, and regenerating it yields a different model than the one that produced a published
+> number. See `docs/CHECKPOINTS.md` §3 for the full rule and the incident that motivated it.
+
 When a run directory already holds a checkpoint with optimizer state, the run **resumes** from
 it: weights, optimizer state, counters, and all three RNG streams are restored, and the new
 checkpoint records the old one as its parent. Raising `max_steps` on the same experiment is
