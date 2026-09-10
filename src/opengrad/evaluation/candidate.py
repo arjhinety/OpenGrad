@@ -338,7 +338,12 @@ def write_candidate_config(
     baseline = yaml.safe_load((root / BASELINE_CONFIG).read_text(encoding="utf-8"))
     candidate = dict(baseline)
     candidate["status"] = CANDIDATE_STATUS
-    candidate["model_id"] = str(checkpoint)
+    # Prefer a repo-relative path: an absolute one bakes this machine's layout into a committed
+    # config, so the same file would not measure the same checkpoint anywhere else.
+    try:
+        candidate["model_id"] = str(checkpoint.resolve().relative_to(root.resolve()))
+    except ValueError:
+        candidate["model_id"] = str(checkpoint)
     candidate["model_revision"] = None
     outputs = {
         name: str(

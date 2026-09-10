@@ -675,6 +675,130 @@ def adapt_glaive(record: dict[str, Any], split: str = "train") -> ToolConversati
     return c
 
 
+GLAIVE_CALL_MARKER = "<functioncall>"
+GLAIVE_CALL_TERMINATOR = "</functioncall>"
+GLAIVE_TEXT_ARTIFACTS = ("<|endoftext|>", "<|endoftext|>\n")
+
+
+def extract_glaive_calls(
+    text: str, pending: int
+) -> tuple[list[dict[str, Any]], int, list[tuple[int, int]]]:
+    """Extract Glaive function calls, tolerating an unterminated block.
+
+    The ``v1`` adapter requires ``</functioncall>`` to close the block, but in this revision of
+    the upstream data the closing tag is absent from every block: 67,481 assistant turns contain
+    an opening ``<functioncall>`` and none of them contain a closing one. ``v1`` therefore parses
+    zero calls, leaves the raw marker in the assistant content, and still emits a ``tool`` message
+    with a synthesised id -- producing a trajectory that the canonical validator correctly rejects
+    as an orphaned tool result. That one interaction cost 51,034 training records.
+
+    The block is located by its opening marker and the JSON value after it is consumed with
+    ``raw_decode``, which reads exactly one value and stops. That ends the block at the end of the
+    JSON rather than at a delimiter the data does not have, and it still handles a terminated
+    block when one is present.
+
+    Returns the calls, the updated call counter, and the character spans of the markers so the
+    caller can strip them from the assistant content.
+    """
+    decoder = json.JSONDecoder()
+    calls: list[dict[str, Any]] = []
+    spans: list[tuple[int, int]] = []
+    cursor = 0
+    while True:
+        start = text.find(GLAIVE_CALL_MARKER, cursor)
+        if start == -1:
+            break
+        body_start = start + len(GLAIVE_CALL_MARKER)
+        position = body_start
+        while position < len(text) and text[position].isspace():
+            position += 1
+        try:
+            value, end = decoder.raw_decode(text, position)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"malformed Glaive function call at offset {start}: {exc}") from exc
+        if not isinstance(value, dict) or not value.get("name"):
+            raise ValueError("malformed Glaive function call")
+        arguments = _json(value.get("arguments", {}), "arguments")
+        if not isinstance(arguments, dict):
+            raise TypeError("Glaive arguments must be an object")
+        calls.append({"id": f"call_{pending:04d}", "name": value["name"], "arguments": arguments})
+        pending += 1
+
+        terminated = text.find(GLAIVE_CALL_TERMINATOR, end)
+        block_end = (
+            terminated + len(GLAIVE_CALL_TERMINATOR)
+            if terminated != -1 and text[end:terminated].strip() == ""
+            else end
+        )
+        spans.append((start, block_end))
+        cursor = block_end
+    return calls, pending, spans
+
+
+def _glaive_parts(record: dict[str, Any]) -> tuple[str, list[str]] | None:
+    chat = record.get("chat", record.get("messages"))
+    if not isinstance(chat, str):
+        return None
+    return str(record.get("system", "")), re.split(r"(?=USER:|ASSISTANT:|FUNCTION RESPONSE:)", chat)
+
+
+def adapt_glaive_v2(record: dict[str, Any], split: str = "train") -> ToolConversation:
+    """Glaive adapter that survives this revision's unterminated function-call blocks.
+
+    Registered separately rather than replacing :func:`adapt_glaive` so that the pinned v1
+    release stays reproducible from the code that produced it. Selecting this adapter is a new
+    corpus version with its own manifest hash, not an edit to v1.
+    """
+    if isinstance(record.get("messages"), list) and "chat" not in record:
+        return adapt(record, "glaive-function-calling-v2", split)
+    parts_result = _glaive_parts(record)
+    if parts_result is None:
+        return _tagged_messages(record, "glaive-function-calling-v2", split, "glaive_v2")
+    system, parts = parts_result
+    messages: list[dict[str, Any]] = []
+    pending = 0
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        if part.startswith("USER:"):
+            messages.append({"role": "user", "content": part[5:].strip()})
+        elif part.startswith("ASSISTANT:"):
+            text = part[9:].strip()
+            calls, pending, spans = extract_glaive_calls(text, pending)
+            remainder = text
+            for start, end in reversed(spans):
+                remainder = remainder[:start] + remainder[end:]
+            for artifact in GLAIVE_TEXT_ARTIFACTS:
+                remainder = remainder.replace(artifact, " ")
+            # The upstream delimiter leaves stray colons and whitespace at the start of these
+            # turns; keeping them would put punctuation at the front of the assistant target.
+            remainder = re.sub(r"^[\s:]+", "", remainder).strip()
+            messages.append(
+                {"role": "assistant", "content": remainder or None, "tool_calls": calls}
+            )
+        elif part.startswith("FUNCTION RESPONSE:"):
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": f"call_{max(0, pending - 1):04d}",
+                    "content": part[18:].strip(),
+                }
+            )
+    c = _base(
+        record,
+        "glaive-function-calling-v2",
+        split,
+        _tool(record.get("tools", [])) or _embedded_tools(str(system)),
+        messages,
+        adapter="glaive_function_calling_v2_v2",
+        source_format="system/chat delimiters, unterminated functioncall blocks",
+    )
+    c.metadata["system"] = system
+    c.validate()
+    return c
+
+
 ADAPTERS: dict[str, Callable[[dict[str, Any], str], ToolConversation]] = {
     "xlam": adapt_xlam,
     "when2call": adapt_when2call,
@@ -682,4 +806,5 @@ ADAPTERS: dict[str, Callable[[dict[str, Any], str], ToolConversation]] = {
     "button": adapt_button,
     "looptool": adapt_looptool,
     "glaive": adapt_glaive,
+    "glaive_v2": adapt_glaive_v2,
 }
