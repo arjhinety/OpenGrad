@@ -3,12 +3,25 @@ import json
 import sys
 from pathlib import Path
 
+from opengrad.agent_cli import (
+    handle_checkpoint_cli,
+    handle_doctor,
+    handle_experiment_cli,
+    handle_inspect_template,
+    handle_promote_reject,
+    handle_train,
+    handle_validate_data,
+)
 from opengrad.benchmarks.cli import benchmark_cli
+from opengrad.benchmarks.reporting.comparator import compare_runs, render_comparison_markdown
+from opengrad.benchmarks.runner import BenchmarkRunner
 from opengrad.data.audit import coverage_report, load_records, render_human
 from opengrad.data.canonical import ToolConversation
 from opengrad.data.semantic import audit_records, validate_training_trajectory
 from opengrad.env_capture import capture
 from opengrad.evaluation.runner import run_baseline
+from opengrad.experiments.preflight import run_experiment_preflight
+from opengrad.failures.analyzer import FailureAnalyzer, FailureItem
 from opengrad.registry.preflight import check
 from opengrad.registry.validate import validate
 
@@ -44,43 +57,212 @@ def main() -> int:
     if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
         return benchmark_cli(sys.argv[2:])
 
-    parser = argparse.ArgumentParser(prog="opengrad")
+    parser = argparse.ArgumentParser(prog="opengrad", description="OpenGrad Research Platform")
     sub = parser.add_subparsers(dest="command")
-    sub.add_parser("validate")
-    sub.add_parser("preflight")
+
+    sub.add_parser("validate", help="validate repository registries")
+
+    # preflight
+    pre_p = sub.add_parser("preflight", help="pre-experiment or config readiness check")
+    pre_p.add_argument("config", nargs="?", help="optional experiment config YAML path")
+    pre_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+
     sub.add_parser("benchmark", help="reproducible post-training benchmark system")
+
+    # validate-data
+    val_data = sub.add_parser("validate-data", help="strict dataset trajectory and schema validation")
+    val_data.add_argument("records", help="JSON or JSONL dataset path")
+    val_data.add_argument("--mode", default="sft", choices=["sft", "dpo"], help="dataset mode")
+    val_data.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # inspect-template
+    ins_temp = sub.add_parser("inspect-template", help="inspect chat template rendering and loss masks")
+    ins_temp.add_argument("--record", help="optional path to conversation JSON record")
+    ins_temp.add_argument("--thinking", action="store_true", help="enable thinking tokens")
+    ins_temp.add_argument("--max-tokens", type=int, default=50, help="max tokens to display")
+    ins_temp.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # train
+    train_p = sub.add_parser("train", help="launch SFT, DPO, or on-policy distillation training")
+    train_p.add_argument("config", help="experiment config YAML path")
+    train_p.add_argument("--dry-run", action="store_true", help="execute CPU mock training without GPU")
+    train_p.add_argument("--force", action="store_true", help="override preflight failure (auditable)")
+    train_p.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # evaluate
+    eval_p = sub.add_parser("evaluate", help="evaluate a model or checkpoint on a benchmark suite")
+    eval_p.add_argument("target", help="checkpoint path or model identifier")
+    eval_p.add_argument("--suite", default="smoke", help="suite name (smoke, tool_use_core, full_post_training)")
+    eval_p.add_argument("--dry-run", action="store_true", help="force CPU dry-run using mock backend")
+    eval_p.add_argument("--limit", type=int, help="limit tasks per benchmark")
+    eval_p.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # compare
+    comp_p = sub.add_parser("compare", help="compare baseline and candidate runs or checkpoints")
+    comp_p.add_argument("baseline", help="baseline run directory")
+    comp_p.add_argument("candidate", help="candidate run directory")
+    comp_p.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # failures
+    fail_p = sub.add_parser("failures", help="analyze and cluster failures in a run directory")
+    fail_p.add_argument("run_dir", help="run directory containing failures.json")
+    fail_p.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # checkpoint
+    ckpt_p = sub.add_parser("checkpoint", help="inspect or list registered checkpoints")
+    ckpt_sub = ckpt_p.add_subparsers(dest="checkpoint_command")
+    ckpt_list = ckpt_sub.add_parser("list", help="list registered checkpoints")
+    ckpt_list.add_argument("--status", help="filter by promotion status")
+    ckpt_list.add_argument("--json", action="store_true", help="emit JSON output")
+    ckpt_ins = ckpt_sub.add_parser("inspect", help="inspect checkpoint details")
+    ckpt_ins.add_argument("checkpoint_id", help="checkpoint ID")
+    ckpt_ins.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # experiment
+    exp_p = sub.add_parser("experiment", help="manage and inspect experiment records")
+    exp_sub = exp_p.add_subparsers(dest="experiment_command")
+    exp_list = exp_sub.add_parser("list", help="list experiments")
+    exp_list.add_argument("--json", action="store_true", help="emit JSON output")
+    exp_show = exp_sub.add_parser("show", help="show experiment details")
+    exp_show.add_argument("experiment_id", help="experiment ID")
+    exp_show.add_argument("--json", action="store_true", help="emit JSON output")
+    exp_diff = exp_sub.add_parser("diff", help="diff two experiments across configurations")
+    exp_diff.add_argument("exp_a", help="baseline experiment ID")
+    exp_diff.add_argument("exp_b", help="candidate experiment ID")
+    exp_diff.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # promote / reject
+    prom_p = sub.add_parser("promote", help="promote a checkpoint to validated production status")
+    prom_p.add_argument("checkpoint_id", help="checkpoint ID")
+    prom_p.add_argument("--reason", help="justification for promotion")
+    prom_p.add_argument("--json", action="store_true", help="emit JSON output")
+
+    rej_p = sub.add_parser("reject", help="reject a candidate checkpoint")
+    rej_p.add_argument("checkpoint_id", help="checkpoint ID")
+    rej_p.add_argument("--reason", help="justification for rejection")
+    rej_p.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # doctor
+    doc_p = sub.add_parser("doctor", help="diagnose environment, tooling, and on-device testing surfaces")
+    doc_p.add_argument("--json", action="store_true", help="emit JSON output")
+
+    # Legacy CLI tools
     data_audit = sub.add_parser("data-audit")
-    data_audit.add_argument(
-        "--records", required=True, help="JSON array or JSONL canonical records"
-    )
+    data_audit.add_argument("--records", required=True, help="JSON array or JSONL canonical records")
     data_audit.add_argument("--config", help="mixture config retained for audit provenance")
     data_audit.add_argument("--json", action="store_true", help="also emit machine-readable JSON")
-    corpus_audit = sub.add_parser(
-        "audit-corpus", help="strict semantic audit of canonical training records"
-    )
+    corpus_audit = sub.add_parser("audit-corpus", help="strict semantic audit of canonical training records")
     corpus_audit.add_argument("--records", required=True, help="canonical JSONL records")
     env = sub.add_parser("env")
     env.add_subparsers(dest="env_command").add_parser("capture")
-    baseline = sub.add_parser(
-        "baseline", help="run the frozen baseline end-to-end (use --dry-run before GPU time)"
-    )
+    baseline = sub.add_parser("baseline", help="run the frozen baseline end-to-end (use --dry-run before GPU time)")
     baseline.add_argument(
         "--config",
         default="configs/evaluation/tool_calling/qwen35_2b_baseline.yaml",
         help="frozen baseline YAML",
     )
-    baseline.add_argument(
-        "--dry-run", action="store_true", help="use the CPU deterministic backend"
-    )
+    baseline.add_argument("--dry-run", action="store_true", help="use the CPU deterministic backend")
     baseline.add_argument("--limit", type=int, help="evaluate only the first N held-out examples")
+
     args = parser.parse_args()
     root = Path.cwd()
+
     if args.command == "validate":
         errors = validate(root)
         print("OK" if not errors else "\n".join(errors))
         return int(bool(errors))
+
     if args.command == "preflight":
+        if getattr(args, "config", None):
+            res = run_experiment_preflight(args.config, root=root)
+            if args.json:
+                print(json.dumps(res.to_dict(), indent=2))
+            else:
+                print(res.render_summary())
+            return 0 if res.overall_status in {"PASS", "WARN"} else 1
         return preflight(root)
+
+    if args.command == "validate-data":
+        return handle_validate_data(args, root)
+
+    if args.command == "inspect-template":
+        return handle_inspect_template(args, root)
+
+    if args.command == "train":
+        return handle_train(args, root)
+
+    if args.command == "evaluate":
+        runner = BenchmarkRunner(root)
+        suite_path = root / "configs" / "benchmark_suites" / f"{args.suite}.yaml"
+        if not suite_path.exists():
+            suite_path = Path(args.suite)
+        if not suite_path.exists():
+            err = {"code": "SUITE_NOT_FOUND", "message": f"Suite not found: {args.suite}"}
+            print(json.dumps(err) if args.json else f"Error: {err['message']}")
+            return 1
+        res_suite = runner.run_suite(suite_path, dry_run=args.dry_run or True, limit=args.limit)
+        if args.json:
+            print(json.dumps(res_suite, indent=2))
+        else:
+            print(f"Evaluated suite '{args.suite}' across {res_suite['benchmarks_run']} benchmarks:")
+            for b_id, b_res in res_suite["results"].items():
+                acc = b_res.get("result", {}).get("overall_accuracy", 0.0)
+                print(f"  - {b_id:<24} {acc:.1f}%")
+        return 0
+
+    if args.command == "compare":
+        comp = compare_runs(Path(args.baseline), Path(args.candidate))
+        if args.json:
+            print(json.dumps(comp, indent=2))
+        else:
+            print(render_comparison_markdown(comp))
+        return 0
+
+    if args.command == "failures":
+        r_dir = Path(args.run_dir)
+        fail_file = r_dir / "failures.json"
+        if not fail_file.exists():
+            err = {"code": "FAILURES_NOT_FOUND", "message": f"File not found: {fail_file}"}
+            print(json.dumps(err) if args.json else f"Error: {err['message']}")
+            return 1
+        fail_data = json.loads(fail_file.read_text(encoding="utf-8"))
+        raw_items = fail_data.get("failures", [])
+        analyzer = FailureAnalyzer()
+        clusters = analyzer.cluster([
+            FailureItem(
+                benchmark=f.get("benchmark", r_dir.name),
+                sample_id=str(f.get("task_id", f.get("sample_id", f"s_{i}"))),
+                prompt=str(f.get("input", f.get("prompt", ""))),
+                expected=f.get("expected"),
+                actual=f.get("parsed_output", f.get("actual")),
+                score=float(f.get("score", 0.0)),
+                failure_category=str(f.get("failure_category", "unknown")),
+                checkpoint_id="unknown",
+                experiment_id="unknown",
+            )
+            for i, f in enumerate(raw_items)
+        ])
+        if args.json:
+            print(json.dumps({"total_clusters": len(clusters), "clusters": [c.to_dict() for c in clusters]}, indent=2))
+        else:
+            print(f"Failure Analysis: {len(raw_items)} failures in {len(clusters)} clusters\n")
+            for c in clusters:
+                print(f"- {c.category:<24} {c.count} failures ({c.percentage:.1f}%)")
+        return 0
+
+    if args.command == "checkpoint":
+        return handle_checkpoint_cli(args, root)
+
+    if args.command == "experiment":
+        return handle_experiment_cli(args, root)
+
+    if args.command in {"promote", "reject"}:
+        return handle_promote_reject(args, root, args.command)
+
+    if args.command == "doctor":
+        return handle_doctor(args, root)
+
+    # Legacy CLI dispatch
     if args.command == "data-audit":
         report = coverage_report(load_records(Path(args.records)))
         print(render_human(report))
@@ -88,6 +270,7 @@ def main() -> int:
             print("\nJSON_REPORT")
             print(json.dumps(report, indent=2, sort_keys=True))
         return 0
+
     if args.command == "audit-corpus":
         records: list[ToolConversation] = []
         failures: list[dict[str, object]] = []
@@ -103,11 +286,7 @@ def main() -> int:
                     if not isinstance(row, dict):
                         raise TypeError("record must be a JSON object")
                 except (json.JSONDecodeError, TypeError) as exc:
-                    code = (
-                        "INVALID_JSON"
-                        if isinstance(exc, json.JSONDecodeError)
-                        else "INVALID_RECORD_TYPE"
-                    )
+                    code = "INVALID_JSON" if isinstance(exc, json.JSONDecodeError) else "INVALID_RECORD_TYPE"
                     reason_counts[code] = reason_counts.get(code, 0) + 1
                     failures.append({"line": line_number, "reasons": [code], "details": [str(exc)]})
                     continue
@@ -133,13 +312,7 @@ def main() -> int:
                 except (KeyError, TypeError, ValueError) as exc:
                     code = "INVALID_CANONICAL_RECORD"
                     reason_counts[code] = reason_counts.get(code, 0) + 1
-                    failures.append(
-                        {
-                            "line": line_number,
-                            "reasons": [code],
-                            "details": [str(exc)],
-                        }
-                    )
+                    failures.append({"line": line_number, "reasons": [code], "details": [str(exc)]})
         summary = audit_records(records)
         summary["records"] = source_rows
         summary["valid"] = source_rows - len(failures)
@@ -153,13 +326,16 @@ def main() -> int:
         summary["failures"] = failures
         print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
         return int(bool(failures))
+
     if args.command == "env" and args.env_command == "capture":
         print(capture(root))
         return 0
+
     if args.command == "baseline":
         result = run_baseline(root / args.config, root=root, limit=args.limit, dry_run=args.dry_run)
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 0
+
     parser.print_help()
     return 0
 
