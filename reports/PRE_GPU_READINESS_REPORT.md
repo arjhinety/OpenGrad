@@ -62,7 +62,7 @@ Operations that *establish* B0 are not required to already own B0's post-run art
 | Command | Result |
 | --- | --- |
 | `python3 -m py_compile <modules>` | PASS |
-| `.venv/bin/python -m pytest` | **191 passed** |
+| `.venv/bin/python -m pytest` | **192 passed** |
 | `.venv/bin/python -m ruff check .` | **All checks passed** |
 | `.venv/bin/opengrad-validate` | `registry validation: OK` |
 | `cd integrations/opengrad-mcp && npm run check` | PASS |
@@ -128,6 +128,10 @@ The verdicts are recorded in `reports/data/behavioral-heldout-v2-contamination-a
 | `one_generation` | PASS |
 | `native_parser` | **FAIL** — `FORMAT_ERROR: ['UNCLOSED_TOOL_CALL']` |
 | `runtime` | **FAIL** — `GPU_SMOKE_FAILED` |
+
+**Root cause identified on CPU: this is a smoke-harness bug, not a model or parser defect.** The smoke generated with `max_new_tokens=8`, but its prompt ("Look up worker 12." with a `lookup` tool) elicits a tool call, and a complete native call needs roughly 20 tokens. The generation was therefore cut off mid-call — consistent with the recorded `output_chars: 30` — and the parser correctly rejected a genuinely truncated call as `UNCLOSED_TOOL_CALL`. A minimal reproduction is pinned in `test_smoke_token_budget_can_complete_a_tool_call`.
+
+The budget is now `SMOKE_MAX_NEW_TOKENS = 128`, comfortably above one complete call. The committed receipt was **not** rerun or altered (its byte hash is unchanged), so the boundary remains `INCOMPLETE` until someone re-runs `opengrad gpu-smoke` on the accelerator.
 
 Hardware: `NVIDIA A100-SXM4-80GB` (A100_80GB), BF16 supported.
 

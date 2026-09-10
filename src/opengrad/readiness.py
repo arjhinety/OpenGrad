@@ -43,6 +43,15 @@ BASELINE_PREDICTIONS = Path("reports/baselines/qwen35_2b_baseline/predictions.js
 BASELINE_RESIDUALS = Path("reports/failures/qwen35_2b_baseline/residual-profile.json")
 BASELINE_ENVIRONMENT = Path("reports/baselines/qwen35_2b_baseline/environment.json")
 PINNED_MODEL_REVISION = "15852e8c16360a2fea060d615a32b45270f8a8fc"
+# Generation budget for the bounded smoke. The smoke prompt elicits a tool call
+# ("Look up worker 12." with a `lookup` tool), and a complete native call
+# (`<tool_call>{"name": "lookup", "arguments": {"q": "worker 12"}}</tool_call>`) needs
+# roughly 20 tokens. A smaller budget truncates mid-call, which the parser correctly
+# rejects as UNCLOSED_TOOL_CALL, failing the boundary for a harness reason rather than a
+# model or parser defect. Keep this comfortably above one complete call.
+SMOKE_MIN_NEW_TOKENS = 64
+SMOKE_MAX_NEW_TOKENS = 128
+
 PINNED_TEMPLATE_HASH = "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80"
 PINNED_EVALUATOR_REVISION = "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc"
 CANONICAL_MODEL_ID = "Qwen/Qwen3.5-2B"
@@ -742,7 +751,7 @@ def gpu_smoke(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         device = next(model.parameters()).device
         encoded = {key: value.to(device) for key, value in encoded.items()}
         with torch.inference_mode():
-            output = model.generate(**encoded, max_new_tokens=8, do_sample=False)
+            output = model.generate(**encoded, max_new_tokens=SMOKE_MAX_NEW_TOKENS, do_sample=False)
         generated = tokenizer.decode(output[0, encoded["input_ids"].shape[1]:], skip_special_tokens=False)
         checks.append({"name": "one_generation", "status": "PASS", "output_chars": len(generated)})
         from opengrad.formatting.parser import parse_qwen_native_output

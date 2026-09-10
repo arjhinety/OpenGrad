@@ -81,6 +81,28 @@ def test_quarantined_examples_are_excluded_from_the_heldout_benchmark():
     assert len(examples) == declared - len(excluded)
 
 
+def test_smoke_token_budget_can_complete_a_tool_call():
+    """The smoke budget must not truncate a native call and fail the boundary.
+
+    The smoke prompt elicits a tool call. With a tiny budget the generation is cut off
+    mid-call, the parser correctly reports UNCLOSED_TOOL_CALL, and the GPU boundary fails
+    for a harness reason rather than a model defect. That is what the committed INCOMPLETE
+    receipt shows: output_chars=30 with FORMAT_ERROR/UNCLOSED_TOOL_CALL.
+    """
+    from opengrad import readiness as readiness_module
+    from opengrad.formatting.parser import parse_qwen_native_output
+
+    assert readiness_module.SMOKE_MAX_NEW_TOKENS >= readiness_module.SMOKE_MIN_NEW_TOKENS
+
+    # A representative complete call is accepted; its truncation is not.
+    complete = '<tool_call>{"name": "lookup", "arguments": {"q": "worker 12"}}</tool_call>'
+    assert parse_qwen_native_output(complete).status == "RAW_VALID"
+    truncated = complete[:30]
+    rejected = parse_qwen_native_output(truncated)
+    assert rejected.status == "FORMAT_ERROR"
+    assert "UNCLOSED_TOOL_CALL" in rejected.errors
+
+
 def test_gpu_smoke_receipt_is_bounded_and_never_runs_training(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
