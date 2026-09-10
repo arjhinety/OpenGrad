@@ -4,14 +4,14 @@
 
 # OpenGrad
 
-**Every gradient is a hypothesis. Every checkpoint is evidence.**
+**Building in Public.** Every gradient is a hypothesis. Every checkpoint is evidence.
 
 Open empirical research on capability–efficiency tradeoffs in small open-weight language models.
 
 [![CI](https://github.com/arrogance231/OpenGrad/actions/workflows/ci.yml/badge.svg)](https://github.com/arrogance231/OpenGrad/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-052B42?style=flat-square)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-052B42?style=flat-square)](LICENSE)
-[![Research status](https://img.shields.io/badge/research-Phase%200.5%20%7C%20no%20scores-052B42?style=flat-square)](PRE_EXPERIMENT_REPORT.md)
+[![Research status](https://img.shields.io/badge/research-Building%20in%20Public%20%7C%20Phase%201.0%20Foundation-052B42?style=flat-square)](PRE_EXPERIMENT_REPORT.md)
 
 </div>
 
@@ -19,7 +19,35 @@ OpenGrad studies how much capability can be extracted from small open-weight lan
 
 Model changes are hypotheses, not improvements. Every intervention is measured. Every regression matters. Failed experiments remain part of the record, and every reported result must be reproducible.
 
-> **Current state:** the repository has validated CPU-safe research infrastructure and a complete deterministic baseline pipeline. It has **no trained OpenGrad model, real model inference run, real benchmark score, speculative-decoding experiment, or published empirical result**. The pre-GPU gate is `DATA_READY / BASELINE_PIPELINE_HARDENING`. See the [Phase 0.5 report](PRE_EXPERIMENT_REPORT.md).
+> **Building in Public:** OpenGrad documents all research journeys, whether successful or failed. The repository provides a complete post-training experiment operating system covering SFT, DPO, On-Policy Distillation, a 16-benchmark evaluation system (Tiers A–E), native MTP/speculative decoding, on-device mobile tool calling with OpenWeights and Android Studio, and clean extension boundaries for future Reinforcement Learning (RL).
+
+---
+
+## 🎯 Primary Research Highlights & Architecture
+
+### 1. Comprehensive Post-Training Evaluation Benchmarks (Tiers A to E)
+OpenGrad rejects single headline accuracy scores and implements a rigorous, versioned multi-tier benchmark system with independent axes for capability, agent behavior, systems performance, and speculative decoding:
+- **Tier A (Primary Tool-Use Research):** BFCL V4, tau3-bench, ACEBench.
+- **Tier B (General & Regression):** IFBench, IFEval, LiveBench, MMLU-Pro, GSM8K, ARC-Challenge.
+- **Tier C (Agent Transfer & On-Device):** MCPMark, AgentBench FC, Terminal-Bench, TUA-Bench, OpenWeights.
+- **Tier D (Stretch):** GAIA (multimodal transfer delta).
+- **Tier E (Systems & Speculative):** Performance Microsuite (10 deterministic frozen prompts), Speculative Replay.
+- **Documentation:** See [Benchmark Strategy](docs/evaluation/BENCHMARK_STRATEGY.md), [Speculative Decoding & MTP](docs/evaluation/SPECULATIVE_DECODING.md), [Adding a Benchmark](docs/evaluation/ADDING_A_BENCHMARK.md), and [Adding an Inference Backend](docs/evaluation/ADDING_A_BACKEND.md).
+
+### 2. On-Device Mobile Testing with OpenWeights & Android Studio
+Connecting direct post-training research to consumer mobile devices:
+- **OpenWeights Integration:** Independent on-device engine (`github.com/alpharomercoma/openweights`).
+- **No Prompt Bloat:** Evaluates small models under OpenWeights' lightweight system prompts (<150 tokens) across both `CallFormat.BARE` and `CallFormat.TAGGED` arms for 18 on-device tools without massive prompt overheads.
+- **Android Studio & Device Testing Environment:** Local host provisioned with Android Studio 2024.2.1, Android SDK platform-tools (`adb`), and a Google Pixel 7 phone AVD (`pixel_phone`) under Android 14.0 API 34.
+- **Documentation:** See [On-Device Testing with OpenWeights](docs/evaluation/OPENWEIGHTS_ON_DEVICE_TESTING.md).
+
+### 3. Post-Training Experiment Operating System & Future RL Architecture
+- **Complete Experiment Lifecycle:** Hypothesis $\to$ Config $\to$ Preflight $\to$ Training $\to$ Checkpoints $\to$ Evaluation $\to$ Regression Detection $\to$ Promotion Policy.
+- **Active Trainer Backends:** SFT, DPO, and On-Policy Distillation (with decoupled `RolloutProvider` and `TeacherProvider`).
+- **Future Reinforcement Learning (RL) Boundary:** Architectural foundation ready for GRPO, PPO, RLOO, and verl without restructuring the codebase.
+- **Documentation:** See [Experiment Foundation](docs/EXPERIMENT_FOUNDATION.md), [Training Lifecycle](docs/TRAINING_LIFECYCLE.md), [Future RL Integration](docs/FUTURE_RL_INTEGRATION.md), and [Agent / Harness Integration](docs/AGENT_INTEGRATION.md).
+
+---
 
 ## At a glance
 
