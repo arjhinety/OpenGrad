@@ -6,7 +6,7 @@ model_id: Qwen/Qwen3.5-2B
 model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
 parent_checkpoint: null
 dataset_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json
-dataset_hash: 3c47e18a742d81be28b0cee7b347e70d8d06117ee78cfee207a5da9ffe289286
+dataset_hash: 8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640
 benchmark_versions:
   bfcl: V4@6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
   when2call: when2call-eval-v1@0582f7749df63a96fdc3070932e83e72396ace53

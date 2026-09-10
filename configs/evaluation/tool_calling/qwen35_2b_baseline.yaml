@@ -15,6 +15,13 @@ generation:
   tool_choice: auto
 evaluations:
   behavioral_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json
+  quality:
+    # Native-parse quality bound. The parser is strict by design: output that runs past the
+    # 512-token completion budget mid-tool-call has no RAW_VALID parse, and those rows are
+    # kept and reported rather than dropped. Requiring every row to parse would be
+    # unsatisfiable for a real model, so the contract bounds the rate instead. Measured on
+    # the first real B0: 3946/3950 RAW_VALID = 0.99899.
+    min_parse_valid_rate: 0.99
   external:
     bfcl:
       version: V4

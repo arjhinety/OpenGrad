@@ -163,6 +163,12 @@ def load_evaluation_examples(root: Path, manifest_path: Path) -> list[CanonicalE
 
     Examples quarantined after a CONTAMINATED Level-5 contamination verdict are excluded:
     a quarantined benchmark item must not be measured by B0 or any later held-out run.
+
+    Evaluation identity is ``example_id``. The frozen splits are not disjoint: the upstream
+    ``when2call_test_llm_judge.jsonl`` is a byte-identical subset of 300 rows already in
+    ``when2call_test_mcq.jsonl``, so pooling the splits double-counts those rows in every
+    aggregate. Distinct examples are therefore evaluated once, and each carries the set of
+    benchmark splits it belongs to so a per-split analysis is still possible.
     """
     root = root.resolve()
     if manifest_path.is_absolute():
@@ -180,20 +186,34 @@ def load_evaluation_examples(root: Path, manifest_path: Path) -> list[CanonicalE
         raise ValueError("evaluation manifest renderer contract is not pinned")
     quarantined = load_quarantine(root / QUARANTINE_PATH).by_split()
     examples: list[CanonicalEvaluationExample] = []
+    seen: dict[str, int] = {}
     for split in manifest.get("splits", []):
-        excluded = quarantined.get(str(split.get("id")), set())
+        split_id = str(split.get("id"))
+        excluded = quarantined.get(split_id, set())
         for raw in _materialized_rows(root, split):
-            if excluded and str(raw.get("example_id")) in excluded:
+            example_id = str(raw.get("example_id"))
+            if excluded and example_id in excluded:
+                continue
+            if example_id in seen:
+                # Same example reached through another split: record the membership rather
+                # than emitting it twice.
+                existing = examples[seen[example_id]]
+                memberships = existing.metadata.setdefault("benchmark_splits", [split_id])
+                if split_id not in memberships:
+                    memberships.append(split_id)
                 continue
             row = dict(raw)
             for key in ("source", "tools", "candidates", "metadata"):
                 row[key] = _json(row[key])
+            metadata = dict(row["metadata"]) if isinstance(row["metadata"], dict) else {}
+            metadata["benchmark_splits"] = [split_id]
             example = CanonicalEvaluationExample(
-                str(row["example_id"]), row["source"], str(row["question"]),
+                example_id, row["source"], str(row["question"]),
                 [_qwen_tool(tool) for tool in row["tools"]], str(row["expected_decision"]),
-                row["candidates"], row["metadata"],
+                row["candidates"], metadata,
             )
             example.validate()
+            seen[example_id] = len(examples)
             examples.append(example)
     return examples
 
@@ -680,6 +700,14 @@ def _validate_baseline_config(config: dict[str, Any]) -> None:
     evaluations = config["evaluations"]
     if not isinstance(evaluations, dict) or not isinstance(evaluations.get("behavioral_manifest"), str) or evaluations.get("evaluator_revision") not in {None, PINNED_MODEL_REVISION}:
         raise ValueError("baseline evaluation config is malformed")
+    quality = evaluations.get("quality")
+    if not isinstance(quality, dict):
+        raise TypeError("baseline evaluation config must define a quality object")
+    rate = quality.get("min_parse_valid_rate")
+    if not isinstance(rate, (int, float)) or isinstance(rate, bool):
+        raise TypeError("min_parse_valid_rate must be a number")
+    if not 0 < float(rate) <= 1:
+        raise ValueError("min_parse_valid_rate must be within (0, 1]")
     if not isinstance(config["provenance"], dict):
         raise TypeError("baseline provenance must be an object")
     outputs = config["outputs"]
@@ -850,6 +878,15 @@ def run_baseline(
         "renderer": "qwen3_5_2b_v1",
         "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
         "records": len(predictions),
+        "parse_valid_rate": (
+            round(
+                sum(1 for row in predictions if row["parser"]["status"] == "RAW_VALID")
+                / len(predictions),
+                6,
+            )
+            if predictions
+            else 0.0
+        ),
         "generation": config["generation"],
         "routing": metrics,
         "parser_status": dict(sorted(parse_counts.items())),

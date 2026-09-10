@@ -52,6 +52,17 @@
       }
     },
     "contamination_policy": {"type": "object", "required": ["training_manifests_excluded", "derived_prompts_excluded"], "properties": {"training_manifests_excluded": {"type": "array", "items": {"type": "string"}}, "derived_prompts_excluded": {"type": "boolean"}}, "additionalProperties": false},
+    "deduplication": {
+      "type": "object",
+      "required": ["identity", "distinct_items"],
+      "properties": {
+        "identity": {"type": "string", "minLength": 1},
+        "distinct_items": {"type": "integer", "minimum": 0},
+        "overlap": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "note": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
     "notes": {"type": "string"}
   },
   "additionalProperties": false

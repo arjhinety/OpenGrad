@@ -19,6 +19,14 @@
     "renderer": "qwen3_5_2b_v1",
     "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80"
   },
+  "deduplication": {
+    "distinct_items": 3652,
+    "identity": "example_id",
+    "note": "The upstream nvidia/When2Call test files are not disjoint: all 300 rows of when2call_test_llm_judge.jsonl are byte-identical duplicates of rows in when2call_test_mcq.jsonl (verified at source revision 0582f7749df63a96fdc3070932e83e72396ace53). Evaluation identity is the distinct union, so those rows are scored once and each example records which splits it belongs to. Summing splits[].items (3952) double-counts them.",
+    "overlap": {
+      "when2call-llm-judge": 300
+    }
+  },
   "notes": "Re-frozen before baseline inference. The held-out namespace is evaluation-only and excludes all six training-eligible SFT sources. Exact conversation and normalized prompt overlap evidence is recorded separately; this is not a semantic-clean claim.",
   "schema_version": 1,
   "splits": [

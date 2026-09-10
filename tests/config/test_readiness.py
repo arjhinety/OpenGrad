@@ -75,10 +75,22 @@ def test_quarantined_examples_are_excluded_from_the_heldout_benchmark():
     for record_id in excluded:
         assert record_id.split(":", 1)[-1] not in loaded, f"{record_id} still evaluated"
 
-    declared = sum(
-        split["items"] for split in json.loads(manifest.read_text(encoding="utf-8"))["splits"]
-    )
+    manifest_data = json.loads(manifest.read_text(encoding="utf-8"))
+    # Evaluation identity is the *distinct* union: the frozen splits are not disjoint (the
+    # llm-judge split repeats 300 mcq rows byte for byte), so summing splits[].items would
+    # double-count them.
+    declared = manifest_data["deduplication"]["distinct_items"]
+    assert declared < sum(split["items"] for split in manifest_data["splits"])
     assert len(examples) == declared - len(excluded)
+
+    ids = [e.example_id for e in examples]
+    assert len(ids) == len(set(ids)), "a deduplicated example must appear once, not per split"
+    shared = [e for e in examples if len(e.metadata.get("benchmark_splits", [])) > 1]
+    assert len(shared) == 300, "the shared examples should record both split memberships"
+    assert all(
+        sorted(e.metadata["benchmark_splits"]) == ["when2call-llm-judge", "when2call-mcq"]
+        for e in shared
+    )
 
 
 def test_smoke_token_budget_can_complete_a_tool_call():
