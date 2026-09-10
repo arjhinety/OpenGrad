@@ -449,7 +449,10 @@ def main() -> int:
             print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
             return 1
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
-        return 0 if result.get("status") == "EXECUTED" else 1
+        # A completed dry run is a successful command: the status field carries
+        # DRY_RUN vs EXECUTED. Exiting non-zero here made agent bridges report a
+        # successful plumbing run as COMMAND_FAILED.
+        return 0 if result.get("status") in {"EXECUTED", "DRY_RUN"} else 1
 
     parser.print_help()
     return 0

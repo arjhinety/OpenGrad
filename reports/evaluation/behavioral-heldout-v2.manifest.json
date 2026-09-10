@@ -23,14 +23,40 @@
   "schema_version": 1,
   "splits": [
     {
-      "content_hash": "ae0f31fbb858bd8239999fafd1c4fe1ab424c4e1b272b505acb293d661f93c49",
+      "content_hash": "c6c1b46a78480ba14fc70cd4d5896e2972cfc99217f08cb977b1776c6384b1e7",
+      "hash_provenance": {
+        "command": "opengrad-data materialize-parquet --dataset when2call --input data/raw/when2call/parquet/when2call-mcq.parquet --output data/processed/normalization-v1/when2call-mcq --split mcq --mode evaluation",
+        "computed_by": "opengrad.data.materialize.materialize_parquet",
+        "materialized_path": "data/processed/normalization-v1/when2call-mcq",
+        "re_frozen_at": "2026-09-10T13:58:20.802919+00:00",
+        "reason": "The previous content_hash was not produced by any repository code path; content_hash support was added to opengrad.data.materialize after this manifest was frozen. Re-frozen from the real pinned materialization.",
+        "source_files": [
+          "test/when2call_test_mcq.jsonl"
+        ],
+        "source_repository": "nvidia/When2Call",
+        "source_revision": "0582f7749df63a96fdc3070932e83e72396ace53",
+        "superseded_content_hash": "ae0f31fbb858bd8239999fafd1c4fe1ab424c4e1b272b505acb293d661f93c49"
+      },
       "id": "when2call-mcq",
       "items": 3652,
       "purpose": "CALL/ANSWER/CLARIFY/UNSUPPORTED behavioral decisions",
       "source": "data/processed/normalization-v1/when2call-mcq/manifest.json"
     },
     {
-      "content_hash": "2a626635783240d45e6bdd58e84bc17802307099ad51bbb4206beda2fc3f7f98",
+      "content_hash": "ea3b1fed77009a65293bb6053967a3dc1cf38b85196b62ff97d0262f2a9f736a",
+      "hash_provenance": {
+        "command": "opengrad-data materialize-parquet --dataset when2call --input data/raw/when2call/parquet/when2call-llm-judge.parquet --output data/processed/normalization-v1/when2call-llm-judge --split llm_judge --mode evaluation",
+        "computed_by": "opengrad.data.materialize.materialize_parquet",
+        "materialized_path": "data/processed/normalization-v1/when2call-llm-judge",
+        "re_frozen_at": "2026-09-10T13:58:20.981030+00:00",
+        "reason": "The previous content_hash was not produced by any repository code path; content_hash support was added to opengrad.data.materialize after this manifest was frozen. Re-frozen from the real pinned materialization.",
+        "source_files": [
+          "test/when2call_test_llm_judge.jsonl"
+        ],
+        "source_repository": "nvidia/When2Call",
+        "source_revision": "0582f7749df63a96fdc3070932e83e72396ace53",
+        "superseded_content_hash": "2a626635783240d45e6bdd58e84bc17802307099ad51bbb4206beda2fc3f7f98"
+      },
       "id": "when2call-llm-judge",
       "items": 300,
       "purpose": "safety and unsupported-request behavioral decisions",

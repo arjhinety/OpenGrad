@@ -476,10 +476,20 @@ def run_baseline(
     output_paths = {}
     for name in output_config:
         value = output_config[name]
-        if dry_run and isinstance(value, str) and Path(value).is_absolute():
+        if not dry_run:
+            output_paths[name] = _project_path(root, value, f"{name} output")
+        elif isinstance(value, str) and Path(value).is_absolute():
+            # An explicit absolute destination (tests, scratch experiments) is honored.
             output_paths[name] = Path(value).resolve()
         else:
-            output_paths[name] = _project_path(root, value, f"{name} output")
+            # A dry run must never write to the canonical evidence namespace. Doing so
+            # would both pollute the evidence paths with deterministic-mock output and
+            # permanently block the real B0 behind the overwrite guard.
+            output_paths[name] = _project_path(
+                root,
+                str(Path("runs/.dry-run/qwen35_2b_baseline") / Path(str(value)).name),
+                f"{name} output",
+            )
     canonical_outputs = {
         "predictions": "reports/baselines/qwen35_2b_baseline/predictions.jsonl",
         "metrics": "reports/baselines/qwen35_2b_baseline/metrics.json",

@@ -105,3 +105,20 @@ def test_cli_evaluate_rejects_a_non_allowlisted_suite(
     assert main() == 1
     payload = json.loads(capsys.readouterr().out)
     assert payload["code"] == "SUITE_NOT_FOUND"
+
+
+def test_cli_baseline_dry_run_exits_zero(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+    """A completed dry run is a success; non-zero made bridges report a failure."""
+    from opengrad import cli
+
+    monkeypatch.setattr(
+        cli,
+        "run_baseline",
+        lambda *a, **k: {"status": "DRY_RUN", "records": 1, "artifacts": {}},
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        ["opengrad", "baseline", "--config", "configs/evaluation/tool_calling/qwen35_2b_baseline.yaml", "--dry-run", "--json"],
+    )
+    assert main() == 0
+    assert json.loads(capsys.readouterr().out)["status"] == "DRY_RUN"

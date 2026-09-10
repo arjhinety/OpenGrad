@@ -1,10 +1,11 @@
 # Pre-GPU Readiness Report
 
-**Scope:** harness-agnostic agent integration and the pre-GPU baseline/readiness contract.
+**Scope:** harness-agnostic agent integration, the pre-GPU baseline/readiness contract, and
+held-out contamination screening.
 **Status:** `PRE_GPU` — no real model result exists.
-**Repository commit at time of writing:** `e7b2306` (this report is added by the immediately following commit; `git log -- reports/PRE_GPU_READINESS_REPORT.md` pins it exactly).
+**Repository commit at time of writing:** the commit that adds this file; `git log -- reports/PRE_GPU_READINESS_REPORT.md` pins it exactly.
 
-> This report intentionally does **not** claim `READY_FOR_SFT`, a real B0, or a successful GPU boundary. None of those conditions is met. See [Remaining blockers](#remaining-blockers).
+> This report intentionally does **not** claim `READY_FOR_SFT`, a real B0, or a successful GPU boundary. None of those conditions is met. See [Remaining blockers](#11-remaining-blockers).
 
 ---
 
@@ -61,22 +62,51 @@ Operations that *establish* B0 are not required to already own B0's post-run art
 | Command | Result |
 | --- | --- |
 | `python3 -m py_compile <7 modules>` | PASS |
-| `.venv/bin/python -m pytest` | **153 passed** |
+| `.venv/bin/python -m pytest` | **164 passed** |
 | `.venv/bin/python -m ruff check .` | **All checks passed** |
 | `.venv/bin/opengrad-validate` | `registry validation: OK` |
 | `cd integrations/opengrad-mcp && npm run check` | PASS |
 | `cd integrations/opengrad-mcp && npm test` | **26 passed, 0 failed** |
+| `.venv/bin/opengrad-contamination heldout-screen` | levels 1–4 `MEASURED`; 2-item audit queue |
 | `cmd mcp get opengrad` | registered, project scope, stdio, enabled |
 | `cmd config get permissions.defaultMode` | `bypass` (user scope) |
 
 The end-to-end test `test_baseline_plumbing_runs_over_a_real_materialized_split` materializes real Parquet with the real materializer and runs the real manifest loader, content-hash verifier, example constructor, prediction path, and artifact writer. Only the tokenizer-dependent renderer is stubbed.
 
+## 6b. Held-out materialization and re-freeze
+
+The withheld evaluation splits are evaluation-only and are deliberately absent from both the canonical release and Git, so they were rebuilt from the pinned upstream revision `0582f7749df63a96fdc3070932e83e72396ace53` of `nvidia/When2Call` (`scripts/rebuild_eval_splits.py`, idempotent):
+
+| Split | Upstream file | Rows | Manifest declares |
+| --- | --- | --- | --- |
+| `when2call-mcq` | `test/when2call_test_mcq.jsonl` | 3,652 | 3,652 |
+| `when2call-llm-judge` | `test/when2call_test_llm_judge.jsonl` | 300 | 300 |
+
+`opengrad readiness` now reports `evaluation_materialization: PASS`. The frozen manifest's
+`content_hash` values were re-frozen from these artifacts with recorded provenance
+(`hash_provenance`), and the baseline experiment's `dataset_hash` was re-synced — see §7.
+
+## 6c. Contamination screening
+
+`screening levels 1–4 are now machine-measured` over the held-out set against the 213,951-record canonical training corpus. Headline result: **2 distinct held-out questions are exact prompt matches** with training records:
+
+- `"What is the current time?"` — matches 5 Glaive Function-Calling v2 records.
+- `"What is the current weather?"` — matches 1 When2Call SFT record.
+
+Both are short, generic tool-use queries. Whether they are substantive contamination or incidental lexical coincidence is precisely the human judgment reserved for level 5; this report does **not** decide it. Level 3 near-duplicate and level 4 SequenceMatcher screening found nothing above threshold once trivially short prompts were excluded.
+
 ## 7. Defects found and fixed in this pass
 
-- **Content-hash byte mismatch (would have blocked real B0 on GPU day).** `evaluation/runner.py` joined rows with a literal two-character `\n` instead of a newline byte, while the materializer and the readiness gate used a real newline. Every correctly materialized split would have failed with *"content hash does not match materialized rows"*. Fixed and pinned by two regression tests (materializer↔evaluator and materializer↔readiness).
+- **Content-hash byte drift (would have blocked real B0 on GPU day).** `evaluation/runner.py` joined rows with a literal two-character `\n` instead of a newline byte, while the materializer and the readiness gate used a real newline. Every correctly materialized split would have failed with *"content hash does not match materialized rows"*. Fixed and pinned by two regression tests (materializer↔evaluator and materializer↔readiness).
+- **Unreproducible frozen content hashes (hard B0 blocker).** The frozen manifest's `content_hash` values were authored by hand: `content_hash` did not exist in `materialize.py` at any commit up to and including `908f1be`, the commit that froze the manifest, and nothing in the repository writes that manifest. With the real splits materialized and row counts exactly matching, the gate still failed on the hash alone. ~26 serialization/row-shape/split-name combinations were probed; none reproduced the frozen value. Resolved by re-freezing from the real artifacts with recorded `hash_provenance` (§6b) rather than by weakening the gate.
+- **Hand-authored contamination report.** `behavioral-heldout-v2-contamination.json` likewise had no generator — nothing in the repository writes it. Levels 1–4 are now produced by `opengrad.contamination.heldout`; level 5 remains human.
+- **Contamination scan identity bug (caught by its own invariant).** `opengrad_id` and `source_record_id` are the literal string `"unknown"` for all 20,827 LoopTool rows, collapsing them into one bucket and producing impossible metrics (negative Jaccard, containment ≈ 11.7) and a 3,905-item false-positive queue. Training identity now uses the unique-per-row `canonical_hash`, an explicit invariant refuses to emit an impossible overlap, and the queue fell to its true size of 2.
+- **Short-prompt containment false positives.** A 3-shingle prompt ("ok thanks") is trivially contained in anything, so containment alone flagged noise. Containment can no longer flag a held-out prompt shorter than `min_shingles`.
 - **Tests reran the real GPU smoke and rewrote committed evidence.** `tests/config/test_readiness.py` called `gpu_smoke(ROOT)`, which performed a real model load/generation on this A100 and rewrote `reports/hardware/qwen_gpu_smoke.json` on every `pytest` run. It now uses an isolated root and a stubbed no-accelerator probe; the receipt hash is asserted stable across the suite.
 - **Lint failures (CI parity).** 15 ruff errors introduced by earlier work: unsorted imports, four useless `if/else` conditionals, two `ValueError`-on-type-error cases, and five blind `except` clauses now annotated with justification. CI runs `ruff check .`, so this suite would have failed.
 - **Dry-run training collision.** Dry-run SFT previously required and mutated a real experiment record; it now writes to a scratch namespace and is labeled `evidence: false`.
+- **`baseline --dry-run` polluted the canonical evidence paths.** With the held-out data present, a dry run wrote deterministic-mock artifacts into `reports/baselines/qwen35_2b_baseline/` and `reports/failures/...`. Because the real run refuses to overwrite existing evidence, a routine dry run *permanently blocked the real B0* behind its own overwrite guard. Dry runs are now redirected to `runs/.dry-run/...` unless the config gives an explicit absolute destination, and a regression test asserts the canonical paths stay free and a real run still succeeds afterwards.
+- **Successful dry runs exited non-zero.** `opengrad baseline --dry-run` returned exit 1, so an agent bridge reported a completed plumbing run as `COMMAND_FAILED`. A finished dry run is now a successful command; the `status` field still carries `DRY_RUN` vs `EXECUTED`.
 - **Silent experiment-ID reuse.** A second real launch with an existing ID now fails with `EXPERIMENT_ID_COLLISION` instead of silently resuming.
 
 ## 8. Real Qwen GPU smoke status — `INCOMPLETE`
@@ -98,39 +128,37 @@ The boundary is **not** verified: the native parser rejected the smoke generatio
 
 ## 9. Real B0 status — not run
 
-No real baseline exists. `real_b0` and `baseline_artifacts` are both `FAIL`. `opengrad baseline --dry-run` is blocked, correctly, because the frozen held-out Parquet materialization is absent:
+No real baseline exists. `real_b0` and `baseline_artifacts` are both `FAIL`, because B0 has not been executed — not because its inputs are missing. The frozen held-out splits are now materialized and hash-verified, so `baseline --dry-run` proceeds through manifest loading and fails only where it should: the deterministic mock is a plumbing check, and a real run still requires the GPU boundary.
 
-```text
-evaluation materialization manifest is missing:
-data/processed/normalization-v1/when2call-mcq/manifest.json
-```
-
-`data/processed/` is gitignored by design, so the held-out splits are not in the checkout. This blocker is reported, not bypassed.
+`data/processed/` is gitignored by design. It can be regenerated at any time from the pinned upstream revision with `python scripts/rebuild_eval_splits.py`.
 
 ## 10. SFT readiness — `false`
 
-`ready_for_sft: false`. `ready_for_baseline: false`. CPU deterministic output never satisfies this contract.
+`ready_for_sft: false`. `ready_for_baseline: false` (the contamination gate is a baseline prerequisite). CPU deterministic output never satisfies this contract.
 
 ## 11. Remaining blockers
 
 `opengrad readiness --json` → `status: FAIL`, blocking gates:
 
-| Gate | Status | Code |
-| --- | --- | --- |
-| `evaluation_materialization` | FAIL | `DATASET_NOT_FOUND` |
-| `contamination_gate` | FAIL | `CONTAMINATION_FAILURE` |
-| `gpu_boundary` | FAIL | `GPU_SMOKE_FAILED` |
-| `real_b0` | FAIL | `BASELINE_NOT_FOUND` |
-| `baseline_artifacts` | FAIL | `BASELINE_NOT_FOUND` |
+| Gate | Status | Code | Note |
+| --- | --- | --- | --- |
+| `contamination_gate` | FAIL | `CONTAMINATION_FAILURE` | `pending_levels=['5_manual_audit']` only; levels 1–4 `MEASURED` |
+| `gpu_boundary` | FAIL | `GPU_SMOKE_FAILED` | native parser `FORMAT_ERROR` |
+| `real_b0` | FAIL | `BASELINE_NOT_FOUND` | not run |
+| `baseline_artifacts` | FAIL | `BASELINE_NOT_FOUND` | not run |
 
-Passing gates include `repository_validation`, `config_validation`, `model_revision`, `model_identity`, `tokenizer_revision`, `chat_template_contract`, `evaluation_manifest`, `evaluation_leakage`, `artifact_storage`, `native_parser` (module presence), and `gpu_probe`.
+`evaluation_materialization` now **PASSES** (both frozen held-out splits are materialized and hash-verified). Passing gates also include `repository_validation`, `config_validation`, `model_revision`, `model_identity`, `tokenizer_revision`, `chat_template_contract`, `evaluation_manifest`, `evaluation_leakage`, `artifact_storage`, `native_parser` (module presence), and `gpu_probe`.
 
-To unblock, in order: materialize the held-out splits from their pinned sources; complete the contamination review; resolve the native-parser smoke failure; then execute real B0.
+To unblock, in order: (1) a human completes level-5 audit of the 2-item queue and adjudicates the two exact prompt matches; (2) resolve the native-parser smoke failure; (3) execute real B0. Step 1 is irreducibly human — no amount of code can close it, and it is deliberately not marked complete.
 
 ## 12. Known limitations
 
 - The MCP server has no third-party runtime dependencies and no vendor plugin, so it cannot reuse a harness's native approval UI. High-impact tools are gated by the server's own readiness checks plus the harness's permission model.
-- Verification of the real held-out splits has not been executed here, because the artifacts are absent; only the gate logic and an end-to-end synthetic materialization are exercised.
+- Levels 1–2 compare user-visible prompt text, not a whole-conversation hash: held-out evaluation examples and training trajectories do not share a conversation schema. No whole-conversation equality claim is made.
+- Level 3 prunes shingles whose training document frequency exceeds `max_df` (default 1000 of 213,951). Pruned count is reported; a paraphrase built from ubiquitous n-grams would be missed.
+- Level 4 candidate generation is prefiltered by level-3 Jaccard and scored with `difflib.SequenceMatcher`. It is **not** an exhaustive semantic search and no embedding similarity was computed, so it can miss meaning-level reuse with no lexical overlap. This is the level most likely to need strengthening before a generalization claim.
+- Level 5 is human and unperformed. Until it completes, the two exact prompt matches stand unadjudicated and `contamination_gate` remains FAIL by design.
+- The `content_hash` re-freeze and `dataset_hash` re-sync are documented in `hash_provenance`; anyone who considers the original frozen placeholders authoritative should treat this as a contract change rather than a fix.
 - The native parser rejects an unclosed tool call in the bounded smoke. Until that is diagnosed, the GPU boundary cannot pass and real B0/SFT stay blocked.
 - Post-SFT comparison and residual analysis remain deferred until artifact paths exist; the workflow reports `DEFERRED_UNTIL_ARTIFACT_PATHS` rather than inventing values.
 

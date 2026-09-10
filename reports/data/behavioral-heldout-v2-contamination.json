@@ -1,21 +1,142 @@
 {
-  "schema_version": 1,
-  "manifest_id": "behavioral-heldout-v2",
-  "status": "EXACT_AND_PROMPT_HASHES_RECORDED",
-  "training_sources_checked": [
-    "xlam-function-calling-60k",
-    "toolace",
-    "looptool-23k",
-    "glaive-function-calling-v2",
-    "button",
-    "when2call-sft"
+  "audit_queue": [
+    {
+      "heldout": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+      "levels": [
+        "1_exact_canonical_conversation_hash",
+        "2_normalized_prompt_hash"
+      ],
+      "matches": [
+        {
+          "level": "1_exact_canonical_conversation_hash",
+          "training": [
+            "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
+            "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
+            "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
+            "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
+            "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
+          ]
+        },
+        {
+          "level": "2_normalized_prompt_hash",
+          "training": [
+            "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
+            "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
+            "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
+            "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
+            "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
+          ]
+        }
+      ]
+    },
+    {
+      "heldout": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
+      "levels": [
+        "1_exact_canonical_conversation_hash",
+        "2_normalized_prompt_hash"
+      ],
+      "matches": [
+        {
+          "level": "1_exact_canonical_conversation_hash",
+          "training": [
+            "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
+          ]
+        },
+        {
+          "level": "2_normalized_prompt_hash",
+          "training": [
+            "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
+          ]
+        }
+      ]
+    }
   ],
+  "audit_queue_size": 2,
+  "counts": {
+    "heldout_records": 3952,
+    "heldout_universe_shingles": 34858,
+    "pruned_shingles": 5781,
+    "scored_pairs": 25501815,
+    "training_records": 213951
+  },
+  "findings": {
+    "level_1_exact_prompt_matches": [
+      {
+        "heldout": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
+        "training": [
+          "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
+        ]
+      },
+      {
+        "heldout": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+        "training": [
+          "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
+          "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
+          "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
+          "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
+          "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
+        ]
+      }
+    ],
+    "level_2_normalized_prompt_matches": [
+      {
+        "heldout": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
+        "training": [
+          "when2call-sft:86a657047f95148adb4911e43e71983b3a1b2f408f4f730fa1a922b5335fd987"
+        ]
+      },
+      {
+        "heldout": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+        "training": [
+          "glaive-function-calling-v2:84f0e500cb87f79ede6aa198315cfc01e6787a72de7df545ec6dcb20b37e31b4",
+          "glaive-function-calling-v2:024944018aebec12b975c961d6378a2b66b6e28f16f7d924ef30e833cbc4e05c",
+          "glaive-function-calling-v2:9772a884e1816e4c22c3d8159cca1f0936fe4b005ca0f18b1cf361cd79d9f908",
+          "glaive-function-calling-v2:ae6133ce3f56b357319d254823d268f316ac9f77b1947d44229d502bcaf75733",
+          "glaive-function-calling-v2:6dadadde4eab36a61ad8a8bdbe90a596c8640e9b14560e9a0cc60ffba4086366"
+        ]
+      }
+    ],
+    "level_3_near_duplicates": [],
+    "level_4_semantic_matches": []
+  },
+  "interpretation": "Levels 1-4 are machine-measured. Level 5 is a human audit of audit_queue and is deliberately NOT_RUN; no clean or generalization claim is made until it completes.",
   "levels": {
     "1_exact_canonical_conversation_hash": "MEASURED",
     "2_normalized_prompt_hash": "MEASURED",
-    "3_near_duplicate_ngram_minhash": "PENDING_SEMANTIC_REVIEW",
-    "4_semantic_similarity": "NOT_RUN",
+    "3_near_duplicate_ngram_minhash": "MEASURED",
+    "4_semantic_similarity": "MEASURED",
     "5_manual_audit": "NOT_RUN"
   },
-  "interpretation": "No exact-overlap or prompt-hash clean claim is implied for paraphrase, semantic, or source-derived contamination. Any generalization claim requires levels 3-5."
+  "manifest_id": "behavioral-heldout-v2",
+  "methodology": {
+    "level_3": "exact 5-gram Jaccard/containment over an inverted index of the held-out shingle universe; shingles with training document frequency > 1000 are pruned as non-discriminative, and containment cannot flag a held-out prompt shorter than 25 shingles",
+    "level_4": "SequenceMatcher (difflib) over level-3 candidates; candidate generation is prefiltered, so this is not an exhaustive semantic search and no embedding similarity was computed",
+    "level_5": "human audit of the emitted queue; not performed by this tool",
+    "levels_1_2_scope": "user-visible prompt text; held-out evaluation examples and training trajectories do not share a conversation schema, so no whole-conversation hash equality is claimed",
+    "thresholds": {
+      "containment": 0.6,
+      "edit_similarity": 0.8,
+      "jaccard": 0.5,
+      "max_df": 1000,
+      "min_shingles": 25
+    }
+  },
+  "schema_version": 1,
+  "status": "REVIEW_REQUIRED_LEVEL_5_PENDING",
+  "training_source_labels_seen": [
+    "button",
+    "glaive-function-calling-v2",
+    "looptool-23k",
+    "toolace",
+    "when2call-sft",
+    "xlam-function-calling-60k"
+  ],
+  "training_sources_checked": [
+    "button",
+    "glaive-function-calling-v2",
+    "looptool-23k",
+    "toolace",
+    "when2call-sft",
+    "xlam-function-calling-60k"
+  ]
 }

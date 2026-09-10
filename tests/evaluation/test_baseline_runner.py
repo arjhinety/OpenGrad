@@ -175,6 +175,44 @@ def test_dry_run_baseline_creates_no_experiment_record(monkeypatch, tmp_path: Pa
     assert ExperimentStore(tmp_path).list_experiments() == []
 
 
+def test_dry_run_baseline_never_writes_canonical_evidence_paths(monkeypatch, tmp_path: Path):
+    """A dry run must not create files the real run then refuses to overwrite.
+
+    The default config uses repository-relative output paths. Before this guard, a
+    routine `baseline --dry-run` wrote deterministic-mock artifacts into
+    reports/baselines/... and permanently blocked the real B0 behind the
+    "evidence already exists" overwrite check.
+    """
+    _patch_manifest_and_renderer(monkeypatch, tmp_path)
+    result = run_baseline(
+        BASELINE_CONFIG.resolve(),
+        root=tmp_path,
+        backend=FakeDeterministicBackend(),
+        limit=2,
+        dry_run=True,
+    )
+    assert result["status"] == "DRY_RUN"
+    for relative in (
+        "reports/baselines/qwen35_2b_baseline/metrics.json",
+        "reports/baselines/qwen35_2b_baseline/predictions.jsonl",
+        "reports/baselines/qwen35_2b_baseline/environment.json",
+        "reports/failures/qwen35_2b_baseline/residual-profile.json",
+    ):
+        assert not (tmp_path / relative).exists(), f"dry run polluted {relative}"
+    assert (tmp_path / "runs/.dry-run/qwen35_2b_baseline/metrics.json").is_file()
+
+    # The canonical paths must still be free for the real, evidence-producing run.
+    real = run_baseline(
+        BASELINE_CONFIG.resolve(),
+        root=tmp_path,
+        backend=FakeDeterministicBackend(),
+        limit=2,
+        dry_run=False,
+    )
+    assert real["status"] == "EXECUTED"
+    assert (tmp_path / "reports/baselines/qwen35_2b_baseline/metrics.json").is_file()
+
+
 def test_baseline_config_validation_rejects_revision_and_output_drift():
     from opengrad.evaluation import runner
 
