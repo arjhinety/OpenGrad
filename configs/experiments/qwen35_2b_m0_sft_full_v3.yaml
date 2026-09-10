@@ -52,6 +52,9 @@ trainer:
   # Measured on this box: ~1.6k supervised tokens/s, so an effective batch of 8 costs about
   # 2s per optimizer step and 2400 steps is ~1.5h. The schedule is sized to fit an
   # evaluation-able curve, not to complete an epoch: one full epoch is ~4h.
+  # Measured on this box with the token budget in place: 1620 supervised tokens/s, 3.0s per
+  # optimizer step at ~8192 tokens. 2400 steps is ~2h, deliberately a partial epoch (a full
+  # epoch is ~4.1h) sized so the run can be evaluated within the session budget.
   max_steps: 2400
   warmup_steps: 120
   max_seq_length: 2048
