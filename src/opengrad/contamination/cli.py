@@ -180,8 +180,9 @@ def _adjudicate(args: argparse.Namespace) -> int:
         training_fp=report.get("training_corpus_fingerprint"),
         quarantined_ids=load_quarantine(quarantine_path).record_ids(),
     )
-    save_audit(audit_path, artifact)
 
+    # --status and --list are queries. They must not write the human artifact, or every
+    # check would produce a spurious diff in a file that records human judgment.
     if args.status:
         quarantine = load_quarantine(quarantine_path)
         evaluation = evaluate_audit(
@@ -198,6 +199,9 @@ def _adjudicate(args: argparse.Namespace) -> int:
         for item in artifact.items:
             print(f"{item.verdict:20s} {item.record_id}  {item.heldout_text[:60]!r}")
         return 0
+
+    # From here the command records a judgment, so the reconciled artifact is persisted.
+    save_audit(audit_path, artifact)
 
     if args.id:
         if not args.verdict:

@@ -439,6 +439,31 @@ def test_cli_quarantine_apply_and_status(tmp_path: Path, monkeypatch, capsys):
     assert "when2call-mcq:a" in capsys.readouterr().out
 
 
+def test_cli_status_and_list_do_not_write_the_audit_artifact(tmp_path: Path, monkeypatch, capsys):
+    """Queries must not mutate the human artifact, or every check creates a diff."""
+    write_report(tmp_path, make_report([make_entry("when2call-mcq:a")]))
+    audit_path = tmp_path / AUDIT_PATH
+
+    # A pure query must not even create the artifact.
+    assert run_cli(monkeypatch, ["adjudicate", "--root", str(tmp_path), "--status"]) == 0
+    assert run_cli(monkeypatch, ["adjudicate", "--root", str(tmp_path), "--list"]) == 0
+    capsys.readouterr()
+    assert not audit_path.exists(), "a read-only query created the human artifact"
+
+    # Once a judgment is recorded, further queries leave it byte-identical.
+    run_cli(
+        monkeypatch,
+        ["adjudicate", "--root", str(tmp_path), "--id", "when2call-mcq:a",
+         "--verdict", "incidental", "--reason", "ok"],
+    )
+    capsys.readouterr()
+    recorded = audit_path.read_bytes()
+    assert run_cli(monkeypatch, ["adjudicate", "--root", str(tmp_path), "--list"]) == 0
+    assert run_cli(monkeypatch, ["adjudicate", "--root", str(tmp_path), "--status"]) == 0
+    capsys.readouterr()
+    assert audit_path.read_bytes() == recorded
+
+
 def test_cli_requires_the_scanner_report(tmp_path: Path, monkeypatch):
     with pytest.raises(SystemExit):
         run_cli(monkeypatch, ["adjudicate", "--root", str(tmp_path), "--status"])

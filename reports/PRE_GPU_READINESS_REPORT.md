@@ -62,7 +62,7 @@ Operations that *establish* B0 are not required to already own B0's post-run art
 | Command | Result |
 | --- | --- |
 | `python3 -m py_compile <modules>` | PASS |
-| `.venv/bin/python -m pytest` | **192 passed** |
+| `.venv/bin/python -m pytest` | **193 passed** |
 | `.venv/bin/python -m ruff check .` | **All checks passed** |
 | `.venv/bin/opengrad-validate` | `registry validation: OK` |
 | `cd integrations/opengrad-mcp && npm run check` | PASS |
