@@ -1,0 +1,12 @@
+{
+  "corpus": null,
+  "dropped_records": null,
+  "hashes": {
+    "canonical_v2_final": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161"
+  },
+  "manifest_ids": [
+    "canonical_v2_final"
+  ],
+  "source_trainable": null,
+  "trainable_records": null
+}

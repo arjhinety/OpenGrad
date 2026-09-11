@@ -59,3 +59,6 @@
 {"timestamp": "2026-09-11T11:46:14.928851+00:00", "event_type": "EXPERIMENT_CREATED", "experiment_id": "m0_v2_final_minus_xlam_fixed_compute", "details": {}}
 {"timestamp": "2026-09-11T11:46:14.960881+00:00", "event_type": "TRAINING", "experiment_id": "m0_v2_final_minus_xlam_fixed_compute", "details": {}}
 {"timestamp": "2026-09-11T12:31:30.239377+00:00", "event_type": "TRAINED", "experiment_id": "m0_v2_final_minus_xlam_fixed_compute", "details": {"final_loss": 0.6940288543701172, "checkpoint": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-2400", "checkpoint_registration_errors": []}}
+{"timestamp": "2026-09-11T12:49:03.419892+00:00", "event_type": "EXPERIMENT_CREATED", "experiment_id": "m0_v2_final_minus_xlam_matched_exposure", "details": {}}
+{"timestamp": "2026-09-11T12:49:03.454171+00:00", "event_type": "TRAINING", "experiment_id": "m0_v2_final_minus_xlam_matched_exposure", "details": {}}
+{"timestamp": "2026-09-11T13:26:43.957983+00:00", "event_type": "TRAINED", "experiment_id": "m0_v2_final_minus_xlam_matched_exposure", "details": {"final_loss": 0.4197496175765991, "checkpoint": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-2119", "checkpoint_registration_errors": []}}

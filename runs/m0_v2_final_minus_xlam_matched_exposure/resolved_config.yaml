@@ -1,0 +1,37 @@
+experiment_id: m0_v2_final_minus_xlam_matched_exposure
+algorithm: sft
+resolved_settings:
+  tuning_method: full
+  learning_rate: 1.0e-05
+  micro_batch_size: 8
+  micro_batch_tokens: 4096
+  gradient_accumulation_steps: 2
+  world_size: 1
+  effective_global_batch_size: 16
+  max_steps: 2119
+  warmup_steps: 106
+  max_seq_length: 2048
+  precision: bfloat16
+  optimizer: adamw_torch
+  optimizer_state: fp32
+  scheduler: cosine
+  gradient_clipping: 1.0
+  gradient_checkpointing: true
+  activation_checkpointing: gradient_checkpointing
+  seed: 42
+  save_steps: 530
+  max_checkpoints: 4
+  lora: null
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+datasets:
+  manifest_ids:
+  - canonical_v2_final
+  hashes:
+    canonical_v2_final: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
+corpus: null
+rendered_records_trainable: null
+git_commit_at_start: 500cb4e7e4a93fa5233b1938608fc55e3452ed84
+git_dirty_at_start: true

@@ -1,0 +1,27 @@
+{
+  "build_commit": "5d39594714316fc557319b09910b14da01ab2a0d",
+  "evaluation_exclusion_policy": "When2Call preference, MCQ, and LLM-judge artifacts are excluded",
+  "hub_repository": "arrochi112/OpenGrad-ToolPolicy-Canonical-v2",
+  "identity": {
+    "cache_version": 1,
+    "corpus_manifest_sha256": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
+    "exclude_sources": [
+      "xlam-function-calling-60k"
+    ],
+    "max_seq_length": 2048,
+    "model_id": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "renderer": "qwen3_5_2b_v1",
+    "supervision_include": [
+      "COMPLETE_TRAJECTORY"
+    ],
+    "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+  },
+  "manifest_sha256": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
+  "record_count": 173237,
+  "release_dir": ".release/hf/toolpolicy-canonical-v2-final",
+  "release_version": "v2.0.0",
+  "shards": 176,
+  "status": "CACHE_HIT"
+}
