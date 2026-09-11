@@ -8,8 +8,6 @@ from pathlib import Path
 from typing import Any
 
 from opengrad.contamination.audit import (
-    AUDIT_PATH,
-    QUARANTINE_PATH,
     VERDICT_CONTAMINATED,
     VERDICT_INCIDENTAL,
     VERDICT_PENDING,
@@ -17,18 +15,20 @@ from opengrad.contamination.audit import (
     AuditEvaluation,
     AuditItem,
     apply_verdict,
+    audit_path_for,
     benchmark_fingerprint,
     build_quarantine,
     default_reviewer,
     evaluate_audit,
     load_audit,
     load_quarantine,
+    quarantine_path_for,
     save_audit,
     save_quarantine,
     sync_audit,
     training_corpus_fingerprint,
 )
-from opengrad.contamination.heldout import OUTPUT as REPORT_PATH
+from opengrad.contamination.heldout import output_path_for
 
 _VERDICT_ALIASES = {
     "c": VERDICT_CONTAMINATED,
@@ -111,7 +111,12 @@ def _show_item(index: int, total: int, item: AuditItem) -> None:
 
 
 def _run_interactive(
-    artifact: AuditArtifact, audit_path: Path, quarantine_path: Path, root: Path, reviewer: str
+    artifact: AuditArtifact,
+    audit_path: Path,
+    quarantine_path: Path,
+    root: Path,
+    reviewer: str,
+    release_dir: Path | None = None,
 ) -> int:
     unresolved = [item for item in artifact.items if not item.resolved()]
     if not unresolved:
@@ -144,28 +149,32 @@ def _run_interactive(
         save_audit(audit_path, artifact)
         print(f"  recorded: {verdict}")
 
-    _report_after(artifact, audit_path, quarantine_path, root)
+    _report_after(artifact, audit_path, quarantine_path, root, release_dir)
     return 0
 
 
 def _report_after(
-    artifact: AuditArtifact, audit_path: Path, quarantine_path: Path, root: Path
+    artifact: AuditArtifact,
+    audit_path: Path,
+    quarantine_path: Path,
+    root: Path,
+    release_dir: Path | None = None,
 ) -> None:
-    report = _load_report(root)
+    report = _load_report(root, release_dir)
     quarantine = load_quarantine(quarantine_path)
     evaluation = evaluate_audit(
         report,
         artifact,
         quarantine,
         benchmark_fp=benchmark_fingerprint(root),
-        training_fp=training_corpus_fingerprint(root),
+        training_fp=training_corpus_fingerprint(root, release_dir),
     )
     _print_summary(evaluation, len(load_quarantine(quarantine_path).record_ids()), audit_path)
     print(f"  quarantine list       : {quarantine_path}")
 
 
-def _load_report(root: Path) -> dict[str, Any]:
-    path = root / REPORT_PATH
+def _load_report(root: Path, release_dir: Path | None = None) -> dict[str, Any]:
+    path = output_path_for(root, release_dir)
     if not path.is_file():
         raise SystemExit(
             f"scanner report not found: {path}\nRun `opengrad-contamination heldout-screen` first."
@@ -178,9 +187,9 @@ def _load_report(root: Path) -> dict[str, Any]:
 
 def _adjudicate(args: argparse.Namespace) -> int:
     root = args.root.resolve()
-    report = _load_report(root)
-    audit_path = root / AUDIT_PATH
-    quarantine_path = root / QUARANTINE_PATH
+    audit_path = audit_path_for(root, args.release_dir)
+    quarantine_path = quarantine_path_for(root, args.release_dir)
+    report = _load_report(root, args.release_dir)
 
     artifact = sync_audit(
         report,
@@ -199,7 +208,7 @@ def _adjudicate(args: argparse.Namespace) -> int:
             artifact,
             quarantine,
             benchmark_fp=benchmark_fingerprint(root),
-            training_fp=training_corpus_fingerprint(root),
+            training_fp=training_corpus_fingerprint(root, args.release_dir),
         )
         _print_summary(evaluation, len(quarantine.record_ids()), audit_path)
         return 0
@@ -232,18 +241,23 @@ def _adjudicate(args: argparse.Namespace) -> int:
             raise SystemExit(f"unknown finding id: {args.id}") from exc
         save_audit(audit_path, artifact)
         print(f"recorded {item.verdict} for {item.record_id}")
-        _report_after(artifact, audit_path, quarantine_path, root)
+        _report_after(artifact, audit_path, quarantine_path, root, args.release_dir)
         return 0
 
     return _run_interactive(
-        artifact, audit_path, quarantine_path, root, args.reviewer or default_reviewer()
+        artifact,
+        audit_path,
+        quarantine_path,
+        root,
+        args.reviewer or default_reviewer(),
+        args.release_dir,
     )
 
 
 def _quarantine(args: argparse.Namespace) -> int:
     root = args.root.resolve()
-    audit_path = root / AUDIT_PATH
-    quarantine_path = root / QUARANTINE_PATH
+    audit_path = audit_path_for(root, args.release_dir)
+    quarantine_path = quarantine_path_for(root, args.release_dir)
     artifact = load_audit(audit_path)
     if artifact is None:
         raise SystemExit(f"audit artifact not found: {audit_path}")
@@ -310,6 +324,12 @@ def main() -> int:
         help="record human Level-5 verdicts (interactive, or non-interactive with --id)",
     )
     adjudicate.add_argument("--root", type=Path, default=Path.cwd())
+    adjudicate.add_argument(
+        "--release-dir",
+        type=Path,
+        default=None,
+        help="canonical training release the verdicts bind to (default: the v1 corpus)",
+    )
     adjudicate.add_argument("--id", help="finding id, e.g. when2call-mcq:<uuid> (non-interactive)")
     adjudicate.add_argument("--verdict", help="contaminated | incidental | pending")
     adjudicate.add_argument("--reason", help="short justification stored with the verdict")
@@ -324,6 +344,12 @@ def main() -> int:
         help="derive the held-out quarantine list from CONTAMINATED verdicts",
     )
     quarantine.add_argument("--root", type=Path, default=Path.cwd())
+    quarantine.add_argument(
+        "--release-dir",
+        type=Path,
+        default=None,
+        help="canonical training release the quarantine belongs to (default: the v1 corpus)",
+    )
     quarantine.add_argument(
         "--apply", action="store_true", help="regenerate the quarantine artifact"
     )

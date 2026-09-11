@@ -19,9 +19,11 @@ from typing import Any
 from opengrad.contamination.audit import (
     AUDIT_PATH as CONTAMINATION_AUDIT_PATH,
 )
+from opengrad.contamination.audit import audit_path_for, quarantine_path_for
 from opengrad.contamination.audit import (
     QUARANTINE_PATH as CONTAMINATION_QUARANTINE_PATH,
 )
+from opengrad.contamination.heldout import output_path_for as contamination_report_path
 from opengrad.contamination.audit import (
     benchmark_fingerprint,
     evaluate_audit,
@@ -72,6 +74,21 @@ TRAINING_SOURCE_MANIFESTS = {
     "data/processed/normalization-v1/button",
     "data/processed/normalization-v1/when2call-sft",
 }
+# The corpus a configuration trains on when it does not name one. Kept as the v1 default because
+# B0 and every result recorded before Canonical-v2 is pinned to it.
+DEFAULT_TRAINING_RELEASE_DIR = ".release/hf/toolpolicy-canonical-v1"
+# The scanner labels the When2Call SFT split "when2call-sft" while release manifests call it
+# "when2call"; the alias keeps the coverage comparison from reporting a spurious mismatch.
+SOURCE_LABEL_ALIASES = {"when2call": "when2call-sft"}
+
+
+def _configured_release_dir(root: Path, raw: dict[str, Any]) -> Path | None:
+    """The release directory a config trains on, or None for the default corpus."""
+    declared = (raw.get("datasets") or {}).get("release_dir")
+    if not declared:
+        return None
+    path = Path(str(declared))
+    return path if path.is_absolute() else root / path
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
@@ -824,12 +841,52 @@ def _materialized_split_state(root: Path, split: dict[str, Any]) -> tuple[bool, 
     )
 
 
-def _contamination_state(root: Path, report: dict[str, Any] | None) -> tuple[bool, str]:
+def _contamination_report(root: Path, release_dir: Path | None = None) -> dict[str, Any] | None:
+    """The scan report for this corpus.
+
+    Corpus-scoped: a scan measures one benchmark against one training corpus, so reports for two
+    corpora must not share a file. Reading the wrong one would evaluate a held-out set against a
+    corpus the experiment is not training on.
+    """
+    return _read_json(contamination_report_path(root, release_dir))
+
+
+def _corpus_source_labels(root: Path, release_dir: Path | None = None) -> set[str] | None:
+    """The source labels a corpus actually contains, read from its release manifest.
+
+    Derived rather than hardcoded. A fixed six-source set cannot describe a corpus built from a
+    different number of sources, and the check that matters is not "were all six scanned" but
+    "was every source this corpus contains scanned, and nothing else". ``None`` means the corpus
+    could not be read, so the caller must not treat the check as satisfied.
+    """
+    base = (root / (release_dir or Path(DEFAULT_TRAINING_RELEASE_DIR))).resolve()
+    manifest = _read_json(base / "release-manifest.json")
+    if manifest is None:
+        return None
+    labels: set[str] = set()
+    for source in manifest.get("sources") or []:
+        if isinstance(source, dict) and source.get("source"):
+            label = str(source["source"])
+            labels.add(SOURCE_LABEL_ALIASES.get(label, label))
+    return labels or None
+
+
+def _contamination_state(
+    root: Path,
+    report: dict[str, Any] | None,
+    release_dir: Path | None = None,
+) -> tuple[bool, str]:
     """Combine machine-measured levels 1-4 with the human Level-5 adjudication artifact.
 
     The generated report is never trusted for Level 5: its verdict is recomputed from the
     durable audit artifact and the quarantine list, so a hand-edited report cannot pass the
     gate and a stale judgment cannot survive a change in the evidence.
+
+    ``release_dir`` is the corpus the configuration will actually train on. It matters: the
+    Level-5 verdicts bind to a training-corpus fingerprint, so evaluating them against a
+    different corpus than the experiment uses would either pass a judgment that no longer
+    applies or fail one that does. Before this parameter existed the comparison was hardcoded to
+    the v1 release, which is exactly that mistake once a newer corpus exists.
     """
     if not report or report.get("manifest_id") != "behavioral-heldout-v2":
         return True, "contamination report is missing or bound to the wrong evaluation manifest"
@@ -852,19 +909,28 @@ def _contamination_state(root: Path, report: dict[str, Any] | None) -> tuple[boo
         if isinstance(report.get("training_sources_checked"), list)
         else set()
     )
-    source_ok = (
-        sources == {item.rsplit("/", 1)[-1] for item in TRAINING_SOURCE_MANIFESTS}
-        or sources == TRAINING_SOURCE_IDS
-    )
+    expected_sources = _corpus_source_labels(root, release_dir)
+    if expected_sources is None:
+        source_ok = False
+        source_detail = (
+            "the corpus being evaluated could not be read, so the scan coverage cannot be "
+            "checked"
+        )
+    else:
+        source_ok = sources == expected_sources
+        source_detail = (
+            f"scanned {sorted(sources)}; corpus contains {sorted(expected_sources)}"
+            + ("" if source_ok else " -> MISMATCH")
+        )
 
-    audit = load_audit(root / CONTAMINATION_AUDIT_PATH)
-    quarantine = load_quarantine(root / CONTAMINATION_QUARANTINE_PATH)
+    audit = load_audit(audit_path_for(root, release_dir))
+    quarantine = load_quarantine(quarantine_path_for(root, release_dir))
     evaluation = evaluate_audit(
         report,
         audit,
         quarantine,
         benchmark_fp=benchmark_fingerprint(root),
-        training_fp=training_corpus_fingerprint(root),
+        training_fp=training_corpus_fingerprint(root, release_dir),
     )
 
     machine_ok = not missing and not machine_pending and source_ok
@@ -877,6 +943,7 @@ def _contamination_state(root: Path, report: dict[str, Any] | None) -> tuple[boo
     detail = (
         f"status={status}; missing_levels={missing or 'none'}; "
         f"pending_levels={machine_pending or 'none'}; sources_ok={source_ok}; "
+        f"scan_coverage[{source_detail}]; "
         f"level_5={evaluation.level_5}; audit[{evaluation.detail()}]"
     )
     return blocked, detail
@@ -1138,8 +1205,11 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
             "Baseline dataset contract is represented by the frozen evaluation manifest",
         )
         add("dataset_snapshot", "PASS", "Baseline uses the frozen evaluation manifest")
-    contamination = _read_json(root / "reports/data/behavioral-heldout-v2-contamination.json")
-    contamination_blocked, contamination_detail = _contamination_state(root, contamination)
+    configuration_release = _configured_release_dir(root, raw)
+    contamination = _contamination_report(root, configuration_release)
+    contamination_blocked, contamination_detail = _contamination_state(
+        root, contamination, configuration_release
+    )
     add(
         "contamination_gate",
         "FAIL" if contamination_blocked else "PASS",

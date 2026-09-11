@@ -27,10 +27,10 @@ from typing import Any
 
 from opengrad.contamination.audit import (
     AUDIT_PATH,
-    QUARANTINE_PATH,
     benchmark_fingerprint,
     finding_fingerprint,
     load_quarantine,
+    quarantine_path_for,
     training_corpus_fingerprint,
 )
 from opengrad.contamination.scanner import edit_similarity, ngrams, normalize
@@ -57,6 +57,13 @@ SOURCE_LABEL_ALIASES = {"when2call": "when2call-sft"}
 HELDOUT_DIRS = ("when2call-mcq", "when2call-llm-judge")
 RELEASE_DIR = Path(".release/hf/toolpolicy-canonical-v1")
 OUTPUT = Path("reports/data/behavioral-heldout-v2-contamination.json")
+
+
+def output_path_for(root: Path, release_dir: Path | str | None = None) -> Path:
+    """Where a scan's report belongs: one report per corpus, see `audit.corpus_slug`."""
+    from opengrad.contamination.audit import corpus_slug, scoped_artifact_path
+
+    return root / scoped_artifact_path(OUTPUT, corpus_slug(release_dir))
 
 
 @dataclass(frozen=True)
@@ -529,12 +536,18 @@ def screen(
 
 
 def screen_and_write(root: Path, **kwargs: Any) -> tuple[dict[str, Any], Path]:
-    """Run the scan and write the generated report. Never touches the human audit file."""
+    """Run the scan and write the generated report. Never touches the human audit file.
+
+    Both the report and the quarantine it honours are scoped to the corpus being scanned, so a
+    scan of one corpus cannot overwrite another corpus's evidence.
+    """
     root = root.resolve()
+    release_dir = kwargs.get("release_dir")
+    quarantine_path = quarantine_path_for(root, release_dir)
     if "exclude_ids" not in kwargs:
-        kwargs["exclude_ids"] = load_quarantine(root / QUARANTINE_PATH).record_ids()
+        kwargs["exclude_ids"] = load_quarantine(quarantine_path).record_ids()
     report = screen(root, **kwargs)
-    path = root / OUTPUT
+    path = output_path_for(root, release_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return report, path

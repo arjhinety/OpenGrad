@@ -39,6 +39,43 @@ RESOLVED_VERDICTS = frozenset({VERDICT_CONTAMINATED, VERDICT_INCIDENTAL})
 
 AUDIT_PATH = Path("reports/data/behavioral-heldout-v2-contamination-audit.json")
 QUARANTINE_PATH = Path("reports/evaluation/behavioral-heldout-v2-quarantine.json")
+
+# A Level-5 verdict is a judgment about a specific benchmark *against a specific training
+# corpus*: it is bound to that corpus's fingerprint, and the quarantine it produces is the set
+# of held-out examples that corpus leaks. Two corpora therefore need two evidence sets, and
+# sharing one file would mean whichever corpus was scanned last silently describes the other.
+# The historical v1 corpus keeps the original paths so every already-recorded B0 result resolves
+# unchanged; any other corpus gets a name derived from its release directory.
+DEFAULT_CORPUS_SLUG = ""
+
+
+def corpus_slug(release_dir: Path | str | None) -> str:
+    """A stable, filesystem-safe slug for a corpus, empty for the historical default."""
+    if release_dir is None:
+        return DEFAULT_CORPUS_SLUG
+    name = Path(release_dir).name
+    if not name or name == "toolpolicy-canonical-v1":
+        return DEFAULT_CORPUS_SLUG
+    return "".join(
+        character if character.isalnum() or character in "-_" else "-" for character in name
+    )
+
+
+def scoped_artifact_path(path: Path, slug: str) -> Path:
+    """Insert a corpus slug before a path's extension; the empty slug is the identity."""
+    if not slug:
+        return path
+    return path.with_name(f"{path.stem}--{slug}{path.suffix}")
+
+
+def audit_path_for(root: Path, release_dir: Path | str | None = None) -> Path:
+    return root / scoped_artifact_path(AUDIT_PATH, corpus_slug(release_dir))
+
+
+def quarantine_path_for(root: Path, release_dir: Path | str | None = None) -> Path:
+    return root / scoped_artifact_path(QUARANTINE_PATH, corpus_slug(release_dir))
+
+
 BENCHMARK_MANIFEST = Path("reports/evaluation/behavioral-heldout-v2.manifest.json")
 
 
