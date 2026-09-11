@@ -52,6 +52,23 @@ def main() -> int:
     )
     parser.add_argument("--out", default=None, help="where to write the curve JSON")
     parser.add_argument(
+        "--partition",
+        default=None,
+        help=(
+            "path to a frozen evaluation partition artifact; scoring is restricted to the named "
+            "side, so the confirmatory partition is never scored during checkpoint selection"
+        ),
+    )
+    parser.add_argument(
+        "--partition-side", default="dev", choices=["dev", "confirmatory"],
+        help="which side of the partition to score",
+    )
+    parser.add_argument(
+        "--checkpoint-ids",
+        default=None,
+        help="comma-separated checkpoint steps to evaluate (overrides the default set)",
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="replace an existing measurement for a checkpoint",
@@ -62,7 +79,25 @@ def main() -> int:
     if not available:
         print(f"no checkpoints under runs/{args.experiment_id}/checkpoints", file=sys.stderr)
         return 1
-    if args.steps:
+    include_ids = None
+    if args.partition:
+        partition = json.loads((ROOT / args.partition).read_text(encoding="utf-8"))
+        include_ids = set(partition[args.partition_side]["example_ids"])
+        print(
+            f"--- scoring {args.partition_side} partition: {len(include_ids)} of "
+            f"{partition['population_size']} examples (fingerprint "
+            f"{partition[args.partition_side]['fingerprint'][:16]})",
+            flush=True,
+        )
+
+    if args.checkpoint_ids:
+        wanted = {int(value) for value in args.checkpoint_ids.split(",") if value.strip()}
+        selected = [(step, path) for step, path in available if step in wanted]
+        missing = sorted(wanted - {step for step, _ in selected})
+        if missing:
+            print(f"requested checkpoints not found: {missing}", file=sys.stderr)
+            return 1
+    elif args.steps:
         wanted = {int(value) for value in args.steps.split(",") if value.strip()}
         selected = [(step, path) for step, path in available if step in wanted]
         missing = sorted(wanted - {step for step, _ in selected})
@@ -102,7 +137,9 @@ def main() -> int:
         )
         print(f"--- evaluating checkpoint-{step} ({checkpoint})", flush=True)
         started = time.monotonic()
-        result = run_candidate_evaluation(config_path, root=ROOT, limit=args.limit)
+        result = run_candidate_evaluation(
+            config_path, root=ROOT, limit=args.limit, include_ids=include_ids
+        )
         result["evaluation_seconds"] = round(time.monotonic() - started, 1)
         curve.append(result)
         comparison = result.get("baseline_comparison", {}).get("metrics", {})

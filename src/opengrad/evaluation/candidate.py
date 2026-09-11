@@ -138,8 +138,15 @@ def run_candidate_evaluation(
     backend: Any = None,
     limit: int | None = None,
     dry_run: bool = False,
+    include_ids: set[str] | None = None,
 ) -> dict[str, Any]:
-    """Measure one checkpoint on the frozen held-out set and diff it against B0."""
+    """Measure one checkpoint on the frozen held-out set and diff it against B0.
+
+    ``include_ids`` restricts scoring to a subset of the frozen population — used to score a
+    checkpoint on the DEV/checkpoint-selection partition only, so the confirmatory partition is
+    never scored during selection and cannot influence it. The frozen manifest contract is still
+    validated in full; only which examples are scored changes.
+    """
     import time
 
     config_path = Path(config_path).resolve()
@@ -153,6 +160,10 @@ def run_candidate_evaluation(
         root, config["evaluations"]["behavioral_manifest"], "behavioral manifest"
     )
     examples = load_evaluation_examples(root, manifest_path)
+    if include_ids is not None:
+        examples = [example for example in examples if str(example.example_id) in include_ids]
+        if not examples:
+            raise ValueError("include_ids selected no examples from the frozen manifest")
     if limit is not None:
         if limit < 1:
             raise ValueError("limit must be positive")
