@@ -1,0 +1,127 @@
+experiment_id: m0_v2_final_minus_xlam_fixed_compute
+hypothesis: >-
+  xLAM source ablation, FIXED-COMPUTE arm. The completed `m0_sft_canonical_v2_final` run is the
+  reference and is not modified or rerun; this run trains the identical recipe on the identical
+  frozen corpus with exactly one source removed.
+
+  THE QUESTION THIS ARM ANSWERS. With the same optimization and GPU budget, does including xLAM
+  improve the resulting policy? The step count is held at 2,400 so the comparison is under equal
+  training budget, and everything else -- base checkpoint, seed, optimizer, learning rate,
+  scheduler, batch geometry, sequence length, precision, renderer, loss masking, checkpoint
+  cadence, promotion policy, and both evaluation partitions -- is byte-identical to the reference.
+
+  WHAT THIS ARM CANNOT SEPARATE, STATED IN ADVANCE. Removing xLAM removes 56,090 of 161,966
+  trainable records, so at an unchanged 2,400 steps the smaller corpus receives MORE effective
+  exposure: 0.363 corpus passes against the reference's 0.237, or 1.53x. Any difference observed
+  here therefore mixes two things -- the absence of xLAM supervision, and the extra passes over
+  what remains -- and this arm alone cannot attribute an effect to either. That is precisely why
+  the matched-exposure arm exists, and the two are reported together or not at all. This is
+  reported rather than compensated: the step count is not lowered to disguise the exposure
+  difference, because doing so would silently convert this into the other arm.
+
+  xLAM is the only source whose records carry the `CALL_PREDICTION` contract, in which the
+  terminal tool call *is* the supervised target and no tool result exists. Removing it removes
+  every record of that shape, so a change in call-decision behaviour is the expected place for an
+  effect to appear, and a change in tool-result interpretation would be surprising because the
+  remaining three sources still supply it.
+
+  WHAT COUNTS AS EVIDENCE. A single training run is probabilistic. If xLAM's contribution and
+  regression both look significant here, that is a finding to record and to test again, not a
+  settled attribution -- the difference is recorded with its magnitude, and the seed-level
+  variance of this corpus is not yet characterized well enough to call a small delta real.
+
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+
+datasets:
+  manifest_ids:
+    - canonical_v2_final
+  hashes:
+    canonical_v2_final: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
+  release_dir: .release/hf/toolpolicy-canonical-v2-final
+  # THE ABLATION VARIABLE. A filter over the frozen corpus, not a rebuild: the remaining 105,876
+  # trainable records are the same bytes with the same supervision contracts, renderer behaviour,
+  # loss masks, contamination decisions and provenance. The corpus fingerprint is unchanged and
+  # is asserted equal to the reference's, so this cannot silently become a corpus swap.
+  exclude_sources:
+    - xlam-function-calling-60k
+  # The yield report for THIS view of the corpus. Readiness reads the evidence for the corpus a
+  # run actually trains on; gating a filtered run on the unfiltered report would include the
+  # source this run removed.
+  yield_report: reports/data/canonical-v2-final-minus-xlam-yield.json
+  source_manifests:
+    - glaive-function-calling-v2
+    - toolace
+    - when2call
+
+# Natural sampling over what remains, with no contract targeted.
+#
+# xLAM was the only source carrying `CALL_PREDICTION`, so removing it removes that contract too and
+# `COMPLETE_TRAJECTORY` is all that is left. Declaring it here is a statement of what this run
+# trains on, not a second filter: every record the source filter kept is `COMPLETE_TRAJECTORY`, so
+# this list selects everything present and excludes nothing. The only data difference from the
+# reference remains the xLAM exclusion, and readiness asserts that by failing closed when a config
+# selects a kind the corpus does not contain.
+supervision:
+  include:
+    - COMPLETE_TRAJECTORY
+
+trainer:
+  type: sft
+  tuning_method: full
+  learning_rate: 1.0e-5
+  micro_batch_size: 8
+  # Activation memory tracks batch width, not sequence count; see docs/SFT_TRAINING.md.
+  micro_batch_tokens: 4096
+  gradient_accumulation_steps: 2
+  # FIXED COMPUTE. Unchanged from the reference so the budget is equal by construction.
+  max_steps: 2400
+  warmup_steps: 120
+  max_seq_length: 2048
+  scheduler: cosine
+  gradient_clipping: 1.0
+  gradient_checkpointing: true
+  optimizer: adamw_torch
+  optimizer_state: fp32
+
+evaluation:
+  suite: tool_use_core
+  baseline_experiment: tool_calling/qwen35_2b/baseline
+  # Frozen. Shared with the reference so the two are selected and confirmed on identical evidence.
+  checkpoint_selection_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json
+  primary_metrics:
+    - call_precision
+    - call_recall
+    - call_f1
+    - over_call_rate
+    - under_call_rate
+    - clarification_accuracy
+    - unsupported_accuracy
+    - parse_valid_rate
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+
+checkpointing:
+  # Cadence preserved so checkpoint-indexed comparisons against the reference are 1:1.
+  save_steps: 600
+  max_checkpoints: 4
+
+promotion:
+  requires_executed_suite: tool_use_core
+  policy_version: tool_use_promotion_v3
+  must_pass:
+    parse_valid_rate_min: 0.99
+  max_regression:
+    default: 1.0
+
+reproducibility:
+  seed: 42
+  precision: bfloat16
+
+speculative_decoding:
+  enabled: false

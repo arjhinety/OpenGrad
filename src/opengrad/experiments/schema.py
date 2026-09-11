@@ -114,6 +114,31 @@ class ExperimentRecord:
         )
 
 
+def _validated_datasets(value: dict[str, Any]) -> dict[str, Any]:
+    """Run the dataset-section validators on the way in, so a bad filter fails at config load."""
+    value["exclude_sources"] = validate_source_exclusion(value.get("exclude_sources"))
+    return value
+
+
+def validate_source_exclusion(value: Any) -> list[str]:
+    """Validate `datasets.exclude_sources`, the source-ablation filter.
+
+    Names are checked for shape only. Whether a named source exists in the corpus is checked at
+    preprocessing time, where the release manifest is available -- a name that matches nothing
+    must fail rather than silently exclude nothing.
+    """
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise TypeError("datasets.exclude_sources must be a list of source ids")
+    cleaned = [str(item).strip() for item in value]
+    if any(not item for item in cleaned):
+        raise ValueError("datasets.exclude_sources entries must be non-empty")
+    if len(set(cleaned)) != len(cleaned):
+        raise ValueError("datasets.exclude_sources contains duplicates")
+    return sorted(cleaned)
+
+
 def validate_supervision_selection(value: Any) -> dict[str, Any]:
     """Validate the optional `supervision` block of an experiment config.
 
@@ -201,7 +226,7 @@ class ExperimentConfig:
             experiment_id=str(data["experiment_id"]),
             hypothesis=str(data["hypothesis"]),
             model=dict(data["model"]),
-            datasets=dict(data["datasets"]),
+            datasets=_validated_datasets(dict(data["datasets"])),
             trainer=dict(data["trainer"]),
             evaluation=dict(data["evaluation"]),
             generation=dict(data["generation"]),

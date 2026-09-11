@@ -78,6 +78,9 @@ class CacheIdentity:
     # changes the sample stream: reusing an unfiltered cache for a filtered run would silently
     # train on records the config excluded.
     supervision_include: tuple[str, ...] = ()
+    # Sources excluded from this sample set, for a source ablation. Also part of the identity, for
+    # the same reason.
+    exclude_sources: tuple[str, ...] = ()
     cache_version: int = CACHE_VERSION
 
     def to_dict(self) -> dict[str, Any]:
@@ -91,6 +94,7 @@ class CacheIdentity:
             "max_seq_length": self.max_seq_length,
             "corpus_manifest_sha256": self.corpus_manifest_sha256,
             "supervision_include": list(self.supervision_include),
+            "exclude_sources": list(self.exclude_sources),
         }
 
     @classmethod
@@ -107,6 +111,7 @@ class CacheIdentity:
             # Restored, not dropped: an identity that forgets its filter would compare equal
             # against a differently-filtered cache and be reused.
             supervision_include=tuple(str(item) for item in include),
+            exclude_sources=tuple(str(item) for item in (data.get("exclude_sources") or [])),
             cache_version=int(data.get("cache_version", 0)),
         )
 
@@ -134,11 +139,11 @@ def _worker_renderer() -> Any:
     return _RENDERER
 
 
-def _process_shard(payload: tuple[str, int, tuple[str, ...]]) -> dict[str, Any]:
+def _process_shard(payload: tuple[str, int, tuple[str, ...], tuple[str, ...]]) -> dict[str, Any]:
     """Render one shard. Runs in a worker process."""
     import pyarrow.parquet as pq  # type: ignore[import-untyped]
 
-    shard_name, max_seq_length, supervision_include = payload
+    shard_name, max_seq_length, supervision_include, exclude_sources = payload
     shard_path = Path(shard_name)
     renderer = _worker_renderer()
     samples: list[dict[str, Any]] = []
@@ -148,6 +153,8 @@ def _process_shard(payload: tuple[str, int, tuple[str, ...]]) -> dict[str, Any]:
     # Records dropped because their declared supervision kind is not selected. Counted
     # separately from failures: an excluded record is not a broken one.
     supervision_excluded: Counter[str] = Counter()
+    # Records dropped because their source is excluded from this ablation. Also not a failure.
+    source_excluded: Counter[str] = Counter()
 
     parquet = pq.ParquetFile(shard_path)
     seen: Counter[str] = Counter()
@@ -183,6 +190,12 @@ def _process_shard(payload: tuple[str, int, tuple[str, ...]]) -> dict[str, Any]:
             if supervision_include and sample.supervision_kind not in supervision_include:
                 supervision_excluded[sample.supervision_kind or "UNCLASSIFIED"] += 1
                 continue
+            # A source ablation excludes rows, not a contract: the excluded records keep their
+            # supervision kind, renderer behaviour, loss mask and provenance, and simply do not
+            # enter this sample stream.
+            if exclude_sources and record.source_dataset in exclude_sources:
+                source_excluded[record.source_dataset] += 1
+                continue
             samples.append(
                 {
                     "record_id": sample.record_id,
@@ -203,6 +216,7 @@ def _process_shard(payload: tuple[str, int, tuple[str, ...]]) -> dict[str, Any]:
         "reasons": dict(reasons),
         "source_counts": dict(source_counts),
         "supervision_excluded": dict(supervision_excluded),
+        "source_excluded": dict(source_excluded),
     }
 
 
@@ -254,12 +268,19 @@ def preprocess_corpus(
     workers: int | None = None,
     progress: Any = None,
     supervision_include: tuple[str, ...] = (),
+    exclude_sources: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Render the whole corpus into a cached sample set. Idempotent per identity.
 
-    ``supervision_include`` restricts the sample stream to the named supervision kinds. It is
-    part of the cache identity, so an ablation cannot silently reuse a differently-filtered
-    sample set.
+    ``supervision_include`` restricts the sample stream to the named supervision kinds, and
+    ``exclude_sources`` removes named sources entirely. Both are part of the cache identity, so
+    an ablation cannot silently reuse a differently-filtered sample set.
+
+    ``exclude_sources`` is a filter over the frozen corpus, not a rebuild: the remaining records
+    are the same bytes, with the same supervision contracts, renderer behaviour, loss masks and
+    provenance. A declared source that the corpus does not contain is an error rather than a
+    no-op, because a typo would otherwise produce an ablation that looks like a result while
+    excluding nothing.
     """
 
     from opengrad.data.renderers import Qwen35_2BRenderer
@@ -279,6 +300,7 @@ def preprocess_corpus(
         max_seq_length=max_seq_length,
         corpus_manifest_sha256=str(identity_info["manifest_sha256"]),
         supervision_include=tuple(sorted(supervision_include)),
+        exclude_sources=tuple(sorted(exclude_sources)),
     )
     if cache_is_current(cache_dir, expected):
         return {"status": "CACHE_HIT", "identity": expected.to_dict(), **identity_info}
@@ -286,6 +308,22 @@ def preprocess_corpus(
     shards = sorted(path for path in base.glob("*.parquet") if path.is_file())
     if not shards:
         raise FileNotFoundError(f"no release shards under {base}")
+    if exclude_sources:
+        # Fail closed on a source the corpus does not contain. A typo would otherwise produce an
+        # ablation that excludes nothing while reporting itself as a filtered run, which is worse
+        # than an error because it looks like a result.
+        manifest = json.loads((base / "release-manifest.json").read_text(encoding="utf-8"))
+        present = {
+            str(item.get("source"))
+            for item in manifest.get("sources") or []
+            if isinstance(item, dict)
+        }
+        unknown = sorted(set(exclude_sources) - present)
+        if unknown:
+            raise ValueError(
+                f"exclude_sources names sources absent from the corpus: {unknown}; "
+                f"the corpus contains: {sorted(present)}"
+            )
 
     # Parallelism is process-level via explicit subprocesses, not a worker pool.
     #
@@ -345,6 +383,8 @@ def preprocess_corpus(
             model_revision,
             "--supervision-include",
             ",".join(sorted(supervision_include)),
+            "--exclude-sources",
+            ",".join(sorted(exclude_sources)),
             *[str(path) for path in chunk],
         ]
         processes.append(subprocess.Popen(command, env=environment, cwd=str(root)))
@@ -504,6 +544,7 @@ def run_worker(
     out_dir: Path,
     max_seq_length: int,
     supervision_include: tuple[str, ...] = (),
+    exclude_sources: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Render a list of shards, appending samples and a per-shard progress line.
 
@@ -524,13 +565,14 @@ def run_worker(
     behavior_trainable: Counter[str] = Counter()
     supervision_trainable: Counter[str] = Counter()
     supervision_excluded: Counter[str] = Counter()
+    source_excluded: Counter[str] = Counter()
     lengths: list[int] = []
     supervised_tokens = 0
     total_tokens = 0
     written = 0
 
     for name in shard_names:
-        payload = _process_shard((name, max_seq_length, supervision_include))
+        payload = _process_shard((name, max_seq_length, supervision_include, exclude_sources))
         for key, value in payload["dispositions"].items():
             dispositions[key] += value
         for key, value in payload["reasons"].items():
@@ -539,6 +581,8 @@ def run_worker(
             source_counts[key] += value
         for key, value in payload["supervision_excluded"].items():
             supervision_excluded[key] += value
+        for key, value in payload["source_excluded"].items():
+            source_excluded[key] += value
         rows = payload["samples"]
         for row in rows:
             source_trainable[row["source_dataset"]] += 1
@@ -570,6 +614,8 @@ def run_worker(
         "supervision_trainable": dict(supervision_trainable),
         "supervision_excluded": dict(supervision_excluded),
         "supervision_include": list(supervision_include),
+        "source_excluded": dict(source_excluded),
+        "exclude_sources": list(exclude_sources),
         "lengths": lengths,
         "supervised_tokens": supervised_tokens,
         "total_tokens": total_tokens,
@@ -592,6 +638,7 @@ def _merge_parts(part_dir: Path, staging: Path) -> dict[str, Any]:
     behavior_trainable: Counter[str] = Counter()
     supervision_trainable: Counter[str] = Counter()
     supervision_excluded: Counter[str] = Counter()
+    source_excluded: Counter[str] = Counter()
     lengths: list[int] = []
     supervised_tokens = 0
     total_tokens = 0
@@ -607,6 +654,7 @@ def _merge_parts(part_dir: Path, staging: Path) -> dict[str, Any]:
             behavior_trainable.update(stats["behavior_trainable"])
             supervision_trainable.update(stats.get("supervision_trainable") or {})
             supervision_excluded.update(stats.get("supervision_excluded") or {})
+            source_excluded.update(stats.get("source_excluded") or {})
             lengths.extend(stats["lengths"])
             supervised_tokens += stats["supervised_tokens"]
             total_tokens += stats["total_tokens"]
@@ -630,6 +678,7 @@ def _merge_parts(part_dir: Path, staging: Path) -> dict[str, Any]:
         "behavior_trainable": dict(behavior_trainable),
         "supervision_trainable": dict(supervision_trainable),
         "supervision_excluded": dict(supervision_excluded),
+        "source_excluded": dict(source_excluded),
         "lengths": lengths,
         "supervised_tokens": supervised_tokens,
         "total_tokens": total_tokens,
@@ -651,6 +700,11 @@ def _worker_main(argv: list[str]) -> int:
         default="",
         help="comma-separated supervision kinds to keep; empty keeps every kind",
     )
+    parser.add_argument(
+        "--exclude-sources",
+        default="",
+        help="comma-separated source datasets to drop entirely; empty keeps every source",
+    )
     parser.add_argument("shards", nargs="+")
     arguments = parser.parse_args(argv)
     os.environ["OPENGRAD_RENDER_REVISION"] = arguments.revision
@@ -660,6 +714,7 @@ def _worker_main(argv: list[str]) -> int:
         Path(arguments.out),
         arguments.max_seq_length,
         tuple(k for k in arguments.supervision_include.split(",") if k),
+        tuple(k for k in arguments.exclude_sources.split(",") if k),
     )
     return 0
 

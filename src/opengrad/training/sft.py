@@ -256,6 +256,14 @@ def run_real_sft(
     supervision_include = tuple(
         sorted(str(item) for item in (supervision_selection.get("include") or []))
     )
+    # Source ablation: exclude named sources from the sample stream. A filter over the frozen
+    # corpus, not a rebuild. Recorded in the cache identity so a filtered run cannot reuse an
+    # unfiltered sample set.
+    exclude_sources = tuple(
+        sorted(
+            str(item) for item in ((experiment.get("datasets") or {}).get("exclude_sources") or [])
+        )
+    )
     rendering_report = preprocess_corpus(
         root,
         cache_dir=cache_dir,
@@ -266,6 +274,7 @@ def run_real_sft(
         renderer_name="qwen3_5_2b_v1",
         max_seq_length=settings.max_seq_length,
         supervision_include=supervision_include,
+        exclude_sources=exclude_sources,
         progress=lambda done, total, written: (
             print(f"  [preprocess] shards {done}/{total} samples={written}", flush=True)
             if done % 10 == 0 or done == total

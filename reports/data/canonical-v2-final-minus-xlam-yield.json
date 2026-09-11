@@ -1,0 +1,106 @@
+{
+  "by_supervision_kind": {
+    "COMPLETE_TRAJECTORY": {
+      "fraction_of_trainable": 1.0,
+      "trainable_records": 105876
+    }
+  },
+  "derivation": "Exact arithmetic over the measured per-source entries of the full corpus report. No record was re-rendered: a source ablation removes a measured source and nothing else.",
+  "derived_from": "reports/data/canonical-v2-final-yield.json",
+  "excluded_by_this_view": "xlam-function-calling-60k",
+  "excluded_sources": [
+    {
+      "id": "button",
+      "reason": "upstream repository is access-gated (HTTP 401); not fetched, not approximated"
+    },
+    {
+      "id": "looptool-23k",
+      "reason": "upstream source was not located; not fetched, not approximated"
+    }
+  ],
+  "max_seq_length": 2048,
+  "model": "Qwen/Qwen3.5-2B",
+  "release_config": "configs/releases/toolpolicy_canonical_v2_final.yaml",
+  "schema_version": 1,
+  "sources": [
+    {
+      "canonical_records": 98339,
+      "failure_reasons": {
+        "TARGET_TRUNCATED": 363,
+        "UNRENDERABLE": 864
+      },
+      "quarantine_ratio": 0.012477,
+      "reasons": [],
+      "render_ratio": 0.987523,
+      "rendered_records": 97112,
+      "source": "glaive-function-calling-v2",
+      "status": "OK",
+      "supervision_kinds_canonical": {
+        "COMPLETE_TRAJECTORY": 98339
+      },
+      "supervision_kinds_trainable": {
+        "COMPLETE_TRAJECTORY": 97112
+      },
+      "targets_with_tool_calls": 48723,
+      "targets_without_tool_calls": 48389,
+      "tool_call_target_ratio": 0.50172,
+      "trainable_records": 97112,
+      "yield_ratio": 0.987523
+    },
+    {
+      "canonical_records": 11051,
+      "failure_reasons": {
+        "TARGET_TRUNCATED": 316,
+        "UNRENDERABLE": 8476
+      },
+      "quarantine_ratio": 0.795584,
+      "reasons": [
+        "trainable yield 0.204 below floor 0.300",
+        "tool-call target ratio 0.145 below floor 0.300 for a source expected to teach tool calling"
+      ],
+      "render_ratio": 0.204416,
+      "rendered_records": 2259,
+      "source": "toolace",
+      "status": "ANOMALY",
+      "supervision_kinds_canonical": {
+        "COMPLETE_TRAJECTORY": 11051
+      },
+      "supervision_kinds_trainable": {
+        "COMPLETE_TRAJECTORY": 2259
+      },
+      "targets_with_tool_calls": 327,
+      "targets_without_tool_calls": 1932,
+      "tool_call_target_ratio": 0.144754,
+      "trainable_records": 2259,
+      "yield_ratio": 0.204416
+    },
+    {
+      "canonical_records": 6505,
+      "failure_reasons": {},
+      "quarantine_ratio": 0.0,
+      "reasons": [],
+      "render_ratio": 1.0,
+      "rendered_records": 6505,
+      "source": "when2call",
+      "status": "OK",
+      "supervision_kinds_canonical": {
+        "COMPLETE_TRAJECTORY": 6505
+      },
+      "supervision_kinds_trainable": {
+        "COMPLETE_TRAJECTORY": 6505
+      },
+      "targets_with_tool_calls": 0,
+      "targets_without_tool_calls": 6505,
+      "tool_call_target_ratio": 0.0,
+      "trainable_records": 6505,
+      "yield_ratio": 1.0
+    }
+  ],
+  "status": "OK",
+  "totals": {
+    "canonical_records": 115895,
+    "targets_with_tool_calls": 49050,
+    "targets_without_tool_calls": 56826,
+    "trainable_records": 105876
+  }
+}

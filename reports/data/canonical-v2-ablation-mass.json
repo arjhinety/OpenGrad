@@ -1,0 +1,84 @@
+{
+  "artifact_kind": "ABLATION_MASS_MEASUREMENT",
+  "effective_epochs_at_reference_steps": {
+    "full": 0.237087,
+    "minus_xlam": 0.362688
+  },
+  "excluded_source": "xlam-function-calling-60k",
+  "exposure_ratios": {
+    "rendered_tokens": 0.643286,
+    "supervised_tokens": 0.882757,
+    "trainable_records": 0.653693
+  },
+  "full": {
+    "by_source": {
+      "glaive-function-calling-v2": {
+        "records": 97112,
+        "supervised": 29230914,
+        "tokens": 59809089
+      },
+      "toolace": {
+        "records": 2259,
+        "supervised": 217905,
+        "tokens": 2189329
+      },
+      "when2call": {
+        "records": 6505,
+        "supervised": 181550,
+        "tokens": 2148521
+      },
+      "xlam-function-calling-60k": {
+        "records": 56090,
+        "supervised": 3935352,
+        "tokens": 35570609
+      }
+    },
+    "max_sequence_length": 2048,
+    "mean_sequence_length": 615.67,
+    "median_sequence_length": 551.0,
+    "rendered_tokens": 99717548,
+    "supervised_tokens": 33565721,
+    "trainable_records": 161966
+  },
+  "matched_steps": {
+    "from_rendered_tokens": 1544,
+    "from_supervised_tokens": 2119,
+    "from_trainable_records": 1569,
+    "preferred": "from_supervised_tokens",
+    "preferred_value": 2119,
+    "why": "supervised tokens are the loss-bearing mass the trainer optimises over, so matching on them matches the quantity that actually drives the update. Rendered tokens include context the loss ignores, and record counts ignore length entirely."
+  },
+  "measured_from": "data/processed/sft-cache-Qwen-Qwen3.5-2B-2048-toolpolicy-canonical-v2-final/sft_samples.parquet",
+  "minus_xlam": {
+    "by_source": {
+      "glaive-function-calling-v2": {
+        "records": 97112,
+        "supervised": 29230914,
+        "tokens": 59809089
+      },
+      "toolace": {
+        "records": 2259,
+        "supervised": 217905,
+        "tokens": 2189329
+      },
+      "when2call": {
+        "records": 6505,
+        "supervised": 181550,
+        "tokens": 2148521
+      }
+    },
+    "max_sequence_length": 2048,
+    "mean_sequence_length": 605.869,
+    "median_sequence_length": 535.0,
+    "rendered_tokens": 64146939,
+    "supervised_tokens": 29630369,
+    "trainable_records": 105876
+  },
+  "note": "Measured from the reference run's own rendered sample cache, so these are the same samples the completed M0 trained on. The ablation is a filter over identical rows: the frozen corpus is not rebuilt or mutated.",
+  "per_step_tokens": {
+    "full": 13985.72,
+    "minus_xlam_at_reference_steps": 12345.99
+  },
+  "reference_steps": 2400,
+  "schema_version": 1
+}
