@@ -23,7 +23,7 @@ Model changes are hypotheses, not improvements. Every intervention is measured. 
 
 ---
 
-## 🎯 Primary Research Highlights & Architecture
+## Primary Research Highlights & Architecture
 
 ### 1. Comprehensive Post-Training Evaluation Benchmarks (Tiers A to E)
 OpenGrad rejects single headline accuracy scores and implements a rigorous, versioned multi-tier benchmark system with independent axes for capability, agent behavior, systems performance, and speculative decoding:
