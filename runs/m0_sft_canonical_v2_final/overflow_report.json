@@ -1,0 +1,20 @@
+{
+  "dispositions": {
+    "CONTEXT_TAIL_TRUNCATED": 2,
+    "OK": 161964
+  },
+  "dropped_fraction": 0.0,
+  "dropped_records": 0,
+  "max_seq_length": 2048,
+  "no_assistant_turn_records": 0,
+  "policy": "keep the whole sequence when it fits; keep the first max_seq_length tokens when every supervised token survives (trailing non-target context is dropped); drop the record when any supervised token would be cut, because partially removed assistant supervision is corrupted supervision. Unrenderable and unmaskable records are quarantined, never repaired.",
+  "records_considered": 161966,
+  "schema_version": 1,
+  "supervised_tokens": 33565721,
+  "tail_truncated_records": 2,
+  "target_truncated_records": 0,
+  "total_tokens": 99717548,
+  "trainable_records": 161966,
+  "unmaskable_records": 0,
+  "unrenderable_records": 0
+}

@@ -46,7 +46,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.evaluation.runner import load_evaluation_examples  # noqa: E402
+from opengrad.evaluation.runner import load_evaluation_examples
 
 MANIFEST = "reports/evaluation/behavioral-heldout-v2.manifest.json"
 OUTPUT = "reports/evaluation/behavioral-heldout-v2-partition.json"
@@ -59,7 +59,7 @@ CONFIRMATORY_FRACTION = 0.35
 
 def ranking_key(seed: str, example_id: str) -> str:
     """Deterministic, order-independent rank for one example."""
-    return hashlib.sha256(f"{seed}\x00{example_id}".encode("utf-8")).hexdigest()
+    return hashlib.sha256(f"{seed}\x00{example_id}".encode()).hexdigest()
 
 
 def fingerprint(example_ids: list[str]) -> str:
@@ -142,7 +142,9 @@ def main() -> int:
     print(f"dev           : {len(dev)}  {payload['dev']['fingerprint'][:16]}")
     print(f"confirmatory  : {len(confirmatory)}  {payload['confirmatory']['fingerprint'][:16]}")
     for label, counts in per_class.items():
-        print(f"  {label:<12} total={counts['total']:<5} dev={counts['dev']:<5} conf={counts['confirmatory']}")
+        print(
+            f"  {label:<12} total={counts['total']:<5} dev={counts['dev']:<5} conf={counts['confirmatory']}"
+        )
     print(f"wrote {out.relative_to(ROOT)}")
     return 0
 

@@ -77,9 +77,7 @@ class ExperimentStore:
             # could name the code that produced it. The flat key is the one that exists, and the
             # nested form is still honoured for any caller that supplies it.
             git_commit=str(
-                environment.get("git_sha")
-                or (environment.get("git") or {}).get("sha")
-                or "unknown"
+                environment.get("git_sha") or (environment.get("git") or {}).get("sha") or "unknown"
             ),
             git_dirty=bool(environment.get("git_dirty", False)),
             environment=environment,

@@ -1,0 +1,166 @@
+{
+  "artifacts": {
+    "environment": "runs/m0_sft_canonical_v2_final/eval/checkpoint-1800/environment.json",
+    "metrics": "runs/m0_sft_canonical_v2_final/eval/checkpoint-1800/metrics.json",
+    "predictions": "runs/m0_sft_canonical_v2_final/eval/checkpoint-1800/predictions.jsonl",
+    "residual_profile": "runs/m0_sft_canonical_v2_final/eval/checkpoint-1800/residual-profile.json"
+  },
+  "backend": "vllm",
+  "baseline_comparison": {
+    "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+    "candidate_run_id": null,
+    "improved": [
+      "call_f1",
+      "call_precision",
+      "clarification_accuracy",
+      "over_call_rate",
+      "under_call_rate",
+      "unsupported_accuracy"
+    ],
+    "metrics": {
+      "call_f1": {
+        "baseline": 0.61913,
+        "candidate": 0.709187,
+        "delta": 0.090057,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      },
+      "call_precision": {
+        "baseline": 0.454185,
+        "candidate": 0.698962,
+        "delta": 0.244777,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      },
+      "call_recall": {
+        "baseline": 0.972201,
+        "candidate": 0.719715,
+        "delta": -0.252486,
+        "direction": "higher_is_better",
+        "verdict": "REGRESSED"
+      },
+      "clarification_accuracy": {
+        "baseline": 0.100943,
+        "candidate": 0.75762,
+        "delta": 0.656676,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      },
+      "over_call_rate": {
+        "baseline": 0.642463,
+        "candidate": 0.170477,
+        "delta": -0.471986,
+        "direction": "lower_is_better",
+        "verdict": "IMPROVED"
+      },
+      "under_call_rate": {
+        "baseline": 0.014672,
+        "candidate": 0.008314,
+        "delta": -0.006358,
+        "direction": "lower_is_better",
+        "verdict": "IMPROVED"
+      },
+      "unsupported_accuracy": {
+        "baseline": 0.013127,
+        "candidate": 0.549881,
+        "delta": 0.536754,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      }
+    },
+    "regressed": [
+      "call_recall"
+    ]
+  },
+  "context_buckets": {
+    "base": 2369,
+    "overflow": 4
+  },
+  "elapsed_seconds": 239.362929,
+  "engine": {
+    "batching": "continuous",
+    "dtype": "bfloat16",
+    "enforce_eager": false,
+    "gpu_memory_utilization": 0.9,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "model_id": "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1800",
+    "name": "vllm",
+    "revision": "None",
+    "seed": 0,
+    "tensor_parallel_size": 1,
+    "version": "0.29.0"
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 512,
+    "temperature": 0.0,
+    "tool_choice": "auto",
+    "top_p": 1.0
+  },
+  "kind": "CANDIDATE_EVALUATION",
+  "lineage": {
+    "base_model_id": "Qwen/Qwen3.5-2B",
+    "base_model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "checkpoint_id": "checkpoint-1800",
+    "checkpoint_step": 1800,
+    "contamination_report": "reports/data/behavioral-heldout-v2-contamination.json",
+    "dataset_manifests": "reports/data/normalization-v1",
+    "evaluator_revision": "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc",
+    "manifest_status": "FROZEN_PRE_GPU",
+    "native_parser": "opengrad.formatting.parser.parse_qwen_native_output@v1",
+    "parent_experiment_id": "m0_sft_canonical_v2_final"
+  },
+  "manifest": "reports/evaluation/behavioral-heldout-v2.manifest.json",
+  "manifest_sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640",
+  "model_id": "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1800",
+  "model_revision": null,
+  "parse_valid_rate": 1.0,
+  "parser_status": {
+    "RAW_VALID": 2373
+  },
+  "records": 2373,
+  "renderer": "qwen3_5_2b_v1",
+  "routing": {
+    "call_f1": 0.7091866588648332,
+    "call_precision": 0.698961937716263,
+    "call_recall": 0.7197149643705463,
+    "clarification_accuracy": 0.7576197387518142,
+    "confusion_matrix": {
+      "ANSWER": {
+        "ANSWER": 0,
+        "CALL": 0,
+        "CLARIFY": 0,
+        "UNSUPPORTED": 0
+      },
+      "CALL": {
+        "ANSWER": 7,
+        "CALL": 606,
+        "CLARIFY": 202,
+        "UNSUPPORTED": 27
+      },
+      "CLARIFY": {
+        "ANSWER": 5,
+        "CALL": 138,
+        "CLARIFY": 522,
+        "UNSUPPORTED": 24
+      },
+      "UNSUPPORTED": {
+        "ANSWER": 39,
+        "CALL": 123,
+        "CLARIFY": 217,
+        "UNSUPPORTED": 463
+      }
+    },
+    "must_call_accuracy": 0.7197149643705463,
+    "no_call_accuracy": 0.0,
+    "over_call_rate": 0.170476812540823,
+    "under_call_rate": 0.00831353919239905,
+    "unsupported_accuracy": 0.5498812351543944
+  },
+  "run_id": "m0_sft_canonical_v2_final/eval/checkpoint-1800",
+  "schema_version": 1,
+  "status": "EXECUTED",
+  "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+}

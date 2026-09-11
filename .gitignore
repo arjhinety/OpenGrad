@@ -36,6 +36,12 @@ runs/**
 !runs/**/resolved_config.yaml
 !runs/**/eval/curve.json
 !runs/**/eval/checkpoint-*/metrics.json
+# Measurements are namespaced by evaluation partition (`eval/dev/`, `eval/confirmatory/`) so a
+# checkpoint scored on DEV and on the confirmatory partition cannot overwrite the other. These
+# patterns keep the summary artifacts committable at either depth.
+!runs/**/eval/*/curve.json
+!runs/**/eval/*/checkpoint-*/metrics.json
+!runs/**/eval/*/selection--*.json
 !runs/**/metrics/*.jsonl
 runs/**/predictions.jsonl
 runs/**/training_state.pt

@@ -340,6 +340,7 @@ def write_candidate_config(
     checkpoint_step: int,
     parent_experiment_id: str,
     out_path: Path,
+    namespace: str | None = None,
 ) -> Path:
     """Produce a candidate config by copying the frozen measurement and swapping the model.
 
@@ -356,10 +357,15 @@ def write_candidate_config(
     except ValueError:
         candidate["model_id"] = str(checkpoint)
     candidate["model_revision"] = None
+    # `namespace` separates two measurements of the same checkpoint that must not overwrite each
+    # other -- scoring it on the DEV partition and on the confirmatory partition. Without it the
+    # second run silently replaces the first, because both resolve to
+    # `runs/<experiment>/eval/<checkpoint>/`.
+    base = Path("runs") / parent_experiment_id / "eval"
+    if namespace:
+        base = base / namespace
     outputs = {
-        name: str(
-            Path("runs") / parent_experiment_id / "eval" / checkpoint_id / Path(str(value)).name
-        )
+        name: str(base / checkpoint_id / Path(str(value)).name)
         for name, value in dict(baseline["outputs"]).items()
     }
     candidate["outputs"] = outputs
@@ -369,6 +375,7 @@ def write_candidate_config(
             "parent_experiment_id": parent_experiment_id,
             "checkpoint_id": checkpoint_id,
             "checkpoint_step": checkpoint_step,
+            "partition_namespace": namespace,
             "base_model_id": baseline["model_id"],
             "base_model_revision": baseline["model_revision"],
         }

@@ -1,0 +1,56 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": null,
+  "dataset_hashes": {
+    "canonical_v2_final": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161"
+  },
+  "dataset_manifest_ids": [
+    "canonical_v2_final"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": false,
+    "git_sha": "fc63ec70f3b007893a63b29a30263eec611d7b0d",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-11T07:35:32.975638+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "m0_sft_canonical_v2_final",
+  "git_commit": "unknown",
+  "git_dirty": false,
+  "hardware_info": {},
+  "hypothesis": "M0 on the completed Canonical-v2 corpus: the first controlled SFT of Qwen3.5-2B against a corpus that carries supervision for the full tool-use process rather than for one fragment of it.\nTwo things changed since the successful partial-v2 run, and the corpus is the only variable this experiment is designed to test.\nFirst, the corpus now contains four sources instead of three. xLAM/APIGEN contributes 56,090 trainable next-tool-call-prediction records under an explicit `CALL_PREDICTION` supervision contract, which the partial-v2 corpus could not admit at all: it contributed 0 gradients.\nSecond, every record declares what it supervises. 56,090 trainable records are `CALL_PREDICTION` (34.6% of the corpus) and 105,876 are `COMPLETE_TRAJECTORY` (65.4%). The two are validated, rendered and measured separately, so this run can be read per contract rather than as one undifferentiated mixture.\nTHE EXPECTED EFFECT, STATED IN ADVANCE. Relative to partial-v2, call-prediction supervision should improve whether to call, which tool to call, and what arguments to generate. It should NOT be credited with improving tool-result interpretation, multi-turn recovery or multi-step planning, because none of the 56,090 call-prediction records contains a tool result. If the run improves the first group and not the second, that is the expected and informative outcome, not a partial failure.\nThe training recipe is deliberately UNCHANGED from `qwen35_2b_m0_sft_v2corpus`: same base checkpoint, full-parameter SFT, same learning rate, schedule, batch geometry, sequence length, seed and checkpoint cadence. This is a causal corpus experiment, not a hyperparameter search. Note that 2,400 steps now covers fewer epochs than on partial-v2, because the corpus grew from 103,036 to 173,237 canonical records; the step count is held fixed on purpose so the two runs differ in one respect, and the epoch difference is reported rather than compensated.\nTwo sources remain unavailable and are excluded rather than approximated: BUTTON (upstream access-gated) and LoopTool-23k (upstream not located). ToolACE and LoopTool's terminal-call shaped records stay classified `COMPLETE_TRAJECTORY` and therefore quarantined, because the available bytes do not establish whether they are intended next-call supervision or truncated trajectories.",
+  "launch_timestamp": "2026-09-11T07:35:32.981953+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": null,
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "TRAINED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "sft",
+  "training_config": {
+    "gradient_accumulation_steps": 2,
+    "gradient_checkpointing": true,
+    "gradient_clipping": 1.0,
+    "learning_rate": 1e-05,
+    "max_seq_length": 2048,
+    "max_steps": 2400,
+    "micro_batch_size": 8,
+    "micro_batch_tokens": 4096,
+    "optimizer": "adamw_torch",
+    "optimizer_state": "fp32",
+    "scheduler": "cosine",
+    "tuning_method": "full",
+    "type": "sft",
+    "warmup_steps": 120
+  }
+}

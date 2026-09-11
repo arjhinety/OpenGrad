@@ -60,7 +60,9 @@ def main() -> int:
         ),
     )
     parser.add_argument(
-        "--partition-side", default="dev", choices=["dev", "confirmatory"],
+        "--partition-side",
+        default="dev",
+        choices=["dev", "confirmatory"],
         help="which side of the partition to score",
     )
     parser.add_argument(
@@ -80,7 +82,9 @@ def main() -> int:
         print(f"no checkpoints under runs/{args.experiment_id}/checkpoints", file=sys.stderr)
         return 1
     include_ids = None
+    namespace = None
     if args.partition:
+        namespace = args.partition_side
         partition = json.loads((ROOT / args.partition).read_text(encoding="utf-8"))
         include_ids = set(partition["example_ids"][args.partition_side])
         print(
@@ -115,7 +119,13 @@ def main() -> int:
         # to check the path works writes the same file a full run did, and the curve then carries
         # a partial point that looks real. Refuse to replace an existing measurement unless asked.
         measured = (
-            ROOT / "runs" / args.experiment_id / "eval" / f"checkpoint-{step}" / "metrics.json"
+            ROOT
+            / "runs"
+            / args.experiment_id
+            / "eval"
+            / (namespace or "")
+            / f"checkpoint-{step}"
+            / "metrics.json"
         )
         if measured.is_file() and not args.force:
             print(
@@ -134,6 +144,7 @@ def main() -> int:
             checkpoint_step=step,
             parent_experiment_id=args.experiment_id,
             out_path=config_path,
+            namespace=namespace,
         )
         print(f"--- evaluating checkpoint-{step} ({checkpoint})", flush=True)
         started = time.monotonic()
@@ -151,7 +162,9 @@ def main() -> int:
         print(f"    {summary}", flush=True)
 
     out_path = (
-        Path(args.out) if args.out else ROOT / "runs" / args.experiment_id / "eval" / "curve.json"
+        Path(args.out)
+        if args.out
+        else ROOT / "runs" / args.experiment_id / "eval" / (namespace or "") / "curve.json"
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     # Merge with any previously measured points. Evaluating a subset must not silently discard the
