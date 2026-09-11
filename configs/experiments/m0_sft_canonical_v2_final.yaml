@@ -1,0 +1,129 @@
+experiment_id: m0_sft_canonical_v2_final
+hypothesis: >-
+  M0 on the completed Canonical-v2 corpus: the first controlled SFT of Qwen3.5-2B against a
+  corpus that carries supervision for the full tool-use process rather than for one fragment of
+  it.
+
+  Two things changed since the successful partial-v2 run, and the corpus is the only variable
+  this experiment is designed to test.
+
+  First, the corpus now contains four sources instead of three. xLAM/APIGEN contributes 56,090
+  trainable next-tool-call-prediction records under an explicit `CALL_PREDICTION` supervision
+  contract, which the partial-v2 corpus could not admit at all: it contributed 0 gradients.
+
+  Second, every record declares what it supervises. 56,090 trainable records are
+  `CALL_PREDICTION` (34.6% of the corpus) and 105,876 are `COMPLETE_TRAJECTORY` (65.4%). The two
+  are validated, rendered and measured separately, so this run can be read per contract rather
+  than as one undifferentiated mixture.
+
+  THE EXPECTED EFFECT, STATED IN ADVANCE. Relative to partial-v2, call-prediction supervision
+  should improve whether to call, which tool to call, and what arguments to generate. It should
+  NOT be credited with improving tool-result interpretation, multi-turn recovery or multi-step
+  planning, because none of the 56,090 call-prediction records contains a tool result. If the run
+  improves the first group and not the second, that is the expected and informative outcome, not
+  a partial failure.
+
+  The training recipe is deliberately UNCHANGED from `qwen35_2b_m0_sft_v2corpus`: same base
+  checkpoint, full-parameter SFT, same learning rate, schedule, batch geometry, sequence length,
+  seed and checkpoint cadence. This is a causal corpus experiment, not a hyperparameter search.
+  Note that 2,400 steps now covers fewer epochs than on partial-v2, because the corpus grew from
+  103,036 to 173,237 canonical records; the step count is held fixed on purpose so the two runs
+  differ in one respect, and the epoch difference is reported rather than compensated.
+
+  Two sources remain unavailable and are excluded rather than approximated: BUTTON (upstream
+  access-gated) and LoopTool-23k (upstream not located). ToolACE and LoopTool's terminal-call
+  shaped records stay classified `COMPLETE_TRAJECTORY` and therefore quarantined, because the
+  available bytes do not establish whether they are intended next-call supervision or truncated
+  trajectories.
+
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+
+datasets:
+  manifest_ids:
+    - canonical_v2_final
+  hashes:
+    canonical_v2_final: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
+  # The completed release. Distinct from `.release/hf/toolpolicy-canonical-v2`, which is the
+  # published partial snapshot; the rendering cache is keyed per corpus so the two cannot evict
+  # each other's samples.
+  release_dir: .release/hf/toolpolicy-canonical-v2-final
+  # The measured per-source trainability and supervision composition. Readiness fails if a source
+  # that should teach tool calling yields no tool-call targets, so this must be a real measurement
+  # and not a stub.
+  yield_report: reports/data/canonical-v2-final-yield.json
+  source_manifests:
+    - glaive-function-calling-v2
+    - toolace
+    - when2call
+    - xlam-function-calling-60k
+
+# The completed corpus is trained under natural sampling: every supervision kind is included and
+# none is reweighted. The ablation this makes available (all kinds vs complete trajectories only
+# vs call prediction only) is a later experiment, and runs by changing this block alone.
+supervision:
+  include:
+    - CALL_PREDICTION
+    - COMPLETE_TRAJECTORY
+
+trainer:
+  type: sft
+  tuning_method: full
+  learning_rate: 1.0e-5
+  micro_batch_size: 8
+  # Activation memory tracks batch width, not sequence count; see docs/SFT_TRAINING.md.
+  micro_batch_tokens: 4096
+  gradient_accumulation_steps: 2
+  max_steps: 2400
+  warmup_steps: 120
+  max_seq_length: 2048
+  scheduler: cosine
+  gradient_clipping: 1.0
+  gradient_checkpointing: true
+  optimizer: adamw_torch
+  optimizer_state: fp32
+
+evaluation:
+  suite: tool_use_core
+  baseline_experiment: tool_calling/qwen35_2b/baseline
+  # The set the winner is chosen on. `behavioral-heldout-v2` is shared with the partial-v2 run,
+  # which selected checkpoint 1200 on it, so it is development/checkpoint-selection evidence and
+  # is not clean test evidence. See docs/evaluation/CHECKPOINT_SELECTION.md.
+  checkpoint_selection_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json
+  primary_metrics:
+    - call_precision
+    - call_recall
+    - call_f1
+    - over_call_rate
+    - under_call_rate
+    - clarification_accuracy
+    - unsupported_accuracy
+    - parse_valid_rate
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+
+checkpointing:
+  save_steps: 600
+  max_checkpoints: 4
+
+promotion:
+  requires_executed_suite: tool_use_core
+  # Versioned policy: call_f1 alone would promote the degenerate always-call baseline, so the
+  # gate is behavioural. See src/opengrad/promotion/tool_use_policy.py.
+  policy_version: tool_use_promotion_v2
+  must_pass:
+    parse_valid_rate_min: 0.99
+  max_regression:
+    default: 1.0
+
+reproducibility:
+  seed: 42
+  precision: bfloat16
+
+speculative_decoding:
+  enabled: false

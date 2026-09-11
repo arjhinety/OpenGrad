@@ -329,6 +329,107 @@ datasets:
     status: pending_dataset_preparation
   exact_revision: null
   source_repository: https://huggingface.co/datasets/Salesforce/APIGen-MT-5k
+- id: canonical_v2_final
+  display_name: OpenGrad ToolPolicy Canonical v2 (final, four sources)
+  organization: OpenGrad
+  # Locally built and frozen; not yet uploaded. The historical partial snapshot is a separate
+  # entry (`canonical_v2`) and is not overwritten by this one.
+  hf_id: unpublished/OpenGrad-ToolPolicy-Canonical-v2
+  repository: configs/releases/toolpolicy_canonical_v2_final.yaml
+  papers:
+  - apigen
+  - toolace
+  - when2call
+  retrieval_date: '2026-09-11'
+  license:
+    value: COMPOSITE_PER_SOURCE
+    verified: true
+    source: release/huggingface/toolpolicy-canonical-v2-final/source-licenses.md
+  redistribution: PER_SOURCE
+  upstream_access_mode: mixed
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: APIGen
+  modifications_disclosed: true
+  original_sample_count: 173237
+  retained_sample_count: 173237
+  preprocessing_version: normalization-v2-final
+  # sha256 of the frozen release manifest. Two independent builds from the same commit produce
+  # this exact value, so it identifies the corpus and not the build.
+  checksum: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
+  source_revision:
+    value: 5d39594714316fc557319b09910b14da01ab2a0d
+    verified: true
+    source: opengrad_git_commit in .release/hf/toolpolicy-canonical-v2-final/release-manifest.json
+  exact_revision: 5d39594714316fc557319b09910b14da01ab2a0d
+  processed_dataset_hash:
+    status: FULL_DATA_VALIDATED
+    value: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
+  source_repository: .release/hf/toolpolicy-canonical-v2-final/release-manifest.json
+  sample_count:
+    published: 173237
+    verified_from: reports/data/canonical-v2-final-yield.json
+  retained_after_filtering:
+    status: FULL_DATA_VALIDATED
+    value: 173237
+  derived_from:
+  - id: glaive-function-calling-v2
+    source_revision: 7e7e32f0466699513b38923bc4991858e192c9274df22e243b9e77eb2775b6e8
+    upstream_license: Apache-2.0
+  - id: toolace
+    source_revision: 7a7a6a2c3b1003c7
+    upstream_license: Apache-2.0
+  - id: when2call
+    source_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    upstream_license: CC-BY-4.0
+  - id: xlam-function-calling-60k
+    source_revision: 26d14ebfe18b1f7b524bd39b404b50af5dc97866
+    upstream_license: CC-BY-4.0
+  category: tool_use
+  intended_stages:
+  - sft
+  allowed_splits:
+  - train
+  forbidden_splits:
+  - evaluation
+  - heldout
+  - preference
+  - mcq_test
+  - llm_judge_test
+  benchmark_overlap_risk: HIGH_IF_TEST_LEAKS
+  known_source_overlap: RECORDED_IN_BEHAVIORAL_HELDOUT_V2_CONTAMINATION_FOR_CANONICAL_V2_FINAL
+  contamination_status: SEMANTIC_REVIEW_COMPLETE
+  planned_initial_mixture_percent: null
+  supervision:
+    # What the corpus supervises, measured at the training boundary rather than counted at the
+    # canonical layer. Contract version: supervision_contract_v1.
+    contract_version: supervision_contract_v1
+    by_kind:
+      CALL_PREDICTION:
+        trainable_records: 56090
+        fraction_of_trainable: 0.346307
+      COMPLETE_TRAJECTORY:
+        trainable_records: 105876
+        fraction_of_trainable: 0.653693
+    by_source:
+      xlam-function-calling-60k: CALL_PREDICTION
+      glaive-function-calling-v2: COMPLETE_TRAJECTORY
+      toolace: COMPLETE_TRAJECTORY
+      when2call: COMPLETE_TRAJECTORY
+  findings:
+    yield_report: reports/data/canonical-v2-final-yield.json
+    report: reports/CANONICAL_V2_COMPLETION_REPORT.md
+    readiness_report: reports/PRE_SFT_READINESS_REPORT.md
+    next_experiment: configs/experiments/m0_sft_canonical_v2_final.yaml
+  notes: 'Completed four-source corpus and the first to carry an explicit supervision contract
+    per record. Adds xLAM (56,090 trainable CALL_PREDICTION records, 0 in the partial snapshot)
+    and recovers ToolACE from 697 to 11,051 canonical records by treating a null `required`
+    placeholder as asserting nothing. Trains under natural sampling: no kind is reweighted.
+    BUTTON and LoopTool-23k remain unavailable upstream and are excluded rather than approximated;
+    ToolACE and LoopTool terminal-call-shaped records remain quarantined under the conservative
+    COMPLETE_TRAJECTORY classification because the available bytes do not establish their intent.'
+
 - id: canonical_v2
   display_name: OpenGrad ToolPolicy Canonical v2 (M0 snapshot, partial)
   organization: OpenGrad
