@@ -25,7 +25,7 @@ The partial snapshot is unmodified and remains published separately.
 | Field | Value |
 |---|---|
 | Corpus fingerprint (release manifest sha256) | `8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161` |
-| Determinism | **proven** — two independent builds produce this manifest and all 176 shards byte-identical (`0` mismatches) |
+| Determinism | **proven** — two independent builds produce this manifest and all 176 shards byte-identical (`0` mismatches), and a *delete-and-rebuild* reproduces the fingerprint exactly because the release config pins `build_commit` |
 | Total canonical records | **173,237** |
 | Total trainable records | **161,966** |
 | Tool-call targets | **105,140** |
@@ -90,24 +90,23 @@ failures are genuine upstream defects and are not recoverable without inventing 
 
 No record was rescued by inferring semantics from shape. This is the discipline the whole
 supervision-contract design exists to enforce, and it costs real yield: ToolACE retains 20.4% of
-its canonical records.
+its canonical records and the gate **reports it as `ANOMALY` on every run** rather than having its
+threshold fitted to the measurement.
 
-That cost is recorded rather than hidden. The yield gate's ToolACE floor was **recalibrated from
-0.3 to 0.1** after measuring 0.204, and the justification matters: a floor of 0.3 fires
-permanently on a source behaving exactly as its classification intends, which trains a reader to
-ignore the gate. 0.1 still detects the failure that matters — if ToolACE's tool-call supervision
-disappeared, the yield would fall toward zero. The threshold was moved to stop a false alarm, not
-to make a real one go away, and the measurement that motivated it is in §3 rather than hidden
-behind the floor.
+That choice is deliberate and was contested. Setting the floor below 0.204 would have turned the
+gate green and made the run look cleaner; it would also have meant the threshold was fitted to the
+number it exists to judge, so the next degradation would pass unnoticed. `ANOMALY` does not block
+readiness, so the honest reading costs nothing operationally: a reader sees that 79.6% of this
+source is quarantined **by decision**, instead of a green tick that hides it.
 
-A second measurement changed a source's *expectation* rather than its threshold. When2Call was
-declared `expects_tool_calls: true` on the assumption that the `<TOOLCALL>` markers in its raw
-text became structured calls. They do not: 0 of its 6,505 canonical records carries a structured
-call, a tool result, or even the marker text. What it supervises is the **decision** — decline,
-ask for the missing detail, or answer directly — in natural language, which is precisely the
-behaviour B0 fails worst (`unsupported_accuracy` 0.0131, `clarification_accuracy` 0.1009). The
-expectation was corrected to `false` and `min_yield_ratio` retained as its collapse guard.
-Requiring structured calls of it would have failed a healthy source, not detected a broken one.
+A second measurement did change an *expectation* rather than a threshold. When2Call was declared
+`expects_tool_calls: true` on the assumption that its `<TOOLCALL>` markers became structured calls.
+Measured, 0 of its 6,505 canonical records carries a structured call, a tool result, or even the
+marker text. What it supervises is the **decision** — decline, ask for the missing detail, or answer
+directly — in natural language, which is precisely the behaviour B0 fails worst
+(`unsupported_accuracy` 0.0131, `clarification_accuracy` 0.1009). Requiring structured calls of it
+would have failed a healthy source rather than detected a broken one, so the expectation was
+corrected to `false` and `min_yield_ratio` retained as its collapse guard.
 
 ## 6. Contamination
 
@@ -158,7 +157,7 @@ infrastructure. None is disabled or dormant for this configuration.
 | `gpu_probe` / `gpu_boundary` | PASS | A100 receipt |
 | `real_b0` / `baseline_artifacts` | PASS | B0 immutable, predictions + metrics present |
 | `training_data_policy` | PASS | no evaluation-only dataset IDs |
-| `renderability_yield` | **ACTIVE** | reads a real measurement: `reports/data/canonical-v2-final-yield.json`. All four sources `OK`; xLAM contributes 56,090 tool-call targets and no source collapses |
+| `renderability_yield` | **ACTIVE** | reads a real measurement: `reports/data/canonical-v2-final-yield.json`. No source collapses; xLAM contributes 56,090 tool-call targets. Reports ToolACE as `ANOMALY` (0.204 against a floor of 0.3) — visible, non-blocking, and deliberately not threshold-fitted |
 | `supervision_composition` | **ACTIVE** | reads the same report; verifies per-kind composition and that the config's selection exists in the corpus |
 | `experiment_preflight` | PASS | |
 
