@@ -1,0 +1,364 @@
+{
+  "baseline": {
+    "artifact_contract_ok": true,
+    "artifact_paths": {
+      "environment": "/root/OpenGrad/reports/baselines/qwen35_2b_baseline/environment.json",
+      "metrics": "/root/OpenGrad/reports/baselines/qwen35_2b_baseline/metrics.json",
+      "predictions": "/root/OpenGrad/reports/baselines/qwen35_2b_baseline/predictions.jsonl",
+      "residual_profile": "/root/OpenGrad/reports/failures/qwen35_2b_baseline/residual-profile.json"
+    },
+    "artifacts": {
+      "environment": true,
+      "metrics": true,
+      "predictions": true,
+      "residual_profile": true
+    },
+    "expected_records": 3650,
+    "id": "qwen35_2b_baseline",
+    "metrics": {
+      "artifacts": {
+        "environment": "reports/baselines/qwen35_2b_baseline/environment.json",
+        "metrics": "reports/baselines/qwen35_2b_baseline/metrics.json",
+        "predictions": "reports/baselines/qwen35_2b_baseline/predictions.jsonl",
+        "residual_profile": "reports/failures/qwen35_2b_baseline/residual-profile.json"
+      },
+      "backend": "vllm",
+      "benchmarks": {
+        "bfcl": {
+          "status": "FROZEN_NOT_EXECUTED"
+        },
+        "tau2": {
+          "status": "FROZEN_NOT_EXECUTED"
+        },
+        "when2call": {
+          "metrics": {
+            "call_f1": 0.6191295795426605,
+            "call_precision": 0.4541847041847042,
+            "call_recall": 0.9722007722007722,
+            "clarification_accuracy": 0.1009433962264151,
+            "confusion_matrix": {
+              "ANSWER": {
+                "ANSWER": 0,
+                "CALL": 0,
+                "CLARIFY": 0,
+                "UNSUPPORTED": 0
+              },
+              "CALL": {
+                "ANSWER": 19,
+                "CALL": 1259,
+                "CLARIFY": 17,
+                "UNSUPPORTED": 0
+              },
+              "CLARIFY": {
+                "ANSWER": 29,
+                "CALL": 923,
+                "CLARIFY": 107,
+                "UNSUPPORTED": 1
+              },
+              "UNSUPPORTED": {
+                "ANSWER": 419,
+                "CALL": 590,
+                "CLARIFY": 269,
+                "UNSUPPORTED": 17
+              }
+            },
+            "must_call_accuracy": 0.9722007722007722,
+            "no_call_accuracy": 0.0,
+            "over_call_rate": 0.6424628450106157,
+            "under_call_rate": 0.014671814671814672,
+            "unsupported_accuracy": 0.013127413127413128
+          },
+          "status": "EXECUTED_LOCAL_BEHAVIORAL"
+        }
+      },
+      "context_buckets": {
+        "base": 3644,
+        "overflow": 6
+      },
+      "elapsed_seconds": 196.485601,
+      "engine": {
+        "batching": "continuous",
+        "dtype": "bfloat16",
+        "enforce_eager": false,
+        "gpu_memory_utilization": 0.9,
+        "max_model_len": 5760,
+        "max_num_seqs": 256,
+        "model_id": "Qwen/Qwen3.5-2B",
+        "name": "vllm",
+        "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+        "seed": 0,
+        "tensor_parallel_size": 1,
+        "version": "0.29.0"
+      },
+      "generation": {
+        "do_sample": false,
+        "max_new_tokens": 512,
+        "temperature": 0.0,
+        "tool_choice": "auto",
+        "top_p": 1.0
+      },
+      "generation_batch_size": 256,
+      "git_commit": "85ddc99df7a051cb6b462260868eb615ae739620",
+      "git_dirty": false,
+      "manifest": "reports/evaluation/behavioral-heldout-v2.manifest.json",
+      "manifest_sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "parse_valid_rate": 0.998904,
+      "parser_status": {
+        "FORMAT_ERROR": 4,
+        "RAW_VALID": 3646
+      },
+      "records": 3650,
+      "renderer": "qwen3_5_2b_v1",
+      "routing": {
+        "call_f1": 0.6191295795426605,
+        "call_precision": 0.4541847041847042,
+        "call_recall": 0.9722007722007722,
+        "clarification_accuracy": 0.1009433962264151,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 19,
+            "CALL": 1259,
+            "CLARIFY": 17,
+            "UNSUPPORTED": 0
+          },
+          "CLARIFY": {
+            "ANSWER": 29,
+            "CALL": 923,
+            "CLARIFY": 107,
+            "UNSUPPORTED": 1
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 419,
+            "CALL": 590,
+            "CLARIFY": 269,
+            "UNSUPPORTED": 17
+          }
+        },
+        "must_call_accuracy": 0.9722007722007722,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.6424628450106157,
+        "under_call_rate": 0.014671814671814672,
+        "unsupported_accuracy": 0.013127413127413128
+      },
+      "run_id": "tool_calling/qwen35_2b/baseline",
+      "schema_version": 1,
+      "status": "EXECUTED",
+      "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+      "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+    },
+    "min_parse_valid_rate": 0.99,
+    "parse_valid_rate": 0.998904,
+    "prediction_records": 3650,
+    "real": true,
+    "residual_profile": {
+      "baseline_experiment": "tool_calling/qwen35_2b/baseline",
+      "failure_counts": {
+        "FORMAT_ERROR": 4,
+        "OVER_CALL": 1513,
+        "PREMATURE_STOP": 714,
+        "UNDER_CALL": 36
+      },
+      "manifest_sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "residuals": {
+        "FORMAT_ERROR": 0.001095890410958904,
+        "OVER_CALL": 0.4145205479452055,
+        "PREMATURE_STOP": 0.19561643835616438,
+        "UNDER_CALL": 0.009863013698630137
+      },
+      "sample_count": 3650,
+      "schema_version": 1
+    },
+    "status": "REAL_COMPLETE"
+  },
+  "blocking_gates": [],
+  "config": "configs/experiments/m1_dpo_canonical_v2_final.yaml",
+  "dataset_revision": {
+    "m1_calibration_preference_pairs_v1": "d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4",
+    "preference": "d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4"
+  },
+  "gates": [
+    {
+      "details": "All registries validate",
+      "error_code": null,
+      "name": "repository_validation",
+      "status": "PASS"
+    },
+    {
+      "details": "Valid experiment config: configs/experiments/m1_dpo_canonical_v2_final.yaml",
+      "error_code": null,
+      "name": "config_validation",
+      "status": "PASS"
+    },
+    {
+      "details": "Pinned model revision: 15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "error_code": null,
+      "name": "model_revision",
+      "status": "PASS"
+    },
+    {
+      "details": "Canonical model ID: Qwen/Qwen3.5-2B",
+      "error_code": null,
+      "name": "model_identity",
+      "status": "PASS"
+    },
+    {
+      "details": "Pinned tokenizer revision: 15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "error_code": null,
+      "name": "tokenizer_revision",
+      "status": "PASS"
+    },
+    {
+      "details": "Experiment config delegates renderer contract to the frozen evaluation manifest",
+      "error_code": null,
+      "name": "chat_template_contract",
+      "status": "PASS"
+    },
+    {
+      "details": "frozen model, renderer, template, split, and content-hash contract match",
+      "error_code": null,
+      "name": "evaluation_manifest",
+      "status": "PASS"
+    },
+    {
+      "details": "All frozen evaluation split manifests are materialized",
+      "error_code": null,
+      "name": "evaluation_materialization",
+      "status": "PASS"
+    },
+    {
+      "details": "SFT dataset IDs, registry eligibility, source revisions, and hashes are pinned",
+      "error_code": null,
+      "name": "dataset_revision",
+      "status": "PASS"
+    },
+    {
+      "details": "SFT dataset IDs, registry eligibility, source revisions, and hashes are pinned",
+      "error_code": null,
+      "name": "dataset_snapshot",
+      "status": "PASS"
+    },
+    {
+      "details": "status=SEMANTIC_REVIEW_COMPLETE; missing_levels=none; pending_levels=none; sources_ok=True; scan_coverage[scanned ['button', 'glaive-function-calling-v2', 'looptool-23k', 'toolace', 'when2call-sft', 'xlam-function-calling-60k']; corpus contains ['button', 'glaive-function-calling-v2', 'looptool-23k', 'toolace', 'when2call-sft', 'xlam-function-calling-60k']]; level_5=COMPLETE; audit[findings=0; resolved=0; pending=0; quarantined=2]",
+      "error_code": null,
+      "name": "contamination_gate",
+      "status": "PASS"
+    },
+    {
+      "details": "Evaluation-only manifest excludes exactly the training manifests",
+      "error_code": null,
+      "name": "evaluation_leakage",
+      "status": "PASS"
+    },
+    {
+      "details": "43.66 GiB free",
+      "error_code": null,
+      "name": "disk_capacity",
+      "status": "PASS"
+    },
+    {
+      "details": "runs/ is writable",
+      "error_code": null,
+      "name": "artifact_storage",
+      "status": "PASS"
+    },
+    {
+      "details": "Qwen native parser is present",
+      "error_code": null,
+      "name": "native_parser",
+      "status": "PASS"
+    },
+    {
+      "details": "NVIDIA A100-SXM4-80GB; VRAM=79.25 GiB; BF16=True",
+      "error_code": null,
+      "name": "gpu_probe",
+      "status": "PASS"
+    },
+    {
+      "details": "Bounded Qwen smoke receipt has complete valid evidence",
+      "error_code": null,
+      "name": "gpu_boundary",
+      "status": "PASS"
+    },
+    {
+      "details": "OpenGrad experiment preflight: PASS",
+      "error_code": null,
+      "name": "experiment_preflight",
+      "status": "PASS"
+    },
+    {
+      "details": "Not an SFT configuration; training data policy deferred",
+      "error_code": null,
+      "name": "training_data_policy",
+      "status": "PASS"
+    },
+    {
+      "details": "Not an SFT configuration; per-source trainability deferred",
+      "error_code": null,
+      "name": "renderability_yield",
+      "status": "PASS"
+    },
+    {
+      "details": "Not an SFT configuration; supervision composition deferred",
+      "error_code": null,
+      "name": "supervision_composition",
+      "status": "PASS"
+    },
+    {
+      "details": "REAL_COMPLETE",
+      "error_code": null,
+      "name": "real_b0",
+      "status": "PASS"
+    },
+    {
+      "details": "{'metrics': '/root/OpenGrad/reports/baselines/qwen35_2b_baseline/metrics.json', 'predictions': '/root/OpenGrad/reports/baselines/qwen35_2b_baseline/predictions.jsonl', 'residual_profile': '/root/OpenGrad/reports/failures/qwen35_2b_baseline/residual-profile.json', 'environment': '/root/OpenGrad/reports/baselines/qwen35_2b_baseline/environment.json'}; raw_valid_rate=0.998904 (min 0.99)",
+      "error_code": null,
+      "name": "baseline_artifacts",
+      "status": "PASS"
+    },
+    {
+      "details": "M1 parent, reference, preference hash/count, frozen evaluation manifest, and policy are pinned (481 pairs)",
+      "error_code": null,
+      "name": "dpo_contract",
+      "status": "PASS"
+    }
+  ],
+  "git_commit": "92ca2b91e7fb1a3b7bd13cc85aa01a596805f3fb",
+  "gpu": {
+    "a100_variant": "A100_80GB",
+    "bf16_supported": true,
+    "compute_capability": [
+      8,
+      0
+    ],
+    "cuda_driver_version": null,
+    "cuda_runtime_version": "13.0",
+    "details": {},
+    "fp8_native_supported": false,
+    "gpu_available": true,
+    "gpu_name": "NVIDIA A100-SXM4-80GB",
+    "is_a100": true,
+    "pytorch_version": "2.13.0+cu130",
+    "total_vram_gb": 79.25,
+    "transformers_version": "5.17.0",
+    "trl_version": "1.13.0",
+    "vllm_available": true
+  },
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "ready_for_baseline": true,
+  "ready_for_dpo": true,
+  "ready_for_sft": true,
+  "schema_version": 1,
+  "status": "PASS",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "warnings": []
+}
