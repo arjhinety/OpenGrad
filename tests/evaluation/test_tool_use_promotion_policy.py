@@ -89,10 +89,16 @@ def test_a_healthy_candidate_promotes() -> None:
 
 
 def test_macro_recall_is_the_mean_of_the_four_class_dimensions() -> None:
-    metrics = {"must_call_accuracy": 1.0, "no_call_accuracy": 1.0,
-               "clarification_accuracy": 1.0, "unsupported_accuracy": 1.0}
+    metrics = {
+        "must_call_accuracy": 1.0,
+        "no_call_accuracy": 1.0,
+        "clarification_accuracy": 1.0,
+        "unsupported_accuracy": 1.0,
+    }
     assert PromotionPolicyV2()._macro(metrics) == pytest.approx(1.0)
-    assert PromotionPolicyV2()._macro({name: 0.5 for name in MACRO_DIMENSIONS}) == pytest.approx(0.5)
+    assert PromotionPolicyV2()._macro({name: 0.5 for name in MACRO_DIMENSIONS}) == pytest.approx(
+        0.5
+    )
 
 
 def test_missing_macro_dimensions_count_as_zero_not_as_passing() -> None:

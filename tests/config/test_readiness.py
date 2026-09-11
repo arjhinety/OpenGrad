@@ -290,10 +290,18 @@ def test_renderability_gate_blocks_a_collapsed_source(tmp_path):
         json.dumps(
             {
                 "sources": [
-                    {"source": "xlam", "status": "COLLAPSE", "canonical_records": 59370,
-                     "trainable_records": 0},
-                    {"source": "glaive", "status": "OK", "canonical_records": 100,
-                     "trainable_records": 99},
+                    {
+                        "source": "xlam",
+                        "status": "COLLAPSE",
+                        "canonical_records": 59370,
+                        "trainable_records": 0,
+                    },
+                    {
+                        "source": "glaive",
+                        "status": "OK",
+                        "canonical_records": 100,
+                        "trainable_records": 99,
+                    },
                 ]
             }
         ),
@@ -313,9 +321,7 @@ def test_renderability_gate_passes_a_healthy_report(tmp_path):
     (tmp_path / "yield.json").write_text(
         json.dumps({"sources": [{"source": "glaive", "status": "OK"}]}), encoding="utf-8"
     )
-    ok, _detail, code = _renderability_state(
-        tmp_path, {"datasets": {"yield_report": "yield.json"}}
-    )
+    ok, _detail, code = _renderability_state(tmp_path, {"datasets": {"yield_report": "yield.json"}})
     assert ok is True
     assert code is None
 
@@ -323,8 +329,6 @@ def test_renderability_gate_passes_a_healthy_report(tmp_path):
 def test_renderability_gate_fails_closed_on_a_missing_report(tmp_path):
     from opengrad.readiness import _renderability_state
 
-    ok, _detail, code = _renderability_state(
-        tmp_path, {"datasets": {"yield_report": "nope.json"}}
-    )
+    ok, _detail, code = _renderability_state(tmp_path, {"datasets": {"yield_report": "nope.json"}})
     assert ok is False
     assert code == "YIELD_REPORT_MISSING"

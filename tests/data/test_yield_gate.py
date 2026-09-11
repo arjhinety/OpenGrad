@@ -46,9 +46,7 @@ def test_context_tail_truncated_is_trainable() -> None:
 
 
 def test_ratios_are_computed_against_canonical_records() -> None:
-    yields = aggregate_yields(
-        [("a", "OK", True)] * 3 + [("a", "UNRENDERABLE", False)] * 1
-    )
+    yields = aggregate_yields([("a", "OK", True)] * 3 + [("a", "UNRENDERABLE", False)] * 1)
     entry = yields["a"]
     assert entry.canonical_records == 4
     assert entry.yield_ratio == pytest.approx(0.75)
@@ -93,7 +91,9 @@ def test_canonical_v1_shape_is_a_collapse() -> None:
         yields,
         {
             "defaults": DEFAULT_EXPECTATIONS,
-            "sources": {"canonical_v1": {"expects_tool_calls": True, "min_tool_call_target_ratio": 0.2}},
+            "sources": {
+                "canonical_v1": {"expects_tool_calls": True, "min_tool_call_target_ratio": 0.2}
+            },
         },
     )
     assert findings[0]["status"] == YIELD_ANOMALY
@@ -174,7 +174,9 @@ def test_partial_expectation_inherits_defaults(tmp_path) -> None:
     path = tmp_path / "e.yaml"
     path.write_text("schema_version: 1\nsources:\n  s:\n    expects_tool_calls: true\n")
     expectations = load_expectations(path)
-    assert expectations["sources"]["s"]["min_yield_ratio"] == DEFAULT_EXPECTATIONS["min_yield_ratio"]
+    assert (
+        expectations["sources"]["s"]["min_yield_ratio"] == DEFAULT_EXPECTATIONS["min_yield_ratio"]
+    )
 
 
 def test_render_table_includes_reasons() -> None:

@@ -21,8 +21,9 @@ targets -- rather than silently contributing nothing to the mixture.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Iterable
+from typing import Any
 
 # Gate outcomes.
 YIELD_OK = "OK"
@@ -116,9 +117,9 @@ DEFAULT_EXPECTATIONS: dict[str, Any] = {
 
 def load_expectations(path: Any) -> dict[str, Any]:
     """Load the per-source expectation config, falling back to conservative defaults."""
-    import yaml
-
     from pathlib import Path
+
+    import yaml
 
     config = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
     if not isinstance(config, dict):
@@ -129,7 +130,10 @@ def load_expectations(path: Any) -> dict[str, Any]:
         if not isinstance(entry, dict):
             raise TypeError(f"yield expectation for {name} must be a mapping")
         merged[str(name)] = {**DEFAULT_EXPECTATIONS, **entry}
-    return {"defaults": {**DEFAULT_EXPECTATIONS, **(config.get("defaults") or {})}, "sources": merged}
+    return {
+        "defaults": {**DEFAULT_EXPECTATIONS, **(config.get("defaults") or {})},
+        "sources": merged,
+    }
 
 
 def evaluate_yield_gate(
@@ -153,9 +157,7 @@ def evaluate_yield_gate(
         else:
             if measured.trainable_records == 0:
                 status = YIELD_COLLAPSE
-                reasons.append(
-                    f"0 of {measured.canonical_records} canonical records are trainable"
-                )
+                reasons.append(f"0 of {measured.canonical_records} canonical records are trainable")
             elif measured.yield_ratio < float(rules["min_yield_ratio"]):
                 status = YIELD_ANOMALY
                 reasons.append(
@@ -178,7 +180,9 @@ def evaluate_yield_gate(
                         f"floor {float(rules['min_tool_call_target_ratio']):.3f} for a source "
                         "expected to teach tool calling"
                     )
-        findings.append({"source": name, "status": status, "reasons": reasons, **measured.as_dict()})
+        findings.append(
+            {"source": name, "status": status, "reasons": reasons, **measured.as_dict()}
+        )
     return findings
 
 
@@ -189,10 +193,7 @@ def gate_is_blocking(findings: list[dict[str, Any]]) -> bool:
 
 def render_yield_table(findings: list[dict[str, Any]]) -> str:
     """A compact human-readable table for reports and CLI output."""
-    header = (
-        f"{'source':<34}{'canon':>8}{'train':>8}{'calls':>8}"
-        f"{'yield':>8}{'call%':>8}  status"
-    )
+    header = f"{'source':<34}{'canon':>8}{'train':>8}{'calls':>8}{'yield':>8}{'call%':>8}  status"
     lines = [header, "-" * len(header)]
     for finding in findings:
         lines.append(

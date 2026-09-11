@@ -27,13 +27,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-import pyarrow.parquet as pq  # noqa: E402
+import pyarrow.parquet as pq
 
-from opengrad.data.adapters import adapt_xlam  # noqa: E402
-from opengrad.data.canonical import canonical_dict  # noqa: E402
-from opengrad.data.renderers import Qwen35_2BRenderer  # noqa: E402
-from opengrad.data.schema import SchemaValidationError, effective_schema  # noqa: E402
-from opengrad.data.xlam_types import (  # noqa: E402
+from opengrad.data.adapters import adapt_xlam
+from opengrad.data.canonical import canonical_dict
+from opengrad.data.renderers import Qwen35_2BRenderer
+from opengrad.data.schema import SchemaValidationError, effective_schema
+from opengrad.data.xlam_types import (
     XlamAnnotationError,
     is_canonical_object_schema,
 )
@@ -106,7 +106,8 @@ def main() -> int:
     renderer = Qwen35_2BRenderer()
     build_sample = None
     if not args.skip_training_boundary:
-        from opengrad.training.sft_data import TRAINABLE, build_sample as _build_sample
+        from opengrad.training.sft_data import TRAINABLE
+        from opengrad.training.sft_data import build_sample as _build_sample
 
         build_sample = _build_sample
 
@@ -196,9 +197,7 @@ def main() -> int:
                     rule_totals[rule] += count
 
                 canonical_hash = hashlib.sha256(
-                    json.dumps(
-                        canonical_dict(conversation), sort_keys=True, default=str
-                    ).encode()
+                    json.dumps(canonical_dict(conversation), sort_keys=True, default=str).encode()
                 ).hexdigest()
                 if canonical_hash in seen_hashes:
                     duplicates += 1
@@ -207,9 +206,7 @@ def main() -> int:
                     seen_hashes.add(canonical_hash)
                     hashes.append(canonical_hash)
 
-                has_calls = any(
-                    message.get("tool_calls") for message in conversation.messages
-                )
+                has_calls = any(message.get("tool_calls") for message in conversation.messages)
                 if has_calls:
                     counters["targets_with_tool_calls"] += 1
                 else:

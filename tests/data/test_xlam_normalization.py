@@ -14,8 +14,8 @@ from opengrad.data.adapters import adapt_xlam
 from opengrad.data.schema import SchemaValidationError, effective_schema
 from opengrad.data.xlam_types import (
     RULE_GENERIC,
-    RULE_REQUIREDNESS_UNASSERTED,
     RULE_OPTIONAL,
+    RULE_REQUIREDNESS_UNASSERTED,
     RULE_SCALAR_ALIAS,
     RULE_WRAPPER,
     XlamAnnotationError,
@@ -77,7 +77,11 @@ def test_default_modifier_is_recorded_but_does_not_imply_optional() -> None:
 
 @pytest.mark.parametrize(
     "annotation",
-    ["str, optional, default 'London'", "int, optional, default=100", "str, optional, default='fr-FR'"],
+    [
+        "str, optional, default 'London'",
+        "int, optional, default=100",
+        "str, optional, default='fr-FR'",
+    ],
 )
 def test_combined_optional_and_default_modifiers(annotation: str) -> None:
     parsed = parse_xlam_annotation(annotation)
@@ -210,11 +214,11 @@ def test_parameter_literally_named_type_is_a_property_not_a_schema_keyword() -> 
     assert schema["properties"] == {"type": {"type": "string", "description": "kind"}}
 
 
-@pytest.mark.parametrize("keyword_like", ["type", "format", "items", "properties", "required", "enum"])
+@pytest.mark.parametrize(
+    "keyword_like", ["type", "format", "items", "properties", "required", "enum"]
+)
 def test_every_keyword_like_parameter_name_is_treated_as_a_property(keyword_like: str) -> None:
-    tools, _ = normalize_xlam_tools(
-        [{"name": "t", "parameters": {keyword_like: {"type": "str"}}}]
-    )
+    tools, _ = normalize_xlam_tools([{"name": "t", "parameters": {keyword_like: {"type": "str"}}}])
     assert tools[0]["parameters"]["properties"] == {keyword_like: {"type": "string"}}
 
 
@@ -347,9 +351,7 @@ def test_default_is_preserved_but_not_treated_as_an_optionality_signal() -> None
 
 
 def test_all_optional_map_omits_required_entirely() -> None:
-    tools, _ = normalize_xlam_tools(
-        [{"name": "t", "parameters": {"a": {"type": "str, optional"}}}]
-    )
+    tools, _ = normalize_xlam_tools([{"name": "t", "parameters": {"a": {"type": "str, optional"}}}])
     assert "required" not in tools[0]["parameters"]
 
 
@@ -452,7 +454,9 @@ def test_adapter_tool_schema_is_canonical_and_required_is_correct() -> None:
 
 
 def test_adapter_fails_closed_on_an_unsupported_annotation() -> None:
-    record = _xlam_record([{"name": "cb", "parameters": {"fn": {"type": "Callable[[float], float]"}}}])
+    record = _xlam_record(
+        [{"name": "cb", "parameters": {"fn": {"type": "Callable[[float], float]"}}}]
+    )
     with pytest.raises(XlamAnnotationError) as excinfo:
         adapt_xlam(record)
     assert excinfo.value.reason_code == "XLAM_TYPE_UNSUPPORTED_CALLABLE"

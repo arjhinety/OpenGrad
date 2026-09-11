@@ -72,9 +72,7 @@ class PromotionPolicyV2:
         values = [float(metrics.get(name, 0.0)) for name in MACRO_DIMENSIONS]
         return sum(values) / len(values) if values else 0.0
 
-    def evaluate(
-        self, candidate: dict[str, Any], baseline: dict[str, Any]
-    ) -> dict[str, Any]:
+    def evaluate(self, candidate: dict[str, Any], baseline: dict[str, Any]) -> dict[str, Any]:
         checks: list[dict[str, Any]] = []
 
         def check(name: str, observed: float, requirement: str, passed: bool, detail: str) -> None:
@@ -139,7 +137,12 @@ class PromotionPolicyV2:
         )
 
         # --- non-regression against the baseline ---------------------------------
-        for name in ("call_precision", "call_recall", "clarification_accuracy", "unsupported_accuracy"):
+        for name in (
+            "call_precision",
+            "call_recall",
+            "clarification_accuracy",
+            "unsupported_accuracy",
+        ):
             if name not in candidate or name not in baseline:
                 continue
             allowed = float(self.max_regression.get(name, self.max_regression.get("default", 0.10)))
