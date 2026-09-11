@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "HF_PUBLICATION_RECORD",
+  "published": "2026-09-11",
+  "experiment": "joint xLAM + CALL_PREDICTION removal (paired fixed-compute / matched-exposure)",
+  "attribution_limit": "Source identity and supervision type are perfectly aligned in Canonical-v2; this records a joint-removal publication and supports no xLAM-specific causal claim.",
+  "collection": {
+    "slug": "arrochi112/opengrad-models-6aa3c7ea9ae58be5adbb113e",
+    "title": "OpenGrad — models",
+    "url": "https://huggingface.co/collections/arrochi112/opengrad-models-6aa3c7ea9ae58be5adbb113e",
+    "new_items": [
+      "arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute",
+      "arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure"
+    ]
+  },
+  "models": [
+    {
+      "repository": "arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute",
+      "repo_type": "model",
+      "hub_revision": "b07aeca26061a8188f33b6240d8be0ad5b21a827",
+      "public": true,
+      "files": 31,
+      "checkpoints": {
+        "600": "retained",
+        "1200": "retained; selected on DEV, scored once on confirmatory, REJECTED on regression.call_recall",
+        "1800": "retained",
+        "2400": "retained"
+      },
+      "steps": 2400,
+      "confirmatory": {"call_f1": 0.6030, "call_precision": 0.7893, "call_recall": 0.4879, "over_call_rate": 0.0716}
+    },
+    {
+      "repository": "arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure",
+      "repo_type": "model",
+      "hub_revision": "69fd6a98e056fdfb108f01e87bc4f776565b4b7b",
+      "public": true,
+      "files": 31,
+      "checkpoints": {
+        "530": "retained",
+        "1060": "retained; selected on DEV by tie-break, scored once on confirmatory, REJECTED on regression.call_recall",
+        "1590": "retained",
+        "2119": "retained"
+      },
+      "steps": 2119,
+      "confirmatory": {"call_f1": 0.5557, "call_precision": 0.8067, "call_recall": 0.4238, "over_call_rate": 0.0558}
+    }
+  ],
+  "dataset_minus_xlam": {
+    "repository": "arrochi112/OpenGrad-ToolPolicy-Canonical-v2-minus-xlam",
+    "repo_type": "dataset",
+    "hub_revision": "7a46f4e4604cf31a5d877f90ade49322f77a4f3d",
+    "current_derived_fingerprint": "5fc739040b1a09fa7b8ac20494609bd4cbe89efc6ed54e4dbc9c2df12268b7f3",
+    "superseded_hub_revision": "8ea9154881a53d735697a5ca16fcd71a23795605",
+    "superseded_derived_fingerprint": "f8ba687e16d8ab740b78a503adb41f4be28bd775f925291d6da7ec31be1ac5ac",
+    "correction": "Interpretation-only: the card now states that removing xLAM also removes the CALL_PREDICTION channel. Parquet bytes and the 118-shard set are unchanged and still byte-identical to the frozen parent.",
+    "retained_shards": 118,
+    "record_count": 115895
+  },
+  "verification": {
+    "remote_checkpoint_weights_checked": 8,
+    "all_present_and_nonzero": true,
+    "local_weights_deleted": false,
+    "note": "Upload-then-verify was applied before anything was considered deletable; with ample disk, every local checkpoint remains retained."
+  },
+  "notes": [
+    "Both arms are published together because they are one paired experiment; neither is the conclusion alone.",
+    "Published checkpoints include the DEV-selected one and every retained intermediate, so the trajectory is checkable, not just the endpoint.",
+    "The reference run and the partial-v2 snapshot are untouched and remain published separately."
+  ]
+}

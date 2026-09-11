@@ -392,6 +392,8 @@ The table above lists interventions; the baseline is recorded by the experiment 
 | [`qwen35_2b_m1_dpo_v1`](runs/qwen35_2b_m1_dpo_v1/) | Qwen3.5-2B | DPO on When2Call preference pairs | `call_f1` 0.6191 → **0.1715** best | Over-calling fixed, tool calling destroyed | **No** | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md) |
 | [`qwen35_2b_m0_sft_v2corpus`](runs/qwen35_2b_m0_sft_v2corpus/) | Qwen3.5-2B | M0 SFT on partial corpus v2 | `call_f1` 0.6191 → **0.5995**; macro recall 0.3621 → **0.6416** | None measured; not promoted | Pending | [M0 report §8](reports/M0_SFT_EXECUTION_REPORT.md) |
 | [`m0_sft_canonical_v2_final`](runs/m0_sft_canonical_v2_final/) | Qwen3.5-2B | M0 SFT on **frozen Canonical-v2** | `call_f1` **0.7470**; recall 0.5342 → **0.7594** | Precision −0.026, over-call +0.058 vs partial-v2 | Confirmatory partition | [Execution](reports/M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md) · [Evaluation](reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
+| [`m0_v2_final_minus_xlam_fixed_compute`](runs/m0_v2_final_minus_xlam_fixed_compute/) | Qwen3.5-2B | **joint xLAM + CALL_PREDICTION removal**, fixed compute (2,400 steps) | `call_f1` 0.7470 → **0.6030**; recall 0.7594 → **0.4879** | Precision +0.054, over-call −0.079 vs full corpus | Confirmatory partition | [Execution](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
+| [`m0_v2_final_minus_xlam_matched_exposure`](runs/m0_v2_final_minus_xlam_matched_exposure/) | Qwen3.5-2B | **joint xLAM + CALL_PREDICTION removal**, matched exposure (2,119 steps) | `call_f1` 0.7470 → **0.5557**; recall 0.7594 → **0.4238** | Precision +0.072, over-call −0.105 vs full corpus | Confirmatory partition | [Execution](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
 
 Two caveats belong next to those numbers rather than in a footnote.
 
@@ -401,6 +403,8 @@ Two caveats belong next to those numbers rather than in a footnote.
 
 **The definitive M0 is not a promotion.** By the repository's own promotion policy every checkpoint is `REJECT`, including the selected one, because B0's recall of 0.9715 is itself a property of over-calling and the policy caps over-call at 0.20 while forbidding a recall drop beyond 0.10. The gate was left as written rather than adjusted after seeing the result. That tension is a finding for the next experiment's design, not a threshold to move.
 
+**The minus-xLAM arms are a joint removal, not a pure xLAM ablation.** Canonical-v2 maps xLAM to *every* `CALL_PREDICTION` record and the other three sources to `COMPLETE_TRAJECTORY`, so removing xLAM also removes the corpus's entire call-prediction supervision channel. The two arms measure **removing xLAM together with that channel**; they cannot separate source identity from supervision type, so **no xLAM-specific causal claim** is made. Both arms lose far more recall than over-calling, and the arm that trains more (fixed compute) does better — the recall loss tracks the missing supervision, not the reduced budget. The separate `CALL_PREDICTION`-only vs `COMPLETE_TRAJECTORY`-only design is prepared and unrun, and is source-confounded in the same way. See the [ablation design](reports/M0_V2_FINAL_ABLATION_DESIGN.md).
+
 Published artifacts for these runs:
 
 | Artifact | Kind | Contents |
@@ -408,6 +412,8 @@ Published artifacts for these runs:
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final) | model | the selected checkpoint (1800) + the findings page |
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2) | model | 4 checkpoints (600/1200/1800/2400) — intact |
 | [`OpenGrad-Qwen3.5-2B-M1-DPO`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO) | model | checkpoint 300 only + the deleted checkpoints' predictions |
+| [`OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute) | model | all 4 checkpoints (600/1200/1800/2400) of the joint-removal fixed-compute arm |
+| [`OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure) | model | all 4 checkpoints (530/1060/1590/2119) of the joint-removal matched-exposure arm |
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation`](https://huggingface.co/datasets/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation) | evaluation record | predictions and metrics for 5 of 6 checkpoints — **no weights exist** |
 
 `results/registry.jsonl` is a **derived index**, not a store: one summary row per experiment, rebuilt from `runs/<experiment_id>/experiment.json`, `runs/<experiment_id>/eval/` and `runs/central_ledger.jsonl`. It can be deleted at any time — `opengrad results rebuild-registry` regenerates it byte-for-byte — so the authoritative values stay in the run artifacts and the index only makes them discoverable. `opengrad results validate-registry` reports any divergence. See [the results namespace](results/README.md).
