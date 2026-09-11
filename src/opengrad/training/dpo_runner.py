@@ -209,6 +209,7 @@ class DPOSettings:
     save_steps: int
     max_checkpoints: int
     reference: str
+    scheduler: str
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -224,6 +225,7 @@ class DPOSettings:
             "save_steps": self.save_steps,
             "max_checkpoints": self.max_checkpoints,
             "reference": self.reference,
+            "scheduler": self.scheduler,
         }
 
 
@@ -267,4 +269,5 @@ def resolve_dpo_settings(experiment: dict[str, Any], trainer: dict[str, Any]) ->
         save_steps=int((experiment.get("checkpointing") or {}).get("save_steps", 0) or 0),
         max_checkpoints=int((experiment.get("checkpointing") or {}).get("max_checkpoints", 2) or 0),
         reference=str(reference),
+        scheduler=str(trainer.get("scheduler", "constant")),
     )

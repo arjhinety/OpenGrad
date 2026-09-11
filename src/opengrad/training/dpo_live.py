@@ -20,7 +20,7 @@ count, and it records that hash in the run.
 
 from __future__ import annotations
 
-import copy
+import hashlib
 import json
 import os
 import random
@@ -121,6 +121,32 @@ def build_prompt(tokenizer: Any, pair: dict[str, Any]) -> str:
     return str(tokenizer.apply_chat_template(messages, **kwargs))
 
 
+def _project_path(root: Path, value: Any, label: str) -> Path:
+    if not value:
+        raise TrainingConfigError(f"{label} must be declared for a real DPO run")
+    path = Path(str(value))
+    if not path.is_absolute():
+        path = (root / path).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise TrainingConfigError(f"{label} must remain inside the repository")
+    if (
+        not path.is_dir()
+        or not (path / "config.json").is_file()
+        or not (path / "model.safetensors").is_file()
+    ):
+        raise TrainingConfigError(f"{label} is not a loadable checkpoint: {path}")
+    return path
+
+
+def _checkpoint_identity(path: Path) -> dict[str, Any]:
+    weights = path / "model.safetensors"
+    digest = hashlib.sha256()
+    with weights.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return {"path": str(path), "model_sha256": digest.hexdigest(), "bytes": weights.stat().st_size}
+
+
 def run_real_dpo(
     *,
     experiment_id: str,
@@ -148,9 +174,36 @@ def run_real_dpo(
     model_spec = experiment.get("model") or {}
     model_id = model_spec.get("model_id")
     model_revision = model_spec.get("model_revision")
-    tokenizer_revision = model_spec.get("tokenizer_revision", model_revision)
     if not model_id or not model_revision:
         raise TrainingConfigError("experiment.model must pin model_id and model_revision")
+
+    initial_checkpoint = _project_path(
+        root, trainer_config.get("initial_checkpoint"), "trainer.initial_checkpoint"
+    )
+    initial_identity = _checkpoint_identity(initial_checkpoint)
+    expected_initial_hash = trainer_config.get("initial_checkpoint_sha256")
+    if expected_initial_hash != initial_identity["model_sha256"]:
+        raise TrainingConfigError(
+            "initial checkpoint hash mismatch: "
+            f"config={expected_initial_hash} on_disk={initial_identity['model_sha256']}"
+        )
+    parent_checkpoint_id = str(trainer_config.get("parent_checkpoint_id") or "")
+    if not parent_checkpoint_id:
+        raise TrainingConfigError("trainer.parent_checkpoint_id is required for M1 lineage")
+
+    reference_checkpoint = initial_checkpoint
+    if settings.reference == "explicit_checkpoint":
+        reference_checkpoint = _project_path(
+            root, trainer_config.get("reference_checkpoint"), "trainer.reference_checkpoint"
+        )
+    reference_identity = _checkpoint_identity(reference_checkpoint)
+    if (
+        settings.reference == "explicit_checkpoint"
+        and reference_identity["model_sha256"] != initial_identity["model_sha256"]
+    ):
+        raise TrainingConfigError(
+            "reference checkpoint must match the initial M1 policy checkpoint for this calibration run"
+        )
 
     preference_path = preference_path_for(experiment, root)
     raw_pairs = load_preference_pairs(preference_path, min_records=8)
@@ -179,6 +232,9 @@ def run_real_dpo(
         git_dirty=provenance["dirty"],
         settings=settings.to_dict(),
         preference_dataset=identity,
+        parent_checkpoint_id=parent_checkpoint_id,
+        initial_checkpoint=initial_identity,
+        reference_checkpoint=reference_identity,
     )
     (output_dir / "preference_dataset.json").write_text(
         json.dumps(identity, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -189,7 +245,7 @@ def run_real_dpo(
     dtype = torch.bfloat16 if settings.precision == "bfloat16" else torch.float32
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
-        model_id, revision=str(tokenizer_revision), trust_remote_code=False
+        str(initial_checkpoint), trust_remote_code=False
     )
     pad_token_id = (
         tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
@@ -198,16 +254,20 @@ def run_real_dpo(
         raise TrainingConfigError("tokenizer exposes neither pad_token_id nor eos_token_id")
 
     model = transformers.AutoModelForCausalLM.from_pretrained(
-        model_id,
-        revision=str(model_revision),
+        str(initial_checkpoint),
         trust_remote_code=False,
-        dtype=dtype,
+        torch_dtype=dtype,
         device_map="auto",
     )
     model.gradient_checkpointing_enable()
     model.train()
 
-    reference = copy.deepcopy(model)
+    reference = transformers.AutoModelForCausalLM.from_pretrained(
+        str(reference_checkpoint),
+        trust_remote_code=False,
+        torch_dtype=dtype,
+        device_map="auto",
+    )
     reference.eval()
     for parameter in reference.parameters():
         parameter.requires_grad_(False)
@@ -215,6 +275,14 @@ def run_real_dpo(
     optimizer = torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad], lr=settings.learning_rate
     )
+    if settings.scheduler == "cosine":
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=settings.max_steps)
+    elif settings.scheduler == "constant":
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda _: 1.0)
+    else:
+        raise TrainingConfigError(
+            f"trainer.scheduler must be one of cosine, constant; got {settings.scheduler!r}"
+        )
     device = next(model.parameters()).device
 
     prompt_format = resolve_prompt_format(experiment)
@@ -244,7 +312,12 @@ def run_real_dpo(
         )
     emit("pairs_ready", usable_pairs=len(encoded), skipped_pairs=rejected_pairs)
 
-    world: dict[str, Any] = {"optimizer_step": 0, "interrupted": False}
+    world: dict[str, Any] = {
+        "optimizer_step": 0,
+        "interrupted": False,
+        "examples_seen": 0,
+        "supervised_tokens_seen": 0,
+    }
     history: list[dict[str, Any]] = []
     created: list[str] = []
     started = time.monotonic()
@@ -290,9 +363,14 @@ def run_real_dpo(
                 [p for p in model.parameters() if p.requires_grad], max_norm=1.0
             )
             optimizer.step()
+            scheduler.step()
             optimizer.zero_grad(set_to_none=True)
             accum = 0
             world["optimizer_step"] += 1
+            world["examples_seen"] += len(batch)
+            world["supervised_tokens_seen"] += sum(
+                sum(chosen_mask) + sum(rejected_mask) for _, chosen_mask, _, rejected_mask in batch
+            )
 
             entry = {
                 "step": world["optimizer_step"],
@@ -300,7 +378,7 @@ def run_real_dpo(
                 "reward_margin": round(float(margin), 6),
                 "preference_accuracy": round(float(accuracy), 6),
                 "grad_norm": round(float(grad_norm), 6),
-                "learning_rate": settings.learning_rate,
+                "learning_rate": float(optimizer.param_groups[0]["lr"]),
                 "elapsed_seconds": round(time.monotonic() - started, 3),
                 "gpu_peak_gib": round(torch.cuda.max_memory_allocated() / 2**30, 4),
             }
@@ -323,12 +401,25 @@ def run_real_dpo(
                     experiment,
                     identity,
                     provenance["sha"],
+                    optimizer=optimizer,
+                    scheduler=scheduler,
+                    parent_checkpoint_id=parent_checkpoint_id,
                 )
                 created.append(str(path))
                 prune_checkpoints(output_dir / "checkpoints", settings.max_checkpoints)
 
     final = _save_dpo_checkpoint(
-        model, tokenizer, output_dir, world, settings, experiment, identity, provenance["sha"]
+        model,
+        tokenizer,
+        output_dir,
+        world,
+        settings,
+        experiment,
+        identity,
+        provenance["sha"],
+        optimizer=optimizer,
+        scheduler=scheduler,
+        parent_checkpoint_id=parent_checkpoint_id,
     )
     if not created or created[-1] != str(final):
         created.append(str(final))
@@ -375,6 +466,10 @@ def _save_dpo_checkpoint(
     experiment: dict[str, Any],
     identity: dict[str, Any],
     git_commit: str,
+    *,
+    optimizer: Any,
+    scheduler: Any,
+    parent_checkpoint_id: str,
 ) -> Path:
     import torch
 
@@ -384,20 +479,35 @@ def _save_dpo_checkpoint(
     model.save_pretrained(path)
     tokenizer.save_pretrained(path)
     torch.save(
-        {"optimizer": None, "optimizer_step": step, "python_rng": random.getstate()},
+        {
+            "optimizer": optimizer.state_dict(),
+            "scheduler": scheduler.state_dict(),
+            "optimizer_step": step,
+            "python_rng": random.getstate(),
+            "torch_rng": torch.random.get_rng_state(),
+            "cuda_rng": torch.cuda.get_rng_state_all(),
+        },
         path / "training_state.pt",
     )
+    datasets = experiment.get("datasets") or {}
     lineage = checkpoint_lineage(
         experiment,
         settings,
         step=step,
-        tokens_seen=0,
-        examples_seen=0,
+        tokens_seen=world.get("supervised_tokens_seen", 0),
+        examples_seen=world.get("examples_seen", 0),
         git_commit=git_commit,
-        dataset_manifest_ids=["when2call_pref_v1"],
-        dataset_hashes={"when2call_pref_v1": str(identity["sha256"])},
-        parent_checkpoint=None,
+        dataset_manifest_ids=list(datasets.get("manifest_ids") or ["preference"]),
+        dataset_hashes=dict(datasets.get("hashes") or {"preference": str(identity["sha256"])}),
+        parent_checkpoint=parent_checkpoint_id,
     )
+    lineage["parent_checkpoint_sha256"] = _checkpoint_identity(
+        _project_path(
+            output_dir.parent.parent,
+            experiment["trainer"].get("initial_checkpoint"),
+            "trainer.initial_checkpoint",
+        )
+    )["model_sha256"]
     # DPO's reference choice changes what the run measures, so it belongs in the lineage.
     lineage["training_algorithm"] = "dpo"
     lineage["reference"] = settings.reference

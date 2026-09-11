@@ -613,3 +613,66 @@ datasets:
   - id: button
     source_revision: 47cb720ed223b249a2f1d0a3faf1cb1eb7175622
     upstream_license: CC-BY-4.0
+
+- id: m1_calibration_preference_pairs_v1
+  display_name: OpenGrad M1 Local Calibration Preference Pairs v1
+  organization: OpenGrad
+  hf_id: null
+  repository: data/processed/m1_calibration_preference_pairs_v1.jsonl
+  papers: []
+  retrieval_date: '2026-09-11'
+  license:
+    value: DERIVED_FROM_COMPOSITE_TRAINING_SOURCES
+    verified: true
+    source: reports/data/m1-calibration-preference-pairs-v1.json
+  redistribution: INTERNAL_RESEARCH_ARTIFACT
+  upstream_access_mode: local_derived
+  downstream_access_requirement: private
+  attribution_required: true
+  citation_required: true
+  citation_target: source
+  modifications_disclosed: true
+  original_sample_count: 481
+  retained_sample_count: 481
+  preprocessing_version: m1_local_calibration_v1
+  checksum: d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4
+  category: preference
+  intended_stages:
+  - dpo
+  allowed_splits:
+  - train
+  forbidden_splits:
+  - evaluation
+  - heldout
+  benchmark_overlap_risk: LOW_TRAINING_ONLY
+  known_source_overlap: FROZEN_EVALUATION_IDS_EXCLUDED
+  contamination_status: TRAINING_SOURCE_ONLY
+  planned_initial_mixture_percent: null
+  notes: >-
+    Local calibration pairs assembled from deterministic base-versus-selected-M0 disagreements
+    plus a bounded curated When2Call training slice. The source report records pair origins,
+    category counts, input hashes, and the exclusion of all frozen behavioral evaluation IDs.
+    This is a DPO training artifact, not an evaluation set and not a teacher-quality claim.
+  source_revision:
+    value: 3c4284a47280a5faece72a1c03bf8bb50318eadd
+    verified: true
+    source: OpenGrad repository commit that froze the M0 lineage before M1
+  sample_count:
+    published: 481
+    verified_from: reports/data/m1-calibration-preference-pairs-v1.json
+  retained_after_filtering:
+    value: 481
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4
+    status: FULL_DATA_VALIDATED
+  exact_revision: d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4
+  source_repository: data/processed/m1_calibration_preference_pairs_v1.jsonl
+  derived_from:
+  - id: canonical_v2_final
+    source_revision: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
+    upstream_license: COMPOSITE_PER_SOURCE
+  - id: when2call
+    source_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    upstream_license: CC-BY-4.0
+    split_used: train_preference

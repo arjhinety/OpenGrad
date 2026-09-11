@@ -36,6 +36,7 @@ from typing import Any
 # including B0, and its 0.40 floor rejected every candidate unconditionally. The bump keeps a v2
 # verdict and a v3 verdict from being read as comparable, because they are not.
 POLICY_VERSION = "tool_use_promotion_v3"
+M1_POLICY_VERSION = "tool_use_promotion_v4"
 
 # Per-class recall dimensions, mapped to the decision class each one measures. The mean over the
 # *measurable* subset is the macro behaviour score.

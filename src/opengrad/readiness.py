@@ -450,12 +450,18 @@ def _training_data_contract(root: Path, raw: dict[str, Any]) -> tuple[bool, str]
         or not all(isinstance(item, str) and item.strip() for item in ids)
     ):
         return False, "SFT dataset manifest IDs are missing or invalid"
+    extra_hash_aliases = (
+        {"preference"}
+        if str(raw.get("trainer", {}).get("type", "")).lower() == "dpo"
+        else set()
+    )
     if (
         not isinstance(hashes, dict)
-        or set(hashes) != set(ids)
+        or set(hashes) - set(ids) - extra_hash_aliases
+        or not set(ids).issubset(hashes)
         or not all(_check_revision(value) for value in hashes.values())
     ):
-        return False, "SFT dataset hashes must be one pinned SHA revision per manifest ID"
+        return False, "Training dataset hashes must pin every manifest ID with no unknown aliases"
     registry = _read_dataset_registry(root)
     unknown = [item for item in ids if item not in registry]
     if unknown:
@@ -981,6 +987,106 @@ def _renderability_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, st
     return True, detail, None
 
 
+def _dpo_contract_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, str | None]:
+    """Validate the DPO-specific identity before a real M1 launch."""
+    datasets = _as_dict(raw.get("datasets"))
+    trainer = _as_dict(raw.get("trainer"))
+    evaluation = _as_dict(raw.get("evaluation"))
+    errors: list[str] = []
+
+    preference_value = datasets.get("preference_path")
+    preference_path = _resolve_project_path(root, preference_value, root / "__missing__")
+    pair_count = 0
+    if not preference_path.is_file():
+        errors.append("preference_path is missing")
+    else:
+        digest = hashlib.sha256(preference_path.read_bytes()).hexdigest()
+        expected = _as_dict(datasets.get("hashes")).get("preference")
+        if expected != digest:
+            errors.append(f"preference hash mismatch: config={expected} on_disk={digest}")
+        try:
+            pair_count = sum(
+                1
+                for line in preference_path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            )
+        except (OSError, UnicodeError):
+            pair_count = 0
+        if pair_count < 100:
+            errors.append(f"preference dataset has only {pair_count} rows; need at least 100")
+
+    report_paths = datasets.get("manifest_paths")
+    if not isinstance(report_paths, list) or len(report_paths) != 1:
+        errors.append("DPO must declare exactly one preference evidence report")
+    else:
+        report_path = _resolve_project_path(root, report_paths[0], root / "__missing__")
+        report = _read_json(report_path)
+        if report is None:
+            errors.append("preference evidence report is missing or unreadable")
+        else:
+            if report.get("artifact_kind") != "M1_CALIBRATION_PREFERENCE_PAIRS":
+                errors.append("preference evidence report has the wrong artifact kind")
+            if report.get("sha256") != _as_dict(datasets.get("hashes")).get("preference"):
+                errors.append("preference evidence report hash disagrees with the config")
+            if report.get("pairs_out") != pair_count:
+                errors.append("preference evidence report count disagrees with the preference file")
+
+    initial_value = trainer.get("initial_checkpoint")
+    initial = _resolve_project_path(root, initial_value, root / "__missing__")
+    if not initial.is_dir() or not (initial / "model.safetensors").is_file():
+        errors.append("initial_checkpoint is not a loadable local checkpoint")
+        initial_hash = None
+    else:
+        initial_hash = hashlib.sha256((initial / "model.safetensors").read_bytes()).hexdigest()
+        if trainer.get("initial_checkpoint_sha256") != initial_hash:
+            errors.append("initial_checkpoint_sha256 does not match model.safetensors")
+
+    reference = _resolve_project_path(
+        root, trainer.get("reference_checkpoint"), root / "__missing__"
+    )
+    if not reference.is_dir() or not (reference / "model.safetensors").is_file():
+        errors.append("reference_checkpoint is not a loadable local checkpoint")
+    elif initial_hash is not None:
+        reference_hash = hashlib.sha256((reference / "model.safetensors").read_bytes()).hexdigest()
+        if reference_hash != initial_hash:
+            errors.append("reference checkpoint hash differs from the initial M1 checkpoint")
+
+    parent_id = trainer.get("parent_checkpoint_id")
+    if not isinstance(parent_id, str) or not parent_id:
+        errors.append("parent_checkpoint_id is missing")
+    else:
+        registry = _read_json(root / "runs/checkpoint_registry.json") or {}
+        matches = [
+            item
+            for item in registry.get("checkpoints", [])
+            if isinstance(item, dict) and item.get("checkpoint_id") == parent_id
+        ]
+        if len(matches) != 1:
+            errors.append(f"parent checkpoint is not uniquely registered: {parent_id}")
+        elif initial_value and Path(str(matches[0].get("path"))).resolve() != initial.resolve():
+            errors.append("parent checkpoint registry path differs from initial_checkpoint")
+
+    manifest = evaluation.get("checkpoint_selection_manifest")
+    manifest_path = _resolve_project_path(root, manifest, root / "__missing__")
+    if not manifest_path.is_file():
+        errors.append("frozen checkpoint-selection manifest is missing")
+
+    if trainer.get("reference") != "explicit_checkpoint":
+        errors.append("M1 must use the explicit selected-M0 reference checkpoint")
+    if raw.get("parent_experiment_id") != "m0_sft_canonical_v2_final":
+        errors.append("M1 parent experiment must be m0_sft_canonical_v2_final")
+    if _as_dict(raw.get("promotion")).get("policy_version") != "tool_use_promotion_v4":
+        errors.append("M1 must pin prospective promotion policy tool_use_promotion_v4")
+
+    if errors:
+        return False, "; ".join(errors), "DPO_CONTRACT_INVALID"
+    return (
+        True,
+        f"M1 parent, reference, preference hash/count, frozen evaluation manifest, and policy are pinned ({pair_count} pairs)",
+        None,
+    )
+
+
 def _supervision_composition_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, str | None]:
     """Report the training mixture by supervision kind, and honour the config's selection.
 
@@ -1340,10 +1446,10 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
     required_artifacts = (
         all(baseline["artifacts"].values()) and baseline.get("artifact_contract_ok") is True
     )
-    is_sft_config = (
-        _is_experiment_config(raw) and str(raw.get("trainer", {}).get("type", "")).lower() == "sft"
-    )
-    if is_sft_config:
+    trainer_type = str(raw.get("trainer", {}).get("type", "")).lower()
+    is_sft_config = _is_experiment_config(raw) and trainer_type == "sft"
+    is_dpo_config = _is_experiment_config(raw) and trainer_type == "dpo"
+    if is_sft_config or is_dpo_config:
         try:
             preflight = run_experiment_preflight(config_path, root=root)
             preflight_ok = preflight.overall_status == "PASS"
@@ -1361,7 +1467,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         add(
             "experiment_preflight",
             "PASS",
-            "Baseline contract does not require SFT experiment preflight",
+            "Configuration does not require a training experiment preflight",
         )
     if is_sft_config:
         dataset_ids = raw.get("datasets", {}).get("manifest_ids", [])
@@ -1431,6 +1537,11 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         ),
         "BASELINE_NOT_FOUND" if not required_artifacts else None,
     )
+    if is_dpo_config:
+        dpo_ok, dpo_detail, dpo_code = _dpo_contract_state(root, raw)
+        add("dpo_contract", "PASS" if dpo_ok else "FAIL", dpo_detail, dpo_code)
+    else:
+        add("dpo_contract", "PASS", "Not a DPO configuration; DPO contract deferred")
 
     # Baseline execution is the operation that establishes real_b0. It may
     # require the hardware probe and repository/data contracts, but must not
@@ -1464,6 +1575,14 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "supervision_composition",
     }
     ready_for_sft = all(gate_map[name]["status"] == "PASS" for name in sft_names)
+    dpo_names = baseline_prerequisites | {
+        "gpu_boundary",
+        "real_b0",
+        "baseline_artifacts",
+        "experiment_preflight",
+        "dpo_contract",
+    }
+    ready_for_dpo = is_dpo_config and all(gate_map[name]["status"] == "PASS" for name in dpo_names)
     blocking = [gate["name"] for gate in gates if gate["status"] == "FAIL"]
     warnings = [gate["name"] for gate in gates if gate["status"] == "WARN"]
     overall = "FAIL" if blocking else ("WARN" if warnings else "PASS")
@@ -1472,6 +1591,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "status": overall,
         "ready_for_baseline": ready_for_baseline,
         "ready_for_sft": ready_for_sft,
+        "ready_for_dpo": ready_for_dpo,
         "blocking_gates": blocking,
         "warnings": warnings,
         "gates": gates,

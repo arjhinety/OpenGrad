@@ -1,0 +1,31 @@
+{
+  "artifact_kind": "M1_LOCAL_CALIBRATION_PREFERENCE_PAIRS",
+  "available_by_expected_decision": {
+    "ANSWER": 494,
+    "CALL": 141,
+    "CLARIFY": 0,
+    "UNSUPPORTED": 0
+  },
+  "base_model": {
+    "id": "Qwen/Qwen3.5-2B",
+    "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+  },
+  "heldout_excluded": 3650,
+  "m0_checkpoint": "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1800",
+  "m0_checkpoint_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+  "note": "Each pair compares actual deterministic outputs from the immutable base and selected M0 policy on Canonical-v2 training prompts. A pair is retained only when exactly one decision matches the canonical behavior label. Frozen DEV and confirmatory IDs are excluded before generation; no evaluation prompt enters this preference set.",
+  "output": "data/processed/m1_local_calibration_pairs_v1.jsonl",
+  "pairs_out": 241,
+  "pairs_usable_before_balancing": 635,
+  "records_in": 3200,
+  "rejected": {
+    "both_or_neither_correct": 2565
+  },
+  "schema_version": 1,
+  "selected_by_expected_decision": {
+    "ANSWER": 100,
+    "CALL": 141
+  },
+  "selection": "deterministic hash order with fixed per-decision caps; no API-generated labels",
+  "sha256": "4bea0c1d7887fdd9805b2d86df32a223ea82d104285d31370af769296763b22c"
+}

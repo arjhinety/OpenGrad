@@ -1,0 +1,46 @@
+{
+  "artifact_kind": "M1_CALIBRATION_PREFERENCE_PAIRS",
+  "by_expected_decision": {
+    "ANSWER": 140,
+    "CALL": 141,
+    "CLARIFY": 100,
+    "UNSUPPORTED": 100
+  },
+  "by_origin": {
+    "curated_when2call_train_preference": 240,
+    "local_base_m0_gold_decision_v1": 241
+  },
+  "contamination": {
+    "curated_source_split": "when2call_train_pref@pinned",
+    "heldout_partition_excluded_before_local_generation": true,
+    "note": "No frozen behavioral DEV or confirmatory prompt is included by construction; all rows are training-source preference data."
+  },
+  "curated_available_by_chosen_decision": {
+    "ANSWER": 73,
+    "CLARIFY": 687,
+    "UNSUPPORTED": 981
+  },
+  "inputs": {
+    "curated": {
+      "path": "data/processed/when2call-preference-pairs-v1.jsonl",
+      "records": 1741,
+      "sha256": "474a8bb1c928efd642a2550c8a5b0a7af699628ddf238c195c6b399a44ed2dcf"
+    },
+    "local": {
+      "path": "data/processed/m1_local_calibration_pairs_v1.jsonl",
+      "records": 241,
+      "sha256": "4bea0c1d7887fdd9805b2d86df32a223ea82d104285d31370af769296763b22c"
+    }
+  },
+  "note": "The local component contains only pairs where exactly one of immutable base and selected M0 matched the canonical decision. The curated component is copied without changing its preference and is bounded so CALL is represented rather than letting no-call preferences recreate the minus-xLAM policy. This dataset does not claim tool-selection or argument correctness where the source does not label it.",
+  "origins": {
+    "curated_when2call": 240,
+    "local_base_m0_disagreements": 241
+  },
+  "output": "data/processed/m1_calibration_preference_pairs_v1.jsonl",
+  "pairs_out": 481,
+  "schema_version": 1,
+  "selection": "local set as generated; curated rows hash-ranked per chosen decision with fixed caps",
+  "sensitive_rows_excluded_from_new_artifact": 5,
+  "sha256": "d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4"
+}

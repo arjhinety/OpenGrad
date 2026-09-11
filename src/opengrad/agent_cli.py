@@ -174,12 +174,23 @@ def handle_train(args: argparse.Namespace, root: Path) -> int:
     # A dry-run is an explicitly non-evidence CPU plumbing check, so it may
     # proceed through WARNs (but never through a failed preflight). Real SFT
     # remains fail-closed on the authoritative B0/readiness contract.
-    if trainer_type == "sft" and not args.dry_run:
+    if trainer_type in {"sft", "dpo"} and not args.dry_run:
         gate = readiness(root, config_path)
-        if gate.get("status") != "PASS" or gate.get("ready_for_sft") is not True:
+        readiness_key = "ready_for_sft" if trainer_type == "sft" else "ready_for_dpo"
+        error_code = (
+            "NO_REAL_SFT_WITHOUT_VALID_B0"
+            if trainer_type == "sft"
+            else "NO_REAL_DPO_WITHOUT_READINESS"
+        )
+        message = (
+            "SFT is blocked until OpenGrad reports ready_for_sft"
+            if trainer_type == "sft"
+            else "DPO is blocked until OpenGrad reports ready_for_dpo"
+        )
+        if gate.get("status") != "PASS" or gate.get(readiness_key) is not True:
             error = {
-                "code": "NO_REAL_SFT_WITHOUT_VALID_B0",
-                "message": "SFT is blocked until OpenGrad reports ready_for_sft",
+                "code": error_code,
+                "message": message,
                 "blocking": True,
                 "blocking_gates": gate.get("blocking_gates", []),
             }
