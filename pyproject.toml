@@ -14,6 +14,9 @@ data = ["datasets>=2.20", "pyarrow>=15.0"]
 evaluation = ["jsonschema>=4.23"]
 training = ["torch", "transformers", "trl", "peft"]
 inference = ["llama-cpp-python"]
+# Optional optimization producer layer. ModelOpt is NEVER a core dependency; the
+# optimization package imports and the deterministic mock work without it.
+optimization = ["nvidia-modelopt"]
 gpu-evaluation = ["torch==2.13.0", "transformers==5.16.1", "pyyaml==6.0.3", "pyarrow>=15.0"]
 benchmark-core = ["pyyaml>=6.0", "jsonschema>=4.23", "pyarrow>=15.0"]
 benchmark-agent = ["pyyaml>=6.0", "jsonschema>=4.23"]

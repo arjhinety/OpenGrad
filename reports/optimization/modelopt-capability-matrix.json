@@ -1,0 +1,120 @@
+{
+  "backend": "modelopt",
+  "backend_revision": null,
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "note": "UNKNOWN means the question cannot be settled without running the backend. It is never a synonym for UNSUPPORTED and never a synonym for SUPPORTED.",
+  "probes": [
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='fp8_ptq'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: ModelOpt documents FP8 PTQ (mtq.quantize) but does not declare which concrete checkpoints it supports without running.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "fp8_ptq",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='nvfp4'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: NVFP4 is documented upstream and is arch-gated to Blackwell-class devices; per-model support is not declared without running.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "nvfp4",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='ptq_other'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: Several PTQ formats are documented upstream; the applicable format for a given checkpoint is established by execution, not by list membership.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "ptq_other",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='qat'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: QAT is a training-time method; it is out of scope for a producer layer that must not train and has not been attempted here.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "qat",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='qad'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: QAD combines quantization with distillation; neither has been attempted here and no per-model fact is recorded.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "qad",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='distillation'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: ModelOpt exposes distillation entry points; no per-model support is declared without running, and OpenGrad already has a separate OPD path.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "distillation",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='pruning_sparsity'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: Pruning/sparsity is documented upstream; the reachable sparsity for a specific checkpoint is established by execution.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "pruning_sparsity",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='speculative_decoding'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: Speculative-decoding training methods are exposed upstream only where the installed revision provides them; none has been attempted here.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "speculative_decoding",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='hf_export'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: ModelOpt documents an Hugging Face exporter; whether a given optimized checkpoint round-trips is verified by executing the export.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": false,
+      "status": "UNKNOWN",
+      "technique": "hf_export",
+      "upstream_documented": true
+    },
+    {
+      "backend": "modelopt",
+      "backend_revision": null,
+      "evidence": "no per-model capability fact is recorded for model_id='Qwen/Qwen3.5-2B' revision='15852e8c16360a2fea060d615a32b45270f8a8fc' technique='vllm_deployment'; backend='modelopt' revision='absent'; support is not inferred from another model size or family and not from a library-level default; it can only be established by executing the backend; upstream: Deployment compatibility with vLLM is a runtime property of the produced artifact and must be measured by the existing inference backend.; hardware: accelerator available",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "requires_gpu": true,
+      "status": "UNKNOWN",
+      "technique": "vllm_deployment",
+      "upstream_documented": true
+    }
+  ],
+  "schema_version": 1
+}

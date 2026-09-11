@@ -57,6 +57,12 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 11. Cross-model replication — PLANNED
 
 12. Quantization and runtime evaluation — PLANNED
+    An isolated, optional optimization producer interface exists
+    ([`src/opengrad/optimization/`](docs/optimization/README.md)): a trained checkpoint
+    plus a recipe in, an optimized checkpoint with full provenance out. It is
+    INTERFACE_ONLY — no optimization has been executed, ModelOpt is not a dependency,
+    and no capability is established (all `UNKNOWN`). See
+    [the ModelOpt integration report](reports/MODELOPT_INTEGRATION_REPORT.md).
 
 13. OpenWeights-derived downstream deployment studies — PLANNED
     OpenWeights is an independent project; its observations motivate hypotheses but are not OpenGrad results.

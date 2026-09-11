@@ -24,9 +24,10 @@ runtimes:
     kind: quantization
     version: null
     supported_platforms: [cuda]
-    status: reference_only
+    status: interface_only
     upstream: https://github.com/NVIDIA/Model-Optimizer
     compatibility: {nvidia: NOT_TESTED, amd: UNKNOWN, cpu: UNKNOWN}
+    notes: Optional optimization-producer interface only; no ModelOpt execution has been run.
   - id: vllm-speculators
     kind: speculative_decoding
     version: null

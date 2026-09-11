@@ -1,0 +1,34 @@
+schema_version: 1
+status: SMOKE_NOT_EXECUTED
+# Deterministic smoke input for the optimization producer layer. It pins every field a
+# future ModelOpt run would need so the run is reproducible when a GPU and the
+# `optimization` extra are available. Nothing here has been executed; see
+# reports/MODELOPT_INTEGRATION_REPORT.md.
+source:
+  checkpoint_id: qwen35_2b_m0_sft_v2corpus::checkpoint-1200
+  # Substitute the real trained-checkpoint directory before running. This path is a
+  # placeholder; no such weights are committed, and the source is never overwritten.
+  path: runs/qwen35_2b_m0_sft_v2corpus/checkpoints/checkpoint-1200
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  hash: null
+  experiment_id: qwen35_2b_m0_sft_v2corpus
+  lineage:
+    - tool_calling/qwen35_2b/baseline
+    - qwen35_2b_m0_sft_v2corpus
+recipe:
+  technique: ptq
+  format: fp8
+  calibration_dataset_id: behavioral-heldout-v2
+  calibration_sample_count: 512
+  calibration_seed: 42
+  export_format: hf
+  parameters:
+    modelopt_algorithm: FP8_DEFAULT_CFG
+    calibration_dataset_fingerprint: null
+runtime:
+  deployment: vllm
+limits:
+  - This is a deterministic smoke definition, not evidence.
+  - No ModelOpt capability for Qwen/Qwen3.5-2B has been GPU-validated.
+  - PTQ/QAT/pruning/distillation/speculative execution were NOT attempted.

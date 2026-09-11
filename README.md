@@ -178,7 +178,7 @@ That is a statement about the *contract*, not about work done: no SFT has been r
 | Preference optimization | CONDITIONAL | Only if full evaluation justifies it |
 | On-policy distillation | PLANNED | [Roadmap](ROADMAP.md) |
 | Cross-model replication | PLANNED | [Roadmap](ROADMAP.md) |
-| Quantization and runtime evaluation | PLANNED | [Efficiency notes](docs/inference/efficiency.md) |
+| Quantization and runtime evaluation | INTERFACE_ONLY — no execution | [Optimization layer](docs/optimization/README.md) |
 | Speculative decoding / MTP | PLANNED | [Reserved configuration](configs/inference/speculative/README.md) |
 
 `VALIDATED` here means repository or fixture infrastructure passed its checks. It does not mean an ML model or real benchmark was validated. The status vocabulary used by experiment records is defined by the [experiment schema](registry/experiments.schema.json).
@@ -260,6 +260,14 @@ The canonical schema and evaluation contracts support measurement of tool-call s
 The repository currently provides contracts and fixtures for these behaviors, not empirical model scores.
 
 ### Systems efficiency — planned
+
+An isolated, optional [optimization producer layer](docs/optimization/README.md)
+(`src/opengrad/optimization/`) now exists so that a trained checkpoint can be turned into
+an optimized checkpoint through a recorded recipe and full provenance. It changes
+artifacts; the existing inference backend executes them and the existing benchmark and
+evaluation system measures them. No optimization has been executed, NVIDIA ModelOpt is
+not a dependency, and every capability answer is `UNKNOWN`. See the
+[ModelOpt integration report](reports/MODELOPT_INTEGRATION_REPORT.md).
 
 Future runtime studies may measure time to first token, prefill and decode throughput, end-to-end latency, VRAM/RAM, checkpoint size, quantization effects, speculative acceptance and accepted length, drafted/accepted tokens per step, draft/target verification cost, total model footprint, added parameters, KV-cache use, load time, output equivalence, parser/EOS/tool failures, and energy or thermal behavior where reliable instrumentation exists. The [efficiency notes](docs/inference/efficiency.md) keep this axis separate from behavioral correctness.
 

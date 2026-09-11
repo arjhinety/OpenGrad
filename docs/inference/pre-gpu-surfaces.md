@@ -6,9 +6,10 @@ A future preflight must record requested and observed device counts, VRAM, drive
 
 ## Reserved runtime/component references
 
-`registry/runtime_components.yaml` records upstream references only:
+`registry/runtime_components.yaml` records upstream references, plus the one interface
+boundary that now exists:
 
-- NVIDIA ModelOpt: quantization reference; NVIDIA `NOT_TESTED`, AMD/CPU `UNKNOWN`.
+- NVIDIA ModelOpt: optional optimization-producer interface (`INTERFACE_ONLY`); no execution, NVIDIA `NOT_TESTED`, AMD/CPU `UNKNOWN`. See [the optimization layer](../optimization/README.md).
 - vLLM Speculators: speculative-decoding reference; NVIDIA and AMD `NOT_TESTED`.
 - DSpark: inference-runtime reference; NVIDIA and AMD `NOT_TESTED`.
 

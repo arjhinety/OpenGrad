@@ -2,10 +2,15 @@ schema_version: 1
 components:
   - id: nvidia-modelopt
     kind: quantization
-    status: REFERENCE_ONLY
+    status: INTERFACE_ONLY
     platforms: {nvidia: NOT_TESTED, amd: UNKNOWN, cpu: UNKNOWN}
     upstream: [https://github.com/NVIDIA/Model-Optimizer]
-    notes: NVIDIA ModelOpt integration is reserved; no OpenGrad quantization or compatibility measurement exists.
+    notes: >-
+      An isolated, optional optimization-producer interface exists
+      (src/opengrad/optimization). No ModelOpt execution has been run: FP8 PTQ, NVFP4,
+      other PTQ, QAT/QAD, distillation, pruning/sparsity, and speculative-decoding
+      training are NOT attempted, and no capability for Qwen/Qwen3.5-2B has been
+      GPU-validated. Capability discovery reports UNKNOWN for every technique.
   - id: vllm-speculators
     kind: speculative_decoding
     status: REFERENCE_ONLY

@@ -48,7 +48,13 @@ def test_runtime_registry_does_not_claim_vendor_support():
         "vllm-speculators",
         "dspark",
     }
-    assert all(item["status"] == "REFERENCE_ONLY" for item in registry["components"])
+    # The ModelOpt entry now has an interface, but "INTERFACE_ONLY" is still not a
+    # vendor-support claim: nothing is SUPPORTED_AFTER_VERIFICATION.
+    statuses = {item["id"]: item["status"] for item in registry["components"]}
+    assert statuses["nvidia-modelopt"] == "INTERFACE_ONLY"
+    assert statuses["vllm-speculators"] == "REFERENCE_ONLY"
+    assert statuses["dspark"] == "REFERENCE_ONLY"
+    assert "SUPPORTED_AFTER_VERIFICATION" not in statuses.values()
     assert all(item["platforms"]["nvidia"] == "NOT_TESTED" for item in registry["components"])
 
 
