@@ -122,7 +122,17 @@ def effective_schema(tool: dict[str, Any]) -> dict[str, Any]:
         "minItems",
         "maxItems",
     }
-    direct = {key: source[key] for key in schema_shape_keys if key in source}
+    # A schema-shape key present on the tool object with a `null` value asserts nothing: it is the
+    # OpenAI function shape surfacing a field that belongs to `parameters`, and a source that
+    # emits it emits `required: null` alongside the real `parameters.required`. Treating `null`
+    # as a value makes the two disagree and rejects otherwise-valid tools -- measured on ToolACE,
+    # every one of 2,000 sampled `SCH_CONFLICT` rejections was exactly this. `null` is dropped
+    # rather than compared, because "no constraint stated" is not a competing constraint.
+    direct = {
+        key: source[key]
+        for key in schema_shape_keys
+        if key in source and source[key] is not None
+    }
     if nested is None:
         schema: dict[str, Any] = {"type": "object", "additionalProperties": True}
         schema.update(direct)
