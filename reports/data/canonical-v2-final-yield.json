@@ -55,11 +55,14 @@
         "UNRENDERABLE": 8476
       },
       "quarantine_ratio": 0.795584,
-      "reasons": [],
+      "reasons": [
+        "trainable yield 0.204 below floor 0.300",
+        "tool-call target ratio 0.145 below floor 0.300 for a source expected to teach tool calling"
+      ],
       "render_ratio": 0.204416,
       "rendered_records": 2259,
       "source": "toolace",
-      "status": "OK",
+      "status": "ANOMALY",
       "supervision_kinds_canonical": {
         "COMPLETE_TRAJECTORY": 11051
       },

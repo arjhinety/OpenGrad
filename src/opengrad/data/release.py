@@ -219,15 +219,24 @@ def build_release(root: Path, config_path: Path, output: Path) -> dict[str, Any]
         release_manifest["output_shards"].append(
             {"file": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size}
         )
-    # A release identity is its payload. Rebuilding the same payload at a later commit used to
-    # rewrite `opengrad_git_commit` (and thus the manifest hash), which silently breaks every
-    # recorded dataset hash and every experiment that pinned this release -- while the data
-    # itself was unchanged. Preserve the established manifest when the payload is identical, so
-    # the fingerprint in the training lineage keeps resolving to the same bytes.
+    # A release identity is its payload, but `opengrad_git_commit` is build provenance that lives
+    # inside the hashed manifest, so rebuilding identical data at a later commit minted a new
+    # fingerprint and silently orphaned every dataset hash and experiment pinned to the release.
+    #
+    # Two mechanisms keep the identity stable, because the first alone was not enough:
+    #
+    # 1. Preserve an existing manifest when the payload is byte-identical (rebuild in place).
+    # 2. Let the release config pin `build_commit`. That covers the case the first mechanism
+    #    cannot: rebuilding into a *deleted* output directory, where there is no previous manifest
+    #    to preserve. Without it, `rm -rf .release/<name>` followed by a rebuild of unchanged data
+    #    produced a different fingerprint -- which is how a frozen corpus's identity moved from
+    #    8ced403b to c311d033 with all 176 shards identical.
     manifest_path = output / "release-manifest.json"
     previous = _read_json(manifest_path)
     if previous is not None and previous.get("output_shards") == release_manifest["output_shards"]:
         release_manifest = previous
+    elif config.get("build_commit"):
+        release_manifest["opengrad_git_commit"] = str(config["build_commit"])
     manifest_path.write_text(_json(release_manifest) + "\n", encoding="utf-8")
     card_dir = root / config.get("card_directory", _DEFAULT_CARD_DIRECTORY)
     card = (card_dir / "README.template.md").read_text(encoding="utf-8")

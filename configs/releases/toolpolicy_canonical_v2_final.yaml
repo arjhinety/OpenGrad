@@ -24,6 +24,12 @@ release_class: PRE_TRAINING_CANONICAL_RELEASE
 canonical_schema_version: tool_use_ir_v1
 behavior_taxonomy_version: tool-use-behavior-taxonomy-v1
 supervision_contract_version: supervision_contract_v1
+# Pins the build provenance that the fingerprint is computed over. Without this, deleting the
+# staged directory and rebuilding unchanged data mints a new fingerprint, because
+# `opengrad_git_commit` is read from HEAD and lives inside the hashed manifest. This release was
+# first built at this commit, and its identity is `8ced403b…`; pinning makes a rebuild reproduce
+# it exactly rather than merely preserving it when the directory happens to still exist.
+build_commit: 5d39594714316fc557319b09910b14da01ab2a0d
 redistribution_policy: exclude_uncleared
 allow_gated_sources: false
 shard_size: 1000
