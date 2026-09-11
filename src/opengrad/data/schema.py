@@ -129,9 +129,7 @@ def effective_schema(tool: dict[str, Any]) -> dict[str, Any]:
     # every one of 2,000 sampled `SCH_CONFLICT` rejections was exactly this. `null` is dropped
     # rather than compared, because "no constraint stated" is not a competing constraint.
     direct = {
-        key: source[key]
-        for key in schema_shape_keys
-        if key in source and source[key] is not None
+        key: source[key] for key in schema_shape_keys if key in source and source[key] is not None
     }
     if nested is None:
         schema: dict[str, Any] = {"type": "object", "additionalProperties": True}

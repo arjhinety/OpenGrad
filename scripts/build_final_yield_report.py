@@ -28,9 +28,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-import yaml  # noqa: E402
+import yaml
 
-from opengrad.data.yield_gate import (  # noqa: E402
+from opengrad.data.yield_gate import (
     SourceYield,
     evaluate_yield_gate,
     gate_is_blocking,
@@ -47,9 +47,7 @@ def _measure_one(payload: tuple[str, str, int]) -> tuple[str, dict[str, dict]]:
     artifact, model, max_seq_length = payload
     from opengrad.data.yield_gate import measure_materialized_corpus
 
-    yields = measure_materialized_corpus(
-        Path(artifact), model=model, max_seq_length=max_seq_length
-    )
+    yields = measure_materialized_corpus(Path(artifact), model=model, max_seq_length=max_seq_length)
     return artifact, {name: entry.as_dict() for name, entry in yields.items()}
 
 

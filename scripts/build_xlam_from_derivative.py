@@ -32,10 +32,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-import pyarrow as pa  # noqa: E402
-import pyarrow.parquet as pq  # noqa: E402
+import pyarrow as pa
+import pyarrow.parquet as pq
 
-from opengrad.data.adapters import adapt_xlam  # noqa: E402
+from opengrad.data.adapters import adapt_xlam
 
 DERIVATIVE_DIR = ROOT / ".release" / "hf" / "toolpolicy-canonical-v1"
 UPSTREAM_REPO = "Salesforce/xlam-function-calling-60k"
@@ -199,7 +199,9 @@ def main() -> int:
         "record_id_digest": digest.hexdigest(),
     }
     manifest_path = ROOT / args.manifest
-    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     print(f"records            : {count}")
     print(f"tools              : {tool_count}")

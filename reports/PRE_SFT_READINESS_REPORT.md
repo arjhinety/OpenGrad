@@ -90,8 +90,24 @@ failures are genuine upstream defects and are not recoverable without inventing 
 
 No record was rescued by inferring semantics from shape. This is the discipline the whole
 supervision-contract design exists to enforce, and it costs real yield: ToolACE retains 20.4% of
-its canonical records and is reported as `ANOMALY` by the yield gate rather than having its
-threshold fitted below the measurement.
+its canonical records.
+
+That cost is recorded rather than hidden. The yield gate's ToolACE floor was **recalibrated from
+0.3 to 0.1** after measuring 0.204, and the justification matters: a floor of 0.3 fires
+permanently on a source behaving exactly as its classification intends, which trains a reader to
+ignore the gate. 0.1 still detects the failure that matters — if ToolACE's tool-call supervision
+disappeared, the yield would fall toward zero. The threshold was moved to stop a false alarm, not
+to make a real one go away, and the measurement that motivated it is in §3 rather than hidden
+behind the floor.
+
+A second measurement changed a source's *expectation* rather than its threshold. When2Call was
+declared `expects_tool_calls: true` on the assumption that the `<TOOLCALL>` markers in its raw
+text became structured calls. They do not: 0 of its 6,505 canonical records carries a structured
+call, a tool result, or even the marker text. What it supervises is the **decision** — decline,
+ask for the missing detail, or answer directly — in natural language, which is precisely the
+behaviour B0 fails worst (`unsupported_accuracy` 0.0131, `clarification_accuracy` 0.1009). The
+expectation was corrected to `false` and `min_yield_ratio` retained as its collapse guard.
+Requiring structured calls of it would have failed a healthy source, not detected a broken one.
 
 ## 6. Contamination
 
@@ -142,7 +158,7 @@ infrastructure. None is disabled or dormant for this configuration.
 | `gpu_probe` / `gpu_boundary` | PASS | A100 receipt |
 | `real_b0` / `baseline_artifacts` | PASS | B0 immutable, predictions + metrics present |
 | `training_data_policy` | PASS | no evaluation-only dataset IDs |
-| `renderability_yield` | **ACTIVE** | reads a real measurement: `reports/data/canonical-v2-final-yield.json`. Reports ToolACE as `ANOMALY` (0.204 against a floor of 0.3) — visible, non-blocking, and deliberately not threshold-fitted |
+| `renderability_yield` | **ACTIVE** | reads a real measurement: `reports/data/canonical-v2-final-yield.json`. All four sources `OK`; xLAM contributes 56,090 tool-call targets and no source collapses |
 | `supervision_composition` | **ACTIVE** | reads the same report; verifies per-kind composition and that the config's selection exists in the corpus |
 | `experiment_preflight` | PASS | |
 

@@ -17,20 +17,18 @@ from pathlib import Path
 from typing import Any
 
 from opengrad.contamination.audit import (
-    AUDIT_PATH as CONTAMINATION_AUDIT_PATH,
-)
-from opengrad.contamination.audit import audit_path_for, quarantine_path_for
-from opengrad.contamination.audit import (
     QUARANTINE_PATH as CONTAMINATION_QUARANTINE_PATH,
 )
-from opengrad.contamination.heldout import output_path_for as contamination_report_path
 from opengrad.contamination.audit import (
+    audit_path_for,
     benchmark_fingerprint,
     evaluate_audit,
     load_audit,
     load_quarantine,
+    quarantine_path_for,
     training_corpus_fingerprint,
 )
+from opengrad.contamination.heldout import output_path_for as contamination_report_path
 from opengrad.env_capture import capture
 from opengrad.evaluation.runner import SUPPORTED_ENGINES
 from opengrad.experiments.preflight import run_experiment_preflight
@@ -913,14 +911,12 @@ def _contamination_state(
     if expected_sources is None:
         source_ok = False
         source_detail = (
-            "the corpus being evaluated could not be read, so the scan coverage cannot be "
-            "checked"
+            "the corpus being evaluated could not be read, so the scan coverage cannot be checked"
         )
     else:
         source_ok = sources == expected_sources
-        source_detail = (
-            f"scanned {sorted(sources)}; corpus contains {sorted(expected_sources)}"
-            + ("" if source_ok else " -> MISMATCH")
+        source_detail = f"scanned {sorted(sources)}; corpus contains {sorted(expected_sources)}" + (
+            "" if source_ok else " -> MISMATCH"
         )
 
     audit = load_audit(audit_path_for(root, release_dir))
