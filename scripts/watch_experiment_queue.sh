@@ -18,7 +18,7 @@ if [[ ! -f "$STATE_FILE" ]]; then
   exit 1
 fi
 
-.venv/bin/python - "$STATE_FILE" "$PID_FILE" "$LOG_FILE" <<'PY
+.venv/bin/python - "$STATE_FILE" "$PID_FILE" "$LOG_FILE" <<'PY'
 import json, os, sys, time
 state_file, pid_file, log_file = sys.argv[1:]
 payload = json.load(open(state_file, encoding="utf-8"))
