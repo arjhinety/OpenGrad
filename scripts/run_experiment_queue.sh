@@ -16,7 +16,7 @@ exec 9>"$LOCK_FILE"
 flock -n 9 || { echo "queue lock is already held: $STATE_ID" >&2; exit 2; }
 
 if [[ -f "$STATE_FILE" ]]; then
-  existing_state="$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["state"])' "$STATE_FILE")"
+  existing_state="$(.venv/bin/python -c 'import json,sys; print(json.load(open(sys.argv[1]))["state"])' "$STATE_FILE")"
   case "$existing_state" in
     M1_RUNNING|M1_TRAINED|M1_EVALUATING|M1_DONE|M2_DECISION|M2_RUNNING|M2_EVALUATING|COMPLETE)
       echo "queue refuses duplicate/terminal launch: $STATE_ID is $existing_state" >&2
@@ -31,7 +31,7 @@ if [[ ! -f "$config_abs" ]]; then
   exit 4
 fi
 
-python - "$STATE_FILE" "$PID_FILE" "$CONFIG" "$STATE_NAME" "$STATE_ID" "$$" <<'PY'
+.venv/bin/python - "$STATE_FILE" "$PID_FILE" "$CONFIG" "$STATE_NAME" "$STATE_ID" "$$" <<'PY
 import hashlib, json, os, subprocess, sys, time
 state_file, pid_file, config, state_name, state_id, shell_pid = sys.argv[1:]
 root = os.path.dirname(os.path.dirname(os.path.dirname(state_file)))
@@ -61,7 +61,7 @@ set +e
 exit_code=$?
 set -e
 
-python - "$STATE_FILE" "$PID_FILE" "$exit_code" <<'PY'
+.venv/bin/python - "$STATE_FILE" "$PID_FILE" "$exit_code" <<'PY
 import json, os, sys, time
 state_file, pid_file, code = sys.argv[1], sys.argv[2], int(sys.argv[3])
 payload = json.load(open(state_file, encoding="utf-8"))
