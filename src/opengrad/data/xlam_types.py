@@ -51,11 +51,12 @@ XLAM_PARAMETER_MAP_NOT_OBJECT = "XLAM_PARAMETER_MAP_NOT_OBJECT"
 
 # Rules recorded in per-record provenance.
 RULE_WRAPPER = "XLAM_PARAMETER_MAP_WRAPPED_AS_OBJECT"
-RULE_OPTIONAL = "XLAM_OPTIONAL_SUFFIX_STRIPPED_TO_REQUIREDNESS"
+RULE_OPTIONAL = "XLAM_OPTIONAL_SUFFIX_PRESERVED"
 RULE_SCALAR_ALIAS = "XLAM_SCALAR_ALIAS_NORMALIZED"
 RULE_GENERIC = "XLAM_GENERIC_ANNOTATION_EXPANDED"
 RULE_BARE_COLLECTION = "XLAM_BARE_COLLECTION_NORMALIZED"
 RULE_DEFAULT_PRESERVED = "XLAM_DEFAULT_PRESERVED"
+RULE_REQUIREDNESS_UNASSERTED = "XLAM_REQUIREDNESS_NOT_ASSERTED"
 
 
 class XlamAnnotationError(ValueError):
@@ -297,7 +298,7 @@ class RepairReport:
     parameters_total: int = 0
     optional_annotations_seen: int = 0
     optional_parameters: int = 0
-    required_parameters: int = 0
+    unmarked_parameters: int = 0
     generic_annotations_seen: int = 0
     defaults_preserved: int = 0
     rules: dict[str, int] = field(default_factory=dict)
@@ -313,7 +314,7 @@ class RepairReport:
         self.parameters_total += other.parameters_total
         self.optional_annotations_seen += other.optional_annotations_seen
         self.optional_parameters += other.optional_parameters
-        self.required_parameters += other.required_parameters
+        self.unmarked_parameters += other.unmarked_parameters
         self.generic_annotations_seen += other.generic_annotations_seen
         self.defaults_preserved += other.defaults_preserved
         for rule, count in other.rules.items():
@@ -327,9 +328,10 @@ class RepairReport:
             "xlam_parameters_total": self.parameters_total,
             "xlam_optional_annotations_seen": self.optional_annotations_seen,
             "xlam_optional_parameters": self.optional_parameters,
-            "xlam_required_parameters": self.required_parameters,
+            "xlam_unmarked_parameters": self.unmarked_parameters,
             "xlam_generic_annotations_seen": self.generic_annotations_seen,
             "xlam_defaults_preserved": self.defaults_preserved,
+            "xlam_required_lists_emitted": 0,
             "xlam_rules": dict(sorted(self.rules.items())),
         }
 
@@ -337,8 +339,24 @@ class RepairReport:
 def _convert_parameter_map(
     name: str, parameters: dict[str, Any], report: RepairReport
 ) -> dict[str, Any]:
+    """Wrap a property map as an object schema, asserting no requiredness.
+
+    No `required` list is emitted, and that is a deliberate reading of the source rather than an
+    omission. Three pieces of evidence agree:
+
+    * the documented per-parameter `required` boolean does not occur in this revision at all
+      (0 of 357,766 descriptors), so the source's own requiredness mechanism is absent;
+    * the only optionality marker present is `, optional`, whose *absence* is not a positive
+      statement of requiredness;
+    * the source's own gold calls contradict requiredness for unmarked parameters -- they omit
+      them in 0.8% (no default) and 4.1% (with default) of observations.
+
+    Marking those parameters required made the canonical schema reject the corpus's own gold
+    arguments: 3,050 of 57,342 records failed with `ARG_REQUIRED` on parameters the source had
+    supplied freely. Since the schema must not contradict the data it describes, requiredness is
+    left unasserted and each parameter's optional marker is preserved in provenance instead.
+    """
     properties: dict[str, Any] = {}
-    required: list[str] = []
     for parameter_name, descriptor in parameters.items():
         if not isinstance(parameter_name, str):
             raise XlamAnnotationError(XLAM_PARAMETER_MAP_NOT_OBJECT, name)
@@ -353,6 +371,9 @@ def _convert_parameter_map(
             report.generic_annotations_seen += 1
         if parsed.optional:
             report.optional_annotations_seen += 1
+            report.optional_parameters += 1
+        else:
+            report.unmarked_parameters += 1
         for rule in parsed.rules:
             report.note(rule)
         leaf = dict(parsed.schema)
@@ -364,19 +385,10 @@ def _convert_parameter_map(
             report.defaults_preserved += 1
             report.note(RULE_DEFAULT_PRESERVED)
         properties[parameter_name] = leaf
-        if parsed.optional:
-            report.optional_parameters += 1
-        else:
-            report.required_parameters += 1
-            required.append(parameter_name)
-    # Requiredness is a property of the parameter map as a whole, so it is assembled here
-    # rather than inferred from any single descriptor.
-    schema: dict[str, Any] = {"type": "object", "properties": properties}
-    if required:
-        schema["required"] = required
+    report.note(RULE_REQUIREDNESS_UNASSERTED, len(properties))
     report.object_wrappers_added += 1
     report.note(RULE_WRAPPER)
-    return schema
+    return {"type": "object", "properties": properties}
 
 
 def _finite(value: Any) -> bool:

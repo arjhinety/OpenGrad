@@ -14,6 +14,7 @@ from opengrad.data.adapters import adapt_xlam
 from opengrad.data.schema import SchemaValidationError, effective_schema
 from opengrad.data.xlam_types import (
     RULE_GENERIC,
+    RULE_REQUIREDNESS_UNASSERTED,
     RULE_OPTIONAL,
     RULE_SCALAR_ALIAS,
     RULE_WRAPPER,
@@ -193,7 +194,6 @@ def test_bare_parameter_map_is_wrapped_as_an_object_schema() -> None:
     assert tools[0]["parameters"] == {
         "type": "object",
         "properties": {"symbol": {"type": "string"}},
-        "required": ["symbol"],
     }
     assert report.bare_parameter_maps_seen == 1
     assert report.object_wrappers_added == 1
@@ -208,7 +208,6 @@ def test_parameter_literally_named_type_is_a_property_not_a_schema_keyword() -> 
     schema = tools[0]["parameters"]
     assert schema["type"] == "object"
     assert schema["properties"] == {"type": {"type": "string", "description": "kind"}}
-    assert schema["required"] == ["type"]
 
 
 @pytest.mark.parametrize("keyword_like", ["type", "format", "items", "properties", "required", "enum"])
@@ -290,7 +289,12 @@ def test_non_object_descriptor_is_rejected() -> None:
 # --- required / optional semantics --------------------------------------------------
 
 
-def test_optional_parameters_are_excluded_from_required() -> None:
+def test_optional_parameters_are_counted_and_requiredness_is_not_asserted() -> None:
+    """The source's optional marker is recorded, but no obligation is invented.
+
+    Marking unmarked parameters required made the schema reject xLAM's own gold arguments
+    (3,050 records failed `ARG_REQUIRED`), so no `required` list is emitted at all.
+    """
     tools, report = normalize_xlam_tools(
         [
             {
@@ -303,22 +307,42 @@ def test_optional_parameters_are_excluded_from_required() -> None:
         ]
     )
     schema = tools[0]["parameters"]
-    assert schema["required"] == ["needed"]
+    assert "required" not in schema
     assert schema["properties"]["spare"] == {"type": "string"}
-    assert report.required_parameters == 1
     assert report.optional_parameters == 1
+    assert report.unmarked_parameters == 1
     assert report.optional_annotations_seen == 1
 
 
-def test_default_does_not_remove_a_parameter_from_required() -> None:
-    """Defaults are frequently empty-string placeholders, so they are not an
-    optionality signal.  Requiredness comes from the source's own `optional` marker."""
+def test_gold_arguments_are_never_rejected_for_a_missing_parameter() -> None:
+    """Whatever the source omits, the canonical schema must accept the source's own calls."""
+    from opengrad.data.schema import validate_arguments
+
+    tools, report = normalize_xlam_tools(
+        [
+            {
+                "name": "t",
+                "parameters": {
+                    "a": {"type": "str"},
+                    "b": {"type": "str"},  # unmarked, but the gold call below omits it
+                    "c": {"type": "str, optional"},
+                },
+            }
+        ]
+    )
+    validate_arguments(tools[0]["parameters"], {"a": "x"})
+    assert report.rules[RULE_REQUIREDNESS_UNASSERTED] == 3
+
+
+def test_default_is_preserved_but_not_treated_as_an_optionality_signal() -> None:
+    """A quarter of observed defaults are empty-string placeholders, so a default is a value
+    annotation only. It is preserved verbatim and does not affect requiredness."""
     tools, report = normalize_xlam_tools(
         [{"name": "t", "parameters": {"symbol": {"type": "str", "default": ""}}}]
     )
     schema = tools[0]["parameters"]
-    assert schema["required"] == ["symbol"]
     assert schema["properties"]["symbol"] == {"type": "string", "default": ""}
+    assert "required" not in schema
     assert report.defaults_preserved == 1
 
 
@@ -384,7 +408,7 @@ def test_normalized_output_passes_the_canonical_schema_validator() -> None:
     schema = effective_schema(tools[0])
     assert schema["type"] == "object"
     assert set(schema["properties"]) == {"a", "b", "c", "d"}
-    assert schema["required"] == ["a", "b", "d"]
+    assert "required" not in schema
 
 
 def test_canonical_validator_still_rejects_an_unwrapped_bare_map() -> None:
@@ -423,7 +447,7 @@ def test_adapter_tool_schema_is_canonical_and_required_is_correct() -> None:
     )
     conversation = adapt_xlam(record)
     schema = conversation.tools[0]["parameters"]
-    assert schema["required"] == ["q"]
+    assert "required" not in schema
     assert schema["properties"]["limit"] == {"type": "integer"}
 
 
@@ -439,4 +463,3 @@ def test_adapter_handles_a_tool_whose_parameter_is_named_type() -> None:
     conversation = adapt_xlam(record)
     schema = conversation.tools[0]["parameters"]
     assert schema["properties"] == {"type": {"type": "string"}}
-    assert schema["required"] == ["type"]
