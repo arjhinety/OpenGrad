@@ -72,8 +72,11 @@ headline number has no corresponding model.
 This has already cost this project once: the M1 DPO run (`qwen35_2b_m1_dpo_v1`) reported three
 checkpoints and published only step 300, while step 100 held the best measured metrics
 (`call_f1` 0.1715 against 0.0258 at step 300). Steps 100 and 200 were deleted after the run and
-had never been uploaded; the recovery was a full re-run. See
-`docs/TRAINING_LIFECYCLE.md` for the run-directory layout this applies to.
+had never been uploaded; the recovery was a full re-run, which then failed to reproduce the
+original's numbers. The M0 run on corpus v1 lost all six of its checkpoints the same way. The
+full account, including what survived and which published claims it weakens, is in the
+[incident log](INCIDENT_LOG.md) (INC-0001). See `docs/TRAINING_LIFECYCLE.md` for the
+run-directory layout this applies to.
 
 ### Disk pressure is not a reason to skip the upload
 

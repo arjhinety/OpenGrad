@@ -332,6 +332,8 @@ Unavailable fields remain `null` or `UNKNOWN`; they are never inferred. **An unt
 
 OpenGrad retains successful runs, failed runs, regressions, null results, non-reproductions, and rejected hypotheses. This prevents duplicated failed work, exposes unstable recipes and model-family differences, makes sensitivity visible, and reduces cherry-picking. A lower score can be useful evidence if the comparison and failure analysis are reproducible.
 
+That extends to our own operational mistakes. [docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md) records errors that changed what we can claim, including one where checkpoint weights were deleted before upload and could not be reproduced (INC-0001). Reports affected by an incident carry a correction pointing at the entry, and past entries are never rewritten to look better.
+
 ## Provenance across projects
 
 OpenGrad uses explicit labels when referring to the neighboring deployment project:
@@ -422,6 +424,7 @@ There is no completed experiment to reproduce yet. The future baseline workflow 
 | See experiment records | [experiments/](experiments/README.md) |
 | See results | [results/](results/registry.jsonl) |
 | See reports and failures | [reports/](reports/README.md) |
+| Read our mistakes | [Incident log](docs/INCIDENT_LOG.md) |
 | Check pre-GPU readiness | [Pre-GPU readiness report](reports/PRE_GPU_READINESS_REPORT.md) and `opengrad readiness --json` |
 | Operate OpenGrad from an agent harness | [Agent / Harness Integration](docs/AGENT_INTEGRATION.md) and [MCP server](integrations/opengrad-mcp/README.md) |
 | Add or challenge a finding | [CONTRIBUTING.md](CONTRIBUTING.md) and [contribution protocols](docs/contributing/README.md) |

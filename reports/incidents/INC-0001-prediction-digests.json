@@ -1,0 +1,24 @@
+{
+  "incident": "INC-0001",
+  "why": "The weights for these checkpoints were deleted before upload. These prediction files are the per-example evidence the recorded metrics were recomputed from, so they are preserved with digests.",
+  "source_run": "qwen35_2b_m1_dpo_v1",
+  "hub_repository": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO",
+  "hub_path": "evaluation/checkpoint-<step>/predictions.jsonl",
+  "files": {
+    "checkpoint-100": {
+      "sha256": "fb944f7d4a1c4c813d21628e1c65b7aab3b07f64da4d6f9e4f2e956aac6875cc",
+      "bytes": 3379711,
+      "records": 3650
+    },
+    "checkpoint-200": {
+      "sha256": "f35e3fb42f4083e25280271b6010c3b9cb687d85c72d55eb4cea66b144f0ff0f",
+      "bytes": 4286500,
+      "records": 3650
+    },
+    "checkpoint-300": {
+      "sha256": "606c0d9b451cec121f1572ad4d2cd4d610ab336c7712630af1baa151cf003f1d",
+      "bytes": 3054271,
+      "records": 3650
+    }
+  }
+}

@@ -32,6 +32,12 @@ corrected model is better by 0.28.
 `TRAINING_STARTED` is satisfied: `qwen35_2b_m0_sft_full_v3` and `qwen35_2b_m0_sft_v2corpus` each took
 2,400 real optimizer steps against the pinned canonical corpus, writing six and four checkpoints.
 
+> **Artefact availability.** Of those ten checkpoints, only four still exist: the corpus-v2 run's,
+> which are published. All six of the corpus-v1 run's checkpoints were deleted before upload, as
+> were M1 DPO's steps 100 and 200. The reported metrics remain recomputable from surviving
+> predictions, but a repeat of the DPO run did not reproduce its trajectory, so the monotonicity
+> claim in §5.3 is withdrawn. See [INC-0001](../docs/INCIDENT_LOG.md).
+
 ---
 
 ## 2. What was run
@@ -280,6 +286,16 @@ The degradation is monotone from the earliest measured checkpoint, so the run ne
 point than B0 to stop at. **DPO is a regression on the promotion metric, and all three checkpoints
 were REJECTED.**
 
+> **Correction (2026-09-10, see [INC-0001](../docs/INCIDENT_LOG.md)).** The per-step numbers above
+> are correct for the weights this run produced, and they recompute exactly from that run's saved
+> predictions. But the weights for steps 100 and 200 were deleted after the run without ever being
+> uploaded, so only step 300 survives — the *worst* of the three, while the card tabulates all
+> three. A repeat of the run with the config, preference data, seed, and environment all pinned
+> did **not** reproduce these numbers: it peaked at step 200 rather than declining monotonically
+> from step 100. The monotonicity claim and the identification of step 100 as the best checkpoint
+> are therefore withdrawn as single-run observations. The direction of the finding — over-calling
+> eliminated, call recall collapsed, precision up — holds in both runs.
+
 ### 5.4 Why both stages fail the same way
 
 SFT and DPO are different objectives and they produce the same directional failure: CALL is
@@ -453,7 +469,13 @@ metrics above including the negative framing:
 * `arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2` — checkpoints 600 / 1200 / 1800 / 2400
 * `arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO` — checkpoint 300
 
-Local copies were removed after byte-for-byte verification of every uploaded file.
+The v2 checkpoints were uploaded and verified before their local copies were removed, so that run
+is intact. The DPO line is not: only step 300 exists, and the M0 run on corpus v1
+(`qwen35_2b_m0_sft_full_v3`) lost all six of its checkpoints, none of which was ever uploaded. The
+local copies were removed as one storage clean-up that assumed every run had been uploaded, and
+that assumption was wrong for two of the three runs. The weights are unrecoverable; the metrics
+recompute exactly from the surviving predictions, and the recovery attempt for the DPO run is
+recorded in [INC-0001](../docs/INCIDENT_LOG.md).
 
 ---
 

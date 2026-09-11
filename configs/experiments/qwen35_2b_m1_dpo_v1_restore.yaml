@@ -1,10 +1,10 @@
 experiment_id: qwen35_2b_m1_dpo_v1_restore
 hypothesis: >-
   Reproduction of `qwen35_2b_m1_dpo_v1`, run for one reason: that run's intermediate checkpoint
-  weights (steps 100 and 200) were removed after upload, so the only surviving artifact was
-  step 300. The recorded result is a negative one whose informative part is the trajectory, and
-  a trajectory whose checkpoints cannot be inspected is not independently verifiable. This run
-  regenerates them.
+  weights (steps 100 and 200) were deleted after the run without ever being uploaded, so the only
+  surviving artifact was step 300. The recorded result is a negative one whose informative part is
+  the trajectory, and a trajectory whose checkpoints cannot be inspected is not independently
+  verifiable. This run regenerates them.
 
   Everything that determines the result is held identical to the original: base checkpoint,
   pinned preference file (same sha256), beta, learning rate, schedule, batch geometry, step
@@ -16,11 +16,19 @@ hypothesis: >-
   authoritative numbers; this run's checkpoints are admissible only if evaluating them
   reproduces those numbers, which is checked before anything is published.
 
-  The original finding stands: DPO on the pinned preference split eliminates over-calling
-  (0.6425 -> 0.0034) and raises precision and clarification accuracy while collapsing call
-  recall (0.9722 -> 0.0131), monotonically from the first measured checkpoint. It is a negative
-  result caused by over-optimisation on a small preference set and by starting from a policy
-  whose always-call bias makes every available signal a "stop calling" signal.
+  OUTCOME, recorded after the run (2026-09-10; see docs/INCIDENT_LOG.md INC-0001). It did NOT
+  reproduce. call_f1 by step, original vs this run: 100 -> 0.1715 vs 0.1036, 200 -> 0.0419 vs
+  0.1186, 300 -> 0.0258 vs 0.0153. The original declined monotonically with step 100 best; this
+  run peaks at step 200. The environment was verified identical (every venv package predates the
+  original run; pyproject.toml and uv.lock unchanged), so these checkpoints are a different model
+  rather than the original's. They were therefore NOT uploaded, and the original's step-100/200
+  weights remain unrecoverable. The direction of the finding is unchanged in both runs:
+  over-calling eliminated, call recall collapsed, precision up. What does not survive is the
+  monotone trajectory, and with it the claim that step 100 is the best checkpoint.
+
+  The cause argued in the original record still stands in both runs: over-optimisation on a small
+  preference set, and a starting policy whose always-call bias makes every available signal a
+  "stop calling" signal.
 
 model:
   model_id: Qwen/Qwen3.5-2B
