@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "M1_PROMOTION_VERDICT",
+  "experiment_id": "m1_dpo_canonical_v2_final_v2",
+  "checkpoint_id": "m1_dpo_canonical_v2_final_v2::dpo-checkpoint-30",
+  "parent_experiment": "m0_sft_canonical_v2_final",
+  "parent_checkpoint": "m0_sft_canonical_v2_final::checkpoint-1800",
+  "policy_version": "tool_use_promotion_v4",
+  "decision": "PROMOTE",
+  "selection": {
+    "partition": "dev",
+    "fingerprint": "88a56821…",
+    "examples": 2373,
+    "selected_checkpoint": 30,
+    "tie_break_applied": true
+  },
+  "confirmatory": {
+    "partition": "pre-registered internal confirmatory",
+    "fingerprint": "d6d1e394…",
+    "examples": 1277,
+    "scored_once": true
+  },
+  "parent_metrics": {
+    "call_f1": 0.7470,
+    "call_precision": 0.7350,
+    "call_recall": 0.7594,
+    "over_call_rate": 0.1505,
+    "clarification_accuracy": 0.7682,
+    "unsupported_accuracy": 0.5430,
+    "parse_valid_rate": 1.0
+  },
+  "candidate_metrics": {
+    "call_f1": 0.7548,
+    "call_precision": 0.735849,
+    "call_recall": 0.774834,
+    "over_call_rate": 0.152913,
+    "clarification_accuracy": 0.765499,
+    "unsupported_accuracy": 0.538631,
+    "parse_valid_rate": 1.0
+  },
+  "deltas_vs_m0_parent": {
+    "call_f1": 0.0078,
+    "call_precision": 0.000806,
+    "call_recall": 0.015453,
+    "over_call_rate": 0.002413,
+    "clarification_accuracy": -0.002695,
+    "unsupported_accuracy": -0.004415
+  },
+  "unmeasured_dimensions": [
+    "no_call_accuracy",
+    "tool_selection_accuracy",
+    "argument_validity",
+    "schema_validity"
+  ],
+  "note": "Promoted prospectively against selected M0, not against B0's degenerate always-call recall. No-call accuracy is NA because the evaluation population has no ANSWER examples. Confirmatory evidence is internal, not an untouched external test."
+}
