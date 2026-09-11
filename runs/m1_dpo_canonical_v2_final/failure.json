@@ -1,0 +1,7 @@
+{
+  "actual_steps": 119,
+  "code": "DPO_HORIZON_UNDERFLOW",
+  "expected_steps": 120,
+  "message": "The real DPO loop completed 119/120 optimizer steps because five pairs were skipped by the sequence-length contract and the final partial accumulation was dropped. The run is preserved as FAILED evidence; no evaluation or promotion is valid.",
+  "skipped_pairs": 5
+}

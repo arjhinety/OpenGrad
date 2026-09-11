@@ -322,8 +322,10 @@ def run_real_dpo(
     created: list[str] = []
     started = time.monotonic()
 
-    for epoch in range(1 + settings.max_steps // max(1, len(encoded))):
+    epoch = 0
+    while world["optimizer_step"] < settings.max_steps:
         order = deterministic_order(len(encoded), settings.seed, epoch)
+        epoch += 1
         accum = 0
         optimizer.zero_grad(set_to_none=True)
         for start in range(0, len(order), settings.micro_batch_size):
