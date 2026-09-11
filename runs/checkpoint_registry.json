@@ -204,12 +204,15 @@
       "experiment_id": "m0_v2_final_minus_xlam_fixed_compute",
       "global_step": 600,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Joint xLAM+CALL_PREDICTION removal arm REJECTED. DEV call_recall 0.5036 against B0's 0.9715 is -0.468, beyond the 0.10 allowance (regression.call_recall). call_f1 0.5926, precision 0.7199, over-call 0.1078. Selected checkpoint per the frozen rule: 1200 (not this step).",
+        "status_updated_at": "2026-09-11T13:51:58.457880+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-600",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "REJECTED",
       "tokens_seen": 1880934,
       "training_loss": 0.694
     },
@@ -222,12 +225,15 @@
       "experiment_id": "m0_v2_final_minus_xlam_fixed_compute",
       "global_step": 1200,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Joint xLAM+CALL_PREDICTION removal arm, SELECTED by the frozen DEV rule and REJECTED on promotion. DEV call_recall 0.4454 against B0's 0.9715 is -0.526, beyond the 0.10 allowance. call_f1 0.5635, precision 0.7669, over-call 0.0745. Confirmatory scored once on this checkpoint only.",
+        "status_updated_at": "2026-09-11T13:51:58.958494+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-1200",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "REJECTED",
       "tokens_seen": 3801605,
       "training_loss": 0.694
     },
@@ -240,12 +246,15 @@
       "experiment_id": "m0_v2_final_minus_xlam_fixed_compute",
       "global_step": 1800,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Joint xLAM+CALL_PREDICTION removal arm REJECTED. DEV call_recall 0.3373 against B0's 0.9715 is -0.634, beyond the 0.10 allowance (regression.call_recall). call_f1 0.4773, precision 0.8161, over-call 0.0418. Selected checkpoint per the frozen rule: 1200 (not this step).",
+        "status_updated_at": "2026-09-11T13:51:59.189045+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-1800",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "REJECTED",
       "tokens_seen": 5705123,
       "training_loss": 0.694
     },
@@ -258,12 +267,15 @@
       "experiment_id": "m0_v2_final_minus_xlam_fixed_compute",
       "global_step": 2400,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Joint xLAM+CALL_PREDICTION removal arm REJECTED. DEV call_recall 0.3444 against B0's 0.9715 is -0.627, beyond the 0.10 allowance (regression.call_recall). call_f1 0.4845, precision 0.8169, over-call 0.0425. Selected checkpoint per the frozen rule: 1200 (not this step).",
+        "status_updated_at": "2026-09-11T13:51:59.436422+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-2400",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "REJECTED",
       "tokens_seen": 7683301,
       "training_loss": 0.694
     },
@@ -276,12 +288,15 @@
       "experiment_id": "m0_v2_final_minus_xlam_matched_exposure",
       "global_step": 530,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Joint xLAM+CALL_PREDICTION removal arm REJECTED. DEV call_recall 0.2352 against B0's 0.9715 is -0.736, beyond the 0.10 allowance (regression.call_recall). call_f1 0.3663, precision 0.8285, over-call 0.0268. Selected checkpoint per the frozen rule: 1060 (not this step).",
+        "status_updated_at": "2026-09-11T13:51:59.672534+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-530",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "REJECTED",
       "tokens_seen": 1679046,
       "training_loss": 0.4197
     },
@@ -294,12 +309,15 @@
       "experiment_id": "m0_v2_final_minus_xlam_matched_exposure",
       "global_step": 1060,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Joint xLAM+CALL_PREDICTION removal arm, SELECTED by the frozen DEV rule and REJECTED on promotion. DEV call_recall 0.3884 against B0's 0.9715 is -0.583, beyond the 0.10 allowance. call_f1 0.5186, precision 0.7804, over-call 0.0601. Confirmatory scored once on this checkpoint only.",
+        "status_updated_at": "2026-09-11T13:51:59.900583+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-1060",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "REJECTED",
       "tokens_seen": 3363940,
       "training_loss": 0.4197
     },
@@ -312,12 +330,15 @@
       "experiment_id": "m0_v2_final_minus_xlam_matched_exposure",
       "global_step": 1590,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Joint xLAM+CALL_PREDICTION removal arm REJECTED. DEV call_recall 0.3943 against B0's 0.9715 is -0.577, beyond the 0.10 allowance (regression.call_recall). call_f1 0.5261, precision 0.7905, over-call 0.0575. Selected checkpoint per the frozen rule: 1060 (not this step).",
+        "status_updated_at": "2026-09-11T13:52:00.134218+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-1590",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "REJECTED",
       "tokens_seen": 5044173,
       "training_loss": 0.4197
     },
@@ -330,17 +351,20 @@
       "experiment_id": "m0_v2_final_minus_xlam_matched_exposure",
       "global_step": 2119,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Joint xLAM+CALL_PREDICTION removal arm REJECTED. DEV call_recall 0.3812 against B0's 0.9715 is -0.590, beyond the 0.10 allowance (regression.call_recall). call_f1 0.5161, precision 0.7985, over-call 0.0529. Selected checkpoint per the frozen rule: 1060 (not this step).",
+        "status_updated_at": "2026-09-11T13:52:00.362966+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-2119",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "REJECTED",
       "tokens_seen": 6743788,
       "training_loss": 0.4197
     }
   ],
-  "last_updated": "2026-09-11T13:26:43.956536+00:00",
+  "last_updated": "2026-09-11T13:52:00.363013+00:00",
   "schema_version": 1,
   "total_checkpoints": 18
 }

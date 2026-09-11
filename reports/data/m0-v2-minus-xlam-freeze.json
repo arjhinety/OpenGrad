@@ -1,0 +1,308 @@
+{
+  "arms": {
+    "m0_v2_final_minus_xlam_fixed_compute": {
+      "selected": 1200,
+      "steps": [
+        600,
+        1200,
+        1800,
+        2400
+      ]
+    },
+    "m0_v2_final_minus_xlam_matched_exposure": {
+      "selected": 1060,
+      "steps": [
+        530,
+        1060,
+        1590,
+        2119
+      ]
+    }
+  },
+  "artifact_kind": "MINUS_XLAM_PAIRED_RESULT_FREEZE",
+  "attribution_limit": "Source identity and supervision type are perfectly aligned in Canonical-v2, so this pins a joint-removal result and supports no xLAM-specific causal claim.",
+  "evidence": {
+    "corpus": {
+      ".release/hf/toolpolicy-canonical-v2-final/release-manifest.json": {
+        "bytes": 37566,
+        "sha256": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161"
+      },
+      ".release/hf/toolpolicy-canonical-v2-minus-xlam/release-manifest.json": {
+        "bytes": 44643,
+        "sha256": "5fc739040b1a09fa7b8ac20494609bd4cbe89efc6ed54e4dbc9c2df12268b7f3"
+      },
+      "configs/releases/toolpolicy_canonical_v2_final.yaml": {
+        "bytes": 5179,
+        "sha256": "b7692adde93ba56a0e6101955c53a99112214b45f68b74bf674122acafd523ea"
+      },
+      "reports/data/canonical-v2-ablation-mass.json": {
+        "bytes": 2730,
+        "sha256": "3e0735c6347fec1e5ac1b902b180b734399f280e7c9b7ed5c721815b78b13178"
+      },
+      "reports/data/canonical-v2-final-minus-xlam-yield.json": {
+        "bytes": 3353,
+        "sha256": "ef96809075a77d99727844704bd5274ce738903887f1f013dd65aed5313bd66a"
+      },
+      "reports/data/canonical-v2-final-yield.json": {
+        "bytes": 3665,
+        "sha256": "99dadf8cd9b0421789149d1aa94c8cef7a90abb4eec11be19e5164bd62abe579"
+      }
+    },
+    "decision": {
+      "results/registry.jsonl": {
+        "bytes": 43825,
+        "sha256": "0163f72392de1f148cd81971e5784628f31122fd5323abf46b4fbb53c65bca7c"
+      },
+      "runs/central_ledger.jsonl": {
+        "bytes": 29495,
+        "sha256": "c81091cff9d75ab693c306e91995a39f4cd4215e33480e82bcd60e53ff294349"
+      },
+      "runs/checkpoint_registry.json": {
+        "bytes": 22928,
+        "sha256": "24ab90742f870b6a697f4be2e21379e8b821b33791cb6f2fc50517e6abe95dda"
+      }
+    },
+    "design": {
+      "configs/experiments/m0_v2_final_minus_xlam_fixed_compute.yaml": {
+        "bytes": 4932,
+        "sha256": "cc8554ad53d35c7c7874f9889107aa78b7867822147a2865cbf60629b0ce9aae"
+      },
+      "configs/experiments/m0_v2_final_minus_xlam_matched_exposure.yaml": {
+        "bytes": 5231,
+        "sha256": "2cbc5e27ad7dd5e2bb662bde4ddd8d637f25ffb0ad67cd3df816747ce594bc15"
+      },
+      "docs/evaluation/CHECKPOINT_SELECTION_RULE.md": {
+        "bytes": 4818,
+        "sha256": "2f8bb95995dbfa3d7680f1029dbc8a7dce50f0375a81f4fd7e56028d84623be9"
+      },
+      "reports/M0_V2_FINAL_ABLATION_DESIGN.md": {
+        "bytes": 2524,
+        "sha256": "09e345ecd25bd8800e0cabb470223f731eecb4b375b659fe72d07edde87c464f"
+      }
+    },
+    "evaluation": {
+      "reports/baselines/qwen35_2b_baseline/metrics.json": {
+        "bytes": 3908,
+        "sha256": "0d06c17bdbe372ba8783eff1906468bba221344a89bfe31ef84814c13455cd05"
+      },
+      "reports/baselines/qwen35_2b_baseline/predictions.jsonl": {
+        "bytes": 3593450,
+        "sha256": "c700c8e0719d6cb84db91d2b4b13962eb1cb19b24a4e9c343fec60d6cae68261"
+      },
+      "reports/evaluation/behavioral-heldout-v2-partition.json": {
+        "bytes": 169852,
+        "sha256": "56c6abc2e24c524b45c382f42927fa02117b2a04c02f04e89e6a40d8b520f901"
+      },
+      "reports/evaluation/behavioral-heldout-v2.manifest.json": {
+        "bytes": 4376,
+        "sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640"
+      }
+    },
+    "m0_v2_final_minus_xlam_fixed_compute": {
+      "reports/data/m0_v2_final_minus_xlam_fixed_compute-readiness.json": {
+        "bytes": 11732,
+        "sha256": "ae0c97ccb93fbe94a0dcf384fc9d48a6f1c651bfda7132a4d0742f23e0a24861"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/dataset_manifest.json": {
+        "bytes": 825,
+        "sha256": "56a35af8f1f55e90cac16db583f1391a9b932af316ae38ddce5d2a7d0f5d51ba"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/environment.json": {
+        "bytes": 374,
+        "sha256": "3be7886a6bb723dc63dad2c0ac4ce1c44717dbcb8f80d787fd82384de90d4a93"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/eval/confirmatory/checkpoint-1200/metrics.json": {
+        "bytes": 5150,
+        "sha256": "a45c4d777fd0c330e8114cb1628e72e7d48435f29ffa1245f4632060b72ebf0e"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/eval/confirmatory/curve.json": {
+        "bytes": 3399,
+        "sha256": "2c44c729dec1b430b04f22fc030622a931f6ee1a557ff780b97a5cb6418d5de4"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/eval/dev/checkpoint-1200/metrics.json": {
+        "bytes": 5110,
+        "sha256": "97f80329ee8ab0e598cbce35204f9f2bb6db922b28b553e46752eda5bb83c97e"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/eval/dev/checkpoint-1800/metrics.json": {
+        "bytes": 5079,
+        "sha256": "10a6aff8e7d9f3794c2ebf8523f9a646c8e11f152f2b1444c037471f8b091aae"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/eval/dev/checkpoint-2400/metrics.json": {
+        "bytes": 5083,
+        "sha256": "2ade24f8eafba7d4f6ba437b0304a1909115d412f995ed936a03c0dfd080f9f3"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/eval/dev/checkpoint-600/metrics.json": {
+        "bytes": 5096,
+        "sha256": "88c4bfc1d71a1ad8d045639e0821edd3f4fcb9140b743bd93fea0027f2a9e0e8"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/eval/dev/curve.json": {
+        "bytes": 13069,
+        "sha256": "05f6b330cff206e31173de5bca4ceb079ddce112fffd4f0ca64587f30f1d83ba"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/eval/dev/selection--dev.json": {
+        "bytes": 5348,
+        "sha256": "e1fa61f7d03beec96429bca7fb974bf10e5ba6c96ae877ad944f6847e7548faa"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/events.jsonl": {
+        "bytes": 1029296,
+        "sha256": "46795c256df5a437b6dd788ef36375ab16bd935a458382844ba1379d81f576eb"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/experiment.json": {
+        "bytes": 3567,
+        "sha256": "29fd8965cc31d535548aa80edaa73ab67d701bb6e1d9b4f52c983f9e7b2fe164"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/ledger.jsonl": {
+        "bytes": 2628,
+        "sha256": "3dcf8cb55efbab67a714f2381652ebda3bc92ce819a00f69d8daddcae70eb6f8"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/metrics/train_log.jsonl": {
+        "bytes": 907691,
+        "sha256": "b82800bf9902bc1cb6fa8af00374b2a61fd9154e2edb54938d3c2d691a4a2866"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/rendering_report.json": {
+        "bytes": 4087,
+        "sha256": "28fda91ea94199aac018f033d352ee22b97d117b8cd691ba9b1e6c7ca9c05d3f"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/resolved_config.yaml": {
+        "bytes": 1444,
+        "sha256": "106a7427124d77c8d07bcc2c88ab7269a4f235bcce42d5f6b8178e79d2ae1083"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/training_metadata.json": {
+        "bytes": 334,
+        "sha256": "a7faff76324e8f163c69237647be78b1402498e1b38c130fadddfe911ffa5bd1"
+      }
+    },
+    "m0_v2_final_minus_xlam_matched_exposure": {
+      "reports/data/m0_v2_final_minus_xlam_matched_exposure-readiness.json": {
+        "bytes": 11738,
+        "sha256": "170c836b049796d402cd1d0f6fb7de1b09d744a63a884d56ee79fc8e03a5a44f"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/dataset_manifest.json": {
+        "bytes": 267,
+        "sha256": "0f168ecfa2c3ed8718c7ac285b6a51a56cb0aed0cf42e18143b3a54601ad00f9"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/environment.json": {
+        "bytes": 373,
+        "sha256": "a7fa46ac4d10d6a7ebed18e2d66b2eac34f3bdc63c7acc99dba3f50e69e3d3b9"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/eval/confirmatory/checkpoint-1060/metrics.json": {
+        "bytes": 5143,
+        "sha256": "a8fa0bbbf33d840496a055675ac18462832330e18992ba8ddd7a1960ab4d9d27"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/eval/confirmatory/curve.json": {
+        "bytes": 3394,
+        "sha256": "06aef1c2cb3a61740d90a6f29baa1acbfb0950de250306ecc7e75286453ee949"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/eval/dev/checkpoint-1060/metrics.json": {
+        "bytes": 5101,
+        "sha256": "4472b77e1af018b149701ae42f4d6d2e61d5bb7b6039d109896c1c64b5a8328b"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/eval/dev/checkpoint-1590/metrics.json": {
+        "bytes": 5133,
+        "sha256": "b9662bcaa6b272e3440eed0cf438fecb14583dcd8810da445567b5ac9207c510"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/eval/dev/checkpoint-2119/metrics.json": {
+        "bytes": 5134,
+        "sha256": "8e02f0c23be95bc82c3b9f6c99b23cdc85ad60f61c1fbae6432972c37a82d836"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/eval/dev/checkpoint-530/metrics.json": {
+        "bytes": 5125,
+        "sha256": "dbbef5a079fe5f36f99e1b539f169be5b34bf55084fb3e781e1a15f63eb1e155"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/eval/dev/curve.json": {
+        "bytes": 13079,
+        "sha256": "07fb1afff109315e9f950f8c38879325cda3dd71ef027806ef65dc58a317cc17"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/eval/dev/selection--dev.json": {
+        "bytes": 5366,
+        "sha256": "62b0a191434495aac52ad124f42ee0fa04f8e9f95b6a5aed525599f396703a42"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/events.jsonl": {
+        "bytes": 909097,
+        "sha256": "c6e040b39ab40d81f4508e195c93f82015e52ee6454db1b7455deac65f38119a"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/experiment.json": {
+        "bytes": 3846,
+        "sha256": "9f72146a2acc13f570afd4454bb4c0acbcbe4bc6aae7cfcb531f74bad4f87843"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/ledger.jsonl": {
+        "bytes": 2664,
+        "sha256": "acaf364adb49c98565d33f8952f3cb1b7f8a1c91f545eb31699ef75edf8e996f"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/metrics/train_log.jsonl": {
+        "bytes": 801692,
+        "sha256": "9c668a009102e9cf97fd4fcb331dce7ea4817ee878a21159c22a289919cb2da7"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/rendering_report.json": {
+        "bytes": 1075,
+        "sha256": "5adf29813950ad2008aa68f3067beccd41556db8e1e221110fcd445cf809f634"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/resolved_config.yaml": {
+        "bytes": 1028,
+        "sha256": "96fa06b4ad4f337757bff83f277226d51682697595d34de3657b39597432049a"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/training_metadata.json": {
+        "bytes": 334,
+        "sha256": "510bfa427a1e1da452d6fb6283ebd31fc931ab73c670d5d4154d9f3cbacf84c2"
+      }
+    },
+    "reports": {
+      "reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md": {
+        "bytes": 6911,
+        "sha256": "98cd331f6efe5e67ee6ae227764a175950e25d7744409462080f652e16a75505"
+      },
+      "reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md": {
+        "bytes": 5235,
+        "sha256": "4b196071f9ad92e8b7353c61c73b6319bb6545f27595e5e75aad846c4e22ca18"
+      }
+    }
+  },
+  "hashes_computed_at_commit": "0807fa32d2dc39a057346b0b9b248fc8ee6e0d9d",
+  "reproduce": {
+    "confirmatory": "python scripts/evaluate_sft_checkpoints.py <arm> --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side confirmatory --checkpoint-ids <selected>",
+    "fixed_dev": "python scripts/evaluate_sft_checkpoints.py m0_v2_final_minus_xlam_fixed_compute --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side dev",
+    "matched_dev": "python scripts/evaluate_sft_checkpoints.py m0_v2_final_minus_xlam_matched_exposure --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side dev",
+    "select": "python scripts/select_checkpoint.py --run runs/<arm> --side dev"
+  },
+  "role": "Pins the evidence behind both arms of the paired joint-removal experiment together, so neither arm can be reported as the conclusion alone.",
+  "schema_version": 1,
+  "treatment": "remove xLAM together with the corpus's CALL_PREDICTION supervision channel",
+  "unversioned_by_design": {
+    "m0_v2_final_minus_xlam_fixed_compute": {
+      "runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-1200/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "4087e4a0b9040d5ed243af9d5ee6cd3f6e24fa4dfcf430d7242fc76a7aafb835"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-1800/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "a7222b4decef24d23b494de0d8ecb8a346b7d1137ee6f3f8d98e69e100da1d40"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-2400/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "e740b8f26bb39924cafdd96161d91fb19457836beaba61adb1d42de30cd03406"
+      },
+      "runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-600/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "34082b7180444ccbb508fc54048d4dcfe424c7931dbf45c41365a25c6d439cfd"
+      }
+    },
+    "m0_v2_final_minus_xlam_matched_exposure": {
+      "runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-1060/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "272343a060f680d2818b2abbf2705cf803a6bdf88f47faad6686baccb494f6b8"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-1590/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "42b14a9fc37658e5663ff3acc2a0c323d8340d63d2d784ff8bca4293adb09e1c"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-2119/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "15c3664537bbcb2dfb37c6219aaaeeb7b10111900fe01c4d21767026a3edfe58"
+      },
+      "runs/m0_v2_final_minus_xlam_matched_exposure/checkpoints/checkpoint-530/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "076b5538910788bac3c1e58ca3be980ca4033e835b1d3f6fc54f3522b20ef7a9"
+      }
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "artifacts": {
+    "environment": "runs/m0_v2_final_minus_xlam_fixed_compute/eval/confirmatory/checkpoint-1200/environment.json",
+    "metrics": "runs/m0_v2_final_minus_xlam_fixed_compute/eval/confirmatory/checkpoint-1200/metrics.json",
+    "predictions": "runs/m0_v2_final_minus_xlam_fixed_compute/eval/confirmatory/checkpoint-1200/predictions.jsonl",
+    "residual_profile": "runs/m0_v2_final_minus_xlam_fixed_compute/eval/confirmatory/checkpoint-1200/residual-profile.json"
+  },
+  "backend": "vllm",
+  "baseline_comparison": {
+    "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+    "candidate_run_id": null,
+    "improved": [
+      "call_precision",
+      "clarification_accuracy",
+      "over_call_rate",
+      "unsupported_accuracy"
+    ],
+    "metrics": {
+      "call_f1": {
+        "baseline": 0.61913,
+        "candidate": 0.603001,
+        "delta": -0.016128,
+        "direction": "higher_is_better",
+        "verdict": "REGRESSED"
+      },
+      "call_precision": {
+        "baseline": 0.454185,
+        "candidate": 0.789286,
+        "delta": 0.335101,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      },
+      "call_recall": {
+        "baseline": 0.972201,
+        "candidate": 0.487859,
+        "delta": -0.484342,
+        "direction": "higher_is_better",
+        "verdict": "REGRESSED"
+      },
+      "clarification_accuracy": {
+        "baseline": 0.100943,
+        "candidate": 0.80593,
+        "delta": 0.704987,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      },
+      "over_call_rate": {
+        "baseline": 0.642463,
+        "candidate": 0.071602,
+        "delta": -0.570861,
+        "direction": "lower_is_better",
+        "verdict": "IMPROVED"
+      },
+      "under_call_rate": {
+        "baseline": 0.014672,
+        "candidate": 0.02649,
+        "delta": 0.011818,
+        "direction": "lower_is_better",
+        "verdict": "REGRESSED"
+      },
+      "unsupported_accuracy": {
+        "baseline": 0.013127,
+        "candidate": 0.602649,
+        "delta": 0.589522,
+        "direction": "higher_is_better",
+        "verdict": "IMPROVED"
+      }
+    },
+    "regressed": [
+      "call_f1",
+      "call_recall",
+      "under_call_rate"
+    ]
+  },
+  "context_buckets": {
+    "base": 1275,
+    "overflow": 2
+  },
+  "elapsed_seconds": 81.991399,
+  "engine": {
+    "batching": "continuous",
+    "dtype": "bfloat16",
+    "enforce_eager": false,
+    "gpu_memory_utilization": 0.9,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "model_id": "runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-1200",
+    "name": "vllm",
+    "revision": "None",
+    "seed": 0,
+    "tensor_parallel_size": 1,
+    "version": "0.29.0"
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 512,
+    "temperature": 0.0,
+    "tool_choice": "auto",
+    "top_p": 1.0
+  },
+  "kind": "CANDIDATE_EVALUATION",
+  "lineage": {
+    "base_model_id": "Qwen/Qwen3.5-2B",
+    "base_model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "checkpoint_id": "checkpoint-1200",
+    "checkpoint_step": 1200,
+    "contamination_report": "reports/data/behavioral-heldout-v2-contamination.json",
+    "dataset_manifests": "reports/data/normalization-v1",
+    "evaluator_revision": "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc",
+    "manifest_status": "FROZEN_PRE_GPU",
+    "native_parser": "opengrad.formatting.parser.parse_qwen_native_output@v1",
+    "parent_experiment_id": "m0_v2_final_minus_xlam_fixed_compute",
+    "partition_namespace": "confirmatory"
+  },
+  "manifest": "reports/evaluation/behavioral-heldout-v2.manifest.json",
+  "manifest_sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640",
+  "model_id": "runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-1200",
+  "model_revision": null,
+  "parse_valid_rate": 0.999217,
+  "parser_status": {
+    "FORMAT_ERROR": 1,
+    "RAW_VALID": 1276
+  },
+  "records": 1277,
+  "renderer": "qwen3_5_2b_v1",
+  "routing": {
+    "call_f1": 0.6030013642564802,
+    "call_precision": 0.7892857142857143,
+    "call_recall": 0.4878587196467991,
+    "clarification_accuracy": 0.8059299191374663,
+    "confusion_matrix": {
+      "ANSWER": {
+        "ANSWER": 0,
+        "CALL": 0,
+        "CLARIFY": 0,
+        "UNSUPPORTED": 0
+      },
+      "CALL": {
+        "ANSWER": 12,
+        "CALL": 221,
+        "CLARIFY": 190,
+        "UNSUPPORTED": 30
+      },
+      "CLARIFY": {
+        "ANSWER": 13,
+        "CALL": 34,
+        "CLARIFY": 299,
+        "UNSUPPORTED": 25
+      },
+      "UNSUPPORTED": {
+        "ANSWER": 22,
+        "CALL": 25,
+        "CLARIFY": 133,
+        "UNSUPPORTED": 273
+      }
+    },
+    "must_call_accuracy": 0.4878587196467991,
+    "no_call_accuracy": 0.0,
+    "over_call_rate": 0.07160194174757281,
+    "under_call_rate": 0.026490066225165563,
+    "unsupported_accuracy": 0.6026490066225165
+  },
+  "run_id": "m0_v2_final_minus_xlam_fixed_compute/eval/checkpoint-1200",
+  "schema_version": 1,
+  "status": "EXECUTED",
+  "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+}

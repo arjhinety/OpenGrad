@@ -1,0 +1,198 @@
+{
+  "artifact_kind": "CHECKPOINT_SELECTION",
+  "baseline": {
+    "call_f1": 0.6152688980819857,
+    "call_precision": 0.45019262520638414,
+    "call_recall": 0.9714964370546318,
+    "clarification_accuracy": 0.09143686502177069,
+    "must_call_accuracy": 0.9714964370546318,
+    "no_call_accuracy": 0.0,
+    "over_call_rate": 0.6525146962769431,
+    "parse_valid_rate": 0.9987357774968394,
+    "records": 2373,
+    "under_call_rate": 0.0166270783847981,
+    "unsupported_accuracy": 0.010688836104513063
+  },
+  "checkpoints": {
+    "1200": {
+      "call_f1": 0.5634861006761833,
+      "call_precision": 0.7668711656441718,
+      "call_recall": 0.44536817102137766,
+      "clarification_accuracy": 0.8156748911465893,
+      "confusion_matrix": {
+        "ANSWER": {
+          "ANSWER": 0,
+          "CALL": 0,
+          "CLARIFY": 0,
+          "UNSUPPORTED": 0
+        },
+        "CALL": {
+          "ANSWER": 19,
+          "CALL": 375,
+          "CLARIFY": 369,
+          "UNSUPPORTED": 79
+        },
+        "CLARIFY": {
+          "ANSWER": 11,
+          "CALL": 77,
+          "CLARIFY": 562,
+          "UNSUPPORTED": 39
+        },
+        "UNSUPPORTED": {
+          "ANSWER": 36,
+          "CALL": 37,
+          "CLARIFY": 247,
+          "UNSUPPORTED": 522
+        }
+      },
+      "must_call_accuracy": 0.44536817102137766,
+      "no_call_accuracy": 0.0,
+      "over_call_rate": 0.07446113651208361,
+      "parse_valid_rate": 0.9995785924989464,
+      "records": 2373,
+      "under_call_rate": 0.022565320665083134,
+      "unsupported_accuracy": 0.6199524940617577
+    },
+    "1800": {
+      "call_f1": 0.477310924369748,
+      "call_precision": 0.8160919540229885,
+      "call_recall": 0.33729216152019004,
+      "clarification_accuracy": 0.841799709724238,
+      "confusion_matrix": {
+        "ANSWER": {
+          "ANSWER": 0,
+          "CALL": 0,
+          "CLARIFY": 0,
+          "UNSUPPORTED": 0
+        },
+        "CALL": {
+          "ANSWER": 18,
+          "CALL": 284,
+          "CLARIFY": 414,
+          "UNSUPPORTED": 126
+        },
+        "CLARIFY": {
+          "ANSWER": 12,
+          "CALL": 47,
+          "CLARIFY": 580,
+          "UNSUPPORTED": 50
+        },
+        "UNSUPPORTED": {
+          "ANSWER": 47,
+          "CALL": 17,
+          "CLARIFY": 246,
+          "UNSUPPORTED": 532
+        }
+      },
+      "must_call_accuracy": 0.33729216152019004,
+      "no_call_accuracy": 0.0,
+      "over_call_rate": 0.041802743305029394,
+      "parse_valid_rate": 1.0,
+      "records": 2373,
+      "under_call_rate": 0.021377672209026127,
+      "unsupported_accuracy": 0.6318289786223278
+    },
+    "2400": {
+      "call_f1": 0.48454469507101083,
+      "call_precision": 0.8169014084507042,
+      "call_recall": 0.34441805225653205,
+      "clarification_accuracy": 0.8505079825834543,
+      "confusion_matrix": {
+        "ANSWER": {
+          "ANSWER": 0,
+          "CALL": 0,
+          "CLARIFY": 0,
+          "UNSUPPORTED": 0
+        },
+        "CALL": {
+          "ANSWER": 14,
+          "CALL": 290,
+          "CLARIFY": 430,
+          "UNSUPPORTED": 108
+        },
+        "CLARIFY": {
+          "ANSWER": 11,
+          "CALL": 48,
+          "CLARIFY": 586,
+          "UNSUPPORTED": 44
+        },
+        "UNSUPPORTED": {
+          "ANSWER": 46,
+          "CALL": 17,
+          "CLARIFY": 254,
+          "UNSUPPORTED": 525
+        }
+      },
+      "must_call_accuracy": 0.34441805225653205,
+      "no_call_accuracy": 0.0,
+      "over_call_rate": 0.042455911169170475,
+      "parse_valid_rate": 1.0,
+      "records": 2373,
+      "under_call_rate": 0.0166270783847981,
+      "unsupported_accuracy": 0.6235154394299287
+    },
+    "600": {
+      "call_f1": 0.5925925925925926,
+      "call_precision": 0.7198641765704584,
+      "call_recall": 0.503562945368171,
+      "clarification_accuracy": 0.7851959361393324,
+      "confusion_matrix": {
+        "ANSWER": {
+          "ANSWER": 0,
+          "CALL": 0,
+          "CLARIFY": 0,
+          "UNSUPPORTED": 0
+        },
+        "CALL": {
+          "ANSWER": 36,
+          "CALL": 424,
+          "CLARIFY": 341,
+          "UNSUPPORTED": 41
+        },
+        "CLARIFY": {
+          "ANSWER": 17,
+          "CALL": 105,
+          "CLARIFY": 541,
+          "UNSUPPORTED": 26
+        },
+        "UNSUPPORTED": {
+          "ANSWER": 146,
+          "CALL": 60,
+          "CLARIFY": 248,
+          "UNSUPPORTED": 388
+        }
+      },
+      "must_call_accuracy": 0.503562945368171,
+      "no_call_accuracy": 0.0,
+      "over_call_rate": 0.1077726975832789,
+      "parse_valid_rate": 0.9995785924989464,
+      "records": 2373,
+      "under_call_rate": 0.04275534441805225,
+      "unsupported_accuracy": 0.46080760095011875
+    }
+  },
+  "ineligible": {},
+  "macro": {
+    "1200": 0.626999,
+    "1800": 0.60364,
+    "2400": 0.606147,
+    "600": 0.583189
+  },
+  "metric_versions": {
+    "policy": "tool_use_promotion_v3"
+  },
+  "partition_examples": 2373,
+  "partition_fingerprint": "88a56821edfc8614285846e8bef60cf8aced124ce3b5a2d4054e8344618c9980",
+  "partition_side": "dev",
+  "policy_verdicts": {
+    "1200": "REJECT",
+    "1800": "REJECT",
+    "2400": "REJECT",
+    "600": "REJECT"
+  },
+  "run": "runs/m0_v2_final_minus_xlam_fixed_compute",
+  "schema_version": 1,
+  "selected_checkpoint": 1200,
+  "selection_rule": "docs/evaluation/CHECKPOINT_SELECTION_RULE.md",
+  "tie_break_applied": false
+}

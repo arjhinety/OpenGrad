@@ -1,0 +1,118 @@
+{
+  "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+  "experiment_id": "m0_v2_final_minus_xlam_matched_exposure",
+  "limit": null,
+  "points": [
+    {
+      "baseline_comparison": {
+        "baseline_run_id": "tool_calling/qwen35_2b/baseline",
+        "candidate_run_id": null,
+        "improved": [
+          "call_precision",
+          "clarification_accuracy",
+          "over_call_rate",
+          "unsupported_accuracy"
+        ],
+        "metrics": {
+          "call_f1": {
+            "baseline": 0.61913,
+            "candidate": 0.555716,
+            "delta": -0.063413,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "call_precision": {
+            "baseline": 0.454185,
+            "candidate": 0.806723,
+            "delta": 0.352538,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "call_recall": {
+            "baseline": 0.972201,
+            "candidate": 0.423841,
+            "delta": -0.54836,
+            "direction": "higher_is_better",
+            "verdict": "REGRESSED"
+          },
+          "clarification_accuracy": {
+            "baseline": 0.100943,
+            "candidate": 0.819407,
+            "delta": 0.718464,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          },
+          "over_call_rate": {
+            "baseline": 0.642463,
+            "candidate": 0.055825,
+            "delta": -0.586638,
+            "direction": "lower_is_better",
+            "verdict": "IMPROVED"
+          },
+          "under_call_rate": {
+            "baseline": 0.014672,
+            "candidate": 0.01766,
+            "delta": 0.002988,
+            "direction": "lower_is_better",
+            "verdict": "REGRESSED"
+          },
+          "unsupported_accuracy": {
+            "baseline": 0.013127,
+            "candidate": 0.620309,
+            "delta": 0.607182,
+            "direction": "higher_is_better",
+            "verdict": "IMPROVED"
+          }
+        },
+        "regressed": [
+          "call_f1",
+          "call_recall",
+          "under_call_rate"
+        ]
+      },
+      "checkpoint_id": "checkpoint-1060",
+      "checkpoint_step": 1060,
+      "evaluation_seconds": 83.8,
+      "parse_valid_rate": 1.0,
+      "records": 1277,
+      "routing": {
+        "call_f1": 0.5557163531114327,
+        "call_precision": 0.8067226890756303,
+        "call_recall": 0.423841059602649,
+        "clarification_accuracy": 0.8194070080862533,
+        "confusion_matrix": {
+          "ANSWER": {
+            "ANSWER": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "UNSUPPORTED": 0
+          },
+          "CALL": {
+            "ANSWER": 8,
+            "CALL": 192,
+            "CLARIFY": 209,
+            "UNSUPPORTED": 44
+          },
+          "CLARIFY": {
+            "ANSWER": 4,
+            "CALL": 27,
+            "CLARIFY": 304,
+            "UNSUPPORTED": 36
+          },
+          "UNSUPPORTED": {
+            "ANSWER": 15,
+            "CALL": 19,
+            "CLARIFY": 138,
+            "UNSUPPORTED": 281
+          }
+        },
+        "must_call_accuracy": 0.423841059602649,
+        "no_call_accuracy": 0.0,
+        "over_call_rate": 0.055825242718446605,
+        "under_call_rate": 0.017660044150110375,
+        "unsupported_accuracy": 0.6203090507726269
+      }
+    }
+  ],
+  "schema_version": 1
+}
