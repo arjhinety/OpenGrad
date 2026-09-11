@@ -1,0 +1,3 @@
+{"timestamp": "2026-09-11T11:46:14.928760+00:00", "event_type": "EXPERIMENT_CREATED", "experiment_id": "m0_v2_final_minus_xlam_fixed_compute", "details": {}}
+{"timestamp": "2026-09-11T11:46:14.960810+00:00", "event_type": "TRAINING", "experiment_id": "m0_v2_final_minus_xlam_fixed_compute", "details": {}}
+{"timestamp": "2026-09-11T12:31:30.239216+00:00", "event_type": "TRAINED", "experiment_id": "m0_v2_final_minus_xlam_fixed_compute", "details": {"final_loss": 0.6940288543701172, "checkpoint": "/root/OpenGrad/runs/m0_v2_final_minus_xlam_fixed_compute/checkpoints/checkpoint-2400", "checkpoint_registration_errors": []}}

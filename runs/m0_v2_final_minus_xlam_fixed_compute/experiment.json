@@ -1,0 +1,56 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": null,
+  "dataset_hashes": {
+    "canonical_v2_final": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161"
+  },
+  "dataset_manifest_ids": [
+    "canonical_v2_final"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": false,
+    "git_sha": "95a82254bd82b5ca2d08a058f0997ea93d80ba25",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-11T11:46:14.922467+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "m0_v2_final_minus_xlam_fixed_compute",
+  "git_commit": "95a82254bd82b5ca2d08a058f0997ea93d80ba25",
+  "git_dirty": false,
+  "hardware_info": {},
+  "hypothesis": "Joint xLAM-plus-CALL_PREDICTION removal, FIXED-COMPUTE arm. The completed `m0_sft_canonical_v2_final` run is the reference and is not modified or rerun. This run filters xLAM from the identical frozen corpus; because xLAM is currently the only source providing `CALL_PREDICTION`, that source filter also removes the corpus's entire call-prediction supervision channel.\nTHE QUESTION THIS ARM ANSWERS. Under the same 2,400-step optimization and GPU budget, what is the effect of removing xLAM together with `CALL_PREDICTION`? Everything else -- base checkpoint, seed, optimizer, learning rate, scheduler, batch geometry, sequence length, precision, renderer, loss masking, checkpoint cadence, promotion policy, and both evaluation partitions -- is held identical to the reference.\nWHAT THIS ARM CANNOT SEPARATE, STATED IN ADVANCE. It cannot distinguish xLAM source identity or content from supervision type: those variables are perfectly aligned in Canonical-v2. It also removes 56,090 of 161,966 trainable records, so at an unchanged 2,400 steps the smaller corpus receives more effective exposure: 0.363 corpus passes against the reference's 0.237, or 1.53x. Any observed difference therefore combines the joint source/channel removal with extra passes over `COMPLETE_TRAJECTORY`. The matched-exposure arm exists to expose that compute/exposure sensitivity, and the two arms are reported together or not at all.\nWHAT COUNTS AS EVIDENCE. A single seeded run is a finding to record and test again, not settled attribution. No xLAM-specific causal claim is valid unless another evidence-backed `CALL_PREDICTION` source makes source identity separable from supervision type. A separate `CALL_PREDICTION`-only versus `COMPLETE_TRAJECTORY`-only design studies supervision composition, but it remains source-confounded in the present corpus and is not executed by this arm.",
+  "launch_timestamp": "2026-09-11T11:46:14.928447+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": null,
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "TRAINED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "sft",
+  "training_config": {
+    "gradient_accumulation_steps": 2,
+    "gradient_checkpointing": true,
+    "gradient_clipping": 1.0,
+    "learning_rate": 1e-05,
+    "max_seq_length": 2048,
+    "max_steps": 2400,
+    "micro_batch_size": 8,
+    "micro_batch_tokens": 4096,
+    "optimizer": "adamw_torch",
+    "optimizer_state": "fp32",
+    "scheduler": "cosine",
+    "tuning_method": "full",
+    "type": "sft",
+    "warmup_steps": 120
+  }
+}
