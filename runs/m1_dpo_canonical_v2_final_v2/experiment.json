@@ -1,0 +1,57 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": null,
+  "dataset_hashes": {
+    "m1_calibration_preference_pairs_v1": "d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4",
+    "preference": "d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4"
+  },
+  "dataset_manifest_ids": [
+    "m1_calibration_preference_pairs_v1"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": false,
+    "git_sha": "bb15c7e0181c7f526875cd1426672431ae14bd83",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-11T17:29:53.971328+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "m1_dpo_canonical_v2_final_v2",
+  "git_commit": "bb15c7e0181c7f526875cd1426672431ae14bd83",
+  "git_dirty": false,
+  "hardware_info": {},
+  "hypothesis": "M1-v2 is the corrected execution of the frozen M1 calibration experiment. It applies DPO to the selected full-corpus M0-final-v2 checkpoint, not to the base or any historical/ablation checkpoint. The objective is calibration: retain strong call recall and precision, reduce unnecessary calls, improve unsupported handling, and preserve clarification behavior.\nThe first M1 identity is preserved as FAILED evidence because its loop completed 119/120 steps after dropping a final partial accumulation. This new identity changes no scientific choice; it uses the corrected loop that continues epochs until the exact configured horizon.\nThe student and reference both start from the selected M0 checkpoint. The preference artifact is the frozen local calibration set with actual deterministic base/M0 disagreements plus a bounded curated When2Call training slice. Frozen behavioral evaluation IDs were excluded before local generation; no paid external API was used.",
+  "launch_timestamp": "2026-09-11T17:29:53.976627+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": "m0_sft_canonical_v2_final",
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "TRAINED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "dpo",
+  "training_config": {
+    "beta": 0.05,
+    "gradient_accumulation_steps": 2,
+    "initial_checkpoint": "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1800",
+    "initial_checkpoint_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+    "learning_rate": 5e-07,
+    "max_seq_length": 2048,
+    "max_steps": 120,
+    "parent_checkpoint_id": "m0_sft_canonical_v2_final::checkpoint-1800",
+    "per_device_train_batch_size": 2,
+    "reference": "explicit_checkpoint",
+    "reference_checkpoint": "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1800",
+    "scheduler": "cosine",
+    "type": "dpo",
+    "warmup_steps": 12
+  }
+}

@@ -1,0 +1,83 @@
+experiment_id: m1_dpo_canonical_v2_final_v2
+parent_experiment_id: m0_sft_canonical_v2_final
+hypothesis: 'M1-v2 is the corrected execution of the frozen M1 calibration experiment.
+  It applies DPO to the selected full-corpus M0-final-v2 checkpoint, not to the base
+  or any historical/ablation checkpoint. The objective is calibration: retain strong
+  call recall and precision, reduce unnecessary calls, improve unsupported handling,
+  and preserve clarification behavior.
+
+  The first M1 identity is preserved as FAILED evidence because its loop completed
+  119/120 steps after dropping a final partial accumulation. This new identity changes
+  no scientific choice; it uses the corrected loop that continues epochs until the
+  exact configured horizon.
+
+  The student and reference both start from the selected M0 checkpoint. The preference
+  artifact is the frozen local calibration set with actual deterministic base/M0 disagreements
+  plus a bounded curated When2Call training slice. Frozen behavioral evaluation IDs
+  were excluded before local generation; no paid external API was used.'
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+datasets:
+  manifest_ids:
+  - m1_calibration_preference_pairs_v1
+  hashes:
+    m1_calibration_preference_pairs_v1: d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4
+    preference: d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4
+  preference_path: data/processed/m1_calibration_preference_pairs_v1.jsonl
+  preference_prompt_format: rendered
+  manifest_paths:
+  - reports/data/m1-calibration-preference-pairs-v1.json
+  source_manifests:
+  - m1_local_calibration_pairs_v1
+  exclude_sources: []
+trainer:
+  type: dpo
+  initial_checkpoint: runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1800
+  initial_checkpoint_sha256: 7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a
+  parent_checkpoint_id: m0_sft_canonical_v2_final::checkpoint-1800
+  reference: explicit_checkpoint
+  reference_checkpoint: runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1800
+  beta: 0.05
+  learning_rate: 5.0e-07
+  scheduler: cosine
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 2
+  max_steps: 120
+  warmup_steps: 12
+  max_seq_length: 2048
+evaluation:
+  suite: tool_use_core
+  baseline_experiment: tool_calling/qwen35_2b/baseline
+  parent_experiment: m0_sft_canonical_v2_final
+  checkpoint_selection_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json
+  primary_metrics:
+  - call_precision
+  - call_recall
+  - call_f1
+  - over_call_rate
+  - under_call_rate
+  - clarification_accuracy
+  - unsupported_accuracy
+  - parse_valid_rate
+  - macro_behaviour_score
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+checkpointing:
+  save_steps: 30
+  max_checkpoints: 4
+promotion:
+  requires_executed_suite: tool_use_core
+  policy_version: tool_use_promotion_v4
+  must_pass:
+    parse_valid_rate_min: 0.99
+  max_regression:
+    default: 1.0
+reproducibility:
+  seed: 42
+  precision: bfloat16
+speculative_decoding:
+  enabled: false
