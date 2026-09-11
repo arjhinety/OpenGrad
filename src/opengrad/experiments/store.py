@@ -88,6 +88,7 @@ class ExperimentStore:
         local_ledger.record(LedgerEventType.EXPERIMENT_CREATED, config.experiment_id)
         self.central_ledger.record(LedgerEventType.EXPERIMENT_CREATED, config.experiment_id)
 
+        self.refresh_registry()
         return record
 
     def register_record(self, record: ExperimentRecord) -> ExperimentRecord:
@@ -112,6 +113,7 @@ class ExperimentStore:
         local_ledger = ExperimentLedger(r_dir / "ledger.jsonl")
         local_ledger.record(LedgerEventType.EXPERIMENT_CREATED, record.experiment_id)
         self.central_ledger.record(LedgerEventType.EXPERIMENT_CREATED, record.experiment_id)
+        self.refresh_registry()
         return record
 
     def get_experiment(self, experiment_id: str) -> ExperimentRecord:
@@ -161,6 +163,9 @@ class ExperimentStore:
         local_ledger.record(status_str, experiment_id, details)
         self.central_ledger.record(status_str, experiment_id, details)
 
+        # Authoritative state is committed above; only now is the derived index refreshed.
+        self.refresh_registry()
+
         return record
 
     def _save_record(self, record: ExperimentRecord) -> None:
@@ -171,3 +176,22 @@ class ExperimentStore:
             json.dumps(record.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
         temp.replace(target)
+
+    def refresh_registry(self) -> bool:
+        """Refresh the derived experiment index. Never fails the authoritative transition.
+
+        Ordering is deliberate: every authoritative write in this class has already committed by
+        the time this runs, so the projection is always built from settled state. If it fails,
+        the authoritative record and the ledger are untouched and
+        ``opengrad results rebuild-registry`` can regenerate the index at any time -- which is
+        the whole reason the index is derived rather than owned.
+        """
+        # Imported here because the registry reads the experiment schema and ledger, and a
+        # module-level import would close a cycle back through this module.
+        from opengrad.results.registry import rebuild_registry
+
+        try:
+            rebuild_registry(self.root)
+        except (OSError, ValueError, TypeError, KeyError):
+            return False
+        return True

@@ -48,6 +48,8 @@ data/raw/
 data/processed/
 datasets/
 results/raw/
+# In-flight atomic write target for the derived experiment index; the index itself is tracked.
+results/*.tmp
 reports/benchmarks/
 openweights/
 android-studio/

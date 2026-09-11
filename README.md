@@ -313,7 +313,7 @@ flowchart TD
 - `registry/` — dataset, benchmark, model, runtime, hardware, provenance, and experiment contracts.
 - `src/opengrad/` — canonical data, fixture adapters, parsing, contamination tools, evaluation schemas, lineage, stage gates, and reporting utilities.
 - `configs/` — data, evaluation, model, training, inference, and planned experiment configurations.
-- `experiments/`, `reports/`, `results/` — append-only evidence namespaces; the B0 baseline and three post-training experiments are recorded.
+- `experiments/`, `reports/`, `results/` — evidence namespaces; the B0 baseline and three post-training experiments are recorded. `runs/<id>/experiment.json` owns experiment state, `reports/` holds the written analyses, and [`results/registry.jsonl`](results/README.md) is a derived, rebuildable index over the run artifacts.
 - `docs/` — methodology, architecture, data, benchmark, inference, reproducibility, contribution, and publication protocols.
 - `integrations/` — harness-facing integrations over the `opengrad … --json` boundary; `opengrad-mcp/` is the dependency-free stdio MCP server.
 - `release/` — tracked Hugging Face release definitions, dataset-card template, attribution audit, and citations.
@@ -385,7 +385,9 @@ Published artifacts for these runs:
 | [`OpenGrad-Qwen3.5-2B-M1-DPO`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO) | model | checkpoint 300 only + the deleted checkpoints' predictions |
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation`](https://huggingface.co/datasets/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation) | evaluation record | predictions and metrics for 5 of 6 checkpoints — **no weights exist** |
 
-`results/registry.jsonl` is currently empty, because these four results are recorded by the experiment store (`runs/<experiment_id>/experiment.json`, each with its own ledger and committed metrics) rather than duplicated into it. Do not confuse passing CPU tests with ML evidence: they validate infrastructure and fixtures, not model quality. Conversely, the B0 numbers above are a real measurement of a real model, but of a *baseline* — and the interventions trained against it have now been measured, in both directions: two regressions and one partial recovery.
+`results/registry.jsonl` is a **derived index**, not a store: one summary row per experiment, rebuilt from `runs/<experiment_id>/experiment.json`, `runs/<experiment_id>/eval/` and `runs/central_ledger.jsonl`. It can be deleted at any time — `opengrad results rebuild-registry` regenerates it byte-for-byte — so the authoritative values stay in the run artifacts and the index only makes them discoverable. `opengrad results validate-registry` reports any divergence. See [the results namespace](results/README.md).
+
+Do not confuse passing CPU tests with ML evidence: they validate infrastructure and fixtures, not model quality. Conversely, the B0 numbers above are a real measurement of a real model, but of a *baseline* — and the interventions trained against it have now been measured, in both directions: two regressions and one partial recovery.
 
 ### Illustrative future record
 
@@ -447,7 +449,7 @@ The B0 baseline, the M0 SFT runs, and the M1 DPO run are recorded and reproducib
 | Inspect benchmarks | [Benchmark registry](registry/benchmarks.yaml) and [benchmark notes](docs/benchmarks/README.md) |
 | Inspect model-family boundaries | [Model configs](configs/models/) and [model registry](registry/models.yaml) |
 | See experiment records | [experiments/](experiments/README.md) |
-| See results | [Results](#results) and the [M0 execution report](reports/M0_SFT_EXECUTION_REPORT.md) |
+| See results | [Results](#results), the [experiment index](results/README.md) and the [M0 execution report](reports/M0_SFT_EXECUTION_REPORT.md) |
 | See reports and failures | [reports/](reports/README.md) |
 | Read our mistakes | [Incident log](docs/INCIDENT_LOG.md) |
 | Check pre-GPU readiness | [Pre-GPU readiness report](reports/PRE_GPU_READINESS_REPORT.md) and `opengrad readiness --json` |

@@ -75,6 +75,11 @@ def main() -> int:
     if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
         return benchmark_cli(sys.argv[2:])
 
+    if len(sys.argv) > 1 and sys.argv[1] == "results":
+        from opengrad.results.cli import results_cli
+
+        return results_cli(sys.argv[2:])
+
     parser = argparse.ArgumentParser(prog="opengrad", description="OpenGrad Research Platform")
     sub = parser.add_subparsers(dest="command")
 
