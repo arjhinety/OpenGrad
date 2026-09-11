@@ -1,5 +1,9 @@
 schema_version: 1
-status: BOOTSTRAP_NO_SCORES
+# The behavioral held-out (when2call-eval) has executed scores: B0 and 12 candidate
+# checkpoints were measured on it, and those results are published. Every *external*
+# benchmark in this registry is still FROZEN_NOT_EXECUTED and has no score, so the
+# registry as a whole is not "bootstrap" any more -- only its external tier is unmeasured.
+status: BEHAVIORAL_SCORED_EXTERNAL_NOT_EXECUTED
 benchmarks:
 - id: bfcl-v4
   name: Berkeley Function Calling Leaderboard V4

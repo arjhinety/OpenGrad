@@ -126,9 +126,9 @@ Do post-training gains survive quantization and optimized constrained-device inf
 
 ## Study 001 — Reliable Tool Use in Small Language Models
 
-The first planned track asks whether a small open-weight model can reliably decide **when and how** to use tools while retaining ordinary instruction-following capability. It is not an attempt to add tool-call grammar to a model that cannot serialize calls. It targets the decision boundary: `CALL`, `DO NOT CALL`, `ASK FIRST`, `SELECT`, `GROUND ARGUMENTS`, `CHAIN`, `PARALLELIZE`, `RECOVER`, and `STOP`.
+The first track asks whether a small open-weight model can reliably decide **when and how** to use tools while retaining ordinary instruction-following capability. It is not an attempt to add tool-call grammar to a model that cannot serialize calls. It targets the decision boundary: `CALL`, `DO NOT CALL`, `ASK FIRST`, `SELECT`, `GROUND ARGUMENTS`, `CHAIN`, `PARALLELIZE`, `RECOVER`, and `STOP`.
 
-The study will cover, when the corresponding evaluation is implemented:
+It has been carried through baseline measurement, a controlled SFT comparison, and a preference-optimization stage, with the results in [Results](#results). The study will cover, as the corresponding evaluations are implemented:
 
 - deciding whether to call a tool, answer directly, ask for clarification, or reject an unsupported request;
 - selecting the correct tool and producing schema-valid, grounded arguments;
@@ -215,18 +215,18 @@ The historical [`tool-calling-mixture-v1`](configs/data/tool_calling/mixture_v1.
 
 ## Benchmark program
 
-OpenGrad has deterministic mock smoke harnesses for the following configured evaluation families. A smoke harness validates the local result contract with fixture predictions; it is not a real model evaluation.
+OpenGrad has deterministic mock smoke harnesses for the following configured evaluation families. A smoke harness validates the local result contract with fixture predictions; it is not a real model evaluation. One row below is not a harness: When2Call is the frozen behavioral held-out set that B0 and every post-training checkpoint were actually scored on.
 
 | Benchmark | Measures in the registry | Harness status | Real score available? | Revision state |
 | --- | --- | --- | --- | --- |
 | BFCL V4 | Function-call accuracy | Mock smoke harness | **No** | Recommended Gorilla revision pinned |
-| When2Call | Call decision, answer quality | End-to-end CPU mock + frozen runner | **No** | Frozen in baseline v2 config |
+| When2Call | Call decision, answer quality | **Executed** — 3,650 held-out examples, engine vLLM 0.29.0 | **Yes** — B0 and 12 candidate checkpoints | Frozen in baseline v2 config; the training corpora exclude it by construction |
 | τ-bench / τ² | Task success, reward | Mock smoke harness | **No** | Recommended repository revision pinned |
 | ToolSandbox | Tool-use correctness | Mock smoke harness | **No** | Authoritative metadata pending |
 | MCPMark Verified | Task success | Mock smoke harness | **No** | Stretch evaluation; metadata pending |
 | Toolathlon | Task success | Mock smoke harness | **No** | Stretch evaluation; metadata pending |
 
-The full benchmark registry is [`registry/benchmarks.yaml`](registry/benchmarks.yaml). The behavioral held-out baseline is a real, executed measurement; every external benchmark family remains `FROZEN_NOT_EXECUTED`, so **no external benchmark score exists**.
+The full benchmark registry is [`registry/benchmarks.yaml`](registry/benchmarks.yaml). The When2Call behavioral held-out is a real, executed measurement with published scores in [Results](#results); every *external* benchmark family remains `FROZEN_NOT_EXECUTED`, so **no external benchmark score exists**. That distinction is the whole point of keeping the behavioral suite separate from the external ones: the behavioral set answers "did tool policy change", and the external sets would answer "did anything else break". Only the first has been measured.
 
 ### Baseline execution gate
 
@@ -361,7 +361,7 @@ OpenGrad result
 
 > **Four empirical OpenGrad results exist: the B0 baseline and three post-training interventions.** Two interventions are negative, one is a partial recovery from a data defect this project published in its own corpus.
 
-The stable results namespace is ready for future records. It lists interventions; the baseline is recorded by the experiment store instead.
+The table above lists interventions; the baseline is recorded by the experiment store instead.
 
 | Experiment | Model | Change | Capability Δ | Regression | Efficiency Δ | Reproduced | Report |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -385,7 +385,7 @@ Published artifacts for these runs:
 | [`OpenGrad-Qwen3.5-2B-M1-DPO`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO) | model | checkpoint 300 only + the deleted checkpoints' predictions |
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation`](https://huggingface.co/datasets/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation) | evaluation record | predictions and metrics for 5 of 6 checkpoints — **no weights exist** |
 
-`results/registry.jsonl` is currently empty. Do not confuse passing CPU tests with ML evidence: they validate infrastructure and fixtures, not model quality. Conversely, the B0 numbers above are a real measurement of a real model, but of a *baseline* — they say nothing yet about whether any intervention improves it.
+`results/registry.jsonl` is currently empty, because these four results are recorded by the experiment store (`runs/<experiment_id>/experiment.json`, each with its own ledger and committed metrics) rather than duplicated into it. Do not confuse passing CPU tests with ML evidence: they validate infrastructure and fixtures, not model quality. Conversely, the B0 numbers above are a real measurement of a real model, but of a *baseline* — and the interventions trained against it have now been measured, in both directions: two regressions and one partial recovery.
 
 ### Illustrative future record
 
@@ -447,7 +447,7 @@ The B0 baseline, the M0 SFT runs, and the M1 DPO run are recorded and reproducib
 | Inspect benchmarks | [Benchmark registry](registry/benchmarks.yaml) and [benchmark notes](docs/benchmarks/README.md) |
 | Inspect model-family boundaries | [Model configs](configs/models/) and [model registry](registry/models.yaml) |
 | See experiment records | [experiments/](experiments/README.md) |
-| See results | [results/](results/registry.jsonl) |
+| See results | [Results](#results) and the [M0 execution report](reports/M0_SFT_EXECUTION_REPORT.md) |
 | See reports and failures | [reports/](reports/README.md) |
 | Read our mistakes | [Incident log](docs/INCIDENT_LOG.md) |
 | Check pre-GPU readiness | [Pre-GPU readiness report](reports/PRE_GPU_READINESS_REPORT.md) and `opengrad readiness --json` |
