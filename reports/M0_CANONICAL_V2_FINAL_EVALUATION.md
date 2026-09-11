@@ -125,9 +125,11 @@ partition can measure.
 **The misreading to avoid:** the corpus changed in **three** ways at once. xLAM was added
 (56,090 trainable call-prediction records where the partial corpus contributed none), ToolACE
 went from 697 to 11,051 accepted records after a validator defect was fixed, and When2Call from
-4,000 to 6,505 after an interrupted materialization was corrected. Attributing the recall
-recovery to xLAM's call-prediction supervision specifically would require the `supervision.include`
-ablation — available, configured, and **not run** in this experiment.
+4,000 to 6,505 after an interrupted materialization was corrected. The planned minus-xLAM arms
+remove xLAM together with the entire `CALL_PREDICTION` channel because no other source currently
+provides that contract. They estimate that joint removal, not an xLAM-content-only effect. The
+separate `CALL_PREDICTION`-only versus `COMPLETE_TRAJECTORY`-only design studies supervision
+composition, but remains source-confounded until another valid call-prediction source exists.
 
 **The second misreading to avoid:** none of the 56,090 call-prediction records contains a tool
 result. Finding a `call_recall` improvement is consistent with call-prediction supervision, but

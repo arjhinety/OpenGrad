@@ -58,8 +58,10 @@ Measured by rendering every record, not by counting canonical rows.
 | when2call | 6,505 | 6,505 | 1.000 | 0 | `COMPLETE_TRAJECTORY` |
 
 The mixture is trained under **natural sampling**. No kind is reweighted, and none is excluded:
-`supervision.include` lists both kinds, and the ablation (all vs one kind) runs by changing that
-block alone.
+`supervision.include` lists both kinds. A supervision-composition arm can select one kind through
+that block, but in this corpus kind and source are perfectly aligned: xLAM provides every
+`CALL_PREDICTION` record and no other source does. The minus-xLAM arms therefore remove xLAM
+together with that entire channel; they are not pure source-content ablations.
 
 ## 4. xLAM
 

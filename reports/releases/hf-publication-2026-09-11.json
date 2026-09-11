@@ -94,7 +94,13 @@
     "parquet_shards": 118,
     "record_count": 115895,
     "trainable_records": 105876,
-    "derived_fingerprint": "f8ba687e16d8ab740b78a503adb41f4be28bd775f925291d6da7ec31be1ac5ac",
+    "derived_fingerprint": "5fc739040b1a09fa7b8ac20494609bd4cbe89efc6ed54e4dbc9c2df12268b7f3",
+    "interpretation_correction": {
+      "previous_derived_fingerprint": "f8ba687e16d8ab740b78a503adb41f4be28bd775f925291d6da7ec31be1ac5ac",
+      "previous_hub_revision": "8ea9154881a53d735697a5ca16fcd71a23795605",
+      "reason": "The previous metadata called this a source ablation without stating that removing xLAM also removes the corpus's entire CALL_PREDICTION channel. Parquet bytes and counts are unchanged.",
+      "corrected_hub_revision": null
+    },
     "parent_fingerprint": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
     "parent_hub_revision": "66470c07ed0a79941f49a5cf67c1b3b1a7d8196e",
     "method": "byte-identical shard selection; no record parsed, rewritten, re-encoded or re-sharded",
@@ -113,6 +119,6 @@
       "remote_spot_check_shards": 5,
       "remote_spot_check_identical_to_parent": true
     },
-    "role": "training input of the xLAM source ablation; carries no result"
+    "role": "training input for removing xLAM together with the CALL_PREDICTION channel; carries no result or source-specific attribution"
   }
 }

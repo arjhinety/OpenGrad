@@ -90,7 +90,7 @@ def build() -> int:
 
     derived = dict(parent)
     derived["release_name"] = f"{parent['release_name']} — minus xLAM view"
-    derived["release_version"] = "v2.1.0-minus-xlam"
+    derived["release_version"] = "v2.1.1-minus-xlam-interpretation-corrected"
     derived["hub_repository"] = "arrochi112/OpenGrad-ToolPolicy-Canonical-v2-minus-xlam"
     derived["sources"] = kept_sources
     derived["record_count"] = record_count
@@ -99,7 +99,16 @@ def build() -> int:
     # commit rather than the commit of the script that selected them. This keeps the derived
     # manifest's identity stable when it is regenerated.
     derived["derived_view"] = {
-        "kind": "SOURCE_ABLATION_VIEW",
+        "kind": "JOINT_SOURCE_AND_SUPERVISION_CHANNEL_REMOVAL_VIEW",
+        "supersedes_interpretation": {
+            "release_version": "v2.1.0-minus-xlam",
+            "manifest_fingerprint": "f8ba687e16d8ab740b78a503adb41f4be28bd775f925291d6da7ec31be1ac5ac",
+            "hub_revision": "8ea9154881a53d735697a5ca16fcd71a23795605",
+            "reason": (
+                "The earlier metadata called this a source ablation without stating that xLAM "
+                "was the corpus's only CALL_PREDICTION source. Shard bytes and counts are unchanged."
+            ),
+        },
         "method": (
             "byte-identical shard selection; no record was parsed, rewritten, re-encoded or "
             "re-sharded"
@@ -125,22 +134,26 @@ def build() -> int:
         "retained_shard_count": len(kept_files),
         "excluded_shard_count": len(dropped_files),
         "why_published": (
-            "This view is the exact training input of the xLAM source ablation "
-            "(m0_v2_final_minus_xlam_fixed_compute and m0_v2_final_minus_xlam_matched_exposure). "
-            "It is published so the ablation's input can be inspected independently of the runs "
-            "and independently of the project's tooling."
+            "This view is the exact training input of the paired joint xLAM-plus-CALL_PREDICTION "
+            "removal experiment (m0_v2_final_minus_xlam_fixed_compute and "
+            "m0_v2_final_minus_xlam_matched_exposure). It is published so the input can be "
+            "inspected independently of the runs and independently of the project's tooling."
         ),
         "not_a_result": (
-            "A corpus view carries no result. Whether including xLAM helps is measured by the "
-            "ablation runs against the frozen evaluation partitions, not by this dataset."
+            "A corpus view carries no result. The paired runs measure removing xLAM together "
+            "with the corpus's CALL_PREDICTION channel; they cannot separate source identity "
+            "from supervision type because xLAM is currently its only provider."
         ),
     }
 
     manifest_path = output / "release-manifest.json"
     manifest_path.write_text(json.dumps(derived, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    # Attribution files are inherited verbatim rather than regenerated. Over-including a licence
-    # is not an error; dropping one is.
+    card = ROOT / "release/huggingface/toolpolicy-canonical-v2-minus-xlam/README.md"
+    if not card.is_file():
+        raise SystemExit(f"release card missing: {card}")
+    shutil.copyfile(card, output / "README.md")
+
     for extra in ("CITATIONS.bib", "source-licenses.md"):
         source_file = ROOT / PARENT / extra
         if source_file.is_file():

@@ -53,7 +53,9 @@ def derive(full: dict, excluded: str) -> dict:
     derived["excluded_by_this_view"] = excluded
     derived["derivation"] = (
         "Exact arithmetic over the measured per-source entries of the full corpus report. No "
-        "record was re-rendered: a source ablation removes a measured source and nothing else."
+        "record was re-rendered. Removing xLAM also removes the entire CALL_PREDICTION channel "
+        "because xLAM is currently its only source; this evidence therefore describes a joint "
+        "source-and-supervision-channel intervention, not a pure source-content ablation."
     )
     return derived
 

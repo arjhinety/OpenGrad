@@ -178,9 +178,10 @@ trajectories, so composition is reported per kind:
   kind at all (`SUPERVISION_UNCLASSIFIED`). It is dormant for configs that declare no yield
   report, and says so.
 
-`supervision.include` supports the ablation the task asked for — full corpus vs one kind — without
-rebuilding canonical data, and it is part of the sample-cache identity so a filtered run cannot
-reuse an unfiltered cache.
+`supervision.include` supports a full-corpus-versus-one-kind composition study without rebuilding
+canonical data, and it is part of the sample-cache identity so a filtered run cannot reuse an
+unfiltered cache. In Canonical-v2 this is not clean supervision-type causal evidence: xLAM provides
+every `CALL_PREDICTION` record, so source identity and supervision kind are perfectly aligned.
 
 `supervision.sampling_weights` is **rejected, not accepted**: weighting is not implemented, and a
 declared weight the trainer ignores would change an experiment's meaning without changing its
@@ -198,8 +199,10 @@ independent builds. Both contracts are in use, and the mixture they produce is m
 | `COMPLETE_TRAJECTORY` | 105,876 | 65.4% |
 | **total** | **161,966** | |
 
-Trained under **natural sampling**: no kind is reweighted and none is excluded. The ablation the
-task asked for runs by changing `supervision.include` alone.
+Trained under **natural sampling**: no kind is reweighted and none is excluded. Separate
+`CALL_PREDICTION`-only and `COMPLETE_TRAJECTORY`-only configs express a supervision-composition
+study, but they remain source-confounded in this corpus. The executable minus-xLAM pair instead
+states its treatment explicitly as removing xLAM together with the `CALL_PREDICTION` channel.
 
 The historical fact about the partial snapshot remains unchanged and is stated on its own card:
 

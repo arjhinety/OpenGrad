@@ -217,8 +217,10 @@ raw call recall is largely retained.
 
 **Does not show:** that any of this came from xLAM's call-prediction supervision specifically.
 The corpus changed in more than one way at once — xLAM was added, ToolACE went from 697 to 11,051
-accepted records, and When2Call from 4,000 to 6,505 — so a per-source attribution would need the
-ablation the mixture configuration makes available but which this experiment did not run.
+accepted records, and When2Call from 4,000 to 6,505. The planned minus-xLAM comparison cannot
+supply a pure per-source attribution either: xLAM is currently the only `CALL_PREDICTION` source,
+so removing it also removes that entire supervision channel. It estimates their joint removal.
+Separating source identity from supervision type requires another valid `CALL_PREDICTION` source.
 
 **Does not show:** anything about tool-result interpretation, multi-turn recovery or multi-step
 planning. None of the 56,090 call-prediction records contains a tool result. The config stated

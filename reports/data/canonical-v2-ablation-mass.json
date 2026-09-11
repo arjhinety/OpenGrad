@@ -74,7 +74,7 @@
     "supervised_tokens": 29630369,
     "trainable_records": 105876
   },
-  "note": "Measured from the reference run's own rendered sample cache, so these are the same samples the completed M0 trained on. The ablation is a filter over identical rows: the frozen corpus is not rebuilt or mutated.",
+  "note": "Measured from the reference run's own rendered sample cache, so these are the same samples the completed M0 trained on. The frozen corpus is not rebuilt or mutated. Removing xLAM jointly removes every CALL_PREDICTION sample because no other source currently provides that contract; these masses do not identify a source-only effect.",
   "per_step_tokens": {
     "full": 13985.72,
     "minus_xlam_at_reference_steps": 12345.99

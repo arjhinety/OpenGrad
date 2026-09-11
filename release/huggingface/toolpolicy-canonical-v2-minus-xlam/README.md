@@ -12,9 +12,9 @@ configs:
     path: "*.parquet"
 ---
 
-> This is a **source-ablation view** of a frozen research corpus. It is the training input of one
-> experiment, published so that experiment's data can be inspected independently. It carries no
-> result, and it is not a recommended training mixture.
+> This is the byte-identical training view for a **joint xLAM-plus-`CALL_PREDICTION` removal**
+> experiment. xLAM is currently the corpus's only source of that supervision contract, so this is
+> not a pure source-content ablation. It carries no result and is not a recommended mixture.
 
 ## What this is
 
@@ -22,8 +22,10 @@ configs:
 with **one source removed**: xLAM/APIGen. Three sources remain, 115,895 canonical records, 118
 shards.
 
-It exists because OpenGrad ran a source ablation against the frozen corpus, and an ablation is only
-checkable if its input is available. This view is the exact input of that experiment.
+It exists because OpenGrad planned paired fixed-compute and matched-exposure runs against this
+selection, and an experiment is only checkable if its input is available. This view is their exact
+input. Removing xLAM also removes all `CALL_PREDICTION` supervision, so the runs estimate that
+joint intervention rather than an xLAM-content-only effect.
 
 ## It is a selection, not a rebuild
 
@@ -39,13 +41,18 @@ against the parent dataset as well as against this one.
 
 ```text
 parent fingerprint : 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
-derived fingerprint: f8ba687e16d8ab740b78a503adb41f4be28bd775f925291d6da7ec31be1ac5ac
+current fingerprint: 5fc739040b1a09fa7b8ac20494609bd4cbe89efc6ed54e4dbc9c2df12268b7f3
+prior fingerprint  : f8ba687e16d8ab740b78a503adb41f4be28bd775f925291d6da7ec31be1ac5ac
+                     superseded only because its interpretation metadata called this a source
+                     ablation without stating the inseparable supervision-channel removal;
+                     retained parquet bytes and counts are unchanged
 ```
 
-Consequences worth stating, because they are properties an ablation depends on: supervision
-contracts, renderer behaviour, loss masks, contamination decisions, source provenance, and
-trainability decisions are **identical to the parent** for every retained record. The only
-difference in the data is that xLAM is absent.
+Consequences worth stating: supervision contracts, renderer behaviour, loss masks, contamination
+decisions, source provenance, and trainability decisions are **identical to the parent** for every
+retained record. Mechanically, the row-selection difference is that xLAM is absent. Experimentally,
+that same removal eliminates the entire `CALL_PREDICTION` channel because no other source currently
+provides it.
 
 ## What was removed, and what it costs
 
@@ -77,8 +84,9 @@ matched on record counts would have confounded two variables.
 ## Supervision contracts
 
 xLAM was the only source carrying `CALL_PREDICTION`, so this view is entirely `COMPLETE_TRAJECTORY`
-— 105,876 trainable records. That is a consequence of excluding the source, not a second filter:
-the ablation removes a source, and no contract was targeted.
+— 105,876 trainable records. The configs explicitly declare that complete post-filter contract set;
+readiness rejects any retained empty or absent selection. Although the implementation filters by
+source, the experimental treatment necessarily removes both xLAM and the supervision channel.
 
 | Contract | Trainable here | In the parent |
 |---|---:|---:|
@@ -87,10 +95,11 @@ the ablation removes a source, and no contract was targeted.
 
 ## Intended use
 
-As the input of the xLAM source ablation, and as a comparison artifact for anyone examining what
-the parent corpus contains. Training on it is what the ablation did, not a recommendation that
-anyone else should: the three remaining sources are the parent's, unbalanced and unmodified, and
-the parent was never a recommended mixture either.
+As the input of the paired joint xLAM-plus-`CALL_PREDICTION` removal experiment, and as a comparison
+artifact for anyone examining the parent corpus. Training on it is not a recommendation: the three
+remaining sources are the parent's, unbalanced and unmodified, and the parent was never a
+recommended mixture either. No xLAM-specific causal attribution is valid unless another evidence-
+backed `CALL_PREDICTION` source separates source identity from supervision type.
 
 Not suitable as a benchmark. A subset of a training corpus is still training data.
 

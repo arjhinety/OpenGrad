@@ -62,8 +62,10 @@ numbers are here so you can decide rather than being told.
 **The improvement is not attributable to one data source.** The corpus changed in three ways at
 once — a new source (xLAM/APIGen) was added, a validator defect was fixed that took ToolACE from
 697 to 11,051 accepted records, and an interrupted materialization was corrected that took
-When2Call from 4,000 to 6,505. Separating their contributions needs the ablation the training
-configuration makes available and which this experiment did not run.
+When2Call from 4,000 to 6,505. The planned minus-xLAM arms remove xLAM together with the entire
+`CALL_PREDICTION` channel because xLAM is currently its only source. They can measure that joint
+removal, not separate xLAM content from supervision type. Such attribution requires another valid
+call-prediction source.
 
 **Some behaviours are not measured at all.** Tool-selection accuracy, argument validity and
 schema validity are not computed by this evaluator, so their absence from the table above is not
