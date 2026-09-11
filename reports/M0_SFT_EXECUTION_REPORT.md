@@ -1,9 +1,29 @@
 # OpenGrad M0 SFT execution report
 
+```
+OpenGrad M0 / M1 — FINAL STATUS (autonomy window closed)
+════════════════════════════════════════════════════════════════════════════
+GPU jobs running at close    none (verified: no compute apps, no train/eval procs)
+Runs completed               3        M0 SFT v1, M0 SFT v2, M1 DPO v1
+Optimizer steps reached      SFT 2400/2400 x2 (target met, not truncated)
+                             DPO  300/300
+Evaluation state             COMPLETE — all 12 checkpoints scored vs B0
+Corpus v1  (published)       call_f1 0.0000  — collapse; procedure exonerated
+Corpus v2  (corrected)       call_f1 0.5995  — macro 0.6416 vs B0 0.3621
+On-policy distillation       NOT ATTEMPTED — out of scope by decision (§6)
+Artefacts published          2 HF repos, 37/37 files byte-verified
+Local weights                deleted after verification (25 GB reclaimed)
+════════════════════════════════════════════════════════════════════════════
+```
+
 **Date:** 2026-09-10
 **Scope:** implement the missing production SFT path, validate the complete M0 execution path, run the
 first real SFT against the pinned canonical corpus, evaluate the result against B0, and decide whether
 DPO or on-policy distillation should follow.
+
+**At close:** no GPU work in flight, nothing was truncated mid-run, and every number below comes from
+a completed run on disk. The v2 corpus result (§8) was produced last and is the finding that decides
+the question: the failure was in the data, not the procedure.
 
 ---
 
@@ -126,7 +146,7 @@ that carry tool calls**:
 | toolace | 11,190 | 673 (6.0%) | schema (`type: "dict"`) |
 | looptool-23k | 20,827 | 145 (0.7%) | schema (`optional`) |
 | button | 7,941 | 9 (0.1%) | schema (bare property map) |
-| xlam-function-calling-60k | 59,370 | **0 (0.0%)** | schema + argument validation |
+| xlam-function-calling-60k | 59,370 | **0 (0.0%)** | `SEM_UNRESOLVED_CALL`, 56,111 records (see below) |
 
 Glaive is the clearest case. Its upstream format encodes calls as `<functioncall> {...}` **inside the
 assistant text**, and the adapter never parses them into `tool_calls`; it still emits a `tool` message
@@ -363,9 +383,15 @@ That makes DPO the right place to end this line of work:
 * **The diagnosed cause is fixed and measured.** The dominant loss was a parseable adapter defect,
   now reading 98.5% of 67,481 previously unparseable turns and restoring tool-call supervision to
   48,723 records (§8.1).
-* **The remaining loss is a separate, mechanical problem** — tool schemas written as Python type
-  hints where JSON Schema is required, which is total for xlam (59,370 records, 0% yield). That is
-  a data-engineering task with a known shape, not a modelling question (§11.2).
+* **The remaining loss is a mix of one semantic decision and one data-engineering task**, and the
+  xlam case is instructive because the obvious diagnosis was wrong. xlam's schema blocker is already
+  fixed — parameter-map normalization takes it from 33 accepted records (0.06%) to 57,342 (96.6%),
+  measured over all 59,370 (`reports/XLAM_NORMALIZATION_FORENSICS.md`). Yield is still 0 for a
+  different reason: 56,111 records (94.5%) are rejected as `SEM_UNRESOLVED_CALL`, because xLAM's
+  `query + tools + answers` format names a call and never returns a tool result, while OpenGrad's
+  trajectory policy requires every call to be resolved. That is a **semantic** change to the
+  supervised target — admitting a terminal call — not a parser fix, and it affects every source.
+  The genuine engineering remainder is smaller than the original estimate (§11.2).
 * **No remaining failure is one that a different objective would address.** Distillation transfers a
   behaviour; the behaviour came back from the data. DPO reweights behaviours a policy can produce;
   the policy can now produce them. Neither is indicated by what is left.
@@ -543,13 +569,26 @@ whitespace-only — no token changes — and the full suite was re-run after it.
    release stays reproducible from the code that produced it. Switching to it is a new corpus
    version with its own manifest hash. Whether a recovered record then passes the remaining schema
    and argument gates is not measured here and needs a rebuild.
-2. **Normalise upstream tool schemas at materialization**, not at render time. Upstream writes Python
-   type hints where JSON Schema is required, and the mapping is mechanical: `dict` → `object`,
-   `str` → `string`, `int` → `integer`, `float` → `number`, `bool` → `boolean`, `list`/`List[T]` →
-   `array` (with `items` from `T`), a trailing `", optional"` stripped. This is the second-largest
-   loss and it is total for some sources: xlam is 59,370 records and currently yields **0** trainable,
-   and it also caps the preference pairs at 19.3% of the split (1,741 of 9,000). Do it at
-   materialization so the canonical record carries a valid schema, and version it like §11.1.
+2. **Admit a terminal call as a valid supervised target — a semantic decision, and the binding
+   constraint on xlam.** xlam's schema normalization is already done and is not the problem:
+   `adapt_xlam` / `xlam_types.py` take the source from **33** canonically accepted records (0.06%)
+   to **57,342** (96.6%) over all 59,370, with every rule recorded in per-record provenance and
+   `eval` never used (`reports/XLAM_NORMALIZATION_FORENSICS.md`, 86 tests in
+   `tests/data/test_xlam_normalization.py`). Trainable yield is nevertheless **0**, because
+   **56,111 records (94.5%)** are rejected as `SEM_UNRESOLVED_CALL`: xlam's
+   `query + tools + answers` format states the call to make and never contains a tool-result turn,
+   and OpenGrad's trajectory policy is a documented *complete-target* policy requiring every call
+   to be resolved by a result. Nothing recoverable is missing — there is no result to recover.
+
+   So the remaining work here is not a parser fix but a change to what the model is trained to do,
+   since admitting a terminal call changes the supervised target for every call-prediction source.
+   It must be versioned and evidenced the way the promotion-policy change was. Two smaller
+   remainders are genuine data work: **2,028 records (3.4%)** are unrepresentable at the schema
+   layer (`List[Union[int, float]]` 1,216, `Callable` 529, `set` 283), and **1,231 (2.1%)** are
+   upstream argument defects, where the gold call's value contradicts the type the same record
+   declares (`dough` declared `object`, passed `"prepared_dough"`). Synthetic placeholders appear
+   where a collection was declared; they are correctly quarantined and not recoverable without
+   inventing data.
 3. **Re-release as canonical v2** with a new manifest hash, and re-run M0 and M1 against it. Do not
    mutate v1: B0 and every existing result are pinned to its hash.
 4. **Verify the mixture before the next training run.** Two cheap checks would have predicted both
