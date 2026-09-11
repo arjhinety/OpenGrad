@@ -83,8 +83,14 @@
         "sha256": "c9dc84ebb1e14d0bf9c35e98d5075ec555557cfd8f63490077c62b1a9166e4fd"
       },
       "reports/M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md": {
-        "bytes": 8276,
-        "sha256": "26fb59435beb7b9aa2e525f6b9142c0a3d93fce6c7a90de964d17aa9d74a7725"
+        "bytes": 11847,
+        "sha256": "e2da5ec29c08797eb3259885df77b8355209803190c17a4a572689c60bf2b3dd"
+      }
+    },
+    "sanity": {
+      "reports/data/m0-final-rendered-sanity.json": {
+        "bytes": 24530,
+        "sha256": "c2fee0a9c14eab9c1ec1427a8aa5409f129eb58ea27fe0a6eaf7e06f2044fbd9"
       }
     },
     "selection": {
@@ -154,9 +160,10 @@
   },
   "experiment_id": "m0_sft_canonical_v2_final",
   "experiment_status": "REJECTED",
-  "hashes_computed_at_commit": "62023f20969db1c3aaa3d600fee9ad92b4fe0cf2",
+  "hashes_computed_at_commit": "82f0cd8f870481290f9f72fd8b7c652e1397e54d",
   "reproduce": {
     "confirmatory": "python scripts/evaluate_sft_checkpoints.py m0_sft_canonical_v2_final --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side confirmatory --checkpoint-ids 1800",
+    "sanity": "python scripts/sanity_check_rendered_samples.py",
     "selection": "python scripts/evaluate_sft_checkpoints.py m0_sft_canonical_v2_final --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side dev",
     "selection_rule": "python scripts/select_checkpoint.py --side dev"
   },

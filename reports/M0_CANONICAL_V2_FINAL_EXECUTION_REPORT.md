@@ -35,6 +35,37 @@ merely recorded.
 | Renderer | `qwen3_5_2b_v1` |
 | Supervision contract | `supervision_contract_v1` |
 
+### ToolACE: fixed data, not a fitted floor
+
+The ToolACE schema defect (`required: null`, which the canonical contract rejected outright after a
+misparse) was repaired in the source adapter, which raised acceptance from **697 to 11,051** records
+against a floor of 0.3 that was never moved to accommodate the observed result. The floor is the
+independent one; a concurrent session had lowered it to 0.1 and that change was reverted precisely
+because a floor fitted to its own measurement measures nothing.
+
+The source does **not** pass that floor. The final measured yield is:
+
+| | |
+|---|---:|
+| Canonical | 11,051 |
+| Trainable | 2,259 |
+| Yield ratio | 0.2044 |
+| Tool-call targets | 327 |
+| Tool-call target ratio | 0.1448 |
+| Readiness floor | 0.300 / 0.300 |
+| Gate result | **ANOMALY** |
+| Trainable failures | 8,476 `UNRENDERABLE`, 316 `TARGET_TRUNCATED` |
+
+Most canonical ToolACE records are rejected at the training-trajectory contract: they contain
+tool-call-shaped content but their results do not resolve, so they are `UNRENDERABLE` rather than
+silently coerced into supervision. That is the contract behaving correctly.
+
+The `renderability_yield` gate reports `PASS` with `anomaly=['toolace']` in its detail — it surfaces
+the anomaly by name rather than absorbing it into a green tick or blocking on it. A source can be a
+minority contributor without invalidating the corpus, but the claim "ToolACE contributes 11,051
+records" is not the same as "ToolACE contributes 11,051 trainable records", and the report states
+the second number.
+
 ## 2. Initialization
 
 The run loaded the **pinned base model**, verified from the run's own record: `model_id`
@@ -116,7 +147,39 @@ The rule disqualified the two checkpoints with the **best headline metric**. Bot
 0.6525 — and the rule's job was to refuse that. This is the outcome the policy was written for,
 and it happened on its first real use.
 
-## 6. Checkpoints
+## 6. Rendered-sample sanity check
+
+Before the run this was a pre-launch check; it is recorded here because the artifact is now
+derivable from the run's own output. `scripts/sanity_check_rendered_samples.py` reads the rendered
+sample cache the trainer actually consumed — 161,966 tokenised records with their supervised
+position sets — and decodes the supervised span of a deterministic bounded sample per source using
+the run's own tokenizer. It inspects the target as the trainer saw it, not a re-derivation from the
+canonical record.
+
+| Source | Rendered | Behaviour mix | Sample supervised | Target is a call |
+|---|---:|---|---:|---:|
+| `glaive-function-calling-v2` | 97,112 | 48,723 CALL · 48,389 ANSWER | 12/12 | 6/12 |
+| `toolace` | 2,259 | 327 CALL · 1,932 ANSWER | 12/12 | 3/12 |
+| `when2call` | 6,505 | 6,505 ANSWER | 12/12 | 0/12 |
+| `xlam-function-calling-60k` | 56,090 | 56,090 CALL | 12/12 | **36/36** |
+
+Three properties were checked mechanically rather than asserted:
+
+- **No record reaches the trainer unsupervised.** All 161,966 have a non-empty supervised span, so
+  the 2,400-step count means what it was intended to mean. A record with no supervised token
+  contributes no gradient while still consuming a step.
+- **A `CALL_PREDICTION` target does not acquire a fabricated tool result.** Decoded xLAM targets are
+  a terminal `<tool_call>` followed by `<|im_end|>` and nothing else. This is the property the
+  supervision contract exists to guarantee, and it is what distinguishes xLAM's supervision from a
+  complete trajectory.
+- **The behaviours being compared are represented.** Decoded When2Call targets are refusals — "I'm
+  sorry, I'm unable to…" — which is the direct-response behaviour B0 fails at, and they are present
+  in the corpus rather than drowned out by the 56,090 call records.
+
+This is a sanity check and not a dataset review. It does not re-adjudicate whether the supervision
+is semantically right; that is the source adapter's contract and the validator's job.
+
+## 7. Checkpoints
 
 | step | weights | sha256 (first 32) |
 |---|---:|---|
@@ -129,7 +192,7 @@ Weights are **not** committed and were **not** deleted. The 200 GB volume was gr
 193 GB before launch specifically so that no checkpoint would need removing — the deletion that
 caused INC-0001 must not repeat here.
 
-## 7. Promotion
+## 8. Promotion
 
 **NOT PROMOTED.** Every checkpoint, including the selected one, fails
 `regression.call_recall` against B0's 0.9715: the selected checkpoint's DEV recall of 0.7197 is
@@ -145,7 +208,7 @@ necessarily loses raw recall, and the policy simultaneously caps over-call at 0.
 recall drop greater than 0.10. As written, those two constraints cannot both be satisfied by a
 calibrated model. That is a finding for the next experiment's design, not a threshold to move now.
 
-## 8. What this run does and does not show
+## 9. What this run does and does not show
 
 **Shows:** under a fixed schedule and a fixed corpus, the finalized heterogeneous corpus produces
 a model that recalls 0.7594 of gold calls at 0.7350 precision and 0.1505 over-call, against B0's
@@ -162,7 +225,7 @@ planning. None of the 56,090 call-prediction records contains a tool result. The
 this expectation before the run, and the measurement does not contradict it — but neither does it
 test it, because the evaluation set does not isolate those behaviours.
 
-## 9. Repository state at completion
+## 10. Repository state at completion
 
 - Weights and per-example predictions remain on disk, ignored by Git; summary evidence is
   committed so the numbers can be checked from a fresh clone.

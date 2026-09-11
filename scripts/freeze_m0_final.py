@@ -68,6 +68,9 @@ EVIDENCE: dict[str, list[str]] = {
         f"runs/{EXPERIMENT}/eval/dev/checkpoint-1800/metrics.json",
         f"runs/{EXPERIMENT}/eval/dev/checkpoint-2400/metrics.json",
     ],
+    "sanity": [
+        "reports/data/m0-final-rendered-sanity.json",
+    ],
     "confirmatory": [
         f"runs/{EXPERIMENT}/eval/confirmatory/curve.json",
         f"runs/{EXPERIMENT}/eval/confirmatory/checkpoint-1800/metrics.json",
@@ -153,6 +156,7 @@ def build() -> int:
                 "--partition-side dev"
             ),
             "selection_rule": "python scripts/select_checkpoint.py --side dev",
+            "sanity": "python scripts/sanity_check_rendered_samples.py",
             "confirmatory": (
                 "python scripts/evaluate_sft_checkpoints.py m0_sft_canonical_v2_final "
                 "--partition reports/evaluation/behavioral-heldout-v2-partition.json "

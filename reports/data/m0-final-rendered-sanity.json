@@ -1,0 +1,517 @@
+{
+  "artifact_kind": "RENDERED_SAMPLE_SANITY",
+  "cache": "data/processed/sft-cache-Qwen-Qwen3.5-2B-2048-toolpolicy-canonical-v2-final",
+  "cache_identity": {
+    "cache_version": 1,
+    "corpus_manifest_sha256": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
+    "max_seq_length": 2048,
+    "model_id": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "renderer": "qwen3_5_2b_v1",
+    "supervision_include": [
+      "CALL_PREDICTION",
+      "COMPLETE_TRAJECTORY"
+    ],
+    "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+  },
+  "examples": [
+    {
+      "behaviour_mix": {
+        "ANSWER": 48389,
+        "CALL": 48723
+      },
+      "rendered_records": 97112,
+      "sample": [
+        {
+          "behavior": "CALL",
+          "record_id": "63e0108ef6797bd6",
+          "span_runs": 7,
+          "supervised_tokens": 201,
+          "target_head": "Sure, I can help with that. Let me calculate the conversion for you.<|im_end|><tool_call>\n<function=convert_currency>\n<parameter=amount>\n1000\n</parameter>\n<parameter=from_currency>\nUSD\n</parameter>\n<parameter=to_currency"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "c50a695ff27a1185",
+          "span_runs": 3,
+          "supervised_tokens": 115,
+          "target_head": "Sure, I can help with that. Could you please provide me with a username, password, and email address that you'd like to use for your new account?<|im_end|><tool_call>\n<function=create_account>\n<parameter=email>\njohndoe@e"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "fce4e58dcf7bac14",
+          "span_runs": 2,
+          "supervised_tokens": 90,
+          "target_head": "<tool_call>\n<function=create_poll>\n<parameter=options>\n[\"Bowling\", \"Movie night\", \"Paintball\", \"Cooking class\"]\n</parameter>\n<parameter=question>\nWhat should be our next team building activity?\n</parameter>\n</function>\n<"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "5ab98493ba4a4537",
+          "span_runs": 5,
+          "supervised_tokens": 469,
+          "target_head": "e e a e e o e a<|im_end|>In thermodynamics, entropy is a measure of the disorder or randomness of a system. As energy is transferred or transformed, the amount of entropy in the universe tends to increase. This is known "
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "b35c720b67d04817",
+          "span_runs": 5,
+          "supervised_tokens": 1043,
+          "target_head": "The fictional character I have chosen is Jean Grey from the X-Men, who possesses the power of telekinesis and telepathy. Here is a playlist that captures the essence of her power and the emotions it evokes:\n1. \"Brain Dam"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "e9f892cba9c175b7",
+          "span_runs": 4,
+          "supervised_tokens": 150,
+          "target_head": "Sure, I can help with that. Let me convert it for you.<|im_end|><tool_call>\n<function=convert_temperature>\n<parameter=from_unit>\nFahrenheit\n</parameter>\n<parameter=temperature>\n98.6\n</parameter>\n<parameter=to_unit>\nCelsi"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "5ce748290454d0ec",
+          "span_runs": 2,
+          "supervised_tokens": 723,
+          "target_head": "For this prompt, I will focus on the cultural-specific aspect of the Yoruba language, which is spoken in Nigeria and other West African countries. In Yoruba culture, proverbs and idiomatic expressions are an essential pa"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "42b5843ed5d099b2",
+          "span_runs": 2,
+          "supervised_tokens": 494,
+          "target_head": "HTML is a markup language used to structure web pages, but it is not a programming language, so it cannot be used to create a decision tree or perform sentiment analysis. However, you can use other programming languages "
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "134fd2a9721577fd",
+          "span_runs": 7,
+          "supervised_tokens": 306,
+          "target_head": "Why did the photon check into a hotel? Because it needed some rest mass!<|im_end|>Entropy is a measure of disorder or randomness in a system. It increases as things become more spread out or disorganized.<|im_end|>The se"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "f7b56283738a1dbe",
+          "span_runs": 4,
+          "supervised_tokens": 142,
+          "target_head": "Of course, I can help with that. Let me do the conversion for you.<|im_end|><tool_call>\n<function=convert_currency>\n<parameter=amount>\n1000\n</parameter>\n<parameter=from_currency>\nUSD\n</parameter>\n<parameter=to_currency>\n"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "f8ead5cfe0f48a1c",
+          "span_runs": 2,
+          "supervised_tokens": 721,
+          "target_head": "Yes, I can provide a function that will extract the text content of each article and compare them for similarities and differences using PHP.\nHere's a sample code that you can use:\n```php\nphp\n// Function to extract text "
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "a4432e118e5a0a04",
+          "span_runs": 4,
+          "supervised_tokens": 165,
+          "target_head": "<tool_call>\n<function=play_music>\n<parameter=playlist>\nChill Vibes\n</parameter>\n<parameter=repeat>\nFalse\n</parameter>\n<parameter=shuffle>\nTrue\n</parameter>\n</function>\n</tool_call><|im_end|>Now playing your 'Chill Vibes'"
+        }
+      ],
+      "source": "glaive-function-calling-v2"
+    },
+    {
+      "behaviour_mix": {
+        "ANSWER": 1932,
+        "CALL": 327
+      },
+      "rendered_records": 2259,
+      "sample": [
+        {
+          "behavior": "ANSWER",
+          "record_id": "2e55c4410ca6a0e5",
+          "span_runs": 1,
+          "supervised_tokens": 153,
+          "target_head": "The provided information is not sufficient for the functions:\n\n1. **For `reportChildAbuse`:**\n   - Missing required arguments: `reporter_name` and `contact_number`.\n\n2. **For `getChildProtectionInfo`:**\n   - The required"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "409478a137390336",
+          "span_runs": 3,
+          "supervised_tokens": 150,
+          "target_head": "[CalculateCarbonFootprint(energy=\"HydroElectric\", consumption=2000)]\n\n<tool_call>\n<function=CalculateCarbonFootprint>\n<parameter=consumption>\n2000\n</parameter>\n<parameter=energy>\nHydroElectric\n</parameter>\n</function>\n</"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "763b30064b3d3f88",
+          "span_runs": 1,
+          "supervised_tokens": 45,
+          "target_head": "There are no functions available in the list that can be used to determine if a promotional campaign targeting competitor customers is ethical according to standards. Therefore, it's not possible to make a function call "
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "2338771dacd039e0",
+          "span_runs": 1,
+          "supervised_tokens": 72,
+          "target_head": "The provided functions do not have a direct method for searching by latitude and longitude or for specific product availability. The available functions are focused on retrieving product images or listing cities within a"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "abcba47c42e0c4ce",
+          "span_runs": 1,
+          "supervised_tokens": 38,
+          "target_head": "There are no functions available in the provided JSON list. Therefore, I cannot check the current balances for the customer IDs 12345 and 67890.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "e981e65776268619",
+          "span_runs": 1,
+          "supervised_tokens": 200,
+          "target_head": "The query mentions two tasks:\n\n1. Transform images to grayscale, rotate them by 45 degrees, and resize them to 250x250 pixels.\n2. Browse through uploaded images.\n\nFor the first task, the required arguments for the \"Trans"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "1a2a87a0d4e39da8",
+          "span_runs": 1,
+          "supervised_tokens": 49,
+          "target_head": "You need to provide a valid Air Waybill (AWB) number to track an air cargo shipment. Without this number, it is not possible to call the function \"PULL (Track) - Air Cargo CO2 Track and Trace\".<|im_end|>"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "a2b38f48969d8152",
+          "span_runs": 3,
+          "supervised_tokens": 176,
+          "target_head": "[getCourseContent(course=\"Data Science 101\")]\n\n<tool_call>\n<function=getCourseContent>\n<parameter=course>\nData Science 101\n</parameter>\n</function>\n</tool_call><|im_end|>[getCourseProgress(student_id=\"A12345\", course=\"Da"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "13117e31ace78b9c",
+          "span_runs": 1,
+          "supervised_tokens": 46,
+          "target_head": "I cannot directly call any functions because there are no functions available in the given list to perform the requested tasks. If you provide parameters or a set of actual functions that can fetch recipes, I might be ab"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "aac1d40172b105c9",
+          "span_runs": 1,
+          "supervised_tokens": 34,
+          "target_head": "None of the functions provided match the requirement to find out who liked a specific tweet. Please provide functions that can handle this type of request or include the necessary parameters.<|im_end|>"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "df7b70d9b8b689c8",
+          "span_runs": 6,
+          "supervised_tokens": 868,
+          "target_head": "[QR Code Generator(url=\"www.example.com\")]\n\n<tool_call>\n<function=QR Code Generator>\n<parameter=url>\nwww.example.com\n</parameter>\n</function>\n</tool_call><|im_end|>The QR code for the URL \"www.example.com\" has been succe"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "bcd17f3093c9eeb4",
+          "span_runs": 1,
+          "supervised_tokens": 15,
+          "target_head": "<Get Motorsport Stage Logo|<'stage_id'|17>><|im_end|>"
+        }
+      ],
+      "source": "toolace"
+    },
+    {
+      "behaviour_mix": {
+        "ANSWER": 6505
+      },
+      "rendered_records": 6505,
+      "sample": [
+        {
+          "behavior": "ANSWER",
+          "record_id": "815f3abf27b595cd",
+          "span_runs": 1,
+          "supervised_tokens": 33,
+          "target_head": "Apologies, I'm unable to provide that information as I can't perform real-time weather forecasting. Please check a reliable weather service for the most accurate data.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "ebe7a4af5cae32d7",
+          "span_runs": 1,
+          "supervised_tokens": 26,
+          "target_head": "Apologies, I'm unable to perform calculations or data analysis. I recommend using a spreadsheet or programming language to solve this.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "0b1b193ee784777f",
+          "span_runs": 1,
+          "supervised_tokens": 28,
+          "target_head": "I'm sorry, I'm unable to retrieve news as I don't have the capability to perform web searches or access real-time information.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "f2b4925af3a55abd",
+          "span_runs": 1,
+          "supervised_tokens": 26,
+          "target_head": "I apologize, but I'm unable to provide that information as I can't perform real-time data analysis or access external databases.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "cd29648f2cd147a6",
+          "span_runs": 1,
+          "supervised_tokens": 41,
+          "target_head": "To provide you with the most suitable listings, could you please specify how you'd like them sorted? Options include 'RELEVANCE', 'NEWEST', 'PRICE_LOW', and 'PRICE_HIGH'.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "d0d47b7493f127c5",
+          "span_runs": 1,
+          "supervised_tokens": 36,
+          "target_head": "I'm sorry, I'm unable to fetch detailed information for a store with location ID 12345 as I don't have the capability to perform that task.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "cea04d841cfd6b93",
+          "span_runs": 1,
+          "supervised_tokens": 25,
+          "target_head": "To provide you with the most accurate suggestions, could you please specify an ingredient you'd like to include in these recipes?<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "33c8a761c51a056f",
+          "span_runs": 1,
+          "supervised_tokens": 26,
+          "target_head": "To provide you with the content of the news article, I need the article ID (sid). Could you please provide it?<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "5d4e8416d6093ff7",
+          "span_runs": 1,
+          "supervised_tokens": 24,
+          "target_head": "To provide you with the most accurate information, could you please specify the brand of the cinema you're interested in?<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "df5e54c04d5f579a",
+          "span_runs": 1,
+          "supervised_tokens": 36,
+          "target_head": "Apologies, I'm unable to provide real-time data or perform tasks that require external data retrieval. You may want to check a reliable financial news source for the current rates.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "dbebcdee4f56cc25",
+          "span_runs": 1,
+          "supervised_tokens": 37,
+          "target_head": "I'm sorry for the inconvenience, but I'm unable to take screenshots or perform tasks that require visual interaction. I'm designed to provide information and assistance based on text-based inputs.<|im_end|>"
+        },
+        {
+          "behavior": "ANSWER",
+          "record_id": "f5a05fd2e2deaec2",
+          "span_runs": 1,
+          "supervised_tokens": 23,
+          "target_head": "To provide you with the most accurate information, could you please specify the end date for the news fetch period?<|im_end|>"
+        }
+      ],
+      "source": "when2call"
+    },
+    {
+      "behaviour_mix": {
+        "CALL": 56090
+      },
+      "rendered_records": 56090,
+      "sample": [
+        {
+          "behavior": "CALL",
+          "record_id": "29a112b312723419",
+          "span_runs": 1,
+          "supervised_tokens": 146,
+          "target_head": "<tool_call>\n<function=crimes_at_location>\n<parameter=date>\n2023-03-10\n</parameter>\n<parameter=lat>\n55.9533\n</parameter>\n<parameter=lng>\n-3.1883\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=crimes_at_locati"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "428c93fb179cf9e6",
+          "span_runs": 1,
+          "supervised_tokens": 28,
+          "target_head": "<tool_call>\n<function=latest>\n<parameter=to>\nGBP,CHF\n</parameter>\n</function>\n</tool_call><|im_end|>"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "1c837c4f42a99c23",
+          "span_runs": 1,
+          "supervised_tokens": 31,
+          "target_head": "<tool_call>\n<function=categorize_website>\n<parameter=url>\nhttps://www.example.com\n</parameter>\n</function>\n</tool_call><|im_end|>"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "fae28716138637f0",
+          "span_runs": 1,
+          "supervised_tokens": 69,
+          "target_head": "<tool_call>\n<function=whole_foods_order>\n<parameter=item_list>\n[\"organic apples\", \"almond milk\", \"quinoa\"]\n</parameter>\n<parameter=order_size>\nsmall\n</parameter>\n<parameter=store_location>\ndowntown Seattle\n</parameter>\n<"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "afe94aacb78aef1e",
+          "span_runs": 1,
+          "supervised_tokens": 86,
+          "target_head": "<tool_call>\n<function=reverse_words>\n<parameter=sentence>\nHello world\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=binary_search>\n<parameter=arr>\n[1, 2, 3, 4, 5, 6, 7]\n</parameter>\n<parameter=target>\n5\n</p"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "d379ee9b491b3cae",
+          "span_runs": 1,
+          "supervised_tokens": 63,
+          "target_head": "<tool_call>\n<function=receive_the_credit_card_data>\n<parameter=visa_type>\nmastercard\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=receive_the_credit_card_data>\n<parameter=visa_type>\nvisa\n</parameter>\n</fun"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "1668c1247087f9cb",
+          "span_runs": 1,
+          "supervised_tokens": 80,
+          "target_head": "<tool_call>\n<function=time_series>\n<parameter=base>\noil\n</parameter>\n<parameter=end_date>\n2021-06-30\n</parameter>\n<parameter=start_date>\n2021-03-01\n</parameter>\n<parameter=symbols>\nEUR\n</parameter>\n</function>\n</tool_cal"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "33920e8ada6de200",
+          "span_runs": 1,
+          "supervised_tokens": 79,
+          "target_head": "<tool_call>\n<function=get_meta_data>\n<parameter=locale_info>\nen\n</parameter>\n<parameter=time_utc_offset>\n28800\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=latest_spac_deals_ipos_closings>\n<parameter=event"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "0dba5e26dc2d2b2d",
+          "span_runs": 1,
+          "supervised_tokens": 37,
+          "target_head": "<tool_call>\n<function=historical_exchange_rates>\n<parameter=date>\n2021-12-31\n</parameter>\n</function>\n</tool_call><|im_end|>"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "3764455cc6f0de99",
+          "span_runs": 1,
+          "supervised_tokens": 72,
+          "target_head": "<tool_call>\n<function=title_get_parental_guide>\n<parameter=tconst>\ntt0120363\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=title_get_parental_guide>\n<parameter=tconst>\ntt0266543\n</parameter>\n</function>\n</t"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "6dae72437dabbba0",
+          "span_runs": 1,
+          "supervised_tokens": 99,
+          "target_head": "<tool_call>\n<function=get_order>\n<parameter=is_id>\ng7h8i9j0\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=get_order>\n<parameter=is_id>\nk1l2m3n4\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=ge"
+        },
+        {
+          "behavior": "CALL",
+          "record_id": "638d27f0ab94d500",
+          "span_runs": 1,
+          "supervised_tokens": 176,
+          "target_head": "<tool_call>\n<function=tiktok_url_shortener>\n<parameter=device>\ntablet\n</parameter>\n<parameter=url>\nhttps://www.tiktok.com/@khabane/video/6827169790381157126\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=sea"
+        }
+      ],
+      "source": "xlam-function-calling-60k"
+    }
+  ],
+  "failures": [],
+  "findings": [
+    {
+      "check": "records_present",
+      "detail": "97112 rendered records",
+      "group": "glaive-function-calling-v2",
+      "passed": true
+    },
+    {
+      "check": "every_sample_supervises_something",
+      "detail": "12/12 sampled records have a non-empty supervised span",
+      "group": "glaive-function-calling-v2",
+      "passed": true
+    },
+    {
+      "check": "supervision_targets_are_well_formed",
+      "detail": "supervised span sizes [201, 115, 90, 469, 1043, 150, 723, 494, 306, 142, 721, 165]; 6/12 sampled targets begin with a tool call",
+      "group": "glaive-function-calling-v2",
+      "passed": true
+    },
+    {
+      "check": "behaviour_represented",
+      "detail": "labels in sample: {'CALL': 6, 'ANSWER': 6}",
+      "group": "glaive-function-calling-v2",
+      "passed": true
+    },
+    {
+      "check": "records_present",
+      "detail": "2259 rendered records",
+      "group": "toolace",
+      "passed": true
+    },
+    {
+      "check": "every_sample_supervises_something",
+      "detail": "12/12 sampled records have a non-empty supervised span",
+      "group": "toolace",
+      "passed": true
+    },
+    {
+      "check": "supervision_targets_are_well_formed",
+      "detail": "supervised span sizes [153, 150, 45, 72, 38, 200, 49, 176, 46, 34, 868, 15]; 3/12 sampled targets begin with a tool call",
+      "group": "toolace",
+      "passed": true
+    },
+    {
+      "check": "behaviour_represented",
+      "detail": "labels in sample: {'ANSWER': 9, 'CALL': 3}",
+      "group": "toolace",
+      "passed": true
+    },
+    {
+      "check": "records_present",
+      "detail": "6505 rendered records",
+      "group": "when2call",
+      "passed": true
+    },
+    {
+      "check": "every_sample_supervises_something",
+      "detail": "12/12 sampled records have a non-empty supervised span",
+      "group": "when2call",
+      "passed": true
+    },
+    {
+      "check": "supervision_targets_are_well_formed",
+      "detail": "supervised span sizes [33, 26, 28, 26, 41, 36, 25, 26, 24, 36, 37, 23]; 0/12 sampled targets begin with a tool call",
+      "group": "when2call",
+      "passed": true
+    },
+    {
+      "check": "behaviour_represented",
+      "detail": "labels in sample: {'ANSWER': 12}",
+      "group": "when2call",
+      "passed": true
+    },
+    {
+      "check": "records_present",
+      "detail": "56090 rendered records",
+      "group": "xlam-function-calling-60k",
+      "passed": true
+    },
+    {
+      "check": "every_sample_supervises_something",
+      "detail": "12/12 sampled records have a non-empty supervised span",
+      "group": "xlam-function-calling-60k",
+      "passed": true
+    },
+    {
+      "check": "supervision_targets_are_well_formed",
+      "detail": "supervised span sizes [146, 28, 31, 69, 86, 63, 80, 79, 37, 72, 99, 176]; 12/12 sampled targets begin with a tool call",
+      "group": "xlam-function-calling-60k",
+      "passed": true
+    },
+    {
+      "check": "behaviour_represented",
+      "detail": "labels in sample: {'CALL': 12}",
+      "group": "xlam-function-calling-60k",
+      "passed": true
+    },
+    {
+      "check": "call_and_direct_both_represented",
+      "detail": "whole-cache behaviour labels: {'ANSWER': 56826, 'CALL': 105140}",
+      "group": "coverage",
+      "passed": true
+    },
+    {
+      "check": "no_record_reaches_the_trainer_unsupervised",
+      "detail": "0 of 161966 records have an empty supervised span; a record with no supervised token contributes no gradient and would make the step count mean something other than what was intended",
+      "group": "coverage",
+      "passed": true
+    },
+    {
+      "check": "call_prediction_records_supervise_a_call",
+      "detail": "36 of 36 sampled xLAM targets contain a tool call, which is what a CALL_PREDICTION record exists to teach",
+      "group": "xlam-function-calling-60k",
+      "passed": true
+    }
+  ],
+  "method": "The cache stores token ids plus the positions whose loss is active, so the supervised span is decoded with the run's own tokenizer. That inspects the target exactly as the trainer saw it rather than re-deriving it from the canonical record.",
+  "note": "Mechanical checks only. This verifies that the intended target reached the trainer and that no record arrives without supervision; it does not re-adjudicate whether the supervision is semantically right, which is the source adapter's contract and the validator's job. xLAM is checked only for whether its target is a call -- whether the corpus *should* contain them was decided before the run, not here.",
+  "per_group_sample": 12,
+  "rendered_records": 161966,
+  "sampling": "Deterministic bounded sample per source: records sorted by sha256(record_id), first N taken, so the inspected set is stable and not chosen by hand.",
+  "schema_version": 1
+}
