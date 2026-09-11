@@ -1,50 +1,38 @@
 experiment_id: m0_v2_final_minus_xlam_matched_exposure
 hypothesis: >-
-  xLAM source ablation, MATCHED-EXPOSURE arm. The completed `m0_sft_canonical_v2_final` run is the
-  reference and is not modified or rerun; this run trains the identical recipe on the identical
-  frozen corpus with exactly one source removed, for a number of steps calculated from measured
-  training mass rather than chosen.
+  Joint xLAM-plus-CALL_PREDICTION removal, MATCHED-EXPOSURE arm. The completed
+  `m0_sft_canonical_v2_final` run is the reference and is not modified or rerun. This run filters
+  xLAM from the identical frozen corpus; because xLAM is currently the only source providing
+  `CALL_PREDICTION`, that source filter also removes the corpus's entire call-prediction channel.
 
-  THE QUESTION THIS ARM ANSWERS. At approximately the same amount of corpus exposure as the
-  reference run, what behaviour changes when xLAM supervision is absent?
+  THE QUESTION THIS ARM ANSWERS. At approximately matched loss-bearing exposure, what is the
+  effect of removing xLAM together with `CALL_PREDICTION`?
 
   HOW THE STEP COUNT WAS OBTAINED. Not by judgement, and not rounded to a comfortable number:
 
       matched_steps = 2400 x (29,630,369 / 33,565,721) = 2118.6 -> 2119
 
-  Both token counts are measured from the reference run's own rendered sample cache, so they are
-  the same samples the reference trained on. 33,565,721 is the corpus wide loss-bearing mass;
-  29,630,369 is what remains once xLAM is removed. Matching on SUPERVISED tokens rather than
-  rendered tokens or record counts is deliberate: supervised tokens are the mass the loss actually
-  acts on, rendered tokens include context the loss ignores, and record counts ignore length
-  entirely. Because xLAM's 56,090 records are short -- a call is a small target and carries no
-  final response -- the three measures disagree sharply and the choice changes the experiment:
+  Both token counts come from the reference run's rendered cache. Matching supervised tokens is
+  deliberate because they are the mass acted on by the loss; rendered tokens include ignored
+  context and record counts ignore length. The alternatives remain recorded:
 
       supervised tokens  0.882757  -> 2119 steps   (used)
       rendered tokens    0.643286  -> 1544 steps
       record counts      0.653693  -> 1569 steps
 
-  Matching on rendered tokens would equalise the forward-pass compute and leave the run seeing
-  ~26% LESS loss-bearing mass than the reference, which is a different experiment: it would
-  confound exposure with loss density. The number used is the one that holds loss-bearing mass
-  equal, and the alternatives are recorded here so the choice can be challenged rather than
-  guessed at.
+  WHAT THIS ARM CANNOT SEPARATE, STATED IN ADVANCE. Source identity and supervision type are
+  perfectly aligned in Canonical-v2, so this is not an xLAM-content-only effect. It also spends
+  fewer optimizer steps and FLOPs than the reference: 2,119 versus 2,400. Any observed difference
+  combines the joint source/channel removal with an 11.7% smaller optimization budget. The
+  fixed-compute arm exposes that compute/exposure sensitivity, and the two arms are reported
+  together or not at all. If they disagree, that disagreement is reported rather than resolved by
+  preferring the more flattering result.
 
-  WHAT THIS ARM CANNOT SEPARATE, STATED IN ADVANCE. It spends less wall-clock and fewer FLOPs than
-  the reference: 2,119 steps against 2,400. Any difference observed here therefore mixes the
-  absence of xLAM supervision with a smaller optimization budget, and this arm alone cannot
-  attribute an effect to either. That is precisely why the fixed-compute arm exists, and the two
-  are reported together or not at all.
-
-  THE APPARENT CONTRADICTION THAT IS THE POINT. Removing xLAM costs 34.6% of records but only
-  11.7% of supervised tokens, because xLAM records are short. So the two arms pull in opposite
-  directions: the fixed-compute arm gives the reduced corpus 1.53x the exposure, and this arm pays
-  11.7% less compute. If the arms disagree, that disagreement is a result to report, not a
-  discrepancy to resolve by preferring the more flattering one.
-
-  WHAT COUNTS AS EVIDENCE. A single training run is probabilistic. If xLAM's contribution and
-  regression both look significant here, that is a finding to record and to test again, not a
-  settled attribution.
+  WHAT COUNTS AS EVIDENCE. A single seeded run is a finding to record and test again, not settled
+  attribution. No xLAM-specific causal claim is valid unless another evidence-backed
+  `CALL_PREDICTION` source makes source identity separable from supervision type. A separate
+  `CALL_PREDICTION`-only versus `COMPLETE_TRAJECTORY`-only design studies supervision composition,
+  but it remains source-confounded in the present corpus and is not executed by this arm.
 
 model:
   model_id: Qwen/Qwen3.5-2B
@@ -57,8 +45,8 @@ datasets:
   hashes:
     canonical_v2_final: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
   release_dir: .release/hf/toolpolicy-canonical-v2-final
-  # Identical ablation variable to the fixed-compute arm, so the two arms differ in the step count
-  # and nothing else. A filter over the frozen corpus, not a rebuild.
+  # Identical joint source/channel intervention to the fixed-compute arm, so the two arms differ in
+  # horizon and nothing else. This is a filter over the frozen corpus, not a rebuild.
   exclude_sources:
     - xlam-function-calling-60k
   yield_report: reports/data/canonical-v2-final-minus-xlam-yield.json
@@ -67,14 +55,9 @@ datasets:
     - toolace
     - when2call
 
-# Natural sampling over what remains, with no contract targeted.
-#
-# xLAM was the only source carrying `CALL_PREDICTION`, so removing it removes that contract too and
-# `COMPLETE_TRAJECTORY` is all that is left. Declaring it here is a statement of what this run
-# trains on, not a second filter: every record the source filter kept is `COMPLETE_TRAJECTORY`, so
-# this list selects everything present and excludes nothing. The only data difference from the
-# reference remains the xLAM exclusion, and readiness asserts that by failing closed when a config
-# selects a kind the corpus does not contain.
+# The complete post-filter contract set, declared explicitly. This is not an empty or inferred
+# selection: all 105,876 retained trainable records are COMPLETE_TRAJECTORY. Readiness fails closed
+# with SUPERVISION_SELECTION_MISMATCH if this declaration names a contract absent after filtering.
 supervision:
   include:
     - COMPLETE_TRAJECTORY

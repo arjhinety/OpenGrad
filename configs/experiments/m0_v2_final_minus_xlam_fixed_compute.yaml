@@ -1,34 +1,30 @@
 experiment_id: m0_v2_final_minus_xlam_fixed_compute
 hypothesis: >-
-  xLAM source ablation, FIXED-COMPUTE arm. The completed `m0_sft_canonical_v2_final` run is the
-  reference and is not modified or rerun; this run trains the identical recipe on the identical
-  frozen corpus with exactly one source removed.
+  Joint xLAM-plus-CALL_PREDICTION removal, FIXED-COMPUTE arm. The completed
+  `m0_sft_canonical_v2_final` run is the reference and is not modified or rerun. This run filters
+  xLAM from the identical frozen corpus; because xLAM is currently the only source providing
+  `CALL_PREDICTION`, that source filter also removes the corpus's entire call-prediction
+  supervision channel.
 
-  THE QUESTION THIS ARM ANSWERS. With the same optimization and GPU budget, does including xLAM
-  improve the resulting policy? The step count is held at 2,400 so the comparison is under equal
-  training budget, and everything else -- base checkpoint, seed, optimizer, learning rate,
-  scheduler, batch geometry, sequence length, precision, renderer, loss masking, checkpoint
-  cadence, promotion policy, and both evaluation partitions -- is byte-identical to the reference.
+  THE QUESTION THIS ARM ANSWERS. Under the same 2,400-step optimization and GPU budget, what is
+  the effect of removing xLAM together with `CALL_PREDICTION`? Everything else -- base checkpoint,
+  seed, optimizer, learning rate, scheduler, batch geometry, sequence length, precision, renderer,
+  loss masking, checkpoint cadence, promotion policy, and both evaluation partitions -- is held
+  identical to the reference.
 
-  WHAT THIS ARM CANNOT SEPARATE, STATED IN ADVANCE. Removing xLAM removes 56,090 of 161,966
-  trainable records, so at an unchanged 2,400 steps the smaller corpus receives MORE effective
-  exposure: 0.363 corpus passes against the reference's 0.237, or 1.53x. Any difference observed
-  here therefore mixes two things -- the absence of xLAM supervision, and the extra passes over
-  what remains -- and this arm alone cannot attribute an effect to either. That is precisely why
-  the matched-exposure arm exists, and the two are reported together or not at all. This is
-  reported rather than compensated: the step count is not lowered to disguise the exposure
-  difference, because doing so would silently convert this into the other arm.
+  WHAT THIS ARM CANNOT SEPARATE, STATED IN ADVANCE. It cannot distinguish xLAM source identity or
+  content from supervision type: those variables are perfectly aligned in Canonical-v2. It also
+  removes 56,090 of 161,966 trainable records, so at an unchanged 2,400 steps the smaller corpus
+  receives more effective exposure: 0.363 corpus passes against the reference's 0.237, or 1.53x.
+  Any observed difference therefore combines the joint source/channel removal with extra passes
+  over `COMPLETE_TRAJECTORY`. The matched-exposure arm exists to expose that compute/exposure
+  sensitivity, and the two arms are reported together or not at all.
 
-  xLAM is the only source whose records carry the `CALL_PREDICTION` contract, in which the
-  terminal tool call *is* the supervised target and no tool result exists. Removing it removes
-  every record of that shape, so a change in call-decision behaviour is the expected place for an
-  effect to appear, and a change in tool-result interpretation would be surprising because the
-  remaining three sources still supply it.
-
-  WHAT COUNTS AS EVIDENCE. A single training run is probabilistic. If xLAM's contribution and
-  regression both look significant here, that is a finding to record and to test again, not a
-  settled attribution -- the difference is recorded with its magnitude, and the seed-level
-  variance of this corpus is not yet characterized well enough to call a small delta real.
+  WHAT COUNTS AS EVIDENCE. A single seeded run is a finding to record and test again, not settled
+  attribution. No xLAM-specific causal claim is valid unless another evidence-backed
+  `CALL_PREDICTION` source makes source identity separable from supervision type. A separate
+  `CALL_PREDICTION`-only versus `COMPLETE_TRAJECTORY`-only design studies supervision composition,
+  but it remains source-confounded in the present corpus and is not executed by this arm.
 
 model:
   model_id: Qwen/Qwen3.5-2B
@@ -41,10 +37,10 @@ datasets:
   hashes:
     canonical_v2_final: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
   release_dir: .release/hf/toolpolicy-canonical-v2-final
-  # THE ABLATION VARIABLE. A filter over the frozen corpus, not a rebuild: the remaining 105,876
-  # trainable records are the same bytes with the same supervision contracts, renderer behaviour,
-  # loss masks, contamination decisions and provenance. The corpus fingerprint is unchanged and
-  # is asserted equal to the reference's, so this cannot silently become a corpus swap.
+  # THE JOINT INTERVENTION. This byte-preserving source filter removes xLAM and, because source and
+  # contract are perfectly aligned here, all CALL_PREDICTION supervision. The retained 105,876
+  # records keep their original bytes, contracts, rendering, loss masks, contamination decisions,
+  # and provenance. The parent corpus fingerprint remains pinned.
   exclude_sources:
     - xlam-function-calling-60k
   # The yield report for THIS view of the corpus. Readiness reads the evidence for the corpus a
@@ -56,14 +52,9 @@ datasets:
     - toolace
     - when2call
 
-# Natural sampling over what remains, with no contract targeted.
-#
-# xLAM was the only source carrying `CALL_PREDICTION`, so removing it removes that contract too and
-# `COMPLETE_TRAJECTORY` is all that is left. Declaring it here is a statement of what this run
-# trains on, not a second filter: every record the source filter kept is `COMPLETE_TRAJECTORY`, so
-# this list selects everything present and excludes nothing. The only data difference from the
-# reference remains the xLAM exclusion, and readiness asserts that by failing closed when a config
-# selects a kind the corpus does not contain.
+# The complete post-filter contract set, declared explicitly. This is not an empty or inferred
+# selection: all 105,876 retained trainable records are COMPLETE_TRAJECTORY. Readiness fails closed
+# with SUPERVISION_SELECTION_MISMATCH if this declaration names a contract absent after filtering.
 supervision:
   include:
     - COMPLETE_TRAJECTORY

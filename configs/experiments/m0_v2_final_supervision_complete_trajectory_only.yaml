@@ -1,0 +1,89 @@
+experiment_id: m0_v2_final_supervision_complete_trajectory_only
+hypothesis: >-
+  PLANNED, NOT LAUNCHED. Supervision-composition arm selecting only `COMPLETE_TRAJECTORY` from
+  frozen Canonical-v2. This studies the behavior learned from complete-trajectory targets under a
+  fixed 2,400-step budget; it is separate from the source-filtered minus-xLAM pair.
+
+  This remains source-confounded and is not clean supervision-type causal evidence in the current
+  corpus. Every evidence-backed
+  `CALL_PREDICTION` record comes from xLAM, while every retained `COMPLETE_TRAJECTORY` record comes
+  from the other sources. This arm is therefore trainable-sample-equivalent to the fixed-compute
+  joint xLAM-plus-CALL_PREDICTION removal arm even though it is expressed as a contract filter. No
+  source-specific or supervision-specific causal attribution is valid until another valid
+  `CALL_PREDICTION` source breaks that perfect alignment. The arm must not be launched alone.
+
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+
+datasets:
+  manifest_ids:
+    - canonical_v2_final
+  hashes:
+    canonical_v2_final: 8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161
+  release_dir: .release/hf/toolpolicy-canonical-v2-final
+  yield_report: reports/data/canonical-v2-final-yield.json
+  source_manifests:
+    - glaive-function-calling-v2
+    - toolace
+    - when2call
+    - xlam-function-calling-60k
+
+supervision:
+  include:
+    - COMPLETE_TRAJECTORY
+
+trainer:
+  type: sft
+  tuning_method: full
+  learning_rate: 1.0e-5
+  micro_batch_size: 8
+  micro_batch_tokens: 4096
+  gradient_accumulation_steps: 2
+  max_steps: 2400
+  warmup_steps: 120
+  max_seq_length: 2048
+  scheduler: cosine
+  gradient_clipping: 1.0
+  gradient_checkpointing: true
+  optimizer: adamw_torch
+  optimizer_state: fp32
+
+evaluation:
+  suite: tool_use_core
+  baseline_experiment: tool_calling/qwen35_2b/baseline
+  checkpoint_selection_manifest: reports/evaluation/behavioral-heldout-v2.manifest.json
+  primary_metrics:
+    - call_precision
+    - call_recall
+    - call_f1
+    - over_call_rate
+    - under_call_rate
+    - clarification_accuracy
+    - unsupported_accuracy
+    - parse_valid_rate
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+
+checkpointing:
+  save_steps: 600
+  max_checkpoints: 4
+
+promotion:
+  requires_executed_suite: tool_use_core
+  policy_version: tool_use_promotion_v3
+  must_pass:
+    parse_valid_rate_min: 0.99
+  max_regression:
+    default: 1.0
+
+reproducibility:
+  seed: 42
+  precision: bfloat16
+
+speculative_decoding:
+  enabled: false
