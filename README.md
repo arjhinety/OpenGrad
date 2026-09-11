@@ -351,14 +351,31 @@ OpenGrad result
 
 ## Results
 
-> **One empirical OpenGrad result exists: the B0 baseline.** No post-training intervention has been run or reported.
+> **Four empirical OpenGrad results exist: the B0 baseline and three post-training interventions.** Two interventions are negative, one is a partial recovery from a data defect this project published in its own corpus.
 
 The stable results namespace is ready for future records. It lists interventions; the baseline is recorded by the experiment store instead.
 
 | Experiment | Model | Change | Capability Δ | Regression | Efficiency Δ | Reproduced | Report |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| [`qwen35_2b_m0_sft_full_v3`](runs/qwen35_2b_m0_sft_full_v3/) | Qwen3.5-2B | M0 SFT on canonical corpus v1 | `call_f1` 0.6191 → **0.0000** | Collapsed: `call_recall` 0.9722 → 0.0000 | — | No (weights lost) | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) |
+| [`qwen35_2b_m1_dpo_v1`](runs/qwen35_2b_m1_dpo_v1/) | Qwen3.5-2B | DPO on When2Call preference pairs | `call_f1` 0.6191 → **0.1715** best | Over-calling fixed, tool calling destroyed | — | **No** | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md) |
+| [`qwen35_2b_m0_sft_v2corpus`](runs/qwen35_2b_m0_sft_v2corpus/) | Qwen3.5-2B | M0 SFT on corrected corpus v2 | `call_f1` 0.6191 → **0.5995**; macro recall 0.3621 → **0.6416** | None measured; not promoted | — | Pending | [M0 report §8](reports/M0_SFT_EXECUTION_REPORT.md) |
 
 Baseline (not an intervention): [`Qwen/Qwen3.5-2B` baseline, 3,650 held-out examples, engine vLLM 0.29.0](reports/baselines/qwen35_2b_baseline/RESULT.md).
+
+Two caveats belong next to those numbers rather than in a footnote.
+
+**B0's `call_f1` comes from a degenerate policy.** It scores 0.6191 by calling a tool on 64.3% of examples whose correct answer is not a call, recalling 97.2% of gold CALLs with 1.3% unsupported-accuracy. The metric that flatters the baseline is the one metric where the corrected model is still slightly behind; on balanced per-class recall the trained model is ahead by 0.28. Do not read the leaderboard column as the finding.
+
+**The M1 DPO result is not reproducible, and its best checkpoint no longer exists.** Its steps 100 and 200 were deleted before upload, and a repeat run with config, data, seed, and environment pinned did not reproduce the trajectory. The direction of that failure holds in both runs; the claim that degradation is monotone from step 100 is withdrawn. That is recorded in the [incident log](docs/INCIDENT_LOG.md) and in the [model card](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO), which no longer presents the deleted checkpoints as available.
+
+Published artifacts for these runs:
+
+| Artifact | Kind | Contents |
+| --- | --- | --- |
+| [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2) | model | 4 checkpoints (600/1200/1800/2400) — intact |
+| [`OpenGrad-Qwen3.5-2B-M1-DPO`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO) | model | checkpoint 300 only + the deleted checkpoints' predictions |
+| [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation`](https://huggingface.co/datasets/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation) | evaluation record | predictions and metrics for 5 of 6 checkpoints — **no weights exist** |
 
 `results/registry.jsonl` is currently empty. Do not confuse passing CPU tests with ML evidence: they validate infrastructure and fixtures, not model quality. Conversely, the B0 numbers above are a real measurement of a real model, but of a *baseline* — they say nothing yet about whether any intervention improves it.
 

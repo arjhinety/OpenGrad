@@ -1,0 +1,46 @@
+{
+  "artifact_kind": "EVALUATION_RECORD",
+  "contains_model_weights": false,
+  "experiment_id": "qwen35_2b_m0_sft_full_v3",
+  "hub_repository": "arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation",
+  "hub_revision": "5dec885bb40af2b7368a5fefb88c0438e86b4b71",
+  "repo_type": "dataset",
+  "public": true,
+  "published_files": 29,
+  "repo_files_including_gitattributes": 30,
+  "why_an_evaluation_record_and_not_a_model": "All six checkpoints this run produced were deleted from local storage before upload and none were recoverable, so no weights exist to publish. The per-example predictions and scored metrics survive, and are published so the run's numbers remain checkable. See docs/INCIDENT_LOG.md INC-0001.",
+  "contents": {
+    "evaluation/curve.json": "all six points, including the one whose artifacts were lost",
+    "evaluation/checkpoint-{800,1200,1600,2000,2400}/predictions.jsonl": "one line per held-out example: expected decision vs predicted decision",
+    "evaluation/checkpoint-{800,1200,1600,2000,2400}/metrics.json": "scored metrics and the frozen B0 comparison",
+    "evaluation/checkpoint-{800,1200,1600,2000,2400}/environment.json": "engine, renderer, template hash, revisions at run time",
+    "evaluation/checkpoint-{800,1200,1600,2000,2400}/residual-profile.json": "residual profile per checkpoint",
+    "run/resolved_config.yaml": "the exact contract the run executed",
+    "run/experiment.json": "experiment record",
+    "run/events.jsonl": "per-step training events",
+    "run/train_log.jsonl": "the loss curve the run produced",
+    "run/dataset_manifest.json": "corpus lineage and pinned hash",
+    "run/training_metadata.json": "the arithmetic the run was sized against",
+    "CHECKSUMS.json": "sha256 and byte size of every other file"
+  },
+  "evidence_gaps": {
+    "model_weights": "all six checkpoints (steps 400, 800, 1200, 1600, 2000, 2400) — lost",
+    "checkpoint_400_predictions": "lost; the curve row is reported but has no per-example evidence behind it",
+    "sampling_new_completions": "impossible; no weights exist"
+  },
+  "headline_result": {
+    "metric": "call_f1",
+    "b0_baseline": 0.6191,
+    "best_checkpoint": {"step": 800, "call_f1": 0.0062},
+    "collapse_at_step": 1200,
+    "conclusion": "Fine-tuning on corpus v1 destroyed tool calling: call_recall fell 0.9722 to 0.0000 and call_f1 to 0.0000 by step 1200. Cause is data coverage, not the training procedure: only 9 of 55,719 trainable records contained a tool call."
+  },
+  "verification": {
+    "digests_verified_on_hub": "27/27 PASS",
+    "missing_files": "none",
+    "representative_stream_load": "PASS",
+    "dataset_config": "default",
+    "split": "predictions",
+    "metrics_recomputed_from_predictions": "PASS (max deviation 4.7e-07 across v3 and v2corpus, i.e. metrics.json rounding)"
+  }
+}

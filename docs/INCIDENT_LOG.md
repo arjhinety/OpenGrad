@@ -144,13 +144,16 @@ longer exist. Treat the per-checkpoint ranking as a single-run observation, not 
 
 ### Open items
 
-* `qwen35_2b_m0_sft_full_v3` has no Hub repository, so its surviving predictions and its negative
-  result have no published location — and its predictions are still local-only and excluded from
-  git by `.gitignore` (`runs/**/predictions.jsonl`). For a run whose weights are gone they are the
-  only per-example evidence in existence, so this is the same exposure that caused this incident.
-  Deciding whether to publish an eval-only repository for it is outstanding.
-* The M0-on-corpus-v2 run's predictions are also local-only, but its weights are all on the Hub,
-  so the exposure there is lower.
+* `qwen35_2b_m0_sft_full_v3` has no model weights anywhere and never will, so its negative result
+  is published as an **evaluation record** rather than a model:
+  [`arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation`](https://huggingface.co/datasets/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation)
+  (dataset repository, 27 files, digests in its `CHECKSUMS.json`). Its predictions were still
+  local-only and gitignored, which was the same exposure that caused this incident; that is now
+  closed for the M1 DPO run and this one.
+* Step 400 of that run is the one row of the evaluation table with no predictions behind it. It
+  cannot be reconstructed, and the table says so rather than dropping the row.
+* The M0-on-corpus-v2 run's predictions are still local-only, but all four of its checkpoints are
+  on the Hub, so the exposure there is lower.
 
 ### Evidence preserved for this incident
 

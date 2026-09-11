@@ -469,13 +469,20 @@ metrics above including the negative framing:
 * `arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2` — checkpoints 600 / 1200 / 1800 / 2400
 * `arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO` — checkpoint 300
 
+Because the corpus-v1 run's weights no longer exist, its result is published as an evaluation
+record instead of a model — the surviving predictions and metrics, so its numbers are checkable
+even though its models are not:
+
+* `arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation` — five checkpoints' predictions and
+  metrics, plus the run's config and loss curve; step 400's predictions are lost and the card says so
+
 The v2 checkpoints were uploaded and verified before their local copies were removed, so that run
-is intact. The DPO line is not: only step 300 exists, and the M0 run on corpus v1
-(`qwen35_2b_m0_sft_full_v3`) lost all six of its checkpoints, none of which was ever uploaded. The
-local copies were removed as one storage clean-up that assumed every run had been uploaded, and
-that assumption was wrong for two of the three runs. The weights are unrecoverable; the metrics
-recompute exactly from the surviving predictions, and the recovery attempt for the DPO run is
-recorded in [INC-0001](../docs/INCIDENT_LOG.md).
+is intact. The other two runs are not: the DPO line has only step 300, and the corpus-v1 run lost
+all six of its checkpoints, none of which was ever uploaded. The local copies were removed as one
+storage clean-up that assumed every run had been uploaded, and that assumption was wrong for two
+of the three runs. The weights are unrecoverable; the metrics recompute exactly from the surviving
+predictions, and the recovery attempt for the DPO run is recorded in
+[INC-0001](../docs/INCIDENT_LOG.md).
 
 ---
 

@@ -1,0 +1,44 @@
+{
+  "artifact_kind": "MODEL_WITH_CORRECTED_CARD_AND_EVIDENCE",
+  "experiment_id": "qwen35_2b_m1_dpo_v1",
+  "hub_repository": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO",
+  "hub_revision": "f4a39d9e1fa52442abdf4b81721631ebf02eb91b",
+  "repo_type": "model",
+  "public": true,
+  "weights_present": {"checkpoint-300": true},
+  "weights_missing": {
+    "checkpoint-100": "deleted before upload; best measured checkpoint of the run (call_f1 0.1715)",
+    "checkpoint-200": "deleted before upload"
+  },
+  "why": "The run measured three checkpoints but only step 300's weights were uploaded before local storage was cleaned. Steps 100 and 200 are unrecoverable. See docs/INCIDENT_LOG.md INC-0001.",
+  "changes_this_session": {
+    "model_card": {
+      "revision": "f4a39d9e1fa52442abdf4b81721631ebf02eb91b",
+      "what": "Added a checkpoint-availability section before the results table: states that only step 300 exists, that step 100 was the best of the three, and that a repeat run with config, data, seed and environment pinned did not reproduce the per-step numbers. The claim that degradation is monotone from step 100 is marked withdrawn. Added a `weights` column to the results table and a `non-reproducible` tag.",
+      "why": "The card previously tabulated three checkpoints with no indication that two had no corresponding model, which implied the run was intact."
+    },
+    "per_example_predictions_uploaded": {
+      "paths": [
+        "evaluation/checkpoint-100/predictions.jsonl",
+        "evaluation/checkpoint-200/predictions.jsonl",
+        "evaluation/checkpoint-300/predictions.jsonl"
+      ],
+      "digests": {
+        "checkpoint-100": "fb944f7d4a1c4c813d21628e1c65b7aab3b07f64da4d6f9e4f2e956aac6875cc",
+        "checkpoint-200": "f35e3fb42f4083e25280271b6010c3b9cb687d85c72d55eb4cea66b144f0ff0f",
+        "checkpoint-300": "606c0d9b451cec121f1572ad4d2cd4d610ab336c7712630af1baa151cf003f1d"
+      },
+      "records_per_file": 3650,
+      "why": "These files are the only per-example evidence for the recorded metrics now that the weights are gone. They were gitignored and local-only, which is the same exposure that caused INC-0001. Verified present and hash-matched after upload."
+    }
+  },
+  "regenerated_weights_not_published": {
+    "experiment_id": "qwen35_2b_m1_dpo_v1_restore",
+    "reason": "The repeat run did not reproduce the original's per-step metrics (call_f1 at steps 100/200/300: 0.1036/0.1186/0.0153 against the original's 0.1715/0.0419/0.0258), with base checkpoint, preference sha256, seed, hyperparameters and software environment all verified identical. Publishing them under the original step labels would attach one run's measurements to the other's model.",
+    "where_kept": "runs/qwen35_2b_m1_dpo_v1_restore/ in the OpenGrad repository, committed"
+  },
+  "verification": {
+    "prediction_digests_on_hub": "3/3 PASS",
+    "metrics_recomputed_from_predictions": "PASS (max deviation 4.9e-07 across the original and the repeat, i.e. metrics.json rounding)"
+  }
+}
