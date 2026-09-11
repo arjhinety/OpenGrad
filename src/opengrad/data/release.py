@@ -46,6 +46,14 @@ def _git_commit(root: Path) -> str:
     return result.stdout.strip() or "UNKNOWN"
 
 
+def _read_json(path: Path) -> dict[str, Any] | None:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
 def _load_config(path: Path) -> dict[str, Any]:
     import yaml
 
@@ -211,7 +219,16 @@ def build_release(root: Path, config_path: Path, output: Path) -> dict[str, Any]
         release_manifest["output_shards"].append(
             {"file": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size}
         )
-    (output / "release-manifest.json").write_text(_json(release_manifest) + "\n", encoding="utf-8")
+    # A release identity is its payload. Rebuilding the same payload at a later commit used to
+    # rewrite `opengrad_git_commit` (and thus the manifest hash), which silently breaks every
+    # recorded dataset hash and every experiment that pinned this release -- while the data
+    # itself was unchanged. Preserve the established manifest when the payload is identical, so
+    # the fingerprint in the training lineage keeps resolving to the same bytes.
+    manifest_path = output / "release-manifest.json"
+    previous = _read_json(manifest_path)
+    if previous is not None and previous.get("output_shards") == release_manifest["output_shards"]:
+        release_manifest = previous
+    manifest_path.write_text(_json(release_manifest) + "\n", encoding="utf-8")
     card_dir = root / config.get("card_directory", _DEFAULT_CARD_DIRECTORY)
     card = (card_dir / "README.template.md").read_text(encoding="utf-8")
     source_rows: list[str] = []
