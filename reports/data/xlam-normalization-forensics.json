@@ -1,0 +1,550 @@
+{
+  "audit": "xlam_normalization_forensics",
+  "corpus_fingerprint_sha256": "b8e8bacba6d3dd88e7cc9e33f7f978fa0e4d55a2954f1db7ef4fea8c23e81984",
+  "counts": {
+    "accepted_after": 57342,
+    "accepted_before": 33,
+    "records_total": 59370,
+    "rejected_after": 2028,
+    "rejected_before": 59337,
+    "targets_with_tool_calls": 57342,
+    "tools_bare_parameter_map": 166781,
+    "tools_old_path_rejects": 166353,
+    "tools_old_path_validates": 428,
+    "tools_total": 166781,
+    "xlam_already_canonical_schemas": 0,
+    "xlam_bare_parameter_maps_seen": 157834,
+    "xlam_defaults_preserved": 254039,
+    "xlam_generic_annotations_seen": 18147,
+    "xlam_object_wrappers_added": 157834,
+    "xlam_optional_annotations_seen": 111718,
+    "xlam_optional_parameters": 111718,
+    "xlam_parameters_total": 340713,
+    "xlam_required_lists_emitted": 0,
+    "xlam_unmarked_parameters": 228995
+  },
+  "distinct_canonical_records": 57342,
+  "duplicates": 0,
+  "input": {
+    "artifact": ".release/hf/toolpolicy-canonical-v1",
+    "shard_sha256": {
+      "xlam-function-calling-60k-000000.parquet": "7f8c17807f48d910cf7ef64bd6f1eb65b38374feaba896c446a2042598f28d5b",
+      "xlam-function-calling-60k-000001.parquet": "2e9a9fd3fad0e739b47cf8978f27ef654d5d661407973ab924efd323c8eb8dd3",
+      "xlam-function-calling-60k-000002.parquet": "730d6b69dae07599e43457ea2e01f75374d748e15f06eabad701fa3a919b0afa",
+      "xlam-function-calling-60k-000003.parquet": "2f39f458aa3ccffe5bd2c117298dbeaa17dc847bcc461067a1675d6ab49478a6",
+      "xlam-function-calling-60k-000004.parquet": "ede79e0307dca5a11c6ecf487b1bd55f6a203045a7cc51e00b3808ba34cbda92",
+      "xlam-function-calling-60k-000005.parquet": "b5e23c46ae3c31d24bc1eed82a5a1ec545097848f8cb75edc984d6a06ee4b14f",
+      "xlam-function-calling-60k-000006.parquet": "794563f11e256b599b39c3751a0ee0d15dc1f782fb0edb6f85da5b9e04a6a77d",
+      "xlam-function-calling-60k-000007.parquet": "152c78d19c10398455cc3f7c967b375af3f7903a7fd0c1fd8c19bfdd3c3206b5",
+      "xlam-function-calling-60k-000008.parquet": "41da14d86f700654281de16c2698df45cb1a2d46576c94097863ddef25ffe8e8",
+      "xlam-function-calling-60k-000009.parquet": "aa95ecf6bfda167c9ed095a84064746810361af8e5d92739e72d35d67f980380",
+      "xlam-function-calling-60k-000010.parquet": "e4a490fd8b76c7bdb654c4ca47a7def7ce0966cecc464c25ddb45278da487dbb",
+      "xlam-function-calling-60k-000011.parquet": "4d96f5b5d674dcc29bde9ba9e36e191951c0c6c3f43be13521792996742c336b",
+      "xlam-function-calling-60k-000012.parquet": "30d7d8686cb5ff53c6405472f88d58770054915eb432d2c13ec7e7656e066f20",
+      "xlam-function-calling-60k-000013.parquet": "b83cf4ac1ef6eeddc42ae53e8051c8550f0e7745538d8b6b965a304eb26375ea",
+      "xlam-function-calling-60k-000014.parquet": "e3c50d332655d33763959070ea9ca1c29c4fd57e75737aae2c0d83cd3a30c4a7",
+      "xlam-function-calling-60k-000015.parquet": "55b38a46b0db5c998ae2a2cae9fa73327622c2f62f59c0b8083a25f95a1aa02f",
+      "xlam-function-calling-60k-000016.parquet": "3a9afc9504bbc4d1e6fecf57d4c3ba5cb6c6fe95433087e5247f0f8013a67c07",
+      "xlam-function-calling-60k-000017.parquet": "6f60f9637563eabe2d56929164d1a72acd5dc78f457bf9ce923af9e93f997358",
+      "xlam-function-calling-60k-000018.parquet": "2e402dd4686dcbf31ebb780daa5bb8d3ad6bf81183e0613c95275e2532097d2e",
+      "xlam-function-calling-60k-000019.parquet": "5b79a64e0eec77af1615dfe3a6252d851dc8a354e1bdaf8cbb48a2a2e01ac4b3",
+      "xlam-function-calling-60k-000020.parquet": "9bd6c45ee14cd2c5a76451367fd807a7017ebc972831daa7efbe670b17b18414",
+      "xlam-function-calling-60k-000021.parquet": "98157410dd0a96290ed90129dffc820c741c7c50c3f94336ad77da5a6c078728",
+      "xlam-function-calling-60k-000022.parquet": "2aa0760d2fd875784c166877469c5d01b95c85506d0d74a599edc4b772714c83",
+      "xlam-function-calling-60k-000023.parquet": "14095e98c0ef1b64d7a1ae124d1d0e1efffb6550d77d4916730fa19aae077d1a",
+      "xlam-function-calling-60k-000024.parquet": "cc9825cdca75c87727df283eb5149a32ac4275148073daabc80677c4d6b4b3bc",
+      "xlam-function-calling-60k-000025.parquet": "a05abae81adc32b931f5bc284838b4ca81d86e3d03488a8ebd08d176c23463a3",
+      "xlam-function-calling-60k-000026.parquet": "f85cc819895f7292b9de1d3fca5b455580458f662fe4918f2f153e992caa2347",
+      "xlam-function-calling-60k-000027.parquet": "c600ceae211d58081861821dede8fb3fda6592ce3fd721c77afed59eb4ccf606",
+      "xlam-function-calling-60k-000028.parquet": "a4853860cb5feeb3f659ded0d94268e97902d6117ea097ccc40eb474756a07b0",
+      "xlam-function-calling-60k-000029.parquet": "32fae67c9d43402b954bd14d122cdf23e63acc933a0d8ad1d29c5e54ce67de0d",
+      "xlam-function-calling-60k-000030.parquet": "6168abfe4b28913de787642f739d3f0f34c712816cda56768e926788d9b0caef",
+      "xlam-function-calling-60k-000031.parquet": "ce0ca789b185cbf9f12328f8f87db4304aa4a32540d369282cc9e32b48bf4784",
+      "xlam-function-calling-60k-000032.parquet": "00f73c30a134df1168658f8504567b05646ff60333f6eec1e2e4d6e32fd8c9f7",
+      "xlam-function-calling-60k-000033.parquet": "8c3af4e0459bbedfa8cf949dfd4b87d021f54da325a24e59cf9a3720b4dbca87",
+      "xlam-function-calling-60k-000034.parquet": "be44aadd91eedb5e65f68f3667ff2f0899651b09018581927837d4c544030751",
+      "xlam-function-calling-60k-000035.parquet": "116884e55506a222b8bc4b6a3e394d8e028303e759b9ead0630ebe7c9cee8fd7",
+      "xlam-function-calling-60k-000036.parquet": "943d43c550e9515f55e22588462da0280abe6e1879790211fe072bce46d84b85",
+      "xlam-function-calling-60k-000037.parquet": "5a3937b16351dcdff41fb89f226ed835b7990ec00904270aff32c3fac665436f",
+      "xlam-function-calling-60k-000038.parquet": "59f5173557391a29f789e5759710c69fb2923d5ca4d82bab10ece7da13e69341",
+      "xlam-function-calling-60k-000039.parquet": "9e444d995169592720479576f427ec565cd7146721d0cc6278a4740f43edb984",
+      "xlam-function-calling-60k-000040.parquet": "b74727b16bb4bbb5913c2cb4293c202e7b0732ca07bc7887711dae38bb33484a",
+      "xlam-function-calling-60k-000041.parquet": "ceeaf7ff29830acf1615979b29f7fbd82b97155c7393e0e041f1696c5747a5c0",
+      "xlam-function-calling-60k-000042.parquet": "b1b5d2dfffe146ed67fc606a895e05ec682000c9641b4c1b63cc07d554b87404",
+      "xlam-function-calling-60k-000043.parquet": "dd9b8e6028732b3d9ad86edf556c74a2160f3b1b624d6bf23467f6149bf3070b",
+      "xlam-function-calling-60k-000044.parquet": "355f447c1cd5e51f680599dc57b443d891bf70910237b5c0ab3407d9fd268139",
+      "xlam-function-calling-60k-000045.parquet": "ce3bd32cc97300c6dcb42a3e9ca9fc2603d506776d274133babf381f09af30de",
+      "xlam-function-calling-60k-000046.parquet": "2e51a1060566b8d5435e3e7065cdcec554a943712e376489a8d72db8bb5db2ca",
+      "xlam-function-calling-60k-000047.parquet": "ab3aa203e6b45fba9967b53db8fd285a3eca2cdb6f3612db179341a8a07360ca",
+      "xlam-function-calling-60k-000048.parquet": "34ecfab7ea0cac7c68dce4dc37530ef0bcc4654413604efd00fcd41160ecfe77",
+      "xlam-function-calling-60k-000049.parquet": "7961f02107dee2d5f49cdc120e6b789f140bfc45de22e5ccbdc7469aeb3a141f",
+      "xlam-function-calling-60k-000050.parquet": "f2a81ce468908125267d976da338af50e21952da0aa0a824e3065522b74fcf8a",
+      "xlam-function-calling-60k-000051.parquet": "9995a80ba2431801fe8c14f2a5d0f989d7910f88c89c0f77e4cc4c03c9cb0c5d",
+      "xlam-function-calling-60k-000052.parquet": "1d19193b2a99ae9af621d64ad9708ac957011ecf5f34d8bd2315c141a243b5dc",
+      "xlam-function-calling-60k-000053.parquet": "30603866754f0152a4ba70a15de3dcefe1b8dba728a6918c5be0d4b1be4f0678",
+      "xlam-function-calling-60k-000054.parquet": "ac26f655fdfc0e16b387be1d42d98ec4446322dac8a5d59e43feedc1445fa26e",
+      "xlam-function-calling-60k-000055.parquet": "b0d5933ce329d4f95f89d5d846e7eefa7f25031e8122d92c12ea4e547debdd6e",
+      "xlam-function-calling-60k-000056.parquet": "7c83e95275ab0ce522307e3d56693a018e95c00821990da7ee6c4f987956eac1",
+      "xlam-function-calling-60k-000057.parquet": "e8370ae577375641dfaae5b6e1c5f07f4a5be04473a6d7e4f38fcb2846959ae9",
+      "xlam-function-calling-60k-000058.parquet": "04c409ce9015f6dbf1ca2c262e8f029ab47670b0e94c671209837ab6d429ec2e",
+      "xlam-function-calling-60k-000059.parquet": "b94e76f2c535348d620da34c9cedc42e91b25891767d26c451428eac418fd140"
+    },
+    "shards": 60,
+    "upstream_access": "GATED_HTTP_401 \u2014 the derivative bytes are the retained artefact",
+    "upstream_repository": "Salesforce/xlam-function-calling-60k",
+    "upstream_revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866"
+  },
+  "per_shard": {
+    "xlam-function-calling-60k-000000.parquet": {
+      "accepted_after": 973,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 27,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000001.parquet": {
+      "accepted_after": 965,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 35,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000002.parquet": {
+      "accepted_after": 971,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 29,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000003.parquet": {
+      "accepted_after": 972,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 28,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000004.parquet": {
+      "accepted_after": 965,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 35,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000005.parquet": {
+      "accepted_after": 965,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 35,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000006.parquet": {
+      "accepted_after": 974,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 26,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000007.parquet": {
+      "accepted_after": 969,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 31,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000008.parquet": {
+      "accepted_after": 966,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 34,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000009.parquet": {
+      "accepted_after": 975,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 25,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000010.parquet": {
+      "accepted_after": 971,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 29,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000011.parquet": {
+      "accepted_after": 967,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 33,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000012.parquet": {
+      "accepted_after": 976,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 24,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000013.parquet": {
+      "accepted_after": 971,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 29,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000014.parquet": {
+      "accepted_after": 971,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 29,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000015.parquet": {
+      "accepted_after": 959,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 41,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000016.parquet": {
+      "accepted_after": 964,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 36,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000017.parquet": {
+      "accepted_after": 966,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 34,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000018.parquet": {
+      "accepted_after": 973,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 27,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000019.parquet": {
+      "accepted_after": 969,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 31,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000020.parquet": {
+      "accepted_after": 968,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 32,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000021.parquet": {
+      "accepted_after": 966,
+      "accepted_before": 3,
+      "records": 1000,
+      "rejected_after": 34,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000022.parquet": {
+      "accepted_after": 977,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 23,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000023.parquet": {
+      "accepted_after": 974,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 26,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000024.parquet": {
+      "accepted_after": 964,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 36,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000025.parquet": {
+      "accepted_after": 961,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 39,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000026.parquet": {
+      "accepted_after": 979,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 21,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000027.parquet": {
+      "accepted_after": 969,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 31,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000028.parquet": {
+      "accepted_after": 962,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 38,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000029.parquet": {
+      "accepted_after": 977,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 23,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000030.parquet": {
+      "accepted_after": 958,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 42,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000031.parquet": {
+      "accepted_after": 973,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 27,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000032.parquet": {
+      "accepted_after": 968,
+      "accepted_before": 2,
+      "records": 1000,
+      "rejected_after": 32,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000033.parquet": {
+      "accepted_after": 965,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 35,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000034.parquet": {
+      "accepted_after": 966,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 34,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000035.parquet": {
+      "accepted_after": 963,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 37,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000036.parquet": {
+      "accepted_after": 964,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 36,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000037.parquet": {
+      "accepted_after": 966,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 34,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000038.parquet": {
+      "accepted_after": 961,
+      "accepted_before": 3,
+      "records": 1000,
+      "rejected_after": 39,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000039.parquet": {
+      "accepted_after": 953,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 47,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000040.parquet": {
+      "accepted_after": 965,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 35,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000041.parquet": {
+      "accepted_after": 960,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 40,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000042.parquet": {
+      "accepted_after": 969,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 31,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000043.parquet": {
+      "accepted_after": 955,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 45,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000044.parquet": {
+      "accepted_after": 956,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 44,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000045.parquet": {
+      "accepted_after": 957,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 43,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000046.parquet": {
+      "accepted_after": 956,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 44,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000047.parquet": {
+      "accepted_after": 958,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 42,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000048.parquet": {
+      "accepted_after": 960,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 40,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000049.parquet": {
+      "accepted_after": 965,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 35,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000050.parquet": {
+      "accepted_after": 951,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 49,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000051.parquet": {
+      "accepted_after": 964,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 36,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000052.parquet": {
+      "accepted_after": 961,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 39,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000053.parquet": {
+      "accepted_after": 967,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 33,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000054.parquet": {
+      "accepted_after": 966,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 34,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000055.parquet": {
+      "accepted_after": 974,
+      "accepted_before": 0,
+      "records": 1000,
+      "rejected_after": 26,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000056.parquet": {
+      "accepted_after": 958,
+      "accepted_before": 2,
+      "records": 1000,
+      "rejected_after": 42,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000057.parquet": {
+      "accepted_after": 959,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 41,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000058.parquet": {
+      "accepted_after": 970,
+      "accepted_before": 1,
+      "records": 1000,
+      "rejected_after": 30,
+      "trainable_after": 0
+    },
+    "xlam-function-calling-60k-000059.parquet": {
+      "accepted_after": 355,
+      "accepted_before": 0,
+      "records": 370,
+      "rejected_after": 15,
+      "trainable_after": 0
+    }
+  },
+  "rejected_after_by_reason": {
+    "XLAM_TYPE_UNSUPPORTED_CALLABLE": 529,
+    "XLAM_TYPE_UNSUPPORTED_SET": 283,
+    "XLAM_TYPE_UNSUPPORTED_UNION": 1216
+  },
+  "rejected_before_by_reason": {
+    "SCH_UNSUPPORTED_KEYWORD": 59305,
+    "SCH_UNSUPPORTED_TYPE": 32
+  },
+  "rule_distribution": {
+    "XLAM_BARE_COLLECTION_NORMALIZED": 3408,
+    "XLAM_DEFAULT_PRESERVED": 254039,
+    "XLAM_GENERIC_ANNOTATION_EXPANDED": 21084,
+    "XLAM_OPTIONAL_SUFFIX_PRESERVED": 111718,
+    "XLAM_PARAMETER_MAP_WRAPPED_AS_OBJECT": 157834,
+    "XLAM_REQUIREDNESS_NOT_ASSERTED": 340713,
+    "XLAM_SCALAR_ALIAS_NORMALIZED": 338800
+  },
+  "schema_version": 1,
+  "training_boundary_reasons": {
+    "SEM_ARGUMENT_INVALID": 1231,
+    "SEM_UNRESOLVED_CALL": 56111
+  },
+  "training_boundary_status": {
+    "UNRENDERABLE": 57342
+  },
+  "unsupported_annotation_reasons": {
+    "XLAM_TYPE_UNSUPPORTED_CALLABLE": 529,
+    "XLAM_TYPE_UNSUPPORTED_SET": 283,
+    "XLAM_TYPE_UNSUPPORTED_UNION": 1216
+  }
+}
