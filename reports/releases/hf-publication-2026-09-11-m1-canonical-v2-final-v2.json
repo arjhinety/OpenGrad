@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "HF_PUBLICATION_RECORD",
+  "published": "2026-09-11",
+  "experiment_id": "m1_dpo_canonical_v2_final_v2",
+  "repository": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2",
+  "hub_revision": "f33d20308982f37deb459076f489e794d5521ee3",
+  "public": true,
+  "parent_experiment": "m0_sft_canonical_v2_final",
+  "parent_checkpoint": "m0_sft_canonical_v2_final::checkpoint-1800",
+  "parent_weight_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+  "preference_dataset_sha256": "d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4",
+  "checkpoints": {
+    "30": "published and selected",
+    "60": "published",
+    "90": "published",
+    "120": "published"
+  },
+  "selection": {
+    "policy": "frozen DEV balanced selector",
+    "partition": "88a56821…",
+    "examples": 2373,
+    "selected": 30,
+    "tie_break": true
+  },
+  "confirmatory": {
+    "partition": "d6d1e394…",
+    "examples": 1277,
+    "scored_once": true,
+    "call_f1": 0.7548,
+    "call_precision": 0.735849,
+    "call_recall": 0.774834,
+    "over_call_rate": 0.152913
+  },
+  "promotion": {
+    "status": "PROMOTED",
+    "policy_version": "tool_use_promotion_v4",
+    "measured_against": "selected M0-final-v2 parent, not B0 degenerate recall"
+  },
+  "limitations": [
+    "confirmatory partition is pre-registered internal evidence, not an untouched external test",
+    "no_call_accuracy is NA because the evaluation population has no ANSWER examples",
+    "tool selection, argument validity and schema validity are not measured by the current evaluator",
+    "single-seed result is not variance evidence"
+  ],
+  "collection": {
+    "slug": "arrochi112/opengrad-models-6aa3c7ea9ae58be5adbb113e",
+    "item_added": true
+  },
+  "retention": {
+    "remote_checkpoint_weights_verified": 4,
+    "local_checkpoint_weights_deleted": 0,
+    "upload_then_verify_rule": "satisfied"
+  }
+}

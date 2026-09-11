@@ -41,27 +41,27 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
    are recorded and committed. The engine, renderer, evaluator, generation configuration,
    and failure taxonomy are pinned alongside them.
 
-8. Controlled SFT comparison — **EXECUTED — 2 NEGATIVE, 1 PARTIAL RECOVERY**
-   Two runs reached real optimizer steps against the canonical corpus. M0 on corpus v1
-   (`qwen35_2b_m0_sft_full_v3`) collapsed tool calling (`call_f1` 0.6191 → 0.0000); M1 DPO on the
-   When2Call preference pairs (`qwen35_2b_m1_dpo_v1`) removed over-calling but collapsed call
-   recall and did not reproduce on a repeat. M0 on the corrected corpus v2
-   (`qwen35_2b_m0_sft_v2corpus`) reached `call_f1` 0.5995 and macro recall 0.6416. M2 was not
-   run; `onpolicy_prompts_v1` was never materialized. See the
-   [M0 SFT execution report](reports/M0_SFT_EXECUTION_REPORT.md).
+8. Controlled SFT comparison — **EXECUTED — CLOSED**
+    The frozen M0 lineage includes the v1 negative, partial-v2, definitive final-v2, and the paired
+    fixed-compute/matched-exposure minus-xLAM arms. Final-v2 recovered call recall but was not
+    promoted; both minus-xLAM arms substantially lost recall. Because xLAM is currently the only
+    CALL_PREDICTION source, those arms measure joint removal of xLAM and that supervision channel,
+    not a pure xLAM-content effect. See [M0 phase closure](reports/M0_PHASE_CLOSURE.md).
 
-9. Full post-SFT evaluation and diagnosis — EXECUTED (partial)
-   Every saved checkpoint was measured against the frozen behavioral-heldout-v2 set with the same
-   engine and parser that produced B0; the failure/regression diagnosis is in the M0 report (§3
-   for the v1 collapses, §8 for the v2 recovery). External benchmark families remain
-   `FROZEN_NOT_EXECUTED`, and the best v2 checkpoint (1200) is still selection on the existing
-   evaluation set and needs checkpoint-selection-disjoint confirmation.
+9. Full post-training evaluation and diagnosis — **EXECUTED**
+    M0 and both minus-xLAM arms were fully evaluated on the frozen DEV partition, selected under
+    the frozen balanced rule, and scored once on the pre-registered internal confirmatory partition.
+    External benchmark families remain `FROZEN_NOT_EXECUTED`; tool-selection and argument/schema
+    validity are still unmeasured by the current evaluator.
 
-10. Preference optimization or on-policy distillation — EXECUTED (DPO) / NOT ATTEMPTED (distillation)
-    DPO was run on the When2Call preference pairs and regressed on the promotion metric; all three
-    checkpoints were rejected, and the trajectory did not reproduce (INC-0001). On-policy
-    distillation was explicitly out of scope and not attempted — not merely conditional. See the
-    [M0 SFT execution report](reports/M0_SFT_EXECUTION_REPORT.md).
+10. Preference optimization or on-policy distillation — **DPO EXECUTED / DISTILLATION NOT JUSTIFIED**
+     M1-v2 DPO started from the selected M0-final checkpoint, preserved its calibrated frontier, and
+     was promoted under prospective `tool_use_promotion_v4`. The first M1 identity is preserved as
+     a 119/120-step failure. The existing M2 path is mock-only: it has no live teacher, student
+     update, parent checkpoint loading, or valid prompt-state dataset. M1 already passes the
+     intended measured calibration policy, so launching M2 would neither answer a distinct valid
+     question nor justify its infrastructure gaps. See the [M1 evaluation report](reports/M1_DPO_EVALUATION.md)
+     and [M2 decision](reports/M2_DECISION.md).
 
 11. Cross-model replication — PLANNED
 

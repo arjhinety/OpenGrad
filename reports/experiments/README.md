@@ -13,7 +13,11 @@ The reports that matter:
 | [`M0_V2_FINAL_ABLATION_DESIGN.md`](../M0_V2_FINAL_ABLATION_DESIGN.md) | Frozen joint xLAM-plus-CALL_PREDICTION removal design and separate supervision-composition pair |
 | [`M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md`](../M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) | The paired joint-removal runs: identity, readiness, training |
 | [`M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md`](../M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) | Their evaluation, reported together with the joint-removal caveat |
-| [`M0_SFT_EXECUTION_REPORT.md`](../M0_SFT_EXECUTION_REPORT.md) | The earlier M0 on corpus v1 and the M1 DPO run, both negative |
+| [`M0_SFT_EXECUTION_REPORT.md`](../M0_SFT_EXECUTION_REPORT.md) | The earlier M0 on corpus v1 and historical DPO results |
+| [`M1_DPO_EXECUTION_REPORT.md`](../M1_DPO_EXECUTION_REPORT.md) | Parent-based DPO training from selected M0 |
+| [`M1_DPO_EVALUATION.md`](../M1_DPO_EVALUATION.md) | Prospective calibration-policy evaluation and promotion |
+| [`M2_DECISION.md`](../M2_DECISION.md) | Why the current M2 path was not run |
+| [`POSTTRAINING_PHASE_SUMMARY.md`](../POSTTRAINING_PHASE_SUMMARY.md) | B0 → M0 → M1 lineage and final phase state |
 | [`SUPERVISION_CONTRACT_REPORT.md`](../SUPERVISION_CONTRACT_REPORT.md) | What each record in the corpus supervises |
 
 This directory holds no reports of its own.
