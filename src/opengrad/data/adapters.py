@@ -10,6 +10,7 @@ from typing import Any
 
 from opengrad.data.canonical import ToolConversation
 from opengrad.data.schema import normalize_tool
+from opengrad.data.xlam_types import normalize_xlam_tools
 
 
 def _json(value: Any, field: str) -> Any:
@@ -178,6 +179,10 @@ def adapt_xlam(record: dict[str, Any], split: str = "train") -> ToolConversation
     if "query" not in record or not isinstance(record["query"], str):
         raise TypeError("missing query")
     tools = _tool(record.get("tools", []))
+    # xLAM stores `parameters` as a property-definition map, not as JSON Schema. Wrapping it
+    # is a source-contract transformation, so it happens here at the source boundary rather
+    # than in the generic schema layer, which must keep rejecting ambiguous bare dicts.
+    tools, repair = normalize_xlam_tools(tools)
     answers = _json(record.get("answers", []), "answers")
     if isinstance(answers, dict):
         answers = [answers]
@@ -205,8 +210,9 @@ def adapt_xlam(record: dict[str, Any], split: str = "train") -> ToolConversation
         split,
         tools,
         messages,
-        adapter="xlam_function_calling_60k_v1",
-        source_format="query/tools/answers",
+        adapter="xlam_function_calling_60k_v2",
+        source_format="query/tools/answers, parameters as a property-definition map",
+        xlam_schema_normalization=repair.as_dict(),
     )
     c.validate()
     return c
