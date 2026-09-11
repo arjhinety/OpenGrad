@@ -1,6 +1,6 @@
 {
   "audit": "xlam_normalization_forensics",
-  "corpus_fingerprint_sha256": "b8e8bacba6d3dd88e7cc9e33f7f978fa0e4d55a2954f1db7ef4fea8c23e81984",
+  "corpus_fingerprint_sha256": "4d4906568de073f3a6724dd1ae87ef32557876bfa3cc493e1fee10075e80d25e",
   "counts": {
     "accepted_after": 57342,
     "accepted_before": 33,
@@ -12,6 +12,8 @@
     "tools_old_path_rejects": 166353,
     "tools_old_path_validates": 428,
     "tools_total": 166781,
+    "trainable_after": 56090,
+    "trainable_with_tool_calls": 56090,
     "xlam_already_canonical_schemas": 0,
     "xlam_bare_parameter_maps_seen": 157834,
     "xlam_defaults_preserved": 254039,
@@ -100,420 +102,420 @@
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 27,
-      "trainable_after": 0
+      "trainable_after": 952
     },
     "xlam-function-calling-60k-000001.parquet": {
       "accepted_after": 965,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 35,
-      "trainable_after": 0
+      "trainable_after": 946
     },
     "xlam-function-calling-60k-000002.parquet": {
       "accepted_after": 971,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 29,
-      "trainable_after": 0
+      "trainable_after": 958
     },
     "xlam-function-calling-60k-000003.parquet": {
       "accepted_after": 972,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 28,
-      "trainable_after": 0
+      "trainable_after": 955
     },
     "xlam-function-calling-60k-000004.parquet": {
       "accepted_after": 965,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 35,
-      "trainable_after": 0
+      "trainable_after": 940
     },
     "xlam-function-calling-60k-000005.parquet": {
       "accepted_after": 965,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 35,
-      "trainable_after": 0
+      "trainable_after": 954
     },
     "xlam-function-calling-60k-000006.parquet": {
       "accepted_after": 974,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 26,
-      "trainable_after": 0
+      "trainable_after": 962
     },
     "xlam-function-calling-60k-000007.parquet": {
       "accepted_after": 969,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 31,
-      "trainable_after": 0
+      "trainable_after": 950
     },
     "xlam-function-calling-60k-000008.parquet": {
       "accepted_after": 966,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 34,
-      "trainable_after": 0
+      "trainable_after": 958
     },
     "xlam-function-calling-60k-000009.parquet": {
       "accepted_after": 975,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 25,
-      "trainable_after": 0
+      "trainable_after": 962
     },
     "xlam-function-calling-60k-000010.parquet": {
       "accepted_after": 971,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 29,
-      "trainable_after": 0
+      "trainable_after": 951
     },
     "xlam-function-calling-60k-000011.parquet": {
       "accepted_after": 967,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 33,
-      "trainable_after": 0
+      "trainable_after": 951
     },
     "xlam-function-calling-60k-000012.parquet": {
       "accepted_after": 976,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 24,
-      "trainable_after": 0
+      "trainable_after": 962
     },
     "xlam-function-calling-60k-000013.parquet": {
       "accepted_after": 971,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 29,
-      "trainable_after": 0
+      "trainable_after": 951
     },
     "xlam-function-calling-60k-000014.parquet": {
       "accepted_after": 971,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 29,
-      "trainable_after": 0
+      "trainable_after": 944
     },
     "xlam-function-calling-60k-000015.parquet": {
       "accepted_after": 959,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 41,
-      "trainable_after": 0
+      "trainable_after": 941
     },
     "xlam-function-calling-60k-000016.parquet": {
       "accepted_after": 964,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 36,
-      "trainable_after": 0
+      "trainable_after": 948
     },
     "xlam-function-calling-60k-000017.parquet": {
       "accepted_after": 966,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 34,
-      "trainable_after": 0
+      "trainable_after": 952
     },
     "xlam-function-calling-60k-000018.parquet": {
       "accepted_after": 973,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 27,
-      "trainable_after": 0
+      "trainable_after": 957
     },
     "xlam-function-calling-60k-000019.parquet": {
       "accepted_after": 969,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 31,
-      "trainable_after": 0
+      "trainable_after": 954
     },
     "xlam-function-calling-60k-000020.parquet": {
       "accepted_after": 968,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 32,
-      "trainable_after": 0
+      "trainable_after": 944
     },
     "xlam-function-calling-60k-000021.parquet": {
       "accepted_after": 966,
       "accepted_before": 3,
       "records": 1000,
       "rejected_after": 34,
-      "trainable_after": 0
+      "trainable_after": 954
     },
     "xlam-function-calling-60k-000022.parquet": {
       "accepted_after": 977,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 23,
-      "trainable_after": 0
+      "trainable_after": 967
     },
     "xlam-function-calling-60k-000023.parquet": {
       "accepted_after": 974,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 26,
-      "trainable_after": 0
+      "trainable_after": 954
     },
     "xlam-function-calling-60k-000024.parquet": {
       "accepted_after": 964,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 36,
-      "trainable_after": 0
+      "trainable_after": 942
     },
     "xlam-function-calling-60k-000025.parquet": {
       "accepted_after": 961,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 39,
-      "trainable_after": 0
+      "trainable_after": 945
     },
     "xlam-function-calling-60k-000026.parquet": {
       "accepted_after": 979,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 21,
-      "trainable_after": 0
+      "trainable_after": 961
     },
     "xlam-function-calling-60k-000027.parquet": {
       "accepted_after": 969,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 31,
-      "trainable_after": 0
+      "trainable_after": 950
     },
     "xlam-function-calling-60k-000028.parquet": {
       "accepted_after": 962,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 38,
-      "trainable_after": 0
+      "trainable_after": 948
     },
     "xlam-function-calling-60k-000029.parquet": {
       "accepted_after": 977,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 23,
-      "trainable_after": 0
+      "trainable_after": 963
     },
     "xlam-function-calling-60k-000030.parquet": {
       "accepted_after": 958,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 42,
-      "trainable_after": 0
+      "trainable_after": 943
     },
     "xlam-function-calling-60k-000031.parquet": {
       "accepted_after": 973,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 27,
-      "trainable_after": 0
+      "trainable_after": 954
     },
     "xlam-function-calling-60k-000032.parquet": {
       "accepted_after": 968,
       "accepted_before": 2,
       "records": 1000,
       "rejected_after": 32,
-      "trainable_after": 0
+      "trainable_after": 951
     },
     "xlam-function-calling-60k-000033.parquet": {
       "accepted_after": 965,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 35,
-      "trainable_after": 0
+      "trainable_after": 928
     },
     "xlam-function-calling-60k-000034.parquet": {
       "accepted_after": 966,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 34,
-      "trainable_after": 0
+      "trainable_after": 942
     },
     "xlam-function-calling-60k-000035.parquet": {
       "accepted_after": 963,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 37,
-      "trainable_after": 0
+      "trainable_after": 927
     },
     "xlam-function-calling-60k-000036.parquet": {
       "accepted_after": 964,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 36,
-      "trainable_after": 0
+      "trainable_after": 942
     },
     "xlam-function-calling-60k-000037.parquet": {
       "accepted_after": 966,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 34,
-      "trainable_after": 0
+      "trainable_after": 938
     },
     "xlam-function-calling-60k-000038.parquet": {
       "accepted_after": 961,
       "accepted_before": 3,
       "records": 1000,
       "rejected_after": 39,
-      "trainable_after": 0
+      "trainable_after": 935
     },
     "xlam-function-calling-60k-000039.parquet": {
       "accepted_after": 953,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 47,
-      "trainable_after": 0
+      "trainable_after": 919
     },
     "xlam-function-calling-60k-000040.parquet": {
       "accepted_after": 965,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 35,
-      "trainable_after": 0
+      "trainable_after": 941
     },
     "xlam-function-calling-60k-000041.parquet": {
       "accepted_after": 960,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 40,
-      "trainable_after": 0
+      "trainable_after": 930
     },
     "xlam-function-calling-60k-000042.parquet": {
       "accepted_after": 969,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 31,
-      "trainable_after": 0
+      "trainable_after": 940
     },
     "xlam-function-calling-60k-000043.parquet": {
       "accepted_after": 955,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 45,
-      "trainable_after": 0
+      "trainable_after": 930
     },
     "xlam-function-calling-60k-000044.parquet": {
       "accepted_after": 956,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 44,
-      "trainable_after": 0
+      "trainable_after": 932
     },
     "xlam-function-calling-60k-000045.parquet": {
       "accepted_after": 957,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 43,
-      "trainable_after": 0
+      "trainable_after": 938
     },
     "xlam-function-calling-60k-000046.parquet": {
       "accepted_after": 956,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 44,
-      "trainable_after": 0
+      "trainable_after": 930
     },
     "xlam-function-calling-60k-000047.parquet": {
       "accepted_after": 958,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 42,
-      "trainable_after": 0
+      "trainable_after": 942
     },
     "xlam-function-calling-60k-000048.parquet": {
       "accepted_after": 960,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 40,
-      "trainable_after": 0
+      "trainable_after": 936
     },
     "xlam-function-calling-60k-000049.parquet": {
       "accepted_after": 965,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 35,
-      "trainable_after": 0
+      "trainable_after": 939
     },
     "xlam-function-calling-60k-000050.parquet": {
       "accepted_after": 951,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 49,
-      "trainable_after": 0
+      "trainable_after": 925
     },
     "xlam-function-calling-60k-000051.parquet": {
       "accepted_after": 964,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 36,
-      "trainable_after": 0
+      "trainable_after": 945
     },
     "xlam-function-calling-60k-000052.parquet": {
       "accepted_after": 961,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 39,
-      "trainable_after": 0
+      "trainable_after": 937
     },
     "xlam-function-calling-60k-000053.parquet": {
       "accepted_after": 967,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 33,
-      "trainable_after": 0
+      "trainable_after": 949
     },
     "xlam-function-calling-60k-000054.parquet": {
       "accepted_after": 966,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 34,
-      "trainable_after": 0
+      "trainable_after": 937
     },
     "xlam-function-calling-60k-000055.parquet": {
       "accepted_after": 974,
       "accepted_before": 0,
       "records": 1000,
       "rejected_after": 26,
-      "trainable_after": 0
+      "trainable_after": 942
     },
     "xlam-function-calling-60k-000056.parquet": {
       "accepted_after": 958,
       "accepted_before": 2,
       "records": 1000,
       "rejected_after": 42,
-      "trainable_after": 0
+      "trainable_after": 935
     },
     "xlam-function-calling-60k-000057.parquet": {
       "accepted_after": 959,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 41,
-      "trainable_after": 0
+      "trainable_after": 941
     },
     "xlam-function-calling-60k-000058.parquet": {
       "accepted_after": 970,
       "accepted_before": 1,
       "records": 1000,
       "rejected_after": 30,
-      "trainable_after": 0
+      "trainable_after": 924
     },
     "xlam-function-calling-60k-000059.parquet": {
       "accepted_after": 355,
       "accepted_before": 0,
       "records": 370,
       "rejected_after": 15,
-      "trainable_after": 0
+      "trainable_after": 342
     }
   },
   "rejected_after_by_reason": {
@@ -535,12 +537,16 @@
     "XLAM_SCALAR_ALIAS_NORMALIZED": 338800
   },
   "schema_version": 1,
+  "supervision_kinds": {
+    "CALL_PREDICTION": 57342
+  },
   "training_boundary_reasons": {
-    "SEM_ARGUMENT_INVALID": 1231,
-    "SEM_UNRESOLVED_CALL": 56111
+    "SEM_ARGUMENT_INVALID": 1231
   },
   "training_boundary_status": {
-    "UNRENDERABLE": 57342
+    "OK": 56090,
+    "TARGET_TRUNCATED": 21,
+    "UNRENDERABLE": 1231
   },
   "unsupported_annotation_reasons": {
     "XLAM_TYPE_UNSUPPORTED_CALLABLE": 529,

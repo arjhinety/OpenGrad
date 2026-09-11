@@ -399,7 +399,9 @@ def supervision_kind_counts(samples: list[SupervisedSample]) -> dict[str, int]:
 def supervision_composition(samples: list[SupervisedSample]) -> dict[str, Any]:
     """Per-kind record and target counts, with the mixture as a fraction of trainable records."""
     trainable = [s for s in samples if s.status in TRAINABLE]
-    per_kind: dict[str, dict[str, int]] = {}
+    # The counters are ints; the derived share and the kind label are not, so the mapping is
+    # typed for what it actually carries rather than for the counters alone.
+    per_kind: dict[str, dict[str, Any]] = {}
     for sample in samples:
         kind = sample.supervision_kind or "UNCLASSIFIED"
         entry = per_kind.setdefault(kind, {"records": 0, "trainable": 0, "targets": 0})

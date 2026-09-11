@@ -552,10 +552,15 @@ def _tagged_messages(
         messages,
         adapter=adapter,
         source_format="messages",
-        # Shared by BUTTON and Glaive. Measured: all 7,941 BUTTON records carry a result for
-        # every call, and Glaive's calls are answered by function-response turns, so both are
-        # complete trajectories. The parameter exists so a future tagged source can declare
-        # otherwise without editing this helper.
+        # Shared by BUTTON and Glaive.
+        #
+        # Measured, and not the same for both. Glaive: 0 of 99,794 records have an unresolved
+        # call, so every call is answered and the trajectory is complete. BUTTON: 5,582 of 7,941
+        # are fully resolved, but 2,359 emit calls that no tool message ever answers -- an
+        # assistant turn asks for three tools and the conversation returns results for only some
+        # of them. Those are invalid under *both* contracts (the terminal turn is prose, so there
+        # is no call-prediction target either), which is correct: the trajectory is genuinely
+        # incomplete and no contract should rescue it. They stay quarantined.
         supervision_kind=supervision_kind,
     )
     c.validate()

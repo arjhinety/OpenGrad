@@ -186,7 +186,9 @@ def supervision_block(
     }
 
 
-def validate_supervision_block(metadata: dict[str, Any], *, require: bool = False) -> dict[str, Any]:
+def validate_supervision_block(
+    metadata: dict[str, Any], *, require: bool = False
+) -> dict[str, Any]:
     """Validate `metadata.supervision`, returning the block.
 
     ``require`` is used at the training boundary, where an undeclared kind means the record's

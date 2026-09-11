@@ -16,10 +16,11 @@ import pytest
 
 from opengrad.data.adapters import adapt_xlam
 from opengrad.data.canonical import CanonicalSFTExample, ToolConversation
+from opengrad.data.schema import effective_schema
 from opengrad.data.semantic import terminal_call_ids, validate_training_trajectory
 from opengrad.data.supervision import (
-    CONTRACTS,
     CONTRACT_VERSION,
+    CONTRACTS,
     SUPERVISION_METADATA_KEY,
     SupervisionAssignment,
     SupervisionKind,
@@ -29,7 +30,6 @@ from opengrad.data.supervision import (
     supervision_block,
     validate_supervision_block,
 )
-from opengrad.data.schema import effective_schema
 
 CALL_PREDICTION = SupervisionKind.CALL_PREDICTION
 COMPLETE_TRAJECTORY = SupervisionKind.COMPLETE_TRAJECTORY
@@ -78,7 +78,9 @@ def _call(call_id: str = "call_0", name: str = "lookup", args: dict | None = Non
     return {
         "role": "assistant",
         "content": None,
-        "tool_calls": [{"id": call_id, "name": name, "arguments": args if args is not None else {"q": "x"}}],
+        "tool_calls": [
+            {"id": call_id, "name": name, "arguments": args if args is not None else {"q": "x"}}
+        ],
     }
 
 
@@ -249,15 +251,17 @@ def test_8_orphan_tool_result_is_rejected() -> None:
 
 def test_8_orphan_tool_result_is_rejected_under_call_prediction_too() -> None:
     """The relaxation is about a missing result, never about an invented one."""
-    example = _conversation(
-        [_user(), _result("call_ghost"), _call()], kind=CALL_PREDICTION
-    )
+    example = _conversation([_user(), _result("call_ghost"), _call()], kind=CALL_PREDICTION)
     assert "ORPHAN_TOOL_RESULT" in _codes(example, CALL_PREDICTION)
 
 
 def test_8_result_name_mismatch_is_rejected() -> None:
     example = _conversation(
-        [_user(), _call(), {"role": "tool", "tool_call_id": "call_0", "name": "other", "content": "x"}],
+        [
+            _user(),
+            _call(),
+            {"role": "tool", "tool_call_id": "call_0", "name": "other", "content": "x"},
+        ],
         kind=COMPLETE_TRAJECTORY,
     )
     assert "TOOL_RESULT_NAME_MISMATCH" in _codes(example, COMPLETE_TRAJECTORY)
@@ -434,8 +438,9 @@ def test_12_complete_trajectory_masks_every_assistant_turn_not_the_results() -> 
     from opengrad.training.sft_data import build_sample
 
     renderer = _renderer_or_skip()
-    example = _conversation([_user(), _call(), _result("call_0", "42"), _answer("done")],
-                            kind=COMPLETE_TRAJECTORY)
+    example = _conversation(
+        [_user(), _call(), _result("call_0", "42"), _answer("done")], kind=COMPLETE_TRAJECTORY
+    )
     sample = build_sample(renderer, example, max_seq_length=2048)
     assert sample.status == "OK"
     assert sample.supervision_kind == "COMPLETE_TRAJECTORY"
@@ -460,7 +465,11 @@ def test_13_supervision_metadata_survives_serialization() -> None:
     assert block["adapter"] == "test_adapter"
 
     rebuilt = ToolConversation(
-        restored["id"], restored["source"], restored["tools"], restored["messages"], restored["metadata"]
+        restored["id"],
+        restored["source"],
+        restored["tools"],
+        restored["messages"],
+        restored["metadata"],
     )
     contract, assignment = resolve_contract(rebuilt.metadata)
     assert contract.kind is CALL_PREDICTION
@@ -612,15 +621,15 @@ def test_16_filtering_is_part_of_the_cache_identity() -> None:
     """Without this, a filtered run could reuse an unfiltered sample set."""
     from opengrad.training.preprocess import CacheIdentity
 
-    base = dict(
-        model_id="m",
-        model_revision="r",
-        tokenizer_revision="r",
-        renderer="qwen3_5_2b_v1",
-        template_hash="h",
-        max_seq_length=2048,
-        corpus_manifest_sha256="c",
-    )
+    base = {
+        "model_id": "m",
+        "model_revision": "r",
+        "tokenizer_revision": "r",
+        "renderer": "qwen3_5_2b_v1",
+        "template_hash": "h",
+        "max_seq_length": 2048,
+        "corpus_manifest_sha256": "c",
+    }
     unfiltered = CacheIdentity(**base)
     filtered = CacheIdentity(**base, supervision_include=("CALL_PREDICTION",))
     assert unfiltered.to_dict() != filtered.to_dict()

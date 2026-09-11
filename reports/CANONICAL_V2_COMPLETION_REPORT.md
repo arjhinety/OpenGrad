@@ -18,14 +18,25 @@ It does not restate the M0/M1 experiment results, which are in
 The xLAM source-adapter defect is fixed, and the fix is verified across all 59,370 retained
 records: canonical acceptance moved from **33 → 57,342** (0.06% → 96.6%).
 
-It does not make xLAM trainable. Every one of those 57,342 records is rejected at the training
-boundary because xLAM is a single-turn call-prediction dataset — a query and the call to make,
-with no tool result — while OpenGrad's trajectory policy requires every call to be resolved.
-That is a distinct property from schema validity, and it is exactly the class of defect the new
-renderability gate exists to catch.
+That was the first blocker. The second was a *policy* problem rather than a parsing one: every one
+of those 57,342 records was then rejected at the training boundary with `SEM_UNRESOLVED_CALL`,
+because xLAM is single-turn call prediction with no tool result and the trajectory policy required
+every call to be resolved.
 
-So: **the xLAM blocker named in the briefing was real and is fixed; a second blocker was
-underneath it and is not.**
+Both are now fixed, and they were genuinely different problems in different layers. The schema
+blocker needed an adapter-level transformation; the trainability blocker needed an explicit
+statement of *what the corpus supervises*, which is now the
+[supervision contract](SUPERVISION_CONTRACT_REPORT.md):
+
+| xLAM | Before | After |
+|---|---:|---:|
+| Schema-valid | 33 | 57,342 |
+| `SEM_UNRESOLVED_CALL` | 56,111 | **0** |
+| Trainable | **0** | **56,090 (94.5%)** |
+| Tool-call targets | 0 | 57,342 |
+
+The remaining 1,252 non-trainable records are 1,231 genuine upstream argument defects and 21 that
+exceed the token window. None is attributable to OpenGrad's parsing or validation.
 
 ---
 
@@ -166,6 +177,8 @@ checkpoint-selection-disjoint confirmation before promotion.
 3. **Break out per-source tool-call targets** in the yield report and declare
    `datasets.yield_report` on the SFT config so the gate is live rather than dormant.
 4. **Re-run contamination auditing** for v2, including the newly recovered Glaive records.
+   The supervision contract also changes the composition, so the audit must cover the new
+   mixture rather than the old one.
 5. **Re-audit the corrected Glaive adapter** against the training boundary per source, since
    canonical retention and trainability are distinct.
 6. **Generalize the parameter-map normalizer to BUTTON and LoopTool.** BUTTON's v1 exclusion

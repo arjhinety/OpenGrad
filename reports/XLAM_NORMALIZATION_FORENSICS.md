@@ -1,8 +1,7 @@
 # xLAM normalization forensics
 
 **Status:** canonical normalization `IMPLEMENTED` and `MEASURED` over all 59,370 retained
-records. Trainability is **not** recovered — see §7. One adapter defect found during this audit
-(the requiredness rule, §4) was fixed and re-measured.
+records. **Trainability is recovered: 0 → 56,090 (94.5%)** under the supervision contract (§7).
 
 **Date:** 2026-09-11
 **Machine-readable evidence:** [`reports/data/xlam-normalization-forensics.json`](data/xlam-normalization-forensics.json)
@@ -17,13 +16,13 @@ records. Trainability is **not** recovered — see §7. One adapter defect found
 |---|---:|---:|
 | Records | 59,370 | 59,370 |
 | Canonical records accepted | **33** (0.06%) | **57,342** (96.6%) |
-| Records rejected | 59,337 | **2,028** (3.4%) |
+| Records rejected at the schema layer | 59,337 | **2,028** (3.4%) |
 | Tools | 166,781 | 166,781 |
-| Trainable records | 0 | **0** |
-| Records with a tool-call target | 0 | 57,342 (canonical only) |
+| **Trainable records** | **0** | **56,090 (94.5%)** |
+| Records with a tool-call target | 0 | 57,342 |
 
-The schema blocker is fixed. The trainability blocker underneath it is not, and is a different
-problem in a different layer (§7).
+Both blockers are now resolved, and they were in different layers: the schema representation
+(§2–§6) and the definition of what the corpus supervises (§7).
 
 ## 2. Why wrapping the parameter map is interpretation, not inference
 
@@ -171,49 +170,61 @@ Parameters: 340,713 total (111,718 carrying an `optional` marker, 228,995 unmark
 lists emitted: **0**.
 
 Corpus fingerprint over the 57,342 accepted canonical records:
-`b8e8bacba6d3dd88e7cc9e33f7f978fa0e4d55a2954f1db7ef4fea8c23e81984`.
+`4d4906568de073f3a6724dd1ae87ef32557876bfa3cc493e1fee10075e80d25e`.
+
+(The earlier `b8e8bacb…` fingerprint in this report's history covered the same records before the
+supervision contract added `metadata.supervision`, which changes the canonical hash of every
+record. The current value is the one the audit emits.)
 Duplicates: 0. Input shard digests are recorded per shard in the JSON artifact.
 
-## 7. The remaining blocker: trainability is still zero
+## 7. Trainability: 0 → 56,090, via the supervision contract
 
-Every one of the 57,342 canonically valid records is rejected at the training boundary, so
-trainable records are **0**. Two distinct causes, and only one of them is about xLAM:
+The remaining blocker was never a parser defect. xLAM's format is `query` + `tools` +
+`answers`: a single turn naming the call to make, with no tool-result turn. OpenGrad's trajectory
+policy required every call to be resolved, so it rejected the entire source — correctly for a
+corpus claiming a complete trajectory, and incorrectly for one whose objective is next-call
+prediction.
 
-| Boundary reason | Records | Share | Attribution |
-|---|---:|---:|---|
-| `SEM_UNRESOLVED_CALL` | 56,111 | 97.9% | **OpenGrad trajectory policy** |
-| `SEM_ARGUMENT_INVALID` (`ARG_TYPE`) | 1,231 | 2.1% | **upstream source quality** |
+With the supervision contract in place (`reports/SUPERVISION_CONTRACT_REPORT.md`), xLAM declares
+`CALL_PREDICTION` and the terminal call is the supervised target:
 
-**`SEM_UNRESOLVED_CALL` (56,111).** xLAM's format is `query` + `tools` + `answers`: a single turn
-naming the call to make. It contains no tool-result turn, so no call is ever *resolved*.
-OpenGrad's trajectory policy is an explicitly documented **complete-target** policy — every call
-must be answered by a tool result — so it rejects the entire source. This is not repairable in the
-adapter; there is no tool result to recover. Making xLAM trainable requires admitting a
-**terminal call** as a valid supervised target for call-prediction sources, which is a semantic
-change to what the model is trained to do, affecting every source. It must be versioned and
-evidenced like the promotion-policy change, and **it is not done here**.
+| | Before the contract | After |
+|---|---:|---:|
+| Records | 59,370 | 59,370 |
+| Schema-valid | 57,342 | 57,342 |
+| `SEM_UNRESOLVED_CALL` | 56,111 | **0** |
+| `SEM_ARGUMENT_INVALID` | 1,231 | 1,231 |
+| **Trainable** | **0** | **56,090 (94.5%)** |
+| Tool-call targets | 0 | 57,342 |
 
-**`SEM_ARGUMENT_INVALID` (1,231, 2.1%).** The gold call's value does not match the type the same
-record declares. These are genuine upstream data-quality defects, not mapping errors, and they
-read exactly like the upstream project's own disclosure ("the remaining 5% have minor issues like
-inaccurate arguments"):
+Every accepted record is `CALL_PREDICTION` (57,342). The arithmetic closes exactly:
 
+```text
+57,342 schema-valid
+ - 1,231 argument-invalid   (upstream placeholder defects, unchanged)
+ -    21 target-truncated   (exceed the 2,048-token window)
+ = 56,090 trainable
 ```
-dough   declared object   passed "prepared_dough"
-books   declared array    passed "<user-provided-books-data>"
-vector  declared array    passed "values"
-```
 
-Synthetic placeholder strings appear where a collection was declared. These are correctly
-quarantined and are not recoverable without inventing data.
+### What remains quarantined, and why
 
-So of 59,370 records: 2,028 (3.4%) are unrepresentable at the schema layer, 1,231 (2.1%) are
-upstream argument defects, and 56,111 (94.5%) are blocked solely by the trajectory policy.
+| Cause | Records | Attribution |
+|---|---:|---|
+| `XLAM_TYPE_UNSUPPORTED_UNION` | 1,216 | this adapter refuses `Union[int, float]` |
+| `XLAM_TYPE_UNSUPPORTED_CALLABLE` | 529 | this adapter refuses `Callable[...]` |
+| `XLAM_TYPE_UNSUPPORTED_SET` | 283 | this adapter refuses `set` (no JSON equivalent) |
+| `SEM_ARGUMENT_INVALID` | 1,231 | **upstream data quality** |
+| `TARGET_TRUNCATED` | 21 | window, not source |
 
-Two consequences worth stating plainly. First, "canonically valid" was the wrong success
-criterion for this source, and the yield gate now measures the right one. Second, the briefing's
-expectation that fixing the schema representation would recover xLAM is only half correct: it
-recovered canonical parsing and revealed that an independent blocker sits behind it.
+2,028 records (3.4%) are unrepresentable at the schema layer and were never approximated; 1,231
+(2.1%) are genuine upstream defects where the gold call's value contradicts the type the same
+record declares — `dough` declared `object` and passed `"prepared_dough"`, `books` declared
+`array` and passed `"<user-provided-books-data>"`. Those read exactly like the upstream project's
+own disclosure of ~5% inaccurate arguments, and they are not recoverable without inventing data.
+
+**No fabricated turn.** The 56,090 accepted records render exactly their messages: two turns,
+`user` and `assistant`, with no `<|im_start|>tool` turn and no placeholder observation. The
+contract changes which turns are *expected*, never which turns *exist*.
 
 ## 8. Reconciliation with the briefing's figures
 

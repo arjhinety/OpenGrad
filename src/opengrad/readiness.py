@@ -918,9 +918,7 @@ def _renderability_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, st
     return True, detail, None
 
 
-def _supervision_composition_state(
-    root: Path, raw: dict[str, Any]
-) -> tuple[bool, str, str | None]:
+def _supervision_composition_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, str | None]:
     """Report the training mixture by supervision kind, and honour the config's selection.
 
     A single aggregate trainable count cannot distinguish a corpus of complete trajectories from
