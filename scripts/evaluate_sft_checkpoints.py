@@ -82,7 +82,7 @@ def main() -> int:
     include_ids = None
     if args.partition:
         partition = json.loads((ROOT / args.partition).read_text(encoding="utf-8"))
-        include_ids = set(partition[args.partition_side]["example_ids"])
+        include_ids = set(partition["example_ids"][args.partition_side])
         print(
             f"--- scoring {args.partition_side} partition: {len(include_ids)} of "
             f"{partition['population_size']} examples (fingerprint "
