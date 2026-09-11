@@ -253,7 +253,7 @@ class ExperimentConfig:
         return cls.from_dict(data)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "experiment_id": self.experiment_id,
             "parent_experiment_id": self.parent_experiment_id,
             "hypothesis": self.hypothesis,
@@ -266,8 +266,13 @@ class ExperimentConfig:
             "promotion": self.promotion,
             "reproducibility": self.reproducibility,
             "speculative_decoding": self.speculative_decoding,
-            "supervision": self.supervision,
         }
+        # An absent filter is serialized by omitting the block, never as `supervision: {}`: a
+        # present-but-empty block is rejected on load, so emitting one would make a valid no-filter
+        # config fail its own round-trip.
+        if self.supervision:
+            payload["supervision"] = self.supervision
+        return payload
 
     def write_resolved(self, destination: Path) -> None:
         destination.parent.mkdir(parents=True, exist_ok=True)
