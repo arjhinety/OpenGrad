@@ -26,6 +26,13 @@ runs/**
 # is ~2.5 MB each and the weights are gigabytes.
 !runs/**/failure.json
 !runs/**/checkpoint_registration_errors.json
+# The two cross-experiment authoritative records. Per-run `ledger.jsonl` and `experiment.json` are
+# tracked so a record can name its own history; these aggregate exactly that across runs, and the
+# checkpoint registry holds lifecycle statuses no per-run file carries. Leaving them untracked
+# meant a fresh clone could rebuild `results/registry.jsonl` and see a checkpoint marked REJECTED
+# while `opengrad checkpoint list` reported it absent -- two authoritative views disagreeing.
+!runs/central_ledger.jsonl
+!runs/checkpoint_registry.json
 !runs/**/rendering_report.json
 !runs/**/overflow_report.json
 !runs/**/training_metadata.json

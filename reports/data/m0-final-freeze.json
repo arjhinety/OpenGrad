@@ -1,0 +1,195 @@
+{
+  "artifact_kind": "M0_FINAL_RESULT_FREEZE",
+  "evidence": {
+    "config": {
+      "configs/experiments/m0_sft_canonical_v2_final.yaml": {
+        "bytes": 5391,
+        "sha256": "dd23923ef1c7133c902ad420c6231f9393a5d08a0c464060fa7fad5a8ea40906"
+      },
+      "docs/evaluation/CHECKPOINT_SELECTION_RULE.md": {
+        "bytes": 4818,
+        "sha256": "2f8bb95995dbfa3d7680f1029dbc8a7dce50f0375a81f4fd7e56028d84623be9"
+      },
+      "reports/data/m0-final-launch-record.json": {
+        "bytes": 3616,
+        "sha256": "9cdade6e937d20f5290c770ce03a510f79ad0e223b366bff722d26b2b37ddbc0"
+      }
+    },
+    "confirmatory": {
+      "runs/m0_sft_canonical_v2_final/eval/confirmatory/checkpoint-1800/metrics.json": {
+        "bytes": 5029,
+        "sha256": "40108677055b116c1f8cd47406b32f18b862fe5f1efcaabd82db3ae0055c87ab"
+      },
+      "runs/m0_sft_canonical_v2_final/eval/confirmatory/curve.json": {
+        "bytes": 3378,
+        "sha256": "9a108f7391cb30a6fb9997bd3680b03faa746de4ff8a2d70fffcccc34890ecb5"
+      }
+    },
+    "contamination": {
+      "reports/data/behavioral-heldout-v2-contamination--toolpolicy-canonical-v2-final.json": {
+        "bytes": 2752,
+        "sha256": "4a5d04f79cd5e98e2a30a93d4f816b75c1fbb167da947451003e1fdb6f41c5b2"
+      }
+    },
+    "corpus": {
+      ".release/hf/toolpolicy-canonical-v2-final/release-manifest.json": {
+        "bytes": 37566,
+        "sha256": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161"
+      },
+      "configs/releases/toolpolicy_canonical_v2_final.yaml": {
+        "bytes": 5179,
+        "sha256": "b7692adde93ba56a0e6101955c53a99112214b45f68b74bf674122acafd523ea"
+      },
+      "reports/data/canonical-v2-final-yield.json": {
+        "bytes": 3665,
+        "sha256": "99dadf8cd9b0421789149d1aa94c8cef7a90abb4eec11be19e5164bd62abe579"
+      }
+    },
+    "decision": {
+      "results/registry.jsonl": {
+        "bytes": 32255,
+        "sha256": "7cdfe1a21330022c3f9d0c6e4434c614e1ae57684b32e9b28c675f7b80ed7870"
+      },
+      "runs/central_ledger.jsonl": {
+        "bytes": 24203,
+        "sha256": "74524200248126b43e252d3d992625c5d2caf9fd56382d405e01a6d07e3e9ab4"
+      },
+      "runs/checkpoint_registry.json": {
+        "bytes": 14126,
+        "sha256": "9556beceb03409fb8ed7c78a9dbecffaaef6e602b7dae0ed66d5a0ac6ab31e4b"
+      }
+    },
+    "evaluation": {
+      "reports/baselines/qwen35_2b_baseline/metrics.json": {
+        "bytes": 3908,
+        "sha256": "0d06c17bdbe372ba8783eff1906468bba221344a89bfe31ef84814c13455cd05"
+      },
+      "reports/baselines/qwen35_2b_baseline/predictions.jsonl": {
+        "bytes": 3593450,
+        "sha256": "c700c8e0719d6cb84db91d2b4b13962eb1cb19b24a4e9c343fec60d6cae68261"
+      },
+      "reports/evaluation/behavioral-heldout-v2-partition.json": {
+        "bytes": 169852,
+        "sha256": "56c6abc2e24c524b45c382f42927fa02117b2a04c02f04e89e6a40d8b520f901"
+      },
+      "reports/evaluation/behavioral-heldout-v2.manifest.json": {
+        "bytes": 4376,
+        "sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640"
+      }
+    },
+    "reports": {
+      "reports/M0_CANONICAL_V2_FINAL_EVALUATION.md": {
+        "bytes": 8021,
+        "sha256": "c9dc84ebb1e14d0bf9c35e98d5075ec555557cfd8f63490077c62b1a9166e4fd"
+      },
+      "reports/M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md": {
+        "bytes": 8276,
+        "sha256": "26fb59435beb7b9aa2e525f6b9142c0a3d93fce6c7a90de964d17aa9d74a7725"
+      }
+    },
+    "selection": {
+      "runs/m0_sft_canonical_v2_final/eval/dev/checkpoint-1200/metrics.json": {
+        "bytes": 4940,
+        "sha256": "9da1bef06f1edcca1ff21666c065fcfcf85c4d0d3831e1fd97d058ca1ff00a1d"
+      },
+      "runs/m0_sft_canonical_v2_final/eval/dev/checkpoint-1800/metrics.json": {
+        "bytes": 4935,
+        "sha256": "c288c5356d675e8c5dfc32fec8a53583f9fd16b6c84fee4d75a7a124de03ae59"
+      },
+      "runs/m0_sft_canonical_v2_final/eval/dev/checkpoint-2400/metrics.json": {
+        "bytes": 4939,
+        "sha256": "a7d53ab697088c7620c07cf747dcc160fad5c31ad731a27cac1a345d5c6af181"
+      },
+      "runs/m0_sft_canonical_v2_final/eval/dev/checkpoint-600/metrics.json": {
+        "bytes": 4927,
+        "sha256": "7f9f2a260a0a9884064da3b1a0e9238e9735197b30710dcbdd076eab8687b12d"
+      },
+      "runs/m0_sft_canonical_v2_final/eval/dev/curve.json": {
+        "bytes": 13029,
+        "sha256": "6be0c2011a7902332c259eb93e0699089eef98eae8bd8fa2df704e49c0e880eb"
+      },
+      "runs/m0_sft_canonical_v2_final/eval/dev/selection--dev.json": {
+        "bytes": 5570,
+        "sha256": "401c9c4814d2acbd8b0eac73c546a4d01e59eb51eeeebf880c1edf431635026b"
+      }
+    },
+    "training": {
+      "runs/m0_sft_canonical_v2_final/dataset_manifest.json": {
+        "bytes": 865,
+        "sha256": "62fd37e28f23c5c5484299e30e6cd1e966a740fe47eb9d90971fb853c3cb84c0"
+      },
+      "runs/m0_sft_canonical_v2_final/environment.json": {
+        "bytes": 374,
+        "sha256": "8855cad665ff3e238df0faf67336848e87faae2a40b2aa60461499fdd65102a2"
+      },
+      "runs/m0_sft_canonical_v2_final/events.jsonl": {
+        "bytes": 1029959,
+        "sha256": "21b43d097424824ad40f6efd0bd0d2edfc8f68532db694462b712f351e32b74e"
+      },
+      "runs/m0_sft_canonical_v2_final/experiment.json": {
+        "bytes": 3981,
+        "sha256": "68b0dc264343dc582766f177a629f39675d346441a65e579cd0a83c507f206f1"
+      },
+      "runs/m0_sft_canonical_v2_final/ledger.jsonl": {
+        "bytes": 8064,
+        "sha256": "fab4430b17697b07e605cbb523468ee73d6d03b3a7015bf6d362161781828665"
+      },
+      "runs/m0_sft_canonical_v2_final/metrics/train_log.jsonl": {
+        "bytes": 908375,
+        "sha256": "db61a2e6728399eabdd05e2c4af5c3c5496ecb0978a07498f11eb3f49ff0bb5a"
+      },
+      "runs/m0_sft_canonical_v2_final/overflow_report.json": {
+        "bytes": 824,
+        "sha256": "b8b9d2d9f67a2f5a1c325de0d90955ed4da76279d4c16ed59aa1175368e81b1a"
+      },
+      "runs/m0_sft_canonical_v2_final/rendering_report.json": {
+        "bytes": 4086,
+        "sha256": "589ea59e1cf51c2e0155db63c069d8781d23d412d5cc629665c6492e732e3f17"
+      },
+      "runs/m0_sft_canonical_v2_final/resolved_config.yaml": {
+        "bytes": 1433,
+        "sha256": "08240328a8085964b975536ca36955e13867fffbe84b9dcddb487839e179c67b"
+      }
+    }
+  },
+  "experiment_id": "m0_sft_canonical_v2_final",
+  "experiment_status": "REJECTED",
+  "hashes_computed_at_commit": "62023f20969db1c3aaa3d600fee9ad92b4fe0cf2",
+  "reproduce": {
+    "confirmatory": "python scripts/evaluate_sft_checkpoints.py m0_sft_canonical_v2_final --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side confirmatory --checkpoint-ids 1800",
+    "selection": "python scripts/evaluate_sft_checkpoints.py m0_sft_canonical_v2_final --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side dev",
+    "selection_rule": "python scripts/select_checkpoint.py --side dev"
+  },
+  "role": "Pins the artifacts behind the numbers reported for the definitive M0 SFT, so a claim can be checked against the file that produced it rather than trusted.",
+  "schema_version": 1,
+  "unversioned_by_design": {
+    "predictions": {
+      "runs/m0_sft_canonical_v2_final/eval/confirmatory/checkpoint-1800/predictions.jsonl": {
+        "bytes": 881772,
+        "sha256": "a4d614689fe31b3c40a56fbf3e557f495257560d22e1294dcc96846399331343"
+      },
+      "runs/m0_sft_canonical_v2_final/eval/dev/checkpoint-1800/predictions.jsonl": {
+        "bytes": 1639834,
+        "sha256": "6385c3dcd853c1cbc8dafb4598e94612c655f739f949a3e24c585372652afa93"
+      }
+    },
+    "weights": {
+      "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1200/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "05b7764f0599b5e341566cef56776db18a7f6ec7f6adf519abf16c4d024f9cdf"
+      },
+      "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-1800/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a"
+      },
+      "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-2400/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "e94487b2730eec144156c5c88d031bd31b54a20f3634c33eda3d68bbc8f6430a"
+      },
+      "runs/m0_sft_canonical_v2_final/checkpoints/checkpoint-600/model.safetensors": {
+        "bytes": 3763692048,
+        "sha256": "20da6bc980d241e3fdd86fefd2dad8dd96433865d6215152b6776a4c4d0ad5a3"
+      }
+    }
+  }
+}

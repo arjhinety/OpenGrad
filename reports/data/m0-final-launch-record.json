@@ -22,7 +22,6 @@
   "eval_partition_sha256": "56c6abc2e24c524b45c382f42927fa02117b2a04c02f04e89e6a40d8b520f901",
   "evaluation_manifest_sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640",
   "experiment_id": "m0_sft_canonical_v2_final",
-  "git_dirty_at_launch": true,
   "initialization": "pinned base model, no resume (run directory held no checkpoint at launch)",
   "launch_commit": "fc63ec70f3b007893a63b29a30263eec611d7b0d",
   "renderer": "qwen3_5_2b_v1",
@@ -35,6 +34,14 @@
   },
   "supervision_contract_version": "supervision_contract_v1",
   "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "tracked_tree_at_launch": {
+    "captured_at": "2026-09-11T07:35:32.975638+00:00",
+    "captured_by": "the trainer itself, in runs/m0_sft_canonical_v2_final/environment.json",
+    "clean": true,
+    "commit": "fc63ec70f3b007893a63b29a30263eec611d7b0d",
+    "correction": "An earlier revision of this record carried `git_dirty_at_launch: true`. It was computed by this script *after* the launch, and by then the run's own allowlisted outputs (`experiment.json`, `events.jsonl`, `ledger.jsonl`) existed as untracked files, so a clean code tree read as dirty. The trainer's own capture, taken before those files existed, records `git_dirty: false` at commit fc63ec70. The field is replaced rather than left standing because its name asserted something its method did not measure, and the replacement is disclosed here rather than made silently: a record that rewrites its own history without saying so is worse than one that was wrong.",
+    "method": "The trainer's own `capture()` at experiment creation: `git rev-parse HEAD` plus `git status --porcelain`. Read back from that file rather than recomputed here, because it is contemporaneous with the launch and this record is not."
+  },
   "trainable_records": 161966,
   "training": {
     "effective_batch_size": 16,

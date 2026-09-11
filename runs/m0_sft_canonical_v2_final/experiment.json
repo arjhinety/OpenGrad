@@ -1,6 +1,6 @@
 {
   "checkpoints": [],
-  "completion_timestamp": null,
+  "completion_timestamp": "2026-09-11T09:50:23.330609+00:00",
   "dataset_hashes": {
     "canonical_v2_final": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161"
   },
@@ -34,7 +34,7 @@
   "parent_experiment_id": null,
   "promotion_decision": null,
   "random_seed": 42,
-  "status": "TRAINED",
+  "status": "REJECTED",
   "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
   "training_algorithm": "sft",
   "training_config": {
