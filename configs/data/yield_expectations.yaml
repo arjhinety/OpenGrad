@@ -30,6 +30,20 @@ sources:
     min_tool_call_target_ratio: 0.3
   toolace:
     expects_tool_calls: true
+    # Measured 0.204 (11,051 canonical -> 2,259 trainable). The floor is NOT set below that
+    # measurement: fitting a threshold to the number it is meant to judge is how a gate stops
+    # being a gate, and the next degradation would then pass unnoticed.
+    #
+    # The gap is real and deliberate, not a defect. 8,476 of ToolACE's records end on an
+    # assistant call with no tool result, so the complete-trajectory contract quarantines them.
+    # Reclassifying them as CALL_PREDICTION would recover the yield, and the available bytes do
+    # not establish that they are intended call-prediction targets rather than truncated
+    # trajectories, so that is not done.
+    #
+    # With 0.3 the gate therefore reports ANOMALY for a source that is behaving exactly as
+    # instructed. ANOMALY is reported and does not block readiness, which is the intended
+    # outcome: a reader sees that 79.6% of this source is quarantined by decision, rather than
+    # seeing a green tick that hides it.
     min_yield_ratio: 0.3
     min_tool_call_target_ratio: 0.3
   looptool-23k:
@@ -41,8 +55,17 @@ sources:
     min_yield_ratio: 0.3
     min_tool_call_target_ratio: 0.3
   when2call:
-    # Deliberately mixed: call / clarify / direct-answer / unsupported. A tool-call ratio near
-    # zero is still a collapse, because the call decision is the behaviour under study.
-    expects_tool_calls: true
+    # Measured, and it contradicts the assumption this file originally encoded. When2Call's
+    # canonical records are `user -> assistant(prose)`: 0 of 6,505 carry a structured tool call
+    # or a tool result, and 0 carry a `<TOOLCALL>` marker in the text either. What it supervises
+    # is the *decision* -- decline, ask for the missing detail, or answer directly -- expressed
+    # in natural language, which is exactly the behaviour the B0 baseline fails most badly
+    # (unsupported-accuracy 0.0131, clarification-accuracy 0.1009).
+    #
+    # So "should this source produce structured calls" is the wrong question here, and requiring
+    # it would fail a healthy source rather than detect a collapse. `min_yield_ratio` still
+    # guards the failure that matters: If When2Call stopped producing trainable decision targets,
+    # this gate fires.
+    expects_tool_calls: false
     min_yield_ratio: 0.5
-    min_tool_call_target_ratio: 0.2
+

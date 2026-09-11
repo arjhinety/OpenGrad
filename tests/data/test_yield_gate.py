@@ -170,7 +170,13 @@ def test_shipped_expectations_load_and_mark_tool_sources(tmp_path) -> None:
     shipped = Path("configs/data/yield_expectations.yaml")
     expectations = load_expectations(shipped)
     assert expectations["sources"]["xlam-function-calling-60k"]["expects_tool_calls"] is True
-    assert expectations["sources"]["when2call"]["expects_tool_calls"] is True
+    assert expectations["sources"]["glaive-function-calling-v2"]["expects_tool_calls"] is True
+    # When2Call supervises the *decision* in prose, not a structured invocation: measured, 0 of
+    # 6,505 canonical records carry a tool call or a result. Requiring structured calls of it
+    # would fail a healthy source instead of detecting a collapse, so `min_yield_ratio` is what
+    # guards it.
+    assert expectations["sources"]["when2call"]["expects_tool_calls"] is False
+    assert expectations["sources"]["when2call"]["min_yield_ratio"] > 0
 
 
 def test_partial_expectation_inherits_defaults(tmp_path) -> None:

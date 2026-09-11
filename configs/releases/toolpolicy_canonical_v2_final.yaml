@@ -1,0 +1,100 @@
+# Canonical corpus v2 FINAL — the completed heterogeneous-supervision corpus.
+#
+# Distinct from the historical partial-v2 snapshot in three ways, all measured:
+#
+#   1. Four sources instead of three. xLAM is included and carries its full 59,370-record
+#      contribution; the partial snapshot's xLAM contribution was 0 trainable records.
+#   2. Every record declares an explicit supervision contract (`metadata.supervision`), so
+#      `CALL_PREDICTION` and `COMPLETE_TRAJECTORY` targets are validated, rendered and measured
+#      separately instead of being forced into one trajectory shape.
+#   3. The partial snapshot's when2call artifact was an INTERRUPTED materialization: it had read
+#      9,162 of the raw file's 15,000 rows and was never finalized (`finalized: null`,
+#      `written: 0`), publishing 4,000 records. This build reads all 15,000 and retains 6,505.
+#
+# Not included, and why:
+#   button    upstream repository is access-gated (HTTP 401); not fetched
+#   looptool  upstream source was not located; not fetched
+#
+# The partial-v2 snapshot is left exactly as published and is not overwritten by this build.
+release_name: OpenGrad ToolPolicy Canonical (v2 final)
+release_version: v2.0.0
+hub_repository: arrochi112/OpenGrad-ToolPolicy-Canonical-v2
+card_directory: release/huggingface/toolpolicy-canonical-v2-final
+release_class: PRE_TRAINING_CANONICAL_RELEASE
+canonical_schema_version: tool_use_ir_v1
+behavior_taxonomy_version: tool-use-behavior-taxonomy-v1
+supervision_contract_version: supervision_contract_v1
+redistribution_policy: exclude_uncleared
+allow_gated_sources: false
+shard_size: 1000
+included_sources:
+  # xLAM is reconstructed from the published v1 derivative rather than fetched from upstream,
+  # which is access-gated. The derivation is representational only and is verified record by
+  # record: `tools` is copied verbatim and `query`/`answers` are recovered from the turns
+  # `adapt_xlam` itself produced. See data/raw/xlam/derivation.json.
+  - id: xlam-function-calling-60k
+    artifact: data/processed/normalization-v2-final/xlam
+    source_revision: 26d14ebfe18b1f7b524bd39b404b50af5dc97866
+    upstream_license: CC-BY-4.0
+    redistribution_status: PERMITTED_WITH_ATTRIBUTION
+    upstream_access_mode: gated
+    downstream_access_requirement: public_allowed
+    attribution_required: true
+    citation_required: true
+    citation_target: APIGen
+    modifications_disclosed: true
+    modification_status: NORMALIZED_DERIVATIVE
+    adapter_version: 1.0.2
+    supervision_kind: CALL_PREDICTION
+  - id: glaive-function-calling-v2
+    artifact: data/processed/normalization-v2-final/glaive
+    source_revision: 7e7e32f0466699513b38923bc4991858e192c9274df22e243b9e77eb2775b6e8
+    upstream_license: Apache-2.0
+    redistribution_status: REDISTRIBUTION_WITH_ATTRIBUTION
+    upstream_access_mode: public
+    downstream_access_requirement: public_allowed
+    attribution_required: true
+    citation_required: true
+    citation_target: source
+    modifications_disclosed: true
+    modification_status: NORMALIZED_DERIVATIVE
+    adapter_version: 1.0.2
+    supervision_kind: COMPLETE_TRAJECTORY
+  - id: toolace
+    artifact: data/processed/normalization-v2-final/toolace
+    source_revision: 7a7a6a2c3b1003c7
+    upstream_license: Apache-2.0
+    redistribution_status: REDISTRIBUTION_WITH_ATTRIBUTION
+    upstream_access_mode: public
+    downstream_access_requirement: public_allowed
+    attribution_required: true
+    citation_required: true
+    citation_target: source
+    modifications_disclosed: true
+    modification_status: NORMALIZED_DERIVATIVE
+    adapter_version: 1.0.2
+    supervision_kind: COMPLETE_TRAJECTORY
+  - id: when2call
+    artifact: data/processed/normalization-v2-final/when2call-sft
+    source_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    upstream_license: CC-BY-4.0
+    redistribution_status: REDISTRIBUTION_WITH_ATTRIBUTION
+    upstream_access_mode: public
+    downstream_access_requirement: public_allowed
+    attribution_required: true
+    citation_required: true
+    citation_target: source
+    modifications_disclosed: true
+    modification_status: NORMALIZED_DERIVATIVE
+    adapter_version: 1.0.2
+    supervision_kind: COMPLETE_TRAJECTORY
+excluded_sources:
+  - id: button
+    reason: upstream repository is access-gated (HTTP 401); not fetched, not approximated
+  - id: looptool-23k
+    reason: upstream source was not located; not fetched, not approximated
+excluded_artifacts:
+  - data/processed/normalization-v2-final/when2call-preference
+  - data/processed/normalization-v2-final/when2call-mcq
+  - data/processed/normalization-v2-final/when2call-llm-judge
+  - reports/artifacts/rendered
