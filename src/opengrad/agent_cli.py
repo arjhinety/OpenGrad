@@ -12,7 +12,7 @@ from typing import Any
 from opengrad.checkpoints.registry import CheckpointLifecycle, CheckpointRecord, CheckpointRegistry
 from opengrad.data.inspector import inspect_template
 from opengrad.data.validator import validate_records
-from opengrad.env_capture import capture
+from opengrad.env_capture import capture, git_identity
 from opengrad.experiments.diff import diff_experiments
 from opengrad.experiments.ledger import ExperimentLedger, LedgerEventType
 from opengrad.experiments.preflight import run_experiment_preflight
@@ -533,6 +533,7 @@ def handle_promote_reject(args: argparse.Namespace, root: Path, decision: str) -
 
 def handle_doctor(args: argparse.Namespace, root: Path) -> int:
     env = capture(root)
+    git_sha, git_dirty = git_identity(env)
     _tot, _used, free = shutil.disk_usage(root)
     free_gb = free // (2**30)
 
@@ -543,10 +544,7 @@ def handle_doctor(args: argparse.Namespace, root: Path) -> int:
     checks: dict[str, dict[str, Any]] = {
         "python": {"version": sys.version.split()[0], "status": "PASS"},
         "disk": {"free_gb": free_gb, "status": "PASS" if free_gb >= 5 else "WARN"},
-        "git": {
-            "sha": env.get("git", {}).get("sha", "unknown")[:10],
-            "dirty": env.get("git_dirty", False),
-        },
+        "git": {"sha": git_sha[:10], "dirty": git_dirty},
         "android_studio": {
             "path": str(android_studio_path),
             "status": "INSTALLED" if android_studio_path.exists() else "MISSING",

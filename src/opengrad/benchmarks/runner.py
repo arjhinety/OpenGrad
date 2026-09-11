@@ -13,7 +13,7 @@ from opengrad.benchmarks.backends.protocol import InferenceBackend
 from opengrad.benchmarks.config import BenchmarkConfig, BenchmarkSuiteConfig
 from opengrad.benchmarks.registry import BenchmarkRegistry
 from opengrad.benchmarks.schema import NormalizedRunResult, NormalizedTaskResult
-from opengrad.env_capture import capture
+from opengrad.env_capture import capture, git_identity
 
 
 class BenchmarkRunner:
@@ -122,7 +122,7 @@ class BenchmarkRunner:
             benchmark=config.benchmark_id,
             benchmark_revision=config.benchmark_revision,
             evaluator_revision=config.evaluator_revision,
-            git_commit=str(env.get("git", {}).get("sha", "unknown")),
+            git_commit=git_identity(env)[0],
             environment=env,
             generation_config=config.generation.to_dict(),
             prompt_template_fingerprint=prompt_fp,

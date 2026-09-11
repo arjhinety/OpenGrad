@@ -55,6 +55,24 @@ def tracked_tree_provenance(root: Path) -> dict[str, Any]:
     return {"sha": sha or None, "dirty": bool(porcelain.strip())}
 
 
+def git_identity(environment: dict[str, Any] | None) -> tuple[str, bool]:
+    """The commit an artifact was produced from, and whether the tree was dirty.
+
+    This module produces two shapes -- `capture()` returns a flat `git_sha`/`git_dirty`, and
+    `tracked_tree_provenance()` a `{"sha", "dirty"}` -- and three call sites read a nested
+    `environment["git"]["sha"]` that neither produces. So every experiment record, benchmark
+    record and doctor report named its commit as `"unknown"`, which defeats the point of
+    recording it: an artifact that cannot name the code that produced it is not reproducible
+    evidence. Reading both real shapes here means a future caller cannot repeat the mistake.
+    """
+    env = environment or {}
+    sha = env.get("git_sha") or env.get("sha") or "unknown"
+    dirty = env.get("git_dirty")
+    if dirty is None:
+        dirty = env.get("dirty")
+    return str(sha), bool(dirty)
+
+
 def write_capture(root: Path, destination: Path) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(capture(root), indent=2) + "\n")

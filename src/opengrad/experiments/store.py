@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from opengrad.env_capture import capture
+from opengrad.env_capture import capture, git_identity
 from opengrad.experiments.ledger import ExperimentLedger, LedgerEventType
 from opengrad.experiments.schema import (
     ExperimentConfig,
@@ -53,6 +53,7 @@ class ExperimentStore:
             (r_dir / sub).mkdir(parents=True, exist_ok=True)
 
         environment = env or capture(self.root)
+        git_sha, git_dirty = git_identity(environment)
         config.write_resolved(r_dir / "resolved_config.yaml")
 
         (r_dir / "environment.json").write_text(
@@ -72,14 +73,8 @@ class ExperimentStore:
             training_config=config.trainer,
             dataset_manifest_ids=list(config.datasets.get("manifest_ids", [])),
             dataset_hashes=dict(config.datasets.get("hashes", {})),
-            # `capture()` returns a flat `git_sha`; reading a nested `environment["git"]["sha"]`
-            # always missed and defaulted every experiment record to "unknown", so no record
-            # could name the code that produced it. The flat key is the one that exists, and the
-            # nested form is still honoured for any caller that supplies it.
-            git_commit=str(
-                environment.get("git_sha") or (environment.get("git") or {}).get("sha") or "unknown"
-            ),
-            git_dirty=bool(environment.get("git_dirty", False)),
+            git_commit=git_sha,
+            git_dirty=git_dirty,
             environment=environment,
             random_seed=int(config.reproducibility.get("seed", 42)),
             hardware_info=dict(environment.get("gpu", {}) or {}),
