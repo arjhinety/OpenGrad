@@ -11,10 +11,20 @@ Evaluation state             COMPLETE — all 12 checkpoints scored vs B0
 Corpus v1  (published)       call_f1 0.0000  — collapse; procedure exonerated
 Corpus v2  (corrected)       call_f1 0.5995  — macro 0.6416 vs B0 0.3621
 On-policy distillation       NOT ATTEMPTED — out of scope by decision (§6)
-Artefacts published          2 HF repos, 37/37 files byte-verified
-Local weights                deleted after verification (25 GB reclaimed)
+Artefacts published          2 HF repos + 1 evaluation record
+Local weights                M0-v1: ALL 6 DELETED BEFORE UPLOAD — unrecoverable
+                             M1 DPO: steps 100, 200 lost; step 300 published
+                             M0-v2: 4/4 uploaded and verified first
+                             See docs/INCIDENT_LOG.md INC-0001 — not a clean deletion
 ════════════════════════════════════════════════════════════════════════════
 ```
+
+> **Do not read the local-storage line above as routine cleanup.** It was not. Local checkpoint
+> weights were deleted to reclaim disk *without first checking whether each run had been uploaded*,
+> which was true for M0-v2 and false for the other two runs. All six M0-v1 checkpoints and M1 DPO's
+> steps 100 and 200 no longer exist anywhere, and M1 DPO's best measured checkpoint was step 100.
+> A repeat of the DPO run with config, data, seed and environment pinned did **not** reproduce its
+> numbers. Full account: [`docs/INCIDENT_LOG.md`](../docs/INCIDENT_LOG.md) INC-0001.
 
 **Date:** 2026-09-10
 **Scope:** implement the missing production SFT path, validate the complete M0 execution path, run the
