@@ -44,7 +44,7 @@ M0_V2 = {
 
 
 def test_policy_is_versioned() -> None:
-    assert POLICY_VERSION == "tool_use_promotion_v2"
+    assert POLICY_VERSION == "tool_use_promotion_v3"
 
 
 def test_call_f1_alone_is_not_sufficient() -> None:
@@ -124,3 +124,89 @@ def test_parse_validity_floor_blocks_uninterpretable_measurements() -> None:
     broken["parse_valid_rate"] = 0.50
     verdict = PromotionPolicyV2().evaluate(broken, B0)
     assert "parse_valid_rate" in verdict["failed_dimensions"]
+
+
+# --- unmeasurable dimensions ---------------------------------------------------------
+
+
+def test_a_dimension_the_eval_set_cannot_measure_is_reported_not_asserted() -> None:
+    """The frozen behaviour set has zero ANSWER examples, so `no_call_accuracy` was 0.0 for every
+    model and its floor rejected every candidate unconditionally."""
+    from opengrad.promotion.tool_use_policy import measurable_dimensions
+
+    matrix = {
+        "ANSWER": {"ANSWER": 0, "CALL": 0, "CLARIFY": 0, "UNSUPPORTED": 0},
+        "CALL": {"ANSWER": 19, "CALL": 1259, "CLARIFY": 17, "UNSUPPORTED": 0},
+        "CLARIFY": {"ANSWER": 29, "CALL": 923, "CLARIFY": 107, "UNSUPPORTED": 1},
+        "UNSUPPORTED": {"ANSWER": 419, "CALL": 590, "CLARIFY": 269, "UNSUPPORTED": 17},
+    }
+    measurable, unmeasurable = measurable_dimensions({"confusion_matrix": matrix})
+    assert unmeasurable == {"no_call_accuracy"}
+    assert "clarification_accuracy" in measurable
+    assert "unsupported_accuracy" in measurable
+    assert "must_call_accuracy" in measurable
+
+
+def test_macro_is_the_mean_over_measurable_dimensions_only() -> None:
+    from opengrad.promotion.tool_use_policy import macro_behaviour_score
+
+    metrics = {
+        "must_call_accuracy": 0.6,
+        "no_call_accuracy": 0.0,
+        "clarification_accuracy": 0.9,
+        "unsupported_accuracy": 0.6,
+    }
+    measurable = {"must_call_accuracy", "clarification_accuracy", "unsupported_accuracy"}
+    assert macro_behaviour_score(metrics, measurable) == pytest.approx(0.7)
+    # Including the unmeasurable class would drag the mean toward zero for every model equally.
+    assert macro_behaviour_score(metrics) == pytest.approx(0.525)
+
+
+def test_an_unmeasurable_dimension_does_not_reject_a_good_candidate() -> None:
+    from opengrad.promotion.tool_use_policy import PromotionPolicyV2
+
+    strong = {
+        "call_precision": 0.80,
+        "call_recall": 0.92,
+        "call_f1": 0.86,
+        "over_call_rate": 0.05,
+        "clarification_accuracy": 0.90,
+        "unsupported_accuracy": 0.88,
+        "no_call_accuracy": 0.0,
+        "must_call_accuracy": 0.92,
+        "parse_valid_rate": 0.999,
+        "confusion_matrix": {
+            "ANSWER": {"ANSWER": 0, "CALL": 0, "CLARIFY": 0, "UNSUPPORTED": 0},
+            "CALL": {"CALL": 10, "ANSWER": 1},
+            "CLARIFY": {"CLARIFY": 10, "CALL": 1},
+            "UNSUPPORTED": {"UNSUPPORTED": 10, "CALL": 1},
+        },
+    }
+    verdict = PromotionPolicyV2().evaluate(strong, B0)
+    assert "no_call_accuracy" not in verdict["failed_dimensions"]
+    assert verdict["unmeasurable_dimensions"] == ["no_call_accuracy"]
+
+
+def test_a_measurable_dimension_is_still_asserted() -> None:
+    """The fix must not become a blanket exemption: a real failure still rejects."""
+    from opengrad.promotion.tool_use_policy import PromotionPolicyV2
+
+    weak = dict(M0_V2)
+    weak["clarification_accuracy"] = 0.10  # far below the 0.50 floor, and measurable
+    weak["confusion_matrix"] = {
+        "ANSWER": {"ANSWER": 0},
+        "CALL": {"CALL": 10},
+        "CLARIFY": {"CLARIFY": 10, "CALL": 1},
+        "UNSUPPORTED": {"UNSUPPORTED": 10},
+    }
+    verdict = PromotionPolicyV2().evaluate(weak, B0)
+    assert "clarification_accuracy" in verdict["failed_dimensions"]
+
+
+def test_without_a_confusion_matrix_every_dimension_is_treated_as_measurable() -> None:
+    """Class counts are unknown, so dropping checks would be the wrong default."""
+    from opengrad.promotion.tool_use_policy import measurable_dimensions
+
+    measurable, unmeasurable = measurable_dimensions({})
+    assert unmeasurable == set()
+    assert measurable == set(MACRO_DIMENSIONS)

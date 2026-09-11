@@ -29,9 +29,16 @@ from dataclasses import dataclass, field
 from typing import Any
 
 # Bump when thresholds or the required dimension set change; verdicts record the version used.
-POLICY_VERSION = "tool_use_promotion_v2"
+#
+# v3 differs from v2 in one respect, found before the M0-final run rather than after it: a floor is
+# no longer asserted on a per-class dimension the evaluation set cannot measure. The frozen
+# behaviour set contains zero ANSWER examples, so `no_call_accuracy` was 0.0 for every model
+# including B0, and its 0.40 floor rejected every candidate unconditionally. The bump keeps a v2
+# verdict and a v3 verdict from being read as comparable, because they are not.
+POLICY_VERSION = "tool_use_promotion_v3"
 
-# Per-class recall dimensions. Their mean is the macro behaviour score.
+# Per-class recall dimensions, mapped to the decision class each one measures. The mean over the
+# *measurable* subset is the macro behaviour score.
 MACRO_DIMENSIONS = (
     "must_call_accuracy",
     "no_call_accuracy",
@@ -39,9 +46,52 @@ MACRO_DIMENSIONS = (
     "unsupported_accuracy",
 )
 
+# Which truth class each per-class dimension is computed over. Used to decide measurability from
+# the confusion matrix the evaluation already records.
+DIMENSION_TRUTH_CLASS = {
+    "must_call_accuracy": "CALL",
+    "no_call_accuracy": "ANSWER",
+    "clarification_accuracy": "CLARIFY",
+    "unsupported_accuracy": "UNSUPPORTED",
+}
+
 # Dimensions the current evaluator cannot measure. Named explicitly so their absence is
 # visible in every verdict rather than being mistaken for a passing check.
 UNMEASURED_DIMENSIONS = ("tool_selection_accuracy", "argument_validity", "schema_validity")
+
+
+def measurable_dimensions(candidate: dict[str, Any]) -> tuple[set[str], set[str]]:
+    """Split the per-class dimensions into measurable and unmeasurable for this evaluation set.
+
+    A per-class dimension is only measurable if the evaluation set actually contains examples of
+    that class, which the recorded confusion matrix answers exactly. On the frozen behaviour set
+    there are **zero** `ANSWER` examples, so `no_call_accuracy` is computed over an empty
+    denominator and is 0.0 for every model. Asserting a floor on it made the policy unsatisfiable
+    regardless of model quality -- the same defect class as a readiness gate no correct
+    repository can satisfy, which is why it is fixed here rather than worked around with a lower
+    threshold.
+    """
+    matrix = candidate.get("confusion_matrix")
+    if not isinstance(matrix, dict):
+        # Without a confusion matrix the class counts are unknown, so every dimension is treated
+        # as measurable. Assuming otherwise would silently drop real checks.
+        return set(MACRO_DIMENSIONS), set()
+    measurable: set[str] = set()
+    unmeasurable: set[str] = set()
+    for name in MACRO_DIMENSIONS:
+        truth = DIMENSION_TRUTH_CLASS.get(name)
+        row = matrix.get(truth) if truth else None
+        total = sum(row.values()) if isinstance(row, dict) else 0
+        (measurable if total > 0 else unmeasurable).add(name)
+    return measurable, unmeasurable
+
+
+def macro_behaviour_score(metrics: dict[str, Any], measurable: set[str] | None = None) -> float:
+    """Mean per-class recall over the measurable dimensions only."""
+    names = [name for name in MACRO_DIMENSIONS if measurable is None or name in measurable]
+    if not names:
+        return 0.0
+    return sum(float(metrics.get(name, 0.0)) for name in names) / len(names)
 
 
 @dataclass
@@ -68,12 +118,12 @@ class PromotionPolicyV2:
     max_regression: dict[str, float] = field(default_factory=lambda: {"default": 0.10})
     version: str = POLICY_VERSION
 
-    def _macro(self, metrics: dict[str, Any]) -> float:
-        values = [float(metrics.get(name, 0.0)) for name in MACRO_DIMENSIONS]
-        return sum(values) / len(values) if values else 0.0
+    def _macro(self, metrics: dict[str, Any], measurable: set[str] | None = None) -> float:
+        return macro_behaviour_score(metrics, measurable)
 
     def evaluate(self, candidate: dict[str, Any], baseline: dict[str, Any]) -> dict[str, Any]:
         checks: list[dict[str, Any]] = []
+        measurable, unmeasurable = measurable_dimensions(candidate)
 
         def check(name: str, observed: float, requirement: str, passed: bool, detail: str) -> None:
             checks.append(
@@ -99,22 +149,26 @@ class PromotionPolicyV2:
         )
 
         # --- behavioural breadth --------------------------------------------------
-        macro = self._macro(candidate)
+        macro = self._macro(candidate, measurable)
         check(
             "macro_recall",
             macro,
             f">= {self.min_macro_recall:.2f}",
             macro >= self.min_macro_recall,
-            "mean per-class recall across CALL/ANSWER/CLARIFY/UNSUPPORTED; "
+            f"mean per-class recall over the measurable classes {sorted(measurable)}; "
             "guards against a degenerate always-call policy",
         )
 
         # --- absolute floors on the behaviours B0 gets wrong ----------------------
+        # A floor is asserted only where the evaluation set can measure the dimension. Asserting
+        # one on an empty class would reject every candidate, including a perfect one.
         for name, floor in (
             ("no_call_accuracy", self.min_no_call_accuracy),
             ("unsupported_accuracy", self.min_unsupported_accuracy),
             ("clarification_accuracy", self.min_clarification_accuracy),
         ):
+            if name in unmeasurable:
+                continue
             observed = float(candidate.get(name, 0.0))
             check(name, observed, f">= {floor:.2f}", observed >= floor, "absolute behaviour floor")
 
@@ -168,5 +222,10 @@ class PromotionPolicyV2:
                 "reported rather than treated as satisfied. Promotion on tool selection or "
                 "argument validity is not supported until they are measured."
             ),
+            # Dimensions the *evaluation set* cannot measure, as opposed to ones the evaluator
+            # does not compute. Derived from the recorded confusion matrix, so it reflects the
+            # data actually scored rather than an assumption about it.
+            "unmeasurable_dimensions": sorted(unmeasurable),
+            "measurable_dimensions": sorted(measurable),
             "call_f1_alone_sufficient": False,
         }

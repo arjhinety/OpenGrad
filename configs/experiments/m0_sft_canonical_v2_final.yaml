@@ -115,7 +115,7 @@ promotion:
   requires_executed_suite: tool_use_core
   # Versioned policy: call_f1 alone would promote the degenerate always-call baseline, so the
   # gate is behavioural. See src/opengrad/promotion/tool_use_policy.py.
-  policy_version: tool_use_promotion_v2
+  policy_version: tool_use_promotion_v3
   must_pass:
     parse_valid_rate_min: 0.99
   max_regression:
