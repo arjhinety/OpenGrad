@@ -1,11 +1,18 @@
 # Pre-GPU Readiness Report
 
+> **Superseded (2026-09-11).** This report describes the pre-GPU state. Every condition it says was
+> unmet has since been met: the GPU boundary passed, real B0 was run and recorded, and SFT was
+> executed (two negative runs and one partial recovery). The false present-tense statements below
+> are corrected in place and the report is kept as the incident record it is. Current status:
+> [README § Current research status](../README.md#current-research-status) and the
+> [M0 SFT execution report](M0_SFT_EXECUTION_REPORT.md).
+
 **Scope:** harness-agnostic agent integration, the pre-GPU baseline/readiness contract, and
 held-out contamination screening.
-**Status:** `PRE_GPU` — no real model result exists.
+**Status:** `PRE_GPU` (historical) — a real model result now exists.
 **Repository commit at time of writing:** the commit that adds this file; `git log -- reports/PRE_GPU_READINESS_REPORT.md` pins it exactly.
 
-> This report intentionally does **not** claim `READY_FOR_SFT`, a real B0, or a successful GPU boundary. None of those conditions is met. See [Remaining blockers](#11-remaining-blockers).
+> At the time of writing this report intentionally did **not** claim `READY_FOR_SFT`, a real B0, or a successful GPU boundary. All three have since been met. See [Remaining blockers](#11-remaining-blockers).
 
 ---
 
@@ -175,7 +182,7 @@ Two upstream follow-ups were filed from this cross-check:
 
 ## 9b. Real B0 — executed
 
-The frozen held-out benchmark ran end to end on the A100 with the real model, the fixed parser, and vLLM 0.29.0. `opengrad readiness` reports `status: PASS`, `baseline: REAL_COMPLETE`, `blocking_gates: []`, and `ready_for_sft: true` (no SFT has been run).
+The frozen held-out benchmark ran end to end on the A100 with the real model, the fixed parser, and vLLM 0.29.0. `opengrad readiness` reports `status: PASS`, `baseline: REAL_COMPLETE`, `blocking_gates: []`, and `ready_for_sft: true` (at the time of writing no SFT had been run; it has since been executed — see the [M0 SFT execution report](M0_SFT_EXECUTION_REPORT.md)).
 
 | | |
 | --- | --- |
@@ -227,8 +234,9 @@ failed on three gates. Three further unsatisfiable-contract defects were fixed:
    and every run creates untracked outputs — so "clean tree" was unsatisfiable. Both now use a
    shared `tracked_tree_provenance()` helper, the same rule the baseline contract uses.
 
-No SFT has been launched. `ready_for_sft: true` means the contract is satisfied, not that a run
-was started: SFT is a separate, explicitly authorized stage.
+At the time of writing no SFT had been launched: `ready_for_sft: true` meant the contract was
+satisfied, not that a run had been started. SFT has since been executed — two negative runs and
+one partial recovery; see the [M0 SFT execution report](M0_SFT_EXECUTION_REPORT.md).
 
 ## 11. Remaining blockers
 
@@ -236,7 +244,7 @@ was started: SFT is a separate, explicitly authorized stage.
 
 Every gate passes: `repository_validation`, `config_validation`, `model_revision`, `model_identity`, `tokenizer_revision`, `chat_template_contract`, `evaluation_manifest`, `evaluation_materialization`, `dataset_revision`, `dataset_snapshot`, `contamination_gate` (`SEMANTIC_REVIEW_COMPLETE`, level 5 `COMPLETE`, 2 quarantined), `evaluation_leakage`, `disk_capacity`, `artifact_storage`, `native_parser`, `gpu_probe`, `gpu_boundary`, `experiment_preflight`, `training_data_policy`, `real_b0` (`REAL_COMPLETE`), and `baseline_artifacts`.
 
-What remains is *research*, not pre-SFT preparation: the SFT stage itself (explicitly not started), and the external benchmark families, which are still `FROZEN_NOT_EXECUTED`.
+What remained at the time of writing was *research*, not pre-SFT preparation: the SFT stage itself (since executed — two negative runs and one partial recovery) and the external benchmark families, which are still `FROZEN_NOT_EXECUTED`.
 
 ## 12. Known limitations
 
@@ -246,9 +254,9 @@ What remains is *research*, not pre-SFT preparation: the SFT stage itself (expli
 - Level 4 candidate generation is prefiltered by level-3 Jaccard and scored with `difflib.SequenceMatcher`. It is **not** an exhaustive semantic search and no embedding similarity was computed, so it can miss meaning-level reuse with no lexical overlap. This is the level most likely to need strengthening before a generalization claim.
 - Level 5 is human and now complete for the current findings. It is only as good as the current scanner: a paraphrase with no lexical overlap against any training record is invisible to levels 1–4 and therefore never reaches the queue.
 - The `content_hash` re-freeze and `dataset_hash` re-sync are documented in `hash_provenance`; anyone who considers the original frozen placeholders authoritative should treat this as a contract change rather than a fix.
-- The native parser rejects an unclosed tool call in the bounded smoke. Until that is diagnosed, the GPU boundary cannot pass and real B0/SFT stay blocked.
+- (Resolved.) The native parser initially rejected an unclosed tool call in the bounded smoke. The truncation was diagnosed and the GPU boundary now passes; the entry is kept as the record of why the boundary mattered.
 - Post-SFT comparison and residual analysis remain deferred until artifact paths exist; the workflow reports `DEFERRED_UNTIL_ARTIFACT_PATHS` rather than inventing values.
 
 ## 13. Confirmation
 
-The GPU boundary **is** now claimed, with a passing receipt. Real B0 **was** run, and is recorded. No real SFT was run. No metric, score, or artifact in this repository was fabricated; the two runs whose evidence was invalid (a double-counted benchmark, then an unsatisfiable parse requirement) were discarded and re-run rather than reported.
+The GPU boundary **is** now claimed, with a passing receipt. Real B0 **was** run, and is recorded. SFT has since been run — two negative runs and one partial recovery; see the [M0 SFT execution report](M0_SFT_EXECUTION_REPORT.md). No metric, score, or artifact in this repository was fabricated; the two runs whose evidence was invalid (a double-counted benchmark, then an unsatisfiable parse requirement) were discarded and re-run rather than reported.

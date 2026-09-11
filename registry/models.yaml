@@ -27,6 +27,8 @@ models:
   mobile_candidate: true
   teacher_candidate: false
   student_candidate: true
-  notes: PLANNED_ONLY. Revision and renderer/template contract are pinned; the
-    native parser is golden-test validated. Runtime architecture and hardware
-    compatibility remain unverified until the GPU run.
+  notes: EXECUTED. Revision and renderer/template contract are pinned; the native
+    parser is golden-test validated and confirmed against real model output on an
+    NVIDIA A100-SXM4-80GB (reports/hardware/qwen_gpu_smoke.json). The model has a
+    real B0 measurement (reports/baselines/qwen35_2b_baseline/RESULT.md); runtime
+    and hardware compatibility were confirmed on that accelerator.

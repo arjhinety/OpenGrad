@@ -56,7 +56,7 @@ The release manifest records the OpenGrad commit, source manifest hashes, source
 
 ## Evaluation boundary
 
-The frozen 3,952-record When2Call evaluation namespace is not included. It remains separate in the OpenGrad GitHub repository. No B0 baseline has run and no model scores are reported.
+The frozen 3,952-record When2Call evaluation namespace is not included. It remains separate in the OpenGrad GitHub repository. This is a model-independent training corpus; the B0 baseline and post-training results now exist and are recorded in the OpenGrad repository, not in this release.
 
 ## Licensing and citations
 

@@ -1,21 +1,24 @@
 schema_version: 1
-status: NOT_RUN
+status: READY
 requested:
-  provider: unknown
-  device_count: 0
+  provider: nvidia
+  device_count: 1
   min_vram_gib: null
   backend: null
 observed:
-  device_count: 0
+  device_count: 1
   driver: null
-  cuda_version: null
+  cuda_version: "13.0"
   rocm_version: null
-  devices: []
+  devices:
+  - name: NVIDIA A100-SXM4-80GB
+    total_vram_gb: 79.25
+    bf16_supported: true
 compatibility:
-  provider: unknown
+  provider: nvidia
   runtime: transformers
-  result: NOT_TESTED
-  basis: No accelerator preflight has been executed.
+  result: COMPATIBLE
+  basis: Real Qwen boundary smoke PASS on NVIDIA A100-SXM4-80GB (reports/hardware/qwen_gpu_smoke.json).
 limitations:
-  - This is a schema-valid placeholder, not evidence of GPU availability or compatibility.
-  - Do not use it to authorize inference or training.
+  - CUDA driver version is not recorded by the boundary receipt; cuda_version is the CUDA runtime version (13.0).
+  - This record reflects the boundary-smoke host only; it is not a general accelerator-support claim.

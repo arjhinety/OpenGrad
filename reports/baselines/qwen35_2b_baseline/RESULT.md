@@ -3,8 +3,9 @@
 **Status:** `EXECUTED` · **Kind:** real model measurement, not a mock · **Engine of record:** vLLM 0.29.0
 
 This is OpenGrad's first empirical measurement. It is a **baseline**, not an intervention result:
-no post-training has been run, so nothing here is evidence about SFT, DPO, distillation, or
-their effects. It measures one model, one held-out set, one engine, one seed, one run.
+it says nothing about SFT, DPO, distillation, or their effects, which were run later and are
+recorded separately in the [M0 SFT execution report](../../M0_SFT_EXECUTION_REPORT.md). It
+measures one model, one held-out set, one engine, one seed, one run.
 
 ## Reproduction
 

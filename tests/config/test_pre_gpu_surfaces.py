@@ -58,8 +58,17 @@ def test_runtime_registry_does_not_claim_vendor_support():
     assert all(item["platforms"]["nvidia"] == "NOT_TESTED" for item in registry["components"])
 
 
-def test_gpu_preflight_placeholder_is_not_evidence():
+def test_gpu_preflight_record_reflects_the_executed_boundary_smoke():
+    """The preflight is no longer a `NOT_RUN` placeholder: the boundary smoke has run, so the
+    record must name the observed accelerator and a compatibility basis (grounded in the receipt)
+    rather than assert vendor support."""
     config = yaml.safe_load((ROOT / "configs/hardware/gpu_preflight_v1.yaml").read_text())
     validate_json(config, _json("registry/gpu_preflight.schema.json"))
-    assert config["status"] == "NOT_RUN"
-    assert config["compatibility"]["result"] == "NOT_TESTED"
+    assert config["status"] == "READY"
+    assert config["compatibility"]["result"] == "COMPATIBLE"
+    assert config["observed"]["device_count"] == 1
+    assert config["observed"]["devices"][0]["name"] == "NVIDIA A100-SXM4-80GB"
+    assert "qwen_gpu_smoke.json" in config["compatibility"]["basis"]
+    smoke = _json("reports/hardware/qwen_gpu_smoke.json")
+    assert smoke["status"] == "PASS"
+    assert smoke["hardware"]["gpu_name"] == "NVIDIA A100-SXM4-80GB"

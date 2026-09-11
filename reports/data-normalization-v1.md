@@ -2,7 +2,14 @@
 
 Status: BASELINE_INFERENCE_READY
 
-This report preserves the historical parser progression below and separates it from the current full accessible-corpus evidence. All currently accessible sources have been normalized and rendered; no external source blocker remains for the pre-GPU baseline. No model weights were downloaded; no CUDA context, model inference, or training was run.
+> **Status note (2026-09-11):** this report describes the pre-GPU corpus state. GPU work has since
+> been executed on an NVIDIA A100-SXM4-80GB — the boundary smoke, the B0 baseline, and the M0/M1
+> post-training runs — so the "no model scores" and "no GPU" framing below is historical, not
+> current. The corpus-normalization evidence is retained. See the
+> [B0 result](baselines/qwen35_2b_baseline/RESULT.md) and the
+> [M0 SFT execution report](M0_SFT_EXECUTION_REPORT.md).
+
+This report preserves the historical parser progression below and separates it from the current full accessible-corpus evidence. All currently accessible sources have been normalized and rendered; no external source blocker remains for the pre-GPU baseline. At the time of writing, no model weights had been downloaded and no CUDA context, model inference, or training had been run.
 
 ## Historical engineering progression
 
@@ -60,11 +67,11 @@ Rendered lineage is in reports/artifacts/render-manifest-lineage.json and per-so
 
 ## Evaluation and experiments
 
-reports/evaluation/behavioral-heldout-v2.manifest.json is MATERIALIZED and frozen with 3,952 evaluation-only records (MCQ 3,652; LLM judge 300), the exact renderer/model contract, source hashes, and an explicit exclusion policy covering all six SFT sources. No model scores exist. The behavioral evaluator contract includes CALL, ANSWER, CLARIFY, UNSUPPORTED, confusion matrix, call precision/recall/F1, under/over-call, wrong-tool, argument, clarification, and unsupported errors.
+reports/evaluation/behavioral-heldout-v2.manifest.json is MATERIALIZED and frozen with 3,952 evaluation-only records (MCQ 3,652; LLM judge 300), the exact renderer/model contract, source hashes, and an explicit exclusion policy covering all six SFT sources. At the time of writing no model scores existed; they have since been measured (see the [M0 SFT execution report](M0_SFT_EXECUTION_REPORT.md)). The behavioral evaluator contract includes CALL, ANSWER, CLARIFY, UNSUPPORTED, confusion matrix, call precision/recall/F1, under/over-call, wrong-tool, argument, clarification, and unsupported errors.
 
 The baseline config is prepared for the unmodified Qwen3.5-2B instruct checkpoint. M0 is the source-oriented hypothesis control; M1 is the behavior-balanced HYPOTHESIS_ONLY config; M2 is SCHEMA_READY and UNRESOLVED_UNTIL_BASELINE with no fabricated weights. Residual failure schema and experiment lineage are prepared but unpopulated.
 
-GPU resource preflight is a NOT_RUN schema-valid record. Hardware, driver, runtime, precision, throughput, and storage observations are TO_BE_RECORDED_AT_EXECUTION; no exact throughput claim is made.
+GPU resource preflight is now a `READY` record grounded in the executed A100 boundary smoke (`configs/hardware/gpu_preflight_v1.yaml`, `reports/hardware/qwen_gpu_smoke.json`); no exact throughput claim is made.
 
 ModelOpt, vLLM Speculators, and DSpark are REFERENCE_ONLY / NOT_TESTED. NVIDIA ModelOpt is CUDA_ONLY by its upstream dependency boundary; vLLM, Transformers, and training support remain BACKEND_DEPENDENT or UNVERIFIED until the selected runtime is tested. No speculative method is claimed supported, and all remain GPU_REQUIRED / PLANNED.
 

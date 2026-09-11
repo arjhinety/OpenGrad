@@ -6,7 +6,7 @@ OpenGrad proceeds from infrastructure to controlled measurement. A later phase i
 
 0. Repository and research infrastructure — COMPLETE
 0.5. CPU-only pre-experiment validation — COMPLETE
-0.6. Deterministic CPU baseline pipeline hardening — COMPLETE; GPU execution not run
+0.6. Deterministic CPU baseline pipeline hardening — COMPLETE (GPU execution has since run; see steps 6–10)
 1. Data source audit and provenance registration — COMPLETE
 2. Canonical normalization and quarantine policy — COMPLETE
 3. Accessible corpus materialization, overlap, contamination, and coverage audits — COMPLETE
@@ -19,8 +19,8 @@ Current evidence:
 - 210,874 tokenizer-rendered SFT candidates; 3,077 LoopTool records remain explicit renderer exclusions because they contain no user query.
 - xLAM and BUTTON are now materialized and included in the corpus audit.
 - The frozen held-out evaluation contains 3,952 records.
-- No model inference, training, or model-quality result exists yet.
-- Canonical dataset publication architecture — PREPARED; upload not run.
+- Model inference, training, and model-quality results now exist: the B0 baseline and three post-training interventions (see [Results](README.md#results)).
+- Canonical dataset publication — v1 published and verified; the Canonical-v2 RC snapshot is published as a partial (3-of-6) rebuild.
 
 ## Publication milestone
 
@@ -28,7 +28,7 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 `arrochi112/OpenGrad-ToolPolicy-Canonical-v1` is public and verified at Hub commit `bb295d8a4ad64f7e8161044ad2fa34f873ede418`. The release contains 213,951 legally cleared canonical SFT records. xLAM is included under CC BY 4.0 with attribution and APIGen citation; its upstream access gate is not reproduced downstream. Publication metadata is recorded in `reports/releases/toolpolicy-canonical-v1-publication.json`.
 
-## Next empirical sequence
+## Empirical sequence
 
 6. B0 unmodified Qwen3.5-2B baseline inference — **REAL_RESULT**
    Executed on an A100 (engine vLLM 0.29.0) over the frozen behavioral-heldout-v2 evaluation:
@@ -41,18 +41,27 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
    are recorded and committed. The engine, renderer, evaluator, generation configuration,
    and failure taxonomy are pinned alongside them.
 
-8. Decide and run the controlled SFT comparison — NOT STARTED
-   Compare M0 source-oriented control, M1 behavior-balanced hypothesis, and M2 residual-driven mixture only after B0 evidence. M2 requires a real residual profile and remains unresolved.
-   The readiness contract for SFT is satisfied (`opengrad readiness configs/experiments/m0_sft.yaml`
-   reports PASS with no blocking gates) and the dry-run plumbing is verified, but no SFT run
-   has been launched. M1 and M2 additionally reference datasets that have not been
-   materialized (`when2call_pref_v1`, `onpolicy_prompts_v1`), so their contracts do not yet
-   resolve.
+8. Controlled SFT comparison — **EXECUTED — 2 NEGATIVE, 1 PARTIAL RECOVERY**
+   Two runs reached real optimizer steps against the canonical corpus. M0 on corpus v1
+   (`qwen35_2b_m0_sft_full_v3`) collapsed tool calling (`call_f1` 0.6191 → 0.0000); M1 DPO on the
+   When2Call preference pairs (`qwen35_2b_m1_dpo_v1`) removed over-calling but collapsed call
+   recall and did not reproduce on a repeat. M0 on the corrected corpus v2
+   (`qwen35_2b_m0_sft_v2corpus`) reached `call_f1` 0.5995 and macro recall 0.6416. M2 was not
+   run; `onpolicy_prompts_v1` was never materialized. See the
+   [M0 SFT execution report](reports/M0_SFT_EXECUTION_REPORT.md).
 
-9. Full post-SFT evaluation and diagnosis — NOT STARTED
+9. Full post-SFT evaluation and diagnosis — EXECUTED (partial)
+   Every saved checkpoint was measured against the frozen behavioral-heldout-v2 set with the same
+   engine and parser that produced B0; the failure/regression diagnosis is in the M0 report (§3
+   for the v1 collapses, §8 for the v2 recovery). External benchmark families remain
+   `FROZEN_NOT_EXECUTED`, and the best v2 checkpoint (1200) is still selection on the existing
+   evaluation set and needs checkpoint-selection-disjoint confirmation.
 
-10. Preference optimization or on-policy distillation — CONDITIONAL
-    Run only when a measured residual justifies the objective.
+10. Preference optimization or on-policy distillation — EXECUTED (DPO) / NOT ATTEMPTED (distillation)
+    DPO was run on the When2Call preference pairs and regressed on the promotion metric; all three
+    checkpoints were rejected, and the trajectory did not reproduce (INC-0001). On-policy
+    distillation was explicitly out of scope and not attempted — not merely conditional. See the
+    [M0 SFT execution report](reports/M0_SFT_EXECUTION_REPORT.md).
 
 11. Cross-model replication — PLANNED
 
@@ -72,16 +81,16 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 15. Joint capability-efficiency optimization — PLANNED
 
-The dependency order is intentional:
+The dependency order was intentional; the status of each stage is now:
 
-B0 baseline
-    -> frozen baseline evidence
-    -> residual profile
-    -> M0/M1/M2 decision
-    -> SFT
-    -> post-SFT evaluation
-    -> conditional preference/distillation
-    -> quantization/runtime
-    -> OpenWeights device validation
-    -> speculative decoding
-    -> joint capability-efficiency studies
+B0 baseline                                  -> EXECUTED (REAL_RESULT)
+    -> frozen baseline evidence              -> COMPLETE
+    -> residual profile                      -> COMPLETE
+    -> M0/M1/M2 decision                     -> M0 and M1 evaluated; M2 not run
+    -> SFT                                   -> EXECUTED (2 negative, 1 partial recovery)
+    -> post-SFT evaluation                   -> EXECUTED (partial; see step 9)
+    -> conditional preference/distillation   -> DPO run and rejected; distillation not attempted
+    -> quantization/runtime                  -> INTERFACE_ONLY (no execution)
+    -> OpenWeights device validation         -> PLANNED
+    -> speculative decoding                  -> PLANNED
+    -> joint capability-efficiency studies   -> PLANNED

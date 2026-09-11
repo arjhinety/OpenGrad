@@ -1,6 +1,6 @@
 # Pre-GPU configuration surfaces
 
-All accelerator work remains unstarted. `configs/hardware/gpu_preflight_v1.yaml` is a schema-valid `NOT_RUN` record; it is not a claim that any GPU, driver, CUDA, ROCm, runtime, or quantization path works.
+Accelerator work has started. The bounded Qwen boundary smoke ran on an NVIDIA A100-SXM4-80GB and is recorded in `reports/hardware/qwen_gpu_smoke.json`; `configs/hardware/gpu_preflight_v1.yaml` now records that executed preflight (`status: READY`, `COMPATIBLE`) rather than a `NOT_RUN` placeholder. It is not a general claim that every GPU, driver, CUDA, ROCm, runtime, or quantization path works — quantization and speculative decoding remain unexecuted.
 
 A future preflight must record requested and observed device counts, VRAM, driver/runtime versions, provider (`nvidia` or `amd`), and a compatibility result with its basis. `UNKNOWN`, `NOT_TESTED`, and `INCOMPATIBLE` must not be collapsed into support. The contract is `registry/gpu_preflight.schema.json`.
 

@@ -26,7 +26,7 @@ datasets:
   checksum: 4ef5c6f0dc552f2231f93f5853a9ef431e9e806d7aa514d0f6b615606ce576c6
   category: tool_use
   intended_stages:
-  - future_sft
+  - sft
   allowed_splits:
   - train
   forbidden_splits: []
@@ -71,7 +71,7 @@ datasets:
   checksum: null
   category: tool_use
   intended_stages:
-  - future_sft
+  - sft
   - future_preference
   - evaluation
   allowed_splits:
@@ -127,7 +127,7 @@ datasets:
   checksum: null
   category: tool_use
   intended_stages:
-  - future_sft
+  - sft
   allowed_splits: []
   forbidden_splits: []
   benchmark_overlap_risk: UNKNOWN_PENDING_AUDIT
@@ -259,7 +259,7 @@ datasets:
   checksum: null
   category: tool_use
   intended_stages:
-  - future_sft
+  - sft
   allowed_splits: []
   forbidden_splits: []
   benchmark_overlap_risk: HIGH_IF_BENCHMARK_LIKE
@@ -381,7 +381,7 @@ datasets:
     upstream_license: CC-BY-4.0
   category: tool_use
   intended_stages:
-  - future_sft
+  - sft
   allowed_splits:
   - train
   forbidden_splits:
@@ -452,7 +452,7 @@ datasets:
   checksum: 181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911
   category: tool_use
   intended_stages:
-  - future_sft
+  - sft
   allowed_splits:
   - train
   forbidden_splits:

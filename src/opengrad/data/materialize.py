@@ -169,7 +169,15 @@ def _training_split_allowlist() -> dict[str, set[str]]:
         if not isinstance(entry, dict) or not isinstance(entry.get("id"), str):
             continue
         dataset_id = entry["id"]
-        if "future_sft" not in entry.get("intended_stages", []):
+        # Registry stage names may carry a `future_` prefix (`future_sft`); normalise it away so
+        # a source promoted from a planned stage to an executed one (`sft`) stays allowlisted.
+        stages = entry.get("intended_stages", [])
+        normalised = (
+            {str(value).lower().removeprefix("future_") for value in stages}
+            if isinstance(stages, list)
+            else set()
+        )
+        if "sft" not in normalised:
             continue
         splits = entry.get("allowed_splits")
         if not isinstance(splits, list):

@@ -55,11 +55,11 @@ Connecting direct post-training research to consumer mobile devices:
 | Question | Current answer |
 | --- | --- |
 | What is being studied? | Capability–efficiency tradeoffs in small open-weight models. |
-| What is the first study? | Reliable tool use, beginning with a planned Qwen3.5-2B baseline. |
+| What is the first study? | Reliable tool use, beginning with the executed Qwen3.5-2B B0 baseline. |
 | What happens after the baseline? | Controlled SFT, diagnosis, conditional preference optimization, distillation, replication, and later systems studies. |
 | How is improvement judged? | Capability, regression, reliability, efficiency, cost, and reproducibility—not one headline score. |
 | Are failures publishable? | Yes. Failed, null, rejected, and non-reproducible runs are evidence. |
-| Are results available now? | Yes, the **B0 baseline** only — no intervention result yet. See [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md). |
+| Are results available now? | Yes — the **B0 baseline** and three post-training interventions (two negative, one partial recovery). See [Results](#results). |
 
 ## Why OpenGrad?
 
@@ -136,7 +136,7 @@ The study will cover, when the corresponding evaluation is implemented:
 - consuming tool observations and handling tool failure;
 - maintaining state across multi-turn tasks.
 
-The first baseline is [`Qwen/Qwen3.5-2B`](registry/models.yaml), recorded as `qwen3.5-2b` at an immutable revision in the [experiment definition](configs/experiments/tool_calling/qwen35_2b_baseline.yaml). It has been **measured on the frozen held-out set** (3,650 distinct examples, engine vLLM 0.29.0 on an A100): the model calls a tool on 97% of gold-`CALL` items but also on 64% of items that should be answered, clarified, or refused. See the [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md). No post-training intervention has been run.
+The first baseline is [`Qwen/Qwen3.5-2B`](registry/models.yaml), recorded as `qwen3.5-2b` at an immutable revision in the [experiment definition](configs/experiments/tool_calling/qwen35_2b_baseline.yaml). It has been **measured on the frozen held-out set** (3,650 distinct examples, engine vLLM 0.29.0 on an A100): the model calls a tool on 97% of gold-`CALL` items but also on 64% of items that should be answered, clarified, or refused. See the [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md). Post-training interventions have since been run and are recorded in the [M0 SFT execution report](reports/M0_SFT_EXECUTION_REPORT.md).
 
 ## Experimental decision pipeline
 
@@ -166,7 +166,7 @@ Gate status: `opengrad readiness` reports `PASS` with no blocking gates. The bas
 opengrad readiness configs/experiments/m0_sft.yaml   # status PASS, blocking_gates [], warnings []
 ```
 
-That is a statement about the *contract*, not about work done: no SFT has been run. Because the default `opengrad readiness` evaluates the baseline config — where SFT-specific data gates auto-pass — the SFT config must be named explicitly for its gate to mean anything.
+That is a statement about the *contract*, not about work done — SFT has since been executed (two negative runs and one partial recovery; see [Results](#results)). The distinction still matters because the default `opengrad readiness` evaluates the baseline config — where SFT-specific data gates auto-pass — so the SFT config must be named explicitly for its gate to mean anything.
 
 | Stage | Status | Evidence |
 | --- | --- | --- |
@@ -174,9 +174,9 @@ That is a statement about the *contract*, not about work done: no SFT has been r
 | CPU fixture and preflight validation | VALIDATED | [Phase 0.5 report](PRE_EXPERIMENT_REPORT.md) |
 | Qwen3.5-2B baseline reproduction | **EXECUTED — REAL RESULT** | [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md); `runs/tool_calling/qwen35_2b/baseline/experiment.json` |
 | Dataset materialization and audit | COMPLETE for current accessible pinned corpora; BUTTON and xLAM included | [Normalization report](reports/data-normalization-v1.md) |
-| Tool-use SFT | NOT STARTED | [Roadmap](ROADMAP.md) |
-| Preference optimization | CONDITIONAL | Only if full evaluation justifies it |
-| On-policy distillation | PLANNED | [Roadmap](ROADMAP.md) |
+| Tool-use SFT | **EXECUTED — 2 NEGATIVE, 1 PARTIAL RECOVERY** | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) |
+| Preference optimization | **EXECUTED — NEGATIVE** | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md) |
+| On-policy distillation | **OUT OF SCOPE — NOT ATTEMPTED** | [M0 report §6](reports/M0_SFT_EXECUTION_REPORT.md) |
 | Cross-model replication | PLANNED | [Roadmap](ROADMAP.md) |
 | Quantization and runtime evaluation | INTERFACE_ONLY — no execution | [Optimization layer](docs/optimization/README.md) |
 | Speculative decoding / MTP | PLANNED | [Reserved configuration](configs/inference/speculative/README.md) |
@@ -195,12 +195,12 @@ The dataset registry records source identity, revisions, intended stages, split 
 
 | Dataset | Purpose in the program | Current support | Training eligibility | Provenance |
 | --- | --- | --- | --- | --- |
-| [xLAM / APIGen Function Calling 60k](registry/datasets.yaml) | Function selection and argument generation | FULL_DATA_VALIDATED: 59,370 retained; 259 failures; 371 duplicates | Future SFT; `train` | Salesforce snapshot revision recorded in registry |
+| [xLAM / APIGen Function Calling 60k](registry/datasets.yaml) | Function selection and argument generation | FULL_DATA_VALIDATED: 59,370 retained; 259 failures; 371 duplicates | SFT (corpus v1); `train` | Salesforce snapshot revision recorded in registry |
 | [When2Call](registry/datasets.yaml) | Call/no-call decisions and answer quality | FULL_DATA_VALIDATED for accessible SFT/preference/evaluation splits | SFT, preference, evaluation remain separate | NVIDIA HF and GitHub sources recorded |
-| [ToolACE](registry/datasets.yaml) | Complex schemas, candidate tools, parallel/dependent calls, negatives | FULL_DATA_VALIDATED with quarantined malformed rows | Future SFT | Team-ACE source revision recorded |
+| [ToolACE](registry/datasets.yaml) | Complex schemas, candidate tools, parallel/dependent calls, negatives | FULL_DATA_VALIDATED with quarantined malformed rows | SFT (corpus v1, v2) | Team-ACE source revision recorded |
 | [BUTTON / BUTTONInstruct](registry/datasets.yaml) | Multi-turn compositional trajectories | FULL_DATA_VALIDATED: 7,941 retained; 59 duplicate-tool failures quarantined; rendering and audits complete | Future SFT | Repository commit recorded |
 | [LoopTool-23k](registry/datasets.yaml) | Loop/tool trajectories requiring lineage audit | FULL_DATA_VALIDATED with quarantined malformed rows | Future SFT | Source revision recorded; possible derivation overlap |
-| [Glaive Function Calling v2](registry/datasets.yaml) | Additional function-calling coverage | FULL_DATA_VALIDATED | Future SFT | HF snapshot revision recorded |
+| [Glaive Function Calling v2](registry/datasets.yaml) | Additional function-calling coverage | FULL_DATA_VALIDATED | SFT (corpus v1, v2) | HF snapshot revision recorded |
 
 These states are deliberately different:
 
@@ -209,7 +209,7 @@ adapter implemented ≠ fixture validated ≠ metadata validated
 metadata validated ≠ full dataset materialized ≠ used in an experiment
 ```
 
-The historical [`tool-calling-mixture-v1`](configs/data/tool_calling/mixture_v1.yaml) is retained as M0, a source-oriented control hypothesis. M1 is the behaviorally balanced [`balanced_policy_v1`](configs/data/tool_calling/balanced_policy_v1.yaml); M2 is the baseline-dependent, schema-ready [`residual_policy_v1`](configs/data/tool_calling/residual_policy_v1.yaml). No mixture has been trained. See the [tool-use mixture methodology](docs/data/tool-use-mixture-methodology.md) and [behavior matrix](docs/data/training-behavior-matrix.md). Materialization preserves source metadata and terms, verifies checksums, normalizes, labels, deduplicates, audits overlap, and freezes versioned artifacts ([protocol](docs/data/DATASET_MATERIALIZATION_PROTOCOL.md)).
+The historical [`tool-calling-mixture-v1`](configs/data/tool_calling/mixture_v1.yaml) is retained as M0, a source-oriented control hypothesis. M1 is the behaviorally balanced [`balanced_policy_v1`](configs/data/tool_calling/balanced_policy_v1.yaml); M2 is the baseline-dependent, schema-ready [`residual_policy_v1`](configs/data/tool_calling/residual_policy_v1.yaml). The **M0** source-oriented mixture has since been trained against both canonical corpus v1 and the corrected v2 (see [Results](#results)); the M1 behavior-balanced and M2 residual-driven mixtures were not trained. See the [tool-use mixture methodology](docs/data/tool-use-mixture-methodology.md) and [behavior matrix](docs/data/training-behavior-matrix.md). Materialization preserves source metadata and terms, verifies checksums, normalizes, labels, deduplicates, audits overlap, and freezes versioned artifacts ([protocol](docs/data/DATASET_MATERIALIZATION_PROTOCOL.md)).
 
 `Salesforce/APIGen-MT-5k` is explicitly excluded from the clean default because of possible τ-bench/τ² overlap. If it is ever used, it must use the contaminated namespace and its scores cannot be presented as clean generalization ([contamination configuration](configs/data/tool_calling/contamination.yaml)).
 
@@ -257,7 +257,7 @@ The canonical schema and evaluation contracts support measurement of tool-call s
 - tool-failure handling and multi-turn state;
 - ordinary instruction-following and structured-output regression.
 
-The repository currently provides contracts and fixtures for these behaviors, not empirical model scores.
+The repository provides contracts and fixtures for these behaviors, and empirical model scores now exist for the B0 baseline and three post-training interventions (see [Results](#results)).
 
 ### Systems efficiency — planned
 
@@ -313,13 +313,13 @@ flowchart TD
 - `registry/` — dataset, benchmark, model, runtime, hardware, provenance, and experiment contracts.
 - `src/opengrad/` — canonical data, fixture adapters, parsing, contamination tools, evaluation schemas, lineage, stage gates, and reporting utilities.
 - `configs/` — data, evaluation, model, training, inference, and planned experiment configurations.
-- `experiments/`, `reports/`, `results/` — append-only namespaces for future evidence; no completed result is present.
+- `experiments/`, `reports/`, `results/` — append-only evidence namespaces; the B0 baseline and three post-training experiments are recorded.
 - `docs/` — methodology, architecture, data, benchmark, inference, reproducibility, contribution, and publication protocols.
 - `integrations/` — harness-facing integrations over the `opengrad … --json` boundary; `opengrad-mcp/` is the dependency-free stdio MCP server.
 - `release/` — tracked Hugging Face release definitions, dataset-card template, attribution audit, and citations.
 - `hf/` — model-card, dataset-card, and experiment-report templates.
 
-Training and inference implementations are intentionally not executed in the current pre-GPU phase. Large data and checkpoints remain outside Git and must be referenced by immutable revisions and hashes.
+Training and inference have now been executed on a GPU (NVIDIA A100-SXM4-80GB). Large data and checkpoints remain outside Git and must be referenced by immutable revisions and hashes.
 
 ## Reproducibility and provenance
 
@@ -431,11 +431,11 @@ uv run opengrad-preflight
 uv run pytest
 ```
 
-These commands validate registries, capture the local environment, exercise CPU-safe fixtures, and run the test suite. They do not download models or datasets, run inference, train a model, or produce a benchmark score. The current preflight explicitly reports `GPU experiments: NOT STARTED`.
+These commands validate registries, capture the local environment, exercise CPU-safe fixtures, and run the test suite. They are CPU-only: they do not download models or datasets, run inference, train a model, or produce a benchmark score. GPU work — the boundary smoke, B0, and the SFT/DPO runs — was executed separately.
 
 ## Reproducing experiments
 
-There is no completed experiment to reproduce yet. The future baseline workflow is specified in [`BASELINE_REPRODUCTION_PROTOCOL.md`](docs/experiments/BASELINE_REPRODUCTION_PROTOCOL.md): acquire the accelerator, fetch the exact Qwen3.5-2B revision, validate its native template/parser, run sanity checks, execute the selected baseline evaluations, compare revisions and settings, investigate discrepancies, and pass the reproduction gate. That protocol is not executed by the development commands above.
+The B0 baseline, the M0 SFT runs, and the M1 DPO run are recorded and reproducible from committed configs (see [Results](#results)); on-policy distillation was not attempted. The baseline workflow is specified in [`BASELINE_REPRODUCTION_PROTOCOL.md`](docs/experiments/BASELINE_REPRODUCTION_PROTOCOL.md): acquire the accelerator, fetch the exact Qwen3.5-2B revision, validate its native template/parser, run sanity checks, execute the selected baseline evaluations, compare revisions and settings, investigate discrepancies, and pass the reproduction gate. That protocol is not executed by the development commands above.
 
 ## Navigation
 
