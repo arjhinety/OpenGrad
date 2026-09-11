@@ -1,3 +1,3 @@
-# Reserved namespace
+# Gemma model configurations
 
-No implementation or result exists in Phase 0.
+Reserved. No Gemma adapter, renderer or checkpoint is implemented, and none has been evaluated.

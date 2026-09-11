@@ -332,9 +332,9 @@ datasets:
 - id: canonical_v2_final
   display_name: OpenGrad ToolPolicy Canonical v2 (final, four sources)
   organization: OpenGrad
-  # Locally built and frozen; not yet uploaded. The historical partial snapshot is a separate
-  # entry (`canonical_v2`) and is not overwritten by this one.
-  hf_id: unpublished/OpenGrad-ToolPolicy-Canonical-v2
+  # Published and frozen at Hub commit 66470c07ed0a79941f49a5cf67c1b3b1a7d8196e. The historical
+  # partial snapshot is a separate entry (`canonical_v2`) and is not overwritten by this one.
+  hf_id: arrochi112/OpenGrad-ToolPolicy-Canonical-v2
   repository: configs/releases/toolpolicy_canonical_v2_final.yaml
   papers:
   - apigen

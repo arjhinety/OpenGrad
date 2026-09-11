@@ -1,3 +1,4 @@
-# Reserved namespace
+# Reinforcement-learning configuration namespace
 
-No implementation or result exists in Phase 0.
+Reserved. No RL trainer is implemented. It exists as a declared future boundary so the
+experiment schema does not need reshaping if one is added.

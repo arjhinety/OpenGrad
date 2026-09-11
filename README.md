@@ -11,7 +11,7 @@ Open empirical research on capability–efficiency tradeoffs in small open-weigh
 [![CI](https://github.com/arrogance231/OpenGrad/actions/workflows/ci.yml/badge.svg)](https://github.com/arrogance231/OpenGrad/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-052B42?style=flat-square)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-052B42?style=flat-square)](LICENSE)
-[![Research status](https://img.shields.io/badge/research-Building%20in%20Public%20%7C%20Phase%201.0%20Foundation-052B42?style=flat-square)](PRE_EXPERIMENT_REPORT.md)
+[![Research status](https://img.shields.io/badge/research-Building%20in%20Public%20%7C%20Phase%201.0%20Foundation-052B42?style=flat-square)](docs/foundation/PRE_EXPERIMENT_REPORT.md)
 
 </div>
 
@@ -166,15 +166,15 @@ Gate status: `opengrad readiness` reports `PASS` with no blocking gates. The bas
 opengrad readiness configs/experiments/m0_sft.yaml   # status PASS, blocking_gates [], warnings []
 ```
 
-That is a statement about the *contract*, not about work done — SFT has since been executed (two negative runs and one partial recovery; see [Results](#results)). The distinction still matters because the default `opengrad readiness` evaluates the baseline config — where SFT-specific data gates auto-pass — so the SFT config must be named explicitly for its gate to mean anything.
+That is a statement about the *contract*, not about work done — SFT has since been executed four times, most recently the definitive M0 on frozen Canonical-v2 (see [Results](#results)). The distinction still matters because the default `opengrad readiness` evaluates the baseline config — where SFT-specific data gates auto-pass — so an SFT config must be named explicitly for its gates to mean anything. The definitive config is [`m0_sft_canonical_v2_final.yaml`](configs/experiments/m0_sft_canonical_v2_final.yaml), and it declares a measured yield report, so its trainability and supervision-composition gates read real evidence rather than idling.
 
 | Stage | Status | Evidence |
 | --- | --- | --- |
-| Repository and research infrastructure | VALIDATED | [Bootstrap report](BOOTSTRAP_REPORT.md) |
-| CPU fixture and preflight validation | VALIDATED | [Phase 0.5 report](PRE_EXPERIMENT_REPORT.md) |
+| Repository and research infrastructure | VALIDATED | [Bootstrap report](docs/foundation/BOOTSTRAP_REPORT.md) |
+| CPU fixture and preflight validation | VALIDATED | [Phase 0.5 report](docs/foundation/PRE_EXPERIMENT_REPORT.md) |
 | Qwen3.5-2B baseline reproduction | **EXECUTED — REAL RESULT** | [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md); `runs/tool_calling/qwen35_2b/baseline/experiment.json` |
-| Dataset materialization and audit | COMPLETE for current accessible pinned corpora; BUTTON and xLAM included | [Normalization report](reports/data-normalization-v1.md) |
-| Tool-use SFT | **EXECUTED — 2 NEGATIVE, 1 PARTIAL RECOVERY** | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) |
+| Dataset materialization and audit | **Canonical-v2 FINAL**: 4 sources, 173,237 records, 161,966 trainable, fingerprint `8ced403b…`. BUTTON and LoopTool excluded — upstreams unavailable | [Completion report](reports/CANONICAL_V2_COMPLETION_REPORT.md) |
+| Tool-use SFT | **EXECUTED — 2 NEGATIVE, 1 PARTIAL RECOVERY, 1 DEFINITIVE** | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) · [final](reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
 | Preference optimization | **EXECUTED — NEGATIVE** | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md) |
 | On-policy distillation | **OUT OF SCOPE — NOT ATTEMPTED** | [M0 report §6](reports/M0_SFT_EXECUTION_REPORT.md) |
 | Cross-model replication | PLANNED | [Roadmap](ROADMAP.md) |
@@ -185,22 +185,43 @@ That is a statement about the *contract*, not about work done — SFT has since 
 
 ## Dataset releases
 
-OpenGrad publishes large normalized research artifacts on Hugging Face while GitHub remains the canonical home for normalization code, schemas, manifests, audits, provenance, and experiment definitions. The prepared release is [`arrochi112/OpenGrad-ToolPolicy-Canonical-v1`](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1) and is now publicly published and verified at Hub commit `bb295d8a4ad64f7e8161044ad2fa34f873ede418`. It is a model-independent pre-training canonical candidate corpus, not a recommended mixture, Qwen-rendered training data, M0, M1, M2, or a model result. The release includes xLAM under CC BY 4.0 with attribution, APIGen citation, and modification disclosure.
+OpenGrad publishes large normalized research artifacts on Hugging Face while GitHub remains the canonical home for normalization code, schemas, manifests, audits, provenance, and experiment definitions. Browse them as collections: [models](https://huggingface.co/collections/arrochi112/opengrad-models-6aa3c7ea9ae58be5adbb113e) and [datasets and evaluation records](https://huggingface.co/collections/arrochi112/opengrad-datasets-and-evaluation-records-6aa3c7eb4514d9bc27e5d160).
 
-The release contains **213,951 normalized canonical records** across six sources — xLAM/APIGen 59,370 · Glaive Function-Calling v2 99,794 · LoopTool-23k 20,827 · ToolACE 11,190 · When2Call SFT 14,829 · BUTTON 7,941 — published as 216 hash-verified Parquet shards. Attribution, citations, and modification disclosure are included per source. The xLAM upstream Hugging Face repository remains gated for access, but the OpenGrad derivative is public; upstream access mode and downstream redistribution permission are modeled independently.
+### Canonical-v2 (current)
 
-The release deliberately **excludes** every evaluation and preference split (When2Call preference, MCQ, and LLM-judge, plus rendered artifacts), so it is the training-side corpus and never the held-out set. The held-out benchmark is materialized separately from its own pinned upstream revision; see the [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md).
+[`arrochi112/OpenGrad-ToolPolicy-Canonical-v2`](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2) at Hub commit `66470c07ed0a79941f49a5cf67c1b3b1a7d8196e`. **173,237 canonical records, 161,966 of them trainable**, across four sources in 176 hash-verified Parquet shards. Its fingerprint is `8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161`, proven reproducible by a delete-and-rebuild.
 
-The dataset registry records source identity, revisions, intended stages, split restrictions, contamination risk, and processing state. All currently accessible pinned corpora have now been materialized or normalized through bounded, resumable canonical artifacts; BUTTON has been normalized with 59 duplicate-tool failures quarantined. OpenGrad preserves two axes: where an example came from (source provenance) and what it trains (behavioral capability). Datasets are sources of evidence, not capabilities by themselves.
+This is the corpus the definitive M0 ran on. Every record declares a **supervision contract**:
+
+| Contract | Trainable | What it supervises |
+|---|---:|---|
+| `COMPLETE_TRAJECTORY` | 105,876 | A full trajectory: every call answered by its result, ending in a terminal response |
+| `CALL_PREDICTION` | 56,090 | Next-call prediction: the terminal tool call *is* the target, so no result is required |
+
+Exactly one rule differs between the contracts — whether a terminal call needs a future environment response. Everything else fails closed under both: undeclared tools, invalid arguments, malformed calls, orphaned results, FIFO order violations. A malformed call stays quarantined even when its *shape* is valid for the other contract. See the [supervision contract report](reports/SUPERVISION_CONTRACT_REPORT.md).
+
+### Canonical-v1
+
+[`arrochi112/OpenGrad-ToolPolicy-Canonical-v1`](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1) at Hub commit `bb295d8a4ad64f7e8161044ad2fa34f873ede418`. **213,951 canonical records** across six sources in 216 shards. It remains pinned by B0 and every earlier result, and is left untouched.
+
+Its own training boundary yielded 48.9% of those records usefully and only **9** with a tool call, which is what the v1 post-training collapse was caused by — recorded in the [M0 execution report](reports/M0_SFT_EXECUTION_REPORT.md).
+
+### Partial-v2 snapshot
+
+[`arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot`](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot), unchanged, 103,036 records, three of six sources. It is the exact corpus that produced the first successful M0 and is distinguished from the final v2 by name, fingerprint and source count. **xLAM contributed zero gradients to it.**
+
+The release deliberately **excludes** every evaluation and preference split, so it is the training-side corpus and never the held-out set. The held-out benchmark is materialized separately from its own pinned upstream revision; see the [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md).
+
+The dataset registry records source identity, revisions, intended stages, split restrictions, contamination risk, and processing state. OpenGrad preserves two axes: where an example came from (source provenance) and what it trains (behavioral capability). Datasets are sources of evidence, not capabilities by themselves.
 
 | Dataset | Purpose in the program | Current support | Training eligibility | Provenance |
 | --- | --- | --- | --- | --- |
-| [xLAM / APIGen Function Calling 60k](registry/datasets.yaml) | Function selection and argument generation | FULL_DATA_VALIDATED: 59,370 retained; 259 failures; 371 duplicates | SFT (corpus v1); `train` | Salesforce snapshot revision recorded in registry |
-| [When2Call](registry/datasets.yaml) | Call/no-call decisions and answer quality | FULL_DATA_VALIDATED for accessible SFT/preference/evaluation splits | SFT, preference, evaluation remain separate | NVIDIA HF and GitHub sources recorded |
-| [ToolACE](registry/datasets.yaml) | Complex schemas, candidate tools, parallel/dependent calls, negatives | FULL_DATA_VALIDATED with quarantined malformed rows | SFT (corpus v1, v2) | Team-ACE source revision recorded |
-| [BUTTON / BUTTONInstruct](registry/datasets.yaml) | Multi-turn compositional trajectories | FULL_DATA_VALIDATED: 7,941 retained; 59 duplicate-tool failures quarantined; rendering and audits complete | Future SFT | Repository commit recorded |
-| [LoopTool-23k](registry/datasets.yaml) | Loop/tool trajectories requiring lineage audit | FULL_DATA_VALIDATED with quarantined malformed rows | Future SFT | Source revision recorded; possible derivation overlap |
-| [Glaive Function Calling v2](registry/datasets.yaml) | Additional function-calling coverage | FULL_DATA_VALIDATED | SFT (corpus v1, v2) | HF snapshot revision recorded |
+| [xLAM / APIGen Function Calling 60k](registry/datasets.yaml) | Function selection and argument generation | v1: 59,370 retained. v2 final: 57,342 canonical, **56,090 trainable** under `CALL_PREDICTION` | SFT (corpus v1, v2 final) | Salesforce snapshot revision recorded; upstream is access-gated, so the v2 build reconstructs from the published v1 derivative with per-record verification |
+| [When2Call](registry/datasets.yaml) | Call/no-call decisions and answer quality | v2 final: 6,505 records, yield 1.000 | SFT, preference, evaluation remain separate | NVIDIA HF and GitHub sources recorded |
+| [ToolACE](registry/datasets.yaml) | Complex schemas, candidate tools, parallel/dependent calls, negatives | v2 final: 11,051 canonical, 2,259 trainable (8,476 end on an unanswered call and stay quarantined) | SFT (corpus v1, v2 final) | Team-ACE source revision recorded |
+| [BUTTON / BUTTONInstruct](registry/datasets.yaml) | Multi-turn compositional trajectories | Not included in v2: upstream is access-gated | Not trained on | Repository commit recorded |
+| [LoopTool-23k](registry/datasets.yaml) | Loop/tool trajectories requiring lineage audit | Not included in v2: upstream was not located | Not trained on | Source revision recorded; possible derivation overlap |
+| [Glaive Function Calling v2](registry/datasets.yaml) | Additional function-calling coverage | v2 final: 98,339 canonical, 97,112 trainable | SFT (corpus v1, v2 final) | HF snapshot revision recorded |
 
 These states are deliberately different:
 
@@ -359,17 +380,18 @@ OpenGrad result
 
 ## Results
 
-> **Four empirical OpenGrad results exist: the B0 baseline and three post-training interventions.** Two interventions are negative, one is a partial recovery from a data defect this project published in its own corpus.
+> **Five empirical results exist: the B0 baseline and four post-training interventions.** Two are negative, one is a partial recovery from a data defect this project published in its own corpus, and the definitive one recovered call recall without reaching promotion.
+
+📊 **[Baseline findings — charts and the full comparison](reports/visual/index.html)** (also [on the model card](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final/blob/main/findings.html)). Every figure is computed from the per-example predictions rather than copied from a report.
 
 The table above lists interventions; the baseline is recorded by the experiment store instead.
 
-| Experiment | Model | Change | Capability Δ | Regression | Efficiency Δ | Reproduced | Report |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [`qwen35_2b_m0_sft_full_v3`](runs/qwen35_2b_m0_sft_full_v3/) | Qwen3.5-2B | M0 SFT on canonical corpus v1 | `call_f1` 0.6191 → **0.0000** | Collapsed: `call_recall` 0.9722 → 0.0000 | — | No (weights lost) | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) |
-| [`qwen35_2b_m1_dpo_v1`](runs/qwen35_2b_m1_dpo_v1/) | Qwen3.5-2B | DPO on When2Call preference pairs | `call_f1` 0.6191 → **0.1715** best | Over-calling fixed, tool calling destroyed | — | **No** | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md) |
-| [`qwen35_2b_m0_sft_v2corpus`](runs/qwen35_2b_m0_sft_v2corpus/) | Qwen3.5-2B | M0 SFT on corrected corpus v2 | `call_f1` 0.6191 → **0.5995**; macro recall 0.3621 → **0.6416** | None measured; not promoted | — | Pending | [M0 report §8](reports/M0_SFT_EXECUTION_REPORT.md) |
-
-Baseline (not an intervention): [`Qwen/Qwen3.5-2B` baseline, 3,650 held-out examples, engine vLLM 0.29.0](reports/baselines/qwen35_2b_baseline/RESULT.md).
+| Experiment | Model | Change | Capability Δ | Regression | Reproduced | Report |
+| --- | --- | --- | --- | --- | --- | --- |
+| [`qwen35_2b_m0_sft_full_v3`](runs/qwen35_2b_m0_sft_full_v3/) | Qwen3.5-2B | M0 SFT on canonical corpus v1 | `call_f1` 0.6191 → **0.0000** | Collapsed: `call_recall` 0.9722 → 0.0000 | No (weights lost) | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) |
+| [`qwen35_2b_m1_dpo_v1`](runs/qwen35_2b_m1_dpo_v1/) | Qwen3.5-2B | DPO on When2Call preference pairs | `call_f1` 0.6191 → **0.1715** best | Over-calling fixed, tool calling destroyed | **No** | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md) |
+| [`qwen35_2b_m0_sft_v2corpus`](runs/qwen35_2b_m0_sft_v2corpus/) | Qwen3.5-2B | M0 SFT on partial corpus v2 | `call_f1` 0.6191 → **0.5995**; macro recall 0.3621 → **0.6416** | None measured; not promoted | Pending | [M0 report §8](reports/M0_SFT_EXECUTION_REPORT.md) |
+| [`m0_sft_canonical_v2_final`](runs/m0_sft_canonical_v2_final/) | Qwen3.5-2B | M0 SFT on **frozen Canonical-v2** | `call_f1` **0.7470**; recall 0.5342 → **0.7594** | Precision −0.026, over-call +0.058 vs partial-v2 | Confirmatory partition | [Execution](reports/M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md) · [Evaluation](reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
 
 Two caveats belong next to those numbers rather than in a footnote.
 
@@ -377,17 +399,20 @@ Two caveats belong next to those numbers rather than in a footnote.
 
 **The M1 DPO result is not reproducible, and its best checkpoint no longer exists.** Its steps 100 and 200 were deleted before upload, and a repeat run with config, data, seed, and environment pinned did not reproduce the trajectory. The direction of that failure holds in both runs; the claim that degradation is monotone from step 100 is withdrawn. That is recorded in the [incident log](docs/INCIDENT_LOG.md) and in the [model card](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO), which no longer presents the deleted checkpoints as available.
 
+**The definitive M0 is not a promotion.** By the repository's own promotion policy every checkpoint is `REJECT`, including the selected one, because B0's recall of 0.9715 is itself a property of over-calling and the policy caps over-call at 0.20 while forbidding a recall drop beyond 0.10. The gate was left as written rather than adjusted after seeing the result. That tension is a finding for the next experiment's design, not a threshold to move.
+
 Published artifacts for these runs:
 
 | Artifact | Kind | Contents |
 | --- | --- | --- |
+| [`OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final) | model | the selected checkpoint (1800) + the findings page |
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2) | model | 4 checkpoints (600/1200/1800/2400) — intact |
 | [`OpenGrad-Qwen3.5-2B-M1-DPO`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO) | model | checkpoint 300 only + the deleted checkpoints' predictions |
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation`](https://huggingface.co/datasets/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation) | evaluation record | predictions and metrics for 5 of 6 checkpoints — **no weights exist** |
 
 `results/registry.jsonl` is a **derived index**, not a store: one summary row per experiment, rebuilt from `runs/<experiment_id>/experiment.json`, `runs/<experiment_id>/eval/` and `runs/central_ledger.jsonl`. It can be deleted at any time — `opengrad results rebuild-registry` regenerates it byte-for-byte — so the authoritative values stay in the run artifacts and the index only makes them discoverable. `opengrad results validate-registry` reports any divergence. See [the results namespace](results/README.md).
 
-Do not confuse passing CPU tests with ML evidence: they validate infrastructure and fixtures, not model quality. Conversely, the B0 numbers above are a real measurement of a real model, but of a *baseline* — and the interventions trained against it have now been measured, in both directions: two regressions and one partial recovery.
+Do not confuse passing CPU tests with ML evidence: they validate infrastructure and fixtures, not model quality. Conversely, the B0 numbers above are a real measurement of a real model, but of a *baseline* — and the interventions trained against it have now been measured in both directions.
 
 ### Illustrative future record
 

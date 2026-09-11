@@ -1,3 +1,3 @@
-# Reserved namespace
+# ExecuTorch inference configurations
 
-No implementation or result exists in Phase 0.
+Reserved. ExecuTorch is a downstream device runtime, not an OpenGrad evaluation engine.

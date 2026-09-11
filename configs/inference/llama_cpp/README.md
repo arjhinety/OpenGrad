@@ -1,3 +1,4 @@
-# Reserved namespace
+# llama.cpp inference configurations
 
-No implementation or result exists in Phase 0.
+Reserved. llama.cpp is the runtime OpenWeights uses for on-device execution, not an OpenGrad
+evaluation engine; OpenGrad measures through vLLM.

@@ -1,3 +1,3 @@
-# Reserved namespace
+# Llama model configurations
 
-No implementation or result exists in Phase 0.
+Reserved. No Llama adapter, renderer or checkpoint is implemented, and none has been evaluated.

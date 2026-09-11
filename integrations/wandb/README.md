@@ -1,3 +1,4 @@
-# Reserved namespace
+# Weights & Biases integration
 
-No implementation or result exists in Phase 0.
+Reserved. OpenGrad records training and evaluation evidence to its own manifests, ledgers and
+reports, so experiment tracking does not depend on an external service and no run requires one.
