@@ -1000,31 +1000,57 @@ def _supervision_composition_state(root: Path, raw: dict[str, Any]) -> tuple[boo
     if payload is None:
         return False, f"Declared yield report is unreadable: {declared}", "YIELD_REPORT_UNREADABLE"
 
+    selected = [str(item) for item in ((raw.get("supervision") or {}).get("include") or [])]
     per_kind: dict[str, dict[str, int]] = {}
     total_trainable = 0
+    invalid_counts: list[str] = []
     for source in payload.get("sources") or []:
         kinds = source.get("supervision_kinds_trainable") or {}
-        for kind, count in kinds.items():
+        for kind, raw_count in kinds.items():
+            try:
+                count = int(raw_count)
+            except (TypeError, ValueError, OverflowError):
+                invalid_counts.append(f"{source.get('source', '<unknown>')}:{kind}={raw_count!r}")
+                continue
+            if count < 0:
+                invalid_counts.append(f"{source.get('source', '<unknown>')}:{kind}={count}")
+                continue
+            if count == 0:
+                continue
             entry = per_kind.setdefault(str(kind), {"trainable": 0, "sources": 0})
-            entry["trainable"] += int(count)
+            entry["trainable"] += count
             entry["sources"] += 1
-            total_trainable += int(count)
-    if not per_kind:
+            total_trainable += count
+    if invalid_counts:
         return (
-            True,
-            f"Yield report declares no trainable supervision kinds: {declared}",
-            None,
+            False,
+            f"Yield report has invalid supervision counts: {invalid_counts}",
+            "SUPERVISION_COMPOSITION_INVALID",
+        )
+    if not per_kind:
+        if selected:
+            return (
+                False,
+                (
+                    "Yield report has no positive trainable supervision kinds but config selects "
+                    f"{selected}: {declared}"
+                ),
+                "SUPERVISION_SELECTION_MISMATCH",
+            )
+        return (
+            False,
+            f"Yield report declares no positive trainable supervision kinds: {declared}",
+            "SUPERVISION_COMPOSITION_MISSING",
         )
 
     composition = {
         kind: {
             **entry,
-            "share": round(entry["trainable"] / total_trainable, 6) if total_trainable else 0.0,
+            "share": round(entry["trainable"] / total_trainable, 6),
         }
         for kind, entry in sorted(per_kind.items())
     }
     unclassified = per_kind.get("UNCLASSIFIED", {}).get("trainable", 0)
-    selected = [str(item) for item in ((raw.get("supervision") or {}).get("include") or [])]
     absent = sorted(kind for kind in selected if kind not in per_kind)
     detail = (
         f"trainable by supervision kind: "

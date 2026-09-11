@@ -570,7 +570,6 @@ def test_16_supervision_include_selects_kinds() -> None:
     from opengrad.experiments.schema import validate_supervision_selection
 
     assert validate_supervision_selection(None) == {}
-    assert validate_supervision_selection({}) == {}
     assert validate_supervision_selection({"include": ["CALL_PREDICTION"]}) == {
         "include": ["CALL_PREDICTION"]
     }
@@ -582,8 +581,11 @@ def test_16_supervision_include_selects_kinds() -> None:
 @pytest.mark.parametrize(
     "block",
     [
+        {},
+        {"include": None},
         {"include": ["NOT_A_KIND"]},
         {"include": []},
+        {"include": ["CALL_PREDICTION", "CALL_PREDICTION"]},
         {"unexpected_key": 1},
         "not-a-mapping",
     ],
@@ -601,6 +603,8 @@ def test_16_sampling_weights_are_rejected_rather_than_silently_ignored() -> None
 
     with pytest.raises(ValueError, match="not implemented"):
         validate_supervision_selection({"sampling_weights": {"CALL_PREDICTION": 1.0}})
+    with pytest.raises(ValueError, match="not implemented"):
+        validate_supervision_selection({"sampling_weights": {}})
     with pytest.raises(ValueError, match="unknown kinds"):
         validate_supervision_selection({"sampling_weights": {"NOPE": 1.0}})
 
@@ -696,6 +700,97 @@ def test_15_readiness_blocks_unclassified_trainable_records(tmp_path: Path) -> N
     )
     assert ok is False
     assert code == "SUPERVISION_UNCLASSIFIED"
+
+
+def test_15_readiness_treats_zero_count_as_absent(tmp_path: Path) -> None:
+    from opengrad.readiness import _supervision_composition_state
+
+    (tmp_path / "yield.json").write_text(
+        json.dumps(
+            {
+                "sources": [
+                    {
+                        "source": "filtered",
+                        "supervision_kinds_trainable": {"CALL_PREDICTION": 0},
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    ok, _detail, code = _supervision_composition_state(
+        tmp_path,
+        {
+            "datasets": {"yield_report": "yield.json"},
+            "supervision": {"include": ["CALL_PREDICTION"]},
+        },
+    )
+    assert ok is False
+    assert code == "SUPERVISION_SELECTION_MISMATCH"
+
+
+def test_15_readiness_fails_when_active_report_has_no_composition(tmp_path: Path) -> None:
+    from opengrad.readiness import _supervision_composition_state
+
+    (tmp_path / "yield.json").write_text(json.dumps({"sources": []}), encoding="utf-8")
+    ok, _detail, code = _supervision_composition_state(
+        tmp_path, {"datasets": {"yield_report": "yield.json"}}
+    )
+    assert ok is False
+    assert code == "SUPERVISION_COMPOSITION_MISSING"
+
+
+def test_15_minus_xlam_configs_select_only_the_contract_present_after_filtering() -> None:
+    import yaml
+
+    from opengrad.experiments.schema import ExperimentConfig
+    from opengrad.readiness import _supervision_composition_state
+
+    root = Path(__file__).resolve().parents[2]
+    paths = [
+        root / "configs/experiments/m0_v2_final_minus_xlam_fixed_compute.yaml",
+        root / "configs/experiments/m0_v2_final_minus_xlam_matched_exposure.yaml",
+    ]
+    for path in paths:
+        config = ExperimentConfig.from_file(path)
+        assert config.datasets["exclude_sources"] == ["xlam-function-calling-60k"]
+        assert config.supervision == {"include": ["COMPLETE_TRAJECTORY"]}
+        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        ok, detail, code = _supervision_composition_state(root, raw)
+        assert ok is True and code is None
+        assert "'COMPLETE_TRAJECTORY': 105876" in detail
+        assert "CALL_PREDICTION" not in detail
+
+
+def test_15_minus_xlam_call_prediction_selection_is_a_hard_mismatch() -> None:
+    import yaml
+
+    from opengrad.readiness import _supervision_composition_state
+
+    root = Path(__file__).resolve().parents[2]
+    path = root / "configs/experiments/m0_v2_final_minus_xlam_fixed_compute.yaml"
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    raw["supervision"] = {"include": ["CALL_PREDICTION"]}
+    ok, detail, code = _supervision_composition_state(root, raw)
+    assert ok is False
+    assert code == "SUPERVISION_SELECTION_MISMATCH"
+    assert "CALL_PREDICTION" in detail
+
+
+def test_16_supervision_composition_designs_are_separate_and_explicit() -> None:
+    from opengrad.experiments.schema import ExperimentConfig
+
+    root = Path(__file__).resolve().parents[2]
+    expected = {
+        "m0_v2_final_supervision_call_prediction_only.yaml": "CALL_PREDICTION",
+        "m0_v2_final_supervision_complete_trajectory_only.yaml": "COMPLETE_TRAJECTORY",
+    }
+    for filename, kind in expected.items():
+        config = ExperimentConfig.from_file(root / "configs/experiments" / filename)
+        assert config.supervision == {"include": [kind]}
+        assert config.datasets["exclude_sources"] == []
+        assert "PLANNED, NOT LAUNCHED" in config.hypothesis
+        assert "source-confounded" in config.hypothesis
 
 
 def test_15_composition_gate_is_dormant_without_a_yield_report(tmp_path: Path) -> None:

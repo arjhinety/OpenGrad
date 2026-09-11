@@ -152,22 +152,10 @@ def validate_supervision_selection(value: Any) -> dict[str, Any]:
     unknown = sorted(set(value) - {"include", "sampling_weights"})
     if unknown:
         raise ValueError(f"unknown supervision keys: {unknown}")
-    include = value.get("include")
-    if include is not None:
-        if not isinstance(include, list) or not include:
-            raise ValueError("supervision.include must be a non-empty list of supervision kinds")
-        bad = sorted(str(item) for item in include if str(item) not in declared_kinds())
-        if bad:
-            raise ValueError(
-                f"supervision.include has unknown kinds: {bad}; "
-                f"declared kinds are: {sorted(declared_kinds())}"
-            )
-    weights = value.get("sampling_weights")
-    if weights:
-        # Declared but not implemented. Accepting it silently would let a researcher believe they
-        # had weighted a mixture when the trainer used natural sampling -- a no-op that changes
-        # the meaning of an experiment without changing its output. `include` is implemented and
-        # covers the ablation this was wanted for (all kinds vs one kind).
+    if "sampling_weights" in value:
+        weights = value["sampling_weights"]
+        if not isinstance(weights, dict):
+            raise TypeError("supervision.sampling_weights must be a mapping")
         bad_keys = sorted(str(key) for key in weights if str(key) not in declared_kinds())
         if bad_keys:
             raise ValueError(
@@ -179,7 +167,23 @@ def validate_supervision_selection(value: Any) -> dict[str, Any]:
             "ignored. Use supervision.include to select kinds for an ablation, or remove the "
             "block to train on the whole corpus under natural sampling."
         )
-    return {"include": include} if value else {}
+    if "include" not in value:
+        raise ValueError(
+            "a declared supervision block must contain supervision.include; remove the block "
+            "to train on the whole corpus under natural sampling"
+        )
+    include = value["include"]
+    if not isinstance(include, list) or not include:
+        raise ValueError("supervision.include must be a non-empty list of supervision kinds")
+    bad = sorted(str(item) for item in include if str(item) not in declared_kinds())
+    if bad:
+        raise ValueError(
+            f"supervision.include has unknown kinds: {bad}; "
+            f"declared kinds are: {sorted(declared_kinds())}"
+        )
+    if len({str(item) for item in include}) != len(include):
+        raise ValueError("supervision.include contains duplicate supervision kinds")
+    return {"include": [str(item) for item in include]}
 
 
 @dataclass(frozen=True)

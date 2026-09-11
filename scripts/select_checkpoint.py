@@ -52,6 +52,16 @@ def score(predictions_path: Path, include: set[str] | None) -> dict:
     return metrics
 
 
+def evaluation_directory(run: Path, side: str) -> Path:
+    namespaced = run / "eval" / side
+    legacy = run / "eval"
+    if namespaced.exists():
+        return namespaced
+    if side == "dev" and any(legacy.glob("checkpoint-*/metrics.json")):
+        return legacy
+    return namespaced
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", default="runs/m0_sft_canonical_v2_final")
@@ -64,7 +74,10 @@ def main() -> int:
 
     baseline = score(ROOT / BASELINE_PREDICTIONS, include)
     checkpoints: dict[int, dict] = {}
-    report_dir = ROOT / args.run / "eval"
+    run_path = Path(args.run)
+    if not run_path.is_absolute():
+        run_path = ROOT / run_path
+    report_dir = evaluation_directory(run_path, args.side)
     for metrics_path in sorted(report_dir.glob("checkpoint-*/metrics.json")):
         step = int(metrics_path.parent.name.split("-")[-1])
         predictions = metrics_path.parent / "predictions.jsonl"
@@ -171,11 +184,7 @@ def main() -> int:
         "selected_checkpoint": selected,
         "tie_break_applied": tie_break,
     }
-    out = (
-        Path(args.output)
-        if args.output
-        else ROOT / args.run / "eval" / f"selection--{args.side}.json"
-    )
+    out = Path(args.output) if args.output else report_dir / f"selection--{args.side}.json"
     out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"wrote {out if not out.is_relative_to(ROOT) else out.relative_to(ROOT)}")
     return 0
