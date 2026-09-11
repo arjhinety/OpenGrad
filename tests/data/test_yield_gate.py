@@ -26,10 +26,10 @@ from opengrad.data.yield_gate import (
 
 def test_aggregate_counts_canonical_and_trainable_separately() -> None:
     rows = [
-        ("a", "OK", True),
-        ("a", "OK", False),
-        ("a", "UNRENDERABLE", False),
-        ("a", "TARGET_TRUNCATED", False),
+        ("a", "OK", True, "CALL_PREDICTION"),
+        ("a", "OK", False, "COMPLETE_TRAJECTORY"),
+        ("a", "UNRENDERABLE", False, "COMPLETE_TRAJECTORY"),
+        ("a", "TARGET_TRUNCATED", False, "COMPLETE_TRAJECTORY"),
     ]
     yields = aggregate_yields(rows)
     entry = yields["a"]
@@ -41,12 +41,15 @@ def test_aggregate_counts_canonical_and_trainable_separately() -> None:
 
 
 def test_context_tail_truncated_is_trainable() -> None:
-    yields = aggregate_yields([("a", "CONTEXT_TAIL_TRUNCATED", True)])
+    yields = aggregate_yields([("a", "CONTEXT_TAIL_TRUNCATED", True, "COMPLETE_TRAJECTORY")])
     assert yields["a"].trainable_records == 1
 
 
 def test_ratios_are_computed_against_canonical_records() -> None:
-    yields = aggregate_yields([("a", "OK", True)] * 3 + [("a", "UNRENDERABLE", False)] * 1)
+    yields = aggregate_yields(
+        [("a", "OK", True, "CALL_PREDICTION")] * 3
+        + [("a", "UNRENDERABLE", False, "CALL_PREDICTION")] * 1
+    )
     entry = yields["a"]
     assert entry.canonical_records == 4
     assert entry.yield_ratio == pytest.approx(0.75)
@@ -185,3 +188,33 @@ def test_render_table_includes_reasons() -> None:
     table = render_yield_table(findings)
     assert "COLLAPSE" in table
     assert "0 of 10 canonical records are trainable" in table
+
+
+def test_supervision_kinds_are_counted_per_source() -> None:
+    """A source's trainable records are attributable to a supervision kind, not just a total."""
+    rows = [
+        ("x", "OK", True, "CALL_PREDICTION"),
+        ("x", "OK", True, "CALL_PREDICTION"),
+        ("x", "OK", True, "COMPLETE_TRAJECTORY"),
+        ("x", "UNRENDERABLE", False, "COMPLETE_TRAJECTORY"),
+    ]
+    entry = aggregate_yields(rows)["x"]
+    assert entry.supervision_kinds == {"CALL_PREDICTION": 2, "COMPLETE_TRAJECTORY": 1}
+    assert entry.supervision_kinds_total == {"CALL_PREDICTION": 2, "COMPLETE_TRAJECTORY": 2}
+    assert entry.as_dict()["supervision_kinds_trainable"] == {
+        "CALL_PREDICTION": 2,
+        "COMPLETE_TRAJECTORY": 1,
+    }
+
+
+def test_unclassified_records_are_not_folded_into_a_real_kind() -> None:
+    entry = aggregate_yields([("x", "OK", True, "")])["x"]
+    assert entry.supervision_kinds == {"UNCLASSIFIED": 1}
+
+
+def test_yield_table_shows_the_kind_breakdown() -> None:
+    yields = {"x": SourceYield(source="x", canonical_records=1, trainable_records=1)}
+    yields["x"].supervision_kinds = {"CALL_PREDICTION": 1}
+    findings = evaluate_yield_gate(yields, {"defaults": DEFAULT_EXPECTATIONS, "sources": {}})
+    table = render_yield_table(findings)
+    assert "trainable by supervision kind: CALL_PREDICTION=1" in table

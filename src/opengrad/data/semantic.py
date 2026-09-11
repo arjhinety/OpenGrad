@@ -3,6 +3,14 @@
 The general IR validator intentionally accepts prompt-only records.  This module is
 an explicit training gate: it validates the call/result graph, effective JSON
 Schema, and ordering without silently repairing malformed records.
+
+Validation is *supervision-aware*. A record's declared
+:class:`~opengrad.data.supervision.SupervisionContract` decides one thing only: whether a
+terminal tool call requires a future environment response. Under `CALL_PREDICTION` the terminal
+call is the supervised target and needs no result; under `COMPLETE_TRAJECTORY` every call must be
+resolved. Everything else -- tool names, arguments against the effective schema, call/result
+identity, FIFO ordering, malformed messages -- is enforced identically under every contract, so
+a malformed call stays quarantined even when its shape is a valid call-prediction example.
 """
 
 from __future__ import annotations
@@ -19,6 +27,7 @@ from opengrad.data.schema import (
     effective_schema,
     validate_arguments,
 )
+from opengrad.data.supervision import SupervisionContract, resolve_contract
 
 
 @dataclass(frozen=True)
@@ -42,8 +51,36 @@ def _content_is_empty(value: Any) -> bool:
     return value is None or (isinstance(value, str) and not value.strip())
 
 
-def validate_training_trajectory(example: ToolConversation) -> list[SemanticIssue]:
-    """Return precise semantic failures for a strict complete-target SFT trajectory."""
+def terminal_call_ids(messages: list[dict[str, Any]]) -> set[str]:
+    """Call ids of the *final* assistant message, which is a `CALL_PREDICTION` target.
+
+    Only the final assistant turn qualifies. A call in an earlier turn is context, and an
+    unresolved earlier call is a malformed trajectory rather than a supervised target, so the
+    exemption cannot be widened to "the last assistant message that happens to have calls" --
+    that would let a trailing prose turn hide an unresolved call.
+    """
+    for message in reversed(messages):
+        if not isinstance(message, dict) or message.get("role") != "assistant":
+            continue
+        calls = message.get("tool_calls") or []
+        if not isinstance(calls, list):
+            return set()
+        ids = set()
+        for call in calls:
+            if isinstance(call, dict):
+                call_id = call.get("id", call.get("call_id"))
+                if isinstance(call_id, str) and call_id.strip():
+                    ids.add(call_id)
+        return ids
+    return set()
+
+
+def validate_training_trajectory(
+    example: ToolConversation, contract: SupervisionContract | None = None
+) -> list[SemanticIssue]:
+    """Return precise semantic failures for the trajectory under its supervision contract."""
+    if contract is None:
+        contract, _assignment = resolve_contract(example.metadata or {})
     issues: list[SemanticIssue] = []
     if not example.messages:
         issues.append(_issue("EMPTY_CONVERSATION", "conversation has no messages"))
@@ -175,9 +212,37 @@ def validate_training_trajectory(example: ToolConversation) -> list[SemanticIssu
             )
         previous_role = role
 
+    # Under a contract whose terminal target IS the call, the final assistant turn's calls are
+    # the supervision target and are not expected to be answered. Every other call is still
+    # governed by `require_intermediate_results`, so an orphaned non-terminal call stays invalid
+    # under both contracts -- this exempts a declared target, not a stray call.
+    targets = (
+        set()
+        if contract.tool_result_required_after_terminal_call
+        else terminal_call_ids(example.messages)
+    )
+    if not contract.tool_result_required_after_terminal_call and not targets:
+        issues.append(
+            _issue(
+                "SUPERVISION_TARGET_MISSING",
+                f"{contract.kind.value} requires a terminal assistant tool call to supervise",
+            )
+        )
+    if not contract.allow_intermediate_calls:
+        for call_id in sorted(set(results) - targets):
+            issues.append(
+                _issue(
+                    "SUPERVISION_INTERMEDIATE_CALL",
+                    f"{contract.kind.value} does not allow calls before the terminal target",
+                    results[call_id],
+                )
+            )
     for call_id in sorted(calls):
-        if call_id not in results:
-            issues.append(_issue("MISSING_TOOL_RESULT", call_id))
+        if call_id in results or call_id in targets:
+            continue
+        if not contract.require_intermediate_results:
+            continue
+        issues.append(_issue("MISSING_TOOL_RESULT", call_id))
     if not seen_assistant_target:
         issues.append(_issue("NO_USEFUL_TARGET", "conversation has no assistant target"))
     return issues

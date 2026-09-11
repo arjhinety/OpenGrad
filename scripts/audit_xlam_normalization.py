@@ -118,6 +118,7 @@ def main() -> int:
     unsupported_types: collections.Counter[str] = collections.Counter()
     trainable_status: collections.Counter[str] = collections.Counter()
     trainable_reasons: collections.Counter[str] = collections.Counter()
+    supervision_kinds: collections.Counter[str] = collections.Counter()
     per_shard: dict[str, dict[str, int]] = {}
     hashes: list[str] = []
     duplicates = 0
@@ -220,6 +221,7 @@ def main() -> int:
                         source_dataset=conversation.source,
                     )
                     trainable_status[sample.status] += 1
+                    supervision_kinds[sample.supervision_kind or "UNCLASSIFIED"] += 1
                     reason = sample.detail.get("reason")
                     if reason:
                         # Reasons arrive as either "CODE: detail" or
@@ -252,6 +254,7 @@ def main() -> int:
         "unsupported_annotation_reasons": dict(sorted(unsupported_types.items())),
         "training_boundary_status": dict(sorted(trainable_status.items())),
         "training_boundary_reasons": dict(sorted(trainable_reasons.items())),
+        "supervision_kinds": dict(sorted(supervision_kinds.items())),
         "per_shard": per_shard,
         "duplicates": duplicates,
         "corpus_fingerprint_sha256": fingerprint,

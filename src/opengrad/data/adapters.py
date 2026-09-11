@@ -10,7 +10,18 @@ from typing import Any
 
 from opengrad.data.canonical import ToolConversation
 from opengrad.data.schema import normalize_tool
+from opengrad.data.supervision import (
+    SupervisionAssignment,
+    SupervisionKind,
+    supervision_block,
+)
 from opengrad.data.xlam_types import normalize_xlam_tools
+
+# Per-row adapter version written into canonical metadata. It feeds `canonical_hash`, so changing
+# it changes every fingerprint derived from re-materialized rows. The per-artifact value lives in
+# each materialization manifest and is a separate field (see the v2 dataset card, which documents
+# that the two differ).
+ADAPTER_VERSION = "1.0.0"
 
 
 def _json(value: Any, field: str) -> Any:
@@ -102,6 +113,9 @@ def _base(
     *,
     adapter: str,
     status: str = "VALID",
+    supervision_kind: SupervisionKind = SupervisionKind.COMPLETE_TRAJECTORY,
+    supervision_assignment: SupervisionAssignment = SupervisionAssignment.SOURCE_ADAPTER,
+    supervision_note: str = "",
     **extra: Any,
 ) -> ToolConversation:
     tools = [normalize_tool(tool) for tool in tools]
@@ -122,12 +136,21 @@ def _base(
         "source_revision": record.get("source_revision"),
         "raw_record_hash": raw_hash,
         "adapter": adapter,
-        "adapter_version": "1.0.0",
+        "adapter_version": ADAPTER_VERSION,
         "parse_status": status,
         "contamination_status": record.get("contamination_status", "UNASSESSED"),
         "source_fields": sorted(record),
         "source_features": extra,
         "tool_context": {"tool_count": len(tools)},
+        # What this record supervises, decided by the adapter from the upstream shape and
+        # carried in the canonical record independently of the source name.
+        "supervision": supervision_block(
+            supervision_kind,
+            assignment=supervision_assignment,
+            adapter=adapter,
+            adapter_version=ADAPTER_VERSION,
+            note=supervision_note,
+        ),
     }
     source_metadata = record.get("metadata")
     if isinstance(source_metadata, dict) and "eligibility" in source_metadata:
@@ -162,6 +185,9 @@ def _generic(record: dict[str, Any], source: str, split: str) -> ToolConversatio
         _tool(record.get("tools", record.get("functions", []))),
         list(messages),
         adapter="generic",
+        # The source-agnostic messages path. Its callers supply whole conversations whose calls
+        # are answered, so it declares the complete-trajectory contract rather than inheriting it.
+        supervision_kind=SupervisionKind.COMPLETE_TRAJECTORY,
     )
 
 
@@ -212,6 +238,17 @@ def adapt_xlam(record: dict[str, Any], split: str = "train") -> ToolConversation
         messages,
         adapter="xlam_function_calling_60k_v2",
         source_format="query/tools/answers, parameters as a property-definition map",
+        # xLAM/APIGen is a next-tool-call prediction corpus: `query + tools -> answers`, where an
+        # answer names the call to make. It structurally contains no tool-result turn, so the
+        # terminal call is the supervised target rather than an unresolved trajectory. Verified
+        # against the upstream dataset card at the pinned revision and against the retained
+        # derivative: every gold call's argument keys are parameter names, and 0 of 59,370
+        # records contain a tool result.
+        supervision_kind=SupervisionKind.CALL_PREDICTION,
+        supervision_assignment=SupervisionAssignment.UPSTREAM_DECLARED,
+        supervision_note=(
+            "upstream card documents answers as the call to make; the corpus has no tool-result turn"
+        ),
         xlam_schema_normalization=repair.as_dict(),
     )
     c.validate()
@@ -267,6 +304,11 @@ def adapt_when2call(record: dict[str, Any], split: str = "train_sft") -> ToolCon
         messages,
         adapter="when2call_v1",
         source_format="<TOOLCALL>",
+        # Measured: 0 of 14,829 canonical When2Call records carry a tool result or a structured
+        # tool call; every one ends in an assistant response. Its supervised behaviour is the
+        # call/answer/clarify/unsupported *decision* expressed as prose, which the complete
+        # trajectory contract validates as-is (there are no calls to resolve).
+        supervision_kind=SupervisionKind.COMPLETE_TRAJECTORY,
     )
     c.validate()
     return c
@@ -422,13 +464,25 @@ def adapt_toolace(record: dict[str, Any], split: str = "train") -> ToolConversat
         messages,
         adapter="toolace_v1",
         source_format="system/conversations from/value",
+        # Declared COMPLETE_TRAJECTORY, which is the status quo and is deliberately unchanged.
+        # Measured: 9,187 records carry a tool call and only 793 carry a tool result, so 8,394
+        # end on an unresolved call. Whether those are truncated trajectories or intended
+        # next-call supervision is NOT established by the available bytes, and reclassifying
+        # them on structure alone would be guessing. Recorded as an open question in
+        # reports/SUPERVISION_CONTRACT_REPORT.md; the yield report counts them explicitly.
+        supervision_kind=SupervisionKind.COMPLETE_TRAJECTORY,
     )
     c.validate()
     return c
 
 
 def _tagged_messages(
-    record: dict[str, Any], source: str, split: str, adapter: str
+    record: dict[str, Any],
+    source: str,
+    split: str,
+    adapter: str,
+    *,
+    supervision_kind: SupervisionKind = SupervisionKind.COMPLETE_TRAJECTORY,
 ) -> ToolConversation:
     raw = record.get("messages", record.get("chat"))
     if not isinstance(raw, list):
@@ -490,7 +544,20 @@ def _tagged_messages(
             (str(m.get("content", "")) for m in messages if m.get("role") == "system"), ""
         )
         tools = _embedded_tools(system_text)
-    c = _base(record, source, split, tools, messages, adapter=adapter, source_format="messages")
+    c = _base(
+        record,
+        source,
+        split,
+        tools,
+        messages,
+        adapter=adapter,
+        source_format="messages",
+        # Shared by BUTTON and Glaive. Measured: all 7,941 BUTTON records carry a result for
+        # every call, and Glaive's calls are answered by function-response turns, so both are
+        # complete trajectories. The parameter exists so a future tagged source can declare
+        # otherwise without editing this helper.
+        supervision_kind=supervision_kind,
+    )
     c.validate()
     return c
 
@@ -576,6 +643,11 @@ def adapt_looptool(record: dict[str, Any], split: str = "train") -> ToolConversa
         adapter="looptool_23k_v1",
         source_format="instruction/input/output",
         derived_from="ToolACE (reported upstream lineage)",
+        # Same open question as ToolACE, and the same decision not to guess: 20,192 of 20,827
+        # records carry a call, 14,448 carry a result, and 20,192 end on an assistant call, so
+        # the source contains both shapes. Left as COMPLETE_TRAJECTORY — the stricter contract —
+        # until upstream evidence establishes the intent.
+        supervision_kind=SupervisionKind.COMPLETE_TRAJECTORY,
     )
     c.metadata["system_instruction"] = instruction
     c.validate()
@@ -862,6 +934,10 @@ def adapt_glaive_v2(record: dict[str, Any], split: str = "train") -> ToolConvers
         messages,
         adapter="glaive_function_calling_v2_v2",
         source_format="system/chat delimiters, unterminated functioncall blocks",
+        # Glaive's calls are answered by `<functioncall>`/function-response turns, so its
+        # resolved calls form real trajectories. Records with no calls end in assistant prose,
+        # which the complete-trajectory contract accepts as the terminal response.
+        supervision_kind=SupervisionKind.COMPLETE_TRAJECTORY,
     )
     c.metadata["system"] = system
     c.validate()

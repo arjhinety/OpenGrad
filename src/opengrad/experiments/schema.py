@@ -10,6 +10,8 @@ from typing import Any
 
 import yaml
 
+from opengrad.data.supervision import declared_kinds
+
 
 class ExperimentStatus(str, Enum):
     CREATED = "CREATED"
@@ -112,6 +114,49 @@ class ExperimentRecord:
         )
 
 
+def validate_supervision_selection(value: Any) -> dict[str, Any]:
+    """Validate the optional `supervision` block of an experiment config.
+
+    Declared kinds are checked against the supervision contract registry, so a typo fails at
+    config load rather than silently selecting nothing (or everything) at training time.
+    """
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise TypeError("supervision must be a mapping")
+    unknown = sorted(set(value) - {"include", "sampling_weights"})
+    if unknown:
+        raise ValueError(f"unknown supervision keys: {unknown}")
+    include = value.get("include")
+    if include is not None:
+        if not isinstance(include, list) or not include:
+            raise ValueError("supervision.include must be a non-empty list of supervision kinds")
+        bad = sorted(str(item) for item in include if str(item) not in declared_kinds())
+        if bad:
+            raise ValueError(
+                f"supervision.include has unknown kinds: {bad}; "
+                f"declared kinds are: {sorted(declared_kinds())}"
+            )
+    weights = value.get("sampling_weights")
+    if weights:
+        # Declared but not implemented. Accepting it silently would let a researcher believe they
+        # had weighted a mixture when the trainer used natural sampling -- a no-op that changes
+        # the meaning of an experiment without changing its output. `include` is implemented and
+        # covers the ablation this was wanted for (all kinds vs one kind).
+        bad_keys = sorted(str(key) for key in weights if str(key) not in declared_kinds())
+        if bad_keys:
+            raise ValueError(
+                f"supervision.sampling_weights has unknown kinds: {bad_keys}; "
+                f"declared kinds are: {sorted(declared_kinds())}"
+            )
+        raise ValueError(
+            "supervision.sampling_weights is not implemented; weighting would be silently "
+            "ignored. Use supervision.include to select kinds for an ablation, or remove the "
+            "block to train on the whole corpus under natural sampling."
+        )
+    return {"include": include} if value else {}
+
+
 @dataclass(frozen=True)
 class ExperimentConfig:
     """Canonical declarative experiment configuration."""
@@ -127,6 +172,9 @@ class ExperimentConfig:
     promotion: dict[str, Any]
     reproducibility: dict[str, Any]
     speculative_decoding: dict[str, Any] = field(default_factory=dict)
+    # Optional supervision selectivity: which supervision kinds to train on, and how to weight
+    # them. Absent means every kind in the corpus is trained under natural sampling.
+    supervision: dict[str, Any] = field(default_factory=dict)
     parent_experiment_id: str | None = None
 
     @classmethod
@@ -161,6 +209,7 @@ class ExperimentConfig:
             promotion=dict(data["promotion"]),
             reproducibility=dict(data["reproducibility"]),
             speculative_decoding=dict(data.get("speculative_decoding") or {}),
+            supervision=validate_supervision_selection(data.get("supervision")),
             parent_experiment_id=data.get("parent_experiment_id"),
         )
 
@@ -188,6 +237,7 @@ class ExperimentConfig:
             "promotion": self.promotion,
             "reproducibility": self.reproducibility,
             "speculative_decoding": self.speculative_decoding,
+            "supervision": self.supervision,
         }
 
     def write_resolved(self, destination: Path) -> None:

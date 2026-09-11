@@ -918,6 +918,77 @@ def _renderability_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, st
     return True, detail, None
 
 
+def _supervision_composition_state(
+    root: Path, raw: dict[str, Any]
+) -> tuple[bool, str, str | None]:
+    """Report the training mixture by supervision kind, and honour the config's selection.
+
+    A single aggregate trainable count cannot distinguish a corpus of complete trajectories from
+    a corpus of call-prediction examples, and those teach different things. The mixture is
+    therefore stated per kind before training, and a config that selected kinds absent from the
+    corpus fails rather than silently training on something else.
+    """
+    declared = (raw.get("datasets") or {}).get("yield_report")
+    if not declared:
+        return (
+            True,
+            "No yield report declared: supervision composition is not measured for this config",
+            None,
+        )
+    payload = _read_json(root / str(declared))
+    if payload is None:
+        return False, f"Declared yield report is unreadable: {declared}", "YIELD_REPORT_UNREADABLE"
+
+    per_kind: dict[str, dict[str, int]] = {}
+    total_trainable = 0
+    for source in payload.get("sources") or []:
+        kinds = source.get("supervision_kinds_trainable") or {}
+        for kind, count in kinds.items():
+            entry = per_kind.setdefault(str(kind), {"trainable": 0, "sources": 0})
+            entry["trainable"] += int(count)
+            entry["sources"] += 1
+            total_trainable += int(count)
+    if not per_kind:
+        return (
+            True,
+            f"Yield report declares no trainable supervision kinds: {declared}",
+            None,
+        )
+
+    composition = {
+        kind: {
+            **entry,
+            "share": round(entry["trainable"] / total_trainable, 6) if total_trainable else 0.0,
+        }
+        for kind, entry in sorted(per_kind.items())
+    }
+    unclassified = per_kind.get("UNCLASSIFIED", {}).get("trainable", 0)
+    selected = [str(item) for item in ((raw.get("supervision") or {}).get("include") or [])]
+    absent = sorted(kind for kind in selected if kind not in per_kind)
+    detail = (
+        f"trainable by supervision kind: "
+        f"{ {k: v['trainable'] for k, v in composition.items()} }; "
+        f"shares: { {k: v['share'] for k, v in composition.items()} }"
+    )
+    if selected:
+        detail += f"; config selects {selected}"
+    if absent:
+        return (
+            False,
+            f"{detail}; config selects kinds the corpus does not contain: {absent}",
+            "SUPERVISION_SELECTION_MISMATCH",
+        )
+    if unclassified:
+        # An unclassified trainable record means a record reached training without a declared
+        # contract. It must not be silently averaged into the mixture.
+        return (
+            False,
+            f"{detail}; {unclassified} trainable records carry no supervision kind",
+            "SUPERVISION_UNCLASSIFIED",
+        )
+    return True, detail, None
+
+
 def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
     root = root.resolve()
     config_path = _resolve_project_path(root, config_path, root / BASELINE_CONFIG).resolve()
@@ -1238,6 +1309,22 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
             "PASS",
             "Not an SFT configuration; per-source trainability deferred",
         )
+    if is_sft_config:
+        composition_ok, composition_detail, composition_code = _supervision_composition_state(
+            root, raw
+        )
+        add(
+            "supervision_composition",
+            "PASS" if composition_ok else "FAIL",
+            composition_detail,
+            composition_code,
+        )
+    else:
+        add(
+            "supervision_composition",
+            "PASS",
+            "Not an SFT configuration; supervision composition deferred",
+        )
     add(
         "real_b0",
         "PASS" if baseline["real"] else "FAIL",
@@ -1284,6 +1371,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "dataset_snapshot",
         "experiment_preflight",
         "renderability_yield",
+        "supervision_composition",
     }
     ready_for_sft = all(gate_map[name]["status"] == "PASS" for name in sft_names)
     blocking = [gate["name"] for gate in gates if gate["status"] == "FAIL"]

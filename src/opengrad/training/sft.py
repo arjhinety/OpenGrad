@@ -249,6 +249,13 @@ def run_real_sft(
     release_dir = (experiment.get("datasets") or {}).get("release_dir")
     release_path = Path(str(release_dir)) if release_dir else None
     cache_dir = default_cache_dir(root, model_id, settings.max_seq_length, release_path)
+    # Optional supervision selectivity. Absent means train on every kind under natural sampling;
+    # declared, it narrows the sample stream and is recorded in the cache identity and report so
+    # an ablation is reproducible rather than implicit.
+    supervision_selection = experiment.get("supervision") or {}
+    supervision_include = tuple(
+        sorted(str(item) for item in (supervision_selection.get("include") or []))
+    )
     rendering_report = preprocess_corpus(
         root,
         cache_dir=cache_dir,
@@ -258,6 +265,7 @@ def run_real_sft(
         tokenizer_revision=str(tokenizer_revision),
         renderer_name="qwen3_5_2b_v1",
         max_seq_length=settings.max_seq_length,
+        supervision_include=supervision_include,
         progress=lambda done, total, written: (
             print(f"  [preprocess] shards {done}/{total} samples={written}", flush=True)
             if done % 10 == 0 or done == total

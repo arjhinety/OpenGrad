@@ -34,7 +34,7 @@ YIELD_NOT_EXPECTED = "NOT_EXPECTED"
 
 @dataclass
 class SourceYield:
-    """Per-source canonical and training-boundary yield."""
+    """Per-source canonical and training-boundary yield, broken down by supervision kind."""
 
     source: str
     canonical_records: int = 0
@@ -43,6 +43,10 @@ class SourceYield:
     targets_with_tool_calls: int = 0
     targets_without_tool_calls: int = 0
     failure_reasons: dict[str, int] = field(default_factory=dict)
+    # Trainable (and total) records per supervision kind. Reported separately so a corpus of
+    # call-prediction records is never summarised as though it were complete trajectories.
+    supervision_kinds: dict[str, int] = field(default_factory=dict)
+    supervision_kinds_total: dict[str, int] = field(default_factory=dict)
 
     @property
     def yield_ratio(self) -> float:
@@ -77,13 +81,15 @@ class SourceYield:
             "tool_call_target_ratio": round(self.tool_call_target_ratio, 6),
             "quarantine_ratio": round(self.quarantine_ratio, 6),
             "failure_reasons": dict(sorted(self.failure_reasons.items())),
+            "supervision_kinds_trainable": dict(sorted(self.supervision_kinds.items())),
+            "supervision_kinds_canonical": dict(sorted(self.supervision_kinds_total.items())),
         }
 
 
 def aggregate_yields(
-    rows: Iterable[tuple[str, str, bool]],
+    rows: Iterable[tuple[str, str, bool, str]],
 ) -> dict[str, SourceYield]:
-    """Aggregate ``(source, boundary_status, has_tool_call_target)`` tuples.
+    """Aggregate ``(source, boundary_status, has_tool_call_target, supervision_kind)`` rows.
 
     ``boundary_status`` is the training-boundary status string; ``OK`` and
     ``CONTEXT_TAIL_TRUNCATED`` are the trainable states.
@@ -91,11 +97,14 @@ def aggregate_yields(
     from opengrad.training.sft_data import TRAINABLE
 
     out: dict[str, SourceYield] = {}
-    for source, status, has_calls in rows:
+    for source, status, has_calls, kind in rows:
         entry = out.setdefault(source, SourceYield(source=source))
+        label = kind or "UNCLASSIFIED"
         entry.canonical_records += 1
+        entry.supervision_kinds_total[label] = entry.supervision_kinds_total.get(label, 0) + 1
         if status in TRAINABLE:
             entry.trainable_records += 1
+            entry.supervision_kinds[label] = entry.supervision_kinds.get(label, 0) + 1
             if has_calls:
                 entry.targets_with_tool_calls += 1
             else:
@@ -204,6 +213,10 @@ def render_yield_table(findings: list[dict[str, Any]]) -> str:
         )
         for reason in finding["reasons"]:
             lines.append(f"{'':<34}  - {reason}")
+        kinds = finding.get("supervision_kinds_trainable") or {}
+        if kinds:
+            rendered = ", ".join(f"{name}={count}" for name, count in sorted(kinds.items()))
+            lines.append(f"{'':<34}  trainable by supervision kind: {rendered}")
     return "\n".join(lines)
 
 
@@ -224,7 +237,7 @@ def measure_materialized_corpus(
     from opengrad.training.sft_data import build_sample
 
     renderer = renderer_for(model)
-    rows: list[tuple[str, str, bool]] = []
+    rows: list[tuple[str, str, bool, str]] = []
     for index, raw in enumerate(iter_materialized_rows(Path(input_dir))):
         if limit is not None and index >= limit:
             break
@@ -235,11 +248,11 @@ def measure_materialized_corpus(
                 row["id"], row["source"], row["tools"], row["messages"], row["metadata"]
             )
         except Exception as exc:  # noqa: BLE001 - malformed rows are quarantined, not repaired
-            rows.append((source, f"CONSTRUCTION_FAILED:{type(exc).__name__}", False))
+            rows.append((source, f"CONSTRUCTION_FAILED:{type(exc).__name__}", False, ""))
             continue
         has_calls = any(message.get("tool_calls") for message in conversation.messages)
         sample = build_sample(
             renderer, conversation, max_seq_length=max_seq_length, source_dataset=source
         )
-        rows.append((source, sample.status, has_calls))
+        rows.append((source, sample.status, has_calls, sample.supervision_kind))
     return aggregate_yields(rows)

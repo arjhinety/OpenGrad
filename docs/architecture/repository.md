@@ -29,6 +29,64 @@ The accessible pinned sources are normalized, audited, and rendered into local i
 
 The first empirical model action is B0: unmodified `Qwen/Qwen3.5-2B` inference against the frozen held-out evaluation. B0 is executed, and the post-training experiments that followed it — two negative, one partial recovery — are recorded in the [M0 SFT execution report](../../reports/M0_SFT_EXECUTION_REPORT.md). No speculative-decoding or external-benchmark result exists.
 
+## Heterogeneous supervision
+
+> OpenGrad does not require all datasets to share one conversational trajectory shape. It
+> requires every dataset to declare what it supervises. Different supervision contracts may
+> coexist in one experiment, but they remain explicitly typed, independently validated,
+> separately measurable, and reproducibly mixable.
+
+Not every legitimate post-training corpus has the same shape. xLAM/APIGen is
+`query + tools -> assistant tool_call`: the supervised objective is next-call prediction, and the
+corpus structurally contains no tool-result turn. Rejecting it as an unresolved trajectory
+discards a useful dataset; accepting unresolved calls in general corrupts datasets that do claim
+full trajectories. The resolution is a declared type, not a heuristic.
+
+```text
+UPSTREAM DATASET
+      │
+      ▼
+SOURCE ADAPTER          normalizes the representation and states the upstream semantics
+      │
+      ▼
+CANONICAL RECORD        messages + tools + provenance + metadata.supervision
+      │
+      ▼
+CONTRACT-AWARE VALIDATION
+      ├── COMPLETE_TRAJECTORY   every call resolved; terminal turn is an assistant response
+      ├── CALL_PREDICTION       the terminal assistant call is the target and needs no result
+      └── future contracts      added by declaring them, never by widening an existing one
+      │
+      ▼
+RENDERER + LOSS MASK    the contract says which turns are context and which carry loss
+      │
+      ▼
+TRAINING MIXTURE        measurable per kind, filterable, optionally weightable
+```
+
+The only rule a contract may change is whether a **terminal** call requires a future environment
+response. Undeclared tools, invalid arguments, malformed calls, duplicate ids, orphaned results,
+FIFO order violations, and a call appearing before a required result all remain invalid under
+every contract, and a malformed call stays quarantined even when its *shape* is a valid
+call-prediction example. An undeclared supervision kind is a failure, never a fallback; absence
+of the field on a record that predates it is read as the stricter `COMPLETE_TRAJECTORY`.
+
+OpenGrad explicitly rejects these:
+
+```text
+NO: dropping a useful dataset because it lacks an arbitrary preferred turn
+NO: fabricating missing tool results
+NO: treating terminal calls as unresolved trajectories without considering task semantics
+NO: globally accepting orphaned calls
+NO: source-name conditionals scattered through validators
+NO: hiding supervision differences in renderer code
+NO: reporting call-prediction records as complete trajectories
+NO: collapsing all supervision kinds into one undifferentiated trainable count
+```
+
+Measured composition and the per-source mapping live in
+[the supervision contract report](../../reports/SUPERVISION_CONTRACT_REPORT.md).
+
 ## Experiment state: authoritative versus derived
 
 Experiment state has exactly one owner per value, and the discovery index is not one of them:

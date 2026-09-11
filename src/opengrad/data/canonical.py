@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from opengrad.data.behavior import validate_behavior
+from opengrad.data.supervision import validate_supervision_block
 
 SCHEMA_VERSION = "tool_use_ir_v1"
 ROLES = {"system", "user", "assistant", "tool"}
@@ -49,6 +50,9 @@ class ToolConversation:
                 behavior.get("capabilities", []),
                 behavior.get("confidence", "known"),
             )
+        # A present-but-undeclared supervision kind is rejected here; absence is allowed for
+        # records that predate the field and is read as the stricter legacy contract.
+        validate_supervision_block(self.metadata)
         names: set[str] = set()
         for tool in self.tools:
             if (
@@ -93,7 +97,11 @@ class ToolConversation:
                     raise ValueError(f"tool result has unknown call id: {call_id}")
 
     def validate_training_semantics(self) -> None:
-        """Validate the stricter trajectory contract used at the training boundary."""
+        """Validate the trajectory contract this record declares.
+
+        The record's `metadata.supervision` decides whether a terminal tool call needs a
+        result; every other rule is enforced identically regardless of kind.
+        """
         try:
             self.validate()
         except ValueError as exc:
@@ -103,8 +111,12 @@ class ToolConversation:
                 ) from exc
             raise
         from opengrad.data.semantic import validate_training_trajectory
+        from opengrad.data.supervision import resolve_contract
 
-        issues = validate_training_trajectory(self)
+        # An undeclared kind is an error here rather than a default, because this is the
+        # boundary where a wrong reading of the record becomes a training target.
+        contract, _assignment = resolve_contract(self.metadata)
+        issues = validate_training_trajectory(self, contract)
         if issues:
             issue = issues[0]
             aliases = {
@@ -114,6 +126,8 @@ class ToolConversation:
                 "ORPHAN_TOOL_RESULT": "SEM_ORPHAN_RESULT",
                 "MISSING_TOOL_RESULT": "SEM_UNRESOLVED_CALL",
                 "INVALID_MESSAGE_SEQUENCE": "SEM_RESULT_ORDER",
+                "SUPERVISION_TARGET_MISSING": "SEM_SUPERVISION_TARGET_MISSING",
+                "SUPERVISION_INTERMEDIATE_CALL": "SEM_SUPERVISION_INTERMEDIATE_CALL",
             }
             code = aliases.get(
                 issue.code,

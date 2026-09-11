@@ -74,6 +74,10 @@ class CacheIdentity:
     template_hash: str
     max_seq_length: int
     corpus_manifest_sha256: str
+    # Which supervision kinds this sample set contains. Part of the identity because filtering
+    # changes the sample stream: reusing an unfiltered cache for a filtered run would silently
+    # train on records the config excluded.
+    supervision_include: tuple[str, ...] = ()
     cache_version: int = CACHE_VERSION
 
     def to_dict(self) -> dict[str, Any]:
@@ -86,10 +90,12 @@ class CacheIdentity:
             "template_hash": self.template_hash,
             "max_seq_length": self.max_seq_length,
             "corpus_manifest_sha256": self.corpus_manifest_sha256,
+            "supervision_include": list(self.supervision_include),
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> CacheIdentity:
+        include = data.get("supervision_include") or []
         return cls(
             model_id=str(data.get("model_id", "")),
             model_revision=str(data.get("model_revision", "")),
@@ -98,6 +104,9 @@ class CacheIdentity:
             template_hash=str(data.get("template_hash", "")),
             max_seq_length=int(data.get("max_seq_length", 0)),
             corpus_manifest_sha256=str(data.get("corpus_manifest_sha256", "")),
+            # Restored, not dropped: an identity that forgets its filter would compare equal
+            # against a differently-filtered cache and be reused.
+            supervision_include=tuple(str(item) for item in include),
             cache_version=int(data.get("cache_version", 0)),
         )
 
@@ -125,17 +134,20 @@ def _worker_renderer() -> Any:
     return _RENDERER
 
 
-def _process_shard(payload: tuple[str, int]) -> dict[str, Any]:
+def _process_shard(payload: tuple[str, int, tuple[str, ...]]) -> dict[str, Any]:
     """Render one shard. Runs in a worker process."""
     import pyarrow.parquet as pq  # type: ignore[import-untyped]
 
-    shard_name, max_seq_length = payload
+    shard_name, max_seq_length, supervision_include = payload
     shard_path = Path(shard_name)
     renderer = _worker_renderer()
     samples: list[dict[str, Any]] = []
     dispositions: Counter[str] = Counter()
     reasons: Counter[str] = Counter()
     source_counts: Counter[str] = Counter()
+    # Records dropped because their declared supervision kind is not selected. Counted
+    # separately from failures: an excluded record is not a broken one.
+    supervision_excluded: Counter[str] = Counter()
 
     parquet = pq.ParquetFile(shard_path)
     seen: Counter[str] = Counter()
@@ -168,6 +180,9 @@ def _process_shard(payload: tuple[str, int]) -> dict[str, Any]:
                 reason = str(sample.detail.get("reason") or sample.status)
                 reasons[reason[:160]] += 1
                 continue
+            if supervision_include and sample.supervision_kind not in supervision_include:
+                supervision_excluded[sample.supervision_kind or "UNCLASSIFIED"] += 1
+                continue
             samples.append(
                 {
                     "record_id": sample.record_id,
@@ -175,6 +190,7 @@ def _process_shard(payload: tuple[str, int]) -> dict[str, Any]:
                     "source_dataset": sample.source_dataset,
                     "behavior_decision": sample.behavior_decision,
                     "status": sample.status,
+                    "supervision_kind": sample.supervision_kind,
                     "tokens": sample.tokens,
                     "supervised": sample.supervised,
                     "template_hash": str(sample.detail.get("template_hash") or ""),
@@ -186,6 +202,7 @@ def _process_shard(payload: tuple[str, int]) -> dict[str, Any]:
         "dispositions": dict(dispositions),
         "reasons": dict(reasons),
         "source_counts": dict(source_counts),
+        "supervision_excluded": dict(supervision_excluded),
     }
 
 
@@ -236,8 +253,14 @@ def preprocess_corpus(
     release_dir: Path | None = None,
     workers: int | None = None,
     progress: Any = None,
+    supervision_include: tuple[str, ...] = (),
 ) -> dict[str, Any]:
-    """Render the whole corpus into a cached sample set. Idempotent per identity."""
+    """Render the whole corpus into a cached sample set. Idempotent per identity.
+
+    ``supervision_include`` restricts the sample stream to the named supervision kinds. It is
+    part of the cache identity, so an ablation cannot silently reuse a differently-filtered
+    sample set.
+    """
 
     from opengrad.data.renderers import Qwen35_2BRenderer
 
@@ -255,6 +278,7 @@ def preprocess_corpus(
         template_hash=template_hash,
         max_seq_length=max_seq_length,
         corpus_manifest_sha256=str(identity_info["manifest_sha256"]),
+        supervision_include=tuple(sorted(supervision_include)),
     )
     if cache_is_current(cache_dir, expected):
         return {"status": "CACHE_HIT", "identity": expected.to_dict(), **identity_info}
@@ -319,6 +343,8 @@ def preprocess_corpus(
             str(max_seq_length),
             "--revision",
             model_revision,
+            "--supervision-include",
+            ",".join(sorted(supervision_include)),
             *[str(path) for path in chunk],
         ]
         processes.append(subprocess.Popen(command, env=environment, cwd=str(root)))
@@ -473,7 +499,11 @@ def samples_to_table(rows: list[dict[str, Any]], pa: Any) -> Any:
 
 
 def run_worker(
-    index: int, shard_names: list[str], out_dir: Path, max_seq_length: int
+    index: int,
+    shard_names: list[str],
+    out_dir: Path,
+    max_seq_length: int,
+    supervision_include: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Render a list of shards, appending samples and a per-shard progress line.
 
@@ -492,23 +522,28 @@ def run_worker(
     source_counts: Counter[str] = Counter()
     source_trainable: Counter[str] = Counter()
     behavior_trainable: Counter[str] = Counter()
+    supervision_trainable: Counter[str] = Counter()
+    supervision_excluded: Counter[str] = Counter()
     lengths: list[int] = []
     supervised_tokens = 0
     total_tokens = 0
     written = 0
 
     for name in shard_names:
-        payload = _process_shard((name, max_seq_length))
+        payload = _process_shard((name, max_seq_length, supervision_include))
         for key, value in payload["dispositions"].items():
             dispositions[key] += value
         for key, value in payload["reasons"].items():
             reasons[key] += value
         for key, value in payload["source_counts"].items():
             source_counts[key] += value
+        for key, value in payload["supervision_excluded"].items():
+            supervision_excluded[key] += value
         rows = payload["samples"]
         for row in rows:
             source_trainable[row["source_dataset"]] += 1
             behavior_trainable[row["behavior_decision"]] += 1
+            supervision_trainable[str(row.get("supervision_kind") or "UNCLASSIFIED")] += 1
             lengths.append(len(row["tokens"]))
             supervised_tokens += len(row["supervised"])
             total_tokens += len(row["tokens"])
@@ -532,6 +567,9 @@ def run_worker(
         "source_counts": dict(source_counts),
         "source_trainable": dict(source_trainable),
         "behavior_trainable": dict(behavior_trainable),
+        "supervision_trainable": dict(supervision_trainable),
+        "supervision_excluded": dict(supervision_excluded),
+        "supervision_include": list(supervision_include),
         "lengths": lengths,
         "supervised_tokens": supervised_tokens,
         "total_tokens": total_tokens,
@@ -552,6 +590,8 @@ def _merge_parts(part_dir: Path, staging: Path) -> dict[str, Any]:
     source_counts: Counter[str] = Counter()
     source_trainable: Counter[str] = Counter()
     behavior_trainable: Counter[str] = Counter()
+    supervision_trainable: Counter[str] = Counter()
+    supervision_excluded: Counter[str] = Counter()
     lengths: list[int] = []
     supervised_tokens = 0
     total_tokens = 0
@@ -565,6 +605,8 @@ def _merge_parts(part_dir: Path, staging: Path) -> dict[str, Any]:
             source_counts.update(stats["source_counts"])
             source_trainable.update(stats["source_trainable"])
             behavior_trainable.update(stats["behavior_trainable"])
+            supervision_trainable.update(stats.get("supervision_trainable") or {})
+            supervision_excluded.update(stats.get("supervision_excluded") or {})
             lengths.extend(stats["lengths"])
             supervised_tokens += stats["supervised_tokens"]
             total_tokens += stats["total_tokens"]
@@ -586,6 +628,8 @@ def _merge_parts(part_dir: Path, staging: Path) -> dict[str, Any]:
         "source_counts": dict(source_counts),
         "source_trainable": dict(source_trainable),
         "behavior_trainable": dict(behavior_trainable),
+        "supervision_trainable": dict(supervision_trainable),
+        "supervision_excluded": dict(supervision_excluded),
         "lengths": lengths,
         "supervised_tokens": supervised_tokens,
         "total_tokens": total_tokens,
@@ -602,10 +646,21 @@ def _worker_main(argv: list[str]) -> int:
     parser.add_argument("--out", required=True)
     parser.add_argument("--max-seq-length", type=int, required=True)
     parser.add_argument("--revision", required=True)
+    parser.add_argument(
+        "--supervision-include",
+        default="",
+        help="comma-separated supervision kinds to keep; empty keeps every kind",
+    )
     parser.add_argument("shards", nargs="+")
     arguments = parser.parse_args(argv)
     os.environ["OPENGRAD_RENDER_REVISION"] = arguments.revision
-    run_worker(arguments.worker, arguments.shards, Path(arguments.out), arguments.max_seq_length)
+    run_worker(
+        arguments.worker,
+        arguments.shards,
+        Path(arguments.out),
+        arguments.max_seq_length,
+        tuple(k for k in arguments.supervision_include.split(",") if k),
+    )
     return 0
 
 

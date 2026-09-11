@@ -30,6 +30,7 @@ from typing import Any
 
 from opengrad.data.canonical import ToolConversation
 from opengrad.data.renderers import Qwen35_2BRenderer, _qwen_messages
+from opengrad.data.supervision import resolve_contract
 
 # Sample disposition. Only OK and CONTEXT_TAIL_TRUNCATED are trainable.
 STATUS_OK = "OK"
@@ -49,6 +50,8 @@ class SupervisedSample:
     source_dataset: str
     behavior_decision: str
     status: str
+    supervision_kind: str = ""
+    """The contract this sample's target was validated under, from the canonical record."""
     tokens: list[int] = field(default_factory=list)
     supervised: list[int] = field(default_factory=list)
     """Token indices that carry loss (assistant spans only)."""
@@ -246,6 +249,18 @@ def build_sample(
         status=STATUS_OK,
     )
 
+    # Resolve the contract up front so every exit path reports which rules judged this record.
+    try:
+        contract, assignment = resolve_contract(conversation.metadata)
+    except (TypeError, ValueError) as exc:
+        sample.status = STATUS_UNRENDERABLE
+        sample.detail["reason"] = f"SUPERVISION_INVALID: {exc}"
+        return sample
+    sample.supervision_kind = contract.kind.value
+    sample.detail["supervision_kind"] = contract.kind.value
+    sample.detail["supervision_assignment"] = assignment
+    sample.detail["validation_policy"] = contract.validation_policy
+
     # Shape is checked before rendering so that a record which simply has no assistant turn is
     # reported as such. The canonical validator rejects it too, but reporting it as a render
     # failure would hide the real reason and inflate the unrenderable count.
@@ -303,6 +318,32 @@ def build_sample(
     sample.detail["supervised_tokens"] = len(supervised)
     sample.detail["template_hash"] = rendered.chat_template_hash
 
+    # Under CALL_PREDICTION the terminal assistant call *is* the target, so it must carry loss.
+    # Assistant-span masking already covers every assistant turn, which means a call-prediction
+    # record needs no special rendering; this asserts that rather than assuming it, so a future
+    # masking change cannot silently drop the call from the loss and leave a sample that looks
+    # trainable while supervising nothing.
+    #
+    # `spans` is ordered by assistant turn, and the contract requires the target to be the final
+    # assistant message, so a one-span-per-turn count makes `spans[-1]` that turn's span.
+    if contract.terminal_target_type == "assistant_tool_call":
+        turns = [i for i, m in enumerate(messages) if m.get("role") == "assistant"]
+        if len(spans) != len(turns):
+            sample.status = STATUS_UNMASKABLE
+            sample.detail["reason"] = (
+                f"{contract.kind.value} needs a supervised span per assistant turn, "
+                f"found {len(spans)} for {len(turns)}"
+            )
+            return sample
+        target_start, target_end = spans[-1]
+        if not any(target_start <= index < target_end for index in supervised):
+            sample.status = STATUS_UNMASKABLE
+            sample.detail["reason"] = (
+                f"{contract.kind.value} terminal call span carries no supervised token"
+            )
+            return sample
+        sample.detail["target_span"] = [target_start, target_end]
+
     if len(tokens) <= max_seq_length:
         sample.tokens = tokens
         sample.supervised = supervised
@@ -336,6 +377,44 @@ def sample_fingerprint(samples: list[SupervisedSample]) -> str:
 
 def disposition_counts(samples: list[SupervisedSample]) -> dict[str, int]:
     return dict(sorted(Counter(sample.status for sample in samples).items()))
+
+
+def supervision_kind_counts(samples: list[SupervisedSample]) -> dict[str, int]:
+    """Trainable samples per supervision kind.
+
+    Reported separately so a corpus of call-prediction records is never summarised as though it
+    were a corpus of complete trajectories.
+    """
+    return dict(
+        sorted(
+            Counter(
+                sample.supervision_kind or "UNCLASSIFIED"
+                for sample in samples
+                if sample.status in TRAINABLE
+            ).items()
+        )
+    )
+
+
+def supervision_composition(samples: list[SupervisedSample]) -> dict[str, Any]:
+    """Per-kind record and target counts, with the mixture as a fraction of trainable records."""
+    trainable = [s for s in samples if s.status in TRAINABLE]
+    per_kind: dict[str, dict[str, int]] = {}
+    for sample in samples:
+        kind = sample.supervision_kind or "UNCLASSIFIED"
+        entry = per_kind.setdefault(kind, {"records": 0, "trainable": 0, "targets": 0})
+        entry["records"] += 1
+        if sample.status in TRAINABLE:
+            entry["trainable"] += 1
+            entry["targets"] += len(sample.supervised)
+    total = len(trainable)
+    for kind, entry in per_kind.items():
+        entry["share_of_trainable"] = round(entry["trainable"] / total, 6) if total else 0.0
+        entry["kind"] = kind
+    return {
+        "trainable_records": total,
+        "kinds": dict(sorted(per_kind.items())),
+    }
 
 
 def supervised_token_total(samples: list[SupervisedSample]) -> int:
