@@ -260,7 +260,7 @@
       "status": "PASS"
     },
     {
-      "details": "43.66 GiB free",
+      "details": "43.67 GiB free",
       "error_code": null,
       "name": "disk_capacity",
       "status": "PASS"
@@ -332,7 +332,7 @@
       "status": "PASS"
     }
   ],
-  "git_commit": "92ca2b91e7fb1a3b7bd13cc85aa01a596805f3fb",
+  "git_commit": "c60b5e8b924bb87e56e391ba18f3bb830d01c808",
   "gpu": {
     "a100_variant": "A100_80GB",
     "bf16_supported": true,
