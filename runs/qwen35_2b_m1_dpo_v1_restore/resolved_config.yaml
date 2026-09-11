@@ -1,0 +1,74 @@
+experiment_id: qwen35_2b_m1_dpo_v1_restore
+parent_experiment_id: null
+hypothesis: "Reproduction of `qwen35_2b_m1_dpo_v1`, run for one reason: that run's\
+  \ intermediate checkpoint weights (steps 100 and 200) were removed after upload,\
+  \ so the only surviving artifact was step 300. The recorded result is a negative\
+  \ one whose informative part is the trajectory, and a trajectory whose checkpoints\
+  \ cannot be inspected is not independently verifiable. This run regenerates them.\n\
+  Everything that determines the result is held identical to the original: base checkpoint,\
+  \ pinned preference file (same sha256), beta, learning rate, schedule, batch geometry,\
+  \ step count, precision, and seed. This config is a copy apart from this field and\
+  \ the identity below, which the CLI requires to be new \u2014 a second launch under\
+  \ an existing experiment ID is refused precisely so that a run directory is never\
+  \ silently rewritten.\nThe original run is NOT superseded and its record is untouched.\
+  \ Its `eval/` metrics remain the authoritative numbers; this run's checkpoints are\
+  \ admissible only if evaluating them reproduces those numbers, which is checked\
+  \ before anything is published.\nThe original finding stands: DPO on the pinned\
+  \ preference split eliminates over-calling (0.6425 -> 0.0034) and raises precision\
+  \ and clarification accuracy while collapsing call recall (0.9722 -> 0.0131), monotonically\
+  \ from the first measured checkpoint. It is a negative result caused by over-optimisation\
+  \ on a small preference set and by starting from a policy whose always-call bias\
+  \ makes every available signal a \"stop calling\" signal."
+model:
+  model_id: Qwen/Qwen3.5-2B
+  model_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+  tokenizer_revision: 15852e8c16360a2fea060d615a32b45270f8a8fc
+datasets:
+  manifest_ids:
+  - when2call_pref_v1
+  hashes:
+    preference: 474a8bb1c928efd642a2550c8a5b0a7af699628ddf238c195c6b399a44ed2dcf
+  preference_path: data/processed/when2call-preference-pairs-v1.jsonl
+  preference_prompt_format: rendered
+  source_manifests:
+  - when2call
+trainer:
+  type: dpo
+  reference: initial_policy
+  beta: 0.1
+  learning_rate: 5.0e-06
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 2
+  max_steps: 300
+  warmup_steps: 20
+  max_seq_length: 2048
+evaluation:
+  suite: tool_use_core
+  baseline_experiment: tool_calling/qwen35_2b/baseline
+  primary_metrics:
+  - call_precision
+  - call_recall
+  - call_f1
+  - over_call_rate
+  - under_call_rate
+  - clarification_accuracy
+  - unsupported_accuracy
+  - parse_valid_rate
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+checkpointing:
+  save_steps: 100
+  max_checkpoints: 3
+promotion:
+  requires_executed_suite: tool_use_core
+  must_pass:
+    parse_valid_rate_min: 0.99
+  max_regression:
+    default: 1.0
+reproducibility:
+  seed: 42
+  precision: bfloat16
+speculative_decoding:
+  enabled: false

@@ -1,0 +1,51 @@
+{
+  "checkpoints": [],
+  "completion_timestamp": null,
+  "dataset_hashes": {
+    "preference": "474a8bb1c928efd642a2550c8a5b0a7af699628ddf238c195c6b399a44ed2dcf"
+  },
+  "dataset_manifest_ids": [
+    "when2call_pref_v1"
+  ],
+  "environment": {
+    "cpu": "x86_64",
+    "cuda": null,
+    "git_dirty": false,
+    "git_sha": "3712a31e38b029a2d68161e3fd45c7e0fdc42109",
+    "gpu": null,
+    "gpu_probe": "not performed by Phase 0.5",
+    "kernel": "6.8.0-100-generic",
+    "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "ram_gb": null,
+    "rocm": null,
+    "timestamp": "2026-09-10T23:47:48.604662+00:00"
+  },
+  "evaluations": [],
+  "experiment_id": "qwen35_2b_m1_dpo_v1_restore",
+  "git_commit": "unknown",
+  "git_dirty": false,
+  "hardware_info": {},
+  "hypothesis": "Reproduction of `qwen35_2b_m1_dpo_v1`, run for one reason: that run's intermediate checkpoint weights (steps 100 and 200) were removed after upload, so the only surviving artifact was step 300. The recorded result is a negative one whose informative part is the trajectory, and a trajectory whose checkpoints cannot be inspected is not independently verifiable. This run regenerates them.\nEverything that determines the result is held identical to the original: base checkpoint, pinned preference file (same sha256), beta, learning rate, schedule, batch geometry, step count, precision, and seed. This config is a copy apart from this field and the identity below, which the CLI requires to be new \u2014 a second launch under an existing experiment ID is refused precisely so that a run directory is never silently rewritten.\nThe original run is NOT superseded and its record is untouched. Its `eval/` metrics remain the authoritative numbers; this run's checkpoints are admissible only if evaluating them reproduces those numbers, which is checked before anything is published.\nThe original finding stands: DPO on the pinned preference split eliminates over-calling (0.6425 -> 0.0034) and raises precision and clarification accuracy while collapsing call recall (0.9722 -> 0.0131), monotonically from the first measured checkpoint. It is a negative result caused by over-optimisation on a small preference set and by starting from a policy whose always-call bias makes every available signal a \"stop calling\" signal.",
+  "launch_timestamp": "2026-09-10T23:47:48.611547+00:00",
+  "metadata": {},
+  "model_id": "Qwen/Qwen3.5-2B",
+  "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "parent_experiment_id": null,
+  "promotion_decision": null,
+  "random_seed": 42,
+  "status": "TRAINED",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "training_algorithm": "dpo",
+  "training_config": {
+    "beta": 0.1,
+    "gradient_accumulation_steps": 2,
+    "learning_rate": 5e-06,
+    "max_seq_length": 2048,
+    "max_steps": 300,
+    "per_device_train_batch_size": 2,
+    "reference": "initial_policy",
+    "type": "dpo",
+    "warmup_steps": 20
+  }
+}
