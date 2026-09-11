@@ -123,6 +123,19 @@ def render_openweights_prompt(
     return f"{system_msg}\n\nUser: {user_prompt}\nAssistant:"
 
 
+def _call_from_json_object(obj: Any) -> tuple[str, str | None, dict[str, Any]]:
+    """Build a CALL triple from a parsed JSON call object.
+
+    Both JSON shapes name the tool with a string, so a non-string value is reported as "no name"
+    rather than leaking through the declared ``str | None`` return. The two JSON branches below
+    share this so they cannot drift apart on malformed input.
+    """
+    candidate = obj.get("name") or obj.get("tool")
+    name = candidate if isinstance(candidate, str) else None
+    args = obj.get("arguments", {})
+    return "CALL", name, args if isinstance(args, dict) else {}
+
+
 def parse_openweights_reply(reply: str) -> tuple[str, str | None, dict[str, Any]]:
     """Parse reply using the OpenWeights ToolPrompting parser logic.
 
@@ -151,10 +164,7 @@ def parse_openweights_reply(reply: str) -> tuple[str, str | None, dict[str, Any]
     tagged_match = re.search(r"<tool_call>(.*?)</tool_call>", cleaned, re.DOTALL)
     if tagged_match:
         try:
-            obj = json.loads(tagged_match.group(1))
-            name = obj.get("name") or obj.get("tool")
-            args = obj.get("arguments", {})
-            return "CALL", name, args if isinstance(args, dict) else {}
+            return _call_from_json_object(json.loads(tagged_match.group(1)))
         except (json.JSONDecodeError, TypeError):
             return "FORMAT_ERROR", None, {}
 
@@ -164,9 +174,7 @@ def parse_openweights_reply(reply: str) -> tuple[str, str | None, dict[str, Any]
         try:
             obj = json.loads(bare_match.group(0))
             if isinstance(obj, dict) and ("tool" in obj or "name" in obj):
-                name = obj.get("tool") or obj.get("name")
-                args = obj.get("arguments", {})
-                return "CALL", name, args if isinstance(args, dict) else {}
+                return _call_from_json_object(obj)
         except (json.JSONDecodeError, TypeError):
             pass
 

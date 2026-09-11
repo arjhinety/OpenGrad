@@ -123,7 +123,8 @@ def training_corpus_fingerprint(root: Path, release_dir: Path | None = None) -> 
 
 def finding_fingerprint(entry: dict[str, Any]) -> str:
     """Identity of one held-out finding: its id, levels, and matched training records."""
-    matches = entry.get("matches") if isinstance(entry.get("matches"), list) else []
+    raw_matches = entry.get("matches")
+    matches: list[Any] = raw_matches if isinstance(raw_matches, list) else []
     canonical_matches = sorted(
         (
             str(match.get("level")),

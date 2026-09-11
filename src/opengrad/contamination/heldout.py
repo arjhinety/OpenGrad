@@ -203,7 +203,9 @@ def iter_training(
     restricts the stream to specific record ids (used for a targeted evidence pass so
     the full corpus is never held in memory).
     """
-    import pyarrow.parquet as pq  # type: ignore[import-untyped]
+    # No `type: ignore` here: mypy reports an untyped pyarrow import once per module, and the
+    # first one (above) already carries the suppression.
+    import pyarrow.parquet as pq
 
     base = (root / (release_dir or RELEASE_DIR)).resolve()
     columns = ["canonical_hash", "source_dataset", "messages"]
@@ -288,12 +290,15 @@ def screen(
     train_exact = _hash_index(train_source(), normalised=False)
     train_normalised = _hash_index(train_source(), normalised=True)
 
-    level1 = [
+    # Heterogeneous value types on purpose: `heldout` is a record id and `training` is every
+    # training record id sharing that hash. Without the explicit annotation mypy joins `str` and
+    # `list[str]` at `Sequence[str]`, which then mis-types every `item["heldout"]` downstream.
+    level1: list[dict[str, Any]] = [
         {"heldout": r.record_id, "training": train_exact[_exact_hash(r.text)]}
         for r in heldout
         if train_exact.get(_exact_hash(r.text))
     ]
-    level2 = [
+    level2: list[dict[str, Any]] = [
         {"heldout": r.record_id, "training": train_normalised[_stable_hash(r.text)]}
         for r in heldout
         if train_normalised.get(_stable_hash(r.text))
@@ -325,7 +330,7 @@ def screen(
             for training_id in postings.get(shingle, ()):
                 overlaps[str(position)][training_id] += 1
 
-    findings = []
+    findings: list[dict[str, Any]] = []
     level4_candidates: list[tuple[int, str, float]] = []
     for position, record in enumerate(heldout):
         size = len(record.shingles)

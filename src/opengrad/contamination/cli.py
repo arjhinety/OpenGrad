@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 from opengrad.contamination.audit import (
     AUDIT_PATH,
@@ -12,7 +13,9 @@ from opengrad.contamination.audit import (
     VERDICT_CONTAMINATED,
     VERDICT_INCIDENTAL,
     VERDICT_PENDING,
+    AuditArtifact,
     AuditEvaluation,
+    AuditItem,
     apply_verdict,
     benchmark_fingerprint,
     build_quarantine,
@@ -70,7 +73,7 @@ def _print_summary(evaluation: AuditEvaluation, quarantine_count: int, audit_pat
     print(f"  audit artifact        : {audit_path}")
 
 
-def _show_item(index: int, total: int, item) -> None:
+def _show_item(index: int, total: int, item: AuditItem) -> None:
     print()
     print("=" * 74)
     print(f"  ITEM {index}/{total}   {item.record_id}")
@@ -108,7 +111,7 @@ def _show_item(index: int, total: int, item) -> None:
 
 
 def _run_interactive(
-    artifact, audit_path: Path, quarantine_path: Path, root: Path, reviewer: str
+    artifact: AuditArtifact, audit_path: Path, quarantine_path: Path, root: Path, reviewer: str
 ) -> int:
     unresolved = [item for item in artifact.items if not item.resolved()]
     if not unresolved:
@@ -145,7 +148,9 @@ def _run_interactive(
     return 0
 
 
-def _report_after(artifact, audit_path: Path, quarantine_path: Path, root: Path) -> None:
+def _report_after(
+    artifact: AuditArtifact, audit_path: Path, quarantine_path: Path, root: Path
+) -> None:
     report = _load_report(root)
     quarantine = load_quarantine(quarantine_path)
     evaluation = evaluate_audit(
@@ -159,13 +164,16 @@ def _report_after(artifact, audit_path: Path, quarantine_path: Path, root: Path)
     print(f"  quarantine list       : {quarantine_path}")
 
 
-def _load_report(root: Path) -> dict:
+def _load_report(root: Path) -> dict[str, Any]:
     path = root / REPORT_PATH
     if not path.is_file():
         raise SystemExit(
             f"scanner report not found: {path}\nRun `opengrad-contamination heldout-screen` first."
         )
-    return json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise SystemExit(f"scanner report is not a JSON object: {path}")
+    return payload
 
 
 def _adjudicate(args: argparse.Namespace) -> int:

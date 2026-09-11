@@ -92,6 +92,16 @@ def _read_json(path: Path) -> dict[str, Any] | None:
     return value if isinstance(value, dict) else None
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    """Narrow an arbitrary artifact field to a mapping without inventing a value for it.
+
+    The ``x.get(k) if isinstance(x.get(k), dict) else {}`` idiom reads correctly but types as a
+    union that still includes ``None``, so every later ``.get`` on it needs its own guard. One
+    helper keeps the narrowing honest and the call sites readable.
+    """
+    return value if isinstance(value, dict) else {}
+
+
 def _git_state(root: Path) -> dict[str, Any]:
     try:
         commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
@@ -201,7 +211,9 @@ def _baseline_state(root: Path) -> dict[str, Any]:
             predictions_valid = structurally_valid and parse_valid_rate >= min_parse_valid_rate
             if structurally_valid:
                 prediction_rows = raw_rows
-                prediction_ids = set(ids)
+                # `structurally_valid` already requires every id to be a non-empty string, so
+                # this keeps the values that check admitted and drops nothing real.
+                prediction_ids = {item for item in ids if isinstance(item, str)}
         except (OSError, json.JSONDecodeError, TypeError):
             prediction_rows = []
     manifest = _read_json(root / BASELINE_MANIFEST)
@@ -285,6 +297,7 @@ def _baseline_state(root: Path) -> dict[str, Any]:
         and prediction_ids == expected_ids
         and metrics.get("records") == expected_records
         and residual_contract_ok
+        and isinstance(residuals, dict)
         and residuals.get("sample_count") == metrics.get("records")
         and environment
         and environment.get("backend") == metrics.get("backend")
@@ -367,7 +380,7 @@ def _materialized_evaluation_ids(root: Path, manifest: dict[str, Any] | None) ->
     if not isinstance(manifest, dict):
         return None
     try:
-        import pyarrow.parquet as pq
+        import pyarrow.parquet as pq  # type: ignore[import-untyped]
 
         result: set[str] = set()
         for split in manifest.get("splits", []):
@@ -413,7 +426,7 @@ def _read_dataset_registry(root: Path) -> dict[str, dict[str, Any]]:
 
 
 def _training_data_contract(root: Path, raw: dict[str, Any]) -> tuple[bool, str]:
-    datasets = raw.get("datasets") if isinstance(raw.get("datasets"), dict) else {}
+    datasets = _as_dict(raw.get("datasets"))
     ids = datasets.get("manifest_ids")
     hashes = datasets.get("hashes")
     if (
@@ -467,11 +480,7 @@ def _training_data_contract(root: Path, raw: dict[str, Any]) -> tuple[bool, str]
         )
         if not _check_revision(source_revision):
             return False, f"SFT dataset source revision is not pinned for {item}"
-        processed = (
-            row.get("processed_dataset_hash")
-            if isinstance(row.get("processed_dataset_hash"), dict)
-            else {}
-        )
+        processed = _as_dict(row.get("processed_dataset_hash"))
         processed_value = processed.get("value")
         if not isinstance(processed_value, str) or not re.fullmatch(
             r"[0-9a-fA-F]{64}", processed_value
@@ -751,7 +760,7 @@ def _materialized_split_state(root: Path, split: dict[str, Any]) -> tuple[bool, 
             f"split {split.get('id')} materialization manifest is missing, unfinished, or empty",
             set(),
         )
-    counts = data.get("counts") if isinstance(data.get("counts"), dict) else {}
+    counts = _as_dict(data.get("counts"))
     written = _safe_item_count({"items": counts.get("written")})
     expected = _safe_item_count(split)
     if written != expected:
@@ -824,7 +833,7 @@ def _contamination_state(root: Path, report: dict[str, Any] | None) -> tuple[boo
     """
     if not report or report.get("manifest_id") != "behavioral-heldout-v2":
         return True, "contamination report is missing or bound to the wrong evaluation manifest"
-    levels = report.get("levels") if isinstance(report.get("levels"), dict) else {}
+    levels = _as_dict(report.get("levels"))
     required = {
         "1_exact_canonical_conversation_hash",
         "2_normalized_prompt_hash",
@@ -988,11 +997,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "TOKENIZER_MISMATCH" if not tokenizer_ok else None,
     )
     config_is_baseline = _is_baseline_config(raw)
-    model_contract = (
-        raw.get("model_renderer_contract")
-        if isinstance(raw.get("model_renderer_contract"), dict)
-        else {}
-    )
+    model_contract = _as_dict(raw.get("model_renderer_contract"))
     template_hash = raw.get("template_hash", model_contract.get("template_hash"))
     if config_is_baseline:
         template_ok = template_hash == PINNED_TEMPLATE_HASH

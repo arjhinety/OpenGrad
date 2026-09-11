@@ -2,6 +2,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from opengrad.agent_cli import (
     handle_checkpoint_cli,
@@ -532,7 +533,7 @@ def main() -> int:
         config_path = root / args.config
         if not args.dry_run:
             gate = readiness(root, config_path)
-            smoke_gate = next(
+            smoke_gate: dict[str, Any] = next(
                 (item for item in gate.get("gates", []) if item.get("name") == "gpu_boundary"), {}
             )
             if gate.get("ready_for_baseline") is not True or smoke_gate.get("status") != "PASS":
