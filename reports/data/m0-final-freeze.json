@@ -160,7 +160,7 @@
   },
   "experiment_id": "m0_sft_canonical_v2_final",
   "experiment_status": "REJECTED",
-  "hashes_computed_at_commit": "0807fa32d2dc39a057346b0b9b248fc8ee6e0d9d",
+  "hashes_computed_at_commit": "11b5ea997f0322643afdb0de00081aadd7321418",
   "reproduce": {
     "confirmatory": "python scripts/evaluate_sft_checkpoints.py m0_sft_canonical_v2_final --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side confirmatory --checkpoint-ids 1800",
     "sanity": "python scripts/sanity_check_rendered_samples.py",
