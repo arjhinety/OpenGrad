@@ -72,7 +72,15 @@ class ExperimentStore:
             training_config=config.trainer,
             dataset_manifest_ids=list(config.datasets.get("manifest_ids", [])),
             dataset_hashes=dict(config.datasets.get("hashes", {})),
-            git_commit=str(environment.get("git", {}).get("sha", "unknown")),
+            # `capture()` returns a flat `git_sha`; reading a nested `environment["git"]["sha"]`
+            # always missed and defaulted every experiment record to "unknown", so no record
+            # could name the code that produced it. The flat key is the one that exists, and the
+            # nested form is still honoured for any caller that supplies it.
+            git_commit=str(
+                environment.get("git_sha")
+                or (environment.get("git") or {}).get("sha")
+                or "unknown"
+            ),
             git_dirty=bool(environment.get("git_dirty", False)),
             environment=environment,
             random_seed=int(config.reproducibility.get("seed", 42)),

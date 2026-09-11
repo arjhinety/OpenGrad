@@ -47,3 +47,32 @@ def test_experiment_diff_causal_warning() -> None:
     assert diff.is_single_variable is False
     assert diff.warning is not None
     assert "Causal attribution" in diff.warning
+
+
+def test_experiment_record_names_the_commit_that_produced_it(tmp_path: Path) -> None:
+    """A record that cannot name its own code is not reproducible evidence.
+
+    `capture()` returns a flat `git_sha`, but the store read a nested `environment["git"]["sha"]`,
+    which never exists -- so every record claimed `git_commit: unknown` even from a clean tree.
+    """
+    from opengrad.experiments.schema import ExperimentConfig
+    from opengrad.experiments.store import ExperimentStore
+
+    store = ExperimentStore(tmp_path)
+    config = ExperimentConfig.from_file("configs/experiments/m0_sft.yaml")
+    record = store.create_experiment(config, env={"git_sha": "a" * 40, "git_dirty": False})
+    assert record.git_commit == "a" * 40
+    assert record.git_dirty is False
+
+    # A caller that supplies the nested shape is still honoured.
+    nested = store.create_experiment(
+        ExperimentConfig.from_dict({**config.to_dict(), "experiment_id": "nested"}),
+        env={"git": {"sha": "b" * 40}, "git_dirty": False},
+    )
+    assert nested.git_commit == "b" * 40
+
+    # And an environment with no git information still says so rather than inventing a value.
+    unknown = store.create_experiment(
+        ExperimentConfig.from_dict({**config.to_dict(), "experiment_id": "nogit"}), env={}
+    )
+    assert unknown.git_commit == "unknown"

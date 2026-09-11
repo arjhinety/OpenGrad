@@ -1,0 +1,50 @@
+{
+  "artifact_kind": "M0_FINAL_LAUNCH_RECORD",
+  "base_model": "Qwen/Qwen3.5-2B",
+  "base_model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "contamination_report_sha256": "4a5d04f79cd5e98e2a30a93d4f816b75c1fbb167da947451003e1fdb6f41c5b2",
+  "contamination_status": "SEMANTIC_REVIEW_COMPLETE",
+  "corpus_fingerprint": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
+  "corpus_record_count": 173237,
+  "environment": {
+    "cuda": "CUDA Version: 13.0",
+    "driver": "580.173.02",
+    "gpu": "NVIDIA A100-SXM4-80GB",
+    "gpu_count": 1,
+    "hostname": "nigga",
+    "kernel": "6.8.0-100-generic",
+    "python": "3.12.3",
+    "vram_total": "81920 MiB"
+  },
+  "epoch_note": "2400 steps x 16 = 38,400 examples seen; with 161,966 trainable records this is 0.237 epochs against partial-v2's 0.377 over 101,785. The step count is held fixed on purpose; the 0.628x epoch ratio is reported, not compensated.",
+  "eval_partition_confirmatory_fingerprint": "d6d1e394a89b5ec8b9ed41ef233d752ff50f69abe41a6e06e34878c1088f32ba",
+  "eval_partition_dev_fingerprint": "88a56821edfc8614285846e8bef60cf8aced124ce3b5a2d4054e8344618c9980",
+  "eval_partition_sha256": "56c6abc2e24c524b45c382f42927fa02117b2a04c02f04e89e6a40d8b520f901",
+  "evaluation_manifest_sha256": "8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640",
+  "experiment_id": "m0_sft_canonical_v2_final",
+  "git_dirty_at_launch": true,
+  "initialization": "pinned base model, no resume (run directory held no checkpoint at launch)",
+  "launch_commit": "fc63ec70f3b007893a63b29a30263eec611d7b0d",
+  "renderer": "qwen3_5_2b_v1",
+  "schema_version": 1,
+  "selection_policy": "tool_use_promotion_v3",
+  "selection_rule_doc": "docs/evaluation/CHECKPOINT_SELECTION_RULE.md",
+  "supervision_composition": {
+    "CALL_PREDICTION": 56090,
+    "COMPLETE_TRAJECTORY": 105876
+  },
+  "supervision_contract_version": "supervision_contract_v1",
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "trainable_records": 161966,
+  "training": {
+    "effective_batch_size": 16,
+    "max_seq_length": 2048,
+    "max_steps": 2400,
+    "precision": "bfloat16",
+    "seed": 42,
+    "tuning_method": "full"
+  },
+  "training_config": "configs/experiments/m0_sft_canonical_v2_final.yaml",
+  "training_config_sha256": "dd23923ef1c7133c902ad420c6231f9393a5d08a0c464060fa7fad5a8ea40906",
+  "yield_report_sha256": "99dadf8cd9b0421789149d1aa94c8cef7a90abb4eec11be19e5164bd62abe579"
+}
