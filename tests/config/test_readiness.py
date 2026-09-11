@@ -267,3 +267,64 @@ def test_materialization_gate_accepts_and_verifies_real_materialized_split(tmp_p
     wrong_count = dict(split, items=99)
     rejected_count, _, _ = _materialized_split_state(tmp_path, wrong_count)
     assert rejected_count is False
+
+
+def test_renderability_gate_is_dormant_without_a_declared_yield_report():
+    """A config that predates the measurement must not fail because of it."""
+    from opengrad.readiness import _renderability_state
+
+    ok, detail, code = _renderability_state(Path.cwd(), {"datasets": {"manifest_ids": ["x"]}})
+    assert ok is True
+    assert code is None
+    assert "not measured" in detail
+
+
+def test_renderability_gate_blocks_a_collapsed_source(tmp_path):
+    """xLAM's shape: canonically valid, zero trainable, and it must not pass silently."""
+    import json
+
+    from opengrad.readiness import _renderability_state
+
+    report = tmp_path / "yield.json"
+    report.write_text(
+        json.dumps(
+            {
+                "sources": [
+                    {"source": "xlam", "status": "COLLAPSE", "canonical_records": 59370,
+                     "trainable_records": 0},
+                    {"source": "glaive", "status": "OK", "canonical_records": 100,
+                     "trainable_records": 99},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    ok, detail, code = _renderability_state(tmp_path, {"datasets": {"yield_report": "yield.json"}})
+    assert ok is False
+    assert code == "DATASET_TRAINABILITY_COLLAPSE"
+    assert "xlam" in detail
+
+
+def test_renderability_gate_passes_a_healthy_report(tmp_path):
+    import json
+
+    from opengrad.readiness import _renderability_state
+
+    (tmp_path / "yield.json").write_text(
+        json.dumps({"sources": [{"source": "glaive", "status": "OK"}]}), encoding="utf-8"
+    )
+    ok, _detail, code = _renderability_state(
+        tmp_path, {"datasets": {"yield_report": "yield.json"}}
+    )
+    assert ok is True
+    assert code is None
+
+
+def test_renderability_gate_fails_closed_on_a_missing_report(tmp_path):
+    from opengrad.readiness import _renderability_state
+
+    ok, _detail, code = _renderability_state(
+        tmp_path, {"datasets": {"yield_report": "nope.json"}}
+    )
+    assert ok is False
+    assert code == "YIELD_REPORT_MISSING"

@@ -873,6 +873,42 @@ def _contamination_state(root: Path, report: dict[str, Any] | None) -> tuple[boo
     return blocked, detail
 
 
+def _renderability_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, str | None]:
+    """Evaluate a configuration's declared per-source trainability report.
+
+    Canonical validity does not imply trainability: Canonical-v1 released 213,951 canonical
+    records whose training boundary yielded 9 tool-call targets, and every canonical-count gate
+    passed. A source that is supposed to teach function calling and yields none has collapsed,
+    and that must block rather than contribute silently.
+
+    The gate is dormant until a build declares `datasets.yield_report`, so it never fails a
+    configuration that predates the measurement -- but once measured, a collapse blocks.
+    """
+    declared = (raw.get("datasets") or {}).get("yield_report")
+    if not declared:
+        return (
+            True,
+            "No yield report declared: per-source trainability is not measured for this config",
+            None,
+        )
+    path = root / str(declared)
+    if not path.is_file():
+        return False, f"Declared yield report is missing: {declared}", "YIELD_REPORT_MISSING"
+    payload = _read_json(path)
+    if payload is None:
+        return False, f"Declared yield report is unreadable: {declared}", "YIELD_REPORT_UNREADABLE"
+    sources = payload.get("sources") or []
+    collapsed = [str(item.get("source")) for item in sources if item.get("status") == "COLLAPSE"]
+    anomalies = [str(item.get("source")) for item in sources if item.get("status") == "ANOMALY"]
+    detail = (
+        f"{len(sources)} sources measured from {declared}; "
+        f"collapse={collapsed or 'none'}; anomaly={anomalies or 'none'}"
+    )
+    if collapsed:
+        return False, detail, "DATASET_TRAINABILITY_COLLAPSE"
+    return True, detail, None
+
+
 def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
     root = root.resolve()
     config_path = _resolve_project_path(root, config_path, root / BASELINE_CONFIG).resolve()
@@ -1183,6 +1219,20 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
             "PASS",
             "Not an SFT configuration; training data policy deferred",
         )
+    if is_sft_config:
+        yield_ok, yield_detail, yield_code = _renderability_state(root, raw)
+        add(
+            "renderability_yield",
+            "PASS" if yield_ok else "FAIL",
+            yield_detail,
+            yield_code,
+        )
+    else:
+        add(
+            "renderability_yield",
+            "PASS",
+            "Not an SFT configuration; per-source trainability deferred",
+        )
     add(
         "real_b0",
         "PASS" if baseline["real"] else "FAIL",
@@ -1228,6 +1278,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "dataset_revision",
         "dataset_snapshot",
         "experiment_preflight",
+        "renderability_yield",
     }
     ready_for_sft = all(gate_map[name]["status"] == "PASS" for name in sft_names)
     blocking = [gate["name"] for gate in gates if gate["status"] == "FAIL"]
