@@ -444,12 +444,15 @@
       "experiment_id": "m1_dpo_canonical_v2_final_v2",
       "global_step": 30,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "Passes frozen prospective tool_use_promotion_v4 against selected M0-final-v2 parent: confirmatory call_f1 0.7548, precision 0.7358, recall 0.7748, over_call 0.1529, macro DEV 0.6768; no measurable regression beyond parent allowances. Tool selection, argument validity, schema validity, and no_call_accuracy remain unmeasured/NA.",
+        "status_updated_at": "2026-09-11T17:57:15.225502+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m1_dpo_canonical_v2_final_v2/checkpoints/dpo-checkpoint-30",
-      "promotion_status": "CANDIDATE",
+      "promotion_status": "PROMOTED",
       "tokens_seen": 10327,
       "training_loss": 0.6757
     },
@@ -508,7 +511,7 @@
       "training_loss": 0.6757
     }
   ],
-  "last_updated": "2026-09-11T17:35:48.248771+00:00",
+  "last_updated": "2026-09-11T17:57:15.225551+00:00",
   "schema_version": 1,
   "total_checkpoints": 26
 }

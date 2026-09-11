@@ -1,6 +1,6 @@
 {
   "checkpoints": [],
-  "completion_timestamp": null,
+  "completion_timestamp": "2026-09-11T17:57:15.226781+00:00",
   "dataset_hashes": {
     "m1_calibration_preference_pairs_v1": "d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4",
     "preference": "d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4"
@@ -35,7 +35,7 @@
   "parent_experiment_id": "m0_sft_canonical_v2_final",
   "promotion_decision": null,
   "random_seed": 42,
-  "status": "TRAINED",
+  "status": "PROMOTED",
   "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
   "training_algorithm": "dpo",
   "training_config": {
