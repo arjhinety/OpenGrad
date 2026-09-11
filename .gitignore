@@ -80,3 +80,6 @@ docs/research/runpod-application-draft.md
 
 # Dry-run scratch: never evidence.
 runs/.dry-run/
+
+# Local agent scratch: session plans, not project artifacts.
+.zcode/
