@@ -7,6 +7,7 @@ The reports that matter:
 
 | Report | Covers |
 |---|---|
+| [`M0_PHASE_CLOSURE.md`](../M0_PHASE_CLOSURE.md) | Permanent closure of the frozen M0/SFT lineage and paired ablation |
 | [`M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md`](../M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md) | The definitive M0 SFT: freeze, training, selection, promotion |
 | [`M0_CANONICAL_V2_FINAL_EVALUATION.md`](../M0_CANONICAL_V2_FINAL_EVALUATION.md) | Its evaluation, separating selection from confirmatory evidence |
 | [`M0_V2_FINAL_ABLATION_DESIGN.md`](../M0_V2_FINAL_ABLATION_DESIGN.md) | Frozen joint xLAM-plus-CALL_PREDICTION removal design and separate supervision-composition pair |

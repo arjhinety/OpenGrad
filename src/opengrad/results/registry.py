@@ -243,6 +243,32 @@ def _checkpoint_summaries(root: Path, experiment_id: str) -> tuple[list[dict[str
     ), unreadable
 
 
+def _known_external_evaluation_contract(
+    root: Path, experiment_id: str, record: dict[str, Any]
+) -> str | None:
+    """Return a known legacy evaluation root, without inventing per-checkpoint metrics.
+
+    The real B0 baseline predates the canonical ``runs/<id>/eval/`` layout. Its authoritative
+    metrics, predictions, residual profile and environment are the four files named in the
+    experiment metadata under ``reports/baselines/``. That is a complete baseline artifact
+    contract, not a reason to synthesize checkpoint rows, so the registry records the external
+    provenance and suppresses only the generic missing-eval warning for this known identity.
+    """
+    if experiment_id != "tool_calling/qwen35_2b/baseline":
+        return None
+    metadata = _as_dict(record.get("metadata"))
+    paths = {
+        str(metadata.get(name))
+        for name in ("metrics", "predictions", "residual_profile")
+        if metadata.get(name)
+    }
+    environment = str(metadata.get("environment") or "reports/baselines/qwen35_2b_baseline/environment.json")
+    paths.add(environment)
+    if len(paths) != 4 or not all((root / path).is_file() for path in paths):
+        return None
+    return "reports/baselines/qwen35_2b_baseline"
+
+
 def _promotion_state(
     events: list[dict[str, Any]],
 ) -> tuple[str | None, list[str], str | None]:
@@ -413,7 +439,12 @@ def build_row(
     # elsewhere (the B0 baseline keeps its metrics under reports/baselines/, by contract), so a
     # missing eval directory is reported rather than treated as a registry defect.
     terminal_evaluation_status = {"EVALUATED", "PROMOTED", "REJECTED"}
-    if str(record.get("status", "")) in terminal_evaluation_status and not checkpoints:
+    external_eval_root = _known_external_evaluation_contract(root, experiment_id, record)
+    if (
+        str(record.get("status", "")) in terminal_evaluation_status
+        and not checkpoints
+        and external_eval_root is None
+    ):
         findings.append(
             RegistryFinding(
                 kind="INTEGRITY",
@@ -429,6 +460,11 @@ def build_row(
             )
         )
 
+    provenance = {
+        "experiment": _relative(root, exp_file),
+        "eval": external_eval_root or f"{run_path}/eval",
+        "ledger": "runs/central_ledger.jsonl",
+    }
     return (
         RegistryRow(
             experiment_id=experiment_id,
@@ -467,11 +503,7 @@ def build_row(
             rejected_checkpoints=rejected,
             ledger_event_count=len(events),
             run_path=run_path,
-            provenance={
-                "experiment": _relative(root, exp_file),
-                "eval": f"{run_path}/eval",
-                "ledger": "runs/central_ledger.jsonl",
-            },
+            provenance=provenance,
         ),
         findings,
     )

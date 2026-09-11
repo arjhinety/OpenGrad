@@ -47,8 +47,8 @@
     },
     "decision": {
       "results/registry.jsonl": {
-        "bytes": 43825,
-        "sha256": "0163f72392de1f148cd81971e5784628f31122fd5323abf46b4fbb53c65bca7c"
+        "bytes": 43820,
+        "sha256": "6461ccbdb0d745dc7b7e656ffe482d1e9f36d31e75f4a04b3d602610aa16cfcc"
       },
       "runs/central_ledger.jsonl": {
         "bytes": 29495,
@@ -160,7 +160,7 @@
   },
   "experiment_id": "m0_sft_canonical_v2_final",
   "experiment_status": "REJECTED",
-  "hashes_computed_at_commit": "11b5ea997f0322643afdb0de00081aadd7321418",
+  "hashes_computed_at_commit": "388e5d8e355b645e4373e511b63a6a6827fbcd1d",
   "reproduce": {
     "confirmatory": "python scripts/evaluate_sft_checkpoints.py m0_sft_canonical_v2_final --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side confirmatory --checkpoint-ids 1800",
     "sanity": "python scripts/sanity_check_rendered_samples.py",
