@@ -88,6 +88,21 @@ def main() -> int:
     release.add_argument("--output", type=Path, required=True)
     release_validate = sub.add_parser("validate-release")
     release_validate.add_argument("--input", type=Path, required=True)
+    yield_report = sub.add_parser(
+        "yield-report",
+        help="per-source canonical/rendered/trainable yield, with collapse detection",
+    )
+    yield_report.add_argument("--input", type=Path, required=True)
+    yield_report.add_argument(
+        "--expectations",
+        type=Path,
+        default=Path("configs/data/yield_expectations.yaml"),
+    )
+    yield_report.add_argument("--model", default="Qwen/Qwen3.5-2B")
+    yield_report.add_argument("--max-seq-length", type=int, default=2048)
+    yield_report.add_argument("--limit", type=int)
+    yield_report.add_argument("--output", type=Path)
+    yield_report.add_argument("--json", action="store_true")
     real_audit = sub.add_parser(
         "real-audit", help="bounded CPU analysis of materialized JSONL corpora"
     )
@@ -191,6 +206,40 @@ def main() -> int:
             return 1
         print(json.dumps({"status": "VALID", "input": str(args.input)}, indent=2))
         return 0
+    if args.command == "yield-report":
+        from opengrad.data.yield_gate import (
+            evaluate_yield_gate,
+            gate_is_blocking,
+            load_expectations,
+            measure_materialized_corpus,
+            render_yield_table,
+        )
+
+        yields = measure_materialized_corpus(
+            args.input,
+            model=args.model,
+            max_seq_length=args.max_seq_length,
+            limit=args.limit,
+        )
+        expectations = load_expectations(args.expectations)
+        findings = evaluate_yield_gate(yields, expectations)
+        payload = {
+            "schema_version": 1,
+            "status": "COLLAPSE" if gate_is_blocking(findings) else "OK",
+            "input": str(args.input),
+            "expectations": str(args.expectations),
+            "sources": findings,
+        }
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(
+                json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print(render_yield_table(findings))
+        return 1 if gate_is_blocking(findings) else 0
     if args.command == "inspect":
         from opengrad.data.adapters import ADAPTERS
 

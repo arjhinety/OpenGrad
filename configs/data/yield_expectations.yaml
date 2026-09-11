@@ -1,0 +1,48 @@
+# Per-source trainability expectations for the renderability/trainability gate.
+#
+# Canonical retention and trainability are different properties. This file states what each
+# source is *expected* to contribute at the training boundary, so that a build can fail when a
+# source silently collapses instead of passing because its canonical counts look healthy.
+#
+# `expects_tool_calls: true` marks a source whose purpose is to teach tool invocation. For such
+# a source, a supervised tool-call target ratio near zero means the source is contributing
+# nothing to the behaviour the mixture exists to teach, and the gate reports COLLAPSE rather
+# than OK. The floors are deliberately well below the observed values so that they detect
+# collapse, not normal variation.
+schema_version: 1
+
+defaults:
+  # A source must turn at least half of its canonical records into trainable targets unless
+  # its own entry says otherwise.
+  min_yield_ratio: 0.5
+  min_tool_call_target_ratio: 0.0
+  expects_tool_calls: false
+
+sources:
+  xlam-function-calling-60k:
+    # Pure single-turn call prediction: the supervised target is the call itself.
+    expects_tool_calls: true
+    min_yield_ratio: 0.5
+    min_tool_call_target_ratio: 0.5
+  glaive-function-calling-v2:
+    expects_tool_calls: true
+    min_yield_ratio: 0.5
+    min_tool_call_target_ratio: 0.3
+  toolace:
+    expects_tool_calls: true
+    min_yield_ratio: 0.3
+    min_tool_call_target_ratio: 0.3
+  looptool-23k:
+    expects_tool_calls: true
+    min_yield_ratio: 0.3
+    min_tool_call_target_ratio: 0.3
+  button:
+    expects_tool_calls: true
+    min_yield_ratio: 0.3
+    min_tool_call_target_ratio: 0.3
+  when2call:
+    # Deliberately mixed: call / clarify / direct-answer / unsupported. A tool-call ratio near
+    # zero is still a collapse, because the call decision is the behaviour under study.
+    expects_tool_calls: true
+    min_yield_ratio: 0.5
+    min_tool_call_target_ratio: 0.2
