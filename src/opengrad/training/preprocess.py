@@ -12,6 +12,7 @@ with the size of the corpus.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -41,7 +42,13 @@ CACHE_MANIFEST = "sft_cache.json"
 
 
 def default_cache_dir(
-    root: Path, model_id: str, max_seq_length: int, release_dir: Path | None = None
+    root: Path,
+    model_id: str,
+    max_seq_length: int,
+    release_dir: Path | None = None,
+    *,
+    supervision_include: tuple[str, ...] = (),
+    exclude_sources: tuple[str, ...] = (),
 ) -> Path:
     """Where a run keeps its rendered sample cache.
 
@@ -51,6 +58,13 @@ def default_cache_dir(
     inside the cache covers the corpus hash, template hash, tokenizer revision, and window, and
     a mismatch forces a rebuild.
 
+    Filtering is part of the name as well as the identity, and that is not redundant. Identity
+    forces a rebuild on mismatch, but a rebuild *replaces* the directory's samples: if a filtered
+    arm and the unfiltered reference resolved to the same directory, training the arm would evict
+    the reference cache the completed run's evidence is measured from. A filter suffix keeps the
+    two apart, while the unfiltered reference keeps its original name so an existing cache still
+    resolves.
+
     Under ``data/processed/`` because it is a large, regenerable derived artifact.
     """
     slug = model_id.replace("/", "-")
@@ -58,9 +72,20 @@ def default_cache_dir(
     # Two corpora rendered with the same model and window would otherwise share one cache
     # directory and each rebuild would evict the other's samples. The default release keeps the
     # original name so an existing cache still resolves.
-    if release_dir is None or release_dir.resolve() == (root / DEFAULT_RELEASE_DIR).resolve():
-        return base
-    return base.with_name(f"{base.name}-{release_dir.resolve().name}")
+    if release_dir is not None and release_dir.resolve() != (root / DEFAULT_RELEASE_DIR).resolve():
+        base = base.with_name(f"{base.name}-{release_dir.resolve().name}")
+    if supervision_include or exclude_sources:
+        # Deterministic and short: the filters themselves, not the experiment, decide the name, so
+        # two arms with identical filters share a cache and arms with different filters cannot.
+        marker = "|".join(
+            (
+                "include=" + ",".join(sorted(supervision_include)),
+                "exclude=" + ",".join(sorted(exclude_sources)),
+            )
+        )
+        digest = hashlib.sha256(marker.encode("utf-8")).hexdigest()[:12]
+        base = base.with_name(f"{base.name}-filter-{digest}")
+    return base
 
 
 @dataclass

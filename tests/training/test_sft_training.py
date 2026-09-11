@@ -646,6 +646,46 @@ def test_default_cache_dir_is_keyed_by_the_rendering_contract(tmp_path):
     )
 
 
+def test_filtered_cache_dir_cannot_replace_the_reference(tmp_path):
+    """A source/supervision filter must not resolve to the unfiltered reference cache.
+
+    Rebuilding a cache replaces its samples. If a filtered arm shared the reference's directory,
+    training the arm would evict the cache the completed run's mass evidence is measured from.
+    """
+    from pathlib import Path as _Path
+
+    from opengrad.training.preprocess import default_cache_dir
+
+    release = _Path(".release/hf/toolpolicy-canonical-v2-final")
+    reference = default_cache_dir(tmp_path, "Qwen/Qwen3.5-2B", 2048, release)
+    filtered = default_cache_dir(
+        tmp_path,
+        "Qwen/Qwen3.5-2B",
+        2048,
+        release,
+        supervision_include=("COMPLETE_TRAJECTORY",),
+        exclude_sources=("xlam-function-calling-60k",),
+    )
+    assert filtered != reference
+    # Deterministic: the same filters choose the same directory, so arms sharing a filter share a
+    # render while different filters cannot collide.
+    assert filtered == default_cache_dir(
+        tmp_path,
+        "Qwen/Qwen3.5-2B",
+        2048,
+        release,
+        supervision_include=("COMPLETE_TRAJECTORY",),
+        exclude_sources=("xlam-function-calling-60k",),
+    )
+    assert filtered != default_cache_dir(
+        tmp_path,
+        "Qwen/Qwen3.5-2B",
+        2048,
+        release,
+        exclude_sources=("xlam-function-calling-60k",),
+    )
+
+
 def test_bucketed_batches_are_reproducible_and_bounded_by_tokens():
     """Bucketing must not cost determinism, and must bound batch width."""
     from opengrad.training.sft_runner import deterministic_batches

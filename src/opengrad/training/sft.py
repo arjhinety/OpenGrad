@@ -248,7 +248,6 @@ def run_real_sft(
     # ------------------------------------------------------------------ corpus
     release_dir = (experiment.get("datasets") or {}).get("release_dir")
     release_path = Path(str(release_dir)) if release_dir else None
-    cache_dir = default_cache_dir(root, model_id, settings.max_seq_length, release_path)
     # Optional supervision selectivity. Absent means train on every kind under natural sampling;
     # declared, it narrows the sample stream and is recorded in the cache identity and report so
     # an ablation is reproducible rather than implicit.
@@ -258,11 +257,20 @@ def run_real_sft(
     )
     # Source ablation: exclude named sources from the sample stream. A filter over the frozen
     # corpus, not a rebuild. Recorded in the cache identity so a filtered run cannot reuse an
-    # unfiltered sample set.
+    # unfiltered sample set, and in the cache directory name so a filtered render cannot replace
+    # the unfiltered reference cache it is measured against.
     exclude_sources = tuple(
         sorted(
             str(item) for item in ((experiment.get("datasets") or {}).get("exclude_sources") or [])
         )
+    )
+    cache_dir = default_cache_dir(
+        root,
+        model_id,
+        settings.max_seq_length,
+        release_path,
+        supervision_include=supervision_include,
+        exclude_sources=exclude_sources,
     )
     rendering_report = preprocess_corpus(
         root,
