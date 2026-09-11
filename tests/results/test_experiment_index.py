@@ -59,9 +59,14 @@ def _config(experiment_id: str = "fixture_run") -> ExperimentConfig:
     )
 
 
-def _write_eval(root: Path, experiment_id: str, step: int, call_f1: float) -> None:
+def _write_eval(
+    root: Path, experiment_id: str, step: int, call_f1: float, *, partition: str | None = None
+) -> None:
     """Write a per-checkpoint metrics artifact in the authoritative shape."""
-    metrics_dir = root / "runs" / experiment_id / "eval" / f"checkpoint-{step}"
+    base = root / "runs" / experiment_id / "eval"
+    if partition:
+        base = base / partition
+    metrics_dir = base / f"checkpoint-{step}"
     metrics_dir.mkdir(parents=True, exist_ok=True)
     (metrics_dir / "metrics.json").write_text(
         json.dumps(
@@ -522,3 +527,32 @@ def test_ledger_events_are_counted_from_the_central_ledger(tmp_path: Path) -> No
     assert row["ledger_event_count"] == len(
         [event for event in events if event.experiment_id == "fixture_run"]
     )
+
+
+def test_namespaced_partition_measurements_are_indexed_separately(tmp_path: Path) -> None:
+    """DEV and confirmatory scores of the same checkpoint are two measurements, not one.
+
+    They live under `eval/<partition>/checkpoint-N/` so one cannot overwrite the other, and the
+    index must see both -- reporting a checkpoint as unevaluated when it has been scored twice
+    would hide exactly the evidence the partition exists to keep apart.
+    """
+    _make_experiment(tmp_path, "fixture_run", status=ExperimentStatus.TRAINED)
+    for partition, value in (("dev", 0.5), ("confirmatory", 0.7)):
+        _write_eval(tmp_path, "fixture_run", 100, value, partition=partition)
+    rebuild_registry(tmp_path)
+    row = load_registry(tmp_path)[0]
+    assert row["evaluated_checkpoint_count"] == 2
+    partitions = {
+        c["eval_partition"]: c["metrics"]["call_f1"] for c in row["evaluated_checkpoints"]
+    }
+    assert partitions == {"dev": 0.5, "confirmatory": 0.7}
+
+
+def test_unnamespaced_measurements_are_still_indexed(tmp_path: Path) -> None:
+    """Every run recorded before the partition existed uses `eval/checkpoint-N/`."""
+    _make_experiment(tmp_path, "fixture_run", status=ExperimentStatus.TRAINED)
+    _write_eval(tmp_path, "fixture_run", 100, 0.5)
+    rebuild_registry(tmp_path)
+    row = load_registry(tmp_path)[0]
+    assert row["evaluated_checkpoint_count"] == 1
+    assert row["evaluated_checkpoints"][0]["eval_partition"] is None

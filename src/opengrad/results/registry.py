@@ -180,11 +180,24 @@ def _checkpoint_summaries(root: Path, experiment_id: str) -> tuple[list[dict[str
         return [], []
     summaries: list[dict[str, Any]] = []
     unreadable: list[str] = []
-    for metrics_path in sorted(eval_dir.glob("checkpoint-*/metrics.json")):
+    # Measurements are namespaced by evaluation partition (`eval/dev/`, `eval/confirmatory/`) so a
+    # checkpoint scored on one cannot overwrite its score on the other. The un-namespaced
+    # `eval/checkpoint-N/` layout is still read, because every run recorded before the partition
+    # existed uses it.
+    candidates = list(eval_dir.glob("checkpoint-*/metrics.json")) + list(
+        eval_dir.glob("*/checkpoint-*/metrics.json")
+    )
+    for metrics_path in sorted(candidates):
         payload = _read_json(metrics_path)
         if payload is None:
             unreadable.append(_relative(root, metrics_path))
             continue
+        # Which partition a measurement belongs to, so a DEV-selected score is never mistaken for
+        # a confirmatory one in the index. `eval/<partition>/checkpoint-N/` yields the partition
+        # name; `eval/checkpoint-N/` yields the empty string.
+        partition = (
+            "" if metrics_path.parent.parent == eval_dir else metrics_path.parent.parent.name
+        )
         lineage = _as_dict(payload.get("lineage"))
         comparison = _as_dict(payload.get("baseline_comparison"))
         metrics_block = _as_dict(comparison.get("metrics"))
@@ -210,6 +223,7 @@ def _checkpoint_summaries(root: Path, experiment_id: str) -> tuple[list[dict[str
                 "parse_valid_rate": _round(payload.get("parse_valid_rate")),
                 "metrics_artifact": _relative(root, metrics_path),
                 "eval_kind": payload.get("kind"),
+                "eval_partition": partition or None,
                 "eval_manifest": _relative(root, root / str(payload["manifest"]))
                 if payload.get("manifest")
                 else None,
@@ -218,7 +232,14 @@ def _checkpoint_summaries(root: Path, experiment_id: str) -> tuple[list[dict[str
             }
         )
     return sorted(
-        summaries, key=lambda item: (int(item["checkpoint_step"]), str(item["checkpoint_id"]))
+        summaries,
+        # The partition is part of the key so that two measurements of the same step order
+        # deterministically instead of depending on filesystem iteration order.
+        key=lambda item: (
+            int(item["checkpoint_step"]),
+            str(item["checkpoint_id"]),
+            str(item["eval_partition"] or ""),
+        ),
     ), unreadable
 
 

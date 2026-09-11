@@ -1,7 +1,14 @@
 # Pre-SFT readiness report
 
 **Date:** 2026-09-11
-**Status:** `READY` — with one documented gap (§9) that does not block starting SFT but does limit what the result may be claimed to show.
+**Status:** `CONSUMED` — readiness was evaluated, the frozen experiment ran, and the results are
+in [`M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md`](M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md) and
+[`M0_CANONICAL_V2_FINAL_EVALUATION.md`](M0_CANONICAL_V2_FINAL_EVALUATION.md).
+
+This report is left as it stood at launch, because a readiness record that is edited after the
+run stops being evidence that readiness was established *before* it. The gap it documents in §9
+— no confirmatory held-out set at the time of writing — was closed before training by
+pre-registering a DEV/confirmatory partition instead (see `docs/evaluation/CHECKPOINT_SELECTION_RULE.md`).
 
 This report is the evidence for one statement: the next legitimate project action is a fresh
 controlled M0 SFT run from the immutable `Qwen/Qwen3.5-2B` base model. It is not a summary of the
