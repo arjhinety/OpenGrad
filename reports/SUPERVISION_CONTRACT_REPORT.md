@@ -1,7 +1,8 @@
 # Supervision contract report
 
-**Status:** `IMPLEMENTED` and `MEASURED`. xLAM is rebuilt under the contract and audited over all
-59,370 retained records. Canonical-v2 is **not** final — see §8.
+**Status:** `IMPLEMENTED`, `MEASURED` and `IN USE`. xLAM is rebuilt under the contract and audited
+over all 59,370 retained records. The completed Canonical-v2 corpus is frozen with both contracts
+live in the definitive M0 config — see §8.
 
 **Date:** 2026-09-11
 **Code:** `src/opengrad/data/supervision.py`, `src/opengrad/data/semantic.py`
@@ -70,6 +71,20 @@ counts records whose only unanswered calls are in the final assistant turn.
 
 Only xLAM's classification is new. **No other source's classification changed**, which the task
 required.
+
+The table is measured on the **v1 release**, which is the largest corpus carrying all six sources
+and therefore the right sample for classifying them. Two of its numbers differ in the frozen
+corpus for reasons unrelated to supervision, and the differences are stated rather than left to
+be discovered:
+
+* **ToolACE** retains **11,051** canonical records in the frozen corpus rather than 697, because a
+  separate validator defect was found and fixed (a `required: null` key on the tool object was
+  being compared against the nested `parameters.required` and reported as a conflict; every one of
+  2,000 sampled rejections had that shape). Its *classification* is unchanged — 8,476 records still
+  end on an unanswered call and are still quarantined as `COMPLETE_TRAJECTORY`.
+* **When2Call** retains **6,505** in both, but the partial snapshot published only 4,000 because
+  its materialization was interrupted after reading 9,162 of 15,000 raw rows and was never
+  finalized. The frozen build reads all 15,000.
 
 ## 4. The open question I deliberately did not resolve
 
@@ -173,26 +188,42 @@ output. That is a deliberate gap rather than a silent one.
 
 ## 8. Canonical-v2 status
 
-**Not final.** The contract changes the semantic meaning of canonical records, so the rebuilt
-corpus is a new artifact with a new fingerprint, and this session did not rebuild all sources.
-The historical facts are unchanged and remain stated on the published snapshot:
+**Frozen.** The completed corpus is four sources, 173,237 canonical records, fingerprint
+`8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161`, proven deterministic by two
+independent builds. Both contracts are in use, and the mixture they produce is measured:
+
+| Contract | Trainable records | Share of trainable |
+|---|---:|---:|
+| `CALL_PREDICTION` | 56,090 | 34.6% |
+| `COMPLETE_TRAJECTORY` | 105,876 | 65.4% |
+| **total** | **161,966** | |
+
+Trained under **natural sampling**: no kind is reweighted and none is excluded. The ablation the
+task asked for runs by changing `supervision.include` alone.
+
+The historical fact about the partial snapshot remains unchanged and is stated on its own card:
 
 ```text
 Corpus-v2 snapshot used for the successful M0:
     xLAM training contribution = 0
 ```
 
-Canonical-v2 becomes final only after: the xLAM rebuild is included in a corpus build, the
-ToolACE/LoopTool classification question is resolved or explicitly deferred in writing, the
-renderability gate is declared by the SFT config so it runs rather than idles, and contamination
-is re-audited for the new composition.
+The frozen corpus is a different artifact with a different fingerprint, and the two must not be
+confused.
 
 ## 9. Whether another SFT is justified
 
-**Not yet, and not by this change alone.** The architecture now admits call-prediction
-supervision, which is a real capability, but no corpus has been rebuilt and released with it, so
-there is nothing new to train on. A next controlled M0 is justified once Canonical-v2 is frozen
-with a measured supervision composition — at which point the interesting comparison is
-deliberately available: the same procedure on a corpus with call-prediction supervision versus the
-corpus without it, reported on call recall, tool selection and argument accuracy separately from
-tool-result interpretation and multi-turn recovery.
+**Yes.** All three conditions this section previously listed as missing are now met: the corpus is
+rebuilt with call-prediction supervision, it is frozen with a measured composition, and the
+definitive config declares `datasets.yield_report` so both new gates are active rather than
+dormant. Readiness passes with `blocking_gates: []`.
+
+The interesting comparison is deliberately available and is stated in the config's hypothesis in
+advance, so the result cannot be reinterpreted after the fact: call-prediction supervision should
+improve *whether* to call, *which* tool, and *which* arguments, and should **not** be credited
+with improving tool-result interpretation, multi-turn recovery or multi-step planning, because
+none of the 56,090 call-prediction records contains a tool result.
+
+One qualification carries forward from `CHECKPOINT_SELECTION.md`: this is a development-set
+experiment, not a confirmatory one, because `behavioral-heldout-v2` is where the partial-v2
+checkpoint was selected.

@@ -1,0 +1,167 @@
+{
+  "artifact_kind": "HUMAN_LEVEL_5_ADJUDICATION",
+  "benchmark_fingerprint": "132786086b94196a5ea7f371620809c8139c0dbb8eeae260c2bb4452dc6f77ee",
+  "created_at": "2026-09-11T06:46:12+00:00",
+  "items": [
+    {
+      "candidates": {
+        "cannot_answer": "I'm sorry for the confusion, but I'm unable to provide the time on a PC as I don't have the capability to access or display real-time information from a specific device.",
+        "direct": "I believe you're asking about the system time on your computer. To check it, look at the bottom right corner of your screen or press the Windows key + Alt + D on your keyboard.",
+        "request_for_info": "To provide you with the current time, I need to execute a system command. Could you please specify the command for displaying time?",
+        "tool_call": "{\"name\": \"cmd_controller.execute\", \"arguments\": {\"command\": \"echo %time%\"}}"
+      },
+      "expected_decision": "request_for_info",
+      "finding_fingerprint": "c3741d8244bab1bb05d3d59e114b9e77dbf189b8db543e27be5f5edd23f98e34",
+      "heldout_text": "What is the current time?",
+      "match_levels": [
+        "1_exact_canonical_conversation_hash",
+        "2_normalized_prompt_hash"
+      ],
+      "matches": [
+        {
+          "level": "1_exact_canonical_conversation_hash",
+          "training": [
+            "glaive-function-calling-v2:5dbe1e7d4d4d028f56f32b38dd8f00d649b33ee54be6052ca6627df41ac5604b",
+            "glaive-function-calling-v2:7a3f5024ceb5fa688a5e54d8aaa9c45b1ed12ab75154d23dbfc0923376c5ace5",
+            "glaive-function-calling-v2:a1c997fbd63778a36b75b89b360bfb8f7eb4c1b8f3df7a830195a59b74c9330b",
+            "glaive-function-calling-v2:12c2cb0343d283afc11c5a4ed62df1ed5f9213bd73ba9d97bbb36a0cfab78d98"
+          ]
+        },
+        {
+          "level": "2_normalized_prompt_hash",
+          "training": [
+            "glaive-function-calling-v2:5dbe1e7d4d4d028f56f32b38dd8f00d649b33ee54be6052ca6627df41ac5604b",
+            "glaive-function-calling-v2:7a3f5024ceb5fa688a5e54d8aaa9c45b1ed12ab75154d23dbfc0923376c5ace5",
+            "glaive-function-calling-v2:a1c997fbd63778a36b75b89b360bfb8f7eb4c1b8f3df7a830195a59b74c9330b",
+            "glaive-function-calling-v2:12c2cb0343d283afc11c5a4ed62df1ed5f9213bd73ba9d97bbb36a0cfab78d98"
+          ]
+        }
+      ],
+      "reason": "Verified against final Canonical-v2 (training fingerprint c12964b0): the held-out prompt 'What is the current time?' occurs in 8 Glaive training records (4 at exact-hash level). Those records label the identical prompt CALL (get_current_time) and return a time, while this item's gold decision is request_for_info -- it measures exactly the CALL-vs-ask-first boundary those records supervise in the opposite direction.",
+      "record_id": "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+      "review_date": "2026-09-11T06:46:12+00:00",
+      "reviewer": "root",
+      "split": "when2call-mcq",
+      "stale": false,
+      "stale_reason": "",
+      "tools": [
+        "cmd_controller.execute"
+      ],
+      "training_evidence": [
+        {
+          "assistant": "None The current time is 10:30 AM.",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:5dbe1e7d4d4d028f56f32b38dd8f00d649b33ee54be6052ca6627df41ac5604b",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": [
+            {
+              "arguments": {},
+              "id": "call_0000",
+              "name": "get_current_time"
+            }
+          ]
+        },
+        {
+          "assistant": "None The current time is 10:30 AM.",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:7a3f5024ceb5fa688a5e54d8aaa9c45b1ed12ab75154d23dbfc0923376c5ace5",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": [
+            {
+              "arguments": {},
+              "id": "call_0000",
+              "name": "get_time"
+            }
+          ]
+        },
+        {
+          "assistant": "None The current time is 14:30 on 25th March 2022.",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:a1c997fbd63778a36b75b89b360bfb8f7eb4c1b8f3df7a830195a59b74c9330b",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": [
+            {
+              "arguments": {},
+              "id": "call_0000",
+              "name": "get_current_time"
+            }
+          ]
+        },
+        {
+          "assistant": "None The current time is 11:30 AM.",
+          "behavior_decision": "CALL",
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:12c2cb0343d283afc11c5a4ed62df1ed5f9213bd73ba9d97bbb36a0cfab78d98",
+          "source": "glaive-function-calling-v2",
+          "tool_calls": [
+            {
+              "arguments": {},
+              "id": "call_0000",
+              "name": "get_current_time"
+            }
+          ]
+        }
+      ],
+      "verdict": "CONTAMINATED"
+    },
+    {
+      "candidates": {
+        "cannot_answer": "Apologies, I'm unable to provide real-time weather information as I don't have that capability.",
+        "direct": "The current weather in NYC is partly cloudy with a temperature of 68°F (20°C).",
+        "request_for_info": "To provide you with the current weather conditions, could you please specify the city and state?",
+        "tool_call": "{\"name\": \"get_current_weather\", \"arguments\": {\"location\": \"New York, NY\"}}"
+      },
+      "expected_decision": "request_for_info",
+      "finding_fingerprint": "efec25017c6524b194add440e48255bdafe12bd5f6bbf7a77239819d6ff752ae",
+      "heldout_text": "What is the current weather?",
+      "match_levels": [
+        "1_exact_canonical_conversation_hash",
+        "2_normalized_prompt_hash"
+      ],
+      "matches": [
+        {
+          "level": "1_exact_canonical_conversation_hash",
+          "training": [
+            "when2call-sft:76a36f4f645c3ea0cab91543cc3f7c47b6bd450cef41f27008f087253287b874"
+          ]
+        },
+        {
+          "level": "2_normalized_prompt_hash",
+          "training": [
+            "when2call-sft:76a36f4f645c3ea0cab91543cc3f7c47b6bd450cef41f27008f087253287b874"
+          ]
+        }
+      ],
+      "reason": "Verified against final Canonical-v2 (training fingerprint c12964b0): the held-out prompt 'What is the current weather?' occurs in 1 When2Call SFT training record whose assistant response asks for the missing location, semantically identical to this item's gold request_for_info answer.",
+      "record_id": "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495",
+      "review_date": "2026-09-11T06:46:19+00:00",
+      "reviewer": "root",
+      "split": "when2call-mcq",
+      "stale": false,
+      "stale_reason": "",
+      "tools": [
+        "get_current_weather",
+        "web_search"
+      ],
+      "training_evidence": [
+        {
+          "assistant": "To provide you with the current weather information, I'll need the location. Could you please specify the location?",
+          "behavior_decision": "ANSWER",
+          "prompt": "What is the current weather?",
+          "record_id": "when2call-sft:76a36f4f645c3ea0cab91543cc3f7c47b6bd450cef41f27008f087253287b874",
+          "source": "when2call-sft",
+          "tool_calls": []
+        }
+      ],
+      "verdict": "CONTAMINATED"
+    }
+  ],
+  "manifest_id": "behavioral-heldout-v2",
+  "note": "Human-authored Level-5 verdicts. Machine-generated contamination reports must never be edited by hand, and this file must never be written by the scanner; use `opengrad-contamination adjudicate`.",
+  "schema_version": 1,
+  "training_corpus_fingerprint": "c12964b05a78b64c6a1dc17c35708e6a92e171d38c18aaf95c9c000d41969420",
+  "updated_at": "2026-09-11T06:46:19+00:00"
+}

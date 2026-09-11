@@ -1,0 +1,61 @@
+{
+  "audit_artifact": "reports/data/behavioral-heldout-v2-contamination-audit.json",
+  "audit_queue": [],
+  "audit_queue_size": 0,
+  "benchmark_fingerprint": "132786086b94196a5ea7f371620809c8139c0dbb8eeae260c2bb4452dc6f77ee",
+  "counts": {
+    "heldout_records": 3950,
+    "heldout_universe_shingles": 34858,
+    "pruned_shingles": 4779,
+    "scored_pairs": 26677211,
+    "training_records": 173237
+  },
+  "findings": {
+    "level_1_exact_prompt_matches": [],
+    "level_2_normalized_prompt_matches": [],
+    "level_3_near_duplicates": [],
+    "level_4_semantic_matches": []
+  },
+  "interpretation": "Levels 1-4 are machine-measured. Level 5 is a human adjudication of audit_queue recorded in the separate audit artifact; this generated report is an input to that review and must never be hand-edited. No clean or generalization claim is made until Level 5 completes.",
+  "levels": {
+    "1_exact_canonical_conversation_hash": "MEASURED",
+    "2_normalized_prompt_hash": "MEASURED",
+    "3_near_duplicate_ngram_minhash": "MEASURED",
+    "4_semantic_similarity": "MEASURED",
+    "5_manual_audit": "NOT_RUN"
+  },
+  "manifest_id": "behavioral-heldout-v2",
+  "methodology": {
+    "level_3": "exact 5-gram Jaccard/containment over an inverted index of the held-out shingle universe; shingles with training document frequency > 1000 are pruned as non-discriminative, and containment cannot flag a held-out prompt shorter than 25 shingles",
+    "level_4": "SequenceMatcher (difflib) over level-3 candidates; candidate generation is prefiltered, so this is not an exhaustive semantic search and no embedding similarity was computed",
+    "level_5": "human audit of the emitted queue; not performed by this tool",
+    "levels_1_2_scope": "user-visible prompt text; held-out evaluation examples and training trajectories do not share a conversation schema, so no whole-conversation hash equality is claimed",
+    "thresholds": {
+      "containment": 0.6,
+      "edit_similarity": 0.8,
+      "jaccard": 0.5,
+      "max_df": 1000,
+      "min_shingles": 25
+    }
+  },
+  "quarantined_record_ids": [
+    "when2call-mcq:6a9903a1-66e7-47d1-b74c-07aedc4b0424",
+    "when2call-mcq:77821b1c-2320-4070-95dd-f8e274536495"
+  ],
+  "scan_fingerprint": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "schema_version": 1,
+  "status": "LEVELS_1_4_MEASURED_LEVEL_5_PENDING",
+  "training_corpus_fingerprint": "c12964b05a78b64c6a1dc17c35708e6a92e171d38c18aaf95c9c000d41969420",
+  "training_source_labels_seen": [
+    "glaive-function-calling-v2",
+    "toolace",
+    "when2call-sft",
+    "xlam-function-calling-60k"
+  ],
+  "training_sources_checked": [
+    "glaive-function-calling-v2",
+    "toolace",
+    "when2call-sft",
+    "xlam-function-calling-60k"
+  ]
+}
