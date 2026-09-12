@@ -6,6 +6,10 @@
 
 **Every gradient is a hypothesis. Every checkpoint is evidence.**
 
+### → [Study 001: We improved the metric. Then the model stopped answering.][study-001]
+
+<sub>The full finding, with every number recomputed from per-example records.</sub>
+
 </div>
 
 OpenGrad is an empirical research repository for capability–efficiency tradeoffs in small
@@ -40,6 +44,7 @@ Every experiment record, its validity, selected checkpoint, and published artifa
 
 | I want to… | Start here |
 |---|---|
+| Read the Study 001 write-up | [Study 001 results][study-001] — the narrative version of the finding |
 | See the latest results | [Latest Results](#latest-results) · [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md) |
 | Download the promoted model | [Hugging Face model](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) |
 | Run or inspect OpenGrad | [Quick Start](#quick-start) |
@@ -86,7 +91,8 @@ reports `FAIL` on those gates by design; the registry and configuration checks s
 ## Latest Results
 
 The primary trajectory of Study 001. Scores are `call_f1` / `call_recall`; B0 is the full
-held-out set (n=3,650) and M0/M1 are the pre-registered confirmatory partition.
+held-out set (n=3,650) and M0/M1 are the pre-registered confirmatory partition. The same results
+written as a narrative, with the charts: [Study 001 results][study-001].
 
 | Stage | Intervention | Primary result | Status |
 |---|---|---|---|
@@ -294,3 +300,7 @@ Source code and documentation are licensed under [Apache-2.0](LICENSE).
 [`runs/`](runs/) and [`registry/`](registry/), and the derived index in
 [`results/registry.jsonl`](results/README.md). The last documentation restructure is recorded in
 [`docs/README_INFORMATION_ARCHITECTURE_AUDIT.md`](docs/README_INFORMATION_ARCHITECTURE_AUDIT.md).</sub>
+
+<!-- Study 001 site. Referenced from the header, Start Here, and Latest Results.
+     Deployment host is provisional — change this one line when the domain moves. -->
+[study-001]: https://opengrad-site.vercel.app/
