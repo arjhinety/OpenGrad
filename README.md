@@ -175,7 +175,7 @@ That is a statement about the *contract*, not about work done — SFT has since 
 | Qwen3.5-2B baseline reproduction | **EXECUTED — REAL RESULT** | [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md); `runs/tool_calling/qwen35_2b/baseline/experiment.json` |
 | Dataset materialization and audit | **Canonical-v2 FINAL**: 4 sources, 173,237 records, 161,966 trainable, fingerprint `8ced403b…`. BUTTON and LoopTool excluded — upstreams unavailable | [Completion report](reports/CANONICAL_V2_COMPLETION_REPORT.md) |
 | Tool-use SFT | **EXECUTED — 2 NEGATIVE, 1 PARTIAL RECOVERY, 1 DEFINITIVE** | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) · [final](reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
-| Preference optimization | **EXECUTED — NEGATIVE** | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md) |
+| Preference optimization | **EXECUTED — 1 HISTORICAL NEGATIVE, 1 PROMOTED** | [M1-v1 negative result (M0 report §5)](reports/M0_SFT_EXECUTION_REPORT.md#5-dpo-was-blocked-now-executed-and-also-negative) · [M1-v2 promoted evaluation](reports/M1_DPO_EVALUATION.md) |
 | On-policy distillation | **OUT OF SCOPE — NOT ATTEMPTED** | [M0 report §6](reports/M0_SFT_EXECUTION_REPORT.md) |
 | Cross-model replication | PLANNED | [Roadmap](ROADMAP.md) |
 | Quantization and runtime evaluation | INTERFACE_ONLY — no execution | [Optimization layer](docs/optimization/README.md) |
