@@ -1,0 +1,45 @@
+{
+  "built_at": "2026-09-12T07:40:48.864632+00:00",
+  "files": {
+    "benchmark": "bench_gguf.py",
+    "prompts": "frozen_prompts_confirmatory_v1.jsonl",
+    "prompts_sha256": "cdd21b640109c90ba00a0d3a43a4005eeec0ce5a442e426e1afdf86e9209dedf",
+    "scorer": "score_generations.py",
+    "vendored_parser_sha256": "b72e413d658543207568ab8956271cfb8cc73a1c9e91d00fcbbe24a6c3dbe7be"
+  },
+  "ladder": [
+    "Q4_K_M",
+    "Q5_K_M",
+    "Q6_K",
+    "Q8_0"
+  ],
+  "measurement_contract": {
+    "add_bos_token": false,
+    "bos_token_id": 248045,
+    "endpoint": "/completion (raw text; never /v1/chat/completions)",
+    "engine_window_per_slot": 5760,
+    "eos_token_ids": [
+      248046,
+      248044
+    ],
+    "evaluator_revision": "2d97c7d5a8de0b16a2e58e4376e231fe06ab16dc",
+    "examples": 1277,
+    "generation": {
+      "cache_prompt": false,
+      "n_predict": 512,
+      "seed": 0,
+      "temperature": 0.0,
+      "top_k": 1,
+      "top_p": 1.0
+    },
+    "partition": "confirmatory",
+    "renderer": "qwen3_5_2b_v1",
+    "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+  },
+  "parent_checkpoint": "m1_dpo_canonical_v2_final_v2::dpo-checkpoint-30",
+  "parent_experiment_id": "m1_dpo_canonical_v2_final_v2",
+  "primary_mobile_target": "Q4_K_M",
+  "runtime": "llama.cpp / GGUF",
+  "schema_version": 1
+}

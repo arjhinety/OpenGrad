@@ -1,0 +1,100 @@
+{
+  "artifact": "qwen3_5_2b_8da4w.pte",
+  "reference_artifact": "qwen3_5_2b_fp32.pte",
+  "group_size": 32,
+  "scale_itemsize_bytes": 2,
+  "bytes": {
+    "fp32": 9565151872,
+    "quantized": 3098349184,
+    "ratio": 3.0872,
+    "weight_region_fp32": 7526875136,
+    "weight_region_quantized": 1059987456,
+    "program_constants_fp32": 2037612624,
+    "program_constants_quantized": 2037612624
+  },
+  "named_data": {
+    "classes": [
+      {
+        "elements_each": 508559360,
+        "count": 1,
+        "parameters": 508559360,
+        "verdict": "QUANTIZED_INT4",
+        "int4_payload_bytes": 254279680,
+        "scale_bytes": 31784960,
+        "identity": "lm_head (tied to the embedding matrix)"
+      },
+      {
+        "elements_each": 12582912,
+        "count": 90,
+        "parameters": 1132462080,
+        "verdict": "QUANTIZED_INT4",
+        "int4_payload_bytes": 6291456,
+        "scale_bytes": 786432,
+        "identity": "MLP gate/up/down, and the fused DeltaNet in_proj_qkv"
+      },
+      {
+        "elements_each": 8388608,
+        "count": 6,
+        "parameters": 50331648,
+        "verdict": "QUANTIZED_INT4",
+        "int4_payload_bytes": 4194304,
+        "scale_bytes": 524288,
+        "identity": "full-attention q_proj (output-gated, 2x width)"
+      },
+      {
+        "elements_each": 4194304,
+        "count": 42,
+        "parameters": 176160768,
+        "verdict": "QUANTIZED_INT4",
+        "int4_payload_bytes": 2097152,
+        "scale_bytes": 262144,
+        "identity": "full-attention o_proj, DeltaNet in_proj_z and out_proj"
+      },
+      {
+        "elements_each": 1048576,
+        "count": 12,
+        "parameters": 12582912,
+        "verdict": "QUANTIZED_INT4",
+        "int4_payload_bytes": 524288,
+        "scale_bytes": 65536,
+        "identity": "full-attention k_proj / v_proj"
+      },
+      {
+        "elements_each": 32768,
+        "count": 36,
+        "parameters": 1179648,
+        "verdict": "QUANTIZED_INT4",
+        "int4_payload_bytes": 16384,
+        "scale_bytes": 2048,
+        "identity": "DeltaNet a_proj / b_proj (per-head gate scalars)"
+      },
+      {
+        "elements_each": 24576,
+        "count": 18,
+        "parameters": 442368,
+        "verdict": "SKIPPED_FP32",
+        "int4_payload_bytes": null,
+        "scale_bytes": null,
+        "identity": "DeltaNet causal depthwise conv1d (6144 channels x kernel 4)"
+      }
+    ],
+    "unconsumed_buffers": {},
+    "quantized_parameters": 1881276416,
+    "skipped_parameters": 442368
+  },
+  "program_constants": {
+    "elements": 509403156,
+    "bytes": 2037612624,
+    "unchanged_between_artifacts": true,
+    "embedding_parameters": 508559360,
+    "embedding_bytes": 2034237440,
+    "embedding_share_of_quantized_artifact": 0.6566,
+    "norm_and_other_parameters": 843796
+  },
+  "coverage": {
+    "named_data_quantized_fraction": 0.999765,
+    "stored_parameters": 2391121940,
+    "overall_quantized_fraction": 0.786776
+  },
+  "reconciled": true
+}

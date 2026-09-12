@@ -1,0 +1,219 @@
+{
+  "corpus": "normalization-v1 sources feeding ToolPolicy-Canonical-v2",
+  "corpus_refusal_templates": {
+    "distinct_12_token_openings": 3700,
+    "top_15": [
+      {
+        "count": 2682,
+        "example": ": I'm sorry, but as an AI, I don't have the capability to perform external tasks such as booking flights. My current function is to calculate BMI (Body Mass Index) based on the weight and height you provide. Is there anything else I can ass"
+      },
+      {
+        "count": 1729,
+        "example": ": I'm sorry, but I'm unable to perform external tasks like ordering a pizza. My capabilities are currently limited to the functions provided to me, such as searching for movies based on specified criteria. <|endoftext|>"
+      },
+      {
+        "count": 1515,
+        "example": ": I'm sorry, but I'm unable to assist with booking flights. My current capabilities are limited to calculating loan payments. If you need help with that, feel free to ask! <|endoftext|>"
+      },
+      {
+        "count": 1268,
+        "example": ": I'm sorry, but I'm unable to perform external tasks such as ordering a pizza. My current function allows me to fetch the latest news headlines for you. If you need any information regarding that, feel free to ask. <|endoftext|>"
+      },
+      {
+        "count": 1026,
+        "example": ": I'm sorry, but I'm unable to assist with that. My current capabilities are limited to the functions provided to me. In this case, I can help calculate GPA based on course grades, credit hours, and the grade obtained. I don't have the abil"
+      },
+      {
+        "count": 965,
+        "example": ": I'm sorry, but I don't have the capability to book flights. My current function allows me to get the exchange rate between two currencies. If you need help with that, feel free to ask! <|endoftext|>"
+      },
+      {
+        "count": 783,
+        "example": ": I'm sorry, but I'm unable to assist with booking flights as it's an external task and I don't have a function provided for that task. However, I can help you calculate the tip on your bill. <|endoftext|>"
+      },
+      {
+        "count": 592,
+        "example": ": I'm sorry, but I don't have the capability to perform external tasks like ordering a pizza. My current function allows me to translate text from one language to another. If you need assistance with translation, feel free to ask! <|endofte"
+      },
+      {
+        "count": 400,
+        "example": ": I'm sorry, but I can't assist with that. My current capabilities allow me to provide information about movies based on their titles. I don't have the ability to place orders or perform external tasks. <|endoftext|>"
+      },
+      {
+        "count": 398,
+        "example": ": I'm sorry, but I can't assist with that. My current capabilities are limited to generating QR codes based on the data provided. I don't have the ability to book flights or perform other external tasks. <|endoftext|>"
+      },
+      {
+        "count": 351,
+        "example": ": I'm sorry, but as an AI, I don't have the ability to perform external tasks such as ordering a pizza. My current function allows me to retrieve news based on your preferences. If you need any news updates, feel free to ask! <|endoftext|>"
+      },
+      {
+        "count": 299,
+        "example": ": I'm sorry, but I don't have the capability to order a pizza as it's an external task and the functions provided to me don't include this feature. I can assist you with creating calendar events though. <|endoftext|>"
+      },
+      {
+        "count": 232,
+        "example": "Apologies, I'm unable to provide that information as I don't have real-time access to vehicle databases. Please consult a reliable automotive resource for accurate details."
+      },
+      {
+        "count": 232,
+        "example": ": I'm sorry, but I am unable to perform external tasks such as booking flights. My current capabilities are limited to the functions provided to me. In this case, I can assist you with currency conversion. <|endoftext|>"
+      },
+      {
+        "count": 228,
+        "example": "Apologies, but I'm unable to perform that task as I don't have real-time data access or web browsing capabilities."
+      }
+    ]
+  },
+  "headline": "Refusal text is taught under NON-refusal decision labels. Records labelled ANSWER whose supervised target is a refusal teach the model that answering looks like declining.",
+  "multi_turn_records_excluded": {
+    "counts_by_first_exchange_label": {
+      "ANSWER": 5,
+      "CALL": 9257
+    },
+    "why_excluded": "These are multi-turn dialogues whose LAST assistant turn is a refusal while the decision label describes the FIRST exchange. Inspected examples are legitimate: the model calls the tool correctly, then declines an unrelated later request. Counting them as mislabelled supervision would be a measurement error. They are reported here and deliberately NOT added to the mislabelled totals."
+  },
+  "overlap_with_model_output": {
+    "also_present_verbatim_in_corpus": 2,
+    "model_refusals_covered_by_shared_templates": 42,
+    "model_top_templates": 10,
+    "note": "Template match is on a normalised 12-token opening. Overlap shows the model reproduces supervision surface forms; it does not by itself establish that these records caused the behaviour.",
+    "share_of_model_refusals": 0.029453015427769985,
+    "shared_templates": {
+      "apologies but im unable to calculate that for you i cant perform": {
+        "corpus_count": 3,
+        "model_count": 12
+      },
+      "apologies but im unable to perform calculations i recommend using a calculator": {
+        "corpus_count": 1,
+        "model_count": 30
+      }
+    }
+  },
+  "per_source": {
+    "button": {
+      "decision_distribution": {
+        "CALL": 7941
+      },
+      "records": 7941,
+      "refusal_rate": 0.0,
+      "refusal_targets": 0,
+      "refusal_targets_by_decision_label": {},
+      "refusals_with_no_tools_offered": 0,
+      "refusals_with_tools_offered": 0,
+      "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
+      "status": "AUDITED"
+    },
+    "glaive": {
+      "decision_distribution": {
+        "ANSWER": 48785,
+        "CALL": 51009
+      },
+      "records": 99794,
+      "refusal_rate": 0.14121089444255167,
+      "refusal_targets": 14092,
+      "refusal_targets_by_decision_label": {
+        "ANSWER": 14092
+      },
+      "refusals_with_no_tools_offered": 0,
+      "refusals_with_tools_offered": 14092,
+      "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
+      "status": "AUDITED"
+    },
+    "looptool": {
+      "decision_distribution": {
+        "ANSWER": 635,
+        "CALL": 20192
+      },
+      "records": 20827,
+      "refusal_rate": 0.00753829164065876,
+      "refusal_targets": 157,
+      "refusal_targets_by_decision_label": {
+        "ANSWER": 157
+      },
+      "refusals_with_no_tools_offered": 82,
+      "refusals_with_tools_offered": 75,
+      "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
+      "status": "AUDITED"
+    },
+    "toolace": {
+      "decision_distribution": {
+        "ANSWER": 2003,
+        "CALL": 9187
+      },
+      "records": 11190,
+      "refusal_rate": 0.0008936550491510277,
+      "refusal_targets": 10,
+      "refusal_targets_by_decision_label": {
+        "ANSWER": 10
+      },
+      "refusals_with_no_tools_offered": 9,
+      "refusals_with_tools_offered": 1,
+      "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
+      "status": "AUDITED"
+    },
+    "when2call-llm-judge": {
+      "decision_distribution": {},
+      "records": 300,
+      "refusal_rate": 0.0,
+      "refusal_targets": 0,
+      "refusal_targets_by_decision_label": {},
+      "refusals_with_no_tools_offered": 0,
+      "refusals_with_tools_offered": 0,
+      "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
+      "status": "AUDITED"
+    },
+    "when2call-mcq": {
+      "decision_distribution": {},
+      "records": 3652,
+      "refusal_rate": 0.0,
+      "refusal_targets": 0,
+      "refusal_targets_by_decision_label": {},
+      "refusals_with_no_tools_offered": 0,
+      "refusals_with_tools_offered": 0,
+      "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
+      "status": "AUDITED"
+    },
+    "when2call-sft": {
+      "decision_distribution": {
+        "ANSWER": 14829
+      },
+      "records": 14829,
+      "refusal_rate": 0.5050913750084294,
+      "refusal_targets": 7490,
+      "refusal_targets_by_decision_label": {
+        "ANSWER": 7490
+      },
+      "refusals_with_no_tools_offered": 2213,
+      "refusals_with_tools_offered": 5277,
+      "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
+      "status": "AUDITED"
+    },
+    "xlam": {
+      "decision_distribution": {
+        "CALL": 59370
+      },
+      "records": 59370,
+      "refusal_rate": 0.0,
+      "refusal_targets": 0,
+      "refusal_targets_by_decision_label": {},
+      "refusals_with_no_tools_offered": 0,
+      "refusals_with_tools_offered": 0,
+      "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
+      "status": "AUDITED"
+    }
+  },
+  "purpose": "Test whether refusal text appears in the SFT supervision, and under which decision labels.",
+  "refusal_detector": "HEURISTIC_REGEX_v1 -- the SAME detector used to score inference, so corpus and model refusals are counted by one definition",
+  "schema_version": 1,
+  "scope_limit": "Descriptive audit. No checkpoint was modified and no data was filtered.",
+  "totals": {
+    "records_audited": 217903,
+    "refusal_target_rate": 0.09981046612483536,
+    "refusal_targets": 21749,
+    "refusal_targets_by_decision_label": {
+      "ANSWER": 21749
+    }
+  },
+  "what_this_does_not_establish": "Causation. These counts show refusal text is present in the supervision and that the model reproduces its surface forms. Establishing that these records CAUSED the behaviour requires the ablation: retrain M0 with the mislabelled records removed or relabelled, hold every other factor fixed, and re-measure GSM8K zero-shot refusal rate. That is a separate experiment with its own held-out evaluation."
+}

@@ -1,0 +1,188 @@
+{
+  "aggregate": {
+    "accuracy": 0.3700964095744681,
+    "accuracy_given_answer": 0.38447591089621824,
+    "answer_rate": 0.9625997340425532,
+    "attempted": 11582,
+    "correct": 4453,
+    "incorrect_attempted": 7129,
+    "invalid_option_rate": 0.002908909574468085,
+    "invalid_options": 35,
+    "parse_failure_rate": 0.03740026595744681,
+    "parse_failures": 450,
+    "refusal_detection_method": "HEURISTIC_REGEX_v1",
+    "refusal_patterns": {},
+    "refusal_rate": 0.0,
+    "refusals": 0,
+    "total": 12032
+  },
+  "benchmark": "mmlu_pro",
+  "coverage": {
+    "is_full_set": true,
+    "note": "Full upstream test split.",
+    "request_set_size": 12032,
+    "scored": 12032
+  },
+  "extraction_methods": {
+    "answer_is": 11600,
+    "trailing_letter": 17
+  },
+  "generation_metadata": {
+    "add_bos_token": false,
+    "architectures": [
+      "Qwen3_5ForCausalLM"
+    ],
+    "benchmark": "mmlu_pro",
+    "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "config_sha256": "88bf86c270d616198909ed1eefef8d8c21ac1fa13f62e947f20f8e1ebd02c211",
+    "cuda": "13.0",
+    "download_seconds": 0.186,
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "eos_token": "<|im_end|>",
+    "eos_token_id": 248046,
+    "gpu_capability": "9.0",
+    "gpu_hourly_usd": 4.54,
+    "gpu_name": "NVIDIA H200",
+    "gpu_total_memory_gib": 139.8,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "max_tokens": 2048,
+    "model_load_seconds": 51.035,
+    "model_repo": "arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final",
+    "model_revision": "acffaf6eb068e556f9a127f36c9478201afb49fa",
+    "sampling": {
+      "seed": 0,
+      "temperature": 0.0,
+      "top_k": 1,
+      "top_p": 1.0
+    },
+    "seed": 0,
+    "stage": "M0_SFT",
+    "subfolder": "",
+    "tokenizer_json_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.14.1",
+    "vllm": "0.29.0",
+    "weight_files": [
+      "model.safetensors"
+    ],
+    "weights_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a"
+  },
+  "per_category": {
+    "biology": {
+      "accuracy": 0.6471408647140865,
+      "accuracy_given_answer": 0.6572237960339944,
+      "answer_rate": 0.9846582984658299,
+      "correct": 464,
+      "n": 717,
+      "refusal_rate": 0.0
+    },
+    "business": {
+      "accuracy": 0.41191381495564006,
+      "accuracy_given_answer": 0.4226267880364109,
+      "answer_rate": 0.9746514575411914,
+      "correct": 325,
+      "n": 789,
+      "refusal_rate": 0.0
+    },
+    "chemistry": {
+      "accuracy": 0.3666077738515901,
+      "accuracy_given_answer": 0.3849721706864564,
+      "answer_rate": 0.9522968197879859,
+      "correct": 415,
+      "n": 1132,
+      "refusal_rate": 0.0
+    },
+    "computer science": {
+      "accuracy": 0.37073170731707317,
+      "accuracy_given_answer": 0.3848101265822785,
+      "answer_rate": 0.9634146341463414,
+      "correct": 152,
+      "n": 410,
+      "refusal_rate": 0.0
+    },
+    "economics": {
+      "accuracy": 0.4549763033175355,
+      "accuracy_given_answer": 0.4620938628158845,
+      "answer_rate": 0.9845971563981043,
+      "correct": 384,
+      "n": 844,
+      "refusal_rate": 0.0
+    },
+    "engineering": {
+      "accuracy": 0.24045407636738905,
+      "accuracy_given_answer": 0.26121076233183854,
+      "answer_rate": 0.9205366357069144,
+      "correct": 233,
+      "n": 969,
+      "refusal_rate": 0.0
+    },
+    "health": {
+      "accuracy": 0.402200488997555,
+      "accuracy_given_answer": 0.4107365792759051,
+      "answer_rate": 0.9792176039119804,
+      "correct": 329,
+      "n": 818,
+      "refusal_rate": 0.0
+    },
+    "history": {
+      "accuracy": 0.2677165354330709,
+      "accuracy_given_answer": 0.272,
+      "answer_rate": 0.984251968503937,
+      "correct": 102,
+      "n": 381,
+      "refusal_rate": 0.0
+    },
+    "law": {
+      "accuracy": 0.15712988192552224,
+      "accuracy_given_answer": 0.16634615384615384,
+      "answer_rate": 0.9445958219800181,
+      "correct": 173,
+      "n": 1101,
+      "refusal_rate": 0.0
+    },
+    "math": {
+      "accuracy": 0.40414507772020725,
+      "accuracy_given_answer": 0.44754098360655736,
+      "answer_rate": 0.9030347890451518,
+      "correct": 546,
+      "n": 1351,
+      "refusal_rate": 0.0
+    },
+    "other": {
+      "accuracy": 0.34415584415584416,
+      "accuracy_given_answer": 0.34602829162132753,
+      "answer_rate": 0.9945887445887446,
+      "correct": 318,
+      "n": 924,
+      "refusal_rate": 0.0
+    },
+    "philosophy": {
+      "accuracy": 0.31462925851703405,
+      "accuracy_given_answer": 0.3158953722334004,
+      "answer_rate": 0.9959919839679359,
+      "correct": 157,
+      "n": 499,
+      "refusal_rate": 0.0
+    },
+    "physics": {
+      "accuracy": 0.3641262509622787,
+      "accuracy_given_answer": 0.37480190174326466,
+      "answer_rate": 0.9715165511932256,
+      "correct": 473,
+      "n": 1299,
+      "refusal_rate": 0.0
+    },
+    "psychology": {
+      "accuracy": 0.47869674185463656,
+      "accuracy_given_answer": 0.479297365119197,
+      "answer_rate": 0.9987468671679198,
+      "correct": 382,
+      "n": 798,
+      "refusal_rate": 0.0
+    }
+  },
+  "scorer": "upstream MMLU-Pro answer regexes; no LLM judge",
+  "stage": "M0_SFT"
+}

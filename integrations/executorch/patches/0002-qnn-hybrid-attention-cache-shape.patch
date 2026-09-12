@@ -1,0 +1,51 @@
+From: OpenGrad <https://github.com/arrogance231/OpenGrad>
+Subject: [PATCH 2/2] examples/llama: derive the QNN cache shape from a layer that has a KV cache
+
+`_to_edge_and_lower_llama` builds the `TagQuantIO` cache shape from
+`model.layers[0].attention`, assuming layer 0 is a KV-cache attention module:
+
+    atten = builder_exported_to_edge.model.layers[0].attention
+    cache_shape = torch.Size(
+        (atten.max_batch_size, atten.max_context_len, atten.n_kv_heads, atten.head_dim)
+    )
+
+That assumption does not hold for hybrid models. Qwen3.5 interleaves Gated DeltaNet
+("linear_attention") and gated full attention, and `layer_types[0]` is `linear_attention` — a
+block carrying recurrent state and no KV cache at all. The export fails with:
+
+    AttributeError: 'AttentionGatedDeltaNet' object has no attribute 'max_context_len'
+
+Selecting the first attention module that actually has a cache is both correct for homogeneous
+models (layer 0 still wins) and correct for hybrids.
+
+Note this fixes the crash, not the semantics: the resulting `cache_shape` describes only the
+full-attention KV cache, and a hybrid model's recurrent-state I/O remains untagged for
+quantization. A complete fix would tag both.
+
+Applies to: pytorch/executorch @ df6147afadf106a0ef3a74f65d80b5c589e63e44
+
+---
+ examples/models/llama/export_llama_lib.py | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/examples/models/llama/export_llama_lib.py b/examples/models/llama/export_llama_lib.py
+--- a/examples/models/llama/export_llama_lib.py
++++ b/examples/models/llama/export_llama_lib.py
+@@ -1534,7 +1534,18 @@ def _to_edge_and_lower_llama(
+-        atten = builder_exported_to_edge.model.layers[0].attention
++        # This derives a KV-cache shape for TagQuantIO, but layer 0 is not guaranteed to have a
++        # KV cache. Qwen3.5 is hybrid: layer_types[0] is "linear_attention", a Gated DeltaNet
++        # block with recurrent state and no cache, so layers[0].attention has no
++        # max_context_len/n_kv_heads/head_dim. Take the first attention that does.
++        atten = next(
++            (
++                layer.attention
++                for layer in builder_exported_to_edge.model.layers
++                if hasattr(layer.attention, "max_context_len")
++            ),
++            builder_exported_to_edge.model.layers[0].attention,
++        )
+         if use_qnn_sha:
+             cache_shape = torch.Size(
+                 (atten.max_batch_size, atten.max_context_len, atten.head_dim)
+             )

@@ -4,6 +4,60 @@
 
 ---
 
+## 0. Methodology lessons from the capability-regression campaign
+
+Four findings that changed how evaluation is done here. Each cost real money to learn; each is now
+a standing requirement.
+
+### 0.1 An evaluation set can only detect what it contains
+
+The frozen tool-policy partition held `tool_call`, `request_for_info` and `cannot_answer` examples
+and **no ANSWER examples**. It therefore could not detect a checkpoint that stopped answering
+ordinary questions — and did not. Coverage of response modes is now a promotion requirement; see
+[`PROMOTION_POLICY.md` §2.5](PROMOTION_POLICY.md).
+
+### 0.2 Never collapse "wrong" and "did not try"
+
+Report `accuracy`, `answer_rate` and `accuracy_given_answer = correct / attempted` **separately**.
+A checkpoint whose accuracy falls while conditional accuracy holds has not lost the ability; it has
+stopped using it. Collapsing them hides exactly the distinction that matters. Where nothing was
+attempted, `accuracy_given_answer` is `null` — never `0.0`, which would read as "tried everything
+and failed".
+
+### 0.3 A fixed generation budget is a confound when it binds unevenly
+
+MMLU-Pro at 768 tokens showed Base 38.0% / M0 36.8% — apparently no regression. Base had hit the
+cap on **37.6%** of items against M0's 7.2%, so the measurement reflected verbosity, not accuracy.
+At 2048 tokens the real gap is **12.0pp**.
+
+Requirements:
+
+- Record `finish_reason` and report the truncation rate **per stage**, always.
+- A materially uneven truncation rate invalidates the comparison; fix the budget and re-run.
+- Where residual truncation remains, report a **truncation-adversarial interval** rather than a
+  point estimate: with *unresolved* = `incorrect ∧ truncated`, true accuracy lies in
+  `[correct/n, (correct+unresolved)/n]`. Do **not** call an observed difference a "lower bound"
+  unless a bound has actually been derived.
+- Changing a budget after inspecting only `finish_reason` counts, before any response is scored, is
+  a **pre-scoring protocol amendment**. Apply it uniformly to every stage, and record it.
+
+### 0.4 Aggregate scores hide behavioural change
+
+On the 7-case OpenWeights sentinel, Base and the promoted checkpoint both scored **5/7** — Base by
+answering two items *wrongly*, the promoted checkpoint by *refusing* them. Identical score, opposite
+behaviour. Always inspect failure modes, not just totals, and never let a 7-case suite carry a
+capability conclusion.
+
+### 0.5 Scorers must be deterministic, and you have to check
+
+The vendored upstream IFEval checkers are non-deterministic out of the box: one fixed generations
+file scored 0.4510 / 0.4492 / 0.4492 across three runs, via `langdetect.detect()` and `random.*` in
+`build_description`. Seed every stochastic dependency in the scorer wrapper — not in the vendored
+source, which must stay byte-identical to upstream — and verify by scoring the same file more than
+once.
+
+---
+
 ## 1. Benchmark Suites
 
 Defined in `configs/benchmark_suites/`:

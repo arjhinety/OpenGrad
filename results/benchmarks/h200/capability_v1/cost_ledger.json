@@ -1,0 +1,432 @@
+{
+  "REMAINING_CREDIT_BALANCE": "NOT_QUERYABLE",
+  "campaign_total_usd": 11.388,
+  "container_overhead_note": "Model download, weight verification, engine start and teardown. Real GPU time, but not attributable to any one benchmark, so it is reported separately rather than loaded onto a benchmark's cost-per-result.",
+  "continuation_total_usd": 8.898,
+  "cpu_work_note": "Dataset acquisition, hashing, validation, scorer tests, the tokenizer-divergence census and all scoring ran on local CPU at no GPU cost. The H200 was used only for model inference.",
+  "credit_balance_note": "`modal billing` exposes metered consumption and credits applied, not a remaining balance. No balance is asserted.",
+  "envelope_is_not_a_balance": true,
+  "envelope_remaining_note": "Arithmetic on the configured EXPERIMENT envelope minus observed spend. NOT an account balance and NOT available credit. The two diverged badly in this run: planning continued against the envelope while actual remaining credit was far lower. Do not size a run from this field.",
+  "envelope_remaining_usd": 11.312,
+  "envelope_usd": 22.7,
+  "failed_launches": [
+    {
+      "_record": "failed_launch",
+      "gpu_allocated": false,
+      "reason": "modal.parameter() annotation stringized by `from __future__ import annotations`",
+      "seq": 0,
+      "stage": "M1_DPO_CURRENT",
+      "usd": 0.0
+    },
+    {
+      "_record": "failed_launch",
+      "gpu_allocated": false,
+      "reason": "Modal CLI charmap UnicodeEncodeError printing U+2713 on a Windows console",
+      "seq": 0,
+      "stage": "M1_DPO_CURRENT",
+      "usd": 0.0
+    },
+    {
+      "_record": "failed_launch",
+      "gpu_allocated": false,
+      "reason": "ROOT = Path(__file__).parents[2] raised IndexError when the module was re-imported inside the container",
+      "seq": 0,
+      "stage": "M1_DPO_CURRENT",
+      "usd": 0.0
+    }
+  ],
+  "failed_launches_note": "Every failed launch in this continuation died client-side or at module import, before a GPU was allocated. Cost $0.00 -- asserted from the run log, not assumed.",
+  "gpu": "NVIDIA H200",
+  "gpu_hourly_usd": 4.54,
+  "gpu_runs": [
+    {
+      "_record": "run",
+      "container_seconds": 249.5,
+      "jobs": [
+        "ifeval@1280",
+        "gsm8k",
+        "sentinel"
+      ],
+      "results_retained": [
+        "gsm8k",
+        "sentinel"
+      ],
+      "seq": 1,
+      "stage": "M1_DPO_CURRENT",
+      "status": "COMPLETE",
+      "superseded": "partial",
+      "superseded_detail": "IFEval superseded by the 2560-token budget; GSM8K and sentinel results from this run are the ones reported.",
+      "usd": 0.3146
+    },
+    {
+      "_record": "run",
+      "container_seconds": 272.99,
+      "jobs": [
+        "ifeval@2560",
+        "gsm8k",
+        "sentinel"
+      ],
+      "results_retained": [
+        "ifeval",
+        "gsm8k",
+        "sentinel"
+      ],
+      "seq": 2,
+      "stage": "BASE",
+      "status": "COMPLETE",
+      "superseded": false,
+      "usd": 0.3443
+    },
+    {
+      "_record": "run",
+      "container_seconds": 194.73,
+      "jobs": [
+        "ifeval@2560",
+        "gsm8k",
+        "sentinel"
+      ],
+      "results_retained": [
+        "ifeval",
+        "gsm8k",
+        "sentinel"
+      ],
+      "seq": 3,
+      "stage": "M0_SFT",
+      "status": "COMPLETE",
+      "superseded": false,
+      "usd": 0.2456
+    },
+    {
+      "_record": "run",
+      "container_seconds": 254.09,
+      "jobs": [
+        "ifeval@2560",
+        "gsm8k",
+        "sentinel"
+      ],
+      "results_retained": [
+        "ifeval",
+        "gsm8k",
+        "sentinel"
+      ],
+      "seq": 4,
+      "stage": "M1_DPO_HISTORICAL",
+      "status": "COMPLETE",
+      "superseded": false,
+      "usd": 0.3204
+    },
+    {
+      "_record": "run",
+      "container_seconds": 107.72,
+      "jobs": [
+        "ifeval@2560"
+      ],
+      "results_retained": [
+        "ifeval"
+      ],
+      "seq": 5,
+      "stage": "M1_DPO_CURRENT",
+      "status": "COMPLETE",
+      "superseded": false,
+      "usd": 0.1358
+    },
+    {
+      "_record": "run",
+      "container_seconds": 593.16,
+      "jobs": [
+        "mmlu_pro@768"
+      ],
+      "results_retained": [],
+      "seq": 6,
+      "stage": "M1_DPO_CURRENT",
+      "status": "COMPLETE",
+      "superseded": true,
+      "superseded_detail": "MMLU-Pro generation budget raised 768 -> 2048 after the truncation confound was found.",
+      "truncated_by_length": 903,
+      "usd": 0.748
+    },
+    {
+      "_record": "run",
+      "container_seconds": 690.71,
+      "jobs": [
+        "mmlu_pro@768"
+      ],
+      "results_retained": [],
+      "seq": 7,
+      "stage": "BASE",
+      "status": "COMPLETE",
+      "superseded": true,
+      "superseded_detail": "MMLU-Pro budget 768 -> 2048. This run is where the confound was discovered: BASE truncated on 37.6% of items against M0_SFT's 7.2%, and 100% of its unattempted examples were truncations rather than refusals.",
+      "truncated_by_length": 4527,
+      "usd": 0.8711
+    },
+    {
+      "_record": "run",
+      "container_seconds": 705.65,
+      "jobs": [
+        "mmlu_pro@768"
+      ],
+      "results_retained": [],
+      "seq": 8,
+      "stage": "M0_SFT",
+      "status": "COMPLETE",
+      "superseded": true,
+      "superseded_detail": "MMLU-Pro budget 768 -> 2048.",
+      "truncated_by_length": 869,
+      "usd": 0.8899
+    },
+    {
+      "_record": "run",
+      "container_seconds": 1092.18,
+      "jobs": [
+        "mmlu_pro@768"
+      ],
+      "results_retained": [],
+      "seq": 9,
+      "stage": "M1_DPO_HISTORICAL",
+      "status": "COMPLETE",
+      "superseded": true,
+      "superseded_detail": "MMLU-Pro budget 768 -> 2048. Truncated on 49.7% of items, the worst of the four, which settled that the budget rather than the checkpoints was the problem.",
+      "truncated_by_length": 5978,
+      "usd": 1.3774
+    },
+    {
+      "_record": "run",
+      "container_seconds": 788.41,
+      "jobs": [
+        "mmlu_pro@2048"
+      ],
+      "results_retained": [
+        "mmlu_pro"
+      ],
+      "seq": 10,
+      "stage": "BASE",
+      "status": "COMPLETE",
+      "superseded": false,
+      "truncated_by_length": 2627,
+      "usd": 0.9943
+    },
+    {
+      "_record": "run",
+      "container_seconds": 732.53,
+      "jobs": [
+        "mmlu_pro@2048"
+      ],
+      "results_retained": [
+        "mmlu_pro"
+      ],
+      "seq": 11,
+      "stage": "M0_SFT",
+      "status": "COMPLETE",
+      "superseded": false,
+      "truncated_by_length": 759,
+      "usd": 0.9238
+    },
+    {
+      "_record": "run",
+      "container_seconds": 773.73,
+      "jobs": [
+        "mmlu_pro@2048"
+      ],
+      "results_retained": [
+        "mmlu_pro"
+      ],
+      "seq": 12,
+      "stage": "M1_DPO_CURRENT",
+      "status": "COMPLETE",
+      "superseded": false,
+      "truncated_by_length": 747,
+      "usd": 0.9758
+    },
+    {
+      "_record": "run",
+      "container_seconds": 600,
+      "container_seconds_is_estimate": true,
+      "estimate_basis": "Terminated mid-run at ~39% of 12032 prompts once actual remaining credit (~$3, far below the configured $22.70 envelope) came to light. The container never reported container_seconds because it was killed, so wall time is estimated from launch to the observed EngineCore shutdown, ~10 minutes. Recorded as an estimate, not a measurement.",
+      "jobs": [
+        "mmlu_pro@2048"
+      ],
+      "note": "Supplementary stage only -- not on the BASE->M0_SFT->M1_DPO_CURRENT primary path. Its MMLU-Pro remains UNMEASURED at the corrected budget.",
+      "results_retained": [],
+      "seq": 13,
+      "stage": "M1_DPO_HISTORICAL",
+      "status": "TERMINATED_BUDGET",
+      "superseded": false,
+      "usd": 0.757,
+      "usd_is_estimate": true
+    }
+  ],
+  "infrastructure_waste_items": [],
+  "infrastructure_waste_note": "Failed launches, wrong pins, client-side crashes. Never counted as benchmark cost.",
+  "infrastructure_waste_usd": 0.0,
+  "per_stage": {
+    "BASE": {
+      "container_seconds": 1752.1100000000001,
+      "runs": [
+        {
+          "container_seconds": 272.99,
+          "jobs": [
+            "ifeval@2560",
+            "gsm8k",
+            "sentinel"
+          ],
+          "superseded": false,
+          "usd": 0.3443
+        },
+        {
+          "container_seconds": 690.71,
+          "jobs": [
+            "mmlu_pro@768"
+          ],
+          "superseded": true,
+          "usd": 0.8711
+        },
+        {
+          "container_seconds": 788.41,
+          "jobs": [
+            "mmlu_pro@2048"
+          ],
+          "superseded": false,
+          "usd": 0.9943
+        }
+      ],
+      "usd": 2.2097
+    },
+    "M0_SFT": {
+      "container_seconds": 1632.9099999999999,
+      "runs": [
+        {
+          "container_seconds": 194.73,
+          "jobs": [
+            "ifeval@2560",
+            "gsm8k",
+            "sentinel"
+          ],
+          "superseded": false,
+          "usd": 0.2456
+        },
+        {
+          "container_seconds": 705.65,
+          "jobs": [
+            "mmlu_pro@768"
+          ],
+          "superseded": true,
+          "usd": 0.8899
+        },
+        {
+          "container_seconds": 732.53,
+          "jobs": [
+            "mmlu_pro@2048"
+          ],
+          "superseded": false,
+          "usd": 0.9238
+        }
+      ],
+      "usd": 2.0593
+    },
+    "M1_DPO_CURRENT": {
+      "container_seconds": 1724.1100000000001,
+      "runs": [
+        {
+          "container_seconds": 249.5,
+          "jobs": [
+            "ifeval@1280",
+            "gsm8k",
+            "sentinel"
+          ],
+          "superseded": "partial",
+          "usd": 0.3146
+        },
+        {
+          "container_seconds": 107.72,
+          "jobs": [
+            "ifeval@2560"
+          ],
+          "superseded": false,
+          "usd": 0.1358
+        },
+        {
+          "container_seconds": 593.16,
+          "jobs": [
+            "mmlu_pro@768"
+          ],
+          "superseded": true,
+          "usd": 0.748
+        },
+        {
+          "container_seconds": 773.73,
+          "jobs": [
+            "mmlu_pro@2048"
+          ],
+          "superseded": false,
+          "usd": 0.9758
+        }
+      ],
+      "usd": 2.1742
+    },
+    "M1_DPO_HISTORICAL": {
+      "container_seconds": 1946.27,
+      "runs": [
+        {
+          "container_seconds": 254.09,
+          "jobs": [
+            "ifeval@2560",
+            "gsm8k",
+            "sentinel"
+          ],
+          "superseded": false,
+          "usd": 0.3204
+        },
+        {
+          "container_seconds": 1092.18,
+          "jobs": [
+            "mmlu_pro@768"
+          ],
+          "superseded": true,
+          "usd": 1.3774
+        },
+        {
+          "container_seconds": 600,
+          "jobs": [
+            "mmlu_pro@2048"
+          ],
+          "superseded": false,
+          "usd": 0.757
+        }
+      ],
+      "usd": 2.4548
+    }
+  },
+  "prior_run": "h200-credit-constrained-v1",
+  "prior_run_usd": 2.49,
+  "retained_runs_note": "GPU runs whose results are the ones reported.",
+  "retained_runs_usd": 5.0116,
+  "run": "h200-capability-diagnosis-v1",
+  "schema_version": 1,
+  "superseded_mmlu_truncation_at_768": {
+    "BASE": {
+      "of": 12032,
+      "rate": 0.3763,
+      "truncated": 4527
+    },
+    "M0_SFT": {
+      "of": 12032,
+      "rate": 0.0722,
+      "truncated": 869
+    },
+    "M1_DPO_CURRENT": {
+      "of": 12032,
+      "rate": 0.0751,
+      "truncated": 903
+    },
+    "M1_DPO_HISTORICAL": {
+      "of": 12032,
+      "rate": 0.4969,
+      "truncated": 5978
+    }
+  },
+  "superseded_runs_note": "Runs whose per-stage run_summary.json was overwritten by a later run of the same stage. Counted in full. A superseded run is NOT infrastructure waste when its results are retained -- see each entry's why_superseded.",
+  "superseded_runs_seconds": 3081.7,
+  "superseded_runs_usd": 3.8864,
+  "total_container_seconds": 7055.4
+}

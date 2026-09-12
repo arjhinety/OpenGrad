@@ -115,7 +115,13 @@ Never claim:
 ```text
 "M1 is better."
 ```
-Instead, provide multi-dimensional empirical evidence:
+Instead, provide multi-dimensional empirical evidence.
+
+> **The block below is an ILLUSTRATIVE FORMAT, not measured results.** None of these numbers were
+> produced by OpenGrad. BFCL V4, tau3 and IFBench remain `BLOCKED_NO_DATASET` — their adapters
+> synthesize placeholder tasks and have never been scored against real data. For actually measured
+> results see [`reports/FINAL_CAMPAIGN_AUDIT.md`](../../reports/FINAL_CAMPAIGN_AUDIT.md).
+
 ```text
 M1 improves BFCL V4 parallel tool calling by +14.2 points,
 improves tau3 retail task completion by +8.1 points,

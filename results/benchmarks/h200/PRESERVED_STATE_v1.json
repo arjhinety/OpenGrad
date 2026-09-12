@@ -1,0 +1,125 @@
+{
+  "absent": [],
+  "append_only_policy": "Only keys listed in append_only_updates may change hash under --verify, and only reports may appear there. Every data artifact -- predictions, scores, ledgers, hashes, frozen inputs -- is strictly immutable.",
+  "append_only_updates": {
+    "report_h200": {
+      "original_sha256": "1611ee415964fe30389feade813b3a8f2cdfdb31d9fa088937ce03d739718277",
+      "reason": "The continuation was explicitly asked to update reports/H200_BENCHMARK_RUN.md. It is extended with a continuation section that ADDS the capability-diagnosis results; no existing figure, table or conclusion in it is rewritten. The original digest is recorded above so the extension is auditable."
+    }
+  },
+  "artifacts": {
+    "capability_run": {
+      "bytes": 9283,
+      "path": "results/benchmarks/h200/capability_run.json",
+      "present": true,
+      "sha256": "1834d778b9fdf9c70ad7bec0b0702a8e0872b6573e3c448a283b4ded61a1cec6"
+    },
+    "engine_agreement": {
+      "bytes": 3888,
+      "path": "results/benchmarks/h200/vllm_vs_llamacpp_agreement.json",
+      "present": true,
+      "sha256": "807b0c77feae182190c573b48cfaed406d6545e19c1efd0a5eeb6bbc93825f43"
+    },
+    "findings_ledger": {
+      "bytes": 42043,
+      "path": "results/quantization/findings.jsonl",
+      "present": true,
+      "sha256": "1124d48577e038d82f90d5af7c1286f842382a9bc686b99c20ed8decb1309fe8"
+    },
+    "frozen_1277_predictions": {
+      "bytes": 1005604,
+      "path": "results/benchmarks/h200/predictions_vllm-bf16_confirmatory.json",
+      "present": true,
+      "sha256": "2a033469e5274dbda71dbf7f8a5f9f8e140258a73cbf8d6ac2699a6bafb5a7bd"
+    },
+    "frozen_1277_scores": {
+      "bytes": 1125,
+      "path": "results/benchmarks/h200/score_vllm-bf16_confirmatory.json",
+      "present": true,
+      "sha256": "8ea68dc0b3b5f02db40a5bd2c9ddc80940e5dcc6f953c66def2e53163b1fa468"
+    },
+    "frozen_eval_set": {
+      "bytes": 13830993,
+      "path": "results/quantization/frozen_behavioral_eval_v1.jsonl",
+      "present": true,
+      "sha256": "4c762f7d0aabf5570734b3e13ef76c81a445cb9e9683f9f0dce55ac75aa01a0f"
+    },
+    "frozen_reference": {
+      "bytes": 3884,
+      "path": "results/quantization/m1_v2_reference.json",
+      "present": true,
+      "sha256": "32dcc7b84fac9bf2e6bc1efdc6c6debb713859b0882174aa74f2cc3f332bcaf3"
+    },
+    "openweights_results": {
+      "bytes": 6656,
+      "path": "results/benchmarks/openweights_parity_opengrad_v1.json",
+      "present": true,
+      "sha256": "59cc20fa9af96a82b96a15885ab627786526170f1b887119d15541f5ecb5108a"
+    },
+    "openweights_spec": {
+      "bytes": 6718,
+      "path": "results/benchmarks/openweights_parity_cases_v1.json",
+      "present": true,
+      "sha256": "2de2e6e7c9b74811706a3fb6a4f85e777b34fe0a2c75944ae673913b5127a82f"
+    },
+    "performance_run": {
+      "bytes": 4810,
+      "path": "results/benchmarks/h200/perf_run.json",
+      "present": true,
+      "sha256": "e551d01bcc3def195f596c5df9f7e6893af3a75dc3c488125313dfeb658e902f"
+    },
+    "phase0_validation": {
+      "bytes": 7616,
+      "path": "results/benchmarks/h200/validate_run.json",
+      "present": true,
+      "sha256": "47ee7c2b43b15d984c82e84f5aa72c43c5b0362ee190e417af3230911f1cd51e"
+    },
+    "preservation_gate": {
+      "bytes": 1052,
+      "path": "results/quantization/quantization_preservation_v1.json",
+      "present": true,
+      "sha256": "aff115f928b542224aaad5c3bbc9452374f5835e476bd2bade56527f0bcd1884"
+    },
+    "ptq_closure": {
+      "bytes": 20885,
+      "path": "manifests/quantization/ptq_phase_closure_v1.json",
+      "present": true,
+      "sha256": "4092f8abc961a34759b64e82d99a9d373cbfe87df912fa2e57531ef43c8df8a0"
+    },
+    "report_engine_parity": {
+      "bytes": 9242,
+      "path": "reports/QUANTIZATION_ENGINE_PARITY.md",
+      "present": true,
+      "sha256": "b0d9e36d3ffc23edf73cb681af5698bd67515f7696778e98e44afd87392b53dd"
+    },
+    "report_h200": {
+      "bytes": 9090,
+      "path": "reports/H200_BENCHMARK_RUN.md",
+      "present": true,
+      "sha256": "1611ee415964fe30389feade813b3a8f2cdfdb31d9fa088937ce03d739718277"
+    },
+    "report_openweights": {
+      "bytes": 4519,
+      "path": "reports/OPENWEIGHTS_TRANSFER_EVALUATION.md",
+      "present": true,
+      "sha256": "312364c20f750c745d3ecc382a695f1265ec11940b0e0688d2a0eb3415ed2562"
+    },
+    "report_ptq_eval": {
+      "bytes": 9699,
+      "path": "reports/QUANTIZATION_PTQ_EVALUATION.md",
+      "present": true,
+      "sha256": "f273a05bfb6e2d3fc13bb620bd5648262105d50b31a09a484978010441db2489"
+    },
+    "run_ledger": {
+      "bytes": 4691,
+      "path": "results/benchmarks/h200_run_ledger.json",
+      "present": true,
+      "sha256": "0c0398fcf9bcb02fde9141725f93beb5fe663e0eb4f97df699660dd4813e4652"
+    }
+  },
+  "continuation_namespace": "results/benchmarks/h200/capability_v1",
+  "continuation_run": "h200-capability-diagnosis-v1",
+  "policy": "Files listed here are immutable for the continuation. The continuation may append metadata elsewhere and may publish explicitly versioned corrected reports, but it never rewrites a completed result in place.",
+  "preserved_run": "h200-credit-constrained-v1",
+  "schema_version": 1
+}

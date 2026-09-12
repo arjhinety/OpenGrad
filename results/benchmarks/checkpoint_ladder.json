@@ -1,0 +1,293 @@
+{
+  "anchored_to": {
+    "declared_current_revision": "f33d20308982f37deb459076f489e794d5521ee3",
+    "declared_parent": "m0_sft_canonical_v2_final::checkpoint-1800",
+    "declared_parent_weight_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+    "frozen_reference": "results/quantization/m1_v2_reference.json"
+  },
+  "checkpoints": [
+    {
+      "add_bos_token": false,
+      "architectures": [
+        "Qwen3_5ForConditionalGeneration"
+      ],
+      "available": true,
+      "bos_token": null,
+      "branch_head": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+      "chat_template_source": "tokenizer_config.json:chat_template",
+      "checkpoint_id": null,
+      "config.json_sha256": "ed1c1723241f23f7f4e23430759cbd7dcfb4103cbdfe052bfe7626b57c2615b4",
+      "eos_token": "<|im_end|>",
+      "experiment_id": null,
+      "file_count": 13,
+      "files": [
+        ".gitattributes",
+        "LICENSE",
+        "README.md",
+        "chat_template.jinja",
+        "config.json",
+        "merges.txt",
+        "model.safetensors-00001-of-00001.safetensors",
+        "model.safetensors.index.json",
+        "preprocessor_config.json",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "video_preprocessor_config.json",
+        "vocab.json"
+      ],
+      "generation_config.json_sha256": null,
+      "has_chat_template_file": true,
+      "hidden_size": 2048,
+      "is_multimodal_config": true,
+      "num_hidden_layers": 24,
+      "order": 0,
+      "pinned_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "repo": "Qwen/Qwen3.5-2B",
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "revision_is_pinned": true,
+      "role": "upstream pretrained/instruct base; no OpenGrad post-training",
+      "single_shard_sha256": "aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1",
+      "stage": "BASE",
+      "subfolder": "",
+      "tokenizer_config.json_sha256": "49e2b6e395f959f077f1e992b338919c0d4a9732fc6e613995e06557f843500c",
+      "tokenizer_files": {
+        "merges.txt": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+        "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+        "tokenizer_config.json": "49e2b6e395f959f077f1e992b338919c0d4a9732fc6e613995e06557f843500c",
+        "vocab.json": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+      },
+      "tokenizer_identity_sha256": "238bf36a3b709cf4fb3b40695e401ef2a89ad0f5313fdffee3c00953afb72b21",
+      "tokenizer_json_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+      "torch_dtype": null,
+      "vocab_size": 248320,
+      "weight_identity_note": "sha256 over 'filename:lfs_sha256' lines for every safetensors shard, sorted. Not a hash of the tensor bytes concatenated; it is a stable identity for the shard set.",
+      "weight_identity_sha256": "39d84abe920b0b3ea5aa22f0e568d5fbf7dd10365d7ac85c9b50520257fc5d6b",
+      "weight_shard_count": 1,
+      "weight_shards": {
+        "model.safetensors-00001-of-00001.safetensors": "aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1"
+      }
+    },
+    {
+      "add_bos_token": null,
+      "architectures": [
+        "Qwen3_5ForCausalLM"
+      ],
+      "available": true,
+      "bos_token": null,
+      "branch_head": "acffaf6eb068e556f9a127f36c9478201afb49fa",
+      "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+      "chat_template_source": "chat_template.jinja",
+      "checkpoint_id": "checkpoint-1800",
+      "config.json_sha256": "88bf86c270d616198909ed1eefef8d8c21ac1fa13f62e947f20f8e1ebd02c211",
+      "eos_token": "<|im_end|>",
+      "experiment_id": "m0_sft_canonical_v2_final",
+      "file_count": 10,
+      "files": [
+        ".gitattributes",
+        "README.md",
+        "chat_template.jinja",
+        "checkpoint_metadata.json",
+        "config.json",
+        "findings.html",
+        "generation_config.json",
+        "model.safetensors",
+        "tokenizer.json",
+        "tokenizer_config.json"
+      ],
+      "generation_config.json_sha256": "62153eb6c69f2e1f426beaa8002b7186437e949c7588167085df14e10e9c0a73",
+      "has_chat_template_file": true,
+      "hidden_size": 2048,
+      "is_multimodal_config": false,
+      "num_hidden_layers": 24,
+      "order": 1,
+      "pinned_revision": null,
+      "repo": "arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final",
+      "revision": "acffaf6eb068e556f9a127f36c9478201afb49fa",
+      "revision_is_pinned": false,
+      "role": "supervised fine-tuning on ToolPolicy-Canonical-v2; direct parent of M1-v2",
+      "single_shard_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+      "stage": "M0_SFT",
+      "subfolder": "",
+      "tokenizer_config.json_sha256": "9cf04fffe3d8c3b85e439fb35c7acad0761ab51c422a8c4256d9f887c3a0be7d",
+      "tokenizer_files": {
+        "tokenizer.json": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+        "tokenizer_config.json": "9cf04fffe3d8c3b85e439fb35c7acad0761ab51c422a8c4256d9f887c3a0be7d"
+      },
+      "tokenizer_identity_sha256": "6d1fb3248f9224231f547339cd407e84c637034c2030ddde690e3007598fe0da",
+      "tokenizer_json_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+      "torch_dtype": "bfloat16",
+      "vocab_size": 248320,
+      "weight_identity_note": "sha256 over 'filename:lfs_sha256' lines for every safetensors shard, sorted. Not a hash of the tensor bytes concatenated; it is a stable identity for the shard set.",
+      "weight_identity_sha256": "acc6eb07259f2eec3849ad13ca0e0b681ef9b53b574d7348ba8aba1d496462fb",
+      "weight_shard_count": 1,
+      "weight_shards": {
+        "model.safetensors": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a"
+      }
+    },
+    {
+      "add_bos_token": null,
+      "architectures": [
+        "Qwen3_5ForCausalLM"
+      ],
+      "available": true,
+      "bos_token": null,
+      "branch_head": "34ebbf13603b79bf955c66bf9a75950fb59a670b",
+      "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+      "chat_template_source": "chat_template.jinja",
+      "checkpoint_id": "dpo-checkpoint-30",
+      "config.json_sha256": "88bf86c270d616198909ed1eefef8d8c21ac1fa13f62e947f20f8e1ebd02c211",
+      "eos_token": "<|im_end|>",
+      "experiment_id": "m1_dpo_canonical_v2_final_v2",
+      "file_count": 7,
+      "files": [
+        "chat_template.jinja",
+        "checkpoint_metadata.json",
+        "config.json",
+        "generation_config.json",
+        "model.safetensors",
+        "tokenizer.json",
+        "tokenizer_config.json"
+      ],
+      "generation_config.json_sha256": "62153eb6c69f2e1f426beaa8002b7186437e949c7588167085df14e10e9c0a73",
+      "has_chat_template_file": true,
+      "hidden_size": 2048,
+      "is_multimodal_config": false,
+      "num_hidden_layers": 24,
+      "order": 2,
+      "pinned_revision": "f33d20308982f37deb459076f489e794d5521ee3",
+      "repo": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2",
+      "revision": "f33d20308982f37deb459076f489e794d5521ee3",
+      "revision_is_pinned": true,
+      "role": "promoted preference-tuned checkpoint; the model under diagnosis",
+      "single_shard_sha256": "903f9b115d418d1988c0d5e1dd4bda7e04809a54a6bc7e34431982fbee2262f6",
+      "stage": "M1_DPO_CURRENT",
+      "subfolder": "dpo-checkpoint-30",
+      "tokenizer_config.json_sha256": "66e427c470fe580fe8c7b5725d857af23d8417e37fae62667ec698306a19987b",
+      "tokenizer_files": {
+        "tokenizer.json": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+        "tokenizer_config.json": "66e427c470fe580fe8c7b5725d857af23d8417e37fae62667ec698306a19987b"
+      },
+      "tokenizer_identity_sha256": "8dfde863217b745831281f66f5c29fbcac43b5c97d2055b8a327d6cfedb4ab25",
+      "tokenizer_json_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+      "torch_dtype": "bfloat16",
+      "vocab_size": 248320,
+      "weight_identity_note": "sha256 over 'filename:lfs_sha256' lines for every safetensors shard, sorted. Not a hash of the tensor bytes concatenated; it is a stable identity for the shard set.",
+      "weight_identity_sha256": "3eb5f0cf4535cfa49a4dbef81b7de318a208f561bdecbec5a610977dc4c6f788",
+      "weight_shard_count": 1,
+      "weight_shards": {
+        "model.safetensors": "903f9b115d418d1988c0d5e1dd4bda7e04809a54a6bc7e34431982fbee2262f6"
+      }
+    },
+    {
+      "add_bos_token": null,
+      "architectures": [
+        "Qwen3_5ForCausalLM"
+      ],
+      "available": true,
+      "bos_token": null,
+      "branch_head": "3a1250c7b8e86758e2605ee67092e24fc8afa5aa",
+      "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+      "chat_template_source": "chat_template.jinja",
+      "checkpoint_id": "checkpoint-300",
+      "config.json_sha256": "6cb8daca9fb653c61485ff7452fc068bacd5c27cbee659ecd24b47186b0d1b52",
+      "eos_token": "<|im_end|>",
+      "experiment_id": "qwen35_2b_m1_dpo",
+      "file_count": 8,
+      "files": [
+        "chat_template.jinja",
+        "checkpoint_metadata.json",
+        "config.json",
+        "generation_config.json",
+        "model.safetensors",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "training_state.pt"
+      ],
+      "generation_config.json_sha256": "62153eb6c69f2e1f426beaa8002b7186437e949c7588167085df14e10e9c0a73",
+      "has_chat_template_file": true,
+      "hidden_size": 2048,
+      "is_multimodal_config": false,
+      "num_hidden_layers": 24,
+      "order": 3,
+      "pinned_revision": null,
+      "repo": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO",
+      "revision": "3a1250c7b8e86758e2605ee67092e24fc8afa5aa",
+      "revision_is_pinned": false,
+      "role": "earlier DPO lineage on a different SFT parent (CorpusV2, not CanonicalV2-Final). SUPPLEMENTARY only -- it is not on the base->M0->M1-v2 path, so a delta against it mixes two changes and cannot localise a stage.",
+      "single_shard_sha256": "eef28bc106b9ba5fff907ee284339ead40f21c1347af61b32e33d17ce3a2f0a0",
+      "stage": "M1_DPO_HISTORICAL",
+      "subfolder": "checkpoint-300",
+      "supplementary": true,
+      "tokenizer_config.json_sha256": "9cf04fffe3d8c3b85e439fb35c7acad0761ab51c422a8c4256d9f887c3a0be7d",
+      "tokenizer_files": {
+        "tokenizer.json": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+        "tokenizer_config.json": "9cf04fffe3d8c3b85e439fb35c7acad0761ab51c422a8c4256d9f887c3a0be7d"
+      },
+      "tokenizer_identity_sha256": "6d1fb3248f9224231f547339cd407e84c637034c2030ddde690e3007598fe0da",
+      "tokenizer_json_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+      "torch_dtype": "bfloat16",
+      "vocab_size": 248320,
+      "weight_identity_note": "sha256 over 'filename:lfs_sha256' lines for every safetensors shard, sorted. Not a hash of the tensor bytes concatenated; it is a stable identity for the shard set.",
+      "weight_identity_sha256": "7216608ee88036b6feed730e5cf54391961a076525b46692e2b9f87ae7403b44",
+      "weight_shard_count": 1,
+      "weight_shards": {
+        "model.safetensors": "eef28bc106b9ba5fff907ee284339ead40f21c1347af61b32e33d17ce3a2f0a0"
+      }
+    }
+  ],
+  "consistency_checks": {
+    "base_architecture_matches_current": false,
+    "base_chat_template_matches_current": true,
+    "base_tokenizer_json_matches_current": false,
+    "current_chat_template_matches_frozen_reference": true,
+    "current_config_matches_h200_run": true,
+    "current_revision_matches_frozen_reference": true,
+    "current_weights_match_h200_run": true,
+    "m0_architecture_matches_current": true,
+    "m0_chat_template_matches_current": true,
+    "m0_tokenizer_json_matches_current": true,
+    "m0_weights_match_frozen_reference_parent": true
+  },
+  "expected_failing_checks": [
+    "base_architecture_matches_current",
+    "base_tokenizer_json_matches_current"
+  ],
+  "known_cross_stage_differences": [
+    {
+      "handling": "The BASE rung is evaluated as published, text-only, with no images supplied. The vision tower is not exercised. The language stack is NOT extracted and re-saved as a causal LM, because a reconstructed artifact is not the original.",
+      "id": "BASE_IS_MULTIMODAL_ARCHITECTURE",
+      "observed": "Qwen/Qwen3.5-2B publishes architectures=['Qwen3_5ForConditionalGeneration'] with a vision_config (depth 24, hidden 1024) and image/video token ids. M0_SFT and M1_DPO_CURRENT publish ['Qwen3_5ForCausalLM'] with a flat text-only config. The text_config of the base is shape-identical to the post-trained config: 24 layers, hidden 2048, vocab 248320, full_attention_interval 4, linear_conv_kernel_dim 4.",
+      "residual_risk": "A multimodal wrapper can differ from a text-only wrapper in prompt handling even with no image present. This is a caveat on BASE deltas, not on the M0->M1 delta, where both sides are Qwen3_5ForCausalLM.",
+      "stages": [
+        "BASE"
+      ]
+    },
+    {
+      "handling": "Each checkpoint is evaluated with its own tokenizer, because the tokenizer is part of the artifact. The number of benchmark prompts whose token ids differ between the base and post-trained tokenizers is measured separately on CPU and reported; if it is zero the difference is behaviourally inert for this study and the BASE delta is readable.",
+      "id": "BASE_TOKENIZER_PRETOKENIZER_REGEX_DIFFERS",
+      "likely_cause": "The post-trained tokenizers were re-serialised by the training stack, which rebuilt the fast tokenizer from an older Qwen2-family template. NOT an intentional change, and NOT verified here -- stated as the probable mechanism, not as a finding.",
+      "observed": "tokenizer.json byte digests differ between the base and the post-trained stages. The vocab (248044 entries) and the merge list are IDENTICAL once serialization format is normalised (base stores merges as space-joined strings, the post-trained stages as 2-element arrays). Two real differences remain: (1) the Split pre-tokenizer regex -- base uses the Qwen3.5 form '[^\\r\\n\\p{L}\\p{N}]?[\\p{L}\\p{M}]+ ... ?[^\\s\\p{L}\\p{M}\\p{N}]+' which is aware of Unicode combining marks, while the post-trained stages carry the older Qwen2 form without \\p{M}; (2) ByteLevel trim_offsets is false on base and true on the post-trained stages. The post-trained stages also register 7 extra added_tokens (ids 248070-248076, audio/tts placeholders) absent from the base's added_tokens list.",
+      "relates_to": "reports/TOKENIZER_DIVERGENCE_REGRESSION.md",
+      "stages": [
+        "BASE",
+        "M0_SFT",
+        "M1_DPO_CURRENT"
+      ]
+    }
+  ],
+  "missing": [],
+  "notes": [
+    "No intermediate DPO step exists between M0_SFT and M1_DPO_CURRENT that is published; dpo-checkpoint-30 is the promoted one and the only DPO artifact on the Hub for this lineage, so the M0->M1 delta is the whole preference stage, not one step of it.",
+    "parent_weight_sha256 in the frozen reference is a digest of the training-time checkpoint. It was initially assumed this need not equal the published M0 repo's shard digest. It does: both are 7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a, verified twice -- from the Hub's LFS metadata here, and by recomputing sha256 over the downloaded file inside the H200 container. The published M0 is the exact parent of M1-v2.",
+    "Two consistency checks are EXPECTED to fail: base_architecture_matches_current and base_tokenizer_json_matches_current. Both are documented in known_cross_stage_differences and are properties of the upstream artifact, not errors in this ladder. Every check on the M0->M1 edge passes, which is the edge that isolates the preference stage."
+  ],
+  "primary_path": [
+    "BASE",
+    "M0_SFT",
+    "M1_DPO_CURRENT"
+  ],
+  "purpose": "Localise the stage at which the OpenWeights sentinel refusal behaviour first becomes observable. The decisive path is BASE -> M0_SFT -> M1_DPO_CURRENT; every stage on it shares one tokenizer and one chat template, which is what makes the deltas readable.",
+  "run": "h200-capability-diagnosis-v1",
+  "schema_version": 1
+}

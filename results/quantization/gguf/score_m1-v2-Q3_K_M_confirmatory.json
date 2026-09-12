@@ -1,0 +1,2195 @@
+{
+  "artifact": "m1-v2-Q3_K_M",
+  "artifact_bytes": 1099258624,
+  "artifact_sha256": "e04d2bd0b6c78d225892f0eaa400cc901108f137921415dc0c41f0becb9a780f",
+  "context_buckets": {
+    "base": 1275,
+    "overflow": 2
+  },
+  "decision_counts": {
+    "ANSWER": 46,
+    "CALL": 634,
+    "CLARIFY": 338,
+    "UNSUPPORTED": 259
+  },
+  "gate_vs_frozen_vllm_reference": {
+    "checks": [
+      {
+        "dimension": "call_f1",
+        "observed": 0.74149034,
+        "passed": false,
+        "requirement": ">= 0.747290323 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "call_precision",
+        "observed": 0.635646688,
+        "passed": false,
+        "requirement": ">= 0.728490566 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "call_recall",
+        "observed": 0.889624724,
+        "passed": true,
+        "requirement": ">= 0.767086093 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "clarification_accuracy",
+        "observed": 0.549865229,
+        "passed": false,
+        "requirement": ">= 0.757843666 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "unsupported_accuracy",
+        "observed": 0.492273731,
+        "passed": false,
+        "requirement": ">= 0.533245033 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "over_call_rate",
+        "observed": 0.280339806,
+        "passed": false,
+        "requirement": "<= 0.162912621 (BF16 + 0.01)"
+      },
+      {
+        "dimension": "parse_valid_rate",
+        "observed": 1.0,
+        "passed": true,
+        "requirement": ">= 0.99"
+      },
+      {
+        "dimension": "existing_tool_use_promotion",
+        "observed": "PROMOTE",
+        "passed": true,
+        "requirement": "PROMOTE/PROMOTED"
+      }
+    ],
+    "decision": "REJECTED_ACCURACY",
+    "failed_dimensions": [
+      "call_f1",
+      "call_precision",
+      "clarification_accuracy",
+      "unsupported_accuracy",
+      "over_call_rate"
+    ],
+    "policy_version": "quantization_preservation_v1",
+    "thresholds": {
+      "call_f1": 0.7472903225806452,
+      "call_precision": 0.7284905660377358,
+      "call_recall": 0.7670860927152318,
+      "clarification_accuracy": 0.7578436657681941,
+      "over_call_rate_max": 0.1629126213592233,
+      "parse_valid_rate_min": 0.99,
+      "unsupported_accuracy": 0.5332450331125828
+    },
+    "tool_use_policy": {
+      "decision": "PROMOTE",
+      "passed": true,
+      "source": "tool_use_promotion_v4"
+    }
+  },
+  "metrics": {
+    "call_f1": 0.7414903403863847,
+    "call_precision": 0.6356466876971609,
+    "call_recall": 0.8896247240618101,
+    "clarification_accuracy": 0.5498652291105122,
+    "over_call_rate": 0.2803398058252427,
+    "parse_valid_rate": 1.0,
+    "unsupported_accuracy": 0.4922737306843267
+  },
+  "parser_status": {
+    "RAW_VALID": 1277
+  },
+  "partition": "confirmatory",
+  "policy_version": "quantization_preservation_v1",
+  "quantization": "Q3_K_M",
+  "quantization_loss_vs_llamacpp_bf16": {
+    "baseline_metrics": {
+      "call_f1": 0.7572192513368984,
+      "call_precision": 0.7344398340248963,
+      "call_recall": 0.7814569536423841,
+      "clarification_accuracy": 0.7681940700808625,
+      "over_call_rate": 0.1553398058252427,
+      "parse_valid_rate": 1.0,
+      "unsupported_accuracy": 0.5474613686534217
+    },
+    "delta": {
+      "call_f1": -0.015729,
+      "call_precision": -0.098793,
+      "call_recall": 0.108168,
+      "clarification_accuracy": -0.218329,
+      "over_call_rate": 0.125,
+      "parse_valid_rate": 0.0,
+      "unsupported_accuracy": -0.055188
+    },
+    "note": "engine and tokenizer identical on both sides, so this delta is attributable to quantization",
+    "output_agreement": {
+      "byte_identical_outputs": 286,
+      "byte_identical_rate": 0.223962,
+      "decision_agreement": 0.771339,
+      "decision_flips": 292,
+      "examples": 1277,
+      "flip_effects": {
+        "broke": 152,
+        "fixed": 95,
+        "lateral": 45
+      },
+      "flips": [
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "0197c149-6f2d-40c6-a45a-2ad6e6525ff7",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "03167efa-28e3-4cbd-8e4c-657042f4c71d",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "03f7ab8e-a67c-45c7-bc04-5597a9c5b654",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "04f596a9-c595-454d-864f-0816910ad47c",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "056392d2-9064-481c-98e9-b592c62f9b88",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "063e8921-95ac-46a8-8840-4e9be7a9b252",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "0764e115-4810-4f31-a6e0-7f8fd167f731",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "07ad417d-b086-44dc-b71e-ec37cfa11708",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "0ab39c2e-5911-42df-a42a-70e62b75d535",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "0ad5a31d-b541-4fa4-b21d-597f6b299ab4",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "0ada4c55-0c4b-4ef0-b5bd-fb097fdea739",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "0b2197fb-05e0-4033-a1e6-1abae907f76a",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "0b74e214-f8d0-40cc-bb90-b853b346a37e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "0c7c7f15-2afd-480f-a62c-c98193d21a04",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "0c9e879a-776d-49d0-b756-f00761c2edc2",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "0e0909f9-ccf4-468c-a75a-5d4168973b66",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "0e6ffb09-1902-47ce-a81f-a79762f93bf4",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "10816bdc-0812-4253-8893-f2d0bb1fbec9",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "10b5b426-6d1f-43f2-b417-4e4613899747",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "10b873ba-95d2-492d-bcf6-68ca4e5039c2",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "114068ef-a5de-4486-8ba5-0b10d5d0f567",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "12b3fdc5-1dbb-4ac1-a38d-3f9f7f241ef2",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "12c1d58f-7535-41d5-bc92-95d3eaf462e8",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "131deafe-9206-42e4-a743-91c3db93eac7",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "14706f17-0ed1-4958-a65e-be40908b5191",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "163c6ac4-92ac-43cd-84eb-5b091cd7dbec",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "170aef85-3a43-47c8-b2a1-618517713407",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "17c6993b-71f4-4627-a8c8-a3323bf83b11",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "17dc0352-70a1-4b06-87fd-bf430893868d",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "198c8c85-fd98-46da-8eb0-f3042145e451",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "1ab0e39d-d643-40d4-8261-54c9658707ff",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "1c447031-fdaa-48c6-8f75-4547acd95412",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "1c577cb6-3ddb-4ac9-9df9-74ca3b3fbfa4",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "1c9a9a88-67f2-4935-8f28-10a13d2009e9",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "1d02fb2b-1710-4866-8adc-baacec2f7ad3",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "1dbdd40d-0086-4d32-9193-d5de11885982",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "1f113e4a-19b8-4963-a413-1ec3ca17e3a2",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "1f21d7e8-9bf4-47ee-a6a1-22abdee611dd",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "2046e91a-b142-4920-95f3-ec18fa9720a7",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "20a445cb-a1f3-4b50-821a-9ea3945be6c7",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "22bac9c5-3699-43b3-901d-7ceabee899d8",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "240b33c0-7d32-495a-9aa0-17401bc12e83",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "247e4430-6824-4e9b-b6df-35742f34e449",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "250501a9-cc76-41d2-9360-af786ff2dad5",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "2549b861-dc86-4750-9e22-8e2582f23fb2",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "25dd3fad-229d-48cd-8cda-2e5530fafa95",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "25e91638-e355-4443-b7d7-7dad680b35d1",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "2644b8a8-2640-4170-b8de-da05c91ebc8b",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "26b8b228-96cf-46db-845f-4d2f707c0fc6",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "273ae6bb-33e2-4405-8eb3-06ee98c6db84",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "28c02a8a-d90e-492c-9792-15265822978f",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "291491f8-7887-4bac-a889-be6ff221bfbb",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "29215f69-48a2-4eb4-b2f9-383ae77b0f6f",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "292e2667-85fb-4152-9a5f-67afe62d38a6",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "29576687-fbd4-45c3-91a3-25e04863f0f8",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "2a8b317a-7c67-4a49-9783-4191ab7bc4c9",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "2ac792dc-5897-4a83-bfdd-decb98be28cb",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "2d494040-bc78-482c-93dd-e15e94b8d285",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "2d7428e2-c556-4680-a1d7-dc588ce53a31",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "2dbfbbc6-b1fb-410e-b324-1f952c40f77a",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "2de9fdec-1b9f-474a-a5b9-e1334b7461c9",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "2e4c9726-8210-4409-9d1e-38e8488a4217",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "300edbb4-36df-4627-a604-0a93edb26192",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "30ecafe9-9830-4e41-a936-e71fa3293c98",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "31cd5d19-c7eb-4066-87fa-ce541232e520",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "32bc23fc-932a-47ef-be40-c78d65b12699",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "34bfd085-ba64-4914-8696-07fe17519305",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "34c8ca6d-9a4e-408e-a0ae-0077d2f0533d",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "36a14b9e-48d7-48b1-8bb1-a68b7ddba74f",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "36a1ac67-98a7-409c-aed1-a6658075960e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "370cadc4-62cc-4e6a-94d7-542b862a46c1",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "38e0a751-3f46-42f6-9c74-9083e5b31b3b",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "39c3c3ce-ece0-4f21-9fe8-673703f79ef8",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "39f956a7-338f-40cc-a6c7-35fecdf2d32d",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "3b7589c0-733d-49e2-ad7d-f9c9f5a452c0",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "3c1c9c20-627b-4ba9-8aee-2ee1a57e42d3",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "3cfcf04f-49bb-457c-be2b-71cf62373549",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "3dc242c5-61be-4798-bf41-1d0d6c836f59",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "3dd89a70-3245-403e-b93d-2465ae362c05",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "3de1a848-cbbe-4c64-b766-a4772e6e9334",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "3e272466-2424-4ccb-9af7-3e7e654901e4",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "3eeab7b3-866b-4d75-b618-e80dd1c2a58a",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "3f01bd90-4c7e-421c-8393-82cfe4297ac4",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "4278694b-0ac1-465d-b46f-27caa7e3c079",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "43e5ad4f-18e8-4c78-afe8-1f47a92d55f2",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "fixed",
+          "example_id": "4635621f-f2aa-4315-92c6-89d6f3524c98",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "483e9a31-fb37-4d98-84f1-ce1d57597134",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "4896a53b-b893-4a7f-a833-8af43e12467f",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "4a74e997-fa74-47c6-9833-bd199bc4ae1b",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "4b0defa3-94fd-4243-9e75-eb57389ff526",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "4be25528-3295-40f2-a8f0-910c4d660b23",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "4ce8adc0-487c-4595-a778-0337c5968eab",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "lateral",
+          "example_id": "50684395-9404-4f60-b4d9-208fa6cd8c9b",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "549d3fdf-408f-4901-baac-e9c9abaf7365",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "54a555f7-7535-4733-94fc-6b38eaf969b2",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "54e54efa-76ea-4023-a04b-d8f4e2498f56",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "5518ecec-71ab-463e-8d48-1b2c3af770ad",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "55a1e76c-288d-456a-a9e2-5be7ce43034d",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "57306166-58e3-4af6-a52e-0db37c586fec",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "fixed",
+          "example_id": "57ce2cd2-db36-4e6b-983c-4d6d6ac4daed",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "583a62f2-0989-4b0b-8373-ae503499777c",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "5a5f4297-5ed8-41ec-a85c-b075f106c829",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "5a66e560-6d86-4dd8-87a5-2c1a10fb8489",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "5b968198-07ad-41ba-a785-81b3e5806677",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "5c81fcc6-3665-497d-b0c2-919aa0193a28",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "5cb5a950-ac01-4945-bd38-d3e1a8ceb78c",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "5d436d5a-8b9c-4ce2-939c-3304117e25d9",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "5e76c7fa-a885-413b-aaf1-1d341df62f07",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "5f4f4896-8875-4c7d-b0b8-7bc338184c1d",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "602505bc-70ca-4952-b924-7f4d1aaea901",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "6065e474-a320-441e-915e-8057573029fe",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "611d632c-b107-4736-8db0-78100186a286",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "617a0d0a-a160-4643-9ebc-51863e9a67b1",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "627143fb-553a-46f6-aa1d-dfbfea56e154",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "65399697-bc8c-4842-ae15-4553aa15207a",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "65af039c-fcd3-4c95-aec3-9550fd5f583b",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "66441f34-3b72-4a50-a953-a4a26da380fe",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "66b130c5-ada3-4003-bb5f-84215d423b33",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "66c96505-49e7-4f05-8863-211d92d4aa82",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "66f0d134-0285-492a-9d58-68f4c6163a80",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "69ad3075-8eec-42c3-be0d-4d2dd85bce40",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "69c13a48-3e05-4d8b-8dbc-6acfd8ad2f49",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "69c5e750-56fa-467c-abf4-18789553cfcb",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "6a9ab6bd-d793-4b84-b880-4ed257cdff96",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "6caaa5ef-c9e9-45f6-9328-d2308b645aa0",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "6d82f09e-0096-4ebc-9288-bce7a8e37c76",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "6ddf2f37-daee-4ce9-a4a4-26e257885922",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "6ea48aae-8a52-4460-8980-086538f9519c",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "lateral",
+          "example_id": "6f9d6e90-faf1-492f-9221-a78d55118bf4",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "71652127-3f76-4e80-bb0a-190d0820dcb5",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "7197481b-b457-45f8-9d9a-66fa60dc30ec",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "727c6e82-3113-4a17-8dd0-733d3538cca4",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "72c5ddbc-5f48-4e0d-b6e5-6b05a9cf89fd",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "73353d1e-cd38-4e81-bc9d-c0cdae7f8703",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "73e0db86-e980-4068-a71b-566defce8076",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "758a53fb-c321-44f6-91ff-ea52965201d6",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "76ccbb11-1a41-4a71-b782-2d586b100284",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "791d3ac7-224d-4dc6-80dd-4517a0dd922c",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "7a4313e6-7b9d-49be-9d1e-cad721bb3d45",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "7aebadf0-e5c5-43b7-89e5-db14461ae997",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "7d4294e4-d627-434d-a80e-8295ed2a5187",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "7db05ff2-5fdc-4837-8f27-c06004a98936",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "7dfb712c-e12b-4156-b3d3-f0b36ee992e2",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "7e8d589c-5d30-43a4-9705-578e4dea30ab",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "7ea21890-de0a-472c-90c2-9f78c2405024",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "7f27e54f-724c-48ed-9d98-a82622f73b36",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "7f3e5a2a-0d62-47a3-b040-07cd181ddebc",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "81703c9f-a513-4468-a584-2ae6afe2a6c1",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "83c9ee1c-4fc8-42c5-bda2-fc557ed5384a",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "83ea3362-c4e8-4780-83a7-963521861a3b",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "85a392ac-d8bc-429f-8613-fb744e414a38",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "87426de9-635b-4139-b91f-b564e9a42487",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "8757ac99-0454-49eb-9a9c-e92e4937f84e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "894936b5-9f47-4e45-b962-dd7912560220",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "8a0c591c-842a-401a-8389-6eb1d207c534",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "8b03a885-3c94-4ed4-adc2-975b05015757",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "8b57cf0d-3ab5-4f65-bf30-d65cd7a1ecb5",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "8c1247a7-72b3-4388-b4eb-c9fc75f19584",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "8d951b04-caa9-4aae-9454-2e8bb7561f9c",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "8da2bcdf-b627-4421-8f04-3fc5dabd0f9e",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "8e790456-3849-41e5-a088-ffc1fa33610f",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "8f3f43c4-bca9-4faa-8faa-b1991c59df5a",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "8f435cf6-7ae6-4664-812d-9f0da9a5d7ff",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "90a300d1-bd6f-4c51-84eb-18940e24283b",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "92f2f154-1cc1-4480-b122-c51412a1051f",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "9678185d-3cbd-472e-a237-e11bb4f2d1a4",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "97f5ac2c-8512-48b2-81bd-ede77bd9e59c",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "9876f9c6-9e33-4df5-8705-fd12012521cd",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "98c6edb3-7a25-4495-923d-ac5820cad744",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "990c399c-8991-4681-916d-3962f33bc11f",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "99490fa8-b40a-4769-894e-4f813e3ca56a",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "9a23da1f-b386-428c-9b81-dc3ea73846f2",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "fixed",
+          "example_id": "9acac2cb-ad52-4cac-ba7a-00d2a987e2c4",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "9acd2d0f-3ee6-4a5f-b317-80bacedd6af9",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "9b12eb4b-6900-44c7-a75e-836bcdd8d037",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "9c96890b-b61a-40dc-b557-b2e83d811c58",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "9cbb9338-1f13-4e77-898f-431f2101a211",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "9dc94336-562c-4325-964b-7066c6793c76",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "9ee5b1bc-18af-4086-905a-e3e47f2008bd",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "9f38aefe-347d-4a76-adf6-773e2265b586",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "9fc5d465-98f8-4bcc-834c-35ad223de97a",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "a052b39e-8d97-446e-b6c2-1abc254726a3",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "a0a70bce-e9d3-4da2-9289-9013f546b1c2",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "a1494943-b619-4117-a380-dccc5791f3bc",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "a54b5181-8852-427c-962e-3c9da866d698",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "a6404669-8138-4b92-9375-99e24ddbb415",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "a683932c-653b-46fc-b433-20dd3940cd95",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "a738f72d-35b8-47c4-a8e1-1bbdefa857b2",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "a8824b11-5ce7-4871-bbf5-dfe7588c943c",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "a98f56ca-00eb-4b29-a58a-b5471c45e57e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "aa97221d-c852-454b-85f1-749064dcb5e4",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "aa99f44d-bbdd-4c2e-9cc8-1bae860b2565",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "abea4094-31f4-42ee-b26d-27348715556e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "ac6a3ee3-22a5-4c32-b2d0-f43ff14781f9",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "acd8e7ae-af67-4fe7-843a-724498d83907",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "ad43fc0e-c586-4281-bfd1-9b84b5078e71",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "ad5e89f6-eec4-40cc-9af5-779ee3c6b99f",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "ad9c62b8-2279-43a7-bc60-8054a2a73b96",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "ae34fdce-e074-4d27-ae30-d11c533f69a6",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "ae683812-5b7a-403a-bac6-1b4788112cb4",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "b11e4b34-5f2c-447d-aade-13a0492a583b",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "b38b5b2c-1e38-4a8b-9976-ddebf326a7d8",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "b45fa804-6590-421a-8b60-70f1cf6ed700",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "b75e6079-a484-4bdf-af40-abcd8502228f",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "b7727782-c5ec-4b5d-93bf-68fe811237f4",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "ba7c97ea-1fa3-40dc-badd-dd63da7787a1",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "bb9ee4e9-9c5c-4b5b-aaf9-eeaa8a7a26ab",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "be8e4b48-1249-40d0-a21f-a01b27ca7d66",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "c009f863-990e-4ada-8217-21faab32b8d7",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "c26333db-6884-4bb6-9be3-106e297ec4fd",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "c317a9ce-8b9e-4546-aa84-256ff5676762",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "c31b1fce-c0a4-498e-b87f-d07221dc5bec",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "ANSWER",
+          "effect": "lateral",
+          "example_id": "c4395b40-0a11-41b5-a15c-0976d9ae64c4",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "c49fd0c5-aa3f-4cc6-aa96-ab58c4c919bb",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "c6b6b188-dca2-4a5d-817c-5bd89cf510f3",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "c7b1e7da-f0ed-4ed2-85a2-db1274504c14",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "c7cee21c-9d1e-4163-b5d0-2605c4e163b7",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "c844b851-b411-448c-ac1e-8224aac78638",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "c9332d7e-a1e3-435c-9e97-f2397106a311",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "c9cf98bc-59d6-4cf2-b62c-0473ae094cee",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "cafcb4e8-dd62-4c6e-ad44-b7e40d21bfa9",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "cbe8276f-eda9-4024-89c9-3e35d2d8ccd0",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "cf05cae1-f604-473f-983a-7bb71ce19f55",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "cff093ef-6685-4792-8861-a29cbfdb74d1",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "d0e6905b-73cf-4415-b847-130854f129e9",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "d124e1d4-ece9-40ff-a5e6-6040e327538a",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "d23aafa6-8292-4aad-b1a4-eeaf6d09dc87",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "d2959e5f-3005-49b4-9013-e7922e55b1f7",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "d3ba2b8c-3503-4f8b-9d2e-6b05860bbd11",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "d4c32e68-03ca-465e-bac2-f5136038b538",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "d4d64a60-1e15-42b7-ad72-5fece4d2cd2f",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "d5eb3a45-a65c-4e0e-b389-1b4f222fcafe",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "d727f4f7-1b94-4791-a86d-73017e88bcc5",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "d8191868-4f21-4c07-bcf3-46f83dbc0152",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "d8bbe264-1aba-42f1-a568-7000a902af06",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "d90874cc-1f26-43e5-a822-38e500a52e8d",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "d9763ab7-0006-41b7-a882-6e5b779ee5ea",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "d9836e0b-fab4-459c-a3ae-ba570fd7343e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "d9f955ce-0981-416d-ae86-c78f3559df17",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "db2c8c1a-659e-4b35-8d61-b8fa172fce31",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "db866313-0561-4138-a914-9cebc96b2afb",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "dc58c088-8098-48a1-a334-a6f6c2f60176",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "dc958876-923c-4eae-9ae6-7c9c5d3b56b3",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "de7aa8cb-64ed-47ba-b1aa-9f7c1990eab6",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "fixed",
+          "example_id": "deb64a97-d3fd-4a2e-9a8d-6c602ef8f51d",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "df0e4910-7354-45c7-80be-b1e7aa4ab2ff",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "df2eab14-8cc5-4191-89b1-96329309bec0",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "df583bea-7e85-4417-9454-c0956e6e942a",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "dfcff372-6764-419c-907b-78add3f03e31",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "lateral",
+          "example_id": "e144528a-89e8-465e-9d34-d3478e2cb94a",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "e2425bb7-3519-4540-8011-25a7ab7ba59a",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "e32ca34a-e4e2-40b6-a1e5-badc1ae5099b",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "e3d89f17-7e5a-45f4-967d-7b6a48122950",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "e41e7c57-da94-4e4a-be4d-6276c6d0bfa8",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "e4ef6ce3-5074-4027-ba7a-778fcc95ad63",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "e52883d5-9e25-4ca2-907a-d017be403cd5",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "e7463ce1-8e31-4535-8c37-47e45bd9fb57",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "e757776e-8edf-4b57-9af8-a456b1ec8917",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "ea107175-b8d7-4058-a04f-8df1ad60ce91",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "ea8592eb-24f1-4fb4-8509-c29908391148",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "eb94a3fa-7614-495e-a650-ce03cbdb3681",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "ebbd8cc5-1368-4f67-a825-87a1f8b6b1ae",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "ebc323b9-ca56-4ee9-a2cc-a3ab1522e287",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "ed54edad-a50f-4031-8535-6e3704d18621",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "ed933622-e2ec-413b-a42b-27b5207b75e9",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "ee3e0178-a846-4f07-b8ba-6b3f5bb93460",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "ee7d2eae-a60f-4cfe-8afd-a386153cb634",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "ee9247c1-fb1e-48eb-9086-6281307593e4",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "ef66bb13-8e35-4ba3-a24f-493a3bc9a6da",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "f06053da-d8b3-4aaa-a387-9ed8bd3a14d0",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "f0ae0618-95eb-42d4-a565-04471af40767",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "f0e4c8e0-b9ca-4b13-875f-41482ca932ae",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "f32a25c2-3596-4328-9a63-bbb058ede574",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "f4118c7f-70eb-4e83-8eba-e0304f04a83c",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "f5469653-b95a-4b6f-a7fd-211cbba32f55",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "f54cc2c7-e845-48d9-af9f-c53403dfc49f",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "f62bf398-a8b3-4a9a-8cbc-373971d99409",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "f67551ce-b6d7-49bb-ad61-6b387bd4a44e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "f692a549-d7f0-4255-a998-c80e772db19a",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "f6abe174-dbab-4001-b362-5cf1a56bc95a",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "f73343d7-dc96-4e34-9817-02a0c7a5c08a",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "f73cfcb3-0f97-44fb-867a-c44fec3fd9b3",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "f7c6b19d-b8d9-4c10-814d-ae4fbc9afff5",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "f81ac2f1-5a04-4bd2-a492-be26e7dea90b",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "f8222a2e-08a8-4c6f-a980-0426b0caa25e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "f9bde03a-6227-41cb-a4bb-4549d30aa612",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "fa6a4002-007e-4ae3-96b5-4c3c4f005b64",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "fad15e9b-826c-4c49-a1db-8797aadd9e0c",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "fb502949-202a-4a4b-915b-ae5661f3d351",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "fe5fa2d5-5504-4d5d-b086-2decffff789c",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "ffc33022-6001-432b-b292-f4b66643b13f",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "fff8753b-22d7-4304-b69a-a01cb339f2ad",
+          "expected": "UNSUPPORTED"
+        }
+      ]
+    },
+    "relative_retention": {
+      "call_f1": 0.979228,
+      "call_precision": 0.865485,
+      "call_recall": 1.138418,
+      "clarification_accuracy": 0.715789,
+      "over_call_rate": 1.804688,
+      "parse_valid_rate": 1.0,
+      "unsupported_accuracy": 0.899194
+    }
+  },
+  "records": 1277,
+  "submitted": 1277
+}

@@ -1,0 +1,45 @@
+{
+  "docs_reachable": true,
+  "evaluability": "No host emulator exists for the MediaTek backend, unlike Qualcomm's x86 HTP emulator. Even a successful build could not be behaviourally evaluated without a Dimensity 9300/9400 device.",
+  "http_probes": [
+    {
+      "curl_returncode": 0,
+      "final_url": "https://neuropilot.mediatek.com/resources/public/npexpress/en/docs/npexpress",
+      "http_code": "200",
+      "redirects": "0",
+      "stderr": "",
+      "url": "https://neuropilot.mediatek.com/resources/public/npexpress/en/docs/npexpress"
+    },
+    {
+      "curl_returncode": 0,
+      "final_url": "https://neuropilot.mediatek.com/",
+      "http_code": "200",
+      "redirects": "0",
+      "stderr": "",
+      "url": "https://neuropilot.mediatek.com/"
+    }
+  ],
+  "model_support": "ExecuTorch has no qwen3_5 model definition for MediaTek. examples/mediatek/models/llm_models covers Qwen2/2.5/3 dense only (modeling_qwen.py), and there is no export_llm integration for this backend.",
+  "pypi": {
+    "available": false,
+    "mtk_converter_returncode": 1,
+    "mtk_converter_stderr": "ERROR: Could not find a version that satisfies the requirement mtk-converter (from versions: none)\n\n[notice] A new release of pip is available: 25.1.1 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\nERROR: No matching distribution found for mtk-converter",
+    "mtk_neuron_returncode": 1,
+    "mtk_neuron_stderr": "ERROR: Could not find a version that satisfies the requirement mtk-neuron (from versions: none)\n\n[notice] A new release of pip is available: 25.1.1 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\nERROR: No matching distribution found for mtk-neuron"
+  },
+  "required_components": [
+    "mtk_converter (cp310 manylinux wheel) \u2014 preprocesses the model into a MediaTek representation",
+    "mtk_neuron (linux x86_64 wheel) \u2014 converts the model to device binaries",
+    "libneuronusdk_adapter.mtk.so \u2014 target-dependent execution",
+    "libneuron_buffer_allocator.so \u2014 DMA buffer allocation",
+    "NeuronAdapter.h \u2014 copied into backends/mediatek/runtime/include/api/"
+  ],
+  "sdk_obtainable_without_login": false,
+  "stage": "probe_mediatek_sdk",
+  "status": "BLOCKED_SDK_ACCESS",
+  "supported_chips": [
+    "MediaTek Dimensity 9300",
+    "MediaTek Dimensity 9400"
+  ],
+  "target": "mediatek-neuropilot"
+}

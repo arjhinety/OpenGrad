@@ -1,0 +1,40 @@
+{
+  "decision_counts": {
+    "ANSWER": 28,
+    "CALL": 469,
+    "CLARIFY": 510,
+    "UNSUPPORTED": 270
+  },
+  "delta_vs_frozen_reference": {
+    "call_f1": -0.004296,
+    "call_precision": 0.001891,
+    "call_recall": -0.011038,
+    "clarification_accuracy": 0.005391,
+    "over_call_rate": -0.003641,
+    "parse_valid_rate": 0.0,
+    "unsupported_accuracy": 0.004415
+  },
+  "frozen_reference_metrics": {
+    "call_f1": 0.7548387096774194,
+    "call_precision": 0.7358490566037735,
+    "call_recall": 0.7748344370860927,
+    "clarification_accuracy": 0.7654986522911051,
+    "over_call_rate": 0.1529126213592233,
+    "parse_valid_rate": 1.0,
+    "unsupported_accuracy": 0.5386313465783664
+  },
+  "metrics": {
+    "call_f1": 0.7505422993492409,
+    "call_precision": 0.7377398720682303,
+    "call_recall": 0.7637969094922737,
+    "clarification_accuracy": 0.77088948787062,
+    "over_call_rate": 0.14927184466019416,
+    "parse_valid_rate": 1.0,
+    "unsupported_accuracy": 0.543046357615894
+  },
+  "parser_status": {
+    "RAW_VALID": 1277
+  },
+  "records": 1277,
+  "submitted": 1277
+}

@@ -1,0 +1,34 @@
+{
+  "package": "instruction_following_eval",
+  "upstream_repo": "https://github.com/google-research/google-research",
+  "upstream_path": "instruction_following_eval",
+  "upstream_commit_touching_path": "e6890f85757dd84e27ca6df2dd30651dafad28e0",
+  "upstream_commit_date": "2026-07-22T20:03:19Z",
+  "fetched_from": "https://raw.githubusercontent.com/google-research/google-research/master/instruction_following_eval/",
+  "fetched_ref": "master",
+  "license": "Apache-2.0",
+  "paper": "Zhou et al. 2023, Instruction-Following Evaluation for Large Language Models, arXiv:2311.07911",
+  "modified": false,
+  "modification_policy": "These files are graders for a public benchmark. They are never edited. If a checker appears wrong, the finding is reported against upstream and the benchmark result is reported with the upstream behaviour intact.",
+  "files": {
+    "instructions.py": {
+      "sha256": "60e086f5342a03ce8e18b64bbcccf86308f523c08aa826707a562150a52f3edf",
+      "bytes": 55162
+    },
+    "instructions_registry.py": {
+      "sha256": "ec92d72c264f6d906978613085db262356174300370a3fffe6fefd5969ce9cfc",
+      "bytes": 7240
+    },
+    "instructions_util.py": {
+      "sha256": "a73797261eee5bf447e279d82a2b700b1bdd3cb1193412dbab1270a85832bc6b",
+      "bytes": 19538
+    }
+  },
+  "runtime_dependencies": ["absl-py", "langdetect", "immutabledict", "nltk"],
+  "nltk_data_required": [
+    "punkt (tokenizers/punkt/english.pickle, loaded by instructions_util.split_into_sentences)"
+  ],
+  "not_vendored": [
+    "evaluation_main.py -- upstream's CLI driver. Not used; the aggregation it performs (strict/loose, prompt-level/instruction-level) is reimplemented in scripts/score_ifeval.py so that per-example failure classification can be attached. The CHECKERS themselves are upstream's and are not reimplemented."
+  ]
+}

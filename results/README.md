@@ -20,7 +20,44 @@ Authoritative — owns the value, never regenerated from anything else
 
 Derived — a projection, safe to delete
     results/registry.jsonl                   one discovery/summary row per experiment
+    results/final_campaign_verdict.json      capability-campaign verdict; regenerate, never edit
 ```
+
+## Benchmark campaigns are a separate namespace
+
+`registry.jsonl` projects the **training** experiment store (`runs/<experiment_id>/`). Benchmark
+campaigns are not training experiments and have no `runs/` identity, so they are **not** projected
+into it — adding rows there would make it a projection of two different things.
+
+The capability-regression campaign lives under `results/benchmarks/` with its own hierarchy:
+
+```text
+Authoritative — owns the value
+    results/benchmarks/h200/capability_v1/evidence/*.jsonl   per-example: input, raw output,
+                                                             parsed output, expected answer, score,
+                                                             failure class, refusal flag, tokens
+    results/benchmarks/h200/capability_v1/<STAGE>/*_scores.json   per-benchmark aggregates
+    results/benchmarks/h200/capability_v1/gpu_runs.jsonl     append-only, one row per GPU run
+    results/benchmarks/checkpoint_ladder.json                stage identities and hashes
+    results/benchmarks/h200/PRESERVED_STATE_v1.json          immutability manifest
+
+Derived — regenerate, never hand-edit
+    results/benchmarks/capability_findings.jsonl             one row per benchmark × checkpoint
+    results/benchmarks/h200/capability_v1/final_campaign_audit.json   full recomputation
+    results/final_campaign_verdict.json                      campaign verdict + pointers
+```
+
+Regenerate the derived artifacts with:
+
+```bash
+python scripts/audit_campaign_final.py        # recompute every metric from per-example rows
+python scripts/build_capability_evidence.py   # evidence files + findings ledger
+python scripts/build_regression_analysis.py   # transition matrix, deltas, intervals
+python scripts/build_final_verdict.py         # verdict (use --verify to detect drift)
+```
+
+`build_final_verdict.py --verify` fails if the committed verdict has drifted from the artifacts,
+which is what keeps it a projection rather than a second source of truth.
 
 `results/registry.jsonl` exists so that discovering experiments, summarising them, comparing them
 and rendering reports do not require walking the filesystem and re-parsing every artifact. It is

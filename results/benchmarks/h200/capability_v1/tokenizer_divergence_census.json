@@ -1,0 +1,49 @@
+{
+  "claim": "TOKENIZER_DIVERGENCE_INERT_FOR_CAPABILITY_SUITE",
+  "interpretation": "Zero divergence means the BASE rung receives token-identical inputs to the post-trained rungs for this suite, so a BASE delta is attributable to weights. It does NOT mean the tokenizers are equivalent in general -- they are not, and the difference remains recorded in the ladder.",
+  "known_difference": {
+    "handling": "Each checkpoint is evaluated with its own tokenizer, because the tokenizer is part of the artifact. The number of benchmark prompts whose token ids differ between the base and post-trained tokenizers is measured separately on CPU and reported; if it is zero the difference is behaviourally inert for this study and the BASE delta is readable.",
+    "id": "BASE_TOKENIZER_PRETOKENIZER_REGEX_DIFFERS",
+    "likely_cause": "The post-trained tokenizers were re-serialised by the training stack, which rebuilt the fast tokenizer from an older Qwen2-family template. NOT an intentional change, and NOT verified here -- stated as the probable mechanism, not as a finding.",
+    "observed": "tokenizer.json byte digests differ between the base and the post-trained stages. The vocab (248044 entries) and the merge list are IDENTICAL once serialization format is normalised (base stores merges as space-joined strings, the post-trained stages as 2-element arrays). Two real differences remain: (1) the Split pre-tokenizer regex -- base uses the Qwen3.5 form '[^\\r\\n\\p{L}\\p{N}]?[\\p{L}\\p{M}]+ ... ?[^\\s\\p{L}\\p{M}\\p{N}]+' which is aware of Unicode combining marks, while the post-trained stages carry the older Qwen2 form without \\p{M}; (2) ByteLevel trim_offsets is false on base and true on the post-trained stages. The post-trained stages also register 7 extra added_tokens (ids 248070-248076, audio/tts placeholders) absent from the base's added_tokens list.",
+    "relates_to": "reports/TOKENIZER_DIVERGENCE_REGRESSION.md",
+    "stages": [
+      "BASE",
+      "M0_SFT",
+      "M1_DPO_CURRENT"
+    ]
+  },
+  "per_benchmark": {
+    "gsm8k": {
+      "base_vs_current_divergent": 0,
+      "base_vs_current_divergent_ids": [],
+      "base_vs_current_divergent_ids_truncated": false,
+      "base_vs_current_divergent_rate": 0.0,
+      "m0_vs_current_divergent": 0,
+      "requests": 2638
+    },
+    "ifeval": {
+      "base_vs_current_divergent": 0,
+      "base_vs_current_divergent_ids": [],
+      "base_vs_current_divergent_ids_truncated": false,
+      "base_vs_current_divergent_rate": 0.0,
+      "m0_vs_current_divergent": 0,
+      "requests": 541
+    },
+    "mmlu_pro": {
+      "base_vs_current_divergent": 0,
+      "base_vs_current_divergent_ids": [],
+      "base_vs_current_divergent_ids_truncated": false,
+      "base_vs_current_divergent_rate": 0.0,
+      "m0_vs_current_divergent": 0,
+      "requests": 12032
+    }
+  },
+  "purpose": "Establish whether the ladder's known tokenizer difference confounds the BASE-vs-post-trained capability comparison.",
+  "schema_version": 1,
+  "totals": {
+    "base_vs_current_divergent": 0,
+    "m0_vs_current_divergent": 0,
+    "requests": 15211
+  }
+}

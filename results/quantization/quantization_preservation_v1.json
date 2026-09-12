@@ -1,0 +1,29 @@
+{
+  "frozen_before_candidate_evaluation": true,
+  "policy_version": "quantization_preservation_v1",
+  "reference": {
+    "call_f1": 0.7548387096774194,
+    "call_precision": 0.7358490566037735,
+    "call_recall": 0.7748344370860927,
+    "clarification_accuracy": 0.7654986522911051,
+    "over_call_rate": 0.1529126213592233,
+    "parse_valid_rate": 1.0,
+    "unsupported_accuracy": 0.5386313465783664
+  },
+  "requirements": {
+    "existing_tool_policy": "tool_use_promotion_v4 must remain satisfied",
+    "over_call_rate": "candidate <= exact BF16 reference + 0.01 absolute",
+    "parse_valid_rate": ">= 0.99",
+    "positive_metrics": "candidate >= 99% of exact BF16 reference"
+  },
+  "schema_version": 1,
+  "thresholds": {
+    "call_f1": 0.7472903225806452,
+    "call_precision": 0.7284905660377358,
+    "call_recall": 0.7670860927152318,
+    "clarification_accuracy": 0.7578436657681941,
+    "over_call_rate_max": 0.1629126213592233,
+    "parse_valid_rate_min": 0.99,
+    "unsupported_accuracy": 0.5332450331125828
+  }
+}

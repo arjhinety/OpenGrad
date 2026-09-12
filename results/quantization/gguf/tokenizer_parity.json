@@ -1,0 +1,166 @@
+{
+  "bos_insertions": 0,
+  "checked": 1277,
+  "exact_matches": 1271,
+  "mismatch_sample": [
+    {
+      "example_id": "2bf3162c-8dbd-4305-8dbc-b765998783fa",
+      "expected_head": [
+        248045,
+        8678,
+        198,
+        2,
+        13455,
+        271,
+        2523,
+        599
+      ],
+      "expected_len": 390,
+      "leading_extra_token": null,
+      "observed_head": [
+        248045,
+        8678,
+        198,
+        2,
+        13455,
+        271,
+        2523,
+        599
+      ],
+      "observed_len": 377
+    },
+    {
+      "example_id": "8643445b-e72d-4d15-85bf-df55a1f1811f",
+      "expected_head": [
+        248045,
+        8678,
+        198,
+        2,
+        13455,
+        271,
+        2523,
+        599
+      ],
+      "expected_len": 357,
+      "leading_extra_token": null,
+      "observed_head": [
+        248045,
+        8678,
+        198,
+        2,
+        13455,
+        271,
+        2523,
+        599
+      ],
+      "observed_len": 344
+    },
+    {
+      "example_id": "b20b6ecc-f602-4aef-8c62-2d79e9547e3a",
+      "expected_head": [
+        248045,
+        846,
+        198,
+        46513,
+        149231,
+        37875,
+        148840,
+        46054
+      ],
+      "expected_len": 35,
+      "leading_extra_token": null,
+      "observed_head": [
+        248045,
+        846,
+        198,
+        150598,
+        149004,
+        231732,
+        151456,
+        148285
+      ],
+      "observed_len": 22
+    },
+    {
+      "example_id": "c9cf98bc-59d6-4cf2-b62c-0473ae094cee",
+      "expected_head": [
+        248045,
+        8678,
+        198,
+        2,
+        13455,
+        271,
+        2523,
+        599
+      ],
+      "expected_len": 439,
+      "leading_extra_token": null,
+      "observed_head": [
+        248045,
+        8678,
+        198,
+        2,
+        13455,
+        271,
+        2523,
+        599
+      ],
+      "observed_len": 413
+    },
+    {
+      "example_id": "e2425bb7-3519-4540-8011-25a7ab7ba59a",
+      "expected_head": [
+        248045,
+        8678,
+        198,
+        2,
+        13455,
+        271,
+        2523,
+        599
+      ],
+      "expected_len": 439,
+      "leading_extra_token": null,
+      "observed_head": [
+        248045,
+        8678,
+        198,
+        2,
+        13455,
+        271,
+        2523,
+        599
+      ],
+      "observed_len": 419
+    },
+    {
+      "example_id": "f9f7c30f-2f81-40c3-885a-c13af9c73966",
+      "expected_head": [
+        248045,
+        846,
+        198,
+        148549,
+        64020,
+        38534,
+        148410,
+        90637
+      ],
+      "expected_len": 51,
+      "leading_extra_token": null,
+      "observed_head": [
+        248045,
+        846,
+        198,
+        155230,
+        155212,
+        210426,
+        151488,
+        151428
+      ],
+      "observed_len": 31
+    }
+  ],
+  "mismatches": 6,
+  "passed": false,
+  "stage": "tokenizer_parity"
+}

@@ -1,0 +1,42 @@
+{
+  "context_length": 4096,
+  "enable_thinking": false,
+  "engine_window": 5760,
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 512,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "output_jsonl": "results/quantization/frozen_prompts_v1.jsonl",
+  "output_sha256": "115e35a71dd6f747463d010eab5bf1317d690374fff972592b5645a356e36976",
+  "partitions": {
+    "confirmatory": 1277,
+    "dev": 2373
+  },
+  "records": 3650,
+  "renderer": "qwen3_5_2b_v1",
+  "schema_version": 1,
+  "source_jsonl": "results/quantization/frozen_behavioral_eval_v1.jsonl",
+  "source_sha256": "4c762f7d0aabf5570734b3e13ef76c81a445cb9e9683f9f0dce55ac75aa01a0f",
+  "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+  "token_stats": {
+    "confirmatory": {
+      "max": 5235,
+      "mean": 894.666,
+      "median": 789,
+      "min": 15,
+      "over_context_length": 2,
+      "over_engine_window": 0
+    },
+    "dev": {
+      "max": 5248,
+      "mean": 880.941,
+      "median": 787,
+      "min": 14,
+      "over_context_length": 4,
+      "over_engine_window": 0
+    }
+  },
+  "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+}

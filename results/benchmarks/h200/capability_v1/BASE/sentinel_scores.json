@@ -1,0 +1,160 @@
+{
+  "cases": [
+    {
+      "calls": [],
+      "failure_mode": "WRONG_CONTENT",
+      "grader": "regex /(^|[^0-9.])9([^0-9]|$)/",
+      "id": "trap-arithmetic",
+      "parsed_decision": "ANSWER",
+      "parser_status": "RAW_VALID",
+      "raw": "1",
+      "refusal": false,
+      "refusal_pattern": null,
+      "status": "fail",
+      "tool_case": false
+    },
+    {
+      "calls": [],
+      "failure_mode": "WRONG_CONTENT",
+      "grader": "regex /\\b16\\b/",
+      "id": "multi-step-change",
+      "parsed_decision": "ANSWER",
+      "parser_status": "RAW_VALID",
+      "raw": "12",
+      "refusal": false,
+      "refusal_pattern": null,
+      "status": "fail",
+      "tool_case": false
+    },
+    {
+      "calls": [],
+      "failure_mode": null,
+      "grader": "regex /mercury[\"',\\s\\]]+venus[\"',\\s\\]]+earth/i",
+      "id": "format-constraint",
+      "parsed_decision": "ANSWER",
+      "parser_status": "RAW_VALID",
+      "raw": "[\"Mercury\", \"Venus\", \"Earth\"]",
+      "refusal": false,
+      "refusal_pattern": null,
+      "status": "pass",
+      "tool_case": false
+    },
+    {
+      "calls": [],
+      "failure_mode": null,
+      "grader": "regex /march\\s*14/i",
+      "id": "extraction",
+      "parsed_decision": "ANSWER",
+      "parser_status": "RAW_VALID",
+      "raw": "March 14",
+      "refusal": false,
+      "refusal_pattern": null,
+      "status": "pass",
+      "tool_case": false
+    },
+    {
+      "calls": [],
+      "failure_mode": null,
+      "grader": "regex /bagwis/i",
+      "id": "memory-across-turns",
+      "parsed_decision": "ANSWER",
+      "parser_status": "RAW_VALID",
+      "raw": "Bagwis",
+      "refusal": false,
+      "refusal_pattern": null,
+      "status": "pass",
+      "tool_case": false
+    },
+    {
+      "calls": [
+        {
+          "arguments": {
+            "city": "Manila"
+          },
+          "name": "get_weather"
+        }
+      ],
+      "failure_mode": null,
+      "grader": "tool_call name=get_weather args contain 'manila'",
+      "id": "tool-call",
+      "parsed_decision": "CALL",
+      "parser_status": "RAW_VALID",
+      "raw": "<tool_call>\n<function=get_weather>\n<parameter=city>\nManila\n</parameter>\n</function>\n</tool_call>",
+      "refusal": false,
+      "refusal_pattern": null,
+      "status": "pass",
+      "tool_case": true
+    },
+    {
+      "calls": [],
+      "failure_mode": null,
+      "grader": "regex /31/",
+      "id": "tool-result",
+      "parsed_decision": "ANSWER",
+      "parser_status": "RAW_VALID",
+      "raw": "The current weather in Manila is **humid** with a temperature of **31\u00b0C**.",
+      "refusal": false,
+      "refusal_pattern": null,
+      "status": "pass",
+      "tool_case": true
+    }
+  ],
+  "fail": 2,
+  "generation_metadata": {
+    "add_bos_token": false,
+    "architectures": [
+      "Qwen3_5ForConditionalGeneration"
+    ],
+    "benchmark": "sentinel",
+    "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "config_sha256": "ed1c1723241f23f7f4e23430759cbd7dcfb4103cbdfe052bfe7626b57c2615b4",
+    "cuda": "13.0",
+    "download_seconds": 24.749,
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "eos_token": "<|im_end|>",
+    "eos_token_id": 248046,
+    "gpu_capability": "9.0",
+    "gpu_hourly_usd": 4.54,
+    "gpu_name": "NVIDIA H200",
+    "gpu_total_memory_gib": 139.8,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "model_load_seconds": 141.371,
+    "model_repo": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "sampling": {
+      "seed": 0,
+      "temperature": 0.0,
+      "top_k": 1,
+      "top_p": 1.0
+    },
+    "seed": 0,
+    "stage": "BASE",
+    "subfolder": "",
+    "tokenizer_json_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.14.1",
+    "vllm": "0.29.0",
+    "weight_files": [
+      "model.safetensors-00001-of-00001.safetensors"
+    ],
+    "weights_sha256": "aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1"
+  },
+  "non_tool_cases": {
+    "pass": 3,
+    "total": 5
+  },
+  "pass": 5,
+  "refusal_failures": 0,
+  "role": "SENTINEL / REGRESSION SMOKE TEST -- not a general-capability benchmark",
+  "stage": "BASE",
+  "statistical_caveat": "7 cases. A one-case change is 14 percentage points. Direction here is a signal to check against the large benchmarks, never a result on its own.",
+  "suite": "openweights-parity-suite",
+  "tool_cases": {
+    "pass": 2,
+    "total": 2
+  },
+  "total": 7,
+  "wrong_content_failures": 2
+}

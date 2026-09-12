@@ -1,0 +1,102 @@
+{
+  "arm_delta": {
+    "accuracy_fewshot_minus_zeroshot": 0.030326004548900665,
+    "answer_rate_fewshot_minus_zeroshot": 0.0,
+    "interpretation_rule": "Pre-registered: a large positive answer_rate delta with a small accuracy_given_answer delta indicates refusal behaviour rather than lost capability. The reverse indicates lost capability.",
+    "refusal_rate_fewshot_minus_zeroshot": 0.0
+  },
+  "arms": {
+    "fewshot8": {
+      "accuracy": 0.7043214556482184,
+      "accuracy_given_answer": 0.7043214556482184,
+      "answer_rate": 1.0,
+      "attempted": 1319,
+      "correct": 929,
+      "extraction_methods": {
+        "answer_is": 1240,
+        "last_number": 79
+      },
+      "incorrect_attempted": 390,
+      "parse_failure_rate": 0.0,
+      "parse_failures": 0,
+      "refusal_detection_method": "HEURISTIC_REGEX_v1",
+      "refusal_patterns": {},
+      "refusal_rate": 0.0,
+      "refusals": 0,
+      "role": "SECONDARY, CONTROLLED -- pre-registered test of refusal vs capability",
+      "total": 1319
+    },
+    "zeroshot": {
+      "accuracy": 0.6739954510993177,
+      "accuracy_given_answer": 0.6739954510993177,
+      "answer_rate": 1.0,
+      "attempted": 1319,
+      "correct": 889,
+      "extraction_methods": {
+        "answer_is": 2,
+        "last_number": 1317
+      },
+      "incorrect_attempted": 430,
+      "parse_failure_rate": 0.0,
+      "parse_failures": 0,
+      "refusal_detection_method": "HEURISTIC_REGEX_v1",
+      "refusal_patterns": {},
+      "refusal_rate": 0.0,
+      "refusals": 0,
+      "role": "PRIMARY -- deployed behaviour",
+      "total": 1319
+    }
+  },
+  "benchmark": "gsm8k",
+  "extraction_order": [
+    "hash_marker",
+    "answer_is",
+    "boxed",
+    "last_number"
+  ],
+  "generation_metadata": {
+    "add_bos_token": false,
+    "architectures": [
+      "Qwen3_5ForConditionalGeneration"
+    ],
+    "benchmark": "gsm8k",
+    "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "config_sha256": "ed1c1723241f23f7f4e23430759cbd7dcfb4103cbdfe052bfe7626b57c2615b4",
+    "cuda": "13.0",
+    "download_seconds": 24.749,
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "eos_token": "<|im_end|>",
+    "eos_token_id": 248046,
+    "gpu_capability": "9.0",
+    "gpu_hourly_usd": 4.54,
+    "gpu_name": "NVIDIA H200",
+    "gpu_total_memory_gib": 139.8,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "max_tokens": 512,
+    "model_load_seconds": 141.371,
+    "model_repo": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "sampling": {
+      "seed": 0,
+      "temperature": 0.0,
+      "top_k": 1,
+      "top_p": 1.0
+    },
+    "seed": 0,
+    "stage": "BASE",
+    "subfolder": "",
+    "tokenizer_json_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.14.1",
+    "vllm": "0.29.0",
+    "weight_files": [
+      "model.safetensors-00001-of-00001.safetensors"
+    ],
+    "weights_sha256": "aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1"
+  },
+  "primary_arm": "zeroshot",
+  "scorer": "deterministic numeric extraction; no LLM judge",
+  "stage": "BASE"
+}

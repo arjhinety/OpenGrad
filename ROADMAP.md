@@ -83,6 +83,60 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 15. Joint capability-efficiency optimization — PLANNED
 
+16. Refusal-supervision ablation — **PLANNED / BLOCKED_ON_PREFLIGHT**
+
+    Diagnosis (executed, see [general-capability regression](reports/GENERAL_CAPABILITY_REGRESSION.md)):
+    the post-SFT checkpoints refuse **100% of bare GSM8K questions** while solving 55.5% of the
+    *same* questions with 8 exemplars, and refusing **0%** of 5-shot MMLU-Pro. A CPU audit of the
+    supervision found **21,749 single-exchange records (10.0% of 217,903) whose supervised target
+    is a refusal and whose decision label is `ANSWER`** — 50.5% of `when2call-sft`, 14.1% of
+    `glaive`, and **zero** labelled `CANNOT_ANSWER`. Evidence:
+    `results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit.json`.
+
+    The hypothesis is that this supervision teaches "answering looks like declining", and that the
+    behaviour over-generalises to questions the model can answer. **It is a hypothesis. Nothing
+    below may be executed as though it were established.**
+
+    **The defect is the LABEL, not the refusal.** Many of these refusals are correct — a model
+    genuinely cannot report today's trending topics or query a VIN database. Deleting them would
+    trade over-refusal for hallucination, which is harder to detect and worse. The intervention
+    under consideration is *relabelling* refusal-targeted records away from `ANSWER`, not removing
+    refusals from the corpus.
+
+    **Pre-flight gate — every item must pass before any GPU time is spent:**
+
+    1. **Refusal-detector precision.** The 21,749 count comes from `HEURISTIC_REGEX_v1`. Hand-label
+       a random sample (n >= 200) of flagged records and measure precision and recall. A detector
+       at, say, 80% precision means ~4,300 records would be relabelled wrongly. Proceed only with a
+       measured precision figure, not an assumed one.
+    2. **Answerability triage.** Partition the flagged records into *correctly refused* (needs
+       real-time data, external action, private state) and *wrongly refused* (answerable from
+       parametric knowledge or arithmetic). This partition is the actual intervention design and
+       does not exist yet. Without it there is no defensible relabelling rule.
+    3. **Correct target label.** Decide what a correctly-refused record should be labelled and what
+       its target text should be, consistent with the existing supervision contract. `ANSWER` is
+       wrong; `CANNOT_ANSWER` may also be wrong if the taxonomy means something narrower.
+    4. **Tool-policy regression guard.** Pre-register that the ablation must not degrade
+       `call_f1`, `call_precision`, `over_call_rate` or `clarification_accuracy` beyond the frozen
+       `quantization_preservation_v1`-style thresholds. The tool policy is the thing that works;
+       an intervention that fixes refusal by breaking it is a net loss.
+    5. **Fresh held-out evaluation.** The frozen confirmatory partition has **no ANSWER examples**,
+       which is precisely why it could not detect this. A new held-out set covering ANSWER
+       behaviour must be constructed and frozen **before** training, not after.
+    6. **Budget.** A full M0 retrain is materially more expensive than this entire diagnosis
+       ($8.90). Confirm actual available credit — not a planning envelope — before committing.
+       See `cost_ledger.json:envelope_is_not_a_balance`.
+
+    **Only then**, the experiment: retrain M0 SFT with the relabelling applied, every other factor
+    held fixed (same base, seed, hyperparameters, schedule, tokenizer, template), and re-measure
+    GSM8K zero-shot refusal rate, IFEval, MMLU-Pro **and** the tool-policy metrics against the
+    pre-registered thresholds. A null result — "relabelling did not reduce zero-shot refusal" —
+    is a publishable outcome and would falsify the hypothesis.
+
+    **Scope discipline.** This is a new experiment family. It does not modify, supersede or
+    relabel any existing checkpoint, corpus release, or frozen evaluation artifact. Canonical-v2
+    and every published checkpoint stay exactly as they are.
+
 The dependency order was intentional; the status of each stage is now:
 
 B0 baseline                                  -> EXECUTED (REAL_RESULT)
@@ -97,3 +151,12 @@ B0 baseline                                  -> EXECUTED (REAL_RESULT)
     -> OpenWeights device validation         -> PLANNED (integration and benchmark definition only; no study executed)
     -> speculative decoding                  -> PLANNED / GPU_REQUIRED (no runtime support or benchmark executed)
     -> joint capability-efficiency studies   -> PLANNED
+    -> general-capability diagnosis          -> EXECUTED (IFEval/GSM8K/MMLU-Pro across BASE -> M0 -> M1-v2)
+    -> refusal-supervision ablation          -> PLANNED / BLOCKED_ON_PREFLIGHT (step 16)
+
+> **Status-drift warning.** Steps 12 and 13 above still read `INTERFACE_ONLY` / `no study
+> executed`. Both were accurate when written and are now out of date: a full GGUF PTQ ladder was
+> executed and closed (`reports/PTQ_PHASE_CLOSURE.md`), and the OpenWeights ParitySuite was run
+> against the promoted checkpoint (`reports/OPENWEIGHTS_TRANSFER_EVALUATION.md`). They are left
+> unedited here rather than silently corrected, because rewriting a roadmap's history is how a
+> roadmap stops being evidence. Update them deliberately, in their own change.

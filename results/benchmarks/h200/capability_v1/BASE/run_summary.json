@@ -1,0 +1,59 @@
+{
+  "container_seconds": 788.41,
+  "environment": {
+    "add_bos_token": false,
+    "architectures": [
+      "Qwen3_5ForConditionalGeneration"
+    ],
+    "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "config_sha256": "ed1c1723241f23f7f4e23430759cbd7dcfb4103cbdfe052bfe7626b57c2615b4",
+    "cuda": "13.0",
+    "download_seconds": 0.787,
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "eos_token": "<|im_end|>",
+    "eos_token_id": 248046,
+    "gpu_capability": "9.0",
+    "gpu_hourly_usd": 4.54,
+    "gpu_name": "NVIDIA H200",
+    "gpu_total_memory_gib": 139.8,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "model_load_seconds": 104.217,
+    "model_repo": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "sampling": {
+      "seed": 0,
+      "temperature": 0.0,
+      "top_k": 1,
+      "top_p": 1.0
+    },
+    "seed": 0,
+    "stage": "BASE",
+    "subfolder": "",
+    "tokenizer_json_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.14.1",
+    "vllm": "0.29.0",
+    "weight_files": [
+      "model.safetensors-00001-of-00001.safetensors"
+    ],
+    "weights_sha256": "aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1"
+  },
+  "estimated_container_cost_usd": 0.9943,
+  "jobs": {
+    "mmlu_pro": {
+      "benchmark": "mmlu_pro",
+      "elapsed_seconds": 643.827,
+      "estimated_gpu_cost_usd": 0.8119,
+      "generations_path": "/vol/h200/capability/BASE/generations_mmlu_pro.jsonl",
+      "output_tokens": 10881057,
+      "prompt_tokens": 17115141,
+      "requests": 12032,
+      "status": "COMPLETE",
+      "total_tokens_per_second": 43484.03,
+      "truncated_by_length": 2627
+    }
+  },
+  "stage": "BASE"
+}

@@ -1,0 +1,809 @@
+{
+  "audit": "final-campaign-audit-v1",
+  "cost": {
+    "campaign_usd": 11.388,
+    "continuation_usd": 8.898,
+    "estimated_rows": [
+      13
+    ],
+    "failed_pre_gpu_launches": 3,
+    "failed_with_gpu_allocated": 0,
+    "gpu_runs": 13,
+    "planning_envelope_is_not_a_balance": true,
+    "planning_envelope_usd": 22.7,
+    "prior_run_usd": 2.49,
+    "retained_usd": 5.0116,
+    "superseded_usd": 3.8864
+  },
+  "engine_parity": {
+    "examples": 1277,
+    "flips": [
+      {
+        "example_id": "0ee4fdd2-b1da-4439-9b49-1d60c15d6f7c",
+        "expected": "CALL",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "236f3df2-0fc8-4733-ad63-c1af1ee53bf7",
+        "expected": "CALL",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "2bf3162c-8dbd-4305-8dbc-b765998783fa",
+        "expected": "CALL",
+        "llamacpp": "CALL",
+        "vllm": "ANSWER"
+      },
+      {
+        "example_id": "3243b9bf-188a-4b6b-9762-36cf4ca0e617",
+        "expected": "CALL",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "354bb8fb-bf48-4be7-ab68-650cac1e4e33",
+        "expected": "UNSUPPORTED",
+        "llamacpp": "UNSUPPORTED",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "39c3c3ce-ece0-4f21-9fe8-673703f79ef8",
+        "expected": "CALL",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "6580a699-4972-4a7f-8e82-b1f3051f7567",
+        "expected": "CALL",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "69ad3075-8eec-42c3-be0d-4d2dd85bce40",
+        "expected": "UNSUPPORTED",
+        "llamacpp": "UNSUPPORTED",
+        "vllm": "ANSWER"
+      },
+      {
+        "example_id": "6f9d6e90-faf1-492f-9221-a78d55118bf4",
+        "expected": "UNSUPPORTED",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "7e6950ad-f700-46f2-a597-1022a587022e",
+        "expected": "CLARIFY",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "7e8d589c-5d30-43a4-9705-578e4dea30ab",
+        "expected": "CLARIFY",
+        "llamacpp": "CLARIFY",
+        "vllm": "ANSWER"
+      },
+      {
+        "example_id": "83f9a224-43ac-4770-a460-22ed2916efea",
+        "expected": "CALL",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "8643445b-e72d-4d15-85bf-df55a1f1811f",
+        "expected": "CLARIFY",
+        "llamacpp": "CALL",
+        "vllm": "ANSWER"
+      },
+      {
+        "example_id": "b03b0854-cc18-4fe2-b5fe-e3ea04205f57",
+        "expected": "UNSUPPORTED",
+        "llamacpp": "CALL",
+        "vllm": "UNSUPPORTED"
+      },
+      {
+        "example_id": "b9bbc31a-e737-42bc-8c6f-8b36d993d5ad",
+        "expected": "CLARIFY",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "c9cf98bc-59d6-4cf2-b62c-0473ae094cee",
+        "expected": "CLARIFY",
+        "llamacpp": "UNSUPPORTED",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "cf05cae1-f604-473f-983a-7bb71ce19f55",
+        "expected": "UNSUPPORTED",
+        "llamacpp": "UNSUPPORTED",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "d8bbe264-1aba-42f1-a568-7000a902af06",
+        "expected": "UNSUPPORTED",
+        "llamacpp": "CLARIFY",
+        "vllm": "UNSUPPORTED"
+      },
+      {
+        "example_id": "f7860af0-72d4-409b-977d-a7fc1602ee51",
+        "expected": "UNSUPPORTED",
+        "llamacpp": "UNSUPPORTED",
+        "vllm": "ANSWER"
+      },
+      {
+        "example_id": "ff399034-72c2-45c4-94fe-371f1a73ace8",
+        "expected": "CALL",
+        "llamacpp": "CALL",
+        "vllm": "CLARIFY"
+      },
+      {
+        "example_id": "ffd16601-8411-4974-9b80-b4d6456d6b44",
+        "expected": "CLARIFY",
+        "llamacpp": "CLARIFY",
+        "vllm": "ANSWER"
+      }
+    ]
+  },
+  "engine_parity_raw_keys": [
+    "decision_agreement",
+    "decision_flips",
+    "exact_output_agreement",
+    "examples",
+    "flip_effects",
+    "flips",
+    "flips_among_known_tokenizer_divergent",
+    "flips_attributable_to_engine_numerics",
+    "note"
+  ],
+  "gsm8k": {
+    "BASE": {
+      "fewshot8": {
+        "accuracy": 0.7043214556482184,
+        "accuracy_given_answer": 0.7043214556482184,
+        "answer_rate": 1.0,
+        "attempted": 1319,
+        "buckets_reconcile": true,
+        "correct": 929,
+        "n": 1319,
+        "parse_failure_rate": 0.0,
+        "parse_failures": 0,
+        "refusal_counted_as_attempt_via_positional_fallback": 0,
+        "refusal_rate": 0.0,
+        "refusals": 0
+      },
+      "zeroshot": {
+        "accuracy": 0.6739954510993177,
+        "accuracy_given_answer": 0.6739954510993177,
+        "answer_rate": 1.0,
+        "attempted": 1319,
+        "buckets_reconcile": true,
+        "correct": 889,
+        "n": 1319,
+        "parse_failure_rate": 0.0,
+        "parse_failures": 0,
+        "refusal_counted_as_attempt_via_positional_fallback": 0,
+        "refusal_rate": 0.0,
+        "refusals": 0
+      }
+    },
+    "M0_SFT": {
+      "fewshot8": {
+        "accuracy": 0.5633055344958302,
+        "accuracy_given_answer": 0.5633055344958302,
+        "answer_rate": 1.0,
+        "attempted": 1319,
+        "buckets_reconcile": true,
+        "correct": 743,
+        "n": 1319,
+        "parse_failure_rate": 0.0,
+        "parse_failures": 0,
+        "refusal_counted_as_attempt_via_positional_fallback": 0,
+        "refusal_rate": 0.0,
+        "refusals": 0
+      },
+      "zeroshot": {
+        "accuracy": 0.0,
+        "accuracy_given_answer": null,
+        "answer_rate": 0.0,
+        "attempted": 0,
+        "buckets_reconcile": true,
+        "correct": 0,
+        "n": 1319,
+        "parse_failure_rate": 0.0,
+        "parse_failures": 0,
+        "refusal_counted_as_attempt_via_positional_fallback": 0,
+        "refusal_rate": 1.0,
+        "refusals": 1319
+      }
+    },
+    "M1_DPO_CURRENT": {
+      "fewshot8": {
+        "accuracy": 0.5549658832448825,
+        "accuracy_given_answer": 0.5549658832448825,
+        "answer_rate": 1.0,
+        "attempted": 1319,
+        "buckets_reconcile": true,
+        "correct": 732,
+        "n": 1319,
+        "parse_failure_rate": 0.0,
+        "parse_failures": 0,
+        "refusal_counted_as_attempt_via_positional_fallback": 0,
+        "refusal_rate": 0.0,
+        "refusals": 0
+      },
+      "zeroshot": {
+        "accuracy": 0.0,
+        "accuracy_given_answer": null,
+        "answer_rate": 0.0,
+        "attempted": 0,
+        "buckets_reconcile": true,
+        "correct": 0,
+        "n": 1319,
+        "parse_failure_rate": 0.0,
+        "parse_failures": 0,
+        "refusal_counted_as_attempt_via_positional_fallback": 0,
+        "refusal_rate": 1.0,
+        "refusals": 1319
+      }
+    },
+    "M1_DPO_HISTORICAL": {
+      "fewshot8": {
+        "accuracy": 0.7043214556482184,
+        "accuracy_given_answer": 0.7184841453982985,
+        "answer_rate": 0.9802880970432145,
+        "attempted": 1293,
+        "buckets_reconcile": true,
+        "correct": 929,
+        "n": 1319,
+        "parse_failure_rate": 0.0,
+        "parse_failures": 0,
+        "refusal_counted_as_attempt_via_positional_fallback": 0,
+        "refusal_rate": 0.019711902956785442,
+        "refusals": 26
+      },
+      "zeroshot": {
+        "accuracy": 0.1728582259287339,
+        "accuracy_given_answer": 0.5984251968503937,
+        "answer_rate": 0.288855193328279,
+        "attempted": 381,
+        "buckets_reconcile": true,
+        "correct": 228,
+        "n": 1319,
+        "parse_failure_rate": 0.0037907505686125853,
+        "parse_failures": 5,
+        "refusal_counted_as_attempt_via_positional_fallback": 0,
+        "refusal_rate": 0.7073540561031084,
+        "refusals": 933
+      }
+    }
+  },
+  "gsm8k_truncation": {
+    "BASE": {
+      "generations": 2638,
+      "truncated": 178
+    },
+    "M0_SFT": {
+      "generations": 2638,
+      "truncated": 2
+    },
+    "M1_DPO_CURRENT": {
+      "generations": 2638,
+      "truncated": 1
+    },
+    "M1_DPO_HISTORICAL": {
+      "generations": 2638,
+      "truncated": 256
+    }
+  },
+  "ifeval": {
+    "BASE": {
+      "accuracy_given_answer": 0.6790352504638218,
+      "answer_rate": 0.9963031423290203,
+      "failure_categories": {
+        "EXTRA_FORBIDDEN_CONTENT": 34,
+        "FORMAT_VIOLATION": 47,
+        "LENGTH_VIOLATION": 28,
+        "MISSING_REQUIRED_ELEMENT": 62,
+        "REFUSAL": 1,
+        "WRONG_CONTENT": 2
+      },
+      "instruction_level_loose_accuracy": 0.8057553956834532,
+      "instruction_level_strict_accuracy": 0.7709832134292566,
+      "instructions": 834,
+      "n": 541,
+      "prompt_level_loose_accuracy": 0.7245841035120147,
+      "prompt_level_strict_accuracy": 0.678373382624769,
+      "refusal_rate": 0.0036968576709796672,
+      "truncated": 47
+    },
+    "M0_SFT": {
+      "accuracy_given_answer": 0.5228310502283106,
+      "answer_rate": 0.8096118299445472,
+      "failure_categories": {
+        "EXTRA_FORBIDDEN_CONTENT": 43,
+        "FORMAT_VIOLATION": 56,
+        "LENGTH_VIOLATION": 42,
+        "MISSING_REQUIRED_ELEMENT": 64,
+        "REFUSAL": 88,
+        "WRONG_CONTENT": 4
+      },
+      "instruction_level_loose_accuracy": 0.6091127098321343,
+      "instruction_level_strict_accuracy": 0.5827338129496403,
+      "instructions": 834,
+      "n": 541,
+      "prompt_level_loose_accuracy": 0.4824399260628466,
+      "prompt_level_strict_accuracy": 0.4510166358595194,
+      "refusal_rate": 0.19038817005545286,
+      "truncated": 67
+    },
+    "M1_DPO_CURRENT": {
+      "accuracy_given_answer": 0.5299539170506913,
+      "answer_rate": 0.8022181146025879,
+      "failure_categories": {
+        "EXTRA_FORBIDDEN_CONTENT": 45,
+        "FORMAT_VIOLATION": 51,
+        "LENGTH_VIOLATION": 44,
+        "MISSING_REQUIRED_ELEMENT": 60,
+        "REFUSAL": 89,
+        "WRONG_CONTENT": 4
+      },
+      "instruction_level_loose_accuracy": 0.6151079136690647,
+      "instruction_level_strict_accuracy": 0.5899280575539568,
+      "instructions": 834,
+      "n": 541,
+      "prompt_level_loose_accuracy": 0.4879852125693161,
+      "prompt_level_strict_accuracy": 0.4584103512014787,
+      "refusal_rate": 0.1977818853974122,
+      "truncated": 63
+    },
+    "M1_DPO_HISTORICAL": {
+      "accuracy_given_answer": 0.5026178010471204,
+      "answer_rate": 0.7060998151571165,
+      "failure_categories": {
+        "EXTRA_FORBIDDEN_CONTENT": 33,
+        "FORMAT_VIOLATION": 52,
+        "LENGTH_VIOLATION": 29,
+        "MISSING_REQUIRED_ELEMENT": 70,
+        "REFUSAL": 116,
+        "WRONG_CONTENT": 6
+      },
+      "instruction_level_loose_accuracy": 0.6163069544364509,
+      "instruction_level_strict_accuracy": 0.5671462829736211,
+      "instructions": 834,
+      "n": 541,
+      "prompt_level_loose_accuracy": 0.49907578558225507,
+      "prompt_level_strict_accuracy": 0.4343807763401109,
+      "refusal_rate": 0.29390018484288355,
+      "truncated": 17
+    }
+  },
+  "lineage": {
+    "all_stages_distinct": true,
+    "architecture_by_stage": {
+      "BASE": [
+        "Qwen3_5ForConditionalGeneration"
+      ],
+      "M0_SFT": [
+        "Qwen3_5ForCausalLM"
+      ],
+      "M1_DPO_CURRENT": [
+        "Qwen3_5ForCausalLM"
+      ],
+      "M1_DPO_HISTORICAL": [
+        "Qwen3_5ForCausalLM"
+      ]
+    },
+    "declared_parent_of_m1v2": "m0_sft_canonical_v2_final::checkpoint-1800",
+    "declared_parent_weight_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+    "engine_identical_across_stages": true,
+    "m0_hub_lfs_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+    "m0_is_exact_parent_of_m1v2": true,
+    "m0_recomputed_in_container_sha256": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+    "m1v1_on_primary_path": false,
+    "m1v1_parent_documented": "earlier DPO lineage on a different SFT parent (CorpusV2, not CanonicalV2-Final). SUPPLEMENTARY only -- it is not on the base->M0->M1-v2 path, so a delta against it mixes two changes and cannot localise a stage.",
+    "m1v1_reason": "The ladder records M1_DPO_HISTORICAL as a different SFT parent (CorpusV2). No persisted metadata places it on the Base -> M0 -> M1-v2 chain, so it is reported as an alternate lineage only.",
+    "m1v2_revision_matches_frozen_reference": true,
+    "m1v2_weights_match_frozen_reference": true,
+    "per_stage_weight_sha256": {
+      "BASE": "aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1",
+      "M0_SFT": "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a",
+      "M1_DPO_CURRENT": "903f9b115d418d1988c0d5e1dd4bda7e04809a54a6bc7e34431982fbee2262f6",
+      "M1_DPO_HISTORICAL": "eef28bc106b9ba5fff907ee284339ead40f21c1347af61b32e33d17ce3a2f0a0"
+    },
+    "verified_independently_twice": true
+  },
+  "method": "every figure recomputed from per-example artifacts",
+  "mmlu_pro_canonical_2048": {
+    "BASE": {
+      "accuracy": 0.4903590425531915,
+      "accuracy_given_answer": 0.5974683544303797,
+      "answer_rate": 0.8207280585106383,
+      "attempted": 9875,
+      "correct": 5900,
+      "invalid_option_rate": 0.001745345744680851,
+      "n": 12032,
+      "per_category_accuracy": {
+        "biology": 0.6959553695955369,
+        "business": 0.532319391634981,
+        "chemistry": 0.5627208480565371,
+        "computer science": 0.4878048780487805,
+        "economics": 0.5912322274881516,
+        "engineering": 0.23632610939112486,
+        "health": 0.4938875305623472,
+        "history": 0.33858267716535434,
+        "law": 0.24795640326975477,
+        "math": 0.6269430051813472,
+        "other": 0.4199134199134199,
+        "philosophy": 0.3847695390781563,
+        "physics": 0.5542725173210161,
+        "psychology": 0.5802005012531328
+      },
+      "refusal_rate": 0.0,
+      "truncated": 2627,
+      "truncation_rate": 0.2183344414893617,
+      "unattempted": 2157,
+      "unattempted_that_are_truncations": 2136,
+      "unresolved_truncated": 2537
+    },
+    "M0_SFT": {
+      "accuracy": 0.3700964095744681,
+      "accuracy_given_answer": 0.38447591089621824,
+      "answer_rate": 0.9625997340425532,
+      "attempted": 11582,
+      "correct": 4453,
+      "invalid_option_rate": 0.002908909574468085,
+      "n": 12032,
+      "per_category_accuracy": {
+        "biology": 0.6471408647140865,
+        "business": 0.41191381495564006,
+        "chemistry": 0.3666077738515901,
+        "computer science": 0.37073170731707317,
+        "economics": 0.4549763033175355,
+        "engineering": 0.24045407636738905,
+        "health": 0.402200488997555,
+        "history": 0.2677165354330709,
+        "law": 0.15712988192552224,
+        "math": 0.40414507772020725,
+        "other": 0.34415584415584416,
+        "philosophy": 0.31462925851703405,
+        "physics": 0.3641262509622787,
+        "psychology": 0.47869674185463656
+      },
+      "refusal_rate": 0.0,
+      "truncated": 759,
+      "truncation_rate": 0.06308178191489362,
+      "unattempted": 450,
+      "unattempted_that_are_truncations": 421,
+      "unresolved_truncated": 676
+    },
+    "M1_DPO_CURRENT": {
+      "accuracy": 0.37042885638297873,
+      "accuracy_given_answer": 0.38452247433353465,
+      "answer_rate": 0.9633477393617021,
+      "attempted": 11591,
+      "correct": 4457,
+      "invalid_option_rate": 0.0036569148936170214,
+      "n": 12032,
+      "per_category_accuracy": {
+        "biology": 0.6401673640167364,
+        "business": 0.40811153358681873,
+        "chemistry": 0.36837455830388693,
+        "computer science": 0.36097560975609755,
+        "economics": 0.4372037914691943,
+        "engineering": 0.2528379772961816,
+        "health": 0.3973105134474328,
+        "history": 0.27296587926509186,
+        "law": 0.16167120799273388,
+        "math": 0.4085862324204293,
+        "other": 0.3409090909090909,
+        "philosophy": 0.3286573146292585,
+        "physics": 0.37028483448806776,
+        "psychology": 0.47368421052631576
+      },
+      "refusal_rate": 0.0,
+      "truncated": 747,
+      "truncation_rate": 0.0620844414893617,
+      "unattempted": 441,
+      "unattempted_that_are_truncations": 404,
+      "unresolved_truncated": 665
+    },
+    "M1_DPO_HISTORICAL": {}
+  },
+  "mmlu_pro_superseded_768": {
+    "BASE": {
+      "accuracy": 0.3799035904255319,
+      "accuracy_given_answer": 0.5918684449048297,
+      "answer_rate": 0.6418716755319149,
+      "attempted": 7723,
+      "correct": 4571,
+      "invalid_option_rate": 0.0014960106382978723,
+      "n": 12032,
+      "per_category_accuracy": {
+        "biology": 0.6624825662482566,
+        "business": 0.41191381495564006,
+        "chemistry": 0.26943462897526504,
+        "computer science": 0.3975609756097561,
+        "economics": 0.5272511848341233,
+        "engineering": 0.12693498452012383,
+        "health": 0.4180929095354523,
+        "history": 0.28083989501312334,
+        "law": 0.2161671207992734,
+        "math": 0.4307920059215396,
+        "other": 0.39826839826839827,
+        "philosophy": 0.3486973947895792,
+        "physics": 0.36566589684372597,
+        "psychology": 0.5626566416040101
+      },
+      "refusal_rate": 0.0,
+      "truncated": 4527,
+      "truncation_rate": 0.3762466755319149,
+      "unattempted": 4309,
+      "unattempted_that_are_truncations": 4292,
+      "unresolved_truncated": 4496
+    },
+    "M0_SFT": {
+      "accuracy": 0.36751994680851063,
+      "accuracy_given_answer": 0.38495690780882735,
+      "answer_rate": 0.9547041223404256,
+      "attempted": 11487,
+      "correct": 4422,
+      "invalid_option_rate": 0.004404920212765957,
+      "n": 12032,
+      "per_category_accuracy": {
+        "biology": 0.6471408647140865,
+        "business": 0.40811153358681873,
+        "chemistry": 0.36130742049469966,
+        "computer science": 0.3804878048780488,
+        "economics": 0.44549763033175355,
+        "engineering": 0.2476780185758514,
+        "health": 0.3960880195599022,
+        "history": 0.27296587926509186,
+        "law": 0.14713896457765668,
+        "math": 0.39526276831976315,
+        "other": 0.3354978354978355,
+        "philosophy": 0.3226452905811623,
+        "physics": 0.37259430331023863,
+        "psychology": 0.47117794486215536
+      },
+      "refusal_rate": 0.0,
+      "truncated": 869,
+      "truncation_rate": 0.07222406914893617,
+      "unattempted": 545,
+      "unattempted_that_are_truncations": 513,
+      "unresolved_truncated": 787
+    },
+    "M1_DPO_CURRENT": {
+      "accuracy": 0.36918218085106386,
+      "accuracy_given_answer": 0.3866980064420649,
+      "answer_rate": 0.9547041223404256,
+      "attempted": 11487,
+      "correct": 4442,
+      "invalid_option_rate": 0.00390625,
+      "n": 12032,
+      "per_category_accuracy": {
+        "biology": 0.6638772663877266,
+        "business": 0.4055766793409379,
+        "chemistry": 0.357773851590106,
+        "computer science": 0.37073170731707317,
+        "economics": 0.4419431279620853,
+        "engineering": 0.24561403508771928,
+        "health": 0.39975550122249387,
+        "history": 0.27296587926509186,
+        "law": 0.1553133514986376,
+        "math": 0.40266469282013323,
+        "other": 0.3409090909090909,
+        "philosophy": 0.3166332665330661,
+        "physics": 0.371824480369515,
+        "psychology": 0.47117794486215536
+      },
+      "refusal_rate": 0.0,
+      "truncated": 903,
+      "truncation_rate": 0.0750498670212766,
+      "unattempted": 545,
+      "unattempted_that_are_truncations": 514,
+      "unresolved_truncated": 813
+    },
+    "M1_DPO_HISTORICAL": {}
+  },
+  "mmlu_pro_truncation_interval": {
+    "base_accuracy_interval": [
+      0.4903590425531915,
+      0.7012134308510638
+    ],
+    "best_case_gap_pp": 33.11170212765957,
+    "derivation": "true_acc in [correct/n, (correct+unresolved)/n]. Unresolved = incorrect AND finish_reason == 'length'. Worst case for the gap gives Base its floor and M0 its ceiling.",
+    "gap_remains_positive_under_adversarial_resolution": true,
+    "m0_accuracy_interval": [
+      0.3700964095744681,
+      0.42627992021276595
+    ],
+    "note": "This is NOT a confidence interval. It is the deterministic range implied by treating every unresolved example adversarially. No distributional assumption is made.",
+    "observed_gap_pp": 12.026263297872342,
+    "unresolved_base": 2537,
+    "unresolved_m0": 676,
+    "worst_case_gap_pp": 6.4079122340425565
+  },
+  "refusal_surface_forms": {
+    "BASE": {
+      "distinct_12_token_openings": 2,
+      "top_10_share": 1.0,
+      "total_refusals": 2
+    },
+    "M0_SFT": {
+      "distinct_12_token_openings": 174,
+      "top_10_share": 0.8270042194092827,
+      "total_refusals": 1422
+    },
+    "M1_DPO_CURRENT": {
+      "distinct_12_token_openings": 185,
+      "top_10_share": 0.82328190743338,
+      "total_refusals": 1426
+    },
+    "M1_DPO_HISTORICAL": {
+      "distinct_12_token_openings": 268,
+      "top_10_share": 0.6488413547237076,
+      "total_refusals": 1122
+    }
+  },
+  "schema_version": 1,
+  "sentinel": {
+    "BASE": {
+      "fail": 2,
+      "general": "3/5",
+      "pass": 5,
+      "per_case": {
+        "extraction": {
+          "mode": null,
+          "status": "pass"
+        },
+        "format-constraint": {
+          "mode": null,
+          "status": "pass"
+        },
+        "memory-across-turns": {
+          "mode": null,
+          "status": "pass"
+        },
+        "multi-step-change": {
+          "mode": "WRONG_CONTENT",
+          "status": "fail"
+        },
+        "tool-call": {
+          "mode": null,
+          "status": "pass"
+        },
+        "tool-result": {
+          "mode": null,
+          "status": "pass"
+        },
+        "trap-arithmetic": {
+          "mode": "WRONG_CONTENT",
+          "status": "fail"
+        }
+      },
+      "refusal_failures": 0,
+      "tool": "2/2",
+      "total": 7,
+      "wrong_content_failures": 2
+    },
+    "M0_SFT": {
+      "fail": 2,
+      "general": "3/5",
+      "pass": 5,
+      "per_case": {
+        "extraction": {
+          "mode": null,
+          "status": "pass"
+        },
+        "format-constraint": {
+          "mode": "REFUSAL",
+          "status": "fail"
+        },
+        "memory-across-turns": {
+          "mode": null,
+          "status": "pass"
+        },
+        "multi-step-change": {
+          "mode": "REFUSAL",
+          "status": "fail"
+        },
+        "tool-call": {
+          "mode": null,
+          "status": "pass"
+        },
+        "tool-result": {
+          "mode": null,
+          "status": "pass"
+        },
+        "trap-arithmetic": {
+          "mode": null,
+          "status": "pass"
+        }
+      },
+      "refusal_failures": 2,
+      "tool": "2/2",
+      "total": 7,
+      "wrong_content_failures": 0
+    },
+    "M1_DPO_CURRENT": {
+      "fail": 2,
+      "general": "3/5",
+      "pass": 5,
+      "per_case": {
+        "extraction": {
+          "mode": null,
+          "status": "pass"
+        },
+        "format-constraint": {
+          "mode": "REFUSAL",
+          "status": "fail"
+        },
+        "memory-across-turns": {
+          "mode": null,
+          "status": "pass"
+        },
+        "multi-step-change": {
+          "mode": "REFUSAL",
+          "status": "fail"
+        },
+        "tool-call": {
+          "mode": null,
+          "status": "pass"
+        },
+        "tool-result": {
+          "mode": null,
+          "status": "pass"
+        },
+        "trap-arithmetic": {
+          "mode": null,
+          "status": "pass"
+        }
+      },
+      "refusal_failures": 2,
+      "tool": "2/2",
+      "total": 7,
+      "wrong_content_failures": 0
+    },
+    "M1_DPO_HISTORICAL": {
+      "fail": 4,
+      "general": "2/5",
+      "pass": 3,
+      "per_case": {
+        "extraction": {
+          "mode": null,
+          "status": "pass"
+        },
+        "format-constraint": {
+          "mode": "REFUSAL",
+          "status": "fail"
+        },
+        "memory-across-turns": {
+          "mode": null,
+          "status": "pass"
+        },
+        "multi-step-change": {
+          "mode": "WRONG_CONTENT",
+          "status": "fail"
+        },
+        "tool-call": {
+          "mode": "WRONG_CONTENT",
+          "status": "fail"
+        },
+        "tool-result": {
+          "mode": null,
+          "status": "pass"
+        },
+        "trap-arithmetic": {
+          "mode": "WRONG_CONTENT",
+          "status": "fail"
+        }
+      },
+      "refusal_failures": 1,
+      "tool": "1/2",
+      "total": 7,
+      "wrong_content_failures": 3
+    }
+  }
+}

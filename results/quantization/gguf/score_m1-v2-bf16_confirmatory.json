@@ -1,0 +1,131 @@
+{
+  "artifact": "m1-v2-bf16",
+  "artifact_bytes": 3775708704,
+  "artifact_sha256": "3cf73dc7f4deb303593ec01b8db4603356e35f1ab3e44edd9444496a04cc83de",
+  "context_buckets": {
+    "base": 1275,
+    "overflow": 2
+  },
+  "decision_counts": {
+    "ANSWER": 22,
+    "CALL": 482,
+    "CLARIFY": 500,
+    "UNSUPPORTED": 273
+  },
+  "engine_parity_vs_vllm_bf16": {
+    "delta": {
+      "call_f1": 0.002381,
+      "call_precision": -0.001409,
+      "call_recall": 0.006623,
+      "clarification_accuracy": 0.002695,
+      "over_call_rate": 0.002427,
+      "parse_valid_rate": 0.0,
+      "unsupported_accuracy": 0.00883
+    },
+    "note": "vLLM BF16 -> llama.cpp BF16 changes engine AND tokenizer together; the 6-prompt \\p{M} pre-tokenizer divergence is inside this delta and is not a quantization effect",
+    "reference_metrics": {
+      "call_f1": 0.7548387096774194,
+      "call_precision": 0.7358490566037735,
+      "call_recall": 0.7748344370860927,
+      "clarification_accuracy": 0.7654986522911051,
+      "over_call_rate": 0.1529126213592233,
+      "parse_valid_rate": 1.0,
+      "unsupported_accuracy": 0.5386313465783664
+    },
+    "relative_retention": {
+      "call_f1": 1.003154,
+      "call_precision": 0.998085,
+      "call_recall": 1.008547,
+      "clarification_accuracy": 1.003521,
+      "over_call_rate": 1.015873,
+      "parse_valid_rate": 1.0,
+      "unsupported_accuracy": 1.016393
+    }
+  },
+  "gate_vs_frozen_vllm_reference": {
+    "checks": [
+      {
+        "dimension": "call_f1",
+        "observed": 0.757219251,
+        "passed": true,
+        "requirement": ">= 0.747290323 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "call_precision",
+        "observed": 0.734439834,
+        "passed": true,
+        "requirement": ">= 0.728490566 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "call_recall",
+        "observed": 0.781456954,
+        "passed": true,
+        "requirement": ">= 0.767086093 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "clarification_accuracy",
+        "observed": 0.76819407,
+        "passed": true,
+        "requirement": ">= 0.757843666 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "unsupported_accuracy",
+        "observed": 0.547461369,
+        "passed": true,
+        "requirement": ">= 0.533245033 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "over_call_rate",
+        "observed": 0.155339806,
+        "passed": true,
+        "requirement": "<= 0.162912621 (BF16 + 0.01)"
+      },
+      {
+        "dimension": "parse_valid_rate",
+        "observed": 1.0,
+        "passed": true,
+        "requirement": ">= 0.99"
+      },
+      {
+        "dimension": "existing_tool_use_promotion",
+        "observed": "PROMOTE",
+        "passed": true,
+        "requirement": "PROMOTE/PROMOTED"
+      }
+    ],
+    "decision": "PTQ_ACCEPTED",
+    "failed_dimensions": [],
+    "policy_version": "quantization_preservation_v1",
+    "thresholds": {
+      "call_f1": 0.7472903225806452,
+      "call_precision": 0.7284905660377358,
+      "call_recall": 0.7670860927152318,
+      "clarification_accuracy": 0.7578436657681941,
+      "over_call_rate_max": 0.1629126213592233,
+      "parse_valid_rate_min": 0.99,
+      "unsupported_accuracy": 0.5332450331125828
+    },
+    "tool_use_policy": {
+      "decision": "PROMOTE",
+      "passed": true,
+      "source": "tool_use_promotion_v4"
+    }
+  },
+  "metrics": {
+    "call_f1": 0.7572192513368984,
+    "call_precision": 0.7344398340248963,
+    "call_recall": 0.7814569536423841,
+    "clarification_accuracy": 0.7681940700808625,
+    "over_call_rate": 0.1553398058252427,
+    "parse_valid_rate": 1.0,
+    "unsupported_accuracy": 0.5474613686534217
+  },
+  "parser_status": {
+    "RAW_VALID": 1277
+  },
+  "partition": "confirmatory",
+  "policy_version": "quantization_preservation_v1",
+  "quantization": "BF16",
+  "records": 1277,
+  "submitted": 1277
+}

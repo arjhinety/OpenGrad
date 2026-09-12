@@ -1,0 +1,320 @@
+{
+  "artifact": "m1-v2-Q6_K",
+  "artifact_bytes": 1556390656,
+  "artifact_sha256": "9d431141b1ce719fe35b3ef55e5db0ef867e1d0d0c52d4c1949293abec67ddce",
+  "context_buckets": {
+    "base": 1275,
+    "overflow": 2
+  },
+  "decision_counts": {
+    "ANSWER": 19,
+    "CALL": 490,
+    "CLARIFY": 492,
+    "UNSUPPORTED": 276
+  },
+  "gate_vs_frozen_vllm_reference": {
+    "checks": [
+      {
+        "dimension": "call_f1",
+        "observed": 0.757158006,
+        "passed": true,
+        "requirement": ">= 0.747290323 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "call_precision",
+        "observed": 0.728571429,
+        "passed": true,
+        "requirement": ">= 0.728490566 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "call_recall",
+        "observed": 0.78807947,
+        "passed": true,
+        "requirement": ">= 0.767086093 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "clarification_accuracy",
+        "observed": 0.765498652,
+        "passed": true,
+        "requirement": ">= 0.757843666 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "unsupported_accuracy",
+        "observed": 0.549668874,
+        "passed": true,
+        "requirement": ">= 0.533245033 (99% of BF16 reference)"
+      },
+      {
+        "dimension": "over_call_rate",
+        "observed": 0.161407767,
+        "passed": true,
+        "requirement": "<= 0.162912621 (BF16 + 0.01)"
+      },
+      {
+        "dimension": "parse_valid_rate",
+        "observed": 1.0,
+        "passed": true,
+        "requirement": ">= 0.99"
+      },
+      {
+        "dimension": "existing_tool_use_promotion",
+        "observed": "PROMOTE",
+        "passed": true,
+        "requirement": "PROMOTE/PROMOTED"
+      }
+    ],
+    "decision": "PTQ_ACCEPTED",
+    "failed_dimensions": [],
+    "policy_version": "quantization_preservation_v1",
+    "thresholds": {
+      "call_f1": 0.7472903225806452,
+      "call_precision": 0.7284905660377358,
+      "call_recall": 0.7670860927152318,
+      "clarification_accuracy": 0.7578436657681941,
+      "over_call_rate_max": 0.1629126213592233,
+      "parse_valid_rate_min": 0.99,
+      "unsupported_accuracy": 0.5332450331125828
+    },
+    "tool_use_policy": {
+      "decision": "PROMOTE",
+      "passed": true,
+      "source": "tool_use_promotion_v4"
+    }
+  },
+  "metrics": {
+    "call_f1": 0.7571580063626724,
+    "call_precision": 0.7285714285714285,
+    "call_recall": 0.7880794701986755,
+    "clarification_accuracy": 0.7654986522911051,
+    "over_call_rate": 0.16140776699029127,
+    "parse_valid_rate": 1.0,
+    "unsupported_accuracy": 0.5496688741721855
+  },
+  "parser_status": {
+    "RAW_VALID": 1277
+  },
+  "partition": "confirmatory",
+  "policy_version": "quantization_preservation_v1",
+  "quantization": "Q6_K",
+  "quantization_loss_vs_llamacpp_bf16": {
+    "baseline_metrics": {
+      "call_f1": 0.7572192513368984,
+      "call_precision": 0.7344398340248963,
+      "call_recall": 0.7814569536423841,
+      "clarification_accuracy": 0.7681940700808625,
+      "over_call_rate": 0.1553398058252427,
+      "parse_valid_rate": 1.0,
+      "unsupported_accuracy": 0.5474613686534217
+    },
+    "delta": {
+      "call_f1": -6.1e-05,
+      "call_precision": -0.005868,
+      "call_recall": 0.006623,
+      "clarification_accuracy": -0.002695,
+      "over_call_rate": 0.006068,
+      "parse_valid_rate": 0.0,
+      "unsupported_accuracy": 0.002208
+    },
+    "note": "engine and tokenizer identical on both sides, so this delta is attributable to quantization",
+    "output_agreement": {
+      "byte_identical_outputs": 1003,
+      "byte_identical_rate": 0.785435,
+      "decision_agreement": 0.980423,
+      "decision_flips": 25,
+      "examples": 1277,
+      "flip_effects": {
+        "broke": 7,
+        "fixed": 10,
+        "lateral": 8
+      },
+      "flips": [
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "07ad417d-b086-44dc-b71e-ec37cfa11708",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "17c6993b-71f4-4627-a8c8-a3323bf83b11",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "1ca93e17-35dc-47b7-99a2-57478d3138f0",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "1e60cc83-b8d2-47c5-b38a-e1fd2cc2b6da",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "2259eb78-a924-4a81-8c9d-94d8107a3199",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "broke",
+          "example_id": "39c3c3ce-ece0-4f21-9fe8-673703f79ef8",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "3de1a848-cbbe-4c64-b766-a4772e6e9334",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "4301ed88-3824-4558-9e86-239a6fd16eb7",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "ANSWER",
+          "effect": "lateral",
+          "example_id": "487162bc-c97f-4089-bbaf-9e94bc3b4c7d",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "4a74e997-fa74-47c6-9833-bd199bc4ae1b",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "607e53fb-e34e-4123-8edb-178328a55ec9",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "6a5153bb-81de-43ec-8eb4-8539ad510a6d",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "6e38f2f6-41b0-4401-8d08-d1f3112ce8ca",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "ANSWER",
+          "effect": "broke",
+          "example_id": "839a7bc5-46b9-4f9e-a5eb-494471211bb3",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "broke",
+          "example_id": "8b57cf0d-3ab5-4f65-bf30-d65cd7a1ecb5",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "UNSUPPORTED",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "8cf90b6c-9e22-49ab-90c1-dad98c06a851",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CALL",
+          "candidate_decision": "CLARIFY",
+          "effect": "fixed",
+          "example_id": "8e5e4227-e76d-4fb2-9f8e-3018a494ad90",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "9f38aefe-347d-4a76-adf6-773e2265b586",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "aa99f44d-bbdd-4c2e-9cc8-1bae860b2565",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "CLARIFY",
+          "effect": "lateral",
+          "example_id": "ad43fc0e-c586-4281-bfd1-9b84b5078e71",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "broke",
+          "example_id": "b45fa804-6590-421a-8b60-70f1cf6ed700",
+          "expected": "CLARIFY"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "CALL",
+          "effect": "lateral",
+          "example_id": "d8bbe264-1aba-42f1-a568-7000a902af06",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "CLARIFY",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "fixed",
+          "example_id": "d9836e0b-fab4-459c-a3ae-ba570fd7343e",
+          "expected": "UNSUPPORTED"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "CALL",
+          "effect": "fixed",
+          "example_id": "e2425bb7-3519-4540-8011-25a7ab7ba59a",
+          "expected": "CALL"
+        },
+        {
+          "baseline_decision": "ANSWER",
+          "candidate_decision": "UNSUPPORTED",
+          "effect": "lateral",
+          "example_id": "ee3e0178-a846-4f07-b8ba-6b3f5bb93460",
+          "expected": "CALL"
+        }
+      ]
+    },
+    "relative_retention": {
+      "call_f1": 0.999919,
+      "call_precision": 0.99201,
+      "call_recall": 1.008475,
+      "clarification_accuracy": 0.996491,
+      "over_call_rate": 1.039063,
+      "parse_valid_rate": 1.0,
+      "unsupported_accuracy": 1.004032
+    }
+  },
+  "records": 1277,
+  "submitted": 1277
+}

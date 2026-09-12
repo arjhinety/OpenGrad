@@ -1,0 +1,118 @@
+{
+  "suite": "openweights-parity-suite",
+  "source": "openweights/core/engine/src/androidTest/kotlin/io/github/alpharomercoma/openweights/core/engine/eval/ParitySuite.kt",
+  "extracted_verbatim": true,
+  "note": "Prompts, graders and sampler transcribed from ParitySuite.kt. OpenWeights recorded these on-device; this spec re-runs the identical conversations against the OpenGrad checkpoint so the comparison is against real recorded results rather than a re-implementation.",
+  "template_caveat": "OpenWeights' tools/eval/compare.py maps family 'qwen35' to None, i.e. it recognises Qwen3.5 but ships no prompt template for it. This run therefore uses the checkpoint's own canonical Qwen3.5 chat template. That is a documented deviation: the model is identical, the prompt rendering is OpenGrad's, not OpenWeights'.",
+  "params": {
+    "temperature": 0.0,
+    "top_k": 1,
+    "seed_openweights": 7,
+    "seed_used": 0,
+    "max_tokens": 768,
+    "seed_note": "OpenWeights used seed 7; greedy decoding with top_k=1 makes the seed immaterial, and seed 0 is kept for consistency with every other OpenGrad measurement."
+  },
+  "weather_tool": {
+    "type": "function",
+    "function": {
+      "name": "get_weather",
+      "description": "Get the current weather for a city.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string", "description": "City name"}
+        },
+        "required": ["city"]
+      }
+    }
+  },
+  "council_paragraph": "The Barangay San Isidro council met on Tuesday. After reviewing the typhoon damage to the covered court, the members voted 6 to 1 to move the annual fiesta from January 21 to March 14, and asked the treasurer to release 45,000 pesos for repairs before the new date.",
+  "cases": [
+    {
+      "id": "trap-arithmetic",
+      "grader": {"type": "regex", "pattern": "(^|[^0-9.])9([^0-9]|$)", "flags": ""},
+      "tools": false,
+      "turns": [
+        {"role": "user", "content": "A farmer has 17 sheep. All but 9 run away. How many sheep does the farmer have left? Answer with just the number."}
+      ]
+    },
+    {
+      "id": "multi-step-change",
+      "grader": {"type": "regex", "pattern": "\\b16\\b", "flags": ""},
+      "tools": false,
+      "turns": [
+        {"role": "user", "content": "Ana buys 7 pencils at 12 pesos each and pays with a 100-peso bill. How many pesos of change does she receive? Answer with just the number."}
+      ]
+    },
+    {
+      "id": "format-constraint",
+      "grader": {"type": "regex", "pattern": "mercury[\"',\\s\\]]+venus[\"',\\s\\]]+earth", "flags": "i"},
+      "tools": false,
+      "turns": [
+        {"role": "user", "content": "Return a JSON array containing exactly the lowercase names of the first three planets from the Sun, and nothing else."}
+      ]
+    },
+    {
+      "id": "extraction",
+      "grader": {"type": "regex", "pattern": "march\\s*14", "flags": "i"},
+      "tools": false,
+      "turns": [
+        {"role": "user", "content": "The Barangay San Isidro council met on Tuesday. After reviewing the typhoon damage to the covered court, the members voted 6 to 1 to move the annual fiesta from January 21 to March 14, and asked the treasurer to release 45,000 pesos for repairs before the new date.\n\nOn what date will the fiesta be held? Answer with just the date."}
+      ]
+    },
+    {
+      "id": "memory-across-turns",
+      "grader": {"type": "regex", "pattern": "bagwis", "flags": "i"},
+      "tools": false,
+      "turns": [
+        {"role": "user", "content": "My cat is named Bagwis. Remember that."},
+        {"role": "assistant_raw_placeholder"},
+        {"role": "user", "content": "What is my cat's name? Answer with just the name."}
+      ],
+      "turn_note": "OpenWeights replays the model's own raw first reply into history, so the KV-cache path is what is tested. The first turn is generated, then fed back verbatim."
+    },
+    {
+      "id": "tool-call",
+      "grader": {
+        "type": "tool_call",
+        "name": "get_weather",
+        "arguments_must_contain": "manila",
+        "description": "calls.any { it.name == \"get_weather\" && \"manila\" in it.argumentsJson.lowercase() }"
+      },
+      "tools": true,
+      "turns": [
+        {"role": "user", "content": "What is the current weather in Manila? Use the tool."}
+      ]
+    },
+    {
+      "id": "tool-result",
+      "grader": {"type": "regex", "pattern": "31", "flags": ""},
+      "tools": true,
+      "turns": [
+        {"role": "user", "content": "What is the current weather in Manila? Use the tool."},
+        {"role": "assistant_raw_placeholder"},
+        {"role": "tool_result", "name": "get_weather", "content": "{\"temperature_c\": 31, \"condition\": \"humid\"}"},
+        {"role": "user_none"}
+      ],
+      "turn_note": "OpenWeights extends the tool-call turn with the tool result and regenerates; there is no additional user message."
+    }
+  ],
+  "recorded_device_results": {
+    "note": "From openweights/tools/eval/results/*.json, graded on-device by ParitySuite itself. No Qwen3.5-2B entry exists, which is the gap this run fills.",
+    "Qwen3-1.7B-Q8_0": {"engine": "LlamaCppEngine", "pass": 7, "fail": 0, "skipped": 0},
+    "Qwen3-1.7B-INT8-INT4-ExecuTorch-XNNPACK": {"engine": "ExecuTorchEngine", "pass": 7, "fail": 0, "skipped": 0},
+    "SmolLM3-3B-INT8-INT4": {"engine": "ExecuTorchEngine", "pass": 6, "fail": 1, "skipped": 0},
+    "SmolLM3-Q4_K_M": {"engine": "LlamaCppEngine", "pass": 6, "fail": 1, "skipped": 0},
+    "LFM2.5-1.2B-Instruct-Q4_K_M": {"engine": "LlamaCppEngine", "pass": 5, "fail": 2, "skipped": 0},
+    "Llama-3.2-3B-Instruct-Q4_K_M": {"engine": "LlamaCppEngine", "pass": 4, "fail": 3, "skipped": 0},
+    "react-native-executorch-lfm-2.5-lfm_2_5_1_2b_xnnpack_8da4w": {"engine": "ExecuTorchEngine", "pass": 4, "fail": 3, "skipped": 0},
+    "react-native-executorch-llama-3.2-llama_3_2_3b_xnnpack_spinquant": {"engine": "ExecuTorchEngine", "pass": 4, "fail": 3, "skipped": 0},
+    "gemma-3-1b-it-Q4_K_M": {"engine": "LlamaCppEngine", "pass": 2, "fail": 3, "skipped": 2},
+    "Gemma3-1B-IT-INT8-INT4-ExecuTorch-XNNPACK": {"engine": "ExecuTorchEngine", "pass": 1, "fail": 4, "skipped": 2}
+  },
+  "comparability_caveats": [
+    "OpenWeights results are on-device (phone), quantized, via LlamaCppEngine/ExecuTorchEngine. This run is BF16 on an H200 via vLLM. The capability grades are comparable; latency and memory are NOT.",
+    "OpenWeights graded with its own on-device ToolCallParser; this run grades with the same regex/tool-call rules transcribed above, applied to OpenGrad's parser output.",
+    "No Qwen3.5-2B baseline exists in the OpenWeights results, so the upstream-vs-OpenGrad delta cannot be computed from these files alone."
+  ]
+}

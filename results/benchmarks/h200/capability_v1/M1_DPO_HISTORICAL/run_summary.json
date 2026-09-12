@@ -1,0 +1,79 @@
+{
+  "container_seconds": 254.09,
+  "environment": {
+    "add_bos_token": false,
+    "architectures": [
+      "Qwen3_5ForCausalLM"
+    ],
+    "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "config_sha256": "6cb8daca9fb653c61485ff7452fc068bacd5c27cbee659ecd24b47186b0d1b52",
+    "cuda": "13.0",
+    "download_seconds": 20.046,
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "eos_token": "<|im_end|>",
+    "eos_token_id": 248046,
+    "gpu_capability": "9.0",
+    "gpu_hourly_usd": 4.54,
+    "gpu_name": "NVIDIA H200",
+    "gpu_total_memory_gib": 139.8,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "model_load_seconds": 75.515,
+    "model_repo": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO",
+    "model_revision": "3a1250c7b8e86758e2605ee67092e24fc8afa5aa",
+    "sampling": {
+      "seed": 0,
+      "temperature": 0.0,
+      "top_k": 1,
+      "top_p": 1.0
+    },
+    "seed": 0,
+    "stage": "M1_DPO_HISTORICAL",
+    "subfolder": "checkpoint-300",
+    "tokenizer_json_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.14.1",
+    "vllm": "0.29.0",
+    "weight_files": [
+      "model.safetensors"
+    ],
+    "weights_sha256": "eef28bc106b9ba5fff907ee284339ead40f21c1347af61b32e33d17ce3a2f0a0"
+  },
+  "estimated_container_cost_usd": 0.3204,
+  "jobs": {
+    "gsm8k": {
+      "benchmark": "gsm8k",
+      "elapsed_seconds": 102.693,
+      "estimated_gpu_cost_usd": 0.1295,
+      "generations_path": "/vol/h200/capability/M1_DPO_HISTORICAL/generations_gsm8k.jsonl",
+      "output_tokens": 532521,
+      "prompt_tokens": 1627874,
+      "requests": 2638,
+      "status": "COMPLETE",
+      "total_tokens_per_second": 21037.32,
+      "truncated_by_length": 256
+    },
+    "ifeval": {
+      "benchmark": "ifeval",
+      "elapsed_seconds": 16.953,
+      "estimated_gpu_cost_usd": 0.0214,
+      "generations_path": "/vol/h200/capability/M1_DPO_HISTORICAL/generations_ifeval.jsonl",
+      "output_tokens": 175933,
+      "prompt_tokens": 31738,
+      "requests": 541,
+      "status": "COMPLETE",
+      "total_tokens_per_second": 12249.79,
+      "truncated_by_length": 17
+    },
+    "sentinel": {
+      "benchmark": "sentinel",
+      "elapsed_seconds": 1.675,
+      "estimated_gpu_cost_usd": 0.0021,
+      "generations_path": "/vol/h200/capability/M1_DPO_HISTORICAL/generations_sentinel.jsonl",
+      "requests": 7,
+      "status": "COMPLETE"
+    }
+  },
+  "stage": "M1_DPO_HISTORICAL"
+}

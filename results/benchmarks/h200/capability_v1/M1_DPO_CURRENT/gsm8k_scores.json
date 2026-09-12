@@ -1,0 +1,103 @@
+{
+  "arm_delta": {
+    "accuracy_fewshot_minus_zeroshot": 0.5549658832448825,
+    "answer_rate_fewshot_minus_zeroshot": 1.0,
+    "interpretation_rule": "Pre-registered: a large positive answer_rate delta with a small accuracy_given_answer delta indicates refusal behaviour rather than lost capability. The reverse indicates lost capability.",
+    "refusal_rate_fewshot_minus_zeroshot": -1.0
+  },
+  "arms": {
+    "fewshot8": {
+      "accuracy": 0.5549658832448825,
+      "accuracy_given_answer": 0.5549658832448825,
+      "answer_rate": 1.0,
+      "attempted": 1319,
+      "correct": 732,
+      "extraction_methods": {
+        "answer_is": 1032,
+        "last_number": 287
+      },
+      "incorrect_attempted": 587,
+      "parse_failure_rate": 0.0,
+      "parse_failures": 0,
+      "refusal_detection_method": "HEURISTIC_REGEX_v1",
+      "refusal_patterns": {},
+      "refusal_rate": 0.0,
+      "refusals": 0,
+      "role": "SECONDARY, CONTROLLED -- pre-registered test of refusal vs capability",
+      "total": 1319
+    },
+    "zeroshot": {
+      "accuracy": 0.0,
+      "accuracy_given_answer": null,
+      "answer_rate": 0.0,
+      "attempted": 0,
+      "correct": 0,
+      "extraction_methods": {
+        "last_number": 2
+      },
+      "incorrect_attempted": 0,
+      "parse_failure_rate": 0.0,
+      "parse_failures": 0,
+      "refusal_detection_method": "HEURISTIC_REGEX_v1",
+      "refusal_patterns": {
+        "apology_inability": 1319
+      },
+      "refusal_rate": 1.0,
+      "refusals": 1319,
+      "role": "PRIMARY -- deployed behaviour",
+      "total": 1319
+    }
+  },
+  "benchmark": "gsm8k",
+  "extraction_order": [
+    "hash_marker",
+    "answer_is",
+    "boxed",
+    "last_number"
+  ],
+  "generation_metadata": {
+    "add_bos_token": false,
+    "architectures": [
+      "Qwen3_5ForCausalLM"
+    ],
+    "benchmark": "gsm8k",
+    "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "config_sha256": "88bf86c270d616198909ed1eefef8d8c21ac1fa13f62e947f20f8e1ebd02c211",
+    "cuda": "13.0",
+    "download_seconds": 19.549,
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "eos_token": "<|im_end|>",
+    "eos_token_id": 248046,
+    "gpu_capability": "9.0",
+    "gpu_hourly_usd": 4.54,
+    "gpu_name": "NVIDIA H200",
+    "gpu_total_memory_gib": 139.8,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "max_tokens": 512,
+    "model_load_seconds": 155.455,
+    "model_repo": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2",
+    "model_revision": "f33d20308982f37deb459076f489e794d5521ee3",
+    "sampling": {
+      "seed": 0,
+      "temperature": 0.0,
+      "top_k": 1,
+      "top_p": 1.0
+    },
+    "seed": 0,
+    "stage": "M1_DPO_CURRENT",
+    "subfolder": "dpo-checkpoint-30",
+    "tokenizer_json_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.14.1",
+    "vllm": "0.29.0",
+    "weight_files": [
+      "model.safetensors"
+    ],
+    "weights_sha256": "903f9b115d418d1988c0d5e1dd4bda7e04809a54a6bc7e34431982fbee2262f6"
+  },
+  "primary_arm": "zeroshot",
+  "scorer": "deterministic numeric extraction; no LLM judge",
+  "stage": "M1_DPO_CURRENT"
+}

@@ -1,0 +1,865 @@
+{
+  "engine_caveat": "Engine effects are NOT folded in here. The vLLM<->llama.cpp agreement of 0.9836 (21 per-example flips) is a separate measurement on a different example set and a different metric, and is recorded in results/benchmarks/h200/vllm_vs_llamacpp_agreement.json. Every stage in this table was run on the same engine and version, so engine choice cannot explain a stage delta.",
+  "first_observable": {
+    "answer_rate_falls": {
+      "edge": "BASE->M0_SFT",
+      "magnitude_pp": -100.0
+    },
+    "conditional_instruction_accuracy_falls": {
+      "edge": "BASE->M0_SFT",
+      "magnitude_pp": -15.62
+    },
+    "conditional_math_accuracy_falls": {
+      "edge": null,
+      "note": "not materially observable on any measured edge"
+    },
+    "fewshot_math_accuracy_falls": {
+      "edge": "BASE->M0_SFT",
+      "magnitude_pp": -14.1
+    },
+    "instruction_following_falls": {
+      "edge": "BASE->M0_SFT",
+      "magnitude_pp": -22.74
+    },
+    "math_accuracy_falls": {
+      "edge": "BASE->M0_SFT",
+      "magnitude_pp": -67.4
+    },
+    "refusal_rises": {
+      "edge": "BASE->M0_SFT",
+      "magnitude_pp": 100.0
+    }
+  },
+  "primary_path": [
+    "BASE",
+    "M0_SFT",
+    "M1_DPO_CURRENT"
+  ],
+  "run": "h200-capability-diagnosis-v1",
+  "schema_version": 1,
+  "stage_deltas": {
+    "BASE->M0_SFT": {
+      "gsm8k_fewshot8": {
+        "accuracy": -0.14101592115238815,
+        "accuracy_given_answer": -0.14101592115238815,
+        "answer_rate": 0.0,
+        "refusal_rate": 0.0
+      },
+      "gsm8k_zeroshot": {
+        "accuracy": -0.6739954510993177,
+        "accuracy_given_answer": null,
+        "answer_rate": -1.0,
+        "refusal_rate": 1.0
+      },
+      "ifeval": {
+        "accuracy_given_answer": -0.1562042002355113,
+        "answer_rate": -0.18669131238447312,
+        "inst_loose": -0.19664268585131894,
+        "inst_strict": -0.18824940047961625,
+        "prompt_loose": -0.24214417744916816,
+        "prompt_strict": -0.22735674676524958,
+        "refusal_rate": 0.1866913123844732
+      },
+      "mmlu_pro": {
+        "accuracy": -0.12026263297872342,
+        "accuracy_given_answer": -0.21299244353416147,
+        "answer_rate": 0.14187167553191482,
+        "refusal_rate": 0.0
+      },
+      "sentinel": {
+        "newly_failing": [
+          "format-constraint"
+        ],
+        "newly_passing": [
+          "trap-arithmetic"
+        ],
+        "pass_delta": 0
+      },
+      "status": "MEASURED"
+    },
+    "M0_SFT->M1_DPO_CURRENT": {
+      "gsm8k_fewshot8": {
+        "accuracy": -0.00833965125094771,
+        "accuracy_given_answer": -0.00833965125094771,
+        "answer_rate": 0.0,
+        "refusal_rate": 0.0
+      },
+      "gsm8k_zeroshot": {
+        "accuracy": 0.0,
+        "accuracy_given_answer": null,
+        "answer_rate": 0.0,
+        "refusal_rate": 0.0
+      },
+      "ifeval": {
+        "accuracy_given_answer": 0.0071228668223807245,
+        "answer_rate": -0.007393715341959317,
+        "inst_loose": 0.005995203836930418,
+        "inst_strict": 0.007194244604316502,
+        "prompt_loose": 0.005545286506469516,
+        "prompt_strict": 0.007393715341959317,
+        "refusal_rate": 0.007393715341959345
+      },
+      "mmlu_pro": {
+        "accuracy": 0.0003324468085106336,
+        "accuracy_given_answer": 4.6563437316404777e-05,
+        "answer_rate": 0.000748005319148981,
+        "refusal_rate": 0.0
+      },
+      "sentinel": {
+        "newly_failing": [],
+        "newly_passing": [],
+        "pass_delta": 0
+      },
+      "status": "MEASURED"
+    }
+  },
+  "stages_absent": [],
+  "stages_measured": [
+    "BASE",
+    "M0_SFT",
+    "M1_DPO_CURRENT",
+    "M1_DPO_HISTORICAL"
+  ],
+  "trajectory": {
+    "basis": "accuracy_given_answer falls by 21.3pp on at least one measured edge -- the ability itself is worse, not merely unused",
+    "caveat": "This is an ordering statement about measured stages, not a causal one. A label says the pattern first becomes observable after a stage; it does not establish that the stage caused it, because no stage was re-run with a controlled intervention.",
+    "co_occurring_conditions": [
+      {
+        "condition": "ANSWER_RATE_COLLAPSE",
+        "detail": "answer_rate falls by 100.0pp on a measured edge"
+      },
+      {
+        "condition": "CONDITIONAL_ACCURACY_LOSS",
+        "detail": "accuracy_given_answer falls by 21.3pp on a measured edge, i.e. worse even when it does attempt"
+      },
+      {
+        "condition": "FEWSHOT_CAPABILITY_LOSS",
+        "detail": "GSM8K 8-shot accuracy falls by 14.1pp on a measured edge. The 8-shot arm has a near-zero refusal rate, so this drop is NOT explained by refusal -- it is lost ability."
+      }
+    ],
+    "co_occurring_note": "More than one condition holding is the normal case, not a contradiction. A single label is reported only because the rules were pre-declared as a precedence ordering.",
+    "label": "GENERAL_DEGRADATION",
+    "material_threshold_pp": 5.0,
+    "rules": {
+      "CHECKPOINT_ANOMALY": "one stage is out of line with both its neighbours",
+      "GENERAL_DEGRADATION": "accuracy_given_answer falls materially -- the ability itself is worse",
+      "INSUFFICIENT_EVIDENCE": "the measured stages do not satisfy any rule above",
+      "OVER_ALIGNMENT": "answer_rate falls materially while accuracy_given_answer is broadly held -- the ability is intact and is not being used",
+      "PURE_IMPROVEMENT": "no general-capability metric falls materially, and tool policy improves",
+      "TRADEOFF": "tool policy improves materially AND at least one general metric falls materially, with accuracy_given_answer broadly held"
+    },
+    "worst_answer_rate_delta_pp": -100.0,
+    "worst_conditional_accuracy_delta_pp": -21.3
+  },
+  "transition_matrix": {
+    "BASE": {
+      "gsm8k": {
+        "fewshot8": {
+          "accuracy": 0.7043214556482184,
+          "accuracy_given_answer": 0.7043214556482184,
+          "answer_rate": 1.0,
+          "correct": 929,
+          "incorrect_attempted": 390,
+          "parse_failure_rate": 0.0,
+          "parse_failures": 0,
+          "refusal_rate": 0.0,
+          "refusals": 0
+        },
+        "zeroshot": {
+          "accuracy": 0.6739954510993177,
+          "accuracy_given_answer": 0.6739954510993177,
+          "answer_rate": 1.0,
+          "correct": 889,
+          "incorrect_attempted": 430,
+          "parse_failure_rate": 0.0,
+          "parse_failures": 0,
+          "refusal_rate": 0.0,
+          "refusals": 0
+        }
+      },
+      "ifeval": {
+        "accuracy_given_answer": 0.6790352504638218,
+        "answer_rate": 0.9963031423290203,
+        "failure_categories": {
+          "EXTRA_FORBIDDEN_CONTENT": 34,
+          "FORMAT_VIOLATION": 47,
+          "LENGTH_VIOLATION": 28,
+          "MISSING_REQUIRED_ELEMENT": 62,
+          "REFUSAL": 1,
+          "WRONG_CONTENT": 2
+        },
+        "inst_loose": 0.8057553956834532,
+        "inst_strict": 0.7709832134292566,
+        "prompt_loose": 0.7245841035120147,
+        "prompt_strict": 0.678373382624769,
+        "refusal_rate": 0.0036968576709796672
+      },
+      "mmlu_pro": {
+        "accuracy": 0.4903590425531915,
+        "accuracy_given_answer": 0.5974683544303797,
+        "answer_rate": 0.8207280585106383,
+        "coverage": {
+          "is_full_set": true,
+          "note": "Full upstream test split.",
+          "request_set_size": 12032,
+          "scored": 12032
+        },
+        "invalid_option_rate": 0.001745345744680851,
+        "per_category": {
+          "biology": {
+            "accuracy": 0.6959553695955369,
+            "accuracy_given_answer": 0.7515060240963856,
+            "answer_rate": 0.9260808926080892,
+            "correct": 499,
+            "n": 717,
+            "refusal_rate": 0.0
+          },
+          "business": {
+            "accuracy": 0.532319391634981,
+            "accuracy_given_answer": 0.693069306930693,
+            "answer_rate": 0.7680608365019012,
+            "correct": 420,
+            "n": 789,
+            "refusal_rate": 0.0
+          },
+          "chemistry": {
+            "accuracy": 0.5627208480565371,
+            "accuracy_given_answer": 0.7932752179327521,
+            "answer_rate": 0.7093639575971732,
+            "correct": 637,
+            "n": 1132,
+            "refusal_rate": 0.0
+          },
+          "computer science": {
+            "accuracy": 0.4878048780487805,
+            "accuracy_given_answer": 0.6024096385542169,
+            "answer_rate": 0.8097560975609757,
+            "correct": 200,
+            "n": 410,
+            "refusal_rate": 0.0
+          },
+          "economics": {
+            "accuracy": 0.5912322274881516,
+            "accuracy_given_answer": 0.6438709677419355,
+            "answer_rate": 0.9182464454976303,
+            "correct": 499,
+            "n": 844,
+            "refusal_rate": 0.0
+          },
+          "engineering": {
+            "accuracy": 0.23632610939112486,
+            "accuracy_given_answer": 0.5782828282828283,
+            "answer_rate": 0.4086687306501548,
+            "correct": 229,
+            "n": 969,
+            "refusal_rate": 0.0
+          },
+          "health": {
+            "accuracy": 0.4938875305623472,
+            "accuracy_given_answer": 0.5281045751633987,
+            "answer_rate": 0.9352078239608802,
+            "correct": 404,
+            "n": 818,
+            "refusal_rate": 0.0
+          },
+          "history": {
+            "accuracy": 0.33858267716535434,
+            "accuracy_given_answer": 0.34864864864864864,
+            "answer_rate": 0.9711286089238845,
+            "correct": 129,
+            "n": 381,
+            "refusal_rate": 0.0
+          },
+          "law": {
+            "accuracy": 0.24795640326975477,
+            "accuracy_given_answer": 0.2619961612284069,
+            "answer_rate": 0.9464123524069028,
+            "correct": 273,
+            "n": 1101,
+            "refusal_rate": 0.0
+          },
+          "math": {
+            "accuracy": 0.6269430051813472,
+            "accuracy_given_answer": 0.813640730067243,
+            "answer_rate": 0.770540340488527,
+            "correct": 847,
+            "n": 1351,
+            "refusal_rate": 0.0
+          },
+          "other": {
+            "accuracy": 0.4199134199134199,
+            "accuracy_given_answer": 0.4444444444444444,
+            "answer_rate": 0.9448051948051948,
+            "correct": 388,
+            "n": 924,
+            "refusal_rate": 0.0
+          },
+          "philosophy": {
+            "accuracy": 0.3847695390781563,
+            "accuracy_given_answer": 0.41379310344827586,
+            "answer_rate": 0.9298597194388778,
+            "correct": 192,
+            "n": 499,
+            "refusal_rate": 0.0
+          },
+          "physics": {
+            "accuracy": 0.5542725173210161,
+            "accuracy_given_answer": 0.7453416149068323,
+            "answer_rate": 0.74364896073903,
+            "correct": 720,
+            "n": 1299,
+            "refusal_rate": 0.0
+          },
+          "psychology": {
+            "accuracy": 0.5802005012531328,
+            "accuracy_given_answer": 0.5951156812339332,
+            "answer_rate": 0.974937343358396,
+            "correct": 463,
+            "n": 798,
+            "refusal_rate": 0.0
+          }
+        },
+        "refusal_rate": 0.0
+      },
+      "sentinel": {
+        "fail": 2,
+        "general_pass": 3,
+        "general_total": 5,
+        "pass": 5,
+        "per_case": {
+          "extraction": "pass",
+          "format-constraint": "pass",
+          "memory-across-turns": "pass",
+          "multi-step-change": "fail",
+          "tool-call": "pass",
+          "tool-result": "pass",
+          "trap-arithmetic": "fail"
+        },
+        "tool_pass": 2,
+        "tool_total": 2,
+        "total": 7
+      },
+      "stage": "BASE"
+    },
+    "M0_SFT": {
+      "gsm8k": {
+        "fewshot8": {
+          "accuracy": 0.5633055344958302,
+          "accuracy_given_answer": 0.5633055344958302,
+          "answer_rate": 1.0,
+          "correct": 743,
+          "incorrect_attempted": 576,
+          "parse_failure_rate": 0.0,
+          "parse_failures": 0,
+          "refusal_rate": 0.0,
+          "refusals": 0
+        },
+        "zeroshot": {
+          "accuracy": 0.0,
+          "accuracy_given_answer": null,
+          "answer_rate": 0.0,
+          "correct": 0,
+          "incorrect_attempted": 0,
+          "parse_failure_rate": 0.0,
+          "parse_failures": 0,
+          "refusal_rate": 1.0,
+          "refusals": 1319
+        }
+      },
+      "ifeval": {
+        "accuracy_given_answer": 0.5228310502283106,
+        "answer_rate": 0.8096118299445472,
+        "failure_categories": {
+          "EXTRA_FORBIDDEN_CONTENT": 43,
+          "FORMAT_VIOLATION": 56,
+          "LENGTH_VIOLATION": 42,
+          "MISSING_REQUIRED_ELEMENT": 64,
+          "REFUSAL": 88,
+          "WRONG_CONTENT": 4
+        },
+        "inst_loose": 0.6091127098321343,
+        "inst_strict": 0.5827338129496403,
+        "prompt_loose": 0.4824399260628466,
+        "prompt_strict": 0.4510166358595194,
+        "refusal_rate": 0.19038817005545286
+      },
+      "mmlu_pro": {
+        "accuracy": 0.3700964095744681,
+        "accuracy_given_answer": 0.38447591089621824,
+        "answer_rate": 0.9625997340425532,
+        "coverage": {
+          "is_full_set": true,
+          "note": "Full upstream test split.",
+          "request_set_size": 12032,
+          "scored": 12032
+        },
+        "invalid_option_rate": 0.002908909574468085,
+        "per_category": {
+          "biology": {
+            "accuracy": 0.6471408647140865,
+            "accuracy_given_answer": 0.6572237960339944,
+            "answer_rate": 0.9846582984658299,
+            "correct": 464,
+            "n": 717,
+            "refusal_rate": 0.0
+          },
+          "business": {
+            "accuracy": 0.41191381495564006,
+            "accuracy_given_answer": 0.4226267880364109,
+            "answer_rate": 0.9746514575411914,
+            "correct": 325,
+            "n": 789,
+            "refusal_rate": 0.0
+          },
+          "chemistry": {
+            "accuracy": 0.3666077738515901,
+            "accuracy_given_answer": 0.3849721706864564,
+            "answer_rate": 0.9522968197879859,
+            "correct": 415,
+            "n": 1132,
+            "refusal_rate": 0.0
+          },
+          "computer science": {
+            "accuracy": 0.37073170731707317,
+            "accuracy_given_answer": 0.3848101265822785,
+            "answer_rate": 0.9634146341463414,
+            "correct": 152,
+            "n": 410,
+            "refusal_rate": 0.0
+          },
+          "economics": {
+            "accuracy": 0.4549763033175355,
+            "accuracy_given_answer": 0.4620938628158845,
+            "answer_rate": 0.9845971563981043,
+            "correct": 384,
+            "n": 844,
+            "refusal_rate": 0.0
+          },
+          "engineering": {
+            "accuracy": 0.24045407636738905,
+            "accuracy_given_answer": 0.26121076233183854,
+            "answer_rate": 0.9205366357069144,
+            "correct": 233,
+            "n": 969,
+            "refusal_rate": 0.0
+          },
+          "health": {
+            "accuracy": 0.402200488997555,
+            "accuracy_given_answer": 0.4107365792759051,
+            "answer_rate": 0.9792176039119804,
+            "correct": 329,
+            "n": 818,
+            "refusal_rate": 0.0
+          },
+          "history": {
+            "accuracy": 0.2677165354330709,
+            "accuracy_given_answer": 0.272,
+            "answer_rate": 0.984251968503937,
+            "correct": 102,
+            "n": 381,
+            "refusal_rate": 0.0
+          },
+          "law": {
+            "accuracy": 0.15712988192552224,
+            "accuracy_given_answer": 0.16634615384615384,
+            "answer_rate": 0.9445958219800181,
+            "correct": 173,
+            "n": 1101,
+            "refusal_rate": 0.0
+          },
+          "math": {
+            "accuracy": 0.40414507772020725,
+            "accuracy_given_answer": 0.44754098360655736,
+            "answer_rate": 0.9030347890451518,
+            "correct": 546,
+            "n": 1351,
+            "refusal_rate": 0.0
+          },
+          "other": {
+            "accuracy": 0.34415584415584416,
+            "accuracy_given_answer": 0.34602829162132753,
+            "answer_rate": 0.9945887445887446,
+            "correct": 318,
+            "n": 924,
+            "refusal_rate": 0.0
+          },
+          "philosophy": {
+            "accuracy": 0.31462925851703405,
+            "accuracy_given_answer": 0.3158953722334004,
+            "answer_rate": 0.9959919839679359,
+            "correct": 157,
+            "n": 499,
+            "refusal_rate": 0.0
+          },
+          "physics": {
+            "accuracy": 0.3641262509622787,
+            "accuracy_given_answer": 0.37480190174326466,
+            "answer_rate": 0.9715165511932256,
+            "correct": 473,
+            "n": 1299,
+            "refusal_rate": 0.0
+          },
+          "psychology": {
+            "accuracy": 0.47869674185463656,
+            "accuracy_given_answer": 0.479297365119197,
+            "answer_rate": 0.9987468671679198,
+            "correct": 382,
+            "n": 798,
+            "refusal_rate": 0.0
+          }
+        },
+        "refusal_rate": 0.0
+      },
+      "sentinel": {
+        "fail": 2,
+        "general_pass": 3,
+        "general_total": 5,
+        "pass": 5,
+        "per_case": {
+          "extraction": "pass",
+          "format-constraint": "fail",
+          "memory-across-turns": "pass",
+          "multi-step-change": "fail",
+          "tool-call": "pass",
+          "tool-result": "pass",
+          "trap-arithmetic": "pass"
+        },
+        "tool_pass": 2,
+        "tool_total": 2,
+        "total": 7
+      },
+      "stage": "M0_SFT"
+    },
+    "M1_DPO_CURRENT": {
+      "gsm8k": {
+        "fewshot8": {
+          "accuracy": 0.5549658832448825,
+          "accuracy_given_answer": 0.5549658832448825,
+          "answer_rate": 1.0,
+          "correct": 732,
+          "incorrect_attempted": 587,
+          "parse_failure_rate": 0.0,
+          "parse_failures": 0,
+          "refusal_rate": 0.0,
+          "refusals": 0
+        },
+        "zeroshot": {
+          "accuracy": 0.0,
+          "accuracy_given_answer": null,
+          "answer_rate": 0.0,
+          "correct": 0,
+          "incorrect_attempted": 0,
+          "parse_failure_rate": 0.0,
+          "parse_failures": 0,
+          "refusal_rate": 1.0,
+          "refusals": 1319
+        }
+      },
+      "ifeval": {
+        "accuracy_given_answer": 0.5299539170506913,
+        "answer_rate": 0.8022181146025879,
+        "failure_categories": {
+          "EXTRA_FORBIDDEN_CONTENT": 45,
+          "FORMAT_VIOLATION": 51,
+          "LENGTH_VIOLATION": 44,
+          "MISSING_REQUIRED_ELEMENT": 60,
+          "REFUSAL": 89,
+          "WRONG_CONTENT": 4
+        },
+        "inst_loose": 0.6151079136690647,
+        "inst_strict": 0.5899280575539568,
+        "prompt_loose": 0.4879852125693161,
+        "prompt_strict": 0.4584103512014787,
+        "refusal_rate": 0.1977818853974122
+      },
+      "mmlu_pro": {
+        "accuracy": 0.37042885638297873,
+        "accuracy_given_answer": 0.38452247433353465,
+        "answer_rate": 0.9633477393617021,
+        "coverage": {
+          "is_full_set": true,
+          "note": "Full upstream test split.",
+          "request_set_size": 12032,
+          "scored": 12032
+        },
+        "invalid_option_rate": 0.0036569148936170214,
+        "per_category": {
+          "biology": {
+            "accuracy": 0.6401673640167364,
+            "accuracy_given_answer": 0.6538461538461539,
+            "answer_rate": 0.9790794979079498,
+            "correct": 459,
+            "n": 717,
+            "refusal_rate": 0.0
+          },
+          "business": {
+            "accuracy": 0.40811153358681873,
+            "accuracy_given_answer": 0.4144144144144144,
+            "answer_rate": 0.9847908745247148,
+            "correct": 322,
+            "n": 789,
+            "refusal_rate": 0.0
+          },
+          "chemistry": {
+            "accuracy": 0.36837455830388693,
+            "accuracy_given_answer": 0.387546468401487,
+            "answer_rate": 0.950530035335689,
+            "correct": 417,
+            "n": 1132,
+            "refusal_rate": 0.0
+          },
+          "computer science": {
+            "accuracy": 0.36097560975609755,
+            "accuracy_given_answer": 0.37755102040816324,
+            "answer_rate": 0.9560975609756097,
+            "correct": 148,
+            "n": 410,
+            "refusal_rate": 0.0
+          },
+          "economics": {
+            "accuracy": 0.4372037914691943,
+            "accuracy_given_answer": 0.44457831325301206,
+            "answer_rate": 0.9834123222748815,
+            "correct": 369,
+            "n": 844,
+            "refusal_rate": 0.0
+          },
+          "engineering": {
+            "accuracy": 0.2528379772961816,
+            "accuracy_given_answer": 0.2728285077951002,
+            "answer_rate": 0.9267285861713106,
+            "correct": 245,
+            "n": 969,
+            "refusal_rate": 0.0
+          },
+          "health": {
+            "accuracy": 0.3973105134474328,
+            "accuracy_given_answer": 0.40473225404732255,
+            "answer_rate": 0.9816625916870416,
+            "correct": 325,
+            "n": 818,
+            "refusal_rate": 0.0
+          },
+          "history": {
+            "accuracy": 0.27296587926509186,
+            "accuracy_given_answer": 0.2765957446808511,
+            "answer_rate": 0.9868766404199475,
+            "correct": 104,
+            "n": 381,
+            "refusal_rate": 0.0
+          },
+          "law": {
+            "accuracy": 0.16167120799273388,
+            "accuracy_given_answer": 0.17098943323727187,
+            "answer_rate": 0.9455040871934605,
+            "correct": 178,
+            "n": 1101,
+            "refusal_rate": 0.0
+          },
+          "math": {
+            "accuracy": 0.4085862324204293,
+            "accuracy_given_answer": 0.4513491414554375,
+            "answer_rate": 0.9052553663952627,
+            "correct": 552,
+            "n": 1351,
+            "refusal_rate": 0.0
+          },
+          "other": {
+            "accuracy": 0.3409090909090909,
+            "accuracy_given_answer": 0.34201954397394135,
+            "answer_rate": 0.9967532467532467,
+            "correct": 315,
+            "n": 924,
+            "refusal_rate": 0.0
+          },
+          "philosophy": {
+            "accuracy": 0.3286573146292585,
+            "accuracy_given_answer": 0.33064516129032256,
+            "answer_rate": 0.9939879759519038,
+            "correct": 164,
+            "n": 499,
+            "refusal_rate": 0.0
+          },
+          "physics": {
+            "accuracy": 0.37028483448806776,
+            "accuracy_given_answer": 0.38235294117647056,
+            "answer_rate": 0.968437259430331,
+            "correct": 481,
+            "n": 1299,
+            "refusal_rate": 0.0
+          },
+          "psychology": {
+            "accuracy": 0.47368421052631576,
+            "accuracy_given_answer": 0.47368421052631576,
+            "answer_rate": 1.0,
+            "correct": 378,
+            "n": 798,
+            "refusal_rate": 0.0
+          }
+        },
+        "refusal_rate": 0.0
+      },
+      "sentinel": {
+        "fail": 2,
+        "general_pass": 3,
+        "general_total": 5,
+        "pass": 5,
+        "per_case": {
+          "extraction": "pass",
+          "format-constraint": "fail",
+          "memory-across-turns": "pass",
+          "multi-step-change": "fail",
+          "tool-call": "pass",
+          "tool-result": "pass",
+          "trap-arithmetic": "pass"
+        },
+        "tool_pass": 2,
+        "tool_total": 2,
+        "total": 7
+      },
+      "stage": "M1_DPO_CURRENT",
+      "tool_policy": {
+        "call_f1": 0.7505422993492409,
+        "call_precision": 0.7377398720682303,
+        "call_recall": 0.7637969094922737,
+        "clarification_accuracy": 0.77088948787062,
+        "over_call_rate": 0.14927184466019416,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.543046357615894
+      },
+      "tool_policy_source": "results/benchmarks/h200/score_vllm-bf16_confirmatory.json"
+    },
+    "M1_DPO_HISTORICAL": {
+      "gsm8k": {
+        "fewshot8": {
+          "accuracy": 0.7043214556482184,
+          "accuracy_given_answer": 0.7184841453982985,
+          "answer_rate": 0.9802880970432145,
+          "correct": 929,
+          "incorrect_attempted": 364,
+          "parse_failure_rate": 0.0,
+          "parse_failures": 0,
+          "refusal_rate": 0.019711902956785442,
+          "refusals": 26
+        },
+        "zeroshot": {
+          "accuracy": 0.1728582259287339,
+          "accuracy_given_answer": 0.5984251968503937,
+          "answer_rate": 0.288855193328279,
+          "correct": 228,
+          "incorrect_attempted": 153,
+          "parse_failure_rate": 0.0037907505686125853,
+          "parse_failures": 5,
+          "refusal_rate": 0.7073540561031084,
+          "refusals": 933
+        }
+      },
+      "ifeval": {
+        "accuracy_given_answer": 0.5026178010471204,
+        "answer_rate": 0.7060998151571165,
+        "failure_categories": {
+          "EXTRA_FORBIDDEN_CONTENT": 33,
+          "FORMAT_VIOLATION": 52,
+          "LENGTH_VIOLATION": 29,
+          "MISSING_REQUIRED_ELEMENT": 70,
+          "REFUSAL": 116,
+          "WRONG_CONTENT": 6
+        },
+        "inst_loose": 0.6163069544364509,
+        "inst_strict": 0.5671462829736211,
+        "prompt_loose": 0.49907578558225507,
+        "prompt_strict": 0.4343807763401109,
+        "refusal_rate": 0.29390018484288355
+      },
+      "sentinel": {
+        "fail": 4,
+        "general_pass": 2,
+        "general_total": 5,
+        "pass": 3,
+        "per_case": {
+          "extraction": "pass",
+          "format-constraint": "fail",
+          "memory-across-turns": "pass",
+          "multi-step-change": "fail",
+          "tool-call": "fail",
+          "tool-result": "pass",
+          "trap-arithmetic": "fail"
+        },
+        "tool_pass": 1,
+        "tool_total": 2,
+        "total": 7
+      },
+      "stage": "M1_DPO_HISTORICAL"
+    }
+  },
+  "truncation_adversarial_intervals": {
+    "gsm8k_fewshot8__BASE_minus_M0_SFT": {
+      "BASE": {
+        "correct": 929,
+        "high": 0.7263078089461713,
+        "low": 0.7043214556482184,
+        "n": 1319,
+        "unresolved_truncated": 29
+      },
+      "M0_SFT": {
+        "correct": 743,
+        "high": 0.5648218347232752,
+        "low": 0.5633055344958302,
+        "n": 1319,
+        "unresolved_truncated": 2
+      },
+      "gap": {
+        "best_case_pp": 16.30022744503411,
+        "observed_pp": 14.101592115238814,
+        "positive_under_adversarial_resolution": true,
+        "worst_case_pp": 13.949962092494317
+      }
+    },
+    "gsm8k_zeroshot__BASE_minus_M0_SFT": {
+      "BASE": {
+        "correct": 889,
+        "high": 0.7740712661106899,
+        "low": 0.6739954510993177,
+        "n": 1319,
+        "unresolved_truncated": 132
+      },
+      "M0_SFT": {
+        "correct": 0,
+        "high": 0.0,
+        "low": 0.0,
+        "n": 1319,
+        "unresolved_truncated": 0
+      },
+      "gap": {
+        "best_case_pp": 77.40712661106899,
+        "observed_pp": 67.39954510993176,
+        "positive_under_adversarial_resolution": true,
+        "worst_case_pp": 67.39954510993176
+      }
+    },
+    "method": "true_accuracy in [correct/n, (correct+unresolved)/n], where unresolved = incorrect AND finish_reason == 'length'. Deterministic range under adversarial resolution of truncated generations; NOT a confidence interval.",
+    "mmlu_pro__BASE_minus_M0_SFT": {
+      "BASE": {
+        "correct": 5900,
+        "high": 0.7012134308510638,
+        "low": 0.4903590425531915,
+        "n": 12032,
+        "unresolved_truncated": 2537
+      },
+      "M0_SFT": {
+        "correct": 4453,
+        "high": 0.42627992021276595,
+        "low": 0.3700964095744681,
+        "n": 12032,
+        "unresolved_truncated": 676
+      },
+      "gap": {
+        "best_case_pp": 33.11170212765957,
+        "observed_pp": 12.026263297872342,
+        "positive_under_adversarial_resolution": true,
+        "worst_case_pp": 6.4079122340425565
+      }
+    },
+    "why": "Truncation rates differ by stage, so a raw difference could in principle be a generation-budget artifact. The interval shows whether the comparison survives the worst admissible resolution of those examples."
+  }
+}

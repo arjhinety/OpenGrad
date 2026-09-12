@@ -1,0 +1,142 @@
+{
+  "decision_agreement": 0.983555,
+  "decision_flips": 21,
+  "exact_output_agreement": 0.870008,
+  "examples": 1277,
+  "flip_effects": {
+    "both_wrong": 2,
+    "llamacpp_correct": 14,
+    "vllm_correct": 5
+  },
+  "flips": [
+    {
+      "example_id": "0ee4fdd2-b1da-4439-9b49-1d60c15d6f7c",
+      "expected": "CALL",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "236f3df2-0fc8-4733-ad63-c1af1ee53bf7",
+      "expected": "CALL",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "2bf3162c-8dbd-4305-8dbc-b765998783fa",
+      "expected": "CALL",
+      "llamacpp": "CALL",
+      "vllm": "ANSWER"
+    },
+    {
+      "example_id": "3243b9bf-188a-4b6b-9762-36cf4ca0e617",
+      "expected": "CALL",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "354bb8fb-bf48-4be7-ab68-650cac1e4e33",
+      "expected": "UNSUPPORTED",
+      "llamacpp": "UNSUPPORTED",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "39c3c3ce-ece0-4f21-9fe8-673703f79ef8",
+      "expected": "CALL",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "6580a699-4972-4a7f-8e82-b1f3051f7567",
+      "expected": "CALL",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "69ad3075-8eec-42c3-be0d-4d2dd85bce40",
+      "expected": "UNSUPPORTED",
+      "llamacpp": "UNSUPPORTED",
+      "vllm": "ANSWER"
+    },
+    {
+      "example_id": "6f9d6e90-faf1-492f-9221-a78d55118bf4",
+      "expected": "UNSUPPORTED",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "7e6950ad-f700-46f2-a597-1022a587022e",
+      "expected": "CLARIFY",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "7e8d589c-5d30-43a4-9705-578e4dea30ab",
+      "expected": "CLARIFY",
+      "llamacpp": "CLARIFY",
+      "vllm": "ANSWER"
+    },
+    {
+      "example_id": "83f9a224-43ac-4770-a460-22ed2916efea",
+      "expected": "CALL",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "8643445b-e72d-4d15-85bf-df55a1f1811f",
+      "expected": "CLARIFY",
+      "llamacpp": "CALL",
+      "vllm": "ANSWER"
+    },
+    {
+      "example_id": "b03b0854-cc18-4fe2-b5fe-e3ea04205f57",
+      "expected": "UNSUPPORTED",
+      "llamacpp": "CALL",
+      "vllm": "UNSUPPORTED"
+    },
+    {
+      "example_id": "b9bbc31a-e737-42bc-8c6f-8b36d993d5ad",
+      "expected": "CLARIFY",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "c9cf98bc-59d6-4cf2-b62c-0473ae094cee",
+      "expected": "CLARIFY",
+      "llamacpp": "UNSUPPORTED",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "cf05cae1-f604-473f-983a-7bb71ce19f55",
+      "expected": "UNSUPPORTED",
+      "llamacpp": "UNSUPPORTED",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "d8bbe264-1aba-42f1-a568-7000a902af06",
+      "expected": "UNSUPPORTED",
+      "llamacpp": "CLARIFY",
+      "vllm": "UNSUPPORTED"
+    },
+    {
+      "example_id": "f7860af0-72d4-409b-977d-a7fc1602ee51",
+      "expected": "UNSUPPORTED",
+      "llamacpp": "UNSUPPORTED",
+      "vllm": "ANSWER"
+    },
+    {
+      "example_id": "ff399034-72c2-45c4-94fe-371f1a73ace8",
+      "expected": "CALL",
+      "llamacpp": "CALL",
+      "vllm": "CLARIFY"
+    },
+    {
+      "example_id": "ffd16601-8411-4974-9b80-b4d6456d6b44",
+      "expected": "CLARIFY",
+      "llamacpp": "CLARIFY",
+      "vllm": "ANSWER"
+    }
+  ],
+  "flips_among_known_tokenizer_divergent": 3,
+  "flips_attributable_to_engine_numerics": 18,
+  "note": "vLLM ran on H200 (BF16); llama.cpp ran the BF16 GGUF on A100. Engine, hardware and kernels all differ, so this is an engine-level comparison, not a quantization one."
+}

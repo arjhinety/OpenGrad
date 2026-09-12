@@ -1,0 +1,71 @@
+{
+  "policy_version": "gguf_release_selection_v1",
+  "frozen_before": "any quantized rung was quantized, generated, or scored",
+  "frozen_at_state": {
+    "scored_rungs_at_time_of_freezing": [],
+    "bf16_gguf_scored": false,
+    "note": "Written while the BF16 behavioural run and the imatrix stage were still executing, so no rung metric had been observed. Recorded here because selecting criteria after seeing the ladder is the same error as moving the gate after seeing a candidate.",
+    "results_directory_contents_at_freeze": [
+      "imatrix.json",
+      "inspect_tokenizer.json",
+      "prepare.json",
+      "release_selection_criteria_v1.json",
+      "tokenizer_parity.json"
+    ],
+    "score_files_present_at_freeze": []
+  },
+  "rationale": "The study mandate is the smallest artifact that PRESERVES behaviour, not the smallest that squeaks past a threshold. A rung that clears the gate by a hair is a worse release candidate than a slightly larger rung with real headroom, because the gate is estimated from one finite evaluation and carries sampling error. So two distinct answers are reported and never conflated.",
+  "highest_compression_passing_rung": {
+    "definition": "Smallest artifact_bytes among rungs whose frozen quantization_preservation_v1 verdict is a pass.",
+    "criteria": [
+      "gate_vs_frozen_vllm_reference.decision is a passing decision"
+    ],
+    "purpose": "Answers RQ3: where is the compression floor under the mandated gate."
+  },
+  "recommended_release_rung": {
+    "definition": "Smallest artifact_bytes among rungs satisfying the frozen gate AND every secondary release criterion below.",
+    "purpose": "Answers: what should actually ship.",
+    "secondary_criteria": {
+      "decision_agreement_vs_llamacpp_bf16_min": 0.99,
+      "retention_vs_llamacpp_bf16_min": 0.995,
+      "retention_metrics": [
+        "call_f1",
+        "call_precision",
+        "call_recall",
+        "clarification_accuracy",
+        "unsupported_accuracy"
+      ],
+      "over_call_rate_absolute_headroom_vs_llamacpp_bf16_max": 0.005,
+      "parse_valid_rate_min": 0.995,
+      "max_broke_flip_fraction": 0.01
+    },
+    "secondary_criteria_notes": {
+      "baseline": "All secondary criteria are measured against the llama.cpp BF16 GGUF, not the frozen vLLM reference, because engine and tokenizer are then held constant and the delta is attributable to quantization.",
+      "over_call_rate_absolute_headroom_vs_llamacpp_bf16_max": "Half the gate's 0.01 absolute tolerance. over_call_rate is an error rate near 0.15 where a relative floor is misleading.",
+      "max_broke_flip_fraction": "A flip that turns a correct decision into an incorrect one is counted separately from a flip that fixes one or moves between two wrong answers. Aggregate metrics can stay flat while correct answers are swapped for incorrect ones at the same rate.",
+      "decision_agreement_vs_llamacpp_bf16_min": "Per-example, not aggregate. Two artifacts can post identical call_f1 while disagreeing on many prompts."
+    }
+  },
+  "tie_breaking": {
+    "order": [
+      "smaller artifact_bytes",
+      "higher decision_agreement_vs_llamacpp_bf16",
+      "higher generation throughput (tokens/s, tg128)",
+      "higher prompt-processing throughput (tokens/s, pp512)"
+    ],
+    "note": "Applied only among rungs that already satisfy every criterion above. Speed never buys a behavioural exemption."
+  },
+  "fallback": {
+    "condition": "No rung satisfies every secondary criterion.",
+    "action": "Report that no rung met the release bar, recommend the highest-compression passing rung ONLY with an explicit statement that its margin is thin, and report the smallest rung that does satisfy the secondary criteria at a larger size if one exists above it.",
+    "prohibition": "Do not relax any threshold in this file to manufacture a recommendation."
+  },
+  "reporting_requirements": {
+    "must_distinguish": [
+      "exact output agreement (byte-identical generations)",
+      "decision-level agreement (same evaluated decision, possibly different wording)",
+      "metric degradation (aggregate movement)"
+    ],
+    "note": "These are not interchangeable. Two models may word a response differently while retaining identical tool-policy decisions; matching F1 does not imply matching predictions."
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "artifact": "m1-v2-bf16.gguf",
+  "keys_matched": {
+    "general.name": "Dpo Checkpoint 30",
+    "tokenizer.ggml.model": "gpt2",
+    "tokenizer.ggml.pre": "qwen35"
+  },
+  "nextn_key_present": false,
+  "stage": "inspect_tokenizer",
+  "tensor_count": 320
+}

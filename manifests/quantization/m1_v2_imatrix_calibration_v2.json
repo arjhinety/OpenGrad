@@ -1,0 +1,92 @@
+{
+  "artifact_kind": "IMATRIX_CALIBRATION_CORPUS",
+  "behavior_counts": {
+    "ANSWER": 300,
+    "CALL": 300,
+    "CLARIFY": 300,
+    "UNSUPPORTED": 300
+  },
+  "behavior_label_source": {
+    "parse_qwen_native_output": 719,
+    "preference_expected_decision": 481
+  },
+  "character_stats": {
+    "max": 14101,
+    "mean": 2855.446,
+    "median": 2217.5,
+    "min": 227,
+    "total": 3426535
+  },
+  "consumer_requirements": {
+    "reason": "llama-imatrix defaults parse_special to false; without the flag the chat special tokens are tokenized as literal text and the matrix is computed over a distribution that never occurs at inference",
+    "required_flags": [
+      "--parse-special"
+    ],
+    "tool": "llama-imatrix"
+  },
+  "contamination": {
+    "confirmatory_examples": 1277,
+    "confirmatory_fingerprint": "d6d1e394a89b5ec8b9ed41ef233d752ff50f69abe41a6e06e34878c1088f32ba",
+    "dev_examples": 2373,
+    "dev_fingerprint": "88a56821edfc8614285846e8bef60cf8aced124ce3b5a2d4054e8344618c9980",
+    "excluded_ids_considered": 3652,
+    "overlap_count": 0,
+    "quarantined_examples": 2
+  },
+  "corpus_id": "m1_v2_imatrix_calibration_v2",
+  "origin_counts": {
+    "canonical_v2_sft": 719,
+    "m1_calibration_preference_pairs_v1": 481
+  },
+  "outputs": {
+    "jsonl": "manifests/quantization/m1_v2_imatrix_calibration_v2.jsonl",
+    "jsonl_sha256": "ed8253b12992b072703efbcf9b6818889fe8ceca62bf303806c269177663e979",
+    "text": "manifests/quantization/m1_v2_imatrix_calibration_v2.txt",
+    "text_bytes": 3429214,
+    "text_sha256": "2b67da2b7046749ade395fc7d9587d7df9694e3b4d3cefeee5457aa75de4b400"
+  },
+  "purpose": "GGUF k-quant importance matrix for M1-v2 deployment descendants",
+  "records": 1200,
+  "render_contract": {
+    "preference_text": "prompt + chosen (rejected completions are never used)",
+    "renderer": "qwen3_5_2b_v1",
+    "sft_text": "render_sft of the full canonical conversation",
+    "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+  },
+  "schema_version": 1,
+  "selection": {
+    "available_per_behavior": {
+      "ANSWER": 8900,
+      "CALL": 13837,
+      "CLARIFY": 4800,
+      "UNSUPPORTED": 4463
+    },
+    "per_source_cap": 250,
+    "render_failures": {
+      "SchemaValidationError/SCH_ADDITIONAL_PROPERTIES_NOT_BOOLEAN": 1,
+      "SchemaValidationError/SCH_UNSUPPORTED_KEYWORD": 230,
+      "SchemaValidationError/SCH_UNSUPPORTED_TYPE": 355
+    },
+    "scan_limit": 8000,
+    "scanned_per_source": {
+      "glaive": 8000,
+      "toolace": 8000,
+      "when2call-sft": 8000,
+      "xlam": 8000
+    },
+    "target_per_behavior": 300,
+    "unlabelled_rows": {}
+  },
+  "source_counts": {
+    "glaive": 226,
+    "glaive-function-calling-v2": 93,
+    "toolace": 297,
+    "when2call": 20,
+    "when2call-preference-pairs-v1": 240,
+    "when2call-sft": 250,
+    "xlam-function-calling-60k": 74
+  },
+  "supersedes": "m1_v2_imatrix_calibration_v1",
+  "supersession_reason": "v1 balanced on metadata.behavior.decision, which labels every non-tool-call turn ANSWER and therefore hid that when2call-sft is roughly half clarification and half refusal by content. v2 labels with parse_qwen_native_output, the same function that scores the model. v1 was never consumed by any artifact."
+}

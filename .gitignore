@@ -90,3 +90,41 @@ runs/.dry-run/
 
 # Local agent scratch: session plans, not project artifacts.
 .zcode/
+
+# ---------------------------------------------------------------------------
+# Benchmark campaign artifacts (capability_v1 and the GGUF study).
+#
+# Same rule the run directories above already follow: the canonical record is
+# committed, the bulk it was derived from is not. Committing everything would
+# add ~720 MB, and single files reach 97 MB -- past the point where GitHub
+# warns and a clone stays usable.
+#
+# COMMITTED (KB-scale, carries every number in reports/):
+#   *_scores.json, run_summary.json, checkpoint_ladder.json, cost_ledger.json,
+#   gpu_runs.jsonl, capability_findings.jsonl, regression_analysis.json,
+#   final_campaign_audit.json, refusal_characterization.json,
+#   sft_refusal_supervision_audit.json, tokenizer_divergence_census.json,
+#   PRESERVED_STATE_v1.json, *_v1.meta.json, results/final_campaign_verdict.json
+#
+# NOT COMMITTED (regenerable or bulk):
+#   request sets  -- rebuilt byte-identically by
+#                    scripts/prepare_capability_benchmarks.py from pinned HF
+#                    revisions; a test asserts the rebuild reproduces the hash
+#   generations   -- raw model output; NOT regenerable without GPU. Held
+#                    locally. To publish, upload as a HF dataset rather than
+#                    committing it here.
+#   per-example   -- derived from generations by the scorers
+#   evidence/     -- the joined per-example view, derived from both
+# ---------------------------------------------------------------------------
+results/benchmarks/datasets/*.jsonl
+results/benchmarks/h200/capability_v1/**/generations_*.jsonl
+results/benchmarks/h200/capability_v1/**/*_per_example.jsonl
+results/benchmarks/h200/capability_v1/evidence/
+results/quantization/frozen_prompts_v1.jsonl
+results/quantization/frozen_behavioral_eval_v1.jsonl
+results/quantization/gguf/predictions_*.json
+results/benchmarks/h200/predictions_*.json
+
+# Local agent scratch: a working copy of checkpoints, GGUF builds and session
+# state. Never project evidence.
+.workspace/

@@ -1,0 +1,13 @@
+{
+  "artifact": "/vol/gguf/m1-v2-Q4_K_M.gguf",
+  "artifact_bytes": 1274396416,
+  "artifact_sha256": "5fdffb70909d17f276baac019534848cc6760a149d99e77ef232f5466671fc5d",
+  "command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-Q4_K_M.gguf Q4_K_M 16",
+  "elapsed_seconds": 56.117,
+  "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+  "quant_type": "Q4_K_M",
+  "source_gguf": "/vol/gguf/m1-v2-bf16.gguf",
+  "source_sha256": "3cf73dc7f4deb303593ec01b8db4603356e35f1ab3e44edd9444496a04cc83de",
+  "stage": "quantize",
+  "tail": "load_imatrix: imatrix datasets=['/data/imatrix_calibration.txt']\nload_imatrix: loaded 186 importance matrix entries from /vol/imatrix/m1-v2.imatrix computed on 1583 chunks\nprepare_imatrix: have 186 importance matrix entries\n\nllama_quantize: quantize time = 24495.00 ms\nllama_quantize:    total time = 24495.00 ms\n"
+}

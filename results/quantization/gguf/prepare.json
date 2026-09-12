@@ -1,0 +1,34 @@
+{
+  "checkpoint": "dpo-checkpoint-30",
+  "converter_command": "python /opt/llama.cpp/convert_hf_to_gguf.py /vol/source/m1-v2/dpo-checkpoint-30 --outfile /vol/gguf/m1-v2-bf16.gguf --outtype bf16 --no-mtp",
+  "gguf": "/vol/gguf/m1-v2-bf16.gguf",
+  "gguf_bytes": 3775708704,
+  "gguf_metadata": {
+    "keys_matched": {
+      "qwen35.block_count": 24
+    },
+    "nextn_key_present": false,
+    "tensor_count": 320
+  },
+  "gguf_sha256": "3cf73dc7f4deb303593ec01b8db4603356e35f1ab3e44edd9444496a04cc83de",
+  "llama_cpp_commit": "d3146f2b56c2db4711ac8391871c9e529d1946d7",
+  "llama_cpp_tag": "b10919",
+  "model_repo": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2",
+  "model_revision": "f33d20308982f37deb459076f489e794d5521ee3",
+  "mtp_reconciliation": {
+    "action": "convert_with_--no-mtp",
+    "config_mutated": false,
+    "converter_flag": "--no-mtp",
+    "declared_mtp_num_hidden_layers": 1,
+    "expected_block_count": 24,
+    "mtp_tensors_present": 0,
+    "num_hidden_layers": 24,
+    "reason": "config declares an MTP head the checkpoint does not contain; --no-mtp makes the converter skip the nextn block instead of writing one with no weights"
+  },
+  "outtype": "bf16",
+  "source_config_sha256": "88bf86c270d616198909ed1eefef8d8c21ac1fa13f62e947f20f8e1ebd02c211",
+  "source_dir": "/vol/source/m1-v2/dpo-checkpoint-30",
+  "source_weight_bytes": 3763692048,
+  "source_weight_sha256": "903f9b115d418d1988c0d5e1dd4bda7e04809a54a6bc7e34431982fbee2262f6",
+  "stage": "prepare"
+}

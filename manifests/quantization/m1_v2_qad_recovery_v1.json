@@ -1,0 +1,29 @@
+{
+  "artifact_kind": "QAD_RECOVERY_CORPUS",
+  "behavior_counts": {
+    "ANSWER": 140,
+    "CALL": 141,
+    "CLARIFY": 100,
+    "UNSUPPORTED": 100
+  },
+  "corpus_id": "m1_v2_qad_recovery_v1",
+  "heldout_exclusion": {
+    "confirmatory_fingerprint": "d6d1e394a89b5ec8b9ed41ef233d752ff50f69abe41a6e06e34878c1088f32ba",
+    "dev_fingerprint": "88a56821edfc8614285846e8bef60cf8aced124ce3b5a2d4054e8344618c9980",
+    "overlap_count": 0
+  },
+  "path": "manifests/quantization/m1_v2_qad_recovery_v1.jsonl",
+  "records": 481,
+  "schema_version": 1,
+  "sha256": "a26982e42d13e2e94c48aa776f12256222c91a53ce19ebda53283dac42dfa211",
+  "source_counts": {
+    "glaive-function-calling-v2": 93,
+    "toolace": 54,
+    "when2call": 20,
+    "when2call-preference-pairs-v1": 240,
+    "xlam-function-calling-60k": 74
+  },
+  "source_sha256": "0907ac321d66ec1e1128149b9c12c86a04402b988561399b3c7e18722d88ff7e",
+  "train_records": 385,
+  "validation_records": 96
+}

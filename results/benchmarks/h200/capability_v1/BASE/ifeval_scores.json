@@ -1,0 +1,90 @@
+{
+  "benchmark": "ifeval",
+  "diagnostic_metrics": {
+    "accuracy": 0.6765249537892791,
+    "accuracy_given_answer": 0.6790352504638218,
+    "answer_rate": 0.9963031423290203,
+    "attempted": 539,
+    "correct": 366,
+    "incorrect_attempted": 173,
+    "parse_failure_rate": 0.0,
+    "parse_failures": 0,
+    "refusal_detection_method": "HEURISTIC_REGEX_v1",
+    "refusal_patterns": {
+      "leading_cannot": 2
+    },
+    "refusal_rate": 0.0036968576709796672,
+    "refusals": 2,
+    "total": 541
+  },
+  "failure_categories": {
+    "EXTRA_FORBIDDEN_CONTENT": 34,
+    "FORMAT_VIOLATION": 47,
+    "LENGTH_VIOLATION": 28,
+    "MISSING_REQUIRED_ELEMENT": 62,
+    "REFUSAL": 1,
+    "WRONG_CONTENT": 2
+  },
+  "failure_category_note": "REFUSAL is HEURISTIC (regex, see opengrad.evaluation.capability). Every other category is DETERMINISTIC, derived from which upstream instruction failed. The official_metrics block is unaffected by this classification.",
+  "generation_metadata": {
+    "add_bos_token": false,
+    "architectures": [
+      "Qwen3_5ForConditionalGeneration"
+    ],
+    "benchmark": "ifeval",
+    "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+    "config_sha256": "ed1c1723241f23f7f4e23430759cbd7dcfb4103cbdfe052bfe7626b57c2615b4",
+    "cuda": "13.0",
+    "download_seconds": 24.749,
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "eos_token": "<|im_end|>",
+    "eos_token_id": 248046,
+    "gpu_capability": "9.0",
+    "gpu_hourly_usd": 4.54,
+    "gpu_name": "NVIDIA H200",
+    "gpu_total_memory_gib": 139.8,
+    "max_model_len": 5760,
+    "max_num_seqs": 256,
+    "max_tokens": 2560,
+    "model_load_seconds": 141.371,
+    "model_repo": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "sampling": {
+      "seed": 0,
+      "temperature": 0.0,
+      "top_k": 1,
+      "top_p": 1.0
+    },
+    "seed": 0,
+    "stage": "BASE",
+    "subfolder": "",
+    "tokenizer_json_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.14.1",
+    "vllm": "0.29.0",
+    "weight_files": [
+      "model.safetensors-00001-of-00001.safetensors"
+    ],
+    "weights_sha256": "aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1"
+  },
+  "official_metrics": {
+    "instruction_level_loose_accuracy": 0.8057553956834532,
+    "instruction_level_strict_accuracy": 0.7709832134292566,
+    "instructions": 834,
+    "prompt_level_loose_accuracy": 0.7245841035120147,
+    "prompt_level_strict_accuracy": 0.678373382624769,
+    "prompts": 541,
+    "scorer": "google-research/instruction_following_eval, vendored unmodified"
+  },
+  "scorer_determinism": {
+    "note": "Upstream IFEval checkers are non-deterministic without this. Measured before seeding: 0.4510 / 0.4492 / 0.4492 strict prompt accuracy on one fixed generations file. Scores produced without a seed carry ~0.2pp jitter.",
+    "seed": 0,
+    "seeded": true,
+    "sources_seeded": [
+      "python random",
+      "langdetect.DetectorFactory"
+    ]
+  },
+  "stage": "BASE"
+}

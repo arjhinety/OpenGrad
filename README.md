@@ -28,11 +28,11 @@ on the record rather than editing them away. The first study is reliable tool us
 |---|---|
 | Base model | `Qwen/Qwen3.5-2B` at revision `15852e8c…` — the only executed target so far |
 | Canonical dataset | **Canonical-v2 final** — 173,237 records, 161,966 trainable, 4 sources, fingerprint `8ced403b…` |
-| Latest completed stage | **M1-v2** DPO, **promoted** 2026-09-11 under the prospective `tool_use_promotion_v4` policy; M0 closed |
-| Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30 |
-| Next research stage | M2 on-policy distillation — **not executed**; scaffold only, live training path unimplemented |
-| Behavioral held-out | When2Call — 3,650 examples scored from the frozen held-out v2 set |
-| Largest current limitation | One 2B model; no external benchmark, device, quantization, or speculative-decoding result exists |
+| Latest completed stage | **General-capability diagnosis** across Base → M0 → M1-v2 on real IFEval, GSM8K and MMLU-Pro. It found an **SFT-induced regression** the tool-policy gate could not see |
+| Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30. **Improved on tool policy; materially worse than Base on general capability. Not an unqualified improvement** |
+| Next research stage | Refusal-supervision ablation — [`ROADMAP.md`](ROADMAP.md) step 16, **BLOCKED_ON_PREFLIGHT**. M2 distillation remains unexecuted scaffold |
+| Behavioral held-out | When2Call — 3,650 examples. **Contains no ANSWER examples**, which is why the regression escaped promotion |
+| Largest current limitation | One 2B model, one lineage, no replicate. The promoted checkpoint refuses 100% of bare arithmetic questions |
 
 Every experiment record, its validity, selected checkpoint, and published artifact: [`docs/EXPERIMENT_STATUS.md`](docs/EXPERIMENT_STATUS.md) (generated from the run artifacts).
 
@@ -103,6 +103,41 @@ Seven post-training interventions have been executed in total: one negative on c
 partial recovery on corpus v2, the definitive final-v2 (selected, not promoted), two joint-removal
 ablations (both negative), a rejected historical DPO attempt, and the promoted M1-v2. Negative
 results are not summarized away here; the full record is in [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md).
+
+### The tool-policy gain came with a general-capability regression
+
+Those `call_f1` numbers are real. They are also not the whole picture. A later diagnosis across the
+checkpoint ladder, on **real upstream IFEval, GSM8K and MMLU-Pro**, found a regression the
+tool-policy gate was structurally unable to detect.
+
+| measure | Base | M0 — SFT | M1-v2 — promoted |
+|---|---:|---:|---:|
+| GSM8K zero-shot accuracy | **67.4%** | **0.0%** | **0.0%** |
+| GSM8K zero-shot refusal rate | 0.0% | **100.0%** | **100.0%** |
+| GSM8K 8-shot accuracy *(same questions)* | **70.4%** | 56.3% | 55.5% |
+| IFEval prompt-level strict | **67.8%** | 45.1% | 45.8% |
+| MMLU-Pro (5-shot, 12,032 items) | **49.0%** | 37.0% | 37.0% |
+
+**Two separable failures, both introduced at SFT:**
+
+1. **A prompt-regime-conditioned refusal policy.** The promoted checkpoint declines every bare
+   arithmetic question — and answers 55.5% of *the same 1,319 questions* when eight worked
+   exemplars are present. It never refuses 5-shot MMLU-Pro. Refusal is conditioned on the request
+   shape, not the subject.
+2. **Genuine capability loss.** The 8-shot and MMLU-Pro gaps occur where refusal is ~0%, so they
+   cannot be explained by declining to answer.
+
+**Preference training changed neither** — `M0 → M1-v2` moves every metric by under 1pp, and 82% of
+GSM8K generations are byte-identical between the two.
+
+The original MMLU-Pro measurement used a 768-token budget and reported 38.0 / 36.8 / 36.9 —
+apparently no regression at all. That was an artifact: Base hit the cap on 37.6% of items against
+M0's 7.2%, so the benchmark was measuring verbosity. Re-run at 2048 tokens, the real gap is 12.0pp.
+The superseded run is retained, not deleted.
+
+- Independent audit of every number above: [`reports/FINAL_CAMPAIGN_AUDIT.md`](reports/FINAL_CAMPAIGN_AUDIT.md)
+- Full diagnosis: [`reports/GENERAL_CAPABILITY_REGRESSION.md`](reports/GENERAL_CAPABILITY_REGRESSION.md)
+- Machine-readable verdict: [`results/final_campaign_verdict.json`](results/final_campaign_verdict.json)
 
 ## What OpenGrad Is
 
@@ -181,7 +216,19 @@ backend. Details: [benchmark inventory and counting convention](docs/benchmarks/
 - **Scope:** the empirical record is one model family (Qwen3.5-2B). No cross-model replication has run.
 - **External benchmarks:** all 17 Tier A–E benchmarks are prepared but not executed; there is no external score.
 - **On-policy distillation:** scaffold only — the live training path is unimplemented and the one recorded M2 run is mock-only (`INVALID`).
-- **Device, quantization, and speculation:** integration or reservation only; no device study, optimization run, or speculative benchmark exists.
+- **Quantization (GGUF):** executed. Nine PTQ rungs were built from a BF16 GGUF with a frozen
+  importance matrix and scored on the 1,277-example confirmatory partition. Only **Q6_K (1.45 GiB)
+  and Q8_0 (1.87 GiB)** pass `quantization_preservation_v1`; every rung at Q5_K_M and below fails.
+  Strict engine tokenizer parity **FAILED** on 6/1,277 prompts (a stock-llama.cpp `\p{M}`
+  pre-tokenizer difference, all Thai) and was not redefined — see
+  [`QUANTIZATION_ENGINE_PARITY.md`](reports/QUANTIZATION_ENGINE_PARITY.md) and
+  [`QUANTIZATION_PTQ_EVALUATION.md`](reports/QUANTIZATION_PTQ_EVALUATION.md).
+- **Quantization (ExecuTorch):** CPU/XNNPACK fp32 and 8da4w exported and audited (99.98% of
+  named-data weights are int4); **no behavioural verdict** — scoring is run externally. Snapdragon
+  is `REJECTED_EXPORT`; MediaTek is `BLOCKED_PORT_INCOMPLETE` (SDK now obtained, Gated DeltaNet
+  layer unimplemented).
+- **Device and speculation:** integration or reservation only; no on-device study, optimization
+  run, or speculative benchmark exists. All throughput figures are A100-80GB, not device numbers.
 - **Reproducibility gaps:** the historical M1-v1 DPO best checkpoints no longer exist, and some scaffold-era runs retain only metadata.
 - **Measurement coverage:** tool selection, argument validity, and schema validity are not computed by the current evaluator.
 

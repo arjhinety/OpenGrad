@@ -1,0 +1,1180 @@
+{
+  "baseline_metrics": {
+    "call_f1": 0.7572192513368984,
+    "call_precision": 0.7344398340248963,
+    "call_recall": 0.7814569536423841,
+    "clarification_accuracy": 0.7681940700808625,
+    "over_call_rate": 0.1553398058252427,
+    "parse_valid_rate": 1.0,
+    "unsupported_accuracy": 0.5474613686534217
+  },
+  "criteria_policy": "gguf_release_selection_v1",
+  "rungs": [
+    {
+      "artifact_bytes": 968541952,
+      "artifact_sha256": "578fdcfc5cd0f8b406a3ca1b5ec3b37237487c057cb7c528a3767a0aa7a9515c",
+      "bench": {
+        "pp2048_stddev": 5.85,
+        "pp2048_tok_s": 9623.46,
+        "pp512_stddev": 2102.67,
+        "pp512_tok_s": 7968.13,
+        "tg128_stddev": 3.61,
+        "tg128_tok_s": 284.78
+      },
+      "byte_identical_rate": 0.128426,
+      "decision_agreement": 0.534064,
+      "decision_flips": 595,
+      "delta_vs_bf16": {
+        "call_f1": -0.085903,
+        "call_precision": -0.179685,
+        "call_recall": 0.068433,
+        "clarification_accuracy": -0.614555,
+        "over_call_rate": 0.21966,
+        "parse_valid_rate": -0.015662,
+        "unsupported_accuracy": 0.121413
+      },
+      "elapsed_seconds": 56.954,
+      "flip_effects": {
+        "broke": 322,
+        "fixed": 180,
+        "lateral": 93
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.671316478,
+            "passed": false,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.554755043,
+            "passed": false,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.849889625,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.153638814,
+            "passed": false,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.668874172,
+            "passed": true,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.375,
+            "passed": false,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 0.984338,
+            "passed": false,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "REJECTED_ACCURACY",
+        "failed_dimensions": [
+          "call_f1",
+          "call_precision",
+          "clarification_accuracy",
+          "over_call_rate",
+          "parse_valid_rate"
+        ],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "metrics": {
+        "call_f1": 0.6713164777680907,
+        "call_precision": 0.5547550432276657,
+        "call_recall": 0.8498896247240618,
+        "clarification_accuracy": 0.15363881401617252,
+        "over_call_rate": 0.375,
+        "parse_valid_rate": 0.984338,
+        "unsupported_accuracy": 0.6688741721854304
+      },
+      "present": true,
+      "quantization": "Q2_K",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-Q2_K.gguf Q2_K 16",
+      "records": 1277,
+      "retention_vs_bf16": {
+        "call_f1": 0.886555,
+        "call_precision": 0.755344,
+        "call_recall": 1.087571,
+        "clarification_accuracy": 0.2,
+        "over_call_rate": 2.414062,
+        "parse_valid_rate": 0.984338,
+        "unsupported_accuracy": 1.221774
+      },
+      "rung": "Q2_K"
+    },
+    {
+      "artifact_bytes": 1099258624,
+      "artifact_sha256": "e04d2bd0b6c78d225892f0eaa400cc901108f137921415dc0c41f0becb9a780f",
+      "bench": {
+        "pp2048_stddev": 11.95,
+        "pp2048_tok_s": 10879.12,
+        "pp512_stddev": 2459.22,
+        "pp512_tok_s": 8706.59,
+        "tg128_stddev": 3.64,
+        "tg128_tok_s": 268.81
+      },
+      "byte_identical_rate": 0.223962,
+      "decision_agreement": 0.771339,
+      "decision_flips": 292,
+      "delta_vs_bf16": {
+        "call_f1": -0.015729,
+        "call_precision": -0.098793,
+        "call_recall": 0.108168,
+        "clarification_accuracy": -0.218329,
+        "over_call_rate": 0.125,
+        "parse_valid_rate": 0.0,
+        "unsupported_accuracy": -0.055188
+      },
+      "elapsed_seconds": 50.898,
+      "flip_effects": {
+        "broke": 152,
+        "fixed": 95,
+        "lateral": 45
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.74149034,
+            "passed": false,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.635646688,
+            "passed": false,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.889624724,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.549865229,
+            "passed": false,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.492273731,
+            "passed": false,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.280339806,
+            "passed": false,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 1.0,
+            "passed": true,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "REJECTED_ACCURACY",
+        "failed_dimensions": [
+          "call_f1",
+          "call_precision",
+          "clarification_accuracy",
+          "unsupported_accuracy",
+          "over_call_rate"
+        ],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "metrics": {
+        "call_f1": 0.7414903403863847,
+        "call_precision": 0.6356466876971609,
+        "call_recall": 0.8896247240618101,
+        "clarification_accuracy": 0.5498652291105122,
+        "over_call_rate": 0.2803398058252427,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.4922737306843267
+      },
+      "present": true,
+      "quantization": "Q3_K_M",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-Q3_K_M.gguf Q3_K_M 16",
+      "records": 1277,
+      "retention_vs_bf16": {
+        "call_f1": 0.979228,
+        "call_precision": 0.865485,
+        "call_recall": 1.138418,
+        "clarification_accuracy": 0.715789,
+        "over_call_rate": 1.804688,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.899194
+      },
+      "rung": "Q3_K_M"
+    },
+    {
+      "artifact_bytes": 1059445504,
+      "artifact_sha256": "8dd5f46bb49882c59a4235992a49b3975a8762e98960938e39311adcba9aafd8",
+      "bench": {
+        "pp2048_stddev": 27.47,
+        "pp2048_tok_s": 12419.8,
+        "pp512_stddev": 2802.04,
+        "pp512_tok_s": 10261.88,
+        "tg128_stddev": 3.13,
+        "tg128_tok_s": 283.42
+      },
+      "byte_identical_rate": 0.299139,
+      "decision_agreement": 0.771339,
+      "decision_flips": 292,
+      "delta_vs_bf16": {
+        "call_f1": -0.051539,
+        "call_precision": -0.156161,
+        "call_recall": 0.12362,
+        "clarification_accuracy": -0.19407,
+        "over_call_rate": 0.207524,
+        "parse_valid_rate": 0.0,
+        "unsupported_accuracy": -0.174393
+      },
+      "elapsed_seconds": 74.265,
+      "flip_effects": {
+        "broke": 163,
+        "fixed": 68,
+        "lateral": 61
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.705679862,
+            "passed": false,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.578279267,
+            "passed": false,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.905077263,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.574123989,
+            "passed": false,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.373068433,
+            "passed": false,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.362864078,
+            "passed": false,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 1.0,
+            "passed": true,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "REJECTED_ACCURACY",
+        "failed_dimensions": [
+          "call_f1",
+          "call_precision",
+          "clarification_accuracy",
+          "unsupported_accuracy",
+          "over_call_rate"
+        ],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "metrics": {
+        "call_f1": 0.7056798623063684,
+        "call_precision": 0.5782792665726375,
+        "call_recall": 0.9050772626931567,
+        "clarification_accuracy": 0.5741239892183289,
+        "over_call_rate": 0.3628640776699029,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.3730684326710817
+      },
+      "present": true,
+      "quantization": "IQ3_M",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-IQ3_M.gguf IQ3_M 16",
+      "records": 1277,
+      "retention_vs_bf16": {
+        "call_f1": 0.931936,
+        "call_precision": 0.787375,
+        "call_recall": 1.158192,
+        "clarification_accuracy": 0.747368,
+        "over_call_rate": 2.335938,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.681452
+      },
+      "rung": "IQ3_M"
+    },
+    {
+      "artifact_bytes": 1195962112,
+      "artifact_sha256": "504ef2535d29eec3512d2b16fd2a8c60e8f82bae53052911f615cebdebd2edd7",
+      "bench": {
+        "pp2048_stddev": 20.12,
+        "pp2048_tok_s": 13288.44,
+        "pp512_stddev": 2251.96,
+        "pp512_tok_s": 10939.1,
+        "tg128_stddev": 3.48,
+        "tg128_tok_s": 306.28
+      },
+      "byte_identical_rate": 0.4213,
+      "decision_agreement": 0.88332,
+      "decision_flips": 149,
+      "delta_vs_bf16": {
+        "call_f1": -0.004121,
+        "call_precision": -0.071688,
+        "call_recall": 0.090508,
+        "clarification_accuracy": -0.105121,
+        "over_call_rate": 0.088592,
+        "parse_valid_rate": 0.0,
+        "unsupported_accuracy": -0.028698
+      },
+      "elapsed_seconds": 70.127,
+      "flip_effects": {
+        "broke": 64,
+        "fixed": 53,
+        "lateral": 32
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.753098189,
+            "passed": true,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.662751678,
+            "passed": false,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.87196468,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.663072776,
+            "passed": false,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.518763797,
+            "passed": false,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.243932039,
+            "passed": false,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 1.0,
+            "passed": true,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "REJECTED_ACCURACY",
+        "failed_dimensions": [
+          "call_precision",
+          "clarification_accuracy",
+          "unsupported_accuracy",
+          "over_call_rate"
+        ],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "metrics": {
+        "call_f1": 0.7530981887511916,
+        "call_precision": 0.662751677852349,
+        "call_recall": 0.8719646799116998,
+        "clarification_accuracy": 0.6630727762803235,
+        "over_call_rate": 0.24393203883495146,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.5187637969094923
+      },
+      "present": true,
+      "quantization": "IQ4_XS",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-IQ4_XS.gguf IQ4_XS 16",
+      "records": 1277,
+      "retention_vs_bf16": {
+        "call_f1": 0.994558,
+        "call_precision": 0.902391,
+        "call_recall": 1.115819,
+        "clarification_accuracy": 0.863158,
+        "over_call_rate": 1.570313,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.947581
+      },
+      "rung": "IQ4_XS"
+    },
+    {
+      "artifact_bytes": 1212055296,
+      "artifact_sha256": "a7d9c26d4957cbd1c36b0795efe0daa0a9970a0a3db9b95eddcca7f14fef5df2",
+      "bench": {
+        "pp2048_stddev": 39.96,
+        "pp2048_tok_s": 12436.09,
+        "pp512_stddev": 1845.33,
+        "pp512_tok_s": 9232.44,
+        "tg128_stddev": 5.58,
+        "tg128_tok_s": 299.2
+      },
+      "byte_identical_rate": 0.475333,
+      "decision_agreement": 0.878622,
+      "decision_flips": 155,
+      "delta_vs_bf16": {
+        "call_f1": 0.000616,
+        "call_precision": -0.06944,
+        "call_recall": 0.099338,
+        "clarification_accuracy": -0.126685,
+        "over_call_rate": 0.088592,
+        "parse_valid_rate": -0.000783,
+        "unsupported_accuracy": -0.030905
+      },
+      "elapsed_seconds": 63.427,
+      "flip_effects": {
+        "broke": 70,
+        "fixed": 54,
+        "lateral": 31
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.757834758,
+            "passed": true,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.665,
+            "passed": false,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.880794702,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.641509434,
+            "passed": false,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.516556291,
+            "passed": false,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.243932039,
+            "passed": false,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 0.999217,
+            "passed": true,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "REJECTED_ACCURACY",
+        "failed_dimensions": [
+          "call_precision",
+          "clarification_accuracy",
+          "unsupported_accuracy",
+          "over_call_rate"
+        ],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "metrics": {
+        "call_f1": 0.7578347578347578,
+        "call_precision": 0.665,
+        "call_recall": 0.8807947019867549,
+        "clarification_accuracy": 0.6415094339622641,
+        "over_call_rate": 0.24393203883495146,
+        "parse_valid_rate": 0.999217,
+        "unsupported_accuracy": 0.5165562913907285
+      },
+      "present": true,
+      "quantization": "Q4_K_S",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-Q4_K_S.gguf Q4_K_S 16",
+      "records": 1277,
+      "retention_vs_bf16": {
+        "call_f1": 1.000813,
+        "call_precision": 0.905452,
+        "call_recall": 1.127119,
+        "clarification_accuracy": 0.835088,
+        "over_call_rate": 1.570313,
+        "parse_valid_rate": 0.999217,
+        "unsupported_accuracy": 0.943548
+      },
+      "rung": "Q4_K_S"
+    },
+    {
+      "artifact_bytes": 1274396416,
+      "artifact_sha256": "5fdffb70909d17f276baac019534848cc6760a149d99e77ef232f5466671fc5d",
+      "bench": {
+        "pp2048_stddev": 9.11,
+        "pp2048_tok_s": 12199.83,
+        "pp512_stddev": 2666.74,
+        "pp512_tok_s": 10289.48,
+        "tg128_stddev": 3.25,
+        "tg128_tok_s": 292.72
+      },
+      "byte_identical_rate": 0.482381,
+      "decision_agreement": 0.871574,
+      "decision_flips": 164,
+      "delta_vs_bf16": {
+        "call_f1": 0.002179,
+        "call_precision": -0.073229,
+        "call_recall": 0.110375,
+        "clarification_accuracy": -0.12938,
+        "over_call_rate": 0.095874,
+        "parse_valid_rate": -0.000783,
+        "unsupported_accuracy": -0.046358
+      },
+      "elapsed_seconds": 56.117,
+      "flip_effects": {
+        "broke": 76,
+        "fixed": 57,
+        "lateral": 31
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.759398496,
+            "passed": true,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.661211129,
+            "passed": false,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.89183223,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.638814016,
+            "passed": false,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.501103753,
+            "passed": false,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.251213592,
+            "passed": false,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 0.999217,
+            "passed": true,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "REJECTED_ACCURACY",
+        "failed_dimensions": [
+          "call_precision",
+          "clarification_accuracy",
+          "unsupported_accuracy",
+          "over_call_rate"
+        ],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "metrics": {
+        "call_f1": 0.7593984962406014,
+        "call_precision": 0.6612111292962357,
+        "call_recall": 0.891832229580574,
+        "clarification_accuracy": 0.6388140161725068,
+        "over_call_rate": 0.2512135922330097,
+        "parse_valid_rate": 0.999217,
+        "unsupported_accuracy": 0.5011037527593819
+      },
+      "present": true,
+      "quantization": "Q4_K_M",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-Q4_K_M.gguf Q4_K_M 16",
+      "records": 1277,
+      "retention_vs_bf16": {
+        "call_f1": 1.002878,
+        "call_precision": 0.900293,
+        "call_recall": 1.141243,
+        "clarification_accuracy": 0.831579,
+        "over_call_rate": 1.617188,
+        "parse_valid_rate": 0.999217,
+        "unsupported_accuracy": 0.915323
+      },
+      "rung": "Q4_K_M"
+    },
+    {
+      "artifact_bytes": 1411120896,
+      "artifact_sha256": "1e6df904fdf9f4f9719f788da16f27364fb3aacebe7d9b2d04978091ed52cb41",
+      "bench": {
+        "pp2048_stddev": 20.49,
+        "pp2048_tok_s": 12413.71,
+        "pp512_stddev": 1701.78,
+        "pp512_tok_s": 11155.4,
+        "tg128_stddev": 1.65,
+        "tg128_tok_s": 292.94
+      },
+      "byte_identical_rate": 0.646045,
+      "decision_agreement": 0.949883,
+      "decision_flips": 64,
+      "delta_vs_bf16": {
+        "call_f1": 0.00399,
+        "call_precision": -0.013096,
+        "call_recall": 0.024283,
+        "clarification_accuracy": -0.021563,
+        "over_call_rate": 0.015777,
+        "parse_valid_rate": 0.0,
+        "unsupported_accuracy": -0.02649
+      },
+      "elapsed_seconds": 59.981,
+      "flip_effects": {
+        "broke": 32,
+        "fixed": 23,
+        "lateral": 9
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.761209593,
+            "passed": true,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.721343874,
+            "passed": false,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.805739514,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.746630728,
+            "passed": false,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.520971302,
+            "passed": false,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.171116505,
+            "passed": false,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 1.0,
+            "passed": true,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "REJECTED_ACCURACY",
+        "failed_dimensions": [
+          "call_precision",
+          "clarification_accuracy",
+          "unsupported_accuracy",
+          "over_call_rate"
+        ],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "metrics": {
+        "call_f1": 0.7612095933263817,
+        "call_precision": 0.7213438735177866,
+        "call_recall": 0.8057395143487859,
+        "clarification_accuracy": 0.7466307277628033,
+        "over_call_rate": 0.17111650485436894,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.5209713024282561
+      },
+      "present": true,
+      "quantization": "Q5_K_M",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-Q5_K_M.gguf Q5_K_M 16",
+      "records": 1277,
+      "retention_vs_bf16": {
+        "call_f1": 1.00527,
+        "call_precision": 0.982169,
+        "call_recall": 1.031073,
+        "clarification_accuracy": 0.97193,
+        "over_call_rate": 1.101563,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.951613
+      },
+      "rung": "Q5_K_M"
+    },
+    {
+      "artifact_bytes": 1556390656,
+      "artifact_sha256": "9d431141b1ce719fe35b3ef55e5db0ef867e1d0d0c52d4c1949293abec67ddce",
+      "bench": {
+        "pp2048_stddev": 18.19,
+        "pp2048_tok_s": 11914.09,
+        "pp512_stddev": 1665.32,
+        "pp512_tok_s": 9383.9,
+        "tg128_stddev": 2.77,
+        "tg128_tok_s": 267.7
+      },
+      "byte_identical_rate": 0.785435,
+      "decision_agreement": 0.980423,
+      "decision_flips": 25,
+      "delta_vs_bf16": {
+        "call_f1": -6.1e-05,
+        "call_precision": -0.005868,
+        "call_recall": 0.006623,
+        "clarification_accuracy": -0.002695,
+        "over_call_rate": 0.006068,
+        "parse_valid_rate": 0.0,
+        "unsupported_accuracy": 0.002208
+      },
+      "elapsed_seconds": 48.159,
+      "flip_effects": {
+        "broke": 7,
+        "fixed": 10,
+        "lateral": 8
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.757158006,
+            "passed": true,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.728571429,
+            "passed": true,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.78807947,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.765498652,
+            "passed": true,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.549668874,
+            "passed": true,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.161407767,
+            "passed": true,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 1.0,
+            "passed": true,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "PTQ_ACCEPTED",
+        "failed_dimensions": [],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "meets_release_bar": false,
+      "metrics": {
+        "call_f1": 0.7571580063626724,
+        "call_precision": 0.7285714285714285,
+        "call_recall": 0.7880794701986755,
+        "clarification_accuracy": 0.7654986522911051,
+        "over_call_rate": 0.16140776699029127,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.5496688741721855
+      },
+      "present": true,
+      "quantization": "Q6_K",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-Q6_K.gguf Q6_K 16",
+      "records": 1277,
+      "release_bar_failures": [
+        "decision agreement 0.980423 < 0.99",
+        "call_precision retention 0.99201 < 0.995",
+        "over_call_rate 0.16140776699029127 > 0.160340"
+      ],
+      "retention_vs_bf16": {
+        "call_f1": 0.999919,
+        "call_precision": 0.99201,
+        "call_recall": 1.008475,
+        "clarification_accuracy": 0.996491,
+        "over_call_rate": 1.039063,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 1.004032
+      },
+      "rung": "Q6_K"
+    },
+    {
+      "artifact_bytes": 2012012288,
+      "artifact_sha256": "0ed0bf43763e5bac70dd3de834452af7836813c11b5d34eab9ce6eb393d907a4",
+      "bench": {
+        "pp2048_stddev": 22.28,
+        "pp2048_tok_s": 13297.3,
+        "pp512_stddev": 1638.19,
+        "pp512_tok_s": 10148.35,
+        "tg128_stddev": 1.77,
+        "tg128_tok_s": 273.83
+      },
+      "byte_identical_rate": 0.866875,
+      "decision_agreement": 0.986688,
+      "decision_flips": 17,
+      "delta_vs_bf16": {
+        "call_f1": -0.002946,
+        "call_precision": -0.003591,
+        "call_recall": -0.002208,
+        "clarification_accuracy": -0.002695,
+        "over_call_rate": 0.002427,
+        "parse_valid_rate": 0.0,
+        "unsupported_accuracy": -0.002208
+      },
+      "elapsed_seconds": 48.623,
+      "flip_effects": {
+        "broke": 8,
+        "fixed": 5,
+        "lateral": 4
+      },
+      "gate": {
+        "checks": [
+          {
+            "dimension": "call_f1",
+            "observed": 0.754273504,
+            "passed": true,
+            "requirement": ">= 0.747290323 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_precision",
+            "observed": 0.730848861,
+            "passed": true,
+            "requirement": ">= 0.728490566 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "call_recall",
+            "observed": 0.779249448,
+            "passed": true,
+            "requirement": ">= 0.767086093 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "clarification_accuracy",
+            "observed": 0.765498652,
+            "passed": true,
+            "requirement": ">= 0.757843666 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "unsupported_accuracy",
+            "observed": 0.545253863,
+            "passed": true,
+            "requirement": ">= 0.533245033 (99% of BF16 reference)"
+          },
+          {
+            "dimension": "over_call_rate",
+            "observed": 0.15776699,
+            "passed": true,
+            "requirement": "<= 0.162912621 (BF16 + 0.01)"
+          },
+          {
+            "dimension": "parse_valid_rate",
+            "observed": 1.0,
+            "passed": true,
+            "requirement": ">= 0.99"
+          },
+          {
+            "dimension": "existing_tool_use_promotion",
+            "observed": "PROMOTE",
+            "passed": true,
+            "requirement": "PROMOTE/PROMOTED"
+          }
+        ],
+        "decision": "PTQ_ACCEPTED",
+        "failed_dimensions": [],
+        "policy_version": "quantization_preservation_v1",
+        "thresholds": {
+          "call_f1": 0.7472903225806452,
+          "call_precision": 0.7284905660377358,
+          "call_recall": 0.7670860927152318,
+          "clarification_accuracy": 0.7578436657681941,
+          "over_call_rate_max": 0.1629126213592233,
+          "parse_valid_rate_min": 0.99,
+          "unsupported_accuracy": 0.5332450331125828
+        },
+        "tool_use_policy": {
+          "decision": "PROMOTE",
+          "passed": true,
+          "source": "tool_use_promotion_v4"
+        }
+      },
+      "imatrix_sha256": "ab6dc65f8a5c02bf036d4233c199d4852fdad488ec018d9adc9d20033a09dbc1",
+      "meets_release_bar": false,
+      "metrics": {
+        "call_f1": 0.7542735042735043,
+        "call_precision": 0.7308488612836439,
+        "call_recall": 0.7792494481236203,
+        "clarification_accuracy": 0.7654986522911051,
+        "over_call_rate": 0.15776699029126215,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.5452538631346578
+      },
+      "present": true,
+      "quantization": "Q8_0",
+      "quantizer_command": "/opt/llama.cpp/build/bin/llama-quantize --imatrix /vol/imatrix/m1-v2.imatrix /vol/gguf/m1-v2-bf16.gguf /vol/gguf/m1-v2-Q8_0.gguf Q8_0 16",
+      "records": 1277,
+      "release_bar_failures": [
+        "decision agreement 0.986688 < 0.99"
+      ],
+      "retention_vs_bf16": {
+        "call_f1": 0.99611,
+        "call_precision": 0.995111,
+        "call_recall": 0.997175,
+        "clarification_accuracy": 0.996491,
+        "over_call_rate": 1.015625,
+        "parse_valid_rate": 1.0,
+        "unsupported_accuracy": 0.995968
+      },
+      "rung": "Q8_0"
+    }
+  ],
+  "selection": {
+    "fallback_used": true,
+    "gate_passing_rungs": [
+      "Q6_K",
+      "Q8_0"
+    ],
+    "highest_compression_passing_rung": "Q6_K",
+    "recommended_release_rung": "Q6_K",
+    "release_bar_rungs": [],
+    "same_rung": false
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "artifact": "m1-v2-Q8_0.gguf",
+  "elapsed_seconds": 297.319,
+  "error_sample": [],
+  "errors": 0,
+  "output": "/vol/generations/m1-v2-Q8_0.confirmatory.jsonl",
+  "partition": "confirmatory",
+  "returned": 1277,
+  "stage": "generate",
+  "submitted": 1277
+}

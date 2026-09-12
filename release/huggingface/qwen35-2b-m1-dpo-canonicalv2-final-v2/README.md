@@ -12,7 +12,7 @@ tags:
   - qwen3.5
   - opengrad
 datasets:
-  - arrochi112/OpenGrad-ToolPolicy-Canonical-v2-minus-xlam
+  - arrochi112/OpenGrad-ToolPolicy-Canonical-v2
 ---
 
 # OpenGrad — M1 DPO calibration on selected M0-final-v2
@@ -24,10 +24,10 @@ base model or a historical DPO checkpoint. Produced by [OpenGrad](https://github
 
 ## Results (pre-registered internal confirmatory partition, 1,277 examples)
 
-| run | `call_f1` | precision | recall | over_call | clarification | unsupported |
-|---|---:|---:|---:|---:|---:|---:|
-| M0-final-v2 @1800 | 0.7470 | 0.7350 | 0.7594 | 0.1505 | 0.7682 | 0.5430 |
-| **M1-v2 @30** | **0.7548** | 0.7358 | **0.7748** | 0.1529 | 0.7655 | 0.5386 |
+![QwenGrad-DPO confirmatory metrics: M0-final-v2 @1800 versus M1-v2 @30](qwengrad-dpo-results.png)
+
+The chart reports the exact values for `call_f1`, precision, recall, `over_call`, clarification,
+and unsupported. Higher is better for every metric except `over_call`.
 
 M1 preserves the M0 calibrated frontier and makes a small improvement in call F1 and recall. It
 does not materially reduce over-calling; this is calibration retention/slight improvement, not a
