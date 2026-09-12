@@ -22,9 +22,16 @@ These documents are preserved unedited, so a reader should know which of their s
 longer hold:
 
 - **"No model inference, training, or model-quality result exists"** (BOOTSTRAP_REPORT). Superseded:
-  B0 and four post-training interventions have executed, and the M0-final run is reported in
-  `reports/`.
+  B0 and seven post-training interventions have executed, including the promoted M1-v2 DPO; see
+  [`docs/EXPERIMENT_STATUS.md`](../EXPERIMENT_STATUS.md).
 - **"GPU branches remain UNVERIFIED"** (EXPERIMENT_FOUNDATION_COMPLETION_REPORT). Superseded: the
   GPU boundary smoke passes and real training and evaluation have run on an A100.
-- **On-policy distillation "supported"** (DPO_OPD_IMPLEMENTATION_REPORT). The foundations exist, but
-  OPD was explicitly not attempted — it is out of scope by decision, not by omission.
+- **"16 Benchmarks Configured"** (EXPERIMENT_FOUNDATION_COMPLETION_REPORT). The list under that
+  heading already names 17 Tier A–E benchmarks; the registry totals 23 identifiers once the
+  behavioral held-out, a legacy registration, three stretch families, and the internal suite are
+  counted. See the
+  [benchmark inventory and counting convention](../../README.md#benchmark-inventory-and-counting-convention).
+- **On-policy distillation "supported"** (DPO_OPD_IMPLEMENTATION_REPORT). Only the scaffold exists:
+  the live training path is unimplemented and the single recorded M2 run is mock-only and marked
+  `INVALID`. Real on-policy distillation was not run — see the
+  [M2 decision](../../reports/M2_DECISION.md).

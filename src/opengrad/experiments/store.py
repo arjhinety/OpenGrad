@@ -169,6 +169,34 @@ class ExperimentStore:
 
         return record
 
+    def update_metadata(
+        self,
+        experiment_id: str,
+        patch: dict[str, Any],
+        note: str | None = None,
+    ) -> ExperimentRecord:
+        """Merge ``patch`` into the record's metadata through the sanctioned writer.
+
+        Used for evidential annotations (for example ``validity``) that must live on the
+        authoritative record without changing its lifecycle status. The previous status is
+        preserved, and a ``RECORD_ANNOTATED`` event lands in both ledgers so the correction
+        is part of the append-only history rather than a silent overwrite.
+        """
+        record = self.get_experiment(experiment_id)
+        record.metadata.update(patch)
+        self._save_record(record)
+
+        details: dict[str, Any] = {"metadata_patch": patch}
+        if note:
+            details["note"] = note
+        r_dir = self.run_dir(experiment_id)
+        local_ledger = ExperimentLedger(r_dir / "ledger.jsonl")
+        local_ledger.record(LedgerEventType.RECORD_ANNOTATED, experiment_id, details)
+        self.central_ledger.record(LedgerEventType.RECORD_ANNOTATED, experiment_id, details)
+
+        self.refresh_registry()
+        return record
+
     def _save_record(self, record: ExperimentRecord) -> None:
         r_dir = self.run_dir(record.experiment_id)
         target = r_dir / "experiment.json"

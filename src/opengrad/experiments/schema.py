@@ -23,6 +23,10 @@ class ExperimentStatus(str, Enum):
     REVIEW = "REVIEW"
     PROMOTED = "PROMOTED"
     REJECTED = "REJECTED"
+    # Preserved as evidence, but not a valid training result: a run that produced no real
+    # model artifact (for example a mock-provider infrastructure pass). A record must not
+    # carry INVALID together with an effective TRAINED/PROMOTED claim in its metadata.
+    INVALID = "INVALID"
     ARCHIVED = "ARCHIVED"
     FAILED = "FAILED"
 

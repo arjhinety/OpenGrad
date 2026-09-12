@@ -48,7 +48,10 @@
       "experiment_id": "qwen35_2b_m2_distill",
       "global_step": 15,
       "hash": "",
-      "metadata": {},
+      "metadata": {
+        "status_note": "MOCK_ONLY - registered by the mock distillation path; no weights exist at the recorded path. Annotated 2026-09-12; see reports/M2_DECISION.md.",
+        "status_updated_at": "2026-09-12T01:43:44.699395+00:00"
+      },
       "model_id": "Qwen/Qwen3.5-2B",
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
@@ -511,7 +514,7 @@
       "training_loss": 0.6757
     }
   ],
-  "last_updated": "2026-09-11T17:57:15.225551+00:00",
+  "last_updated": "2026-09-12T01:43:44.699395+00:00",
   "schema_version": 1,
   "total_checkpoints": 26
 }

@@ -13,20 +13,20 @@ OpenGrad proceeds from infrastructure to controlled measurement. A later phase i
 4. Exact Qwen3.5-2B rendering and token audit — COMPLETE
 5. Frozen held-out evaluation preparation — COMPLETE
 
-Current evidence:
+Current evidence (Canonical-v2 era):
 
-- 213,951 canonical valid SFT records across the current accessible sources.
-- 210,874 tokenizer-rendered SFT candidates; 3,077 LoopTool records remain explicit renderer exclusions because they contain no user query.
-- xLAM and BUTTON are now materialized and included in the corpus audit.
-- The frozen held-out evaluation contains 3,952 records.
-- Model inference, training, and model-quality results now exist: the B0 baseline and three post-training interventions (see [Results](README.md#results)).
-- Canonical dataset publication — v1 published and verified; the Canonical-v2 RC snapshot is published as a partial (3-of-6) rebuild.
+- **Canonical-v2 final** is the active training corpus: 173,237 canonical records, 161,966 trainable under the two supervision contracts, across four sources, corpus fingerprint `8ced403b…`. BUTTON and LoopTool stay excluded because their upstreams are unavailable.
+- The frozen behavioral held-out contains 3,652 distinct items; 3,650 were scored after two quarantines. The v1-era planning figures — 213,951 canonical records and a 3,952 pre-deduplication split sum — are historical, and are labelled as such in the publication milestone below.
+- Model inference, training, and model-quality results now exist: the B0 baseline and **seven post-training interventions**, including the promoted M1-v2 DPO (see [Results](README.md#results)). The machine-checkable per-record view is [docs/EXPERIMENT_STATUS.md](docs/EXPERIMENT_STATUS.md).
+- Canonical dataset publication — v1 (213,951 records, six sources) and Canonical-v2 final (173,237 records, four sources) are published and verified; the 103,036-record partial v2 snapshot is retained as historical evidence, not as the current corpus.
 
 ## Publication milestone
 
 Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
-`arrochi112/OpenGrad-ToolPolicy-Canonical-v1` is public and verified at Hub commit `bb295d8a4ad64f7e8161044ad2fa34f873ede418`. The release contains 213,951 legally cleared canonical SFT records. xLAM is included under CC BY 4.0 with attribution and APIGen citation; its upstream access gate is not reproduced downstream. Publication metadata is recorded in `reports/releases/toolpolicy-canonical-v1-publication.json`.
+- [`arrochi112/OpenGrad-ToolPolicy-Canonical-v1`](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1) (historical) is public and verified at Hub commit `bb295d8a4ad64f7e8161044ad2fa34f873ede418`. The release contains 213,951 legally cleared canonical SFT records. xLAM is included under CC BY 4.0 with attribution and APIGen citation; its upstream access gate is not reproduced downstream. Publication metadata is recorded in `reports/releases/toolpolicy-canonical-v1-publication.json`.
+- [`arrochi112/OpenGrad-ToolPolicy-Canonical-v2`](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2) (current) carries 173,237 canonical records and 161,966 trainable ones across four sources, with fingerprint `8ced403b…` proven reproducible by a delete-and-rebuild. Publication metadata is recorded in `reports/releases/toolpolicy-canonical-v2-publication.json`.
+- [`arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot`](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot) (historical, partial) is the 103,036-record, three-of-six-source corpus behind the first successful M0. It is distinguished from the final v2 by name, fingerprint and source count, and is not the current corpus.
 
 ## Empirical sequence
 
@@ -75,9 +75,11 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 13. OpenWeights-derived downstream deployment studies — PLANNED
     OpenWeights is an independent project; its observations motivate hypotheses but are not OpenGrad results.
+    The adapter and the versioned Tier C `openweights` benchmark definition exist, but no post-training
+    device study has been executed, so no OpenGrad result rests on device measurements.
 
 14. Speculative decoding and inference research — PLANNED / GPU_REQUIRED
-    Future comparisons may include autoregressive decoding, external draft speculation, Medusa, EAGLE-3, DFlash, DSpark, and native MTP where supported. No method is currently benchmarked or supported by OpenGrad.
+    Future comparisons may include autoregressive decoding, external draft speculation, Medusa, EAGLE-3, DFlash, DSpark, and native MTP where supported. A reserved configuration exists; no method is currently implemented, benchmarked, or supported by OpenGrad.
 
 15. Joint capability-efficiency optimization — PLANNED
 
@@ -86,11 +88,12 @@ The dependency order was intentional; the status of each stage is now:
 B0 baseline                                  -> EXECUTED (REAL_RESULT)
     -> frozen baseline evidence              -> COMPLETE
     -> residual profile                      -> COMPLETE
-    -> M0/M1/M2 decision                     -> M0 and M1 evaluated; M2 not run
-    -> SFT                                   -> EXECUTED (2 negative, 1 partial recovery)
-    -> post-SFT evaluation                   -> EXECUTED (partial; see step 9)
-    -> conditional preference/distillation   -> DPO run and rejected; distillation not attempted
+    -> M0/M1/M2 decision                     -> M0 closed; M1 evaluated; M2 not run (mock-only path, not justified)
+    -> SFT                                   -> EXECUTED (2 negative, 1 partial recovery, 1 definitive, 2 negative joint-removal ablations)
+    -> post-SFT evaluation                   -> EXECUTED (see step 9)
+    -> preference optimization               -> first DPO identity rejected/not reproducible; M1-v2 DPO EXECUTED and PROMOTED
+    -> distillation                          -> NOT RUN (scaffold only; live training path unimplemented)
     -> quantization/runtime                  -> INTERFACE_ONLY (no execution)
-    -> OpenWeights device validation         -> PLANNED
-    -> speculative decoding                  -> PLANNED
+    -> OpenWeights device validation         -> PLANNED (integration and benchmark definition only; no study executed)
+    -> speculative decoding                  -> PLANNED / GPU_REQUIRED (no runtime support or benchmark executed)
     -> joint capability-efficiency studies   -> PLANNED

@@ -16,7 +16,7 @@ configs:
 
 ## What this release is
 
-OpenGrad ToolPolicy Canonical v1 is a provenance-preserving, model-independent normalization of several public tool-use and function-calling datasets. It is released as a pre-training candidate corpus for controlled research into tool-use policy in small open-weight language models. See [OpenGrad](https://github.com/arrogance231/OpenGrad) for the production methodology and reproducibility artifacts.
+OpenGrad ToolPolicy Canonical v1 is a provenance-preserving, model-independent normalization of several public tool-use and function-calling datasets. It is released as a pre-training candidate corpus for controlled research into tool-use policy in small open-weight language models. See [OpenGrad](https://github.com/arjhinety/OpenGrad) for the production methodology and reproducibility artifacts.
 
 ## xLAM / APIGen provenance
 

@@ -49,6 +49,66 @@ def test_experiment_diff_causal_warning() -> None:
     assert "Causal attribution" in diff.warning
 
 
+def test_invalid_status_can_replace_trained_for_a_mock_run(tmp_path: Path) -> None:
+    """A record that trained nothing real must be able to shed TRAINED.
+
+    INVALID exists so a mock/infrastructure-only pass is preserved as evidence while no
+    machine-readable consumer can keep reading it as a trained model.
+    """
+    store = ExperimentStore(tmp_path)
+    cfg = ExperimentConfig.from_file("configs/experiments/m0_sft.yaml")
+    store.create_experiment(cfg)
+    store.update_status(cfg.experiment_id, ExperimentStatus.TRAINED)
+
+    corrected = store.update_status(
+        cfg.experiment_id,
+        ExperimentStatus.INVALID,
+        {"reason": "mock providers only; no model artifact was produced"},
+    )
+    assert corrected.status == ExperimentStatus.INVALID.value
+    # A correction must not mint a completion timestamp the run never earned.
+    assert corrected.completion_timestamp is None
+
+    central_events = ExperimentLedger(store.runs_dir / "central_ledger.jsonl").read_events()
+    correction_events = [e for e in central_events if e.event_type == "INVALID"]
+    assert len(correction_events) == 1
+    assert "mock" in correction_events[0].details["reason"]
+
+
+def test_update_metadata_annotates_without_touching_status(tmp_path: Path) -> None:
+    """Validity annotations ride on the authoritative record and the append-only ledger.
+
+    The lifecycle status is historical fact and must not change; the annotation makes the
+    evidential weight machine-readable (and lands a RECORD_ANNOTATED event in both ledgers).
+    """
+    store = ExperimentStore(tmp_path)
+    cfg = ExperimentConfig.from_file("configs/experiments/m0_sft.yaml")
+    store.create_experiment(cfg)
+
+    annotated = store.update_metadata(
+        cfg.experiment_id,
+        {"validity": "SCAFFOLD_ONLY"},
+        note="scaffold-era infrastructure identity",
+    )
+    assert annotated.status == ExperimentStatus.CREATED.value
+    assert annotated.metadata["validity"] == "SCAFFOLD_ONLY"
+
+    reread = store.get_experiment(cfg.experiment_id)
+    assert reread.metadata["validity"] == "SCAFFOLD_ONLY"
+
+    for ledger_path in (
+        store.run_dir(cfg.experiment_id) / "ledger.jsonl",
+        store.runs_dir / "central_ledger.jsonl",
+    ):
+        events = ExperimentLedger(ledger_path).read_events()
+        annotated_events = [
+            e for e in events if e.event_type == LedgerEventType.RECORD_ANNOTATED.value
+        ]
+        assert len(annotated_events) == 1
+        assert annotated_events[0].details["metadata_patch"] == {"validity": "SCAFFOLD_ONLY"}
+        assert "scaffold" in annotated_events[0].details["note"]
+
+
 def test_experiment_record_names_the_commit_that_produced_it(tmp_path: Path) -> None:
     """A record that cannot name its own code is not reproducible evidence.
 

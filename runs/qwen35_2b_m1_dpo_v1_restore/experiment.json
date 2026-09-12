@@ -28,7 +28,11 @@
   "hardware_info": {},
   "hypothesis": "Reproduction of `qwen35_2b_m1_dpo_v1`, run for one reason: that run's intermediate checkpoint weights (steps 100 and 200) were removed after upload, so the only surviving artifact was step 300. The recorded result is a negative one whose informative part is the trajectory, and a trajectory whose checkpoints cannot be inspected is not independently verifiable. This run regenerates them.\nEverything that determines the result is held identical to the original: base checkpoint, pinned preference file (same sha256), beta, learning rate, schedule, batch geometry, step count, precision, and seed. This config is a copy apart from this field and the identity below, which the CLI requires to be new \u2014 a second launch under an existing experiment ID is refused precisely so that a run directory is never silently rewritten.\nThe original run is NOT superseded and its record is untouched. Its `eval/` metrics remain the authoritative numbers; this run's checkpoints are admissible only if evaluating them reproduces those numbers, which is checked before anything is published.\nThe original finding stands: DPO on the pinned preference split eliminates over-calling (0.6425 -> 0.0034) and raises precision and clarification accuracy while collapsing call recall (0.9722 -> 0.0131), monotonically from the first measured checkpoint. It is a negative result caused by over-optimisation on a small preference set and by starting from a policy whose always-call bias makes every available signal a \"stop calling\" signal.",
   "launch_timestamp": "2026-09-10T23:47:48.611547+00:00",
-  "metadata": {},
+  "metadata": {
+    "repeat_of": "qwen35_2b_m1_dpo_v1",
+    "validity": "NON_REPRODUCIBLE_REPEAT",
+    "validity_note": "2026-09-12 documentation/state audit: this is a repeat run of the M1-v1 DPO identity, not a distinct intervention. Its trajectory did not reproduce the original and its weights were deliberately not published (reports/releases/qwen35-2b-m1-dpo-publication.json). Excluded from intervention counts; retained as reproducibility evidence."
+  },
   "model_id": "Qwen/Qwen3.5-2B",
   "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
   "parent_experiment_id": null,

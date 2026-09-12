@@ -1,6 +1,6 @@
 # OpenPapers workflow
 
-OpenPapers is the first-level research server for OpenGrad ([repository](https://github.com/arrogance231/openpapers), release `v1.0.0`, commit `227fd2b76c86825d5faef39afe5195f6b0e362c0` on `master`). It is an Apache-2.0 MCP server for scholarly retrieval, paper ingestion, and reproducible research workflows; its release quality is gated by a five-level test program with recorded evidence ([test plan](https://github.com/arrogance231/openpapers/blob/master/docs/testing.md)).
+OpenPapers is the first-level research server for OpenGrad ([repository](https://github.com/arjhinety/OpenPapers), release `v1.0.0`, commit `227fd2b76c86825d5faef39afe5195f6b0e362c0` on `master`). It is an Apache-2.0 MCP server for scholarly retrieval, paper ingestion, and reproducible research workflows; its release quality is gated by a five-level test program with recorded evidence ([test plan](https://github.com/arjhinety/OpenPapers/blob/master/docs/testing.md)).
 
 It provides replaceable adapters for arXiv, Crossref, OpenAlex, Semantic Scholar, GitHub, and Hugging Face; preserves DOI/arXiv/provider identities; discovers citations and implementations; reads bounded paper and repository content without executing it; and records evidence, uncertainty, conflicts, and provider failures. It can run over stdio or Streamable HTTP and uses local SQLite or PostgreSQL/pgvector storage.
 

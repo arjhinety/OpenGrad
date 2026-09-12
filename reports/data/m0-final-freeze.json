@@ -48,15 +48,15 @@
     "decision": {
       "results/registry.jsonl": {
         "bytes": 50874,
-        "sha256": "965cee9178dff0185e14b65097c81b1615de49e2b0fc83da3d630ba9ee8cd486"
+        "sha256": "5312ef3ec723c132f52cbacff03b008cb5e418dba0640d698ef0040bd834a1a9"
       },
       "runs/central_ledger.jsonl": {
-        "bytes": 31695,
-        "sha256": "afe10993703aa8e335083e94a19b271981837d540dcff47ab39fc8599e8b432c"
+        "bytes": 34727,
+        "sha256": "d91a80c8d6a6fba67aa372dcd85249f9a6e6c3c89a2350e08f8d2529766e3e0f"
       },
       "runs/checkpoint_registry.json": {
-        "bytes": 28955,
-        "sha256": "7b19d1fa5881d8af1f9131d0a887a1099671db2fd36ef711514a0dc3a1cb0b46"
+        "bytes": 29195,
+        "sha256": "b345e2ac55bc3584ba8d942432a5b12a9908400a7c2050c201f48b33fc7555ac"
       }
     },
     "evaluation": {
@@ -160,7 +160,7 @@
   },
   "experiment_id": "m0_sft_canonical_v2_final",
   "experiment_status": "REJECTED",
-  "hashes_computed_at_commit": "449161ab7627171f129f57f6964c15090147ebc1",
+  "hashes_computed_at_commit": "b422db3b1a5290afcabd1622d4c81dccaaa71cdc",
   "reproduce": {
     "confirmatory": "python scripts/evaluate_sft_checkpoints.py m0_sft_canonical_v2_final --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side confirmatory --checkpoint-ids 1800",
     "sanity": "python scripts/sanity_check_rendered_samples.py",

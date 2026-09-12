@@ -28,7 +28,10 @@
   "hardware_info": {},
   "hypothesis": "M1 tests whether DPO on preference pairs eliminates unnecessary-tool calls and format errors without regressing instruction following.",
   "launch_timestamp": "2026-09-10T05:00:24.716589+00:00",
-  "metadata": {},
+  "metadata": {
+    "validity": "SCAFFOLD_ONLY",
+    "validity_note": "2026-09-12 documentation/state audit: scaffold-era infrastructure identity predating the real GPU experiment era. It holds only its original scaffold records (reports/M0_SFT_EXECUTION_REPORT.md section 6) and is excluded from executed-experiment counts. Lifecycle status retained as a historical ledger fact, not rewritten."
+  },
   "model_id": "Qwen/Qwen3.5-2B",
   "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
   "parent_experiment_id": "qwen35_2b_m0_sft",

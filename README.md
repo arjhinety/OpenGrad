@@ -8,10 +8,10 @@
 
 Open empirical research on capability–efficiency tradeoffs in small open-weight language models.
 
-[![CI](https://github.com/arrogance231/OpenGrad/actions/workflows/ci.yml/badge.svg)](https://github.com/arrogance231/OpenGrad/actions/workflows/ci.yml)
+[![CI](https://github.com/arjhinety/OpenGrad/actions/workflows/ci.yml/badge.svg)](https://github.com/arjhinety/OpenGrad/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-052B42?style=flat-square)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-052B42?style=flat-square)](LICENSE)
-[![Research status](https://img.shields.io/badge/research-Building%20in%20Public%20%7C%20Phase%201.0%20Foundation-052B42?style=flat-square)](docs/foundation/PRE_EXPERIMENT_REPORT.md)
+[![Research status](https://img.shields.io/badge/research-Building%20in%20Public%20%7C%20M1--v2%20DPO%20promoted-052B42?style=flat-square)](reports/M1_DPO_EVALUATION.md)
 
 </div>
 
@@ -19,7 +19,7 @@ OpenGrad studies how much capability can be extracted from small open-weight lan
 
 Model changes are hypotheses, not improvements. Every intervention is measured. Every regression matters. Failed experiments remain part of the record, and every reported result must be reproducible.
 
-> OpenGrad documents all research journeys, whether successful or failed. The repository provides a complete post-training experiment operating system covering SFT, DPO, On-Policy Distillation, a 16-benchmark evaluation system (Tiers A–E), native MTP/speculative decoding, on-device mobile tool calling with OpenWeights and Android Studio, and clean extension boundaries for future Reinforcement Learning (RL).
+> OpenGrad documents all research journeys, whether successful or failed. The repository provides a post-training experiment operating system with executed SFT and DPO trainer backends, an on-policy distillation scaffold whose live training path is not yet implemented, a 17-benchmark external evaluation registry (Tiers A–E) plus the executed When2Call behavioral held-out, a reserved configuration for planned native MTP/speculative decoding (no runtime support or benchmark executed), an OpenWeights integration for downstream on-device validation (no device study executed), and clean extension boundaries for future Reinforcement Learning (RL).
 
 ---
 
@@ -34,16 +34,17 @@ OpenGrad rejects single headline accuracy scores and implements a rigorous, vers
 - **Tier E (Systems & Speculative):** Performance Microsuite (10 deterministic frozen prompts), Speculative Replay.
 - **Documentation:** See [Benchmark Strategy](docs/evaluation/BENCHMARK_STRATEGY.md), [Speculative Decoding & MTP](docs/evaluation/SPECULATIVE_DECODING.md), [Adding a Benchmark](docs/evaluation/ADDING_A_BENCHMARK.md), and [Adding an Inference Backend](docs/evaluation/ADDING_A_BACKEND.md).
 
-### 2. On-Device Mobile Testing with OpenWeights & Android Studio
+### 2. On-Device Mobile Testing with OpenWeights & Android Studio (integration; device validation planned)
 Connecting direct post-training research to consumer mobile devices:
 - **OpenWeights Integration:** Independent on-device engine (`github.com/alpharomercoma/openweights`).
 - **No Prompt Bloat:** Evaluates small models under OpenWeights' lightweight system prompts (<150 tokens) across both `CallFormat.BARE` and `CallFormat.TAGGED` arms for 18 on-device tools without massive prompt overheads.
 - **Android Studio & Device Testing Environment:** Local host provisioned with Android Studio 2024.2.1, Android SDK platform-tools (`adb`), and a Google Pixel 7 phone AVD (`pixel_phone`) under Android 14.0 API 34.
+- **Status:** The adapter, the `CallFormat` arms, and the versioned Tier C benchmark definition (`openweights`) exist, but **no post-training device study has been executed** — no OpenGrad result rests on device measurements yet. A provisioned test host is not completed empirical validation.
 - **Documentation:** See [On-Device Testing with OpenWeights](docs/evaluation/OPENWEIGHTS_ON_DEVICE_TESTING.md).
 
 ### 3. Post-Training Experiment Operating System & Future RL Architecture
 - **Complete Experiment Lifecycle:** Hypothesis $\to$ Config $\to$ Preflight $\to$ Training $\to$ Checkpoints $\to$ Evaluation $\to$ Regression Detection $\to$ Promotion Policy.
-- **Active Trainer Backends:** SFT, DPO, and On-Policy Distillation (with decoupled `RolloutProvider` and `TeacherProvider`).
+- **Trainer Backends:** SFT and DPO, both executed on GPU. On-policy distillation is scaffolded with decoupled `RolloutProvider` and `TeacherProvider` interfaces, but its live path is unimplemented and only the mock providers run — see the [M2 decision](reports/M2_DECISION.md).
 - **Future Reinforcement Learning (RL) Boundary:** Architectural foundation ready for GRPO, PPO, RLOO, and verl without restructuring the codebase.
 - **Harness-Agnostic Agent Boundary:** OpenGrad is driven by any agent harness through the same documented `opengrad … --json` CLI. `integrations/opengrad-mcp/` packages that boundary as a dependency-free stdio MCP server for evaluation, readiness, gating, and post-training orchestration — no vendor plugin required.
 - **Documentation:** See [Experiment Foundation](docs/EXPERIMENT_FOUNDATION.md), [Training Lifecycle](docs/TRAINING_LIFECYCLE.md), [Future RL Integration](docs/FUTURE_RL_INTEGRATION.md), and [Agent / Harness Integration](docs/AGENT_INTEGRATION.md).
@@ -160,13 +161,13 @@ flowchart TD
 
 ## Current research status
 
-Gate status: `opengrad readiness` reports `PASS` with no blocking gates. The baseline is real, and the readiness contract is satisfied for the SFT config too:
+Gate status: on a fresh checkout `opengrad readiness` reports `FAIL` with blocking gates that depend on local evidence and hardware rather than on the code — `evaluation_materialization`, `contamination_gate`, `gpu_probe`, `real_b0`, and `baseline_artifacts`. The processed corpus, the adjudicated contamination evidence, and the GPU measurements are materialized locally and are not committed, so the gates cannot pass from a clone alone; `experiment_preflight` additionally warns while the working tree holds uncommitted changes. The code-level checks do pass — registry validation and experiment-config validation both report `PASS` — and the baseline itself is real:
 
 ```bash
-opengrad readiness configs/experiments/m0_sft.yaml   # status PASS, blocking_gates [], warnings []
+opengrad readiness configs/experiments/m0_sft.yaml   # evaluate the SFT config explicitly
 ```
 
-That is a statement about the *contract*, not about work done — SFT has since been executed four times, most recently the definitive M0 on frozen Canonical-v2 (see [Results](#results)). The distinction still matters because the default `opengrad readiness` evaluates the baseline config — where SFT-specific data gates auto-pass — so an SFT config must be named explicitly for its gates to mean anything. The definitive config is [`m0_sft_canonical_v2_final.yaml`](configs/experiments/m0_sft_canonical_v2_final.yaml), and it declares a measured yield report, so its trainability and supervision-composition gates read real evidence rather than idling.
+That is a statement about the *contract*, not about work done — the M0 lineage spans five completed SFT arms on GPU (one negative on corpus v1, one partial recovery on corpus v2, the definitive final-v2, and the paired minus-xLAM joint-removal ablations), after two early CUDA-OOM attempts and one scaffold run (see [Results](#results)). The distinction still matters because the default `opengrad readiness` evaluates the baseline config — where SFT-specific data gates auto-pass — so an SFT config must be named explicitly for its gates to mean anything. The definitive config is [`m0_sft_canonical_v2_final.yaml`](configs/experiments/m0_sft_canonical_v2_final.yaml), and it declares a measured yield report, so its trainability and supervision-composition gates read real evidence rather than idling.
 
 | Stage | Status | Evidence |
 | --- | --- | --- |
@@ -174,12 +175,12 @@ That is a statement about the *contract*, not about work done — SFT has since 
 | CPU fixture and preflight validation | VALIDATED | [Phase 0.5 report](docs/foundation/PRE_EXPERIMENT_REPORT.md) |
 | Qwen3.5-2B baseline reproduction | **EXECUTED — REAL RESULT** | [B0 result](reports/baselines/qwen35_2b_baseline/RESULT.md); `runs/tool_calling/qwen35_2b/baseline/experiment.json` |
 | Dataset materialization and audit | **Canonical-v2 FINAL**: 4 sources, 173,237 records, 161,966 trainable, fingerprint `8ced403b…`. BUTTON and LoopTool excluded — upstreams unavailable | [Completion report](reports/CANONICAL_V2_COMPLETION_REPORT.md) |
-| Tool-use SFT | **EXECUTED — 2 NEGATIVE, 1 PARTIAL RECOVERY, 1 DEFINITIVE** | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) · [final](reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
+| Tool-use SFT | **EXECUTED — 1 NEGATIVE (CORPUS V1), 1 PARTIAL RECOVERY, 1 DEFINITIVE (NOT PROMOTED), 2 JOINT-REMOVAL ABLATIONS (BOTH NEGATIVE)** | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) · [final](reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) · [ablations](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
 | Preference optimization | **EXECUTED — 1 HISTORICAL NEGATIVE, 1 PROMOTED** | [M1-v1 negative result (M0 report §5)](reports/M0_SFT_EXECUTION_REPORT.md#5-dpo-was-blocked-now-executed-and-also-negative) · [M1-v2 promoted evaluation](reports/M1_DPO_EVALUATION.md) |
-| On-policy distillation | **OUT OF SCOPE — NOT ATTEMPTED** | [M0 report §6](reports/M0_SFT_EXECUTION_REPORT.md) |
+| On-policy distillation | **SCAFFOLD ONLY — LIVE PATH NOT IMPLEMENTED; NOT RUN (mock-only, not justified)** | [M2 decision](reports/M2_DECISION.md) · [M0 report §6](reports/M0_SFT_EXECUTION_REPORT.md) |
 | Cross-model replication | PLANNED | [Roadmap](ROADMAP.md) |
 | Quantization and runtime evaluation | INTERFACE_ONLY — no execution | [Optimization layer](docs/optimization/README.md) |
-| Speculative decoding / MTP | PLANNED | [Reserved configuration](configs/inference/speculative/README.md) |
+| Speculative decoding / MTP | PLANNED — no runtime support or benchmark executed | [Reserved configuration](configs/inference/speculative/README.md) |
 
 `VALIDATED` here means repository or fixture infrastructure passed its checks. It does not mean an ML model or real benchmark was validated. The status vocabulary used by experiment records is defined by the [experiment schema](registry/experiments.schema.json).
 
@@ -230,7 +231,9 @@ adapter implemented ≠ fixture validated ≠ metadata validated
 metadata validated ≠ full dataset materialized ≠ used in an experiment
 ```
 
-The historical [`tool-calling-mixture-v1`](configs/data/tool_calling/mixture_v1.yaml) is retained as M0, a source-oriented control hypothesis. M1 is the behaviorally balanced [`balanced_policy_v1`](configs/data/tool_calling/balanced_policy_v1.yaml); M2 is the baseline-dependent, schema-ready [`residual_policy_v1`](configs/data/tool_calling/residual_policy_v1.yaml). The **M0** source-oriented mixture has since been trained against both canonical corpus v1 and the corrected v2 (see [Results](#results)); the M1 behavior-balanced and M2 residual-driven mixtures were not trained. See the [tool-use mixture methodology](docs/data/tool-use-mixture-methodology.md) and [behavior matrix](docs/data/training-behavior-matrix.md). Materialization preserves source metadata and terms, verifies checksums, normalizes, labels, deduplicates, audits overlap, and freezes versioned artifacts ([protocol](docs/data/DATASET_MATERIALIZATION_PROTOCOL.md)).
+> **Terminology note.** `M0`/`M1`/`M2` name two unrelated things in this repository: **dataset mixtures** (this section) and **training phases** (M0 SFT, M1 DPO, M2 on-policy distillation — see [Results](#results) and [EXPERIMENT_STATUS.md](docs/EXPERIMENT_STATUS.md)). The mixtures are written below as mixture-M0/M1/M2 to keep them distinct; the executed M1 DPO phase did not train on mixture-M1.
+
+The historical [`tool-calling-mixture-v1`](configs/data/tool_calling/mixture_v1.yaml) is retained as **mixture-M0**, a source-oriented control hypothesis. **mixture-M1** is the behaviorally balanced [`balanced_policy_v1`](configs/data/tool_calling/balanced_policy_v1.yaml); **mixture-M2** is the baseline-dependent, schema-ready [`residual_policy_v1`](configs/data/tool_calling/residual_policy_v1.yaml). Only mixture-M0 has been trained — against both canonical corpus v1 and the corrected v2 (see [Results](#results)); mixture-M1 and mixture-M2 were never trained. See the [tool-use mixture methodology](docs/data/tool-use-mixture-methodology.md) and [behavior matrix](docs/data/training-behavior-matrix.md). Materialization preserves source metadata and terms, verifies checksums, normalizes, labels, deduplicates, audits overlap, and freezes versioned artifacts ([protocol](docs/data/DATASET_MATERIALIZATION_PROTOCOL.md)).
 
 `Salesforce/APIGen-MT-5k` is explicitly excluded from the clean default because of possible τ-bench/τ² overlap. If it is ever used, it must use the contaminated namespace and its scores cannot be presented as clean generalization ([contamination configuration](configs/data/tool_calling/contamination.yaml)).
 
@@ -248,6 +251,18 @@ OpenGrad has deterministic mock smoke harnesses for the following configured eva
 | Toolathlon | Task success | Mock smoke harness | **No** | Stretch evaluation; metadata pending |
 
 The full benchmark registry is [`registry/benchmarks.yaml`](registry/benchmarks.yaml). The When2Call behavioral held-out is a real, executed measurement with published scores in [Results](#results); every *external* benchmark family remains `FROZEN_NOT_EXECUTED`, so **no external benchmark score exists**. That distinction is the whole point of keeping the behavioral suite separate from the external ones: the behavioral set answers "did tool policy change", and the external sets would answer "did anything else break". Only the first has been measured.
+
+### Benchmark inventory and counting convention
+
+The registry contains 23 benchmark identifiers, so a count is only meaningful when the subset is named:
+
+- **17 external benchmarks in Tiers A–E** — the primary external suite listed above. Every one is `FROZEN_NOT_EXECUTED` and has no score.
+- **1 executed behavioral held-out** — When2Call (`when2call-eval`), the only benchmark with real scores.
+- **1 legacy registration** — τ-bench/τ² (`tau-bench-tau2`), kept for its pinned revision; the Tier A `tau3` entry is the current registration.
+- **3 stretch families awaiting authoritative metadata** — ToolSandbox, MCPMark Verified, and Toolathlon. These three, plus BFCL V4, are the mock smoke-harness rows in the table above.
+- **1 internal regression suite** — `internal-no-tool-regression` (public fixtures only; the secret holdout is not materialized here).
+
+That is 17 + 1 + 1 + 3 + 1 = 23. Earlier README phrasing said "16-benchmark" while the Tier A–E list it referred to already named 17 entries; the external suite count is 17 and the full registry total is 23.
 
 ### Baseline execution gate
 
@@ -384,6 +399,8 @@ OpenGrad result
 
 📊 **[Baseline-to-M0-final findings — charts and comparison](reports/visual/index.html)** (also [on the model card](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final/blob/main/findings.html)). These charts cover the lineage through M0-final-v2; the complete intervention record, including the later ablations and M1-v2, is in the table below. Every figure is computed from the available per-example predictions rather than copied from a report.
 
+The machine-checkable index of every experiment record — lifecycle status, `validity`, selected checkpoint, confirmatory score, report, and published artifact — is [`docs/EXPERIMENT_STATUS.md`](docs/EXPERIMENT_STATUS.md), regenerated from the authoritative run artifacts and required to be byte-identical by the test suite. Scaffold-era and mock records appear there but are excluded from the executed-intervention count by their `validity` annotation.
+
 The table below lists interventions; the baseline is recorded by the experiment store instead.
 
 | Experiment | Model | Change | Capability Δ | Regression | Evidence status | Report |
@@ -470,7 +487,7 @@ These commands validate registries, capture the local environment, exercise CPU-
 
 ## Reproducing experiments
 
-The B0 baseline, the M0 SFT runs, and the M1 DPO run are recorded and reproducible from committed configs (see [Results](#results)); on-policy distillation was not attempted. The baseline workflow is specified in [`BASELINE_REPRODUCTION_PROTOCOL.md`](docs/experiments/BASELINE_REPRODUCTION_PROTOCOL.md): acquire the accelerator, fetch the exact Qwen3.5-2B revision, validate its native template/parser, run sanity checks, execute the selected baseline evaluations, compare revisions and settings, investigate discrepancies, and pass the reproduction gate. That protocol is not executed by the development commands above.
+The B0 baseline, the M0 SFT runs (including both minus-xLAM ablations), and the M1 DPO runs are recorded and reproducible from committed configs (see [Results](#results)); real on-policy distillation was not run — the M2 scaffold has no live training path (see the [M2 decision](reports/M2_DECISION.md)). The baseline workflow is specified in [`BASELINE_REPRODUCTION_PROTOCOL.md`](docs/experiments/BASELINE_REPRODUCTION_PROTOCOL.md): acquire the accelerator, fetch the exact Qwen3.5-2B revision, validate its native template/parser, run sanity checks, execute the selected baseline evaluations, compare revisions and settings, investigate discrepancies, and pass the reproduction gate. That protocol is not executed by the development commands above.
 
 ## Navigation
 
@@ -514,7 +531,7 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md), the [reproduction PR guide](docs/
 
 - [Experimental Machines](https://experimentalmachines.org/) — the independent research group behind this program ("Independent research across intelligence, compute, and data"; "Test what others assume"). OpenGrad is a direct supporting project to the group's founder, whose deployment program is OpenWeights.
 - [OpenWeights](https://github.com/alpharomercoma/openweights) — downstream execution environment for compatible GGUF/llama.cpp and ExecuTorch artifacts and practical device-side measurements. OpenGrad defines experiments, evaluation, and evidence; OpenWeights runs compatible artifacts.
-- [OpenPapers](https://github.com/arrogance231/openpapers) — first-level research server for OpenGrad: just-in-time, provenance-preserving scholarly retrieval during active research instead of speculative bulk paper downloads (see [the boundary documentation](docs/research/OPENPAPERS.md)). Its findings are research inputs, not empirical OpenGrad results.
+- [OpenPapers](https://github.com/arjhinety/OpenPapers) — first-level research server for OpenGrad: just-in-time, provenance-preserving scholarly retrieval during active research instead of speculative bulk paper downloads (see [the boundary documentation](docs/research/OPENPAPERS.md)). Its findings are research inputs, not empirical OpenGrad results.
 
 OpenGrad's initial research questions were motivated in part by engineering and measurements from OpenWeights, developed by `alpharomercoma`, founder of Experimental Machines. OpenWeights provides the constrained-device environment in which practical limits of small open-weight models became visible; it remains an independent project rather than an OpenGrad component.
 

@@ -2,5 +2,5 @@ cff-version: 1.2.0
 title: OpenGrad
 type: software
 message: "Please cite OpenGrad using the repository URL until a formal release DOI exists."
-repository-code: https://github.com/arrogance231/OpenGrad
+repository-code: https://github.com/arjhinety/OpenGrad
 license: Apache-2.0
