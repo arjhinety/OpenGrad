@@ -17,7 +17,7 @@ Current evidence (Canonical-v2 era):
 
 - **Canonical-v2 final** is the active training corpus: 173,237 canonical records, 161,966 trainable under the two supervision contracts, across four sources, corpus fingerprint `8ced403b…`. BUTTON and LoopTool stay excluded because their upstreams are unavailable.
 - The frozen behavioral held-out contains 3,652 distinct items; 3,650 were scored after two quarantines. The v1-era planning figures — 213,951 canonical records and a 3,952 pre-deduplication split sum — are historical, and are labelled as such in the publication milestone below.
-- Model inference, training, and model-quality results now exist: the B0 baseline and **seven post-training interventions**, including the promoted M1-v2 DPO (see [Results](README.md#results)). The machine-checkable per-record view is [docs/EXPERIMENT_STATUS.md](docs/EXPERIMENT_STATUS.md).
+- Model inference, training, and model-quality results now exist: the B0 baseline and **seven post-training interventions**, including the promoted M1-v2 DPO (see [Results](README.md#latest-results)). The machine-checkable per-record view is [docs/EXPERIMENT_STATUS.md](docs/EXPERIMENT_STATUS.md).
 - Canonical dataset publication — v1 (213,951 records, six sources) and Canonical-v2 final (173,237 records, four sources) are published and verified; the 103,036-record partial v2 snapshot is retained as historical evidence, not as the current corpus.
 
 ## Publication milestone

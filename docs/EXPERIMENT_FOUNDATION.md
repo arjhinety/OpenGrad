@@ -70,3 +70,42 @@ An experiment progresses strictly through defined states:
 - `REJECTED`: Checkpoint violated regression or quality thresholds.
 - `ARCHIVED`: Superseded or historical checkpoint.
 - `FAILED`: Execution terminated with fatal error.
+- `INVALID`: Preserved as evidence, but not a valid training result — for example a mock-provider
+  infrastructure pass that produced no model artifact. A record must not carry `INVALID` together
+  with an effective trained or promoted claim in its metadata.
+
+---
+
+## 4. Illustrative Future Record
+
+This is a schema-shaped example only; it is not a run and contains no result:
+
+```yaml
+experiment_id: example-only
+status: EXAMPLE
+
+model:
+  family: qwen
+  revision: <immutable revision>
+
+intervention:
+  type: sft
+
+data:
+  mixture: <versioned config>
+
+evaluation:
+  benchmark_revision: <commit>
+
+environment:
+  hardware: <captured>
+  software: <captured>
+
+results:
+  capability: <not-run>
+  regressions: <not-run>
+  efficiency: <not-run>
+```
+
+Use the real [experiment schema](../registry/experiments.schema.json) and
+[experiment report template](../hf/EXPERIMENT_REPORT_TEMPLATE.md) for actual records.

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -286,6 +287,62 @@ def test_registry_projection_is_not_stale() -> None:
     findings = validate_registry(ROOT)
     unexpected = [finding for finding in findings if finding.code not in documented_never_evaluated]
     assert unexpected == [], "\n".join(finding.render() for finding in unexpected)
+
+
+def _heading_slug(text: str) -> str:
+    """GitHub's heading anchor: lowercase, strip punctuation, then each whitespace becomes '-'."""
+    text = text.strip().lower()
+    text = re.sub(r"[^\w\s-]", "", text)
+    return re.sub(r"\s", "-", text)
+
+
+def _markdown_anchors(path: Path) -> set[str]:
+    anchors = set()
+    if not path.is_file():
+        return anchors
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        heading = re.match(r"^#{1,6}\s+(.*)$", line)
+        if heading:
+            anchors.add(_heading_slug(heading.group(1)))
+    return anchors
+
+
+def test_documentation_links_and_anchors_resolve() -> None:
+    """A moved section must not leave a dangling link behind.
+
+    Checks every tracked Markdown file's relative link targets and heading anchors. Tracked files only
+    (via ``git ls-files``) so untracked local notes cannot fail the suite.
+    """
+    tracked = subprocess.run(
+        ["git", "ls-files", "*.md"], capture_output=True, text=True, cwd=ROOT, check=False
+    ).stdout.split()
+    assert tracked, "git ls-files returned no Markdown files"
+
+    link_re = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+    problems: list[str] = []
+    for relative in tracked:
+        path = ROOT / relative
+        if path.name.lower().startswith("readme.template"):
+            continue
+        for target in link_re.findall(path.read_text(encoding="utf-8", errors="replace")):
+            if target.startswith(("http://", "https://", "mailto:")):
+                continue
+            path_part, _, anchor = target.partition("#")
+            if not path_part:
+                if anchor and _heading_slug(anchor) not in _markdown_anchors(path):
+                    problems.append(f"{relative} -> #{anchor}")
+                continue
+            resolved = (path.parent / path_part).resolve()
+            broken_target = not resolved.exists()
+            broken_anchor = (
+                not broken_target
+                and bool(anchor)
+                and resolved.suffix == ".md"
+                and _heading_slug(anchor) not in _markdown_anchors(resolved)
+            )
+            if broken_target or broken_anchor:
+                problems.append(f"{relative} -> {target}")
+    assert problems == [], "broken documentation links:\n" + "\n".join(sorted(set(problems)))
 
 
 def test_removed_stale_claims_do_not_return() -> None:

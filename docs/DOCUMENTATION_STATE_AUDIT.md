@@ -16,6 +16,10 @@ Two method notes:
   training machine but are not committed. That is called out under *Unresolved* below rather than
   papered over.
 
+Line references in the evidence table point at `README.md` as it stood **before** the later
+2026-09-12 information-architecture refactor ([`README_INFORMATION_ARCHITECTURE_AUDIT.md`](README_INFORMATION_ARCHITECTURE_AUDIT.md));
+the claims and the artifacts behind them, not the line positions, are authoritative.
+
 ## Evidence table
 
 | # | Claim (before) | Where | Corrected value | Authoritative source | Files changed |

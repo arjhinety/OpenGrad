@@ -33,3 +33,27 @@ Compare two evaluation runs:
 opengrad compare runs/m0_baseline/eval runs/m1_candidate/eval
 ```
 Emits formatted markdown deltas for capability accuracy, category breakdowns, and systems metrics (TTFT, throughput, speedup).
+
+---
+
+## 3. Baseline Execution Gate
+
+The frozen B0 definition is `configs/evaluation/tool_calling/qwen35_2b_baseline.yaml` and points to
+the held-out v2 manifest. Before using a GPU, run the dry path:
+
+```text
+opengrad baseline --dry-run
+```
+
+It loads the held-out manifest, renders the exact Qwen prompt, calls
+`InferenceBackend.generate()`, parses native Qwen tool calls, evaluates routing, and writes
+predictions, metrics, a residual profile, and an environment capture.
+
+The deterministic backend is a plumbing test only; it **must never be reported as a model score**.
+Real scores require an accelerator and are recorded under `reports/baselines/` and
+`runs/<experiment_id>/eval/`.
+
+## 4. Benchmark Inventory
+
+The registry, tier list, counting convention, and harness status consulted when choosing a suite
+live in [benchmarks/README.md](benchmarks/README.md).

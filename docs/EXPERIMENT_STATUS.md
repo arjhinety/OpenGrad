@@ -11,8 +11,8 @@ python scripts/reporting/generate_experiment_status.py
 
 A byte-identical regeneration is required by `tests/results/test_state_consistency.py`, so a
 stale table fails the suite instead of drifting quietly. Prose lives in the
-[README](../README.md#results); the numeric claims there and the counting convention below
-are checked against this table and the registry.
+[README](../README.md#latest-results); the numeric claims there and the counting convention
+below are checked against this table and the registry.
 
 ## Counting convention
 

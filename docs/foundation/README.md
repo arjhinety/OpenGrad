@@ -30,7 +30,7 @@ longer hold:
   heading already names 17 Tier A–E benchmarks; the registry totals 23 identifiers once the
   behavioral held-out, a legacy registration, three stretch families, and the internal suite are
   counted. See the
-  [benchmark inventory and counting convention](../../README.md#benchmark-inventory-and-counting-convention).
+  [benchmark inventory and counting convention](../benchmarks/README.md#inventory-and-counting-convention).
 - **On-policy distillation "supported"** (DPO_OPD_IMPLEMENTATION_REPORT). Only the scaffold exists:
   the live training path is unimplemented and the single recorded M2 run is mock-only and marked
   `INVALID`. Real on-policy distillation was not run — see the
