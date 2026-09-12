@@ -1,4 +1,4 @@
-From: OpenGrad <https://github.com/arrogance231/OpenGrad>
+From: OpenGrad <https://github.com/arjhinety/OpenGrad>
 Subject: [PATCH 2/2] examples/llama: derive the QNN cache shape from a layer that has a KV cache
 
 `_to_edge_and_lower_llama` builds the `TagQuantIO` cache shape from

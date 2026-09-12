@@ -95,7 +95,7 @@ parent model's tool-calling policy survived.
 These were exported through a **custom OpenGrad path**, not a stock one-command ExecuTorch export:
 the context window is raised from 2048 to 5760 to fit the frozen evaluation, and the Snapdragon
 target additionally needs two source patches to ExecuTorch. Full details and the patch files are in
-[`integrations/executorch/`](https://github.com/arrogance231/OpenGrad/tree/master/integrations/executorch).
+[`integrations/executorch/`](https://github.com/arjhinety/OpenGrad/tree/master/integrations/executorch).
 
 Note on `8da4w`: upstream's `examples/models/qwen3_5/README.md` states that quantization is
 *"intentionally deferred to a follow-up"*. It was attempted anyway and exported cleanly, 3.09×

@@ -1,4 +1,4 @@
-From: OpenGrad <https://github.com/arrogance231/OpenGrad>
+From: OpenGrad <https://github.com/arjhinety/OpenGrad>
 Subject: [PATCH 1/2] backends/qualcomm: skip higher-order ops in LiftConstantScalarOperands
 
 `LiftConstantScalarOperands._create_tensor_args` dereferences `node.target._schema` for every
