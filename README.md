@@ -59,7 +59,7 @@ Connecting direct post-training research to consumer mobile devices:
 | What happens after the baseline? | Controlled SFT, diagnosis, conditional preference optimization, distillation, replication, and later systems studies. |
 | How is improvement judged? | Capability, regression, reliability, efficiency, cost, and reproducibility—not one headline score. |
 | Are failures publishable? | Yes. Failed, null, rejected, and non-reproducible runs are evidence. |
-| Are results available now? | Yes — the **B0 baseline** and three post-training interventions (two negative, one partial recovery). See [Results](#results). |
+| Are results available now? | Yes — the **B0 baseline** and seven post-training interventions, including historical negative results, Canonical-v2 recovery and ablations, and the promoted M1-v2 result. See [Results](#results). |
 
 ## Why OpenGrad?
 
@@ -278,7 +278,7 @@ The canonical schema and evaluation contracts support measurement of tool-call s
 - tool-failure handling and multi-turn state;
 - ordinary instruction-following and structured-output regression.
 
-The repository provides contracts and fixtures for these behaviors, and empirical model scores now exist for the B0 baseline and three post-training interventions (see [Results](#results)).
+The repository provides contracts and fixtures for these behaviors, and empirical model scores now exist for the B0 baseline and seven post-training interventions (see [Results](#results)).
 
 ### Systems efficiency — planned
 
@@ -334,7 +334,7 @@ flowchart TD
 - `registry/` — dataset, benchmark, model, runtime, hardware, provenance, and experiment contracts.
 - `src/opengrad/` — canonical data, fixture adapters, parsing, contamination tools, evaluation schemas, lineage, stage gates, and reporting utilities.
 - `configs/` — data, evaluation, model, training, inference, and planned experiment configurations.
-- `experiments/`, `reports/`, `results/` — evidence namespaces; the B0 baseline and three post-training experiments are recorded. `runs/<id>/experiment.json` owns experiment state, `reports/` holds the written analyses, and [`results/registry.jsonl`](results/README.md) is a derived, rebuildable index over the run artifacts.
+- `experiments/`, `reports/`, `results/` — evidence namespaces; the B0 baseline and seven post-training interventions are recorded. `runs/<id>/experiment.json` owns experiment state, `reports/` holds the written analyses, and [`results/registry.jsonl`](results/README.md) is a derived, rebuildable index over the run artifacts.
 - `docs/` — methodology, architecture, data, benchmark, inference, reproducibility, contribution, and publication protocols.
 - `integrations/` — harness-facing integrations over the `opengrad … --json` boundary; `opengrad-mcp/` is the dependency-free stdio MCP server.
 - `release/` — tracked Hugging Face release definitions, dataset-card template, attribution audit, and citations.
@@ -380,28 +380,27 @@ OpenGrad result
 
 ## Results
 
-> **Five empirical results exist: the B0 baseline and four post-training interventions.** Two are negative, one is a partial recovery from a data defect this project published in its own corpus, and the definitive one recovered call recall without reaching promotion.
+> **Eight empirical results are recorded: the B0 baseline and seven post-training interventions.** Historical M0-v1 and M1-v1 were negative; partial-v2 recovered from a data defect; definitive M0-final-v2 restored balanced call behavior but did not pass its original promotion gate; both joint-removal ablations reduced recall; and M1-v2 made a small favorable movement and was promoted under the prospective v4 policy.
 
-📊 **[Baseline findings — charts and the full comparison](reports/visual/index.html)** (also [on the model card](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final/blob/main/findings.html)). Every figure is computed from the per-example predictions rather than copied from a report.
+📊 **[Baseline-to-M0-final findings — charts and comparison](reports/visual/index.html)** (also [on the model card](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final/blob/main/findings.html)). These charts cover the lineage through M0-final-v2; the complete intervention record, including the later ablations and M1-v2, is in the table below. Every figure is computed from the available per-example predictions rather than copied from a report.
 
-The table above lists interventions; the baseline is recorded by the experiment store instead.
+The table below lists interventions; the baseline is recorded by the experiment store instead.
 
-| Experiment | Model | Change | Capability Δ | Regression | Reproduced | Report |
+| Experiment | Model | Change | Capability Δ | Regression | Evidence status | Report |
 | --- | --- | --- | --- | --- | --- | --- |
-| [`qwen35_2b_m0_sft_full_v3`](runs/qwen35_2b_m0_sft_full_v3/) | Qwen3.5-2B | M0 SFT on canonical corpus v1 | `call_f1` 0.6191 → **0.0000** | Collapsed: `call_recall` 0.9722 → 0.0000 | No (weights lost) | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) |
-| [`qwen35_2b_m1_dpo_v1`](runs/qwen35_2b_m1_dpo_v1/) | Qwen3.5-2B | DPO on When2Call preference pairs | `call_f1` 0.6191 → **0.1715** best | Over-calling fixed, tool calling destroyed | **No** | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md) |
-| [`qwen35_2b_m0_sft_v2corpus`](runs/qwen35_2b_m0_sft_v2corpus/) | Qwen3.5-2B | M0 SFT on partial corpus v2 | `call_f1` 0.6191 → **0.5995**; macro recall 0.3621 → **0.6416** | None measured; not promoted | Pending | [M0 report §8](reports/M0_SFT_EXECUTION_REPORT.md) |
-| [`m0_sft_canonical_v2_final`](runs/m0_sft_canonical_v2_final/) | Qwen3.5-2B | M0 SFT on **frozen Canonical-v2** | `call_f1` **0.7470**; recall 0.5342 → **0.7594** | Precision −0.026, over-call +0.058 vs partial-v2 | Confirmatory partition | [Execution](reports/M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md) · [Evaluation](reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
-| [`m0_v2_final_minus_xlam_fixed_compute`](runs/m0_v2_final_minus_xlam_fixed_compute/) | Qwen3.5-2B | **joint xLAM + CALL_PREDICTION removal**, fixed compute (2,400 steps) | `call_f1` 0.7470 → **0.6030**; recall 0.7594 → **0.4879** | Precision +0.054, over-call −0.079 vs full corpus | Confirmatory partition | [Execution](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
-| [`m0_v2_final_minus_xlam_matched_exposure`](runs/m0_v2_final_minus_xlam_matched_exposure/) | Qwen3.5-2B | **joint xLAM + CALL_PREDICTION removal**, matched exposure (2,119 steps) | `call_f1` 0.7470 → **0.5557**; recall 0.7594 → **0.4238** | Precision +0.072, over-call −0.105 vs full corpus | Confirmatory partition | [Execution](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
-| [`m1_dpo_canonical_v2_final_v2`](runs/m1_dpo_canonical_v2_final_v2/) | Qwen3.5-2B | M1 DPO calibration from selected M0-final-v2 | `call_f1` 0.7470 → **0.7548**; recall → **0.7748** | Over-call +0.0024; unsupported −0.0044 vs M0 | Confirmatory partition | [Execution](reports/M1_DPO_EXECUTION_REPORT.md) · [Evaluation](reports/M1_DPO_EVALUATION.md) |
-| [`m1_dpo_canonical_v2_final_v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) | Qwen3.5-2B | Published promoted M1-v2 checkpoints | all 4 checkpoints published; selected 30 | Tool/argument/schema validity unmeasured | HF model card | [M1 evaluation](reports/M1_DPO_EVALUATION.md) |
+| [`qwen35_2b_m0_sft_full_v3`](runs/qwen35_2b_m0_sft_full_v3/) | Qwen3.5-2B | M0 SFT on canonical corpus v1 | `call_f1` 0.6191 → **0.0000** | Collapsed: `call_recall` 0.9722 → 0.0000 | Negative; weights lost | [M0 report](reports/M0_SFT_EXECUTION_REPORT.md) |
+| [`qwen35_2b_m1_dpo_v1`](runs/qwen35_2b_m1_dpo_v1/) | Qwen3.5-2B | DPO on When2Call preference pairs | `call_f1` 0.6191 → **0.1715** best | Over-calling fixed, tool calling destroyed | Negative; not reproducible | [M0 report §5](reports/M0_SFT_EXECUTION_REPORT.md#5-dpo-was-blocked-now-executed-and-also-negative) |
+| [`qwen35_2b_m0_sft_v2corpus`](runs/qwen35_2b_m0_sft_v2corpus/) | Qwen3.5-2B | M0 SFT on partial corpus v2 | `call_f1` 0.6191 → **0.5995**; macro recall 0.3621 → **0.6416** | None measured | Partial recovery; not promoted | [M0 report §8](reports/M0_SFT_EXECUTION_REPORT.md#8-corpus-v2-testing-the-root-cause-rather-than-asserting-it) |
+| [`m0_sft_canonical_v2_final`](runs/m0_sft_canonical_v2_final/) | Qwen3.5-2B | M0 SFT on **frozen Canonical-v2** | `call_f1` **0.7470**; recall 0.5342 → **0.7594** | Precision −0.026, over-call +0.058 vs partial-v2 | Confirmatory; not promoted | [Execution](reports/M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md) · [Evaluation](reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
+| [`m0_v2_final_minus_xlam_fixed_compute`](runs/m0_v2_final_minus_xlam_fixed_compute/) | Qwen3.5-2B | **joint xLAM + CALL_PREDICTION removal**, fixed compute (2,400 steps) | `call_f1` 0.7470 → **0.6030**; recall 0.7594 → **0.4879** | Precision +0.054, over-call −0.079 vs full corpus | Confirmatory; not promoted | [Execution](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
+| [`m0_v2_final_minus_xlam_matched_exposure`](runs/m0_v2_final_minus_xlam_matched_exposure/) | Qwen3.5-2B | **joint xLAM + CALL_PREDICTION removal**, matched exposure (2,119 steps) | `call_f1` 0.7470 → **0.5557**; recall 0.7594 → **0.4238** | Precision +0.072, over-call −0.105 vs full corpus | Confirmatory; not promoted | [Execution](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
+| [`m1_dpo_canonical_v2_final_v2`](runs/m1_dpo_canonical_v2_final_v2/) | Qwen3.5-2B | M1 DPO calibration from selected M0-final-v2 | `call_f1` 0.7470 → **0.7548**; recall → **0.7748** | Over-call +0.0024; unsupported −0.0044 vs M0 | **Confirmatory; promoted** | [Execution](reports/M1_DPO_EXECUTION_REPORT.md) · [Evaluation](reports/M1_DPO_EVALUATION.md) |
 
-Two caveats belong next to those numbers rather than in a footnote.
+Four caveats belong next to those numbers rather than in a footnote.
 
 **B0's `call_f1` comes from a degenerate policy.** It scores 0.6191 by calling a tool on 64.3% of examples whose correct answer is not a call, recalling 97.2% of gold CALLs with 1.3% unsupported-accuracy. The metric that flatters the baseline is the one metric where the corrected model is still slightly behind; on balanced per-class recall the trained model is ahead by 0.28. Do not read the leaderboard column as the finding.
 
-**The historical M1-v1 DPO result is not reproducible, and its best checkpoint no longer exists.** Its steps 100 and 200 were deleted before upload, and a repeat run with config, data, seed, and environment pinned did not reproduce the trajectory. The direction of that failure holds in both runs; the claim that degradation is monotone from step 100 is withdrawn. The new parent-based M1-v2 is a separate identity and is reported below.
+**The historical M1-v1 DPO result is not reproducible, and its best checkpoint no longer exists.** Its steps 100 and 200 were deleted before upload, and a repeat run with config, data, seed, and environment pinned did not reproduce the trajectory. The direction of that failure holds in both runs; the claim that degradation is monotone from step 100 is withdrawn. The new parent-based M1-v2 is a separate identity and is reported independently in the table above.
 
 **The definitive M0 is not a promotion.** By the repository's own promotion policy every checkpoint is `REJECT`, including the selected one, because B0's recall of 0.9715 is itself a property of over-calling and the policy caps over-call at 0.20 while forbidding a recall drop beyond 0.10. The gate was left as written rather than adjusted after seeing the result. That tension is a finding for the next experiment's design, not a threshold to move.
 
