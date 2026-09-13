@@ -23,8 +23,8 @@ Arjhine Ty.
 [![Python](https://img.shields.io/badge/python-3.11%2B-052B42?style=flat-square)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-052B42?style=flat-square)](LICENSE)
 [![Research status](https://img.shields.io/badge/research-Building%20in%20Public%20%7C%20M1--v2%20DPO%20promoted-052B42?style=flat-square)](reports/M1_DPO_EVALUATION.md)
-[![Hugging Face models](https://img.shields.io/badge/Hugging%20Face-models-FFD21E?style=flat-square)](https://huggingface.co/collections/arrochi112/opengrad-models-6aa3c7ea9ae58be5adbb113e)
-[![Hugging Face datasets](https://img.shields.io/badge/Hugging%20Face-datasets-FFD21E?style=flat-square)](https://huggingface.co/collections/arrochi112/opengrad-datasets-and-evaluation-records-6aa3c7eb4514d9bc27e5d160)
+[![Hugging Face models](https://img.shields.io/badge/Hugging%20Face-models-FFD21E?style=flat-square)](https://huggingface.co/collections/arjhinety/opengrad-models-6aa3c7ea9ae58be5adbb113e)
+[![Hugging Face datasets](https://img.shields.io/badge/Hugging%20Face-datasets-FFD21E?style=flat-square)](https://huggingface.co/collections/arjhinety/opengrad-datasets-and-evaluation-records-6aa3c7eb4514d9bc27e5d160)
 
 ---
 
@@ -35,7 +35,7 @@ Arjhine Ty.
 | Base model | `Qwen/Qwen3.5-2B` at revision `15852e8c…` — the only executed target so far |
 | Canonical dataset | **Canonical-v2 final** — 173,237 records, 161,966 trainable, 4 sources, fingerprint `8ced403b…` |
 | Latest completed stage | **General-capability diagnosis** across Base → M0 → M1-v2 on real IFEval, GSM8K and MMLU-Pro. It found a **general-capability regression associated with tool-policy post-training** that the tool-policy gate could not see. It appears after SFT (M0) and also after DPO applied directly to Base (M1-v1), so it is not specific to SFT |
-| Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30, promoted under the parent-relative `tool_use_promotion_v4` gate. **Improved on tool policy over Base; within noise of its M0 parent; materially worse than Base on general capability. Not an unqualified improvement** |
+| Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30, promoted under the parent-relative `tool_use_promotion_v4` gate. **Improved on tool policy over Base; within noise of its M0 parent; materially worse than Base on general capability. Not an unqualified improvement** |
 | Studies | **Study 001 frozen 2026-09-13** at tag [`study-001`](https://github.com/arjhinety/OpenGrad/tree/study-001). **Study 002 in progress, no results yet:** refusal relabelling ([`ROADMAP.md`](ROADMAP.md) step 16, **BLOCKED_ON_PREFLIGHT**), M2 on-policy distillation (unexecuted scaffold) and speculative decoding. See [`docs/research/STUDIES.md`](docs/research/STUDIES.md) |
 | Behavioral held-out | When2Call — 3,650 examples. **Contains no ANSWER examples**, which is why the regression escaped promotion |
 | Largest current limitation | One 2B model, one lineage, no replicate. The promoted checkpoint refuses 100% of bare arithmetic questions |
@@ -48,8 +48,8 @@ Every experiment record, its validity, selected checkpoint, and published artifa
 |---|---|
 | Read the Study 001 write-up | [Study 001 results][study-001] — the narrative version of the finding |
 | See the latest results | [Latest Results](#latest-results) · [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md) |
-| Download the promoted model | [Hugging Face model](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) |
-| Browse every Study 001 model and dataset | [OpenGrad Study 001 collection](https://huggingface.co/collections/arrochi112/opengrad-study-001-6aa63e0a0f26f66ca8042d25) — in reading order, with a note per item |
+| Download the promoted model | [Hugging Face model](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) |
+| Browse every Study 001 model and dataset | [OpenGrad Study 001 collection](https://huggingface.co/collections/arjhinety/opengrad-study-001) — in reading order, with a note per item |
 | Run or inspect OpenGrad | [Quick Start](#quick-start) |
 | Check what is executed vs. planned | [`docs/EXPERIMENT_STATUS.md`](docs/EXPERIMENT_STATUS.md) · [`ROADMAP.md`](ROADMAP.md) |
 | Reproduce an experiment | [Baseline reproduction protocol](docs/experiments/BASELINE_REPRODUCTION_PROTOCOL.md) |
@@ -225,9 +225,9 @@ Full statements, the first study's scope, and the experimental decision pipeline
 
 | Dataset release | Records | Role |
 |---|---:|---|
-| [Canonical-v2 final](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2) | 173,237 (161,966 trainable) | **Current** training corpus |
-| [Canonical-v1](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1) | 213,951 | Historical; training corpus of the negative M0-v1 run (B0's record pins only the held-out manifest, not a corpus) |
-| [Partial-v2 snapshot](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot) | 103,036 | Historical; corpus behind the first successful M0 |
+| [Canonical-v2 final](https://huggingface.co/datasets/arjhinety/OpenGrad-ToolPolicy-Canonical-v2) | 173,237 (161,966 trainable) | **Current** training corpus |
+| [Canonical-v1](https://huggingface.co/datasets/arjhinety/OpenGrad-ToolPolicy-Canonical-v1) | 213,951 | Historical; training corpus of the negative M0-v1 run (B0's record pins only the held-out manifest, not a corpus) |
+| [Partial-v2 snapshot](https://huggingface.co/datasets/arjhinety/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot) | 103,036 | Historical; corpus behind the first successful M0 |
 
 Evaluation layers, and what has actually run in each:
 
@@ -341,6 +341,10 @@ remain subject to their own licenses and attribution requirements.
 
 Please cite the repository using [CITATION.cff](CITATION.cff) until a formal release DOI exists.
 Contact: Arjhine Ty, Experimental Intelligence — [arjhine@experimentalmachines.org](mailto:arjhine@experimentalmachines.org).
+
+The Hugging Face namespace was renamed from `arrochi112` to `arjhinety` on 2026-09-13. Old links
+redirect, and committed records (run manifests, publication records, frozen reports) keep the name
+they were written with.
 Source code and documentation are licensed under [Apache-2.0](LICENSE).
 
 ---
