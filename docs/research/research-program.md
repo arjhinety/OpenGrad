@@ -24,8 +24,8 @@ tool-call grammar to a model that cannot serialize calls. It targets the decisio
 `CALL`, `DO NOT CALL`, `ASK FIRST`, `SELECT`, `GROUND ARGUMENTS`, `CHAIN`, `PARALLELIZE`,
 `RECOVER`, and `STOP`.
 
-**Status.** Carried through baseline measurement, a controlled SFT comparison, and a
-preference-optimization stage, with the results recorded in [`docs/EXPERIMENT_RESULTS.md`](../EXPERIMENT_RESULTS.md).
+**Status.** **Frozen 2026-09-13** at tag `study-001`; see [studies](STUDIES.md). Carried through
+baseline measurement, a controlled SFT comparison, and a preference-optimization stage, with the results recorded in [`docs/EXPERIMENT_RESULTS.md`](../EXPERIMENT_RESULTS.md).
 On-policy distillation (RQ4) has not been run: its scaffold has no live training path, and the one
 recorded M2 attempt is mock-only (see [`reports/M2_DECISION.md`](../../reports/M2_DECISION.md)).
 
@@ -39,6 +39,13 @@ The study will cover, as the corresponding evaluations are implemented:
 
 The first baseline is [`Qwen/Qwen3.5-2B`](../../registry/models.yaml), recorded as `qwen3.5-2b` at an
 immutable revision in the [experiment definition](../../configs/experiments/tool_calling/qwen35_2b_baseline.yaml).
+
+## Study 002 — Relabelling, on-policy distillation and speculative decoding
+
+In progress, no results yet. It takes up what Study 001 left open: refusal relabelling of the SFT
+corpus (and any other dataset correction it turns out to need), on-policy distillation (RQ4) and
+speculative decoding (RQ5), each pre-registered and reported against the frozen Study 001
+checkpoints. Scope and status: [studies](STUDIES.md).
 
 ## Experimental decision pipeline
 

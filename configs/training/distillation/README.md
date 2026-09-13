@@ -1,10 +1,10 @@
 # On-policy distillation configuration namespace
 
 **Deliberately not executed.** The trainer foundations exist (`src/opengrad/training/distillation.py`,
-with `TeacherProvider` and `RolloutProvider` seams), but no distillation run has been performed and
-none is planned for the current sequence.
+with `TeacherProvider` and `RolloutProvider` seams), but no distillation run has been performed. It
+was not part of Study 001 and is in scope for [Study 002](../../../docs/research/STUDIES.md).
 
-That is a decision, not an omission. The M0/M1 line ended at DPO because the diagnosis identified
+Leaving it out of Study 001 was a decision, not an omission. The M0/M1 line ended at DPO because the diagnosis identified
 the corpus as the binding constraint, and distillation reweights or transfers behaviour a policy can
 already produce — the same limitation that made DPO ineffective on corpus v1. See
 [`reports/M0_SFT_EXECUTION_REPORT.md`](../../../reports/M0_SFT_EXECUTION_REPORT.md) §6.

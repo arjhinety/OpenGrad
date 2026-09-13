@@ -180,3 +180,9 @@ B0 baseline                                  -> EXECUTED (REAL_RESULT)
 > updated deliberately in their own change, to record the executed and closed GGUF PTQ ladder
 > (`reports/PTQ_PHASE_CLOSURE.md`) and the OpenWeights ParitySuite run
 > (`reports/OPENWEIGHTS_TRANSFER_EVALUATION.md`). The previous wording is in git history.
+
+> **Study boundary (2026-09-13).** Everything executed above is Study 001, frozen at tag
+> `study-001`. The refusal-supervision ablation (step 16), on-policy distillation (the unexecuted
+> branch of step 10) and speculative decoding (step 14) are Study 002, which has no results yet.
+> Cross-model replication (step 11) and joint capability-efficiency optimization (step 15) are not
+> assigned to a study. See [`docs/research/STUDIES.md`](docs/research/STUDIES.md).

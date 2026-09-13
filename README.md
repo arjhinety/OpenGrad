@@ -34,7 +34,7 @@ on the record rather than editing them away. The first study is reliable tool us
 | Canonical dataset | **Canonical-v2 final** — 173,237 records, 161,966 trainable, 4 sources, fingerprint `8ced403b…` |
 | Latest completed stage | **General-capability diagnosis** across Base → M0 → M1-v2 on real IFEval, GSM8K and MMLU-Pro. It found a **general-capability regression associated with tool-policy post-training** that the tool-policy gate could not see. It appears after SFT (M0) and also after DPO applied directly to Base (M1-v1), so it is not specific to SFT |
 | Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30, promoted under the parent-relative `tool_use_promotion_v4` gate. **Improved on tool policy over Base; within noise of its M0 parent; materially worse than Base on general capability. Not an unqualified improvement** |
-| Next research stage | Refusal-supervision ablation — [`ROADMAP.md`](ROADMAP.md) step 16, **BLOCKED_ON_PREFLIGHT**. M2 distillation remains unexecuted scaffold |
+| Studies | **Study 001 frozen 2026-09-13** at tag [`study-001`](https://github.com/arjhinety/OpenGrad/tree/study-001). **Study 002 in progress, no results yet:** refusal relabelling ([`ROADMAP.md`](ROADMAP.md) step 16, **BLOCKED_ON_PREFLIGHT**), M2 on-policy distillation (unexecuted scaffold) and speculative decoding. See [`docs/research/STUDIES.md`](docs/research/STUDIES.md) |
 | Behavioral held-out | When2Call — 3,650 examples. **Contains no ANSWER examples**, which is why the regression escaped promotion |
 | Largest current limitation | One 2B model, one lineage, no replicate. The promoted checkpoint refuses 100% of bare arithmetic questions |
 
@@ -100,7 +100,7 @@ scores 0.6191 / 0.9722. The same results written as a narrative, with the charts
 | **B0** | Base `Qwen/Qwen3.5-2B` | 0.6264 / 0.9735 — from a degenerate policy that calls on 62% of no-call items | Baseline |
 | **M0** | Canonical-v2 SFT (checkpoint 1800) | 0.7470 / 0.7594 | Selected; **not promoted** under `tool_use_promotion_v3` (recall-regression check against B0) |
 | **M1** | M1-v2 DPO calibration (checkpoint 30) | **0.7548 / 0.7748** | **PROMOTED** under `tool_use_promotion_v4` (checks against the M0 parent) |
-| **M2** | On-policy distillation | — | **Not executed** (mock-only scaffold) |
+| **M2** | On-policy distillation | — | **Not executed** in Study 001 (mock-only scaffold); in scope for Study 002 |
 
 **"Not promoted" → "PROMOTED" is a gate change, not a measured improvement.** M1-v2 is promoted
 under a parent-relative gate (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2
@@ -112,7 +112,7 @@ call_f1, 7 of 453 calls, single seed) is within noise.
 - Promoted evaluation: [`reports/M1_DPO_EVALUATION.md`](reports/M1_DPO_EVALUATION.md)
 - Derived result index: [`results/registry.jsonl`](results/README.md)
 - Corrections to frozen reports and published artifacts: [**Errata**](reports/ERRATA.md)
-- Claim audit, 93 findings across this repository, the Hugging Face cards and the project site, each with its resolution: [**claim-audit.pdf**](https://opengrad.arjhinety.com/claim-audit.pdf)
+- Claim audit, 93 findings across this repository, the Hugging Face cards and the project site, each with its resolution: [**claim-audit.pdf**](https://opengrad.arjhinety.com/studies/001/claim-audit.pdf)
 
 Seven post-training interventions have been executed in total: one negative on corpus v1, one
 partial recovery on corpus v2, the definitive final-v2 (selected, not promoted), two joint-removal
@@ -247,7 +247,7 @@ validate only the result contract. Details: [benchmark inventory and counting co
 
 Claims in frozen reports and published artifacts that were later found wrong are corrected in the
 [**Errata**](reports/ERRATA.md) rather than edited in place. The
-[**claim audit**](https://opengrad.arjhinety.com/claim-audit.pdf) that found them lists every finding
+[**claim audit**](https://opengrad.arjhinety.com/studies/001/claim-audit.pdf) that found them lists every finding
 and how it was resolved.
 
 - **Scope:** the empirical record is one model family (Qwen3.5-2B). No cross-model replication has run.
@@ -348,4 +348,4 @@ Source code and documentation are licensed under [Apache-2.0](LICENSE).
 
 <!-- Study 001 site. Referenced from the header, Start Here, and Latest Results.
      Deployment host is provisional — change this one line when the domain moves. -->
-[study-001]: https://opengrad-site.vercel.app/
+[study-001]: https://opengrad.arjhinety.com/studies/001

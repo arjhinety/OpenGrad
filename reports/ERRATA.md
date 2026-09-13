@@ -475,6 +475,13 @@ was written, so it is corrected here rather than rewritten.
   600 does not fail `regression.call_recall`; its recall delta is −0.059, inside the −0.10 allowance.
   It fails only `over_call_rate`. Every other checkpoint of the run does fail
   `regression.call_recall`. **Source:** `runs/m0_sft_canonical_v2_final/eval/dev/selection--dev.json`.
+- `results/benchmarks/h200/capability_v1/gpu_runs.jsonl` line 8 (`seq` 7, `superseded_detail`).
+  **As written:** "100% of its unattempted examples were truncations rather than refusals".
+  **Correction:** 99.6%: 4,292 of Base's 4,309 unattempted MMLU-Pro items at the 768-token budget
+  were truncations. The conclusion (truncation, not refusal) is unchanged, and
+  `reports/GENERAL_CAPABILITY_REGRESSION.md` and `reports/FINAL_CAMPAIGN_AUDIT.md` already give 99.6%.
+  **Source:** `results/benchmarks/h200/capability_v1/final_campaign_audit.json`
+  (`mmlu_pro_superseded_768.BASE`: `unattempted`, `unattempted_that_are_truncations`).
 
 ## 8. Consequences for the headline findings
 
