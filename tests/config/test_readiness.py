@@ -18,9 +18,17 @@ def test_repository_status_is_machine_readable_and_reports_the_real_baseline():
     # `real` must go back to False instead of the projection still claiming a baseline.
     real = status["baseline"]["real"]
     assert isinstance(real, bool)
-    from opengrad.readiness import BASELINE_METRICS
+    from opengrad.readiness import BASELINE_MANIFEST, BASELINE_METRICS, BASELINE_PREDICTIONS
 
-    has_artifacts = (ROOT / BASELINE_METRICS).is_file()
+    # A real baseline also needs the materialized held-out split, which is gitignored under
+    # data/processed/. Without it the expected example ids cannot be established, so a clean
+    # checkout must report the baseline as not real rather than trusting metrics.json alone.
+    splits = json.loads((ROOT / BASELINE_MANIFEST).read_text(encoding="utf-8"))["splits"]
+    has_artifacts = (
+        (ROOT / BASELINE_METRICS).is_file()
+        and (ROOT / BASELINE_PREDICTIONS).is_file()
+        and all((ROOT / split["source"]).is_file() for split in splits)
+    )
     assert real is has_artifacts
     assert (
         status["state"] == ("BASELINE" if real else "PRE_BASELINE") or status["state"] == "REVIEW"
@@ -96,7 +104,10 @@ def test_quarantined_examples_are_excluded_from_the_heldout_benchmark():
         pytest.skip("no quarantined examples in this checkout")
 
     manifest = ROOT / "reports/evaluation/behavioral-heldout-v2.manifest.json"
-    examples = load_evaluation_examples(ROOT, manifest)
+    try:
+        examples = load_evaluation_examples(ROOT, manifest)
+    except FileNotFoundError as exc:
+        pytest.skip(f"materialized evaluation data not present in this checkout: {exc}")
     loaded = {example.example_id for example in examples}
     for record_id in excluded:
         assert record_id.split(":", 1)[-1] not in loaded, f"{record_id} still evaluated"

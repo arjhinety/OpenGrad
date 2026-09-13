@@ -25,7 +25,7 @@ benchmark-core = ["pyyaml>=6.0", "jsonschema>=4.23", "pyarrow>=15.0"]
 benchmark-agent = ["pyyaml>=6.0", "jsonschema>=4.23"]
 benchmark-terminal = ["pyyaml>=6.0", "jsonschema>=4.23"]
 benchmark-speculative = ["pyyaml>=6.0", "jsonschema>=4.23", "pyarrow>=15.0"]
-dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11", "pyyaml>=6.0", "jsonschema>=4.23"]
+dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11", "pyyaml>=6.0", "jsonschema>=4.23", "pyarrow>=15.0"]
 
 [project.scripts]
 opengrad = "opengrad.cli:main"

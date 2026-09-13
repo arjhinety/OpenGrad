@@ -2175,6 +2175,7 @@ data = [
 dev = [
     { name = "jsonschema" },
     { name = "mypy" },
+    { name = "pyarrow" },
     { name = "pytest" },
     { name = "pyyaml" },
     { name = "ruff" },
@@ -2224,6 +2225,7 @@ requires-dist = [
     { name = "pyarrow", marker = "extra == 'benchmark-core'", specifier = ">=15.0" },
     { name = "pyarrow", marker = "extra == 'benchmark-speculative'", specifier = ">=15.0" },
     { name = "pyarrow", marker = "extra == 'data'", specifier = ">=15.0" },
+    { name = "pyarrow", marker = "extra == 'dev'", specifier = ">=15.0" },
     { name = "pyarrow", marker = "extra == 'gpu-evaluation'", specifier = ">=15.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pyyaml", marker = "extra == 'benchmark-agent'", specifier = ">=6.0" },

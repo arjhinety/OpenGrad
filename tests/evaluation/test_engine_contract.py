@@ -218,6 +218,7 @@ class _SerialOnlyBackend:
 
 
 def test_runner_batches_when_the_engine_can(monkeypatch, tmp_path):
+    pytest.importorskip("transformers")  # token lengths come from the pinned tokenizer
     from tests.evaluation.test_baseline_runner import (
         BASELINE_CONFIG,
         _patch_manifest_and_renderer,
@@ -242,6 +243,7 @@ def test_runner_batches_when_the_engine_can(monkeypatch, tmp_path):
 
 
 def test_runner_falls_back_to_serial_for_engines_without_batching(monkeypatch, tmp_path):
+    pytest.importorskip("transformers")  # token lengths come from the pinned tokenizer
     from tests.evaluation.test_baseline_runner import (
         BASELINE_CONFIG,
         _patch_manifest_and_renderer,

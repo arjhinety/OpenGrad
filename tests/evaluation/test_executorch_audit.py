@@ -46,6 +46,8 @@ def _real_audits():
 @pytest.fixture(scope="module")
 def reconciliation():
     (_fp32_doc, fp32), (_quant_doc, quant) = _real_audits()
+    if not audit.CONFIG.is_file():
+        pytest.skip(f"source checkpoint config not present in this checkout: {audit.CONFIG}")
     config = json.loads(audit.CONFIG.read_text(encoding="utf-8"))
     labels = audit.expected_weight_classes(config)
     return audit.reconcile(fp32, quant, labels), fp32, quant, labels

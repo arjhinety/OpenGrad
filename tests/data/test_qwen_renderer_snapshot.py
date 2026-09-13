@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from opengrad.data.canonical import ToolConversation
 from opengrad.data.renderers import Qwen35_2BRenderer
 
@@ -8,6 +10,7 @@ ROOT = Path(__file__).parents[1] / "fixtures" / "rendered"
 
 
 def test_qwen35_pinned_answer_snapshot():
+    pytest.importorskip("transformers")  # the renderer applies the pinned Qwen tokenizer
     example = ToolConversation(
         "answer",
         "fixture",

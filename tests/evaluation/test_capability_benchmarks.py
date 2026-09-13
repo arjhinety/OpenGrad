@@ -125,7 +125,14 @@ def test_mmlu_pro_extractor_accepts_correct_and_rejects_wrong():
     assert extract("the answer is (A)")[0] != "B"
 
 
+def _require_ifeval_runtime() -> None:
+    """The vendored checkers need upstream's runtime (third_party/.../PROVENANCE.json)."""
+    for module in ("absl", "langdetect", "immutabledict", "nltk"):
+        pytest.importorskip(module)
+
+
 def test_ifeval_checkers_accept_correct_and_reject_wrong():
+    _require_ifeval_runtime()
     sys.path.insert(0, str(ROOT / "scripts"))
     from score_ifeval import follows
 
@@ -323,6 +330,7 @@ def test_prompt_content_is_not_templated_repetition(name, min_distinct_ratio):
 
 def test_ifeval_exercises_most_of_the_instruction_registry():
     """Real IFEval spans the registry. A synthesised stand-in would use a handful of ids."""
+    _require_ifeval_runtime()
     from instruction_following_eval import instructions_registry
 
     used = {i for r in load_requests("ifeval") for i in r["score_key"]["instruction_id_list"]}
@@ -377,6 +385,7 @@ def test_vendored_ifeval_checkers_are_unmodified():
 
 
 def test_failure_category_map_covers_every_registry_instruction():
+    _require_ifeval_runtime()
     from instruction_following_eval import instructions_registry
 
     registry = set(instructions_registry.INSTRUCTION_DICT)

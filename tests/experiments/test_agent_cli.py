@@ -39,6 +39,7 @@ def test_cli_preflight_experiment(
 def test_cli_inspect_template(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    pytest.importorskip("transformers")  # inspect-template renders with the pinned tokenizer
     monkeypatch.setattr("sys.argv", ["opengrad", "inspect-template", "--max-tokens", "10"])
     assert main() == 0
     captured = capsys.readouterr()

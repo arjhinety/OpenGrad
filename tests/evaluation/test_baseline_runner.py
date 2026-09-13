@@ -78,6 +78,7 @@ def test_native_parser_covers_golden_boundary_cases():
 
 
 def test_dry_run_executes_manifest_to_artifacts(monkeypatch, tmp_path: Path):
+    pytest.importorskip("transformers")  # token lengths come from the pinned tokenizer
     from opengrad.data.canonical import CanonicalEvaluationExample
     from opengrad.evaluation import runner
 
@@ -135,6 +136,7 @@ def test_dry_run_executes_manifest_to_artifacts(monkeypatch, tmp_path: Path):
 def test_real_baseline_registers_canonical_record_and_refuses_overwrite(
     monkeypatch, tmp_path: Path
 ):
+    pytest.importorskip("transformers")  # token lengths come from the pinned tokenizer
     from opengrad.experiments.store import ExperimentStore
 
     _patch_manifest_and_renderer(monkeypatch, tmp_path)
@@ -162,6 +164,7 @@ def test_real_baseline_registers_canonical_record_and_refuses_overwrite(
 
 
 def test_dry_run_baseline_creates_no_experiment_record(monkeypatch, tmp_path: Path):
+    pytest.importorskip("transformers")  # token lengths come from the pinned tokenizer
     from opengrad.experiments.store import ExperimentStore
 
     _patch_manifest_and_renderer(monkeypatch, tmp_path)
@@ -187,6 +190,7 @@ def test_dry_run_baseline_never_writes_canonical_evidence_paths(monkeypatch, tmp
     reports/baselines/... and permanently blocked the real B0 behind the
     "evidence already exists" overwrite check.
     """
+    pytest.importorskip("transformers")  # token lengths come from the pinned tokenizer
     _patch_manifest_and_renderer(monkeypatch, tmp_path)
     result = run_baseline(
         BASELINE_CONFIG.resolve(),
