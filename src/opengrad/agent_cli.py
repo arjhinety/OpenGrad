@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -542,6 +543,14 @@ def handle_promote_reject(args: argparse.Namespace, root: Path, decision: str) -
         return 1
 
 
+def _path_exists(path: Path) -> bool:
+    """A diagnostic must report, not crash: an unreadable path counts as absent."""
+    try:
+        return path.exists()
+    except OSError:
+        return False
+
+
 def handle_doctor(args: argparse.Namespace, root: Path) -> int:
     env = capture(root)
     git_sha, git_dirty = git_identity(env)
@@ -550,7 +559,9 @@ def handle_doctor(args: argparse.Namespace, root: Path) -> int:
 
     android_studio_path = Path("/opt/android-studio")
     android_sdk_path = Path("/opt/android-sdk")
-    avd_path = Path("/root/.android/avd/pixel_phone.avd")
+    # The emulator's own lookup order: ANDROID_AVD_HOME, else ~/.android/avd.
+    avd_home = os.environ.get("ANDROID_AVD_HOME") or str(Path.home() / ".android" / "avd")
+    avd_path = Path(avd_home) / "pixel_phone.avd"
 
     checks: dict[str, dict[str, Any]] = {
         "python": {"version": sys.version.split()[0], "status": "PASS"},
@@ -558,15 +569,15 @@ def handle_doctor(args: argparse.Namespace, root: Path) -> int:
         "git": {"sha": git_sha[:10], "dirty": git_dirty},
         "android_studio": {
             "path": str(android_studio_path),
-            "status": "INSTALLED" if android_studio_path.exists() else "MISSING",
+            "status": "INSTALLED" if _path_exists(android_studio_path) else "MISSING",
         },
         "android_sdk": {
             "path": str(android_sdk_path),
-            "status": "INSTALLED" if android_sdk_path.exists() else "MISSING",
+            "status": "INSTALLED" if _path_exists(android_sdk_path) else "MISSING",
         },
         "pixel_phone_avd": {
             "path": str(avd_path),
-            "status": "PROVISIONED" if avd_path.exists() else "NOT_PROVISIONED",
+            "status": "PROVISIONED" if _path_exists(avd_path) else "NOT_PROVISIONED",
         },
         "benchmarks_registry": {"status": "OK"},
     }
