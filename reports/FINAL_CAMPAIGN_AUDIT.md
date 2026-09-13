@@ -160,8 +160,8 @@ rate would have been far more dangerous, because it would have been believed.
 Retained at `M1_DPO_CURRENT/ifeval_scores_budget1280_superseded*`. 65/541 responses hit the cap.
 
 The 2560-token re-run did **not** remove IFEval truncation: 47 (Base), 67 (M0), 63 (M1-v2) and 17
-(M1-v1) of 541 responses still hit the cap (`finish_reason: length` in the generations). The IFEval
-rows in §3 carry that budget caveat; no interval has been computed for them.
+(M1-v1) of 541 responses still hit the cap (`finish_reason: length` in the generations). This applies
+to every IFEval row in §3, which do not restate it; no interval has been computed for them.
 
 ---
 
@@ -216,7 +216,7 @@ Refusal explains the zero-shot answer-rate collapse. It does **not** explain eve
 
 The first three rows are measured in regimes with **essentially no refusal**, so refusal cannot
 account for them. The conditional MMLU-Pro row excludes 2,136 truncated Base items from Base's
-denominator; on the 9,637 items both stages attempted the drop is **−17.7pp** (60.1% → 42.4%). No
+denominator; on the 9,637 items both stages attempted the drop is **−17.7pp** (60.0% → 42.4%). No
 interval is computed for either conditional figure.
 
 ### Truncation-adversarial intervals — derived, not asserted

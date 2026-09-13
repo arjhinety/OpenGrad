@@ -10,7 +10,7 @@ could have detected it. Is that lost capability, learned refusal, or noise from 
 > accuracy_given_answer falls by 21.3pp on at least one measured edge -- the ability itself is worse, not merely unused
 
 The 21.3pp is MMLU-Pro on `BASE->M0_SFT`, and it excludes 2,136 truncated Base items from Base's
-denominator. On the 9,637 items both stages attempted the drop is 17.7pp (60.1% → 42.4%). No
+denominator. On the 9,637 items both stages attempted the drop is 17.7pp (60.0% → 42.4%). No
 interval is given for either figure; the label holds on both.
 
 This is an ordering statement about measured stages, not a causal one. A label says the pattern first becomes observable after a stage; it does not establish that the stage caused it, because no stage was re-run with a controlled intervention.

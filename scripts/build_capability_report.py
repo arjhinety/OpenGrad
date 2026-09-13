@@ -189,7 +189,7 @@ could have detected it. Is that lost capability, learned refusal, or noise from 
 > {traj['basis']}
 
 The 21.3pp is MMLU-Pro on `BASE->M0_SFT`, and it excludes 2,136 truncated Base items from Base's
-denominator. On the 9,637 items both stages attempted the drop is 17.7pp (60.1% → 42.4%). No
+denominator. On the 9,637 items both stages attempted the drop is 17.7pp (60.0% → 42.4%). No
 interval is given for either figure; the label holds on both.
 
 {traj['caveat']}

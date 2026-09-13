@@ -24,8 +24,8 @@ ANALYSIS = CAP / "regression_analysis.json"
 LEDGER = CAP / "cost_ledger.json"
 OUT = ROOT / "results/final_campaign_verdict.json"
 
-# Stated here rather than read from final_campaign_audit.json's `lineage.m1v1_reason`, which still
-# carries the superseded "different SFT parent (CorpusV2)" text. The lineage below is what
+# Stated here rather than read from final_campaign_audit.json's `lineage.m1v1_reason`, so the verdict
+# does not depend on that file's wording. The lineage below is what
 # runs/qwen35_2b_m1_dpo_v1/experiment.json and the published checkpoint-300 record.
 M1V1_EXCLUSION_REASON = (
     "M1_DPO_HISTORICAL (qwen35_2b_m1_dpo_v1, checkpoint-300) is DPO applied directly to the base "
