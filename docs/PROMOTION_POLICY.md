@@ -33,8 +33,14 @@ A promotion policy (`src/opengrad/promotion/policy.py`) evaluates three classes 
 **A promotion gate is only as broad as the held-out set behind it.** `tool_use_promotion_v4`
 promoted M1-v2 on a frozen partition containing **only** `tool_call`, `request_for_info` and
 `cannot_answer` examples — and **no ANSWER examples at all**. The checkpoint it promoted refuses
-100% of bare arithmetic questions and scores 22.7pp below Base on IFEval. Nothing in the gate could
-have detected that, because the gate never asked the model to simply answer something.
+100% of bare arithmetic questions and scores 22.0pp below Base on IFEval prompt-strict (67.8% →
+45.8%). Nothing in the gate could have detected that, because the gate never asked the model to
+simply answer something.
+
+The promotion itself is also weaker than the word suggests. M1-v2 is promoted under a
+parent-relative gate (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2 fails the
+v3 gate that rejected M0. The promotion reflects the gate change; the measured difference from M0
+(+0.0078 call_f1, 7 of 453 calls, single seed) is within noise.
 
 Any future promotion gate **must** evaluate held-out examples covering all four response modes:
 

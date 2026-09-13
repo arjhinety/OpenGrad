@@ -33,6 +33,15 @@ This report preserves the historical parser progression below and separates it f
 | xLAM | 60,000 | 59,370 | 259 | 371 | 59,370 SFT | FULL_DATA_VALIDATED | data/processed/normalization-v1/xlam/manifest.json |
 | BUTTON | 8,000 | 7,941 | 59 duplicate-tool failures | 0 canonical duplicates after rejection | 7,941 SFT | FULL_DATA_VALIDATED | data/processed/normalization-v1/button.manifest.json |
 
+> **Glaive caveat (added 2026-09-13).** `FULL_DATA_VALIDATED` and "0 quarantined" for Glaive describe
+> schema validation at normalization, which does not run the trajectory checks. The v1 Glaive
+> adapter never parsed Glaive's `<functioncall>` markers into `tool_calls`: it left them in the
+> assistant text and emitted an orphaned `tool` message. At the training boundary 50,900 of the
+> materialized Glaive records were rejected as `SEM_ORPHAN_RESULT`, none of the surviving ones
+> carried a tool call, and the published v1 corpus had 9 tool-call targets in 55,719 trainable
+> records. That defect, not a data-access blocker, is why M0 on v1 collapsed. It was fixed by the
+> separate `glaive_v2` adapter used for Canonical-v2 (`M0_SFT_EXECUTION_REPORT.md` §3.1, §8).
+
 Accessible SFT candidate count currently audited/rendered: 210,874 tokenizer-rendered records (213,951 canonical records before the explicit 3,077 LoopTool template exclusions). Preference and evaluation artifacts remain separate and cannot enter ordinary SFT materialization.
 
 ## Audits

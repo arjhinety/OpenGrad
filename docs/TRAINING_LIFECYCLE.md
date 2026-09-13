@@ -12,7 +12,7 @@ OpenGrad standardizes training underneath the `TrainerBackend` interface:
 | :--- | :--- | :--- | :--- |
 | **SFT** | `sft` | `SFTTrainerBackend` | Supervised Fine-Tuning for initial tool policy and format adherence. |
 | **DPO** | `dpo` | `DPOTrainerBackend` | Direct Preference Optimization to penalize over-calling and syntax violations. |
-| **On-Policy Distill** | `on_policy_distillation` | `OnPolicyDistillationTrainerBackend` | Rollout generation supervised by teacher model feedback. |
+| **On-Policy Distill** | `on_policy_distillation` | `OnPolicyDistillationTrainerBackend` | Rollout generation supervised by teacher model feedback. **Mock/dry-run only:** the live path raises `NotImplementedError` and produces no checkpoint; M2 was closed as NOT RUN (`reports/M2_DECISION.md`). |
 
 ---
 
@@ -41,4 +41,4 @@ To execute on real GPU hardware:
 ```bash
 opengrad train configs/experiments/m0_sft.yaml
 ```
-Outputs final checkpoints to `runs/<experiment-id>/checkpoints/` and automatically registers them in the `CheckpointRegistry`.
+Outputs final checkpoints to `runs/<experiment-id>/checkpoints/` and automatically registers them in the `CheckpointRegistry`. This holds for SFT and DPO; on-policy distillation has no live training path and writes no real checkpoint.

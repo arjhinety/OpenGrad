@@ -48,7 +48,7 @@ statement of *what the corpus supervises*, which is now the
 | Schema-valid | 33 | 57,342 |
 | `SEM_UNRESOLVED_CALL` | 56,111 | **0** |
 | Trainable | **0** | **56,090 (94.5%)** |
-| Tool-call targets | 0 | 57,342 |
+| Tool-call targets (trainable) | 0 | 56,090 |
 
 The remaining 1,252 non-trainable records are 1,231 genuine upstream argument defects and 21 that
 exceed the token window. None is attributable to OpenGrad's parsing or validation.
@@ -149,7 +149,8 @@ corpus bytes rather than re-stamped from the previous verdict, because the evide
 held-out prompt *"What is the current time?"* now occurs in **8** Glaive training records where
 the partial corpus had 5, and *"What is the current weather?"* occurs in **1** When2Call record.
 Both are exact-prompt matches whose training labels contradict the held-out gold decision, so both
-are `CONTAMINATED` and quarantined, leaving 3,950 held-out examples.
+are `CONTAMINATED` and quarantined, leaving 3,650 held-out examples (3,652 distinct; the 300
+`when2call-llm-judge` rows duplicate MCQ rows).
 
 The newly recovered Glaive records — the ones the corrected adapter now parses — went through this
 review; the increase from 5 to 8 matches is exactly why re-verification was required rather than
@@ -245,9 +246,12 @@ as selected rather than as an unbiased measurement. See
 
 ## 9. Remaining work, in order
 
-1. **Materialize a confirmatory held-out set** disjoint from checkpoint selection. All 3,952
-   upstream test rows are already in use, so this needs a deterministic split of the existing
-   3,950 or new upstream data. Until then close claims stay development-set claims.
+1. **Materialize a confirmatory held-out set** disjoint from checkpoint selection. All 3,652
+   distinct upstream test examples are already in use, so this needs a deterministic split of the
+   existing 3,650 or new upstream data. Until then close claims stay development-set claims.
+   *Done (2026-09-11):* a pre-registered 2,373 DEV / 1,277 confirmatory split of the 3,650
+   (`reports/evaluation/behavioral-heldout-v2-partition.json`). The confirmatory side is internal
+   evidence, not an untouched benchmark.
 2. **Obtain access** to the gated xLAM upstream and BUTTON, or record them as permanently
    unavailable. xLAM's *inclusion* no longer depends on it (the derivative reconstruction is
    verified), but its provenance does.

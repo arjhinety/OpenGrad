@@ -4,10 +4,13 @@
 **Date:** 2026-09-11
 **Preceding result:** M1-v2 DPO, promoted checkpoint 30
 
-M1-v2 preserved the selected M0 frontier and made a small favorable movement: confirmatory
+M1-v2 preserved the selected M0 frontier with a small movement: confirmatory
 `call_f1` 0.7470 → 0.7548, recall 0.7594 → 0.7748, precision 0.7350 → 0.7358, over-call
 0.1505 → 0.1529, clarification 0.7682 → 0.7655, unsupported 0.5430 → 0.5386. It passes every
 measurable requirement of prospective `tool_use_promotion_v4` and is authoritatively promoted.
+M1-v2 is promoted under a parent-relative gate (v4) introduced after M0 was evaluated; M0 also
+clears v4, and M1-v2 fails the v3 gate that rejected M0. The promotion reflects the gate change;
+the measured difference from M0 (+0.0078 call_f1, 7 of 453 calls, single seed) is within noise.
 The result does not expose a measured calibration failure that requires teacher-guided refinement.
 
 The existing M2 configuration and implementation cannot answer a valid additional question:

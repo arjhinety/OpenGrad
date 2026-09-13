@@ -12,8 +12,10 @@ Raw recomputation: `results/benchmarks/h200/capability_v1/final_campaign_audit.j
 
 ## 1. Executive conclusion
 
-Tool-policy SFT introduced **two separable regressions**, and preference optimization changed
-neither.
+Tool-policy post-training on When2Call-derived data is associated with **two separable
+regressions**, and the M0 → M1-v2 preference stage changed neither. The regression appears after
+SFT (M0) and also after DPO applied directly to the base (M1-v1, 70.7% GSM8K zero-shot refusal), so
+it is not specific to SFT. Causation is not established: one lineage, one seed, no replicate.
 
 1. **A prompt-regime-conditioned refusal policy.** On bare zero-shot GSM8K the model went from
    answering every question to declining every question. The same model answers the *same*
@@ -21,7 +23,8 @@ neither.
 2. **Genuine capability degradation**, measurable in regimes where refusal is absent and therefore
    not explainable by refusal.
 
-The promoted checkpoint improved the metric it was optimized for. The regression was invisible to
+The promoted checkpoint improved the metric it was optimized for relative to B0 (its gain over M0,
++0.0078 call_f1 or 7 of 453 calls on one seed, is within noise). The regression was invisible to
 the promotion gate because the frozen confirmatory partition contains **no ANSWER examples**. The
 successful artifact of this campaign is the evaluation methodology and the resulting diagnosis —
 not the checkpoint.
@@ -46,9 +49,12 @@ All four stages carry **distinct weight digests**; no checkpoint mix-up. All sta
 `temperature 0.0 / top_p 1.0 / top_k 1`, seed 0, prefix caching off), so no stage delta is
 attributable to the runtime.
 
-**M1-v1 is NOT on the primary path.** The ladder records it under a different SFT parent
-(CorpusV2). No persisted metadata places it on `Base → M0 → M1-v2`. It is reported as an alternate
-lineage only — see [§7](#7-alternate-lineage--m1-v1).
+**M1-v1 is NOT on the primary path.** It is DPO applied directly to the base model:
+`runs/qwen35_2b_m1_dpo_v1/experiment.json` records `parent_experiment_id: null`,
+`reference: initial_policy` and preference data `when2call_pref_v1`. It has no SFT parent (an
+earlier ladder record placed it on a CorpusV2 SFT parent; that was wrong). No persisted metadata
+places it on `Base → M0 → M1-v2`. It is reported as an alternate lineage only — see
+[§7](#7-alternate-lineage--m1-v1).
 
 **Two architecture/tokenizer caveats, both measured:**
 
@@ -117,17 +123,20 @@ move together for Base.
 
 **Base and the promoted checkpoint score identically and fail completely differently.** Base
 attempts `trap-arithmetic` and `multi-step-change` and gets them *wrong* (answers "1" and "12");
-M0/M1-v2 *refuse* them. This is the clearest demonstration in the campaign that an aggregate score
+M0/M1-v2 pass `trap-arithmetic` but *refuse* `multi-step-change` and `format-constraint`, which Base
+passes (`sentinel_scores.json`). This is the clearest demonstration in the campaign that an aggregate score
 can hide a total change in behaviour — and the reason 7 cases are never used as evidence for or
 against general capability.
 
 ---
 
-## 4. Superseded results — preserved, never deleted
+## 4. Superseded results — preserved, with one gap
 
 ### MMLU-Pro @768 — `SUPERSEDED_PROTOCOL_INVALID`
 
-Retained at `results/benchmarks/h200/capability_v1/<STAGE>/superseded_mmlu_768/`.
+Retained at `results/benchmarks/h200/capability_v1/<STAGE>/superseded_mmlu_768/` for Base, M0 and
+M1-v2. M1-v1's `superseded_mmlu_768/` directory is empty: its 49.7% truncation figure survives only
+in the cost ledger (`gpu_runs.jsonl`, `cost_ledger.json`).
 
 | stage | accuracy @768 | truncation @768 | accuracy @2048 | truncation @2048 |
 |---|---:|---:|---:|---:|
@@ -139,8 +148,8 @@ Retained at `results/benchmarks/h200/capability_v1/<STAGE>/superseded_mmlu_768/`
 **This is the most important methodological finding of the campaign.** At 768 tokens the three
 stages looked flat — 38.0 / 36.8 / 36.9 — which would have been reported as *"MMLU-Pro shows no
 degradation."* That conclusion was an artifact: the budget bit Base five times harder than the
-post-trained stages, and **100% of Base's unattempted examples at 768 were truncations**, not
-refusals or malformed answers. The benchmark was measuring verbosity, not accuracy.
+post-trained stages, and **99.6% of Base's unattempted examples at 768 (4,292 of 4,309) were
+truncations**, not refusals or malformed answers. The benchmark was measuring verbosity, not accuracy.
 
 Corrected at 2048, the same comparison shows a **12.0pp** Base advantage. **The corrected protocol
 strengthened the conclusion that the flawed protocol had hidden.** A uniform-looking truncation
@@ -149,6 +158,10 @@ rate would have been far more dangerous, because it would have been believed.
 ### IFEval @1280 — `SUPERSEDED_PROTOCOL_INVALID`
 
 Retained at `M1_DPO_CURRENT/ifeval_scores_budget1280_superseded*`. 65/541 responses hit the cap.
+
+The 2560-token re-run did **not** remove IFEval truncation: 47 (Base), 67 (M0), 63 (M1-v2) and 17
+(M1-v1) of 541 responses still hit the cap (`finish_reason: length` in the generations). The IFEval
+rows in §3 carry that budget caveat; no interval has been computed for them.
 
 ---
 
@@ -159,7 +172,7 @@ Retained at `M1_DPO_CURRENT/ifeval_scores_budget1280_superseded*`. 65/541 respon
 | Base | 0.0% | 0.0% | 0.0% | 0.4% |
 | M0 — SFT | **100.0%** | **0.0%** | **0.0%** | 19.0% |
 | M1-v2 | **100.0%** | **0.0%** | **0.0%** | 19.8% |
-| M1-v1 | 71.0% | 2.0% | UNMEASURED | 29.4% |
+| M1-v1 | 70.7% | 2.0% | UNMEASURED | 29.4% |
 
 **The decisive contrast holds content constant.** Both GSM8K arms cover the identical 1,319
 questions; only the presence of eight worked exemplars differs. Refusal moves 100% → 0%. The
@@ -168,18 +181,24 @@ generation-budget confound whatsoever.
 
 The supported statement is:
 
-> SFT introduced a learned conditional refusal behaviour that is strongly activated by the bare
-> zero-shot request regime and is suppressed by in-context demonstrations.
+> Tool-policy post-training on When2Call-derived data is associated with a learned conditional
+> refusal behaviour that is strongly activated by the bare zero-shot request regime and is
+> suppressed by in-context demonstrations. It appears after SFT (M0) and also after DPO applied
+> directly to the base (M1-v1), so it is not specific to SFT. Causation is not established: one
+> lineage, one seed, no replicate.
 
 Refusal surface forms are **stereotyped**: M1-v2 emitted 1,426 refusals across 185 distinct
 12-token openings, with the top 10 covering 82.3%. Base emitted 2 refusals total. Stereotypy is
 consistent with a learned behaviour, but it is **not** evidence about the internal mechanism — see
 [§10](#10-evidence-hierarchy).
 
-A CPU audit of the supervision (`sft_refusal_supervision_audit.json`) found **21,749 single-exchange
-records (10.0% of 217,903) whose supervised target is a refusal and whose decision label is
-`ANSWER`** — 50.5% of `when2call-sft`, 14.1% of `glaive`, and **zero** labelled `CANNOT_ANSWER`.
-This is an **association**, not a demonstrated cause. The ablation that would establish causation is
+A CPU audit of the supervision found refusal-shaped supervised targets labelled `ANSWER`. The
+first audit (`sft_refusal_supervision_audit.json`, 21,749 of 217,903 = 10.0%; `when2call-sft`
+7,490 / 14,829) measured the normalization-v1 sources, not M0's corpus. On the published
+Canonical-v2 final corpus that M0 trained on (`sft_refusal_supervision_audit_canonical_v2.json`):
+**18,114 of 173,237 single-exchange records (10.5%)** have a refusal target labelled `ANSWER` —
+When2Call **4,038 of 6,505 (62.1%)**, Glaive 14,066 of 98,339 (14.3%), ToolACE 10, xLAM 0 — and
+**zero** are labelled `CANNOT_ANSWER`. This is an **association**, not a demonstrated cause. The ablation that would establish causation is
 specified in `ROADMAP.md` step 16 and has not been run.
 
 ---
@@ -196,7 +215,9 @@ Refusal explains the zero-shot answer-rate collapse. It does **not** explain eve
 | IFEval acc given answer | 0-shot | 19% | 67.9% | 52.3% | −15.6pp |
 
 The first three rows are measured in regimes with **essentially no refusal**, so refusal cannot
-account for them.
+account for them. The conditional MMLU-Pro row excludes 2,136 truncated Base items from Base's
+denominator; on the 9,637 items both stages attempted the drop is **−17.7pp** (60.1% → 42.4%). No
+interval is computed for either conditional figure.
 
 ### Truncation-adversarial intervals — derived, not asserted
 
@@ -218,10 +239,12 @@ assume no distribution. The direction of the finding does not depend on the gene
 
 ## 7. Alternate lineage — M1-v1
 
-Different SFT parent (CorpusV2). **Not on the primary causal chain.** Informative as a natural
-ablation: it shows the refusal behaviour is not all-or-nothing across lineages.
+DPO applied directly to the base model (`parent_experiment_id: null`, `reference: initial_policy`,
+preference data `when2call_pref_v1`); no SFT stage. **Not on the primary causal chain.** Informative
+as a natural ablation: it shows the refusal behaviour also appears without any SFT stage, and is not
+all-or-nothing across lineages.
 
-- GSM8K zero-shot refusal **71.0%**, accuracy 17.3%, acc-given-answer 59.8%
+- GSM8K zero-shot refusal **70.7%** (933 / 1,319), accuracy 17.3%, acc-given-answer 59.8%
 - GSM8K 8-shot refusal **2.0%**, accuracy 70.4%
 - IFEval refusal **29.4%**, strict 43.4%
 - MMLU-Pro at the corrected budget: **UNMEASURED** — the run was terminated mid-flight on budget
@@ -286,7 +309,9 @@ behaviour if explicitly targeted. None of those were measured.
 
 - The refusal is prompt-regime conditioned (strong across three benchmarks; mechanism not established)
 - Few-shot context moves the model out of the refusal regime (behavioural, not mechanistic)
-- SFT introduced the regression *within the verified primary lineage* (single lineage, no replicate)
+- The regression first appears at Base → M0 *within the verified primary lineage* (single lineage,
+  no replicate); M1-v1, DPO directly on the base, also refuses 70.7% of zero-shot GSM8K, so it is
+  not specific to SFT
 
 **SUGGESTIVE:**
 
@@ -343,8 +368,10 @@ All are covered by regression tests in `tests/evaluation/test_capability_benchma
 
 ## 13. Protocol amendments
 
-Both were **pre-scoring amendments to remove a truncation confound**, not undisclosed parameter
-tweaks.
+Both were amendments to reduce a truncation confound, applied uniformly to every stage, not
+undisclosed parameter tweaks. Only the IFEval change is recorded as decided before scoring. The
+768-token MMLU-Pro pass was scored first (38.0 / 36.8 / 36.9) and the budget was raised after
+observing its truncation, as the table says. Neither amendment removed truncation entirely (§4, §6).
 
 | amendment | trigger | timing |
 |---|---|---|
@@ -362,7 +389,7 @@ re-run, double-counting some runs and erasing others.
 
 | category | USD |
 |---|---:|
-| retained runs (results reported) | 5.01 |
+| retained runs (includes $0.757 for seq 13, which reported no results) | 5.01 |
 | superseded runs (counted in full) | 3.89 |
 | INFRASTRUCTURE_WASTE | **0.00** |
 | continuation subtotal | **8.90** |
@@ -373,7 +400,9 @@ re-run, double-counting some runs and erasing others.
   module import, so $0.00, asserted from the log rather than assumed.
 - **1 estimated row** (seq 13, M1-v1 MMLU-Pro): terminated mid-run, never reported
   `container_seconds`; flagged `usd_is_estimate: true` with its basis recorded.
-- **$3.89 of $8.90 (44%) is superseded work**, almost all the 768-token MMLU-Pro pass.
+- **$3.89 of $8.90 (44%) is superseded work**, almost all the 768-token MMLU-Pro pass. Adding the
+  $0.757 terminated M1-v1 MMLU-Pro run, **$4.64 (52%) of the continuation produced no reported
+  result**.
 
 Campaign spend was **$11.39 against an approximately $22.70 internal planning envelope**. That
 envelope was **never a queried account balance**, and treating it as one led to over-committing
@@ -387,9 +416,9 @@ consumption, not a balance.
 | rejected claim | why |
 |---|---|
 | "The model simply forgot math" | It solves 55.5% of GSM8K with exemplars and never refuses MMLU-Pro. |
-| "The issue is purely refusal" | −14.1pp on 8-shot GSM8K and −21.3pp conditional accuracy on MMLU-Pro occur where refusal is ~0%. |
+| "The issue is purely refusal" | −14.1pp on 8-shot GSM8K and −21.3pp conditional accuracy on MMLU-Pro (−17.7pp on items both stages attempted) occur where refusal is ~0%. |
 | "The issue is purely capability loss" | 100% → 0% refusal from exemplars alone, content held constant, cannot be a capability fact. |
-| "DPO caused the regression" | Every signal is first observable on `Base → M0`; `M0 → M1-v2` is flat and 82% byte-identical. |
+| "The M0 → M1-v2 DPO stage caused the regression" | Every signal is first observable on `Base → M0`; `M0 → M1-v2` is flat and 82% byte-identical. This rules out only that preference stage: M1-v1 — DPO directly on the base, no SFT — refuses 70.7% of zero-shot GSM8K, so DPO on When2Call-derived data can produce the refusal too. |
 | "DPO did nothing / barely changed the weights" | Only behaviour on this suite was measured. No weight-space claim is supported. |
 | "MMLU-Pro showed no degradation" | That was the @768 artifact. Corrected: −12.0pp. |
 | "The promoted checkpoint is strictly better than Base" | It is better on tool policy and materially worse on every general-capability measure here. |

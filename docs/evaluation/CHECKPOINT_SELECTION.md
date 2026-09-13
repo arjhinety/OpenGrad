@@ -20,9 +20,9 @@ the same set cannot be reused as clean test evidence for a *close* comparison.
 | Set | Manifest | Role |
 |---|---|---|
 | `behavioral-heldout-v2` | `reports/evaluation/behavioral-heldout-v2.manifest.json` | **Development / checkpoint selection.** Shared with B0 and the partial-v2 run, whose checkpoint 1200 was selected on it. Disjoint from every training corpus by construction (the training releases exclude it). |
-| Held-out final evaluation | not yet materialized | **Confirmatory.** Must be disjoint from checkpoint selection, from the training corpus, and from any set used to tune anything. |
+| Held-out final evaluation | `reports/evaluation/behavioral-heldout-v2-partition.json` (confirmatory side, 1,277 examples; materialized 2026-09-11) | **Confirmatory.** Must be disjoint from checkpoint selection, from the training corpus, and from any set used to tune anything. It is a pre-registered split of `behavioral-heldout-v2` (2,373 DEV / 1,277 confirmatory), so it is internal evidence, not an untouched benchmark: the wider population was already used for the partial-v2 selection. |
 
-`3,650` distinct examples (3,952 before the two quarantined items were removed) is small. It is
+`3,650` examples (3,652 distinct before the two quarantined items were removed) is small. It is
 adequate for detecting a collapse of the kind v1 exhibited and not adequate for resolving a
 difference of a few points, so a close call between checkpoints on this set should be treated as
 a tie rather than as a ranking.
@@ -50,3 +50,10 @@ result is treated as final.
 This is recorded as a known limitation rather than a satisfied requirement. Materializing a
 disjoint confirmatory set is the next data task after the first SFT, not a prerequisite for
 running it, because the run's *between-corpus* question does not depend on it.
+
+*Update (2026-09-13):* the confirmatory partition was materialized on 2026-09-11 (1,277 examples,
+fingerprint `d6d1e394…`) before the definitive M0 was evaluated. M0 checkpoint 1800 was selected
+on the 2,373-example DEV side and scored once on the confirmatory side; it was not promoted under
+`tool_use_promotion_v3`. M1-v2 checkpoint 30 was selected and confirmed the same way and promoted
+under `tool_use_promotion_v4`, a parent-relative gate introduced after M0 was evaluated; M0 also
+clears v4 and M1-v2 fails v3. See [`M1_DPO_EVALUATION.md`](../../reports/M1_DPO_EVALUATION.md).

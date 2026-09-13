@@ -52,7 +52,12 @@ Distillation loss is applied **only** over the student-generated assistant token
 
 ## 4. Single-A100 Execution Modes
 
-OpenGrad supports three hardware-adaptive modes for the A100:
+> **Status (2026-09-13): design only.** None of these modes can train today. The live path in
+> `src/opengrad/training/distillation.py` raises `NotImplementedError`; only `dry_run` and the mock
+> backend execute, and they update no weights. M2 was closed as `NOT RUN / NOT JUSTIFIED`
+> ([`reports/M2_DECISION.md`](../reports/M2_DECISION.md)).
+
+OpenGrad's design specifies three hardware-adaptive modes for the A100:
 
 | Mode | Identifier | Requirements | Staleness |
 | :--- | :--- | :--- | :---: |

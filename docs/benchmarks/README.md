@@ -60,7 +60,7 @@ the frozen held-out set.
 | Benchmark | Measures in the registry | Harness status | Real score available? | Revision state |
 |---|---|---|---|---|
 | BFCL V4 | Function-call accuracy | Mock smoke harness | **No** | Recommended Gorilla revision pinned |
-| When2Call | Call decision, answer quality | **Executed** — 3,650 held-out examples, engine vLLM 0.29.0 | **Yes** — B0 and 12 candidate checkpoints | Frozen in the baseline v2 config; training corpora exclude it by construction |
+| When2Call | Call decision, answer quality | **Executed** — 3,650 held-out examples, engine vLLM 0.29.0 | **Yes** — B0 and 31 candidate checkpoints across 8 runs with committed metrics under `runs/*/eval` (28 excluding the non-reproducible `qwen35_2b_m1_dpo_v1_restore` repeat) | Frozen in the baseline v2 config; training corpora exclude it by construction |
 | IFEval | Instruction following (prompt/instruction, strict/loose) | **Executed** in the H200 capability campaign — 541 prompts, vendored upstream checkers | **Yes** — Base, M0, M1-v2 | Upstream revision pinned in `PINS`, [`scripts/prepare_capability_benchmarks.py`](../../scripts/prepare_capability_benchmarks.py) |
 | GSM8K | Grade-school math | **Executed** in the H200 capability campaign — 1,319 questions, zero-shot and 8-shot arms | **Yes** — Base, M0, M1-v2 | Upstream revision pinned in `PINS`, [`scripts/prepare_capability_benchmarks.py`](../../scripts/prepare_capability_benchmarks.py) |
 | MMLU-Pro | Knowledge and reasoning | **Executed** in the H200 capability campaign — 12,032 items, 5-shot | **Yes** — Base, M0, M1-v2 | Upstream revision pinned in `PINS`, [`scripts/prepare_capability_benchmarks.py`](../../scripts/prepare_capability_benchmarks.py) |

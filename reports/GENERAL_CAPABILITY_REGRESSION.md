@@ -9,6 +9,10 @@ could have detected it. Is that lost capability, learned refusal, or noise from 
 
 > accuracy_given_answer falls by 21.3pp on at least one measured edge -- the ability itself is worse, not merely unused
 
+The 21.3pp is MMLU-Pro on `BASE->M0_SFT`, and it excludes 2,136 truncated Base items from Base's
+denominator. On the 9,637 items both stages attempted the drop is 17.7pp (60.1% → 42.4%). No
+interval is given for either figure; the label holds on both.
+
 This is an ordering statement about measured stages, not a causal one. A label says the pattern first becomes observable after a stage; it does not establish that the stage caused it, because no stage was re-run with a controlled intervention.
 
 ## Evidence labels used in this report
@@ -36,8 +40,10 @@ regression on its own and is never promoted by this report.
 Missing checkpoints: None — every stage on the primary path resolved.
 
 The decisive path is **BASE → M0_SFT → M1_DPO_CURRENT**. Every stage on it shares one chat template
-and one tokenizer *file lineage*; `M1_DPO_HISTORICAL` sits on a different SFT parent and is
-supplementary, because a delta against it would mix two changes.
+and one tokenizer *file lineage*. `M1_DPO_HISTORICAL` (M1-v1) is DPO applied directly to the base
+model — `parent_experiment_id: null`, `reference: initial_policy`, preference data
+`when2call_pref_v1` — with no SFT stage. It is supplementary because it is a different lineage, but
+it matters: it refuses 70.7% of zero-shot GSM8K, so the regression is not specific to SFT.
 
 ## Transition matrix
 
@@ -63,7 +69,7 @@ All figures are percentages except `call_f1`. `answer rate` and `refusal rate` a
 |---|---|
 | answer rate falls | `BASE->M0_SFT` (-100.0pp) |
 | conditional instruction accuracy falls | `BASE->M0_SFT` (-15.6pp) |
-| conditional math accuracy falls | not materially observable |
+| conditional math accuracy falls | not measurable at 0-shot (M0 attempted none); 8-shot: `BASE->M0_SFT` (-14.1pp) |
 | fewshot math accuracy falls | `BASE->M0_SFT` (-14.1pp) |
 | instruction following falls | `BASE->M0_SFT` (-22.7pp) |
 | math accuracy falls | `BASE->M0_SFT` (-67.4pp) |
@@ -86,7 +92,7 @@ The threshold for "material" is **5 percentage points**, declared
 before the numbers existed.
 
 Worst observed on any measured edge: answer rate **-100.0pp**,
-conditional accuracy **-21.3pp**.
+conditional accuracy **-21.3pp** (MMLU-Pro; -17.7pp on items both stages attempted).
 
 ### The pre-registered 8-shot control
 
@@ -125,8 +131,8 @@ ten options, and it did not bite evenly:
 | M1-v2 — DPO | 903 (7.5%) | 747 (6.2%) |
 | M1-v1 (supplementary) | 5,978 (49.7%) | not measured — run terminated |
 
-At 768, **100% of Base's unattempted examples were truncations**, not refusals or malformed
-answers. The benchmark was measuring verbosity, not accuracy, and the Base-vs-post-trained
+At 768, **99.6% of Base's unattempted examples (4,292 of 4,309) were truncations**, not refusals
+or malformed answers. The benchmark was measuring verbosity, not accuracy, and the Base-vs-post-trained
 comparison was invalid. The whole pass was discarded and re-run at 2048; its cost is counted in
 full in the ledger.
 
@@ -231,7 +237,8 @@ M0→M1 edge has the same architecture on both sides.
 agreement of **0.9836 (21 flips)** is a different example set and a different metric; it is not
 folded into any stage delta here. Every stage above ran on the same engine and version, so engine
 choice cannot explain a stage difference. The conservative form of that earlier finding stands:
-**engine choice produces measurable non-zero per-example behavioural differences.**
+**runtime choice produces measurable non-zero per-example behavioural differences** — runtime, not
+engine alone, because that comparison also changed hardware (H200 vs A100).
 
 **Statistical power.** IFEval is 541 prompts and GSM8K 1319; a one-example change is 0.18pp and
 0.08pp respectively. The sentinel is 7 cases, where one case is 14pp — which is why it cannot carry
@@ -244,12 +251,15 @@ re-prompted against these results, and no benchmark failure was fed back into an
 
 | category | USD |
 |---|---:|
-| retained runs (results reported) | $5.01 |
+| retained runs (includes $0.757 for a terminated run that reported no results) | $5.01 |
 | superseded runs (counted in full) | $3.89 |
 | INFRASTRUCTURE_WASTE | $0.00 |
 | **this continuation total** | **$8.90** |
 | prior run (preserved) | $2.49 |
 | **campaign total** | **$11.39** |
+
+Spend that produced no reported result (superseded runs plus the terminated M1-v1 MMLU-Pro run) is
+$4.64, 52% of the continuation.
 
 `REMAINING_CREDIT_BALANCE = NOT_QUERYABLE` — the Modal API exposes consumption, not a remaining
 balance. Only the configured envelope and observed spend are known.
@@ -269,4 +279,5 @@ python scripts/build_capability_report.py
 
 Per-example evidence for every row above lives in
 `results/benchmarks/h200/capability_v1/<STAGE>/*_per_example.jsonl`, including raw model output, so
-every aggregate here is recomputable without re-running the GPU.
+every aggregate here is recomputable without re-running the GPU — in a working tree that has them.
+Those files are bulk and not committed; see `FINAL_CAMPAIGN_AUDIT.md` §16.

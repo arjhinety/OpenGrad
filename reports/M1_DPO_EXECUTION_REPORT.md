@@ -1,6 +1,7 @@
 # M1 DPO execution report
 
-**Status:** `COMPLETED / PROMOTED`
+**Status:** `COMPLETED / PROMOTED` under `tool_use_promotion_v4`, which was introduced after M0 was
+evaluated; M0 also clears v4 and M1-v2 fails the v3 gate that rejected M0 (see the evaluation report)
 **Experiment:** `m1_dpo_canonical_v2_final_v2`
 **Parent:** selected `m0_sft_canonical_v2_final::checkpoint-1800`
 **Parent weight hash:** `7144579aeecec8b4de25f193ab63085e…`
@@ -8,7 +9,7 @@
 
 ## Design
 
-M1 tests whether preference optimization can calibrate the healthy M0-final-v2 policy without
+M1 tests whether preference optimization can calibrate the selected M0-final-v2 policy without
 returning to the base model or destroying recovered call capability. The student and frozen
 reference both start from the selected M0 checkpoint. This is not the historical base-starting
 DPO identity and does not overwrite it.
@@ -16,8 +17,9 @@ DPO identity and does not overwrite it.
 The preference artifact is `data/processed/m1_calibration_preference_pairs_v1.jsonl`, 481 pairs,
 sha256 `d39168948d09fc3c355cd83f9f0857f310086322b0968fd2e7d78125150faef4`:
 
-- 141 expected `CALL` pairs from deterministic base/M0 disagreements;
-- 140 `ANSWER`, 100 `CLARIFY`, 100 `UNSUPPORTED` pairs from the bounded curated training slice;
+- 241 pairs from deterministic base/M0 disagreements: 141 expected `CALL` and 100 expected `ANSWER`;
+- 240 pairs from the bounded curated When2Call training slice: 40 `ANSWER`, 100 `CLARIFY`,
+  100 `UNSUPPORTED` (only 73 curated `ANSWER` pairs were available);
 - frozen DEV/confirmatory IDs excluded before local generation;
 - no paid external API;
 - five credential-like source rows excluded from the new artifact and recorded in the dataset report;
@@ -57,12 +59,15 @@ horizon; no scientific parameter changed.
 
 ## Lineage
 
-Every checkpoint records:
+The experiment record (`runs/m1_dpo_canonical_v2_final_v2/experiment.json`) records:
 
 - parent checkpoint ID `m0_sft_canonical_v2_final::checkpoint-1800`;
 - parent model hash;
 - preference dataset ID/hash;
 - clean launch commit and exact configuration identity.
+
+The per-checkpoint entries in `runs/checkpoint_registry.json` do not: `parent_checkpoint` is `null`
+for all four M1-v2 checkpoints.
 
 M1 is ready for its evaluation conclusion; it is not evidence that DPO improves unmeasured tool
 selection, argument validity or schema validity.

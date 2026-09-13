@@ -2,6 +2,12 @@
 
 **Status:** STOPPED BY USER before PTQ, runtime parity, QAD, export, or publication.
 
+> **Superseded (2026-09-13).** This records the state at the interruption. The GGUF PTQ phase was
+> resumed and is now `CLOSED`: all nine rungs were scored against the gate below; Q6_K and Q8_0
+> pass, and the recommended release under the pre-registered smallest-passing rule is Q6_K
+> (`manifests/quantization/ptq_phase_closure_v1.json`, `reports/PTQ_PHASE_CLOSURE.md`). QAD was
+> not run (`reports/QAD_DECISION.md`).
+
 **Study objective:** produce GGUF/llama.cpp and ExecuTorch/TorchAO descendants of the promoted
 M1-v2 BF16 model, accepting only artifacts that pass a frozen behavioral-preservation gate.
 
@@ -59,7 +65,7 @@ Thresholds computed from the exact values above, before candidate evaluation:
 ```
 
 The final artifact also needs the existing M1 tool-use promotion verdict to remain `PROMOTE`.
-No candidate has been evaluated against this gate yet.
+No candidate had been evaluated against this gate at handoff (nine have since; see the note above).
 
 ## Completed during the interrupted turn
 

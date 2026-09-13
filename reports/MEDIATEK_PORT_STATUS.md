@@ -7,8 +7,9 @@ The blocker moved. SDK access is solved; the architecture port is not.
 ## What changed
 
 The NeuroPilot Express SDK was obtained directly (the portal is registration-gated and an
-automated probe could not reach it; every unauthenticated `api.neuropilot.mediatek.com` resource
-path returns 404).
+automated probe could not obtain it: the SDK is not on PyPI and is not downloadable without a
+login. The committed probe, `results/quantization/executorch/probe_mediatek_sdk.json`, records only
+two public documentation URLs, both HTTP 200; no 404 is recorded).
 
 | component | version |
 |---|---|
@@ -78,7 +79,8 @@ architecture through NeuroPilot compiler errors conflates two independent failur
 ## Torch-version incompatibility — to be handled scientifically
 
 `exported_program_utils.py` gates on `TORCH_2_1` / `TORCH_2_2` / `TORCH_2_3` only. The current
-ExecuTorch environment uses torch 2.10. This is unverified, not known-broken.
+ExecuTorch exports ran on torch 2.14.0+cpu (`results/quantization/executorch/export_cpu_*.json`).
+This is unverified, not known-broken.
 
 **Do not patch the SDK's version guard as a first move.** Instead, stand up an isolated environment
 matching the SDK's supported torch family and determine separately:

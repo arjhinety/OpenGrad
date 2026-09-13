@@ -104,7 +104,11 @@ def main() -> int:
     for k, v in analysis["first_observable"].items():
         edge = v.get("edge")
         mag = f" ({v['magnitude_pp']:+.1f}pp)" if v.get("magnitude_pp") is not None else ""
-        fo_rows.append(f"| {k.replace('_', ' ')} | {('`' + edge + '`' + mag) if edge else 'not materially observable'} |")
+        cell = ("`" + edge + "`" + mag) if edge else "not materially observable"
+        if not edge and k == "conditional_math_accuracy_falls":
+            # Unmeasurable at 0-shot (M0 attempted nothing); the pre-registered 8-shot arm shows it.
+            cell = "not measurable at 0-shot (M0 attempted none); 8-shot: `BASE->M0_SFT` (-14.1pp)"
+        fo_rows.append(f"| {k.replace('_', ' ')} | {cell} |")
     fo_md = "\n".join(fo_rows)
 
     # -- per-category MMLU-Pro -------------------------------------------------------------------
@@ -164,7 +168,8 @@ def main() -> int:
     cost_md = "_cost ledger not built_"
     if ledger:
         cost_md = (
-            f"| retained runs (results reported) | ${ledger['retained_runs_usd']:.2f} |\n"
+            "| retained runs (includes $0.757 for a terminated run that reported no results) | "
+            f"${ledger['retained_runs_usd']:.2f} |\n"
             f"| superseded runs (counted in full) | ${ledger['superseded_runs_usd']:.2f} |\n"
             f"| INFRASTRUCTURE_WASTE | ${ledger['infrastructure_waste_usd']:.2f} |\n"
             f"| **this continuation total** | **${ledger['continuation_total_usd']:.2f}** |\n"
@@ -182,6 +187,10 @@ could have detected it. Is that lost capability, learned refusal, or noise from 
 **Answer label: `{traj['label']}`**
 
 > {traj['basis']}
+
+The 21.3pp is MMLU-Pro on `BASE->M0_SFT`, and it excludes 2,136 truncated Base items from Base's
+denominator. On the 9,637 items both stages attempted the drop is 17.7pp (60.1% → 42.4%). No
+interval is given for either figure; the label holds on both.
 
 {traj['caveat']}
 
@@ -207,8 +216,10 @@ regression on its own and is never promoted by this report.
 Missing checkpoints: {missing_md}
 
 The decisive path is **BASE → M0_SFT → M1_DPO_CURRENT**. Every stage on it shares one chat template
-and one tokenizer *file lineage*; `M1_DPO_HISTORICAL` sits on a different SFT parent and is
-supplementary, because a delta against it would mix two changes.
+and one tokenizer *file lineage*. `M1_DPO_HISTORICAL` (M1-v1) is DPO applied directly to the base
+model — `parent_experiment_id: null`, `reference: initial_policy`, preference data
+`when2call_pref_v1` — with no SFT stage. It is supplementary because it is a different lineage, but
+it matters: it refuses 70.7% of zero-shot GSM8K, so the regression is not specific to SFT.
 
 ## Transition matrix
 
@@ -247,7 +258,7 @@ The threshold for "material" is **{traj['material_threshold_pp']:.0f} percentage
 before the numbers existed.
 
 Worst observed on any measured edge: answer rate **{traj.get('worst_answer_rate_delta_pp')}pp**,
-conditional accuracy **{traj.get('worst_conditional_accuracy_delta_pp')}pp**.
+conditional accuracy **{traj.get('worst_conditional_accuracy_delta_pp')}pp** (MMLU-Pro; -17.7pp on items both stages attempted).
 
 ### The pre-registered 8-shot control
 
@@ -279,8 +290,8 @@ ten options, and it did not bite evenly:
 | M1-v2 — DPO | 903 (7.5%) | 747 (6.2%) |
 | M1-v1 (supplementary) | 5,978 (49.7%) | not measured — run terminated |
 
-At 768, **100% of Base's unattempted examples were truncations**, not refusals or malformed
-answers. The benchmark was measuring verbosity, not accuracy, and the Base-vs-post-trained
+At 768, **99.6% of Base's unattempted examples (4,292 of 4,309) were truncations**, not refusals
+or malformed answers. The benchmark was measuring verbosity, not accuracy, and the Base-vs-post-trained
 comparison was invalid. The whole pass was discarded and re-run at 2048; its cost is counted in
 full in the ledger.
 
@@ -370,7 +381,8 @@ M0→M1 edge has the same architecture on both sides.
 agreement of **0.9836 (21 flips)** is a different example set and a different metric; it is not
 folded into any stage delta here. Every stage above ran on the same engine and version, so engine
 choice cannot explain a stage difference. The conservative form of that earlier finding stands:
-**engine choice produces measurable non-zero per-example behavioural differences.**
+**runtime choice produces measurable non-zero per-example behavioural differences** — runtime, not
+engine alone, because that comparison also changed hardware (H200 vs A100).
 
 **Statistical power.** IFEval is 541 prompts and GSM8K 1319; a one-example change is 0.18pp and
 0.08pp respectively. The sentinel is 7 cases, where one case is 14pp — which is why it cannot carry
@@ -384,6 +396,9 @@ re-prompted against these results, and no benchmark failure was fed back into an
 | category | USD |
 |---|---:|
 {cost_md}
+
+Spend that produced no reported result (superseded runs plus the terminated M1-v1 MMLU-Pro run) is
+$4.64, 52% of the continuation.
 
 `REMAINING_CREDIT_BALANCE = NOT_QUERYABLE` — the Modal API exposes consumption, not a remaining
 balance. Only the configured envelope and observed spend are known.
@@ -403,7 +418,8 @@ python scripts/build_capability_report.py
 
 Per-example evidence for every row above lives in
 `results/benchmarks/h200/capability_v1/<STAGE>/*_per_example.jsonl`, including raw model output, so
-every aggregate here is recomputable without re-running the GPU.
+every aggregate here is recomputable without re-running the GPU — in a working tree that has them.
+Those files are bulk and not committed; see `FINAL_CAMPAIGN_AUDIT.md` §16.
 """
     OUT.write_text(body, encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)}")

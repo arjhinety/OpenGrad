@@ -230,3 +230,9 @@ none of the 56,090 call-prediction records contains a tool result.
 One qualification carries forward from `CHECKPOINT_SELECTION.md`: this is a development-set
 experiment, not a confirmatory one, because `behavioral-heldout-v2` is where the partial-v2
 checkpoint was selected.
+
+*Update (2026-09-13):* the definitive M0 run was afterwards evaluated with a pre-registered
+DEV/confirmatory split of that population (2,373 / 1,277 examples,
+`reports/evaluation/behavioral-heldout-v2-partition.json`). The confirmatory side is pre-registered
+internal evidence, not an untouched external benchmark, because the wider population was already
+used for the partial-v2 selection.

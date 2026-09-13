@@ -22,10 +22,12 @@ In DPO:
 $$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}}\left[\log \sigma\left(\beta \log \frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \beta \log \frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\right)\right]$$
 
 ### Critical Grounding Rule:
-The reference policy $\pi_{\text{ref}}$ **must** correspond to the frozen SFT policy (e.g. `checkpoints/qwen35_2b_m0_sft`), **never** the original untouched Qwen base model. OpenGrad enforces this by:
-1. Recording `reference_checkpoint` explicitly in the experiment configuration.
-2. Freezing the SFT policy weights or merging the SFT adapter before initializing the DPO model.
-3. Rejecting runs where the reference model hash diverges from the SFT checkpoint.
+The intended rule is that the reference policy $\pi_{\text{ref}}$ corresponds to the frozen SFT policy (e.g. `checkpoints/qwen35_2b_m0_sft`), not the original untouched Qwen base model. **The code does not enforce that, and one executed run violated it.** What is actually implemented:
+1. `trainer.reference` must be declared explicitly as `initial_policy` or `explicit_checkpoint` (`src/opengrad/training/dpo_runner.py`); `explicit_checkpoint` requires `reference_checkpoint`.
+2. In the live M1 path (`dpo_live.py`), the initial checkpoint's hash must match the config, and an explicit reference must hash-match that initial checkpoint.
+3. Nothing rejects a base-model reference. `initial_policy` on a base-model start makes the base the reference.
+
+M1-v1 (`qwen35_2b_m1_dpo_v1`) ran exactly that way: `parent_experiment_id: null`, `reference: initial_policy`, DPO directly on the base model. M1-v2 (`m1_dpo_canonical_v2_final_v2`) follows the rule: `reference: explicit_checkpoint` at M0-final-v2 checkpoint 1800.
 
 ---
 
@@ -39,6 +41,12 @@ OpenGrad constructs DPO mixtures from two distinct sources:
 2. **Synthetic Residual Preferences**:
    - Generated from the active student checkpoint ($N=4$ candidates).
    - Adjudicated via deterministic schema/tool validators first, with OpenAI adjudication used strictly for ambiguous semantic comparisons.
+
+**What the executed runs used.** Neither run used synthetic residual preferences. M1-v1 used 1,741
+When2Call training preference pairs (`when2call_pref_v1`). M1-v2 used 481 pairs
+(`m1_calibration_preference_pairs_v1`): 240 curated When2Call pairs plus 241 deterministic
+disagreement pairs between the base model and the selected M0 checkpoint, generated locally with no
+external API (`reports/data/m1-calibration-preference-pairs-v1.json`).
 
 ---
 

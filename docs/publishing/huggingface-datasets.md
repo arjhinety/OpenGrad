@@ -8,11 +8,13 @@ GitHub is the canonical home for source code, schemas, manifests, provenance, au
 
 | Release | Records | Sources | Status | Hub revision | Publication record |
 |---|---:|---:|---|---|---|
-| `OpenGrad-ToolPolicy-Canonical-v2` | 173,237 canonical / **161,966 trainable** | 4 | **Current** | `66470c07ed0a79941f49a5cf67c1b3b1a7d8196e` | `reports/releases/toolpolicy-canonical-v2-publication.json` |
-| `OpenGrad-ToolPolicy-Canonical-v1` | 213,951 | 6 | Historical (pinned by B0 and all earlier results) | `bb295d8a4ad64f7e8161044ad2fa34f873ede418` | `reports/releases/toolpolicy-canonical-v1-publication.json` |
-| `OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot` | 103,036 | 3 of 6 | Historical experiment snapshot | — | — |
+| `OpenGrad-ToolPolicy-Canonical-v2` | 173,237 canonical / **161,966 trainable** | 4 | **Current** | `66470c07ed0a79941f49a5cf67c1b3b1a7d8196e` | `reports/releases/hf-publication-2026-09-11.json` |
+| `OpenGrad-ToolPolicy-Canonical-v1` | 213,951 | 6 | Historical (pinned by the corpus-v1 training runs; B0's record pins only the held-out evaluation manifest) | `bb295d8a4ad64f7e8161044ad2fa34f873ede418` | `reports/releases/toolpolicy-canonical-v1-publication.json` |
+| `OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot` | 103,036 | 3 of 6 | Historical experiment snapshot | `8b43caebf2b96259f8f86611d39f75bcaa3ee130` | `reports/releases/toolpolicy-canonical-v2-publication.json` |
 
-Canonical-v2 final is the corpus the definitive M0 and M1 DPO ran on. Its corpus fingerprint is
+Canonical-v2 final is the corpus the definitive M0 SFT trained on. M1-v2 DPO did not train on it
+directly: its preference data is `m1_calibration_preference_pairs_v1` (481 pairs — 240 curated
+When2Call training preference pairs and 241 base/M0 disagreement pairs). Its corpus fingerprint is
 `8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161` (the sha256 of the frozen
 release manifest), proven reproducible by a delete-and-rebuild; the tracked definition is
 `configs/releases/toolpolicy_canonical_v2_final.yaml`.

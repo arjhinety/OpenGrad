@@ -7,7 +7,7 @@ GPU jobs running at close    none (verified: no compute apps, no train/eval proc
 Runs completed               3        M0 SFT v1, M0 SFT v2, M1 DPO v1
 Optimizer steps reached      SFT 2400/2400 x2 (target met, not truncated)
                              DPO  300/300
-Evaluation state             COMPLETE — all 12 checkpoints scored vs B0
+Evaluation state             COMPLETE — all 13 checkpoints scored vs B0
 Corpus v1  (published)       call_f1 0.0000  — collapse; procedure exonerated
 Corpus v2  (corrected)       call_f1 0.5995  — macro 0.6416 vs B0 0.3621
 On-policy distillation       NOT ATTEMPTED — out of scope by decision (§6)
@@ -41,9 +41,9 @@ the question: the failure was in the data, not the procedure.
 
 | Item | Result |
 | --- | --- |
-| Real optimizer steps against the pinned dataset | **YES** — 4 SFT runs, 2,400 steps each |
+| Real optimizer steps against the pinned dataset | **YES** — 2 SFT runs, 2,400 steps each |
 | M0 on corpus v1 (published) | **NEGATIVE** — SFT destroys tool calling |
-| M1 DPO on corpus v1 | **NEGATIVE** — DPO trades tool calling away, and over-optimises |
+| M1 DPO on the base model (When2Call preference pairs, no SFT parent) | **NEGATIVE** — DPO trades tool calling away, and over-optimises |
 | M0 on corpus v2 (corrected) | **POSITIVE** — call_f1 0.5995, macro 0.6416 |
 | Best trained call_f1 vs B0 | **0.5995** (v2 @ 1200) vs B0 **0.6191**; macro **0.6416** vs **0.3621** |
 | Promotion | v1 SFT (6) and DPO (3) REJECTED; v2 SFT retained as candidates |
@@ -171,8 +171,9 @@ exists to improve, and it is dominated by the behaviour that suppresses it.
 ### 3.2 A metric gap this exposed
 
 `under_call_rate` is defined as `matrix["CALL"]["ANSWER"] / call_actual` — it counts only
-ANSWER-instead-of-CALL. A model that redirects every call to CLARIFY therefore scores *better* on
-`under_call_rate` (0.0185) than B0 (0.0147) while having zero call recall. The suite cannot see this
+ANSWER-instead-of-CALL. A model that redirects every call to CLARIFY therefore scores almost the same
+on `under_call_rate` as B0 (0.0185 against 0.0147; lower is better, so only 0.004 worse) while having
+zero call recall. The suite cannot see this
 failure mode through that metric; `call_recall` and `call_f1` are what catch it. Worth fixing before
 the metric is used as a promotion gate.
 
@@ -361,9 +362,10 @@ prompt set. Both would have to be built before a run meant anything.
 moving 0.0000 → 0.5995 under an unchanged procedure. That is the correct order: fix the data, then
 ask whether a teacher adds anything the data did not.
 
-**No OPD, RL, or further preference stage was run.** `runs/qwen35_2b_m2_distill/` and
-`runs/qwen35_2b_m1_dpo/` still hold only their original scaffold records; no M2 experiment was
-created.
+**No real OPD, RL, or further preference stage was run.** `runs/qwen35_2b_m1_dpo/` still holds only
+its original scaffold record. `runs/qwen35_2b_m2_distill/` is an M2 experiment that was created on
+2026-09-10 and executed only the mock distillation path (no checkpoint, no evaluation); the ledger
+marked it `INVALID` / `MOCK_ONLY` on 2026-09-12.
 
 ## 7. Stopping point — the decision that was asked for
 
@@ -480,8 +482,8 @@ checkpoint, renderer, masking, and schedule fixed, and changing only the corpus:
 * over-calling falls from 0.6425 to **0.0989**, a 6.5x reduction, while call recall stays
   at 0.5050 instead of falling to 0.003.
 * macro recall rises from B0's 0.3621 to **0.6416** — and unlike the v1 models, the gain
-  is not bought by sacrificing CALL: per-class recall is CALL 0.505, CLARIFY 0.778,
-  UNSUPPORTED 0.636, against B0's 0.972 / 0.101 / 0.013.
+  is not bought by sacrificing CALL: per-class recall is CALL 0.505, CLARIFY 0.791,
+  UNSUPPORTED 0.629, against B0's 0.972 / 0.101 / 0.013.
 
 So v2 @ 1200 is a better model than B0 on precision (+0.28), over-calling (-0.54), macro
 (+0.28), clarification (+0.68) and unsupported accuracy (+0.62), and worse on call recall
@@ -531,8 +533,9 @@ predictions, and the recovery attempt for the DPO run is recorded in
 * **Fail-closed data boundary.** 154,760 records were quarantined rather than repaired. Nothing was
   coerced, no tool schema was normalised into validity, and no supervision was reconstructed.
 * **No fabricated results.** The negative result is reported as negative. No checkpoint was promoted.
-* **No DPO, distill, or RL run was started**, and none of their data requirements were satisfied with
-  placeholders.
+* **No real distill or RL run was started**, and none of their data requirements were satisfied with
+  placeholders. The one DPO run (§5) used the real When2Call preference split, not the placeholder
+  rows; the M2 record in the ledger is a mock-only pass (§6).
 * **Reproducibility.** Every number here comes from committed configs plus artifacts under `runs/`.
   `runs/` is untracked by design; the configs, the code, and the reports are committed.
 

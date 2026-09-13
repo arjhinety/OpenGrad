@@ -2,6 +2,8 @@
 
 Status: PRE_GPU_COMPLETE / BASELINE_INFERENCE_READY. Accessible corpora are materialized and audited; no model has been trained or evaluated.
 
+*Status update (2026-09-13):* the "no model has been trained or evaluated" line above is historical. B0 has been scored, the M0 SFT line (corpus v1, corpus v2, Canonical-v2 final, two minus-xLAM ablations) and DPO (M1-v1 directly on the base, M1-v2 on M0) have been trained and evaluated, and M2 was not run. See [`docs/EXPERIMENT_RESULTS.md`](../EXPERIMENT_RESULTS.md).
+
 ## Research framing
 
 Tool-call syntax, tool-use policy, and agent task completion are different claims. OpenGrad studies reliable tool-use policy: whether a model should CALL, ANSWER, CLARIFY, or report UNSUPPORTED; which tool and arguments to use; how to handle observations, state, dependencies, and failure; and when to stop. A valid serialized call is protocol evidence, not evidence of a reliable policy.

@@ -131,7 +131,8 @@ Both candidates were re-verified against the **final** corpus bytes before adjud
 re-stamped from the previous verdict: the held-out prompt *"What is the current time?"* occurs in
 **8** Glaive training records (up from 5), and *"What is the current weather?"* occurs in **1**
 When2Call record. Both are exact-prompt matches whose training labels contradict the held-out
-gold decision, so both are quarantined and the benchmark is 3,950 distinct examples.
+gold decision, so both are quarantined and the benchmark is 3,650 examples (3,652 distinct; the
+300 `when2call-llm-judge` rows are byte-identical duplicates of MCQ rows).
 
 Contamination status: `SEMANTIC_REVIEW_COMPLETE`. Evidence artifacts are corpus-scoped
 (`…--toolpolicy-canonical-v2-final.json`) so they cannot be confused with the v1 corpus's.
@@ -143,7 +144,7 @@ Contamination status: `SEMANTIC_REVIEW_COMPLETE`. Evidence artifacts are corpus-
 | Manifest | `reports/evaluation/behavioral-heldout-v2.manifest.json` |
 | sha256 | `8bb6ad2e37613c996476bb734b93ef792eae807ec2cccf6b200d96a47332c640` |
 | Freeze revision | `2d97c7d5a8de0b16…` |
-| Contents | `when2call-mcq` 3,652 + `when2call-llm-judge` 300, less 2 quarantined = **3,950** |
+| Contents | `when2call-mcq` 3,652 + `when2call-llm-judge` 300 (all 300 duplicate MCQ rows, so 3,652 distinct), less 2 quarantined = **3,650** |
 | Role | **development / checkpoint selection** |
 
 ## 8. Gate status
@@ -158,7 +159,7 @@ infrastructure. None is disabled or dormant for this configuration.
 | `model_revision` / `model_identity` | PASS | pinned base revision |
 | `tokenizer_revision` | PASS | pinned |
 | `chat_template_contract` | PASS | native renderer |
-| `evaluation_manifest` / `evaluation_materialization` | PASS | 3,950 examples materialized |
+| `evaluation_manifest` / `evaluation_materialization` | PASS | 3,650 examples materialized |
 | `dataset_revision` / `dataset_snapshot` | PASS | `canonical_v2_final` pinned in the registry |
 | `contamination_gate` | PASS | Level 5 complete, corpus-scoped |
 | `evaluation_leakage` | PASS | evaluation-only manifest excludes the training sources |
@@ -178,9 +179,13 @@ measured report.
 
 **The confirmatory held-out set does not exist.** `behavioral-heldout-v2` is where the partial-v2
 checkpoint 1200 was selected, so it is development/selection evidence and cannot serve as clean
-test evidence for a *close* comparison. All 3,952 upstream test rows are already in use and there
+test evidence for a *close* comparison. All 3,652 distinct upstream test examples are already in use and there
 is no spare held-out data, so materializing a disjoint confirmatory set requires either a
-deterministic split of the existing 3,950 or new upstream data.
+deterministic split of the existing 3,650 or new upstream data.
+
+*Update (2026-09-11):* that split was made — a pre-registered 2,373 DEV / 1,277 confirmatory
+partition (`reports/evaluation/behavioral-heldout-v2-partition.json`), used for the definitive M0
+and M1-v2 evaluations. It is internal evidence, not an untouched benchmark.
 
 This does **not** block SFT, and the config does not pretend otherwise: it names
 `behavioral-heldout-v2` explicitly as the selection set, and `CHECKPOINT_SELECTION.md` records

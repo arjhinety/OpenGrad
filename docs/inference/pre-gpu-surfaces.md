@@ -1,6 +1,6 @@
 # Pre-GPU configuration surfaces
 
-Accelerator work has started. The bounded Qwen boundary smoke ran on an NVIDIA A100-SXM4-80GB and is recorded in `reports/hardware/qwen_gpu_smoke.json`; `configs/hardware/gpu_preflight_v1.yaml` now records that executed preflight (`status: READY`, `COMPATIBLE`) rather than a `NOT_RUN` placeholder. It is not a general claim that every GPU, driver, CUDA, ROCm, runtime, or quantization path works — quantization and speculative decoding remain unexecuted.
+Accelerator work has started. The bounded Qwen boundary smoke ran on an NVIDIA A100-SXM4-80GB and is recorded in `reports/hardware/qwen_gpu_smoke.json`; `configs/hardware/gpu_preflight_v1.yaml` now records that executed preflight (`status: READY`, `COMPATIBLE`) rather than a `NOT_RUN` placeholder. It is not a general claim that every GPU, driver, CUDA, ROCm, runtime, or quantization path works — speculative decoding remains unexecuted. Quantization has since run: the GGUF/llama.cpp PTQ ladder for M1-v2 was executed on an A100 and closed (`manifests/quantization/ptq_phase_closure_v1.json`, `reports/PTQ_PHASE_CLOSURE.md`), and a CPU ExecuTorch 8da4w export was produced; neither is a claim about any other quantization path.
 
 A future preflight must record requested and observed device counts, VRAM, driver/runtime versions, provider (`nvidia` or `amd`), and a compatibility result with its basis. `UNKNOWN`, `NOT_TESTED`, and `INCOMPATIBLE` must not be collapsed into support. The contract is `registry/gpu_preflight.schema.json`.
 

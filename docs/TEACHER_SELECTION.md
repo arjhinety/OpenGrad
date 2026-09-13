@@ -9,7 +9,10 @@
 - **Primary Student:** `Qwen/Qwen3.5-2B` (Pinned Revision: `15852e8c16360a2fea060d615a32b45270f8a8fc`)
 - **Primary Teacher:** `Qwen/Qwen3.8-27B` (or 27B–32B class Qwen teacher `Qwen/Qwen2.5-32B-Instruct`)
 
-Both models share the Qwen architecture family, identical special tokens, and a 248,064 token vocabulary.
+Tokenizer compatibility between these teachers and the student has **not** been verified: no
+teacher tokenizer has been downloaded and compared. The code's own offline mock
+(`src/opengrad/distillation/tokenizer_gate.py`) gives the student a 248,064-token vocabulary and
+Qwen2.5 a 151,936-token vocabulary, which would fail the gate below.
 
 ---
 
@@ -35,6 +38,12 @@ If any token differs, OpenGrad emits:
 TOKENIZER_INCOMPATIBLE
 ```
 and training is blocked. OpenGrad never silently maps incompatible logits by index.
+
+**As currently wired, this gate is not fail-closed.** `opengrad distill validate-teacher` calls
+`validate_teacher_tokenizer_offline(..., mock_compatible=True)` (`src/opengrad/agent_cli.py`), which
+returns `TOKENIZER_COMPATIBLE` without loading either tokenizer, so the command always passes. The
+real comparison (`compare_tokenizers`) exists but is not reached from the CLI. No distillation run
+has depended on this gate: M2 was not run (`reports/M2_DECISION.md`).
 
 ---
 

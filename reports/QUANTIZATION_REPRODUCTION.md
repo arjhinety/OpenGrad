@@ -129,11 +129,21 @@ are untouched by it, and they must not be attributed to the quantization phase.
 
 | check | expected |
 |---|---|
-| `close_ptq_phase.py` | `Q6_K → MEMORY_OPTIMIZED_RELEASE`, `Q8_0 → RECOMMENDED_RELEASE`, 7 rungs `REJECTED_ACCURACY` |
+| `close_ptq_phase.py` | `selection.recommended_release_rung: Q6_K` (Q6_K and Q8_0 pass the gate; no rung meets the secondary release bar, so the smallest passing rung is the fallback), 7 rungs `REJECTED_ACCURACY` |
 | `audit_executorch_quantization.py` | `reconciled: True`, 99.98% of named-data weights int4 |
 | tokenizer parity | 1271/1277 exact, 0 BOS insertions — **a FAIL, and expected** |
 | divergence probe | 6 fixtures, 3 behaviour-changing |
 | BF16 generate | 1277/1277, ~213s on A100 with 8 slots |
+
+The committed closure manifest also carries per-rung role labels (`Q8_0 → RECOMMENDED_RELEASE`,
+`Q6_K → MEMORY_OPTIMIZED_RELEASE`). Those labels were hard-coded in the script after the ladder was
+scored and contradict the pre-registered rule (`release_selection_criteria_v1.json`: smallest
+passing format wins). The recommended release is **Q6_K (1.45 GiB)**; Q8_0 (1.87 GiB) also passes.
+Both pass inside run-to-run noise: the H200 vLLM BF16 rerun of the unquantized reference itself
+fails the gate (recall 0.7638 < 0.7671 floor), and Q6_K clears precision by one example (357/490
+against 356.96 required). The "99.98% int4" figure counts named-data weights only; overall int4
+coverage is 78.7%, and the fp32 embedding is 65.7% of the `.pte`
+(`results/quantization/executorch/quantization_audit_8da4w.json`).
 
 If the BF16 generate takes tens of minutes with no progress output, the llama-server stdout pipe
 has been reattached to an undrained `subprocess.PIPE`; see

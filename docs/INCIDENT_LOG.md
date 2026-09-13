@@ -107,10 +107,11 @@ The divergence is qualitative, not just numeric. The original declined monotonic
 same step (0.632 vs 0.271 at step 200).
 
 The regenerated weights were **not** published. They are a different model, and uploading them
-under the original step labels would attach this run's measurements to the original's card. The
-regenerated checkpoints and all their measurements remain in
-`runs/qwen35_2b_m1_dpo_v1_restore/` and are committed, so the disagreement can be inspected
-rather than taken on trust.
+under the original step labels would attach this run's measurements to the original's card. What
+is committed under `runs/qwen35_2b_m1_dpo_v1_restore/` is the run record, the training log, and the
+per-checkpoint `metrics.json` / `curve.json`. The regenerated checkpoint weights and the
+per-example predictions are **not** committed (and are not in the repository at all), so the
+aggregate disagreement can be read but not recomputed from predictions.
 
 ### What this does to published claims
 

@@ -150,3 +150,14 @@ Commands run after the edits (from the repository root, with the repository virt
 that contradicts the committed evidence after these changes, and the test suite that governs
 documentation/state consistency passes. The failures and findings listed under *Unresolved* are
 environment- and history-dependent and reproduce on unmodified `HEAD`.
+
+## Addendum — 2026-09-13
+
+The closing claim above — that no documentation statement contradicting the committed evidence
+remained after these changes — was not true. At the time it was written, `ROADMAP.md` still
+described the SFT arms as "2 negative, 1 partial, 1 definitive, 2 ablations" (there are five SFT
+arms and one negative), `docs/benchmarks/README.md` still said When2Call had been scored for "B0 and
+12 candidate checkpoints", and `docs/models/renderer-matrix.md` still said no training run had used
+the renderer. A later claim audit found further contradictions across the reports and docs. The
+corrections, and the frozen files that can only be corrected there, are listed in
+[`reports/ERRATA.md`](../reports/ERRATA.md).

@@ -23,6 +23,11 @@ QAD_RECOMMENDED_TO_RUN_NOW          = deferred — see "The prize is smaller tha
 `Q8_0` provides a more conservative option at 1.874 GiB. A shippable, gate-passing GGUF exists
 today. Nothing about the release depends on QAD.
 
+The gate's pass/fail line is inside run-to-run noise, so "passes" is a weak statement: the H200
+vLLM BF16 rerun of the *unquantized* reference itself fails `quantization_preservation_v1` (recall
+0.7638 < 0.7671 floor), and Q6_K clears the precision floor by one example (357 of 490 predicted
+calls correct against 356.96 required).
+
 ## The prize is smaller than assumed
 
 This is the finding that most affects the decision, and it was not visible before the ladder was
@@ -82,13 +87,14 @@ one, and switching later is cheap.
 
 QAD is chosen here for a reason specific to this checkpoint:
 
-**The policy being preserved came from DPO, not SFT.** M1-v2 is SFT → `dpo-checkpoint-30`, and the
-DPO stage is what produced the low `over_call_rate` of 0.1553. The measured Q4 failure mode is
-exactly that number reverting to 0.2512. Plain QAT on the SFT corpus with token cross-entropy pulls
-the student back toward the **pre-DPO distribution — the one that over-called** — so it would
-plausibly reinforce the failure the experiment exists to fix. A QAT variant that preserved the
-policy correctly would need the DPO objective running under fake quantization, which reintroduces
-preference data and is explicitly excluded above as a confound.
+**The policy being preserved is the post-DPO checkpoint, not the SFT corpus.** M1-v2 is SFT →
+`dpo-checkpoint-30`. The DPO stage did *not* lower over-calling: on the vLLM confirmatory partition
+it rose slightly, 0.1505 (M0) → 0.1529 (M1-v2); 0.1553 is the same M1-v2 reference measured under
+llama.cpp BF16. The measured Q4 failure mode is that 0.1553 rising to 0.2512. Plain QAT on the SFT
+corpus with token cross-entropy trains toward the corpus targets rather than toward the M1-v2
+policy, so it optimizes a proxy for the behaviour the experiment exists to preserve. A QAT variant
+that targeted the M1-v2 policy directly would need the DPO objective running under fake
+quantization, which reintroduces preference data and is explicitly excluded above as a confound.
 
 QAD avoids the proxy entirely: the BF16 teacher **is** the post-DPO policy, immutable and hashed
 (`903f9b11…`). Matching its outputs targets the quantity of interest directly.
@@ -101,7 +107,7 @@ Two secondary advantages:
 
 **QAT would be preferable if** no teacher existed, or if the goal were to *exceed* BF16 behaviour at
 low bits rather than preserve it. Neither applies. A hybrid (KL + a small CE term) is the obvious
-variant, but any CE weight reintroduces the pre-DPO pull described above, so it is not part of
+variant, but any CE weight reintroduces the corpus-target pull described above, so it is not part of
 Stage 1.
 
 ## Scope discipline

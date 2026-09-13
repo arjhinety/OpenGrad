@@ -35,7 +35,10 @@ On the pre-registered internal confirmatory partition (1,277 examples, scored on
 
 The full final-v2 corpus strongly recovered tool-call recall relative to partial-v2. It was not
 promoted because the frozen promotion policy rejected its call-recall regression against B0. No
-M0 threshold or policy was changed after seeing this result.
+M0 threshold or policy was changed after seeing this result. A parent-relative gate
+(`tool_use_promotion_v4`) was introduced afterwards for M1; M0 checkpoint 1800's confirmatory
+metrics also clear every v4 floor, and M1-v2 fails the v3 gate that rejected M0
+(see [`M1_DPO_EVALUATION.md`](M1_DPO_EVALUATION.md)).
 
 ## Paired minus-xLAM finding
 
@@ -64,7 +67,11 @@ and must not be reported as a clean supervision-type causal estimate.
 - Full Canonical-v2 final fingerprint: `8ced403b…`, 173,237 canonical / 161,966 trainable records.
 - Minus-xLAM filtered trainable set: 105,876 `COMPLETE_TRAJECTORY` records and 0
   `CALL_PREDICTION` records.
-- Matched-exposure calculation: `2400 × (29,630,369 / 33,565,721) = 2118.6 → 2119`.
+- Matched-exposure calculation: `2400 × (29,630,369 / 33,565,721) = 2118.6 → 2119`. This matches
+  corpus-level supervised tokens, not logged exposure: the training logs record 6,743,788
+  supervised tokens for the matched arm against 5,678,531 for the reference (1.19×), and the
+  selected checkpoints saw 3.36M (matched @1060) and 3.80M (fixed @1200) against the reference's
+  4.27M (@1800). Exposure is therefore not held fixed between the selected checkpoints.
 - DEV partition: 2,373 examples, fingerprint `88a56821…`.
 - Confirmatory partition: 1,277 examples, fingerprint `d6d1e394…`.
 - Confirmatory evidence is **pre-registered internal evaluation**, not an untouched external test.

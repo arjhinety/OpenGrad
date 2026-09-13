@@ -28,7 +28,9 @@ and failed".
 
 MMLU-Pro at 768 tokens showed Base 38.0% / M0 36.8% — apparently no regression. Base had hit the
 cap on **37.6%** of items against M0's 7.2%, so the measurement reflected verbosity, not accuracy.
-At 2048 tokens the real gap is **12.0pp**.
+At 2048 tokens the observed gap is **12.0pp**, but Base still truncates on 21.8% of items against
+M0's 6.3%, so under the rule below it is reported as an interval: **+6.4pp to +33.1pp** under
+truncation-adversarial resolution (observed +12.0pp).
 
 Requirements:
 
@@ -44,8 +46,9 @@ Requirements:
 ### 0.4 Aggregate scores hide behavioural change
 
 On the 7-case OpenWeights sentinel, Base and the promoted checkpoint both scored **5/7** — Base by
-answering two items *wrongly*, the promoted checkpoint by *refusing* them. Identical score, opposite
-behaviour. Always inspect failure modes, not just totals, and never let a 7-case suite carry a
+answering `trap-arithmetic` and `multi-step-change` *wrongly*, the promoted checkpoint by passing
+`trap-arithmetic` and *refusing* `multi-step-change` and `format-constraint`. Identical score,
+different failures and opposite behaviour. Always inspect failure modes, not just totals, and never let a 7-case suite carry a
 capability conclusion.
 
 ### 0.5 Scorers must be deterministic, and you have to check
