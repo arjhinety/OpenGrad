@@ -232,5 +232,5 @@ class OnPolicyDistillationTrainerBackend(TrainerBackend):
             )
 
         raise NotImplementedError(
-            "Live on-policy distillation requires accelerator execution. Use dry_run=True for pre-GPU testing."
+            "Live on-policy distillation is deliberately unimplemented: M2 was closed as NOT RUN / NOT JUSTIFIED and needs its own design freeze first (reports/M2_DECISION.md). Use dry_run=True or backend='mock' to exercise the pipeline."
         )

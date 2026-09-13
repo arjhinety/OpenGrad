@@ -208,20 +208,24 @@ Evaluation layers, and what has actually run in each:
 | Layer | Purpose | Current status |
 |---|---|---|
 | Behavioral held-out | Tool-use policy (when to call, answer, clarify, refuse) | **Executed** — When2Call, 3,650 examples |
-| External capability | General regressions and transfer | **Prepared, not executed** — 17 Tier A–E benchmarks, all frozen |
+| External capability | General regressions and transfer | **3 of 17 executed** — IFEval, GSM8K, MMLU-Pro (Tier B) on Base → M0 → M1-v2; the other 14 are frozen, not executed |
 | Agent / runtime | Realistic transfer in agent loops | Planned |
 | Systems | Latency, throughput, memory, spec decoding | Planned |
 
-No external benchmark score exists: the runs under `reports/benchmarks/` used the deterministic mock
-backend. Details: [benchmark inventory and counting convention](docs/benchmarks/README.md) ·
+The three executed external benchmarks ran in the H200 capability-diagnosis campaign with the
+upstream scorers (IFEval 541 prompts, GSM8K 1,319 questions in two arms, MMLU-Pro 12,032 items);
+results are in [`results/benchmarks/h200/capability_v1/`](results/benchmarks/h200/capability_v1/)
+and the verdict in [`results/final_campaign_verdict.json`](results/final_campaign_verdict.json).
+The runs under `reports/benchmarks/` are different: they used the deterministic mock backend and
+validate only the result contract. Details: [benchmark inventory and counting convention](docs/benchmarks/README.md) ·
 [benchmark strategy](docs/evaluation/BENCHMARK_STRATEGY.md) · [dataset releases](docs/publishing/huggingface-datasets.md) ·
 [supervision contract](reports/SUPERVISION_CONTRACT_REPORT.md).
 
 ## Current Limitations
 
 - **Scope:** the empirical record is one model family (Qwen3.5-2B). No cross-model replication has run.
-- **External benchmarks:** all 17 Tier A–E benchmarks are prepared but not executed; there is no external score.
-- **On-policy distillation:** scaffold only — the live training path is unimplemented and the one recorded M2 run is mock-only (`INVALID`).
+- **External benchmarks:** 3 of the 17 Tier A–E benchmarks have real scores (IFEval, GSM8K, MMLU-Pro); the tool-use (Tier A), agent-transfer (Tier C), stretch and systems tiers are prepared but not executed.
+- **On-policy distillation:** deliberately not run. M1-v2 exposed no calibration failure that teacher guidance would address, so M2 was closed as `NOT RUN / NOT JUSTIFIED` ([decision](reports/M2_DECISION.md)); the trainer is a mock-tested scaffold whose live path refuses to run, and the one recorded M2 run is mock-only (`INVALID`).
 - **Quantization (GGUF):** executed. Nine PTQ rungs were built from a BF16 GGUF with a frozen
   importance matrix and scored on the 1,277-example confirmatory partition. Only **Q6_K (1.45 GiB)
   and Q8_0 (1.87 GiB)** pass `quantization_preservation_v1`; every rung at Q5_K_M and below fails.
