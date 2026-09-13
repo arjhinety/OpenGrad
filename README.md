@@ -330,7 +330,7 @@ Operate OpenGrad from an agent harness through the same documented `opengrad …
 
 - [OpenWeights](https://github.com/alpharomercoma/openweights) — independent on-device execution environment for compatible GGUF/llama.cpp and ExecuTorch artifacts; OpenGrad defines experiments and evidence, OpenWeights runs compatible artifacts.
 - [OpenPapers](https://github.com/arjhinety/OpenPapers) — provenance-preserving scholarly retrieval used during active research; its findings are research inputs, not OpenGrad results.
-- [Experimental Machines](https://experimentalmachines.org/) — the independent research group this program supports.
+- [Experimental Intelligence](https://experimentalintelligence.org/) — the machine-learning research effort OpenGrad belongs to. It grew out of [Experimental Machines](https://experimentalmachines.org/), the same team's first effort, which benchmarks LLM inference on datacenter, laptop and phone hardware. When the team moved into ML research, that work became Experimental Intelligence.
 
 OpenGrad records upstream datasets, models, benchmarks, and papers in its registries; those sources
 remain subject to their own licenses and attribution requirements.
@@ -338,6 +338,7 @@ remain subject to their own licenses and attribution requirements.
 ## Citation and License
 
 Please cite the repository using [CITATION.cff](CITATION.cff) until a formal release DOI exists.
+Contact: Arjhine Ty, Experimental Intelligence — [arjhine@experimentalmachines.org](mailto:arjhine@experimentalmachines.org).
 Source code and documentation are licensed under [Apache-2.0](LICENSE).
 
 ---

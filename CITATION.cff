@@ -2,5 +2,11 @@ cff-version: 1.2.0
 title: OpenGrad
 type: software
 message: "Please cite OpenGrad using the repository URL until a formal release DOI exists."
+authors:
+  - given-names: Arjhine
+    family-names: Ty
+    affiliation: Experimental Intelligence
+    email: arjhine@experimentalmachines.org
 repository-code: https://github.com/arjhinety/OpenGrad
+url: https://opengrad.arjhinety.com
 license: Apache-2.0
