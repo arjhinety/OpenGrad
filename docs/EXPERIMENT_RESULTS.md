@@ -9,8 +9,11 @@ authoritative run artifacts.
 > **Eight empirical results are recorded: the B0 baseline and seven post-training interventions.**
 > Historical M0-v1 and M1-v1 were negative; partial-v2 recovered from a data defect; definitive
 > M0-final-v2 restored balanced call behavior but did not pass its original promotion gate; both
-> joint-removal ablations reduced recall; and M1-v2 made a small favorable movement and was promoted
-> under the prospective v4 policy.
+> joint-removal ablations reduced recall; and M1-v2 moved within noise of M0 and was promoted.
+> M1-v2 is promoted under a parent-relative gate (v4) introduced after M0 was
+> evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that rejected M0. The promotion
+> reflects the gate change; the measured difference from M0 (+0.0078 call_f1, 7 of 453 calls,
+> single seed) is within noise.
 
 📊 **[Baseline-to-M0-final findings — charts and comparison](../reports/visual/index.html)** (also
 [on the model card](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final/blob/main/findings.html)).
@@ -23,40 +26,59 @@ The table below lists interventions; the B0 baseline is recorded by the experime
 | Experiment | Model | Change | Capability Δ | Regression | Evidence status | Report |
 | --- | --- | --- | --- | --- | --- | --- |
 | [`qwen35_2b_m0_sft_full_v3`](../runs/qwen35_2b_m0_sft_full_v3/) | Qwen3.5-2B | M0 SFT on canonical corpus v1 | `call_f1` 0.6191 → **0.0000** | Collapsed: `call_recall` 0.9722 → 0.0000 | Negative; weights lost | [M0 report](../reports/M0_SFT_EXECUTION_REPORT.md) |
-| [`qwen35_2b_m1_dpo_v1`](../runs/qwen35_2b_m1_dpo_v1/) | Qwen3.5-2B | DPO on When2Call preference pairs | `call_f1` 0.6191 → **0.1715** best | Over-calling fixed, tool calling destroyed | Negative; not reproducible | [M0 report §5](../reports/M0_SFT_EXECUTION_REPORT.md#5-dpo-was-blocked-now-executed-and-also-negative) |
-| [`qwen35_2b_m0_sft_v2corpus`](../runs/qwen35_2b_m0_sft_v2corpus/) | Qwen3.5-2B | M0 SFT on partial corpus v2 | `call_f1` 0.6191 → **0.5995**; macro recall 0.3621 → **0.6416** | None measured | Partial recovery; not promoted | [M0 report §8](../reports/M0_SFT_EXECUTION_REPORT.md#8-corpus-v2-testing-the-root-cause-rather-than-asserting-it) |
-| [`m0_sft_canonical_v2_final`](../runs/m0_sft_canonical_v2_final/) | Qwen3.5-2B | M0 SFT on **frozen Canonical-v2** | `call_f1` **0.7470**; recall 0.5342 → **0.7594** | Precision −0.026, over-call +0.058 vs partial-v2 | Confirmatory; not promoted | [Execution](../reports/M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md) · [Evaluation](../reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
+| [`qwen35_2b_m1_dpo_v1`](../runs/qwen35_2b_m1_dpo_v1/) | Qwen3.5-2B | DPO on When2Call preference pairs, applied directly to the base (no SFT parent) | `call_f1` 0.6191 → **0.1715** best | Over-calling fixed, tool calling destroyed | Negative; not reproducible | [M0 report §5](../reports/M0_SFT_EXECUTION_REPORT.md#5-dpo-was-blocked-now-executed-and-also-negative) |
+| [`qwen35_2b_m0_sft_v2corpus`](../runs/qwen35_2b_m0_sft_v2corpus/) | Qwen3.5-2B | M0 SFT on partial corpus v2 | `call_f1` 0.6191 → **0.5995** best; macro recall 0.3621 → **0.6416** best (checkpoint 1200 of 4, chosen on this same full set; final checkpoint 2400: 0.5292 / 0.6173) | At checkpoint 1200: `call_recall` 0.9722 → 0.5050 (−0.467), `call_f1` −0.020 vs B0 | Partial recovery; not promoted | [M0 report §8](../reports/M0_SFT_EXECUTION_REPORT.md#8-corpus-v2-testing-the-root-cause-rather-than-asserting-it) |
+| [`m0_sft_canonical_v2_final`](../runs/m0_sft_canonical_v2_final/) | Qwen3.5-2B | M0 SFT on **frozen Canonical-v2** | `call_f1` **0.7470**; recall 0.5342 → **0.7594** | Unsupported −0.080, clarification −0.027, precision −0.026, over-call +0.058 vs partial-v2 | Confirmatory; not promoted | [Execution](../reports/M0_CANONICAL_V2_FINAL_EXECUTION_REPORT.md) · [Evaluation](../reports/M0_CANONICAL_V2_FINAL_EVALUATION.md) |
 | [`m0_v2_final_minus_xlam_fixed_compute`](../runs/m0_v2_final_minus_xlam_fixed_compute/) | Qwen3.5-2B | **Joint xLAM + CALL_PREDICTION removal**, fixed compute (2,400 steps) | `call_f1` 0.7470 → **0.6030**; recall 0.7594 → **0.4879** | Precision +0.054, over-call −0.079 vs full corpus | Confirmatory; not promoted | [Execution](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
-| [`m0_v2_final_minus_xlam_matched_exposure`](../runs/m0_v2_final_minus_xlam_matched_exposure/) | Qwen3.5-2B | **Joint xLAM + CALL_PREDICTION removal**, matched exposure (2,119 steps) | `call_f1` 0.7470 → **0.5557**; recall 0.7594 → **0.4238** | Precision +0.072, over-call −0.105 vs full corpus | Confirmatory; not promoted | [Execution](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
-| [`m1_dpo_canonical_v2_final_v2`](../runs/m1_dpo_canonical_v2_final_v2/) | Qwen3.5-2B | M1 DPO calibration from selected M0-final-v2 | `call_f1` 0.7470 → **0.7548**; recall → **0.7748** | Over-call +0.0024; unsupported −0.0044 vs M0 | **Confirmatory; promoted** | [Execution](../reports/M1_DPO_EXECUTION_REPORT.md) · [Evaluation](../reports/M1_DPO_EVALUATION.md) |
+| [`m0_v2_final_minus_xlam_matched_exposure`](../runs/m0_v2_final_minus_xlam_matched_exposure/) | Qwen3.5-2B | **Joint xLAM + CALL_PREDICTION removal**, matched exposure (2,119 steps) | `call_f1` 0.7470 → **0.5557**; recall 0.7594 → **0.4238** | Precision +0.072, over-call −0.095 vs full corpus | Confirmatory; not promoted | [Execution](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [Evaluation](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) |
+| [`m1_dpo_canonical_v2_final_v2`](../runs/m1_dpo_canonical_v2_final_v2/) | Qwen3.5-2B | M1 DPO calibration from selected M0-final-v2 | `call_f1` 0.7470 → **0.7548** (+0.0078, 351 vs 344 of 453 CALL examples); recall → **0.7748** | Over-call +0.0024; unsupported −0.0044; clarification −0.0027 vs M0 | **Confirmatory; promoted under v4** (fails v3 on all 4 DEV checkpoints; difference from M0 within noise) | [Execution](../reports/M1_DPO_EXECUTION_REPORT.md) · [Evaluation](../reports/M1_DPO_EVALUATION.md) |
 
 ## Caveats
 
 **B0's `call_f1` comes from a degenerate policy.** It scores 0.6191 by calling a tool on 64.3% of
 examples whose correct answer is not a call, recalling 97.2% of gold CALLs with 1.3%
-unsupported-accuracy. The metric that flatters the baseline is the one metric where the corrected
-model is still slightly behind; on balanced per-class recall the trained model is ahead by 0.28. Do
-not read the leaderboard column as the finding.
+unsupported-accuracy (full set, n=3,650; on the confirmatory partition B0 scores 0.6264, calling on
+62.4% of no-call items). `call_f1` is the metric that flatters the baseline: partial-v2 was still
+behind B0 on it (0.5995), while M0-final-v2 and M1-v2 are ahead on the confirmatory partition by
+0.121 and 0.128. On balanced per-class (macro) recall the gap is far larger — B0 0.3699 against
+M0-final-v2 0.6902 on the same partition. Do not read the leaderboard column as the finding.
+
+**The table mixes evaluation sets.** B0, M0-v1, M1-v1 and partial-v2 are scored on the full
+3,650-example held-out; M0-final-v2, both ablations and M1-v2 on the pre-registered 1,277-example
+confirmatory partition. The partial-v2 recall of 0.5342 and the M0-final regression column compare
+against partial-v2's confirmatory-partition row in the
+[M0 evaluation report](../reports/M0_CANONICAL_V2_FINAL_EVALUATION.md); no per-partition artifact
+for partial-v2 is committed, so those deltas cannot be recomputed from `runs/`. Every number here is
+a single seed with no interval.
 
 **The historical M1-v1 DPO result is not reproducible, and its best checkpoint no longer exists.** Its
 steps 100 and 200 were deleted before upload, and a repeat run with config, data, seed, and
 environment pinned did not reproduce the trajectory. The direction of that failure holds in both
-runs; the claim that degradation is monotone from step 100 is withdrawn. The parent-based M1-v2 is a
-separate identity, reported independently.
+runs; the claim that degradation is monotone from step 100 is withdrawn. M1-v1 is DPO applied
+directly to the base (`parent_experiment_id: null`, reference = the initial policy), and its
+published checkpoint 300 refuses 70.7% (933/1,319) of zero-shot GSM8K, so the general-capability
+regression is not specific to SFT (see the [README](../README.md#the-tool-policy-gain-came-with-a-general-capability-regression)).
+The parent-based M1-v2 is a separate identity, reported independently.
 
-**The definitive M0 is not a promotion.** By the repository's own promotion policy every checkpoint
-is `REJECT`, including the selected one, because B0's recall of 0.9715 is itself a property of
-over-calling and the policy caps over-call at 0.20 while forbidding a recall drop beyond 0.10. The
-gate was left as written rather than adjusted after seeing the result. That tension is a finding for
-the next experiment's design, not a threshold to move.
+**The definitive M0 is not a promotion.** Under the repository's promotion policy at the time
+(`tool_use_promotion_v3`) every checkpoint is `REJECT`, including the selected one. Checkpoints
+1200, 1800 and 2400 fail `regression.call_recall`: they fall more than 0.10 below B0's DEV recall of
+0.9715, which is itself a property of over-calling. Checkpoint 600 stays within that margin (−0.059)
+and fails only the 0.20 over-call cap (0.3436). No checkpoint here met both constraints. The v3 gate
+was left as written rather than adjusted after seeing the result. The later M1-v2 promotion used a
+different, parent-relative gate (`tool_use_promotion_v4`, committed after M0's confirmatory results);
+M0's own confirmatory metrics also clear v4, so the promotion reflects the gate change rather than a
+measured improvement over M0.
 
 **The minus-xLAM arms are a joint removal, not a pure xLAM ablation.** Canonical-v2 maps xLAM to
 *every* `CALL_PREDICTION` record and the other three sources to `COMPLETE_TRAJECTORY`, so removing
 xLAM also removes the corpus's entire call-prediction supervision channel. The two arms measure
 **removing xLAM together with that channel**; they cannot separate source identity from supervision
-type, so **no xLAM-specific causal claim** is made. Both arms lose far more recall than over-calling,
-and the arm that trains more (fixed compute) does better — the recall loss tracks the missing
-supervision, not the reduced budget. The separate `CALL_PREDICTION`-only vs `COMPLETE_TRAJECTORY`-only
+type, so **no xLAM-specific causal claim** is made. Both arms lose far more recall than over-calling.
+Exposure was not held fixed, so the result does not separate missing supervision from reduced
+exposure: the "matched" arm logged 1.19× the reference's supervised tokens (6,743,788 vs 5,678,531),
+and the selected checkpoints (1060 matched, 1200 fixed) had seen 3.36M / 3.80M supervised tokens
+against 4.27M for the reference's selected checkpoint 1800. The separate `CALL_PREDICTION`-only vs `COMPLETE_TRAJECTORY`-only
 design is prepared and unrun, and is source-confounded in the same way. See the
 [ablation design](../reports/M0_V2_FINAL_ABLATION_DESIGN.md).
 

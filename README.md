@@ -32,8 +32,8 @@ on the record rather than editing them away. The first study is reliable tool us
 |---|---|
 | Base model | `Qwen/Qwen3.5-2B` at revision `15852e8c…` — the only executed target so far |
 | Canonical dataset | **Canonical-v2 final** — 173,237 records, 161,966 trainable, 4 sources, fingerprint `8ced403b…` |
-| Latest completed stage | **General-capability diagnosis** across Base → M0 → M1-v2 on real IFEval, GSM8K and MMLU-Pro. It found an **SFT-induced regression** the tool-policy gate could not see |
-| Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30. **Improved on tool policy; materially worse than Base on general capability. Not an unqualified improvement** |
+| Latest completed stage | **General-capability diagnosis** across Base → M0 → M1-v2 on real IFEval, GSM8K and MMLU-Pro. It found a **general-capability regression associated with tool-policy post-training** that the tool-policy gate could not see. It appears after SFT (M0) and also after DPO applied directly to Base (M1-v1), so it is not specific to SFT |
+| Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30, promoted under the parent-relative `tool_use_promotion_v4` gate. **Improved on tool policy over Base; within noise of its M0 parent; materially worse than Base on general capability. Not an unqualified improvement** |
 | Next research stage | Refusal-supervision ablation — [`ROADMAP.md`](ROADMAP.md) step 16, **BLOCKED_ON_PREFLIGHT**. M2 distillation remains unexecuted scaffold |
 | Behavioral held-out | When2Call — 3,650 examples. **Contains no ANSWER examples**, which is why the regression escaped promotion |
 | Largest current limitation | One 2B model, one lineage, no replicate. The promoted checkpoint refuses 100% of bare arithmetic questions |
@@ -90,25 +90,34 @@ reports `FAIL` on those gates by design; the registry and configuration checks s
 
 ## Latest Results
 
-The primary trajectory of Study 001. Scores are `call_f1` / `call_recall`; B0 is the full
-held-out set (n=3,650) and M0/M1 are the pre-registered confirmatory partition. The same results
-written as a narrative, with the charts: [Study 001 results][study-001].
+The primary trajectory of Study 001. Scores are `call_f1` / `call_recall` on the pre-registered
+confirmatory partition (n=1,277), single seed, no interval. On the full held-out set (n=3,650) B0
+scores 0.6191 / 0.9722. The same results written as a narrative, with the charts:
+[Study 001 results][study-001].
 
 | Stage | Intervention | Primary result | Status |
 |---|---|---|---|
-| **B0** | Base `Qwen/Qwen3.5-2B` | 0.6191 / 0.9722 — from a degenerate policy that calls on 64% of no-call items | Baseline |
-| **M0** | Canonical-v2 SFT (checkpoint 1800) | 0.7470 / 0.7594 | Selected; **not promoted** (recall-regression gate) |
-| **M1** | M1-v2 DPO calibration (checkpoint 30) | **0.7548 / 0.7748** | **PROMOTED** |
+| **B0** | Base `Qwen/Qwen3.5-2B` | 0.6264 / 0.9735 — from a degenerate policy that calls on 62% of no-call items | Baseline |
+| **M0** | Canonical-v2 SFT (checkpoint 1800) | 0.7470 / 0.7594 | Selected; **not promoted** under `tool_use_promotion_v3` (recall-regression check against B0) |
+| **M1** | M1-v2 DPO calibration (checkpoint 30) | **0.7548 / 0.7748** | **PROMOTED** under `tool_use_promotion_v4` (checks against the M0 parent) |
 | **M2** | On-policy distillation | — | **Not executed** (mock-only scaffold) |
+
+**"Not promoted" → "PROMOTED" is a gate change, not a measured improvement.** M1-v2 is promoted
+under a parent-relative gate (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2
+fails the v3 gate that rejected M0 (all four DEV checkpoints `REJECT`; DEV recall 0.7257 against
+B0's 0.9715). The promotion reflects the gate change; the measured difference from M0 (+0.0078
+call_f1, 7 of 453 calls, single seed) is within noise.
 
 - Full intervention record, caveats, and published artifacts: [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md)
 - Promoted evaluation: [`reports/M1_DPO_EVALUATION.md`](reports/M1_DPO_EVALUATION.md)
 - Derived result index: [`results/registry.jsonl`](results/README.md)
+- Corrections to frozen reports and published artifacts: [**Errata**](reports/ERRATA.md)
 
 Seven post-training interventions have been executed in total: one negative on corpus v1, one
 partial recovery on corpus v2, the definitive final-v2 (selected, not promoted), two joint-removal
-ablations (both negative), a rejected historical DPO attempt, and the promoted M1-v2. Negative
-results are not summarized away here; the full record is in [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md).
+ablations (both negative), a rejected historical DPO attempt applied directly to Base, and the
+promoted M1-v2. Negative results are not summarized away here; the full record is in
+[`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md).
 
 ### The tool-policy gain came with a general-capability regression
 
@@ -124,22 +133,34 @@ tool-policy gate was structurally unable to detect.
 | IFEval prompt-level strict | **67.8%** | 45.1% | 45.8% |
 | MMLU-Pro (5-shot, 12,032 items) | **49.0%** | 37.0% | 37.0% |
 
-**Two separable failures, both introduced at SFT:**
+**Two separable failures, both first observed at M0 on the primary lineage:**
 
 1. **A prompt-regime-conditioned refusal policy.** The promoted checkpoint declines every bare
-   arithmetic question — and answers 55.5% of *the same 1,319 questions* when eight worked
-   exemplars are present. It never refuses 5-shot MMLU-Pro. Refusal is conditioned on the request
-   shape, not the subject.
+   arithmetic question — yet with eight worked exemplars it answers all 1,319 of *the same
+   questions* (answer rate 100%) and gets 55.5% of them right. It never refuses 5-shot MMLU-Pro.
+   Refusal is conditioned on the request shape, not the subject.
 2. **Genuine capability loss.** The 8-shot and MMLU-Pro gaps occur where refusal is ~0%, so they
    cannot be explained by declining to answer.
 
-**Preference training changed neither** — `M0 → M1-v2` moves every metric by under 1pp, and 82% of
-GSM8K generations are byte-identical between the two.
+**The M0 → M1-v2 DPO step did not materially change either on this suite** — it moves every metric
+by under 1pp, and 82% of GSM8K generations are byte-identical between the two.
+
+**What the regression is associated with.** It is a general-capability regression associated with
+tool-policy post-training on When2Call-derived data. It appears after SFT (M0) and also after DPO
+applied directly to the base (M1-v1), so it is not specific to SFT. M1-v1 (`qwen35_2b_m1_dpo_v1`,
+checkpoint 300) has no SFT parent (`parent_experiment_id: null`, reference = the initial policy,
+preference data `when2call_pref_v1`), and it refuses **70.7%** (933/1,319) of the same zero-shot
+GSM8K questions, against Base's 0%. Its 8-shot accuracy (70.4%) matches Base, its IFEval
+prompt-level strict is 43.4%, and its MMLU-Pro at the corrected budget is unmeasured. Causation is
+not established: one lineage, one seed, no replicate.
 
 The original MMLU-Pro measurement used a 768-token budget and reported 38.0 / 36.8 / 36.9 —
 apparently no regression at all. That was an artifact: Base hit the cap on 37.6% of items against
-M0's 7.2%, so the benchmark was measuring verbosity. Re-run at 2048 tokens, the real gap is 12.0pp.
-The superseded run is retained, not deleted.
+M0's 7.2%, so the benchmark was measuring verbosity. Re-run at 2048 tokens, the observed gap is
+12.0pp — a point estimate. Base still hits the cap on 21.8% of items against M0's 6.3%, so the
+truncation-adversarial interval is **6.4–33.1pp**: the gap stays positive however the truncated
+items resolve, but its size is not pinned down. The superseded 768-token runs for these three
+stages are retained, not deleted.
 
 - Independent audit of every number above: [`reports/FINAL_CAMPAIGN_AUDIT.md`](reports/FINAL_CAMPAIGN_AUDIT.md)
 - Full diagnosis: [`reports/GENERAL_CAPABILITY_REGRESSION.md`](reports/GENERAL_CAPABILITY_REGRESSION.md)
@@ -200,7 +221,7 @@ Full statements, the first study's scope, and the experimental decision pipeline
 | Dataset release | Records | Role |
 |---|---:|---|
 | [Canonical-v2 final](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2) | 173,237 (161,966 trainable) | **Current** training corpus |
-| [Canonical-v1](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1) | 213,951 | Historical; pinned by B0 and earlier results |
+| [Canonical-v1](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1) | 213,951 | Historical; training corpus of the negative M0-v1 run (B0's record pins only the held-out manifest, not a corpus) |
 | [Partial-v2 snapshot](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot) | 103,036 | Historical; corpus behind the first successful M0 |
 
 Evaluation layers, and what has actually run in each:
@@ -223,29 +244,46 @@ validate only the result contract. Details: [benchmark inventory and counting co
 
 ## Current Limitations
 
+Claims in frozen reports and published artifacts that were later found wrong are corrected in the
+[**Errata**](reports/ERRATA.md) rather than edited in place.
+
 - **Scope:** the empirical record is one model family (Qwen3.5-2B). No cross-model replication has run.
 - **External benchmarks:** 3 of the 17 Tier A–E benchmarks have real scores (IFEval, GSM8K, MMLU-Pro); the tool-use (Tier A), agent-transfer (Tier C), stretch and systems tiers are prepared but not executed.
 - **On-policy distillation:** deliberately not run. M1-v2 exposed no calibration failure that teacher guidance would address, so M2 was closed as `NOT RUN / NOT JUSTIFIED` ([decision](reports/M2_DECISION.md)); the trainer is a mock-tested scaffold whose live path refuses to run, and the one recorded M2 run is mock-only (`INVALID`).
 - **Quantization (GGUF):** executed. Nine PTQ rungs were built from a BF16 GGUF with a frozen
   importance matrix and scored on the 1,277-example confirmatory partition. Only **Q6_K (1.45 GiB)
   and Q8_0 (1.87 GiB)** pass `quantization_preservation_v1`; every rung at Q5_K_M and below fails.
+  Under the pre-registered smallest-passing-format rule the recommended release is **Q6_K** (the
+  closure manifest records `recommended_release_rung: Q6_K`); neither passing rung meets the
+  stricter secondary release bar. The pass/fail line is inside run-to-run noise: an H200 vLLM BF16
+  rerun of the unquantized reference itself fails the gate (recall 0.7638 < 0.7671 floor), and Q6_K
+  clears the precision floor by one example (357/490 against 356.96 required).
   Strict engine tokenizer parity **FAILED** on 6/1,277 prompts (a stock-llama.cpp `\p{M}`
   pre-tokenizer difference, all Thai) and was not redefined — see
   [`QUANTIZATION_ENGINE_PARITY.md`](reports/QUANTIZATION_ENGINE_PARITY.md) and
   [`QUANTIZATION_PTQ_EVALUATION.md`](reports/QUANTIZATION_PTQ_EVALUATION.md).
-- **Quantization (ExecuTorch):** CPU/XNNPACK fp32 and 8da4w exported and audited (99.98% of
-  named-data weights are int4); **no behavioural verdict** — scoring is run externally. Snapdragon
-  is `REJECTED_EXPORT`; MediaTek is `BLOCKED_PORT_INCOMPLETE` (SDK now obtained, Gated DeltaNet
-  layer unimplemented).
+- **Quantization (ExecuTorch):** CPU/XNNPACK fp32 and 8da4w exported and audited. 99.98% of the
+  named-data weights are int4, but overall int4 coverage is **78.7%** of stored parameters: the
+  embedding table stays fp32 and is 65.7% of the quantized artifact. **No behavioural verdict** —
+  scoring is run externally. Snapdragon is `REJECTED_EXPORT`; MediaTek is `BLOCKED_PORT_INCOMPLETE`
+  (SDK now obtained, Gated DeltaNet layer unimplemented).
 - **Device and speculation:** integration or reservation only; no on-device study, optimization
-  run, or speculative benchmark exists. All throughput figures are A100-80GB, not device numbers.
+  run, or speculative benchmark exists. Every throughput figure is a datacentre number, not a
+  device number: the GGUF ladder's are A100-80GB, and the H200 vLLM saturation sweep and
+  performance microsuite are in [`reports/H200_BENCHMARK_RUN.md`](reports/H200_BENCHMARK_RUN.md).
 - **Reproducibility gaps:** the historical M1-v1 DPO best checkpoints no longer exist, and some scaffold-era runs retain only metadata.
 - **Measurement coverage:** tool selection, argument validity, and schema validity are not computed by the current evaluator.
 
 ## Reproducing Experiments
 
-The B0 baseline, the M0 SFT lineage (including both ablations), and the M1 DPO runs are recorded and
-reproducible from committed configs. The baseline workflow is specified in the
+The B0 baseline, the M0 SFT lineage (including both ablations), and the M1 DPO runs are recorded:
+experiment records and ledgers for all of them, and committed resolved configs, seeds and dataset
+hashes for every training run (B0's environment and predictions sit under
+[`reports/baselines/`](reports/baselines/qwen35_2b_baseline/RESULT.md)). Recorded is not the
+same as reproduced: the only repeat ever attempted, `qwen35_2b_m1_dpo_v1_restore` (M1-v1 re-run
+with config, data, seed and environment pinned), did not reproduce the original trajectory and is
+annotated `NON_REPRODUCIBLE_REPEAT`. No other run has been repeated, so every other result here is
+a single, unreplicated run. The baseline workflow is specified in the
 [baseline reproduction protocol](docs/experiments/BASELINE_REPRODUCTION_PROTOCOL.md): acquire the
 accelerator, fetch the exact model revision, validate its native template and parser, run sanity
 checks, execute the selected evaluations, compare revisions, and pass the reproduction gate. That

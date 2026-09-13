@@ -118,26 +118,54 @@ def _confirmatory_metrics(experiment_id: str) -> dict[str, float]:
     return {}
 
 
-def _published_map() -> dict[str, str]:
-    """Experiment id -> published repository, from the release records."""
-    published: dict[str, str] = {}
+def _repo_type(entry: dict, default: str = "model") -> str:
+    """The Hub repository type a release entry declares; Hub URLs differ for datasets."""
+    value = str(entry.get("repo_type") or default)
+    return value if value in {"model", "dataset"} else default
+
+
+def _published_map() -> dict[str, tuple[str, str]]:
+    """Experiment id -> (published repository, Hub repo type), from the release records.
+
+    A record naming the experiment or the repository directly always wins. The collection item
+    lists in a publication record are consulted only for experiments no direct entry covers,
+    because a collection membership says that a repository is published but not what it holds.
+    """
+    published: dict[str, tuple[str, str]] = {}
+    from_collections: dict[str, tuple[str, str]] = {}
     for path in sorted((ROOT / "reports" / "releases").glob("*.json")):
         record = _read_json(path)
         experiment_id = record.get("experiment_id")
         repository = record.get("repository") or record.get("hub_repository")
         if experiment_id and repository:
-            published[str(experiment_id)] = str(repository)
+            published[str(experiment_id)] = (str(repository), _repo_type(record))
         for model in record.get("models") or []:
             repository = model.get("repository")
             mapped = REPOSITORY_EXPERIMENTS.get(str(repository))
             if mapped:
-                published[mapped] = str(repository)
+                published[mapped] = (str(repository), _repo_type(model))
         model = record.get("model")
         if isinstance(model, dict):
             mapped = REPOSITORY_EXPERIMENTS.get(str(model.get("repository")))
             if mapped:
-                published[mapped] = str(model.get("repository"))
+                published[mapped] = (str(model.get("repository")), _repo_type(model))
+        collections = record.get("collections")
+        if isinstance(collections, dict):
+            for kind, repo_type in (("models", "model"), ("datasets", "dataset")):
+                collection = collections.get(kind)
+                items = collection.get("items") if isinstance(collection, dict) else None
+                for repository in items or []:
+                    mapped = REPOSITORY_EXPERIMENTS.get(str(repository))
+                    if mapped:
+                        from_collections.setdefault(mapped, (str(repository), repo_type))
+    for experiment_id, entry in from_collections.items():
+        published.setdefault(experiment_id, entry)
     return published
+
+
+def _hub_url(repository: str, repo_type: str) -> str:
+    prefix = "datasets/" if repo_type == "dataset" else ""
+    return f"https://huggingface.co/{prefix}{repository}"
 
 
 def _baseline_metrics() -> dict[str, float]:
@@ -185,7 +213,7 @@ def build_document() -> str:
                 "datasets": ", ".join(record.get("dataset_manifest_ids") or []) or "—",
                 "metrics": metrics,
                 "promotion": promotion,
-                "published": published.get(experiment_id, ""),
+                "published": published.get(experiment_id),
                 "reports": REPORTS.get(experiment_id, []),
                 "launched": str(record.get("launch_timestamp", "")),
             }
@@ -263,7 +291,7 @@ def build_document() -> str:
         reports = " · ".join(_link(path) for path in row["reports"]) or "—"
         published = row["published"]
         published_cell = (
-            f"[`{published}`](https://huggingface.co/{published})" if published else "—"
+            f"[`{published[0]}`]({_hub_url(*published)})" if isinstance(published, tuple) else "—"
         )
         lines.append(
             "| [`{experiment_id}`](../runs/{experiment_id}/) | {algorithm} | {datasets} | "
