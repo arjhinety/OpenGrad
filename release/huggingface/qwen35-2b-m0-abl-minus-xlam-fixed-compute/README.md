@@ -39,7 +39,7 @@ would need another evidence-backed `CALL_PREDICTION` source.
 
 | run | `call_f1` | precision | recall | over_call | clarify | unsupp |
 |---|---:|---:|---:|---:|---:|---:|
-| B0 (untrained) | 0.6191 | 0.4542 | 0.9722 | 0.6425 | 0.1009 | 0.0131 |
+| B0 (untrained) | 0.6264 | 0.4618 | 0.9735 | 0.6238 | 0.1186 | 0.0177 |
 | reference (full corpus) @1800 | **0.7470** | 0.7350 | **0.7594** | 0.1505 | 0.7682 | 0.5430 |
 | **this arm** (fixed-compute) @1200 | 0.6030 | 0.7893 | 0.4879 | 0.0716 | 0.8059 | 0.6026 |
 | matched-exposure arm @1060 | 0.5557 | 0.8067 | 0.4238 | 0.0558 | 0.8194 | 0.6203 |
@@ -48,17 +48,30 @@ Removing the joint source/channel drops recall far below both the reference and 
 precision rises and over-calling falls to a small fraction. The models become conservative but
 stop recalling the calls they should make — the direction the missing supervision predicts.
 
-The arm that trains **more** (this one: 2,400 steps, ~1.53× exposure over the retained corpus)
-does **better** than the matched-exposure arm, so the recall loss tracks the missing supervision
-rather than the reduced training budget. The two arms are one experiment and must be read
-together.
+The arm that trains **more** (this one: 2,400 steps, ~1.53× the reference's passes over its
+corpus) does **better** than the matched-exposure arm. That is consistent with the recall loss
+tracking the missing supervision, but it does not rule out exposure. Batches are token-budgeted,
+so steps do not hold supervised tokens fixed: the matched-exposure arm logged 6,743,788
+supervised tokens against the reference's 5,678,531 (1.19×, not ~1.0×), and this arm 7,683,301.
+The metrics above come from checkpoints that saw fewer supervised tokens than the reference's
+selected checkpoint: 3.80M here at 1200 and 3.36M for the matched arm at 1060, against 4.27M for
+the reference at 1800. "Exposure does not explain the result" is therefore not supported as
+stated. The two arms are one experiment and must be read together.
 
 ## Honest limits
 
 **Not a promotion.** Every checkpoint of both arms is `REJECTED` on `regression.call_recall`
-against B0, as is every checkpoint of the reference run. The gate was left exactly as written.
+against B0 (every matched-arm DEV checkpoint and fixed-arm 1800/2400 also fail
+`call_f1_retention`). Every checkpoint of the reference run is rejected too, its checkpoint 600
+on over-call alone. The gate was left exactly as written.
 
 **Single seed.** A small between-arm difference is a finding to replicate, not a settled result.
+
+**Provenance.** The matched-exposure arm was launched at 12:49 UTC on 2026-09-11 from commit
+`500cb4e` with uncommitted changes (`git_dirty: true` in `experiment.json` and `events.jsonl`).
+`0807fa3` is the 13:26 UTC commit that recorded the finished run, not the launch commit. This
+arm's own `run_start` event records commit `95a8225` with `git_dirty: true`, while its
+`experiment.json` records `git_dirty: false`.
 
 **Some behaviours are unmeasured.** Tool-selection accuracy, argument validity and schema
 validity are not computed; their absence is not a zero. The evaluation population has no

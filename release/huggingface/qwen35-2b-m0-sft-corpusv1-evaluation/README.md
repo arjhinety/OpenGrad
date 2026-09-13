@@ -63,17 +63,22 @@ model had stopped emitting tool calls entirely: `call_recall` 0.9722 → 0.0000,
 collapse seen from the other side — the baseline's 0.6425 over-call rate came from an
 always-call policy, and removing all calls removes all over-calls with it.
 
-The cause is in the data, not the training procedure. At the training boundary, corpus v1
-retained 55,719 records of which **9 (0.0162%)** contained a tool call in their supervised
-target. The records that carried tool calls were the ones being discarded: 51,034 rejected as
-orphaned tool results because the Glaive adapter could not parse that revision's call format,
-and 154,760 quarantined for declaring tool schemas as Python type hints where JSON Schema is
-required. There was almost nothing in the signal to learn tool calling from.
+The evidence points to the data rather than the training procedure. At the training boundary,
+corpus v1 retained 55,719 records of which **9 (0.0162%)** contained a tool call in their
+supervised target. The records that carried tool calls were the ones being discarded: of the
+154,760 that failed to render, 51,034 were Glaive records rejected as orphaned tool results
+because the Glaive adapter could not parse that revision's call format; xLAM's records all end
+on a call that no tool result answers; and most ToolACE, LoopTool and BUTTON records failed the
+canonical schema contract. There was almost nothing in the signal to learn tool calling from.
 
-The controlled test of that explanation is the corpus-v2 run — same base checkpoint, same
-procedure, same hyperparameters, same evaluation, corpus the only variable — which reached
-`call_f1` 0.5995 and `call_recall` 0.5050. See
+The test of that explanation is the corpus-v2 run — same base checkpoint, same procedure, same
+hyperparameters, same evaluation — which reached `call_f1` 0.5995 and `call_recall` 0.5050 at
+checkpoint 1200, the best of its four on this same set. See
 [`arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2).
+The corpus was the only thing changed, but it changed in more than one way: v2 also dropped
+three of v1's six sources (xLAM, BUTTON, LoopTool), used a smaller When2Call slice (4,000
+records against 14,829), and has 101,785 trainable records against 55,719. The pair points to
+the corpus rather than the procedure; it does not isolate tool-call supervision as the cause.
 That comparison is what makes this run evidence rather than just a failed attempt, and it is
 also why this repository may be useful: it is the losing half of a controlled pair, kept
 because the loss is the measurement.

@@ -18,7 +18,8 @@ datasets:
 # OpenGrad — Qwen3.5-2B, joint xLAM + CALL_PREDICTION removal (matched-exposure)
 
 Full-parameter SFT of `Qwen/Qwen3.5-2B` on Canonical-v2 with xLAM removed, training for a horizon
-that matches the reference's **supervised-token exposure** (2,119 steps). Produced by
+computed to match the reference's **supervised-token exposure** (2,119 steps; the logged exposure
+came out 1.19×, see below). Produced by
 [OpenGrad](https://github.com/arjhinety/OpenGrad).
 
 **Research artifact, not a production model.** Published because the experiment's whole point is a
@@ -46,26 +47,38 @@ is the mass the loss acts on. xLAM's records are short, so the measures disagree
 (records → 1,569, rendered tokens → 1,544, supervised tokens → 2,119). This arm additionally
 spends **11.7% fewer optimizer steps/FLOPs** than the reference.
 
+The match holds for the corpus totals, not for what training saw. Batches are token-budgeted, so
+steps do not hold supervised tokens fixed: logged, this arm saw 6,743,788 supervised tokens
+against the reference's 5,678,531 (**1.19×**, not ~1.0×).
+
 ## Results (confirmatory partition, 1,277 examples, scored once)
 
 | run | `call_f1` | precision | recall | over_call | clarify | unsupp |
 |---|---:|---:|---:|---:|---:|---:|
-| B0 (untrained) | 0.6191 | 0.4542 | 0.9722 | 0.6425 | 0.1009 | 0.0131 |
+| B0 (untrained) | 0.6264 | 0.4618 | 0.9735 | 0.6238 | 0.1186 | 0.0177 |
 | reference (full corpus) @1800 | **0.7470** | 0.7350 | **0.7594** | 0.1505 | 0.7682 | 0.5430 |
 | fixed-compute arm @1200 | 0.6030 | 0.7893 | 0.4879 | 0.0716 | 0.8059 | 0.6026 |
 | **this arm** (matched-exposure) @1060 | 0.5557 | 0.8067 | 0.4238 | 0.0558 | 0.8194 | 0.6203 |
 
 Recall collapses furthest here while precision is highest and over-calling is lowest — the same
-direction as the fixed-compute arm, run further. Because the arm that trains **more** does
-**better**, the recall loss is not explained by the reduced budget; it tracks the missing
-supervision. The two arms are one experiment and must be read together.
+direction as the fixed-compute arm, run further. The arm that trains **more** does **better**,
+which is consistent with the recall loss tracking the missing supervision, but exposure is not
+ruled out: the metrics above come from checkpoints that saw fewer supervised tokens than the
+reference's selected checkpoint (3.36M here at 1060 and 3.80M for the fixed arm at 1200, against
+4.27M for the reference at 1800). "The reduced budget does not explain the result" is not
+supported as stated. The two arms are one experiment and must be read together.
 
 ## Honest limits
 
 **Not a promotion.** Every checkpoint of both arms is `REJECTED` on `regression.call_recall`
-against B0. The gate was left exactly as written.
+against B0 (every matched-arm DEV checkpoint and fixed-arm 1800/2400 also fail
+`call_f1_retention`). The gate was left exactly as written.
 
 **Single seed.** A small between-arm difference is a finding to replicate, not a settled result.
+
+**Provenance.** The matched-exposure arm was launched at 12:49 UTC on 2026-09-11 from commit
+`500cb4e` with uncommitted changes (`git_dirty: true` in `experiment.json` and `events.jsonl`).
+`0807fa3` is the 13:26 UTC commit that recorded the finished run, not the launch commit.
 
 **Some behaviours are unmeasured.** Tool-selection accuracy, argument validity and schema
 validity are not computed; their absence is not a zero.

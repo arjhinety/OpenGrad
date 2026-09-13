@@ -56,9 +56,17 @@ valid call-prediction example.
 
 ## Source manifest
 
-| Source | Role | Upstream | Pinned revision | Raw count | Canonical retained | Published count | License/terms | Adapter version |
-|---|---|---|---|---|---:|---:|---:|---|---|
+| Source | Role | Upstream | Pinned revision or input-file SHA-256 † | Raw count | Canonical retained | Published count | License/terms | Adapter version |
+|---|---|---|---|---:|---:|---:|---|---|
 {{SOURCE_TABLE}}
+
+† For xLAM and When2Call this is a Hub commit. For Glaive and ToolACE it is **not** a Hub
+revision: it is the SHA-256 of the local input file the adapter read (for ToolACE, the first 16
+hex characters of `7a7a6a2c3b1003c789bb…`), and it does not match the Hub file's LFS hash either.
+The Hub revisions are `e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac` (Glaive) and
+`6bda777c88d21e5a204703c1ee45597a8fa4f734` (ToolACE): Canonical-v1 records the same input files,
+by SHA-256, against those revisions, and the Hub history shows neither upstream data file has
+changed since it was uploaded.
 
 ## Composition and trainability
 
@@ -88,6 +96,30 @@ The mixture is **natural**: no supervision kind is reweighted and none is exclud
   answer directly. It carries no structured call and no tool result, and that is its contribution
   rather than a defect.
 
+### Refusal text under `ANSWER` labels
+
+The refusal detector used to score model outputs (`HEURISTIC_REGEX_v1`) finds refusal-shaped
+supervised targets that carry the decision label `ANSWER`. Counting single-exchange records only
+(a multi-turn record's label describes its first exchange, not its last turn), **18,114 of the
+173,237 records (10.5%)** have one, and all 18,114 are labelled `ANSWER`:
+
+| Source | Refusal-shaped `ANSWER` targets |
+|---|---:|
+| when2call | **4,038 of 6,505 (62.1%)** |
+| glaive-function-calling-v2 | 14,066 of 98,339 |
+| toolace | 10 of 11,051 |
+| xlam-function-calling-60k | 0 of 57,342 |
+
+A record labelled `ANSWER` whose target declines teaches that answering can look like declining.
+M0, trained on this corpus, and M1-v2, trained from M0, decline all 1,319 zero-shot GSM8K
+questions; M1-v1, DPO applied directly to the base model without this corpus, declines 70.7%.
+The count is descriptive and does not establish that these records caused that behaviour; that
+would need a retrain without them. When2Call entered M0's training in full, so its count applies
+exactly; Glaive's and ToolACE's are over release records, some of which M0's renderer
+quarantined. Source:
+`results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit_canonical_v2.json`, which
+supersedes an audit of the normalization-v1 sources (21,749 of 217,903) that was not this corpus.
+
 ## What is not included
 
 | Source | Reason |
@@ -104,11 +136,15 @@ nothing.
 
 | Cause | Records | Attribution |
 |---|---:|---|
-| Unrepresentable at the schema layer | 2,028 | Adapter refuses `Union`, `Callable`, `set` — no exact JSON Schema form |
-| `SEM_ARGUMENT_INVALID` | 1,231 | **Upstream data quality**: the gold call's value contradicts the type the same record declares |
+| Unrepresentable at the schema layer | 2,028 | xLAM, at canonicalization (59,370 → 57,342), so not among the 173,237 canonical records. Adapter refuses `Union`, `Callable`, `set` — no exact JSON Schema form |
+| `SEM_ARGUMENT_INVALID` | 1,231 | xLAM. **Upstream data quality**: the gold call's value contradicts the type the same record declares |
 | Unresolved non-terminal calls | 8,476 | ToolACE records quarantined under the conservative classification |
-| `TARGET_TRUNCATED` | 700 | Exceed the 2,048-token window after rendering |
-| `UNRENDERABLE` | 2,095 | Trajectory contract violations, counted rather than repaired |
+| `TARGET_TRUNCATED` | 700 | Exceed the 2,048-token window after rendering (Glaive 363, ToolACE 316, xLAM 21) |
+| `UNRENDERABLE` | 864 | Glaive records that fail the argument or trajectory contract, counted rather than repaired |
+
+The last four rows are the training-boundary drops: 1,231 + 8,476 + 700 + 864 = **11,271** of the
+173,237 canonical records, leaving 161,966 trainable. An earlier version of this table gave
+`UNRENDERABLE` as 2,095, which counted xLAM's 1,231 a second time.
 
 Quarantine is a result, not a shortfall. A record that cannot be interpreted under its declared
 contract is reported rather than coerced into training text.
@@ -116,10 +152,11 @@ contract is reported rather than coerced into training text.
 ## Evaluation boundary
 
 The frozen When2Call held-out namespace (`when2call-mcq`, `when2call-llm-judge`, and the preference
-split) is **excluded** from this payload and remains separate in the OpenGrad repository. Two
-held-out examples were adjudicated `CONTAMINATED` against this corpus and quarantined, leaving
-3,950 distinct evaluation examples. Contamination review is complete for this corpus and its
-evidence artifacts are corpus-scoped.
+split) is **excluded** from this payload and remains separate in the OpenGrad repository. It
+holds 3,952 records but 3,652 distinct examples, because all 300 LLM-judge rows duplicate MCQ
+rows. Two held-out examples were adjudicated `CONTAMINATED` against this corpus and quarantined,
+leaving 3,650 distinct evaluation examples. Contamination review is complete for this corpus and
+its evidence artifacts are corpus-scoped.
 
 ## Provenance and versioning
 

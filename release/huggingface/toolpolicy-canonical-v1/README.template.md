@@ -18,13 +18,21 @@ configs:
 
 OpenGrad ToolPolicy Canonical v1 is a provenance-preserving, model-independent normalization of several public tool-use and function-calling datasets. It is released as a pre-training candidate corpus for controlled research into tool-use policy in small open-weight language models. See [OpenGrad](https://github.com/arjhinety/OpenGrad) for the production methodology and reproducibility artifacts.
 
+## Known defect: 9 tool-call targets at the training boundary
+
+**Do not use v1 as a tool-calling SFT corpus as-is.** Rendered for Qwen3.5-2B under OpenGrad's trajectory contract, only 55,719 of the 213,951 records are trainable, and only **9** of those (0.016%) have a tool call in the supervised target. Training the M0 SFT recipe on it reproduced a tool-call collapse: call recall 0.0031 at step 800 and 0.0000 from step 1200 onward, on the 3,650-example held-out set.
+
+The main cause is the v1 Glaive adapter (`glaive_function_calling_v2_v1`), which left the source's unterminated `<functioncall>` blocks unparsed. 50,851 of the 99,794 Glaive records carry their call as plain assistant text with an empty `tool_calls` list, so their function-response turns are orphaned tool results that fail the trajectory contract, and the Glaive records that remain contain no calls. xLAM's 59,370 records all end on a call that no tool result answers, which that contract also rejects, and most ToolACE, LoopTool and BUTTON records fail the schema layer.
+
+[Canonical-v2](https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v2) addresses both: its Glaive adapter parses the calls, and its `CALL_PREDICTION` contract admits call-only records such as xLAM's. If you use v1's Glaive records in another pipeline, their calls are unparsed text, not structured `tool_calls`.
+
 ## xLAM / APIGen provenance
 
 This release includes 59,370 normalized records derived from `Salesforce/xlam-function-calling-60k` at revision `26d14ebfe18b1f7b524bd39b404b50af5dc97866`. The upstream dataset declares CC BY 4.0. Redistribution of these normalized xLAM-derived records is permitted under CC BY 4.0, subject to attribution and the applicable license terms. OpenGrad modifies the records through canonical schema conversion, tool-definition and message normalization, structural validation, invalid-record filtering, deduplication, and metadata augmentation where represented by the canonical artifact. These are modified derivatives; the original Salesforce/APIGen authors retain attribution, and users should cite APIGen. OpenGrad is not affiliated with or endorsed by Salesforce or the APIGen authors. The upstream repository uses a Hugging Face access gate; that upstream access mode is distinct from downstream redistribution permission, and this public OpenGrad dataset is not gated solely for that reason. Any upstream ethical-use statements remain source context and do not replace the applicable license terms.
 
 ## What this release is not
 
-It is not a final recommended training mixture, a Qwen3.5 training dataset, M0, M1, M2, or a post-training result. No claim is made that training on all records or their natural proportions is optimal. The exact Qwen3.5-2B training mixture will be frozen separately after baseline evaluation and experiment selection.
+It is not a final recommended training mixture, a Qwen3.5 training dataset, M0, M1, M2, or a post-training result. No claim is made that training on all records or their natural proportions is optimal. Baseline evaluation and post-training have since run: the early M0 SFT runs trained on this release and collapsed (see above), and the definitive M0 trained on Canonical-v2.
 
 ## Configurations
 

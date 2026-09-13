@@ -16,11 +16,11 @@ configs:
 
 ## What this release is
 
-OpenGrad ToolPolicy Canonical v2 is a provenance-preserving, model-independent normalization of public tool-use and function-calling datasets. It was built to test one hypothesis with a measurement attached: that the tool-call collapse observed in the M0 and M1 experiments on v1 was caused by the training corpus containing almost no tool-call supervision, rather than by the training procedure.
+OpenGrad ToolPolicy Canonical v2 is a provenance-preserving, model-independent normalization of public tool-use and function-calling datasets. It was built to test one hypothesis with a measurement attached: that the tool-call collapse observed in the M0 SFT experiments on v1 was caused by the training corpus containing almost no tool-call supervision, rather than by the training procedure.
 
 It is a **partial** build. Three of the six sources that appear in v1 could not be fetched for this snapshot, so the composition differs from v1 and this release is **not a drop-in replacement for v1**. Read it as an ablation on the presence of tool-call supervision.
 
-v1 is left untouched and remains pinned by the B0 baseline and every result that depends on it.
+v1 is left untouched and remains pinned by the M0 SFT runs that trained on it. (The B0 baseline pins only the held-out evaluation manifest, not a training corpus.)
 
 ## Why this snapshot exists
 
@@ -31,12 +31,14 @@ The measured state of this snapshot, on the payload as published:
 | Quantity | v1 | this release |
 |---|---:|---:|
 | Published canonical records | 213,951 | {{RECORD_COUNT}} |
-| Records containing at least one tool call | 9 of 55,719 trainable (0.016%) | 49,423 of 103,036 (48.0%) |
+| Trainable records whose target contains a tool call | 9 of 55,719 (0.016%) | 48,723 of 101,785 (47.9%) |
 | Sources | 6 | 3 |
+
+Both columns of the tool-call row are counted at the training boundary. Before rendering, 49,423 of this release's 103,036 canonical records (48.0%) contain a tool call; that figure is not comparable with v1's 9, which counts trainable records.
 
 ## Findings this corpus produced
 
-This corpus exists to answer one question, and it answered it. One experiment was run on it — M0 SFT, experiment ID `qwen35_2b_m0_sft_v2corpus` — using the **same** procedure, hyperparameters, base checkpoint (`Qwen/Qwen3.5-2B`), seed, and held-out evaluation as the M0 and M1 runs on v1. The corpus was the only variable. Full configuration: [`configs/experiments/qwen35_2b_m0_sft_v2corpus.yaml`](https://github.com/arjhinety/OpenGrad/blob/master/configs/experiments/qwen35_2b_m0_sft_v2corpus.yaml).
+This corpus exists to answer one question, and it answered it. One experiment was run on it — M0 SFT, experiment ID `qwen35_2b_m0_sft_v2corpus` — using the **same** procedure, hyperparameters, base checkpoint (`Qwen/Qwen3.5-2B`), seed, and held-out evaluation as the M0 SFT runs on v1. The corpus was the only variable, but it changed in more than one way (see below). Full configuration: [`configs/experiments/qwen35_2b_m0_sft_v2corpus.yaml`](https://github.com/arjhinety/OpenGrad/blob/master/configs/experiments/qwen35_2b_m0_sft_v2corpus.yaml).
 
 Scored on the frozen When2Call held-out split (3,650 distinct examples), best over checkpoints:
 
@@ -49,9 +51,9 @@ Scored on the frozen When2Call held-out split (3,650 distinct examples), best ov
 | `unsupported_accuracy` | 0.0131 | 0.5058 – 0.7992 | **0.5923 – 0.6363** |
 | `clarification_accuracy` | 0.1009 | 0.7434 – 0.9538 | **0.7783 – 0.8613** |
 
-**The finding.** On v1, SFT destroyed tool calling: `call_recall` fell to 0.0031 and `call_f1` effectively to zero, while `over_call_rate` collapsed to 0.0000 — the model stopped emitting tool calls almost entirely, monotonically, across every checkpoint. On this corpus, the same procedure preserved the capability: `call_recall` rose roughly 170× (0.0031 → 0.5050) and `over_call_rate` fell from the baseline's 0.6425 to 0.0577, with `call_precision` improving from 0.4542 to 0.7891.
+**The finding.** On v1, SFT destroyed tool calling: `call_recall` fell to 0.0031 and `call_f1` effectively to zero, while `over_call_rate` collapsed to 0.0000 — the model stopped emitting tool calls almost entirely, monotonically, across every checkpoint. On this corpus, the same procedure preserved the capability: `call_recall` rose roughly 160× (0.0031 → 0.5050) and `over_call_rate` fell from the baseline's 0.6425 to 0.0577, with `call_precision` improving from 0.4542 to 0.7891.
 
-This isolates the cause. The v1 collapse was a **data-coverage failure, not a training-procedure failure**: v1's training signal contained 9 tool-call targets out of 55,719 retained records, so there was nothing to learn the behaviour from. Supplying that supervision — and changing nothing else — produced a model that calls tools without calling them indiscriminately. A further signal that the training procedure behaves normally here: this corpus yields an interior optimum (best `call_f1` at step 1200, with steps 1800 and 2400 declining), whereas on v1 the metric decayed to zero and stayed there.
+This points to a **data-coverage failure rather than a training-procedure failure**: v1's training signal contained 9 tool-call targets out of 55,719 retained records, so there was nothing to learn the behaviour from. It does not isolate tool-call coverage as the cause, because other things changed at the same time: three of v1's six sources were dropped (xLAM, BUTTON, LoopTool), the When2Call slice went from 14,829 to 4,000 records, and the trainable set grew from 55,719 to 101,785 records. Supplying tool-call supervision, together with those changes, produced a model that calls tools without calling them indiscriminately. A further signal that the training procedure behaves normally here: this corpus yields an interior optimum (best `call_f1` at step 1200, with steps 1800 and 2400 declining), whereas on v1 the metric decayed to zero and stayed there.
 
 **What this finding does not claim.** The best `call_f1` on this corpus (0.5995) remains marginally below the B0 baseline's 0.6191, so there is no claim that SFT on this corpus beats the untrained baseline on the headline metric. B0 reaches 0.6191 with a degenerate near-always-call policy — `call_recall` 0.9722 against `unsupported_accuracy` 0.0131 and `over_call_rate` 0.6425 — so its score reflects calling on almost every example rather than deciding when to call. This corpus's contribution is a non-degenerate policy, not a higher headline number. No checkpoint from this run was promoted, and none is distributed with this release.
 
@@ -79,9 +81,11 @@ The payload is a unified Parquet table. Filter by `source_dataset` and `source_s
 
 ## Source manifest
 
-| Source | Role | Upstream | Pinned revision | Raw count | Canonical retained | Published count | License/terms | Adapter version |
-|---|---|---|---|---|---:|---:|---:|---|---|
+| Source | Role | Upstream | Pinned revision or input-file SHA-256 † | Raw count | Canonical retained | Published count | License/terms | Adapter version |
+|---|---|---|---|---:|---:|---:|---|---|
 {{SOURCE_TABLE}}
+
+† For When2Call this is a Hub commit. For Glaive and ToolACE it is **not** a Hub revision: it is the SHA-256 of the local input file the adapter read (for ToolACE, the first 16 hex characters of `7a7a6a2c3b1003c789bb…`), and it does not match the Hub file's LFS hash either. The Hub revisions are `e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac` (Glaive) and `6bda777c88d21e5a204703c1ee45597a8fa4f734` (ToolACE): Canonical-v1 records the same input files, by SHA-256, against those revisions, and the Hub history shows neither upstream data file has changed since it was uploaded.
 
 "Adapter version" above is the version each source's artifact manifest records for the materializer that ran. It is not the per-row value: every row also carries an `adapter` name and an `adapter_version` field, and for the Glaive records that per-row version reads `1.0.0` in both v1 and this release. The two Glaive builds are distinguished per row by the **`adapter` name**, `glaive_function_calling_v2_v1` (v1) versus `glaive_function_calling_v2_v2` (this release), not by that version field.
 
