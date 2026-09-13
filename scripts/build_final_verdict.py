@@ -24,6 +24,16 @@ ANALYSIS = CAP / "regression_analysis.json"
 LEDGER = CAP / "cost_ledger.json"
 OUT = ROOT / "results/final_campaign_verdict.json"
 
+# Stated here rather than read from final_campaign_audit.json's `lineage.m1v1_reason`, which still
+# carries the superseded "different SFT parent (CorpusV2)" text. The lineage below is what
+# runs/qwen35_2b_m1_dpo_v1/experiment.json and the published checkpoint-300 record.
+M1V1_EXCLUSION_REASON = (
+    "M1_DPO_HISTORICAL (qwen35_2b_m1_dpo_v1, checkpoint-300) is DPO applied directly to the base "
+    "Qwen/Qwen3.5-2B: parent_experiment_id null, reference initial_policy, preference data "
+    "when2call_pref_v1. It has no SFT parent, so it is not on the Base -> M0 -> M1-v2 chain and is "
+    "reported as an alternate BASE -> DPO lineage only."
+)
+
 
 def build() -> dict:
     audit = json.loads(AUDIT.read_text(encoding="utf-8"))
@@ -41,6 +51,11 @@ def build() -> dict:
         return audit["mmlu_pro_canonical_2048"].get(stage, {}).get(key)
 
     intervals = analysis.get("truncation_adversarial_intervals", {})
+
+    m1v1_zs_refusals = g("M1_DPO_HISTORICAL", "zeroshot", "refusals")
+    m1v1_zs_n = g("M1_DPO_HISTORICAL", "zeroshot", "n")
+    m1v1_zs_rate = g("M1_DPO_HISTORICAL", "zeroshot", "refusal_rate")
+    m1v1_zs_text = f"{m1v1_zs_rate * 100:.1f}% ({m1v1_zs_refusals:,}/{m1v1_zs_n:,})"
 
     return {
         "schema_version": 1,
@@ -64,7 +79,7 @@ def build() -> dict:
             "engine_identical_across_stages": lin["engine_identical_across_stages"],
             "weight_sha256": lin["per_stage_weight_sha256"],
             "excluded_from_primary_path": {
-                "M1_DPO_HISTORICAL": lin["m1v1_reason"],
+                "M1_DPO_HISTORICAL": M1V1_EXCLUSION_REASON,
             },
         },
 
@@ -75,6 +90,13 @@ def build() -> dict:
                 "m0_refusal_rate": g("M0_SFT", "zeroshot", "refusal_rate"),
                 "m1v2_refusal_rate": g("M1_DPO_CURRENT", "zeroshot", "refusal_rate"),
                 "first_observable_edge": "BASE->M0_SFT",
+                "m1v1_dpo_on_base_refusal_rate": m1v1_zs_rate,
+                "not_specific_to_sft": (
+                    "BASE->M0_SFT is the first edge on the primary path. The pattern also appears "
+                    f"after DPO applied directly to the base (M1_DPO_HISTORICAL, {m1v1_zs_text} "
+                    "zero-shot refusal, no SFT parent), so it is not specific to SFT. Causation is "
+                    "not established: one lineage, one seed, no replicate."
+                ),
                 "truncation_confound": "none -- 0 truncated zero-shot generations for M0 and M1-v2",
             },
             "refusal_is_prompt_regime_conditioned": {
@@ -119,6 +141,12 @@ def build() -> dict:
                     "A statement about behaviour on THIS suite. NOT a weight-space claim, NOT a "
                     "claim about optimizer effectiveness, NOT a claim that DPO could never repair "
                     "this behaviour if explicitly targeted."
+                ),
+                "edge_scope": (
+                    "Measured on the M0_SFT->M1_DPO_CURRENT edge only, i.e. DPO applied on top of a "
+                    "parent that already refuses 100% zero-shot. It does NOT rule out DPO as a "
+                    "cause of the regression: DPO applied directly to the base (M1_DPO_HISTORICAL) "
+                    f"refuses {m1v1_zs_text} of GSM8K zero-shot, against 0% for BASE."
                 ),
             },
         },
@@ -184,7 +212,11 @@ def build() -> dict:
 
         "limitations": [
             "M1_DPO_HISTORICAL corrected-budget MMLU-Pro is UNMEASURED; not interpolated.",
-            "Causation of the refusal pattern is NOT established; the corpus audit is association only.",
+            (
+                "Causation of the refusal pattern is NOT established; the corpus audit is "
+                "association only. The pattern appears after SFT (M0) and also after DPO applied "
+                "directly to the base (M1_DPO_HISTORICAL), so it is not specific to SFT."
+            ),
             "Single lineage, single base model, no replicate; no cross-family generalization claimed.",
             "BASE remains truncation-disadvantaged on MMLU-Pro (21.8% vs 6.3%); handled by interval.",
             (
@@ -216,6 +248,9 @@ def build() -> dict:
             "regression_analysis": "results/benchmarks/h200/capability_v1/regression_analysis.json",
             "refusal_characterization": "results/benchmarks/h200/capability_v1/refusal_characterization.json",
             "sft_corpus_audit": "results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit.json",
+            "sft_corpus_audit_canonical_v2": (
+                "results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit_canonical_v2.json"
+            ),
             "tokenizer_census": "results/benchmarks/h200/capability_v1/tokenizer_divergence_census.json",
             "checkpoint_ladder": "results/benchmarks/checkpoint_ladder.json",
             "preserved_state": "results/benchmarks/h200/PRESERVED_STATE_v1.json",

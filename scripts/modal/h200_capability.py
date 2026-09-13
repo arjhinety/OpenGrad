@@ -90,7 +90,7 @@ LADDER = {
         "subfolder": "checkpoint-300",
         "expected_weight_sha256": None,
         "expected_config_sha256": None,
-        "architecture_note": "Qwen3_5ForCausalLM; different SFT parent -- supplementary only",
+        "architecture_note": "Qwen3_5ForCausalLM; DPO applied directly to base, no SFT parent -- supplementary only",
     },
 }
 

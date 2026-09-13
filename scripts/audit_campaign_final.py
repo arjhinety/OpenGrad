@@ -224,9 +224,10 @@ def main() -> int:
         "m1v1_parent_documented": by_stage["M1_DPO_HISTORICAL"].get("role"),
         "m1v1_on_primary_path": False,
         "m1v1_reason": (
-            "The ladder records M1_DPO_HISTORICAL as a different SFT parent (CorpusV2). No "
-            "persisted metadata places it on the Base -> M0 -> M1-v2 chain, so it is reported as "
-            "an alternate lineage only."
+            "M1_DPO_HISTORICAL is DPO applied directly to the base model (parent_experiment_id "
+            "null, reference initial_policy), with no SFT stage. It is not on the Base -> M0 -> "
+            "M1-v2 chain, so it is reported as an alternate lineage only; it still refuses 70.7% "
+            "of zero-shot GSM8K, so the regression is not specific to SFT."
         ),
         "engine_identical_across_stages": len({
             (envs[s].get("vllm"), envs[s].get("dtype"), envs[s].get("max_model_len"),

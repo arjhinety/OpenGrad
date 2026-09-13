@@ -533,6 +533,7 @@
     "refusal_characterization": "results/benchmarks/h200/capability_v1/refusal_characterization.json",
     "regression_analysis": "results/benchmarks/h200/capability_v1/regression_analysis.json",
     "sft_corpus_audit": "results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit.json",
+    "sft_corpus_audit_canonical_v2": "results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit_canonical_v2.json",
     "tokenizer_census": "results/benchmarks/h200/capability_v1/tokenizer_divergence_census.json"
   },
   "findings": {
@@ -558,6 +559,7 @@
       "why_not_refusal": "Refusal is ~0% in this arm, so the gap cannot be explained by declining to answer."
     },
     "preference_stage_material_change": {
+      "edge_scope": "Measured on the M0_SFT->M1_DPO_CURRENT edge only, i.e. DPO applied on top of a parent that already refuses 100% zero-shot. It does NOT rule out DPO as a cause of the regression: DPO applied directly to the base (M1_DPO_HISTORICAL) refuses 70.7% (933/1,319) of GSM8K zero-shot, against 0% for BASE.",
       "evidence_level": "CONFIRMED",
       "gsm8k_fewshot8_delta_pp": -0.83,
       "ifeval_prompt_strict_delta_pp": 0.74,
@@ -578,14 +580,16 @@
       "evidence_level": "CONFIRMED",
       "first_observable_edge": "BASE->M0_SFT",
       "m0_refusal_rate": 1.0,
+      "m1v1_dpo_on_base_refusal_rate": 0.7073540561031084,
       "m1v2_refusal_rate": 1.0,
+      "not_specific_to_sft": "BASE->M0_SFT is the first edge on the primary path. The pattern also appears after DPO applied directly to the base (M1_DPO_HISTORICAL, 70.7% (933/1,319) zero-shot refusal, no SFT parent), so it is not specific to SFT. Causation is not established: one lineage, one seed, no replicate.",
       "truncation_confound": "none -- 0 truncated zero-shot generations for M0 and M1-v2"
     }
   },
   "is_source_of_truth": false,
   "limitations": [
     "M1_DPO_HISTORICAL corrected-budget MMLU-Pro is UNMEASURED; not interpolated.",
-    "Causation of the refusal pattern is NOT established; the corpus audit is association only.",
+    "Causation of the refusal pattern is NOT established; the corpus audit is association only. The pattern appears after SFT (M0) and also after DPO applied directly to the base (M1_DPO_HISTORICAL), so it is not specific to SFT.",
     "Single lineage, single base model, no replicate; no cross-family generalization claimed.",
     "BASE remains truncation-disadvantaged on MMLU-Pro (21.8% vs 6.3%); handled by interval.",
     "Refusal detection is HEURISTIC_REGEX_v1 with unmeasured precision; it never feeds an official benchmark metric.",
@@ -596,7 +600,7 @@
     "all_stages_distinct_weights": true,
     "engine_identical_across_stages": true,
     "excluded_from_primary_path": {
-      "M1_DPO_HISTORICAL": "The ladder records M1_DPO_HISTORICAL as a different SFT parent (CorpusV2). No persisted metadata places it on the Base -> M0 -> M1-v2 chain, so it is reported as an alternate lineage only."
+      "M1_DPO_HISTORICAL": "M1_DPO_HISTORICAL (qwen35_2b_m1_dpo_v1, checkpoint-300) is DPO applied directly to the base Qwen/Qwen3.5-2B: parent_experiment_id null, reference initial_policy, preference data when2call_pref_v1. It has no SFT parent, so it is not on the Base -> M0 -> M1-v2 chain and is reported as an alternate BASE -> DPO lineage only."
     },
     "m0_is_exact_parent_of_m1v2": true,
     "path": [

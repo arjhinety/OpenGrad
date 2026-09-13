@@ -207,6 +207,10 @@
   "refusal_detector": "HEURISTIC_REGEX_v1 -- the SAME detector used to score inference, so corpus and model refusals are counted by one definition",
   "schema_version": 1,
   "scope_limit": "Descriptive audit. No checkpoint was modified and no data was filtered.",
+  "superseded_by": {
+    "path": "results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit_canonical_v2.json",
+    "reason": "audited normalization-v1 sources, not the Canonical-v2 corpus M0 trained on"
+  },
   "totals": {
     "records_audited": 217903,
     "refusal_target_rate": 0.09981046612483536,

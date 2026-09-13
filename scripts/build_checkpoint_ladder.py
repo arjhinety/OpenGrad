@@ -72,12 +72,16 @@ LADDER = [
         "repo": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO",
         "subfolder": "checkpoint-300",
         "pinned_revision": None,
-        "experiment_id": "qwen35_2b_m1_dpo",
+        # The published repo is qwen35_2b_m1_dpo_v1 (reports/releases/qwen35-2b-m1-dpo-publication.json),
+        # not the 40-step qwen35_2b_m1_dpo identity, which has an SFT parent and no checkpoints.
+        "experiment_id": "qwen35_2b_m1_dpo_v1",
         "checkpoint_id": "checkpoint-300",
         "role": (
-            "earlier DPO lineage on a different SFT parent (CorpusV2, not CanonicalV2-Final). "
-            "SUPPLEMENTARY only -- it is not on the base->M0->M1-v2 path, so a delta against it "
-            "mixes two changes and cannot localise a stage."
+            "earlier DPO run applied directly to the base Qwen/Qwen3.5-2B, with no SFT parent "
+            "(runs/qwen35_2b_m1_dpo_v1/experiment.json: parent_experiment_id null, reference "
+            "initial_policy, preference data when2call_pref_v1). SUPPLEMENTARY only -- it is not "
+            "on the base->M0->M1-v2 path. Its own edge is BASE->DPO; a delta against M0 or "
+            "M1-v2 mixes two changes and cannot localise a stage."
         ),
         "supplementary": True,
     },

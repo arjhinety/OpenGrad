@@ -192,7 +192,7 @@
       "checkpoint_id": "checkpoint-300",
       "config.json_sha256": "6cb8daca9fb653c61485ff7452fc068bacd5c27cbee659ecd24b47186b0d1b52",
       "eos_token": "<|im_end|>",
-      "experiment_id": "qwen35_2b_m1_dpo",
+      "experiment_id": "qwen35_2b_m1_dpo_v1",
       "file_count": 8,
       "files": [
         "chat_template.jinja",
@@ -214,7 +214,7 @@
       "repo": "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO",
       "revision": "3a1250c7b8e86758e2605ee67092e24fc8afa5aa",
       "revision_is_pinned": false,
-      "role": "earlier DPO lineage on a different SFT parent (CorpusV2, not CanonicalV2-Final). SUPPLEMENTARY only -- it is not on the base->M0->M1-v2 path, so a delta against it mixes two changes and cannot localise a stage.",
+      "role": "earlier DPO run applied directly to the base Qwen/Qwen3.5-2B, with no SFT parent (runs/qwen35_2b_m1_dpo_v1/experiment.json: parent_experiment_id null, reference initial_policy, preference data when2call_pref_v1). SUPPLEMENTARY only -- it is not on the base->M0->M1-v2 path. Its own edge is BASE->DPO; a delta against M0 or M1-v2 mixes two changes and cannot localise a stage.",
       "single_shard_sha256": "eef28bc106b9ba5fff907ee284339ead40f21c1347af61b32e33d17ce3a2f0a0",
       "stage": "M1_DPO_HISTORICAL",
       "subfolder": "checkpoint-300",
