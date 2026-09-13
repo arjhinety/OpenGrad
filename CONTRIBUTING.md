@@ -11,6 +11,7 @@ Before opening a data or experiment PR:
 - distinguish deterministic fixture tests from live provider/device evidence;
 - for M2, reference the executed baseline, residual profile, evidence count, and algorithm revision; never hard-code model-family assumptions;
 - include regressions, contamination risk, and limitations.
+- for any experiment or published claim, follow the checklists in `docs/research/GUARDRAILS.md`, which record the mistakes Study 001 made and how to avoid repeating them.
 
 Capability data and speculative/MTP continuation data have separate objectives and configurations. A behavior column is not evidence that a source has been fully measured. Use the canonical taxonomy in `registry/tool_behaviors.yaml` and the methodology in `docs/data/tool-use-mixture-methodology.md`.
 

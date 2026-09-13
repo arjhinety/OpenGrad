@@ -1,0 +1,121 @@
+{
+ "audit": "study-001 site recheck",
+ "date": "2026-09-13",
+ "scope": "every numeric and status claim on opengrad-site at commit 3aac71d, recomputed against OpenGrad at 1a1d7de",
+ "claims_checked": 165,
+ "claims_held": 158,
+ "findings": [
+  {
+   "id": "R1",
+   "severity": "MED",
+   "area": "P",
+   "location": "opengrad-site@3aac71d:src/components/ResearchCharts.tsx:235",
+   "claim": "100% of Base's unattempted items at 768 were truncations",
+   "actual": "99.6% (4,292 of 4,309). The repo reports were corrected for finding 39; the site kept the old figure. The append-only gpu_runs.jsonl seq 7 also says 100%.",
+   "category": "WRONG-NUMBER",
+   "pinned": "",
+   "public": true,
+   "repeat_of": 39,
+   "resolution": {
+    "status": "RESOLVED",
+    "where": "site 61fc955; reports/ERRATA.md section 7 (5ed5d7f) for gpu_runs.jsonl"
+   }
+  },
+  {
+   "id": "R2",
+   "severity": "LOW",
+   "area": "P",
+   "location": "opengrad-site@3aac71d:src/components/ResearchCharts.tsx:300-301",
+   "claim": "Base gets two items wrong; M1-v2 refuses them",
+   "actual": "Different items: Base gets trap-arithmetic and multi-step-change wrong; M1-v2 refuses multi-step-change and format-constraint and passes trap-arithmetic (sentinel_scores.json). Same error as finding 32, fixed in the repo but not on the site.",
+   "category": "WRONG",
+   "pinned": "",
+   "public": true,
+   "repeat_of": 32,
+   "resolution": {
+    "status": "RESOLVED",
+    "where": "site 61fc955"
+   }
+  },
+  {
+   "id": "R3",
+   "severity": "LOW",
+   "area": "P",
+   "location": "opengrad-site@3aac71d:src/components/ResearchPage.tsx:113-115",
+   "claim": "$11.39 total cost ... 13 GPU runs",
+   "actual": "$11.39 is the $8.90 continuation plus the $2.49 prior run; the 13 GPU runs are the continuation only. Same population mix as finding 60.",
+   "category": "MISLEADING",
+   "pinned": "",
+   "public": true,
+   "repeat_of": 60,
+   "resolution": {
+    "status": "RESOLVED",
+    "where": "site 61fc955"
+   }
+  },
+  {
+   "id": "R4",
+   "severity": "LOW",
+   "area": "P",
+   "location": "opengrad-site@3aac71d:src/components/ResearchPage.tsx:129-130",
+   "claim": "Every number on this page recomputes from 48,840 per-example records",
+   "actual": "48,840 covers the capability suite only, not the tool-policy F1 or the corpus audit.",
+   "category": "OVERSTATED",
+   "pinned": "",
+   "public": true,
+   "repeat_of": null,
+   "resolution": {
+    "status": "RESOLVED",
+    "where": "site 61fc955"
+   }
+  },
+  {
+   "id": "R5",
+   "severity": "LOW",
+   "area": "P",
+   "location": "opengrad-site@3aac71d:src/components/ResearchPage.tsx:284",
+   "claim": "byte-identical outputs 82% (M0 to M1-v2)",
+   "actual": "81.96% is GSM8K generations only (2,162 of 2,638).",
+   "category": "MISLEADING",
+   "pinned": "",
+   "public": true,
+   "repeat_of": null,
+   "resolution": {
+    "status": "RESOLVED",
+    "where": "site 61fc955"
+   }
+  },
+  {
+   "id": "R6",
+   "severity": "LOW",
+   "area": "P",
+   "location": "opengrad-site@3aac71d:src/data/study.ts:62-66 and the IFEval figures",
+   "claim": "IFEval shown with no token-cap caveat",
+   "actual": "47/67/63/17 of 541 IFEval responses (Base/M0/M1-v2/M1-v1) hit the 2,560-token cap. Same caveat as finding 30, added to the repo but not the site.",
+   "category": "MISSING-CAVEAT",
+   "pinned": "",
+   "public": true,
+   "repeat_of": 30,
+   "resolution": {
+    "status": "RESOLVED",
+    "where": "site 61fc955"
+   }
+  },
+  {
+   "id": "R7",
+   "severity": "LOW",
+   "area": "P",
+   "location": "opengrad-site@3aac71d:src/components/ResearchPage.tsx:341",
+   "claim": "mode REFUSE, 453 examples",
+   "actual": "The class is cannot_answer / UNSUPPORTED, which is what the section text calls it.",
+   "category": "INTERNAL-CONTRADICTION",
+   "pinned": "",
+   "public": true,
+   "repeat_of": null,
+   "resolution": {
+    "status": "RESOLVED",
+    "where": "site 61fc955"
+   }
+  }
+ ]
+}

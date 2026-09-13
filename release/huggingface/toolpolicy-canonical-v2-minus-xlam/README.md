@@ -14,7 +14,8 @@ configs:
 
 > This is the byte-identical training view for a **joint xLAM-plus-`CALL_PREDICTION` removal**
 > experiment. xLAM is currently the corpus's only source of that supervision contract, so this is
-> not a pure source-content ablation. It carries no result and is not a recommended mixture.
+> not a pure source-content ablation. It carries no result of its own and is not a recommended
+> mixture. It is part of [OpenGrad Study 001](https://opengrad.arjhinety.com/studies/001).
 
 ## What this is
 
@@ -22,10 +23,16 @@ configs:
 with **one source removed**: xLAM/APIGen. Three sources remain, 115,895 canonical records, 118
 shards.
 
-It exists because OpenGrad planned paired fixed-compute and matched-exposure runs against this
-selection, and an experiment is only checkable if its input is available. This view is their exact
-input. Removing xLAM also removes all `CALL_PREDICTION` supervision, so the runs estimate that
-joint intervention rather than an xLAM-content-only effect.
+It is the exact input of OpenGrad's paired fixed-compute and matched-exposure runs, published
+because an experiment is only checkable if its input is available. Both runs have been executed and
+published as negative results:
+[`M0-ABL-MinusXLAM-FixedCompute`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute)
+and
+[`M0-ABL-MinusXLAM-MatchedExposure`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure).
+The matched-exposure arm saw 1.19× the reference's supervised tokens, so its exposure was not in
+fact matched (see the OpenGrad `reports/ERRATA.md`). Removing xLAM also removes all
+`CALL_PREDICTION` supervision, so the runs estimate that joint intervention rather than an
+xLAM-content-only effect.
 
 ## It is a selection, not a rebuild
 
@@ -80,6 +87,18 @@ That asymmetry is the reason the ablation needed two arms and two different step
 than one. It is also the most transferable thing this view demonstrates: in a heterogeneous corpus,
 a source's share of records is a poor proxy for its share of training signal, and an ablation that
 matched on record counts would have confounded two variables.
+
+## Refusal-shaped targets
+
+The parent corpus carries 18,114 records (10.5% of 173,237) whose target is a refusal but whose
+decision label is ANSWER, found by a heuristic detector whose precision has not yet been measured.
+None of them come from xLAM (Glaive 14,066, When2Call 4,038, ToolACE 10), so **all 18,114 are in
+this view: 15.6% of its 115,895 records**, a larger share than in the parent. OpenGrad Study 001
+found a general-capability regression associated with tool-policy post-training on
+When2Call-derived data, including refusal of every zero-shot GSM8K question; this supervision is a
+candidate explanation, not a demonstrated cause. Source:
+`results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit_canonical_v2.json` in the
+OpenGrad repository.
 
 ## Supervision contracts
 

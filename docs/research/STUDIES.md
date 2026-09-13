@@ -5,17 +5,25 @@ OpenGrad's research is published as numbered studies. Each study has a permanent
 
 ## Versioning rules
 
-- **Freezing.** A study is frozen when its findings are final. The freeze is an annotated git tag
-  (`study-001`, `study-002`, …) in this repository, and a tag of the same name in `opengrad-site`
-  on the commit that froze its page. The study's page links its evidence at the tag, not at
+- **Freezing.** A study is frozen when its findings are final and an independent claim audit of the
+  repository, the Hugging Face cards and the site has every finding resolved and logged under
+  [`reports/audits/`](../../reports/audits/study-001-claim-audit/README.md). The freeze is an
+  annotated git tag (`study-001`, `study-002`, …) in this repository, a tag of the same name in
+  `opengrad-site` on the commit that froze its page, and a tag of the same name on each of the
+  study's Hugging Face repositories. The study's page links its evidence at the tag, not at
   `master`, so a reader lands on the evidence the page was written from.
-- **After a freeze, nothing in the study changes silently.** A number later found wrong in a frozen
+- **After a freeze, the findings do not change silently.** A number later found wrong in a frozen
   study is corrected in [`reports/ERRATA.md`](../../reports/ERRATA.md), the same way frozen,
   hash-pinned reports are corrected. The study's checkpoints, corpora and evaluations are not
-  modified, relabelled or replaced.
+  modified, relabelled or replaced. Navigation and links to the study's own artifacts may still
+  be added to its page.
 - **New work goes into the next study.** Any experiment started after a freeze belongs to the next
   study. It is pre-registered before it runs, and it is reported against the frozen study's
-  checkpoints, not in place of them.
+  checkpoints, not in place of them. Its models and datasets go to new Hugging Face repositories,
+  so the frozen study's links keep pointing at what they describe.
+- **Guardrails.** Every study from 002 on follows [GUARDRAILS.md](GUARDRAILS.md): rules derived
+  from the 100 claims Study 001 got wrong, with a checklist before GPU time is spent and one
+  before anything is published or frozen.
 
 ## Study 001 — tool-policy post-training on Qwen3.5-2B
 
@@ -35,14 +43,20 @@ that the promotion gate could not see. Causation is not established.
   and [`reports/FINAL_CAMPAIGN_AUDIT.md`](../../reports/FINAL_CAMPAIGN_AUDIT.md)
 - Corrections: [`reports/ERRATA.md`](../../reports/ERRATA.md) and the
   [claim audit](https://opengrad.arjhinety.com/studies/001/claim-audit.pdf), 93 findings with their
-  resolutions
+  resolutions, plus 7 from the pre-freeze site recheck; the full ledger is in
+  [`reports/audits/study-001-claim-audit/`](../../reports/audits/study-001-claim-audit/README.md)
+- Models and datasets: the
+  [OpenGrad Study 001 collection](https://huggingface.co/collections/arrochi112/opengrad-study-001-6aa63e0a0f26f66ca8042d25)
+  on Hugging Face, in reading order with a note per item. Each repository carries a `study-001`
+  tag at its frozen revision
 
 ## Study 002 — relabelling, on-policy distillation and speculative decoding
 
 **Status: IN PROGRESS. No results yet.** Landing page:
 [opengrad.arjhinety.com/studies/002](https://opengrad.arjhinety.com/studies/002).
 
-Scope, each part pre-registered before any GPU time is spent:
+Scope, each part pre-registered before any GPU time is spent, against the
+[guardrails](GUARDRAILS.md) checklist:
 
 1. **Dataset corrections, starting with refusal relabelling** ([`ROADMAP.md`](../../ROADMAP.md)
    step 16, `BLOCKED_ON_PREFLIGHT`). A heuristic detector flags 18,114 of Canonical-v2's 173,237

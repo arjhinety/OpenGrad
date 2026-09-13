@@ -47,11 +47,13 @@ Every experiment record, its validity, selected checkpoint, and published artifa
 | Read the Study 001 write-up | [Study 001 results][study-001] — the narrative version of the finding |
 | See the latest results | [Latest Results](#latest-results) · [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md) |
 | Download the promoted model | [Hugging Face model](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) |
+| Browse every Study 001 model and dataset | [OpenGrad Study 001 collection](https://huggingface.co/collections/arrochi112/opengrad-study-001-6aa63e0a0f26f66ca8042d25) — in reading order, with a note per item |
 | Run or inspect OpenGrad | [Quick Start](#quick-start) |
 | Check what is executed vs. planned | [`docs/EXPERIMENT_STATUS.md`](docs/EXPERIMENT_STATUS.md) · [`ROADMAP.md`](ROADMAP.md) |
 | Reproduce an experiment | [Baseline reproduction protocol](docs/experiments/BASELINE_REPRODUCTION_PROTOCOL.md) |
 | Understand the methodology | [Research program](docs/research/research-program.md) · [Methodology](docs/research/methodology.md) |
 | Add a benchmark or backend | [Adding a benchmark](docs/evaluation/ADDING_A_BENCHMARK.md) · [Adding a backend](docs/evaluation/ADDING_A_BACKEND.md) |
+| Plan or publish a Study 002 experiment | [Guardrails](docs/research/GUARDRAILS.md) — rules and checklists derived from the 100 claims Study 001 got wrong |
 | Challenge a result | [CONTRIBUTING.md](CONTRIBUTING.md) · [Negative-result guide](docs/contributing/negative-result.md) |
 
 **Contents:** [Current status](#current-research-status) · [Quick start](#quick-start) · [Latest results](#latest-results) · [How it works](#how-opengrad-works) · [Research program](#research-program) · [Datasets & evaluation](#datasets--evaluation) · [Limitations](#current-limitations) · [Reproducing](#reproducing-experiments) · [Repository structure](#repository-structure) · [Contributing](#contributing)

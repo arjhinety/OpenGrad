@@ -1,0 +1,560 @@
+[
+ {
+  "id": 1,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 2,
+  "status": "RESOLVED",
+  "where": "POSTTRAINING_PHASE_SUMMARY.md, M1_DPO_EVALUATION.md, M2_DECISION.md (c0121d0); docs/EXPERIMENT_RESULTS.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 3,
+  "status": "RESOLVED",
+  "where": "docs/EXPERIMENT_RESULTS.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 4,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801) (eval 105-107, exec 197-199, ablation eval 107-109); docs/EXPERIMENT_RESULTS.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 5,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 6,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801) (execution:29, design:18, evaluation:60-72)",
+  "note": ""
+ },
+ {
+  "id": 7,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 8,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 9,
+  "status": "RESOLVED",
+  "where": "M1_DPO_EVALUATION.md, POSTTRAINING_PHASE_SUMMARY.md (c0121d0); reports/ERRATA.md (d55b801) (ablation eval:28)",
+  "note": ""
+ },
+ {
+  "id": 10,
+  "status": "RESOLVED",
+  "where": "reports/M1_DPO_EXECUTION_REPORT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 11,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 12,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 13,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 14,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 15,
+  "status": "RESOLVED",
+  "where": "reports/M1_DPO_EXECUTION_REPORT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 16,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801); docs/EXPERIMENT_RESULTS.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 17,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 18,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 19,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 20,
+  "status": "RESOLVED",
+  "where": "docs/EXPERIMENT_RESULTS.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 21,
+  "status": "RESOLVED",
+  "where": "reports/M0_SFT_EXECUTION_REPORT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 22,
+  "status": "RESOLVED",
+  "where": "reports/SUPERVISION_CONTRACT_REPORT.md (c0121d0)",
+  "note": "Original sentence kept; dated update note appended directly after it."
+ },
+ {
+  "id": 23,
+  "status": "RESOLVED",
+  "where": "M1_DPO_EVALUATION.md (c0121d0); reports/ERRATA.md (d55b801) (ablation eval 91, 97-98)",
+  "note": ""
+ },
+ {
+  "id": 24,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801) (PTQ_PHASE_CLOSURE); QUANTIZATION_REPRODUCTION.md (c0121d0); README.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 25,
+  "status": "RESOLVED",
+  "where": "reports/QAD_DECISION.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 26,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801) (H200:103-105); reports/QAD_DECISION.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 27,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801) section 6",
+  "note": ""
+ },
+ {
+  "id": 28,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 29,
+  "status": "RESOLVED",
+  "where": "reports/FINAL_CAMPAIGN_AUDIT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 30,
+  "status": "RESOLVED",
+  "where": "reports/FINAL_CAMPAIGN_AUDIT.md (c0121d0, a4f6f8c)",
+  "note": "Truncation counts (47/67/63/17 of 541) are disclosed, and the text now states that the caveat applies to every IFEval row in section 3, which do not restate it."
+ },
+ {
+  "id": 31,
+  "status": "RESOLVED",
+  "where": "reports/FINAL_CAMPAIGN_AUDIT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 32,
+  "status": "RESOLVED",
+  "where": "reports/FINAL_CAMPAIGN_AUDIT.md, docs/EVALUATION.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 33,
+  "status": "RESOLVED",
+  "where": "reports/GENERAL_CAPABILITY_REGRESSION.md via scripts/build_capability_report.py (c0121d0, a4f6f8c); FINAL_CAMPAIGN_AUDIT.md (a4f6f8c)",
+  "note": "17.7pp is correct. Base's joint-attempt accuracy is 5,787/9,637 = 60.0% (first written as 60.1%, fixed in a4f6f8c in both files)."
+ },
+ {
+  "id": 34,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 35,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801) section 4",
+  "note": ""
+ },
+ {
+  "id": 36,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801)",
+  "note": ""
+ },
+ {
+  "id": 37,
+  "status": "RESOLVED",
+  "where": "docs/PROMOTION_POLICY.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 38,
+  "status": "RESOLVED",
+  "where": "GENERAL_CAPABILITY_REGRESSION.md (c0121d0); reports/ERRATA.md (d55b801) (H200:223)",
+  "note": ""
+ },
+ {
+  "id": 39,
+  "status": "RESOLVED",
+  "where": "GENERAL_CAPABILITY_REGRESSION.md, FINAL_CAMPAIGN_AUDIT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 40,
+  "status": "RESOLVED",
+  "where": "reports/FINAL_CAMPAIGN_AUDIT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 41,
+  "status": "RESOLVED",
+  "where": "reports/FINAL_CAMPAIGN_AUDIT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 42,
+  "status": "RESOLVED",
+  "where": "GENERAL_CAPABILITY_REGRESSION.md, FINAL_CAMPAIGN_AUDIT.md (c0121d0); reports/ERRATA.md (d55b801) (H200:249)",
+  "note": ""
+ },
+ {
+  "id": 43,
+  "status": "RESOLVED",
+  "where": "GENERAL_CAPABILITY_REGRESSION.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 44,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801) (PTQ eval, engine parity, PTQ closure)",
+  "note": ""
+ },
+ {
+  "id": 45,
+  "status": "RESOLVED",
+  "where": "reports/QUANTIZATION_HANDOFF.md (c0121d0)",
+  "note": "Line 3 status kept as history, with a 'Superseded' note directly under it; line 62 edited."
+ },
+ {
+  "id": 46,
+  "status": "RESOLVED",
+  "where": "reports/MEDIATEK_PORT_STATUS.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 47,
+  "status": "RESOLVED",
+  "where": "reports/MEDIATEK_PORT_STATUS.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 48,
+  "status": "RESOLVED",
+  "where": "reports/ERRATA.md (d55b801) (release/executorch/cpu/README.md); README.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 49,
+  "status": "RESOLVED",
+  "where": "README.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 50,
+  "status": "RESOLVED",
+  "where": "README.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 51,
+  "status": "RESOLVED",
+  "where": "README.md (3bf8b67); docs/EVALUATION.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 52,
+  "status": "RESOLVED",
+  "where": "README.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 53,
+  "status": "RESOLVED",
+  "where": "README.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 54,
+  "status": "RESOLVED",
+  "where": "README.md (3bf8b67); docs/publishing/huggingface-datasets.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 55,
+  "status": "RESOLVED",
+  "where": "README.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 56,
+  "status": "RESOLVED",
+  "where": "ROADMAP.md (3bf8b67); docs/DOCUMENTATION_STATE_AUDIT.md addendum (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 57,
+  "status": "RESOLVED",
+  "where": "ROADMAP.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 58,
+  "status": "RESOLVED",
+  "where": "ROADMAP.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 59,
+  "status": "RESOLVED",
+  "where": "ROADMAP.md (3bf8b67); docs/publishing/huggingface-datasets.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 60,
+  "status": "RESOLVED",
+  "where": "ROADMAP.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 61,
+  "status": "RESOLVED",
+  "where": "docs/EXPERIMENT_RESULTS.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 62,
+  "status": "RESOLVED",
+  "where": "docs/EXPERIMENT_RESULTS.md (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 63,
+  "status": "RESOLVED",
+  "where": "docs/EXPERIMENT_STATUS.md via scripts/reporting/generate_experiment_status.py (3bf8b67)",
+  "note": "Generator output is byte-identical to the committed file."
+ },
+ {
+  "id": 64,
+  "status": "RESOLVED",
+  "where": "docs/EXPERIMENT_STATUS.md via scripts/reporting/generate_experiment_status.py (3bf8b67)",
+  "note": ""
+ },
+ {
+  "id": 65,
+  "status": "RESOLVED",
+  "where": "docs/DPO_ARCHITECTURE.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 66,
+  "status": "RESOLVED",
+  "where": "docs/TEACHER_SELECTION.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 67,
+  "status": "RESOLVED",
+  "where": "docs/ON_POLICY_DISTILLATION.md, docs/TRAINING_LIFECYCLE.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 68,
+  "status": "RESOLVED",
+  "where": "docs/INCIDENT_LOG.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 69,
+  "status": "RESOLVED",
+  "where": "docs/evaluation/CHECKPOINT_SELECTION.md (c0121d0)",
+  "note": "Line 23 edited. Lines 44-48 are kept in the present tense, with a dated update at the end of the same section."
+ },
+ {
+  "id": 70,
+  "status": "RESOLVED",
+  "where": "docs/evaluation/CHECKPOINT_SELECTION.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 71,
+  "status": "RESOLVED",
+  "where": "docs/architecture/repository.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 72,
+  "status": "RESOLVED",
+  "where": "docs/benchmarks/README.md (c0121d0)",
+  "note": "The new text says 31 checkpoints (28 without the repeat), 'with committed metrics'. That matches runs/*/eval. The finding's 29/32 also counted v1 step 400, which appears only in curve.json."
+ },
+ {
+  "id": 73,
+  "status": "RESOLVED",
+  "where": "docs/models/renderer-matrix.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 74,
+  "status": "RESOLVED",
+  "where": "docs/inference/pre-gpu-surfaces.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 75,
+  "status": "RESOLVED",
+  "where": "docs/publishing/huggingface-datasets.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 76,
+  "status": "RESOLVED",
+  "where": "docs/research/methodology.md (c0121d0)",
+  "note": "The standard sentence is kept, with a new paragraph directly after it stating that M1-v2 does not meet it."
+ },
+ {
+  "id": 77,
+  "status": "RESOLVED",
+  "where": "docs/DOCUMENTATION_STATE_AUDIT.md addendum (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 78,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f)",
+  "note": ""
+ },
+ {
+  "id": 79,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f)",
+  "note": ""
+ },
+ {
+  "id": 80,
+  "status": "RESOLVED",
+  "where": "results audit JSONs + script (88c5d41); FINAL_CAMPAIGN_AUDIT.md (c0121d0); ROADMAP.md (3bf8b67); site (deployed 2026-09-13)",
+  "note": "Canonical-v2 figures (18,114/173,237; When2Call 4,038/6,505) recomputed from the release shards and they match."
+ },
+ {
+  "id": 81,
+  "status": "RESOLVED",
+  "where": "checkpoint_ladder.json, final_campaign_verdict.json (88c5d41); GENERAL_CAPABILITY_REGRESSION.md, FINAL_CAMPAIGN_AUDIT.md (c0121d0); ERRATA section 7 (capability_findings.jsonl) (d55b801); site (deployed 2026-09-13)",
+  "note": ""
+ },
+ {
+  "id": 82,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f)",
+  "note": ""
+ },
+ {
+  "id": 83,
+  "status": "RESOLVED",
+  "where": "site (deployed 2026-09-13)",
+  "note": ""
+ },
+ {
+  "id": 84,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f)",
+  "note": ""
+ },
+ {
+  "id": 85,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f)",
+  "note": ""
+ },
+ {
+  "id": 86,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f); CANONICAL_V2_COMPLETION_REPORT.md, PRE_SFT_READINESS_REPORT.md, PRE_GPU_READINESS_REPORT.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 87,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f); config caveat in reports/ERRATA.md (d55b801) section 5",
+  "note": ""
+ },
+ {
+  "id": 88,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13)",
+  "note": ""
+ },
+ {
+  "id": 89,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f) (CorpusV2 card; v2-M0-snapshot card and template)",
+  "note": ""
+ },
+ {
+  "id": 90,
+  "status": "RESOLVED",
+  "where": "reports/data-normalization-v1.md (c0121d0)",
+  "note": ""
+ },
+ {
+  "id": 91,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f)",
+  "note": ""
+ },
+ {
+  "id": 92,
+  "status": "RESOLVED",
+  "where": "HF card (on the Hub, 2026-09-13) + template (a18e45f)",
+  "note": ""
+ },
+ {
+  "id": 93,
+  "status": "RESOLVED",
+  "where": "site (deployed 2026-09-13); docs/data/tool-use-mixture-methodology.md, CANONICAL_V2_COMPLETION_REPORT.md (c0121d0)",
+  "note": "The methodology line 3 is kept, with a status update directly under it marking it historical."
+ }
+]
