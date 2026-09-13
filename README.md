@@ -16,6 +16,8 @@ OpenGrad is an empirical research repository for capability–efficiency tradeof
 open-weight language models. It provides reproducible infrastructure for controlled post-training,
 regression-aware evaluation, and provenance-preserving publication — and it keeps negative results
 on the record rather than editing them away. The first study is reliable tool use in Qwen3.5-2B.
+OpenGrad is the premier frontier research repository of the [Experimental Intelligence](https://experimentalintelligence.org/) lab, fully maintained by
+Arjhine Ty.
 
 [![CI](https://github.com/arjhinety/OpenGrad/actions/workflows/ci.yml/badge.svg)](https://github.com/arjhinety/OpenGrad/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-052B42?style=flat-square)](pyproject.toml)
@@ -330,7 +332,7 @@ Operate OpenGrad from an agent harness through the same documented `opengrad …
 
 - [OpenWeights](https://github.com/alpharomercoma/openweights) — independent on-device execution environment for compatible GGUF/llama.cpp and ExecuTorch artifacts; OpenGrad defines experiments and evidence, OpenWeights runs compatible artifacts.
 - [OpenPapers](https://github.com/arjhinety/OpenPapers) — provenance-preserving scholarly retrieval used during active research; its findings are research inputs, not OpenGrad results.
-- [Experimental Intelligence](https://experimentalintelligence.org/) — the machine-learning research effort OpenGrad belongs to. It grew out of [Experimental Machines](https://experimentalmachines.org/), the same team's first effort, which benchmarks LLM inference on datacenter, laptop and phone hardware. When the team moved into ML research, that work became Experimental Intelligence.
+- [Experimental Intelligence](https://experimentalintelligence.org/) — the research lab OpenGrad is the premier frontier research repository of, fully maintained by Arjhine Ty. It grew out of [Experimental Machines](https://experimentalmachines.org/), the same team's first effort, which benchmarks LLM inference on datacenter, laptop and phone hardware. When the team moved into ML research, that work became Experimental Intelligence.
 
 OpenGrad records upstream datasets, models, benchmarks, and papers in its registries; those sources
 remain subject to their own licenses and attribution requirements.

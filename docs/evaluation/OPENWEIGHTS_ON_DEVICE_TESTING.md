@@ -1,6 +1,6 @@
 # On-Device Tool Calling & Android Studio Testing with OpenWeights
 
-**Building in Public.** OpenGrad connects directly to practical on-device deployment questions exposed by [OpenWeights](https://github.com/alpharomercoma/openweights), an independent mobile open-weight model deployment engine developed by Alpha Romer Coma (Experimental Machines, the team's hardware-benchmarking effort; OpenGrad belongs to its machine-learning successor, Experimental Intelligence).
+**Building in Public.** OpenGrad connects directly to practical on-device deployment questions exposed by [OpenWeights](https://github.com/alpharomercoma/openweights), an independent mobile open-weight model deployment engine developed by Alpha Romer Coma (Experimental Machines, the team's hardware-benchmarking effort; OpenGrad is the premier frontier research repository of its machine-learning successor, the Experimental Intelligence lab).
 
 ---
 
