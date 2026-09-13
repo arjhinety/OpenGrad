@@ -56,6 +56,7 @@ def _probe(url: str) -> dict:
         ],
         text=True,
         capture_output=True,
+        check=False,
     )
     parts = result.stdout.strip().split(" ", 2)
     return {
@@ -75,11 +76,13 @@ def probe() -> dict:
         ["pip", "download", "mtk-converter", "--no-deps", "-d", "/tmp/mtk"],
         text=True,
         capture_output=True,
+        check=False,
     )
     pip_neuron = subprocess.run(
         ["pip", "download", "mtk-neuron", "--no-deps", "-d", "/tmp/mtk"],
         text=True,
         capture_output=True,
+        check=False,
     )
 
     reachable = any(item["http_code"] == "200" for item in http)

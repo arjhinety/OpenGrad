@@ -37,7 +37,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.evaluation.runner import (  # noqa: E402
+from opengrad.evaluation.runner import (
     PINNED_EVALUATOR_REVISION,
     PINNED_MODEL_REVISION,
     PINNED_TEMPLATE_HASH,

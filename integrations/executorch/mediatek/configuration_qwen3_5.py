@@ -10,9 +10,6 @@
 from models.llm_models.configuration_base import BaseConfig
 
 
-# flake8: noqa: C901
-
-
 class Qwen3_5Config(BaseConfig):
     """Qwen3.5 hybrid text config.
 

@@ -27,11 +27,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "third_party"))
 
-import random  # noqa: E402
+import random
 
-import langdetect  # noqa: E402
-
-from instruction_following_eval import instructions_registry  # noqa: E402
+import langdetect
+from instruction_following_eval import instructions_registry
 
 # The upstream checkers are non-deterministic out of the box, and it is measurable: scoring one
 # fixed generations file three times produced strict prompt accuracy 0.4510, 0.4492, 0.4492.
@@ -50,7 +49,7 @@ IFEVAL_SCORER_SEED = 0
 random.seed(IFEVAL_SCORER_SEED)
 langdetect.DetectorFactory.seed = IFEVAL_SCORER_SEED
 
-from opengrad.evaluation.capability import (  # noqa: E402
+from opengrad.evaluation.capability import (
     AnswerAccounting,
     classify_ifeval_failure,
     detect_refusal,
@@ -86,7 +85,7 @@ def follows(instruction_id: str, kwargs: dict, prompt: str, response: str) -> bo
         return False
     try:
         return bool(inst.check_following(response))
-    except Exception:
+    except Exception:  # noqa: BLE001 - upstream IFEval semantics: a checker that raises is not followed
         return False
 
 

@@ -135,7 +135,7 @@ def _run(
     started = time.time()
     merged = {**os.environ, **(env or {})}
     result = subprocess.run(
-        command, cwd=cwd, shell=shell, text=True, capture_output=True, env=merged
+        command, cwd=cwd, shell=shell, text=True, capture_output=True, env=merged, check=False
     )
     # Capture both ends. ExecuTorch dumps the entire lowered graph on a partitioner failure, which
     # is tens of thousands of characters and pushes the actual exception out of a tail-only window.
@@ -176,19 +176,18 @@ def _sha256(path: str | Path) -> str:
 
 def _versions() -> dict:
     import importlib
-
     from importlib import metadata
 
     out = {"executorch_commit": EXECUTORCH_COMMIT}
     for name in ("torch", "torchao", "executorch"):
         try:
             out[name] = str(importlib.import_module(name).__version__)
-        except Exception:
+        except Exception:  # noqa: BLE001 - fall back to the installed distribution's metadata
             # executorch built from source exposes no __version__; the installed distribution
             # still records one, and an unpinnable runtime version is not acceptable provenance.
             try:
                 out[name] = metadata.version(name)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - recorded as unavailable, never guessed
                 out[name] = f"unavailable: {type(exc).__name__}"
     return out
 
@@ -477,7 +476,7 @@ def audit_pte(artifact: str) -> dict:
             raw = deserialize(path.read_bytes())
             method = f"{module_name}.{attr}"
             break
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - each failed deserializer is recorded as an attempt
             errors.append(f"{module_name}.{attr}: {type(exc).__name__}: {exc}")
 
     if raw is None:
@@ -502,7 +501,7 @@ def audit_pte(artifact: str) -> dict:
                 continue
             try:
                 candidate = getattr(raw, name)
-            except Exception:
+            except Exception:  # noqa: BLE001, S112 - a raising attribute cannot own execution_plan
                 continue
             if hasattr(candidate, "execution_plan"):
                 program, container = candidate, name
@@ -644,7 +643,7 @@ def audit_pte(artifact: str) -> dict:
                             else None,
                         }
                     )
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - store shapes vary; the failure is recorded
                 errors_here.append(f"{source}: {type(exc).__name__}: {exc}")
 
         return {
@@ -664,7 +663,7 @@ def audit_pte(artifact: str) -> dict:
         mutable_bytes = sum(
             len(getattr(b, "storage", b"") or b"") for b in (mutable_data_buffers or [])
         )
-    except Exception:
+    except Exception:  # noqa: BLE001 - an unmeasurable buffer is reported as None, not zero
         mutable_bytes = None
 
     quantized = {name: count for name, count in operators.items() if "quant" in name.lower()}

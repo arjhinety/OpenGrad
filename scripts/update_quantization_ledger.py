@@ -18,7 +18,7 @@ Usage:
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -105,7 +105,7 @@ def bench_summary(rung: str) -> dict | None:
 
 def build_rows() -> list[dict]:
     provenance = common_provenance()
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     rows = []
 
     roles = release_roles()

@@ -53,7 +53,7 @@ ENV = {
 
 def run(command: list[str], *, label: str) -> subprocess.CompletedProcess:
     print(f"\n$ {' '.join(command)}", flush=True)
-    result = subprocess.run(command, env=ENV, text=True, capture_output=True)
+    result = subprocess.run(command, env=ENV, text=True, capture_output=True, check=False)
     if result.returncode != 0:
         print(result.stdout[-4000:], flush=True)
         print(result.stderr[-4000:], flush=True)
@@ -149,7 +149,7 @@ def main() -> int:
                 "status": verdict["gate_vs_frozen_vllm_reference"]["decision"],
                 "bytes": record["artifact_bytes"],
             })
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - a failed rung is recorded and the ladder continues
             # Recorded, not swallowed: a rung that failed is evidence about where the floor is.
             print(f"!!! {rung} FAILED: {type(exc).__name__}: {exc}", flush=True)
             outcomes.append({"rung": rung, "status": "ERROR", "error": f"{type(exc).__name__}: {exc}"})

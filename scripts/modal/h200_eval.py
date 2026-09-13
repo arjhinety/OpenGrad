@@ -345,8 +345,7 @@ class Engine:
         os.makedirs(out_dir, exist_ok=True)
         path = f"{out_dir}/vllm-bf16.{partition}.jsonl"
         with open(path, "w", encoding="utf-8", newline="\n") as handle:
-            for g in generations:
-                handle.write(json.dumps(g, ensure_ascii=False, sort_keys=True) + "\n")
+            handle.writelines(json.dumps(g, ensure_ascii=False, sort_keys=True) + "\n" for g in generations)
         volume.commit()
         return self._persist("frozen", {
             "phase": "frozen",
@@ -482,7 +481,7 @@ def _driver_version() -> str | None:
             ["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"],
             capture_output=True, text=True, check=True,
         ).stdout.strip()
-    except Exception:
+    except Exception:  # noqa: BLE001 - provenance records None when nvidia-smi is unavailable
         return None
 
 
@@ -491,7 +490,7 @@ def _pkg_version(name: str) -> str | None:
         from importlib import metadata
 
         return metadata.version(name)
-    except Exception:
+    except Exception:  # noqa: BLE001 - provenance records None rather than aborting the run
         return None
 
 

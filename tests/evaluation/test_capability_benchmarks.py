@@ -12,8 +12,8 @@ what any checkpoint does.
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "third_party"))
 
-from opengrad.evaluation.capability import (  # noqa: E402
+from opengrad.evaluation.capability import (
     IFEVAL_ID_TO_CATEGORY,
     AnswerAccounting,
     detect_refusal,
@@ -449,7 +449,7 @@ def test_prepare_script_is_deterministic():
         pytest.skip("datasets not prepared")
     proc = subprocess.run(
         [sys.executable, str(ROOT / "scripts/prepare_capability_benchmarks.py")],
-        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace",
+        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False,
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
     for name, blob in before.items():

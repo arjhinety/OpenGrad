@@ -232,7 +232,7 @@ def main() -> int:
             exists_ok=True,
         )
         print(f"added to collection {COLLECTION_SLUG}")
-    except Exception as exc:  # publishing succeeded; collection membership is recoverable
+    except Exception as exc:  # noqa: BLE001 - publishing succeeded; collection membership is recoverable
         print(f"WARNING: could not add to collection: {type(exc).__name__}: {exc}")
     return 0
 

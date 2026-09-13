@@ -18,10 +18,11 @@ Usage:
 from __future__ import annotations
 
 import json
+from itertools import pairwise
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CAP = ROOT / "results/benchmarks/h200/capability_v1"
+CAP = ROOT /"results/benchmarks/h200/capability_v1"
 OUT_JSON = CAP / "regression_analysis.json"
 
 STAGE_ORDER = ["BASE", "M0_SFT", "M1_DPO_CURRENT", "M1_DPO_HISTORICAL"]
@@ -205,7 +206,7 @@ def collect() -> dict:
 
 def build_deltas(stages: dict) -> dict:
     deltas = {}
-    for a, b in zip(PRIMARY_PATH, PRIMARY_PATH[1:]):
+    for a, b in pairwise(PRIMARY_PATH):
         if a not in stages or b not in stages:
             deltas[f"{a}->{b}"] = {"status": "ABSENT",
                                    "missing": [s for s in (a, b) if s not in stages]}

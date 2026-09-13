@@ -333,20 +333,27 @@ def main() -> int:
         "checkpoints": entries,
         "missing": [e["stage"] for e in entries if not e["available"]],
         "notes": [
-            "No intermediate DPO step exists between M0_SFT and M1_DPO_CURRENT that is published; "
-            "dpo-checkpoint-30 is the promoted one and the only DPO artifact on the Hub for this "
-            "lineage, so the M0->M1 delta is the whole preference stage, not one step of it.",
-            "parent_weight_sha256 in the frozen reference is a digest of the training-time "
-            "checkpoint. It was initially assumed this need not equal the published M0 repo's "
-            "shard digest. It does: both are "
-            "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a, verified twice -- "
-            "from the Hub's LFS metadata here, and by recomputing sha256 over the downloaded file "
-            "inside the H200 container. The published M0 is the exact parent of M1-v2.",
-            "Two consistency checks are EXPECTED to fail: base_architecture_matches_current and "
-            "base_tokenizer_json_matches_current. Both are documented in "
-            "known_cross_stage_differences and are properties of the upstream artifact, not "
-            "errors in this ladder. Every check on the M0->M1 edge passes, which is the edge that "
-            "isolates the preference stage.",
+            (
+                "No intermediate DPO step exists between M0_SFT and M1_DPO_CURRENT that is "
+                "published; dpo-checkpoint-30 is the promoted one and the only DPO artifact on the "
+                "Hub for this lineage, so the M0->M1 delta is the whole preference stage, not one "
+                "step of it."
+            ),
+            (
+                "parent_weight_sha256 in the frozen reference is a digest of the training-time "
+                "checkpoint. It was initially assumed this need not equal the published M0 repo's "
+                "shard digest. It does: both are "
+                "7144579aeecec8b4de25f193ab63085efdf8d9d76b85ed915352291b0152277a, verified twice -- "
+                "from the Hub's LFS metadata here, and by recomputing sha256 over the downloaded "
+                "file inside the H200 container. The published M0 is the exact parent of M1-v2."
+            ),
+            (
+                "Two consistency checks are EXPECTED to fail: base_architecture_matches_current "
+                "and base_tokenizer_json_matches_current. Both are documented in "
+                "known_cross_stage_differences and are properties of the upstream artifact, not "
+                "errors in this ladder. Every check on the M0->M1 edge passes, which is the edge "
+                "that isolates the preference stage."
+            ),
         ],
         "expected_failing_checks": [
             "base_architecture_matches_current",

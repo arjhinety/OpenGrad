@@ -86,7 +86,6 @@ def main() -> int:
     superseded_seconds = sum(r["container_seconds"] for r in gpu_runs if r["superseded"] is True)
     waste_usd = sum(w["usd"] for w in waste_items) + sum(f["usd"] for f in failed)
     continuation_total = round(retained_usd + superseded_usd + waste_usd, 4)
-    benchmark_usd, overhead_usd, inference_seconds = retained_usd, 0.0, 0.0
     prior_usd = prior.get("estimated_spend_usd", 0.0)
 
     payload = {

@@ -168,7 +168,7 @@ image = (
 
 def _run(command: list[str], **kwargs) -> str:
     print("+", " ".join(str(part) for part in command), flush=True)
-    result = subprocess.run(command, text=True, capture_output=True, **kwargs)
+    result = subprocess.run(command, text=True, capture_output=True, check=False, **kwargs)
     if result.returncode != 0:
         print(result.stdout[-8000:], flush=True)
         print(result.stderr[-8000:], flush=True)
@@ -193,7 +193,7 @@ def _gguf_metadata(path: str, needles: tuple[str, ...] = ()) -> dict:
     plausible command is assumed to have done what its name says.
     """
     sys.path.insert(0, f"{LLAMA}/gguf-py")
-    from gguf import GGUFReader  # noqa: PLC0415  (only importable inside the container)
+    from gguf import GGUFReader
 
     reader = GGUFReader(path, "r")
     out: dict = {"keys_matched": {}}
@@ -202,7 +202,7 @@ def _gguf_metadata(path: str, needles: tuple[str, ...] = ()) -> dict:
         if not needles or any(needle.lower() in lowered for needle in needles):
             try:
                 out["keys_matched"][key] = field.contents()
-            except Exception as exc:  # metadata shape varies by type; the key's presence is data
+            except Exception as exc:  # noqa: BLE001 - metadata shape varies by type; the key's presence is data
                 out["keys_matched"][key] = f"<unreadable: {type(exc).__name__}: {exc}>"
     out["tensor_count"] = len(reader.tensors)
     out["nextn_key_present"] = any("nextn" in k.lower() for k in reader.fields)
@@ -280,7 +280,7 @@ class Server:
                 if response.status_code == 200:
                     print(f"llama-server ready after {int(timeout - (deadline - time.time()))}s")
                     return
-            except Exception:
+            except Exception:  # noqa: BLE001, S110 - not listening yet; the deadline bounds the wait
                 pass
             time.sleep(2)
         raise RuntimeError(f"llama-server did not become ready:\n{self.read_log()}")
@@ -343,7 +343,10 @@ def _reconcile_mtp_declaration(source: str) -> dict:
         config = _json.load(handle)
 
     with safe_open(f"{source}/model.safetensors", framework="pt") as weights:
-        mtp_tensors = sorted(key for key in weights.keys() if key.lower().startswith("mtp."))
+        # safe_open is not a dict: .keys() is its API for listing tensor names.
+        mtp_tensors = sorted(
+            key for key in weights.keys() if key.lower().startswith("mtp.")  # noqa: SIM118
+        )
 
     declared = config.get("mtp_num_hidden_layers")
     record = {
@@ -674,7 +677,7 @@ def generate(artifact: str, partition: str = "confirmatory", n_parallel: int = 8
                     "tokens_predicted": body.get("tokens_predicted"),
                     "tokens_evaluated": body.get("tokens_evaluated"),
                 }
-            except Exception as exc:  # surfaced, never silently dropped
+            except Exception as exc:  # noqa: BLE001 - surfaced, never silently dropped
                 return row["example_id"], {
                     "example_id": row["example_id"],
                     "raw": "",
@@ -988,7 +991,7 @@ def tokenizer_divergence_probe(example_ids: list[str], artifact: str = "m1-v2-bf
                 "tokens_predicted": int(generated.shape[1] - ids.shape[1]),
             }
         provenance["hf_cross_check"] = {"ran": True}
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - the cross-check is optional; its failure is recorded
         provenance["hf_cross_check"] = {
             "ran": False,
             "error": f"{type(exc).__name__}: {exc}",

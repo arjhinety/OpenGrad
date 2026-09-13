@@ -163,7 +163,7 @@ def main() -> int:
     print("-" * len(hdr))
     for stage, e in report.items():
         b = e["by_benchmark"]
-        def rate(k):
+        def rate(k, b=b):
             return f"{b[k]['refusal_rate']*100:.1f}%" if k in b else "-"
         print(f"{stage:<20}{rate('gsm8k_zeroshot'):>14}{rate('gsm8k_fewshot8'):>14}"
               f"{rate('mmlu_pro'):>13}{rate('ifeval'):>15}")

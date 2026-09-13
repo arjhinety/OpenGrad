@@ -132,7 +132,7 @@ def _pkg_version(name: str) -> str:
 
     try:
         return version(name)
-    except Exception:
+    except Exception:  # noqa: BLE001 - provenance records "unknown" rather than aborting the run
         return "unknown"
 
 
@@ -205,7 +205,8 @@ class CapabilityEngine:
         self.load_seconds = round(time.time() - load_started, 3)
 
         props = torch.cuda.get_device_properties(0)
-        cfg = json.load(open(os.path.join(model_dir, "config.json"), encoding="utf-8"))
+        with open(os.path.join(model_dir, "config.json"), encoding="utf-8") as handle:
+            cfg = json.load(handle)
         template_path = os.path.join(model_dir, "chat_template.jinja")
         self.environment = {
             "stage": self.stage,
@@ -258,8 +259,7 @@ class CapabilityEngine:
         os.makedirs(out_dir, exist_ok=True)
         path = f"{out_dir}/{name}.jsonl"
         with open(path, "w", encoding="utf-8", newline="\n") as fh:
-            for r in rows:
-                fh.write(json.dumps(r, sort_keys=True, ensure_ascii=True) + "\n")
+            fh.writelines(json.dumps(r, sort_keys=True, ensure_ascii=True) + "\n" for r in rows)
         volume.commit()
         return path
 
@@ -351,7 +351,7 @@ class CapabilityEngine:
                     requests = self._load_requests(job, mmlu_limit, gsm8k_arms)
                     results[job] = self._run_requests(requests, job)
                 results[job]["status"] = "COMPLETE"
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - a failed job must not stop the others
                 # A failed job is recorded, not hidden, and the remaining jobs still run.
                 results[job] = {"status": "FAILED", "error": f"{type(exc).__name__}: {exc}"}
                 print(f"JOB {job} FAILED: {type(exc).__name__}: {exc}", flush=True)
@@ -373,7 +373,8 @@ class CapabilityEngine:
                        gsm8k_arms: list[str] | None) -> list[dict]:
         path = {"ifeval": "/data/ifeval.jsonl", "gsm8k": "/data/gsm8k.jsonl",
                 "mmlu_pro": "/data/mmlu_pro.jsonl"}[job]
-        rows = [json.loads(line) for line in open(path, encoding="utf-8") if line.strip()]
+        with open(path, encoding="utf-8") as handle:
+            rows = [json.loads(line) for line in handle if line.strip()]
         if job == "gsm8k" and gsm8k_arms:
             rows = [r for r in rows if r["arm"] in gsm8k_arms]
         if job == "mmlu_pro" and mmlu_limit:
@@ -398,7 +399,8 @@ class CapabilityEngine:
         OpenWeights does on device. The cases are not edited -- this is a regression smoke test,
         not a capability benchmark, and its value depends entirely on staying fixed.
         """
-        spec = json.load(open("/data/sentinel.json", encoding="utf-8"))
+        with open("/data/sentinel.json", encoding="utf-8") as handle:
+            spec = json.load(handle)
         tool = spec["weather_tool"]
         max_tokens = spec["params"]["max_tokens"]
         started = time.time()

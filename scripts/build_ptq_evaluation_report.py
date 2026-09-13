@@ -376,7 +376,7 @@ python scripts/build_ptq_evaluation_report.py
         f"| `{r['rung']}` | `{(r.get('artifact_sha256') or 'n/a')[:24]}…` | "
         f"{r.get('artifact_bytes') or 0:,} | `{r.get('quantizer_command') or 'n/a'}` |"
         for r in rungs
-    ) + f"""
+    ) + """
 
 ## Caveats that must travel with these numbers
 

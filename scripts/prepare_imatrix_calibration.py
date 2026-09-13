@@ -53,17 +53,17 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.contamination.audit import QUARANTINE_PATH, load_quarantine  # noqa: E402
-from opengrad.data.materialize import iter_materialized_rows  # noqa: E402
-from opengrad.data.real_analysis import _restore_row  # noqa: E402
-from opengrad.data.renderers import Qwen35_2BRenderer, _qwen_messages  # noqa: E402
-from opengrad.data.schema import normalize_tool  # noqa: E402
-from opengrad.evaluation.runner import (  # noqa: E402
+from opengrad.contamination.audit import QUARANTINE_PATH, load_quarantine
+from opengrad.data.materialize import iter_materialized_rows
+from opengrad.data.real_analysis import _restore_row
+from opengrad.data.renderers import Qwen35_2BRenderer, _qwen_messages
+from opengrad.data.schema import normalize_tool
+from opengrad.evaluation.runner import (
     PINNED_MODEL_REVISION,
     PINNED_TEMPLATE_HASH,
     _qwen_tool,
 )
-from opengrad.formatting.parser import parse_qwen_native_output  # noqa: E402
+from opengrad.formatting.parser import parse_qwen_native_output
 
 CORPUS_ID = "m1_v2_imatrix_calibration_v2"
 SUPERSEDES = "m1_v2_imatrix_calibration_v1"
@@ -258,7 +258,7 @@ def collect_sft(
                 continue
             try:
                 text = render_calibration_text(renderer, row)
-            except Exception as exc:  # quarantine rather than crash the corpus build
+            except Exception as exc:  # noqa: BLE001 - quarantine rather than crash the corpus build
                 # Bucket by error code, not by message: these carry the offending field names, so
                 # keying on the message produces thousands of near-unique entries and a manifest
                 # that is mostly noise.

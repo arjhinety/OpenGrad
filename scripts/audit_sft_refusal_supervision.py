@@ -34,7 +34,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.evaluation.capability import detect_refusal  # noqa: E402
+from opengrad.evaluation.capability import detect_refusal
 
 NORM = ROOT / "data/processed/normalization-v1"
 OUT = ROOT / "results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit.json"
@@ -87,7 +87,7 @@ def main() -> int:
                 messages = json.loads(rec["messages"]) if isinstance(rec["messages"], str) else rec["messages"]
                 meta = json.loads(rec["metadata"]) if isinstance(rec["metadata"], str) else rec["metadata"]
                 tools = json.loads(rec["tools"]) if isinstance(rec["tools"], str) else rec["tools"]
-            except Exception:
+            except Exception:  # noqa: BLE001, S112 - an unparseable record is excluded from the audit
                 continue
 
             decision = ((meta or {}).get("behavior") or {}).get("decision")

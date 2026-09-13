@@ -45,7 +45,7 @@ def _real_audits():
 
 @pytest.fixture(scope="module")
 def reconciliation():
-    (fp32_doc, fp32), (quant_doc, quant) = _real_audits()
+    (_fp32_doc, fp32), (_quant_doc, quant) = _real_audits()
     config = json.loads(audit.CONFIG.read_text(encoding="utf-8"))
     labels = audit.expected_weight_classes(config)
     return audit.reconcile(fp32, quant, labels), fp32, quant, labels

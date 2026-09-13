@@ -13,7 +13,7 @@
 
 import torch
 from models.llm_models.configuration_qwen3_5 import Qwen3_5Config
-from models.llm_models.modeling_common import Attention, DecoderLayer, MLP, ModelChunk
+from models.llm_models.modeling_common import MLP, Attention, DecoderLayer, ModelChunk
 
 SPEC = "integrations/executorch/mediatek/IMPLEMENTATION_SPEC.md (OpenGrad repository)"
 

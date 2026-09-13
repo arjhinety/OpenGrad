@@ -34,7 +34,6 @@ import argparse
 import json
 import platform
 import subprocess
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,7 +64,7 @@ def git(*args: str) -> str | None:
         return subprocess.run(
             ["git", *args], cwd=ROOT, capture_output=True, text=True, check=True
         ).stdout.strip()
-    except Exception:
+    except Exception:  # noqa: BLE001 - provenance degrades to None outside a git checkout
         return None
 
 
@@ -164,8 +163,7 @@ def collect() -> dict:
     return {
         "phase": "ptq",
         "phase_status": "CLOSED",
-        "policy_version": gate["policy_version"] if "policy_version" in gate else
-                          "quantization_preservation_v1",
+        "policy_version": gate.get("policy_version", "quantization_preservation_v1"),
         "closure_manifest_version": "ptq_phase_closure_v1",
         "immutability": (
             "Every value here is copied from evidence the phase already wrote. Nothing was "

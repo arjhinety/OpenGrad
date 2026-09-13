@@ -81,7 +81,7 @@ def test_quantizing_from_a_quantized_source_is_refused():
 
 
 def test_quantizing_from_bf16_is_allowed():
-    assert_quantizable_source("m1-v2-bf16.gguf", source_type="bf16") is None
+    assert assert_quantizable_source("m1-v2-bf16.gguf", source_type="bf16") is None
 
 
 def test_unknown_source_type_is_refused():

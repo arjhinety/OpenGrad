@@ -41,7 +41,7 @@ SCORERS = {
 def run(cmd: list[str], label: str) -> subprocess.CompletedProcess:
     print(f"\n$ {label}", flush=True)
     result = subprocess.run(cmd, env=ENV, text=True, capture_output=True,
-                            encoding="utf-8", errors="replace")
+                            encoding="utf-8", errors="replace", check=False)
     if result.stdout:
         print(result.stdout.rstrip())
     if result.returncode != 0:

@@ -33,11 +33,11 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.evaluation.quantized import (  # noqa: E402
+from opengrad.evaluation.quantized import (
     load_frozen_prompts,
     score_runtime_generations,
 )
-from opengrad.promotion.quantization import (  # noqa: E402
+from opengrad.promotion.quantization import (
     PRESERVATION_POLICY_VERSION,
     evaluate_quantization_preservation,
 )

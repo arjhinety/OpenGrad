@@ -58,17 +58,19 @@ def _enclosing_function(tree: ast.AST, target: ast.AST):
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             start, end = node.lineno, getattr(node, "end_lineno", node.lineno)
-            if start <= target.lineno <= end:
-                if best is None or node.lineno > best.lineno:
-                    best = node
+            if start <= target.lineno <= end and (best is None or node.lineno > best.lineno):
+                best = node
     return best
 
 
 def _has_drain(scope: ast.AST) -> bool:
     for node in ast.walk(scope):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-            if node.func.attr == "communicate":
-                return True
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "communicate"
+        ):
+            return True
     return False
 
 

@@ -187,8 +187,10 @@ def build() -> dict:
             "Causation of the refusal pattern is NOT established; the corpus audit is association only.",
             "Single lineage, single base model, no replicate; no cross-family generalization claimed.",
             "BASE remains truncation-disadvantaged on MMLU-Pro (21.8% vs 6.3%); handled by interval.",
-            "Refusal detection is HEURISTIC_REGEX_v1 with unmeasured precision; it never feeds an "
-            "official benchmark metric.",
+            (
+                "Refusal detection is HEURISTIC_REGEX_v1 with unmeasured precision; it never feeds "
+                "an official benchmark metric."
+            ),
             "BASE is a multimodal artifact evaluated text-only as published.",
             "11 benchmarks remain BLOCKED_NO_DATASET; Speculative Replay BLOCKED_MISSING_MTP_COMPONENT.",
         ],

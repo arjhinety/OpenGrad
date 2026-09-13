@@ -33,8 +33,8 @@ REFUSAL_WINDOW_CHARS = 400
 
 REFUSAL_PATTERNS: tuple[tuple[str, str], ...] = (
     ("apology_inability",
-     r"\b(?:apologies|i\s+apologi[sz]e|i'?m\s+sorry|i\s+am\s+sorry|sorry)\b[^.]{0,90}?"
-     r"\b(?:unable|cannot|can'?t|not\s+able|don'?t\s+have\s+the\s+abilit)"),
+     (r"\b(?:apologies|i\s+apologi[sz]e|i'?m\s+sorry|i\s+am\s+sorry|sorry)\b[^.]{0,90}?"
+      r"\b(?:unable|cannot|can'?t|not\s+able|don'?t\s+have\s+the\s+abilit)")),
     ("leading_unable",
      r"^\s*(?:i'?m|i\s+am)\s+(?:unable|not\s+able)\s+to\b"),
     ("leading_cannot",

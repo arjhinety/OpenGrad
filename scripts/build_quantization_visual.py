@@ -75,7 +75,6 @@ def composition_rows(audit: dict) -> tuple[list[dict], list[dict]]:
     skipped_bytes = sum(c["parameters"] * 4 for c in skipped_classes)
 
     embedding = consts["embedding_bytes"]
-    norms = consts["bytes"] - embedding
 
     # fp32 reference: the same weights, stored at 4 bytes each, no scales.
     fp32_linear = sum(c["parameters"] * 4 for c in quantized_classes)

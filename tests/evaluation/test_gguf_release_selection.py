@@ -12,8 +12,6 @@ import importlib.util
 import json
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/build_ptq_evaluation_report.py"
 CRITERIA_PATH = ROOT / "results/quantization/gguf/release_selection_criteria_v1.json"

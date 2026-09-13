@@ -12,7 +12,8 @@ quantize and publish paths rather than in a report nobody reruns.
 from __future__ import annotations
 
 import re
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 M1_V2_EXPERIMENT = "m1_dpo_canonical_v2_final_v2"
 M1_V2_CHECKPOINT = "dpo-checkpoint-30"

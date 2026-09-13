@@ -32,7 +32,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.evaluation.capability import AnswerAccounting, detect_refusal  # noqa: E402
+from opengrad.evaluation.capability import AnswerAccounting, detect_refusal
 
 REQUESTS = ROOT / "results/benchmarks/datasets/gsm8k_v1.jsonl"
 

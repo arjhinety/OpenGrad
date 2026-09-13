@@ -34,7 +34,6 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -312,7 +311,7 @@ def main() -> int:
         try:
             args = (pin["hf_dataset"], pin["config"]) if pin["config"] else (pin["hf_dataset"],)
             ds = load_dataset(*args, revision=pin["revision"])
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - an unloadable dataset is recorded as BLOCKED
             print(f"  BLOCKED_NO_DATASET: {type(exc).__name__}: {exc}")
             (OUTDIR / f"{name}_v1.meta.json").parent.mkdir(parents=True, exist_ok=True)
             (OUTDIR / f"{name}_v1.meta.json").write_text(

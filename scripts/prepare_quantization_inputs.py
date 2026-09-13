@@ -14,7 +14,6 @@ from typing import Any
 from opengrad.evaluation.runner import load_evaluation_examples
 from opengrad.promotion.quantization import compute_preservation_thresholds
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_ID = "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2"
 MODEL_REVISION = "f33d20308982f37deb459076f489e794d5521ee3"
@@ -50,7 +49,7 @@ def git_sha() -> str:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
         ).strip()
-    except Exception:
+    except Exception:  # noqa: BLE001 - provenance degrades to "unknown" outside a git checkout
         return "unknown"
 
 
@@ -69,7 +68,6 @@ def main() -> None:
     args = parser.parse_args()
     model_dir = (ROOT / args.model_dir).resolve() if not args.model_dir.is_absolute() else args.model_dir
 
-    manifest = json.loads((ROOT / EVAL_MANIFEST).read_text(encoding="utf-8"))
     partition = json.loads((ROOT / PARTITION).read_text(encoding="utf-8"))
     examples = load_evaluation_examples(ROOT, ROOT / EVAL_MANIFEST)
     dev_ids = set(partition["example_ids"]["dev"])

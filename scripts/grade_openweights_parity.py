@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.formatting.parser import parse_qwen_native_output  # noqa: E402
+from opengrad.formatting.parser import parse_qwen_native_output
 
 SPEC = ROOT / "results/benchmarks/openweights_parity_cases_v1.json"
 RUN = ROOT / "results/benchmarks/h200/capability_run.json"

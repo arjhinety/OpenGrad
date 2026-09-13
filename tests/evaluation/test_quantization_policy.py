@@ -4,7 +4,6 @@ from opengrad.promotion.quantization import (
     evaluate_quantization_preservation,
 )
 
-
 REFERENCE = {
     "call_f1": 0.7548387096774194,
     "call_precision": 0.7358490566037735,

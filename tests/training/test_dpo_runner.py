@@ -12,7 +12,9 @@ import math
 from pathlib import Path
 
 import pytest
-import torch
+
+# torch ships in the `training` extra, not `dev`; skip rather than fail collection without it.
+torch = pytest.importorskip("torch")
 
 from opengrad.training.dpo_runner import (
     PreferenceDataError,

@@ -24,8 +24,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.evaluation.capability import detect_refusal  # noqa: E402
-from opengrad.formatting.parser import parse_qwen_native_output  # noqa: E402
+from opengrad.evaluation.capability import detect_refusal
+from opengrad.formatting.parser import parse_qwen_native_output
 
 SPEC = ROOT / "results/benchmarks/openweights_parity_cases_v1.json"
 FLAGS = {"i": re.IGNORECASE, "": 0}

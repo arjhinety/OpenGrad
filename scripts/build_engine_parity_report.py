@@ -28,8 +28,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from opengrad.evaluation.routing import routing_metrics  # noqa: E402
-from opengrad.formatting.parser import parse_qwen_native_output  # noqa: E402
+from opengrad.evaluation.routing import routing_metrics
+from opengrad.formatting.parser import parse_qwen_native_output
 
 GGUF = ROOT / "results/quantization/gguf"
 PARITY = GGUF / "tokenizer_parity.json"
