@@ -70,18 +70,23 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 11. Cross-model replication — PLANNED
 
-12. Quantization and runtime evaluation — PLANNED
-    An isolated, optional optimization producer interface exists
-    ([`src/opengrad/optimization/`](docs/optimization/README.md)): a trained checkpoint
-    plus a recipe in, an optimized checkpoint with full provenance out. It is
-    INTERFACE_ONLY — no optimization has been executed, ModelOpt is not a dependency,
-    and no capability is established (all `UNKNOWN`). See
+12. Quantization and runtime evaluation — GGUF PTQ EXECUTED AND CLOSED; ExecuTorch EXPORTED
+    A nine-rung GGUF PTQ ladder was built from a BF16 GGUF and scored on the confirmatory partition.
+    Q6_K (1.45 GiB) is the pre-registered release and Q8_0 (1.87 GiB) also passes
+    `quantization_preservation_v1`, but the gate sits inside rerun noise
+    ([PTQ closure](reports/PTQ_PHASE_CLOSURE.md), [errata](reports/ERRATA.md)). ExecuTorch
+    CPU/XNNPACK fp32 and 8da4w were exported and audited, with no behavioural verdict; Snapdragon is
+    `REJECTED_EXPORT` and MediaTek `BLOCKED_PORT_INCOMPLETE`. The separate optimization producer
+    interface ([`src/opengrad/optimization/`](docs/optimization/README.md)) is still INTERFACE_ONLY:
+    no ModelOpt optimization has been executed. See
     [the ModelOpt integration report](reports/MODELOPT_INTEGRATION_REPORT.md).
 
-13. OpenWeights-derived downstream deployment studies — PLANNED
+13. OpenWeights-derived downstream deployment studies — PARITY SUITE RUN; NO DEVICE STUDY
     OpenWeights is an independent project; its observations motivate hypotheses but are not OpenGrad results.
-    The adapter and the versioned Tier C `openweights` benchmark definition exist, but no post-training
-    device study has been executed, so no OpenGrad result rests on device measurements.
+    The 7-case OpenWeights ParitySuite was run on the H200 against the promoted checkpoint and the base
+    ([report](reports/OPENWEIGHTS_TRANSFER_EVALUATION.md), [errata](reports/ERRATA.md)); both score 5/7,
+    so it shows no transfer difference. No post-training on-device study has been executed, so no
+    OpenGrad result rests on device measurements.
 
 14. Speculative decoding and inference research — PLANNED / GPU_REQUIRED
     Future comparisons may include autoregressive decoding, external draft speculation, Medusa, EAGLE-3, DFlash, DSpark, and native MTP where supported. A reserved configuration exists; no method is currently implemented, benchmarked, or supported by OpenGrad.
@@ -163,16 +168,15 @@ B0 baseline                                  -> EXECUTED (REAL_RESULT)
     -> post-SFT evaluation                   -> EXECUTED (see step 9)
     -> preference optimization               -> first DPO identity (on Base) rejected/not reproducible; M1-v2 DPO EXECUTED and PROMOTED under v4 (fails v3; within noise of M0)
     -> distillation                          -> NOT RUN (scaffold only; live training path unimplemented)
-    -> quantization/runtime                  -> INTERFACE_ONLY (no execution)
-    -> OpenWeights device validation         -> PLANNED (integration and benchmark definition only; no study executed)
+    -> quantization/runtime                  -> GGUF PTQ EXECUTED and CLOSED (Q6_K recommended; gate inside rerun noise); ExecuTorch exported, no behavioural verdict
+    -> OpenWeights device validation         -> ParitySuite run on H200 (Base and M1-v2 both 5/7); no on-device study executed
     -> speculative decoding                  -> PLANNED / GPU_REQUIRED (no runtime support or benchmark executed)
     -> joint capability-efficiency studies   -> PLANNED
     -> general-capability diagnosis          -> EXECUTED (IFEval/GSM8K/MMLU-Pro across BASE -> M0 -> M1-v2)
     -> refusal-supervision ablation          -> PLANNED / BLOCKED_ON_PREFLIGHT (step 16)
 
-> **Status-drift warning.** Steps 12 and 13 above still read `INTERFACE_ONLY` / `no study
-> executed`. Both were accurate when written and are now out of date: a full GGUF PTQ ladder was
-> executed and closed (`reports/PTQ_PHASE_CLOSURE.md`), and the OpenWeights ParitySuite was run
-> against the promoted checkpoint (`reports/OPENWEIGHTS_TRANSFER_EVALUATION.md`). They are left
-> unedited here rather than silently corrected, because rewriting a roadmap's history is how a
-> roadmap stops being evidence. Update them deliberately, in their own change.
+> **Status update (2026-09-13).** Steps 12 and 13 previously read `INTERFACE_ONLY` / `no study
+> executed`, which was accurate when written. As the earlier drift warning here asked, they were
+> updated deliberately in their own change, to record the executed and closed GGUF PTQ ladder
+> (`reports/PTQ_PHASE_CLOSURE.md`) and the OpenWeights ParitySuite run
+> (`reports/OPENWEIGHTS_TRANSFER_EVALUATION.md`). The previous wording is in git history.
