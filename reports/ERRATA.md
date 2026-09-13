@@ -14,6 +14,11 @@ This file supersedes the statements listed here. Where a frozen file and this fi
 file is the correct one. No frozen number is edited. Each entry either changes what a number is
 said to show, or replaces a number that the frozen artifacts contradict.
 
+These entries come from a claim audit of the repository, the Hugging Face cards and the project
+site, which checked about 990 claims against the committed artifacts and found 93 that did not hold.
+The full list, with the resolution of each finding (including those fixed in unfrozen files), is in
+the [claim audit PDF](https://opengrad.arjhinety.com/claim-audit.pdf).
+
 ## How to verify
 
 Each entry names the artifact its correction comes from. Line numbers refer to the frozen files as

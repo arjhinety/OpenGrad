@@ -112,6 +112,7 @@ call_f1, 7 of 453 calls, single seed) is within noise.
 - Promoted evaluation: [`reports/M1_DPO_EVALUATION.md`](reports/M1_DPO_EVALUATION.md)
 - Derived result index: [`results/registry.jsonl`](results/README.md)
 - Corrections to frozen reports and published artifacts: [**Errata**](reports/ERRATA.md)
+- Claim audit, 93 findings across this repository, the Hugging Face cards and the project site, each with its resolution: [**claim-audit.pdf**](https://opengrad.arjhinety.com/claim-audit.pdf)
 
 Seven post-training interventions have been executed in total: one negative on corpus v1, one
 partial recovery on corpus v2, the definitive final-v2 (selected, not promoted), two joint-removal
@@ -245,7 +246,9 @@ validate only the result contract. Details: [benchmark inventory and counting co
 ## Current Limitations
 
 Claims in frozen reports and published artifacts that were later found wrong are corrected in the
-[**Errata**](reports/ERRATA.md) rather than edited in place.
+[**Errata**](reports/ERRATA.md) rather than edited in place. The
+[**claim audit**](https://opengrad.arjhinety.com/claim-audit.pdf) that found them lists every finding
+and how it was resolved.
 
 - **Scope:** the empirical record is one model family (Qwen3.5-2B). No cross-model replication has run.
 - **External benchmarks:** 3 of the 17 Tier A–E benchmarks have real scores (IFEval, GSM8K, MMLU-Pro); the tool-use (Tier A), agent-transfer (Tier C), stretch and systems tiers are prepared but not executed.
