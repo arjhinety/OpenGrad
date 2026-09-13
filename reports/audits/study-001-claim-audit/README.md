@@ -11,6 +11,15 @@ was resolved. The lessons drawn from it, as rules for later studies, are in
 | `resolutions.json` | One resolution per finding: status, where it was fixed (with the commit), and a note where the fix needed one. All 93 are `RESOLVED` |
 | `recheck-2026-09-13.json` | The 7 findings of a recheck of opengrad-site at `3aac71d` before the Study 001 freeze, 165 claims checked. `repeat_of` names the original finding when the site repeated an error already fixed in the repository |
 
+## Found after the audit
+
+- **`arrochi112/OpenGrad-ToolPolicy-Canonical-v2-minus-xlam` dataset card** (not in the audit's
+  card set). It said the ablation runs were planned, though both had run and were negative, and it
+  did not mention that the view carries all 18,114 of the parent's refusal-shaped ANSWER targets
+  (15.6% of its 115,895 records, against 10.5% in the parent). Corrected in the template
+  (`d7689e6`) and on the Hub (commit `055b6f17`, 2026-09-13), which is the revision its `study-001`
+  tag points at.
+
 ## Method
 
 Four independent read-only audits covered the top-level docs, the training and evaluation reports,
