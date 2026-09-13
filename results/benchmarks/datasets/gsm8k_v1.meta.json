@@ -1,0 +1,39 @@
+{
+  "arms": [
+    "zeroshot",
+    "fewshot8"
+  ],
+  "benchmark": "gsm8k",
+  "fewshot_prefix_sha256": "02d376ea2623d2a3f764222c630618b1511a1581ec81b8a4da3c8b1a52342603",
+  "fewshot_source": "openai/gsm8k main:train[:8]",
+  "fingerprint": "83cdb856bfc0e87cbe7bd6f75d9f454eb46c583dac53ce3ea197bc64ca8acdd7",
+  "is_real_upstream_data": true,
+  "max_tokens": 512,
+  "metrics": [
+    "accuracy",
+    "answer_rate",
+    "refusal_rate",
+    "parse_failure_rate",
+    "accuracy_given_answer"
+  ],
+  "no_synthetic_records": true,
+  "protocol": {
+    "fewshot8": "SECONDARY, CONTROLLED. Canonical 8-shot CoT built from the first 8 train items. Pre-registered to separate capability loss from learned refusal.",
+    "zeroshot": "PRIMARY. Bare question as a single user turn. No exemplars, no added instruction about format. Measures deployed behaviour."
+  },
+  "request_count": 2638,
+  "request_file": "results/benchmarks/datasets/gsm8k_v1.jsonl",
+  "request_file_sha256": "8081f50e43fb5e4adca928ba1c8d7b1a60dd57e47e39ee8f316ae3de52dee297",
+  "scorer": "scripts/score_gsm8k.py -- deterministic numeric extraction, no LLM judge",
+  "source": {
+    "citation": "Cobbe et al. 2021, arXiv:2110.14168",
+    "config": "main",
+    "expected_count": 1319,
+    "hf_dataset": "openai/gsm8k",
+    "revision": "740312add88f781978c0658806c59bc2815b9866",
+    "split": "test"
+  },
+  "status": "READY",
+  "unique_questions": 1319,
+  "upstream_split_count": 1319
+}

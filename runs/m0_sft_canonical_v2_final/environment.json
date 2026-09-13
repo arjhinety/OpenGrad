@@ -1,0 +1,14 @@
+{
+  "cpu": "x86_64",
+  "cuda": null,
+  "git_dirty": false,
+  "git_sha": "fc63ec70f3b007893a63b29a30263eec611d7b0d",
+  "gpu": null,
+  "gpu_probe": "not performed by Phase 0.5",
+  "kernel": "6.8.0-100-generic",
+  "os": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "ram_gb": null,
+  "rocm": null,
+  "timestamp": "2026-09-11T07:35:32.975638+00:00"
+}

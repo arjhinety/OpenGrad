@@ -26,6 +26,9 @@ runs/**
 # is ~2.5 MB each and the weights are gigabytes.
 !runs/**/failure.json
 !runs/**/checkpoint_registration_errors.json
+# The run's captured environment (engine, library versions, commit). Result freezes pin it as
+# evidence, so it must survive a fresh clone like the record it belongs to.
+!runs/**/environment.json
 # The two cross-experiment authoritative records. Per-run `ledger.jsonl` and `experiment.json` are
 # tracked so a record can name its own history; these aggregate exactly that across runs, and the
 # checkpoint registry holds lifecycle statuses no per-run file carries. Leaving them untracked
@@ -55,11 +58,18 @@ runs/**/training_state.pt
 runs/**/model.safetensors
 runs/**/*.tmp
 artifacts/
-.release/
+# Assembled Hugging Face dataset releases. The parquet shards are hundreds of MB and are published
+# on the Hub, so they stay out of Git. A release manifest that a result freeze pins as evidence is
+# committed, byte-identical to the published copy, so the freeze verifies from a fresh clone.
+.release/**
+!.release/**/
+!.release/hf/toolpolicy-canonical-v2-final/release-manifest.json
 /checkpoints/
 data/raw/
 data/processed/
-datasets/
+# Anchored: an unanchored `datasets/` also hid results/benchmarks/datasets/*.meta.json and
+# docs/datasets/, which are meant to be committed.
+/datasets/
 results/raw/
 # In-flight atomic write target for the derived experiment index; the index itself is tracked.
 results/*.tmp

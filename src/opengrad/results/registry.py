@@ -462,9 +462,15 @@ def build_row(
 
     provenance = {
         "experiment": _relative(root, exp_file),
-        "eval": external_eval_root or f"{run_path}/eval",
         "ledger": "runs/central_ledger.jsonl",
     }
+    # Name an eval location only when evaluation evidence exists. Failed, scaffold and mock runs
+    # never produced any, and a template path to an empty directory git does not keep would
+    # claim an evaluation that never happened.
+    if external_eval_root:
+        provenance["eval"] = external_eval_root
+    elif checkpoints:
+        provenance["eval"] = f"{run_path}/eval"
     return (
         RegistryRow(
             experiment_id=experiment_id,

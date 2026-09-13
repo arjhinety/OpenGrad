@@ -1,0 +1,29 @@
+{
+  "benchmark": "ifeval",
+  "fingerprint": "e1e75291ba033973f90ffab07c488ad5430ef4a8e6dc9d2fd92d0bcfe8010ee3",
+  "instruction_count": 834,
+  "is_real_upstream_data": true,
+  "max_tokens": 2560,
+  "metrics": [
+    "prompt_level_strict_accuracy",
+    "instruction_level_strict_accuracy",
+    "prompt_level_loose_accuracy",
+    "instruction_level_loose_accuracy"
+  ],
+  "no_synthetic_records": true,
+  "protocol": "0-shot, upstream prompt verbatim as a single user turn",
+  "request_count": 541,
+  "request_file": "results/benchmarks/datasets/ifeval_v1.jsonl",
+  "request_file_sha256": "15b8afe856ca52535155eb7905f942a4896475ae825e26e62e306d020a949ac4",
+  "scorer": "third_party/instruction_following_eval (vendored upstream checkers, unmodified)",
+  "source": {
+    "citation": "Zhou et al. 2023, arXiv:2311.07911",
+    "config": null,
+    "expected_count": 541,
+    "hf_dataset": "google/IFEval",
+    "revision": "966cd89545d6b6acfd7638bc708b98261ca58e84",
+    "split": "train"
+  },
+  "status": "READY",
+  "upstream_split_count": 541
+}

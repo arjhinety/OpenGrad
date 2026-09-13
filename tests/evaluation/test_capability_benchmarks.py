@@ -287,9 +287,11 @@ def test_accounting_reconciles_or_raises():
 @pytest.mark.parametrize("name", sorted(BENCHMARKS))
 def test_request_file_hash_matches_recorded(name):
     meta = load_meta(name)
-    raw = (DATASETS / f"{name}_v1.jsonl").read_bytes()
-    assert hashlib.sha256(raw).hexdigest() == meta["request_file_sha256"]
     assert len(meta["source"]["revision"]) == 40, "dataset revision must be a full commit sha"
+    request_file = DATASETS / f"{name}_v1.jsonl"
+    if not request_file.is_file():
+        pytest.skip("request set is gitignored; rebuild with scripts/prepare_capability_benchmarks.py")
+    assert hashlib.sha256(request_file.read_bytes()).hexdigest() == meta["request_file_sha256"]
 
 
 @pytest.mark.parametrize("name,repo", [
