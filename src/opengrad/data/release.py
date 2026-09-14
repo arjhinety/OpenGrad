@@ -297,6 +297,21 @@ def validate_release(staging: Path) -> list[str]:
         errors.append("source-licenses.md missing")
     if not (staging / "CITATIONS.bib").exists():
         errors.append("CITATIONS.bib missing")
+    # Every source present in the payload must be named in the licence file.
+    # This release's own licence file was once copied from the three-source
+    # partial snapshot, which listed xLAM only under "Sources not in this
+    # release" and so would have published 57,342 xLAM records under no stated
+    # attribution. The check looks for the upstream URL rather than the name of
+    # the source: the stale file did contain the name, so a name-only check
+    # would have passed it.
+    licenses_path = staging / "source-licenses.md"
+    if licenses_path.exists():
+        licenses = licenses_path.read_text(encoding="utf-8")
+        for source in manifest.get("sources", []):
+            source_id = source.get("source", "")
+            repo = _SOURCE_REPOS.get(source_id, "")
+            if repo and repo not in licenses:
+                errors.append(f"source-licenses.md omits present source: {source_id} ({repo})")
     seen = 0
     for source in manifest.get("sources", []):
         input_manifest = Path(source.get("input_manifest", ""))

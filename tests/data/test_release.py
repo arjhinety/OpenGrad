@@ -53,6 +53,67 @@ def test_release_validator_fails_closed_without_manifest(tmp_path: Path):
     assert validate_release(tmp_path) == ["release-manifest.json missing"]
 
 
+def _staging_with_one_source(tmp_path: Path, licenses: str) -> Path:
+    import hashlib
+    import json
+
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    input_manifest = tmp_path / "input-manifest.json"
+    input_manifest.write_text("{}\n", encoding="utf-8")
+    (staging / "release-manifest.json").write_text(
+        json.dumps(
+            {
+                "release_name": "fixture",
+                "release_version": "v0",
+                "sources": [
+                    {
+                        "source": "xlam-function-calling-60k",
+                        "input_manifest": str(input_manifest),
+                        "input_manifest_sha256": hashlib.sha256(
+                            input_manifest.read_bytes()
+                        ).hexdigest(),
+                    }
+                ],
+                "excluded_sources": [],
+                "record_count": 1,
+                "output_shards": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (staging / "README.md").write_text("card\n", encoding="utf-8")
+    (staging / "source-licenses.md").write_text(licenses, encoding="utf-8")
+    (staging / "CITATIONS.bib").write_text("cites\n", encoding="utf-8")
+    return staging
+
+
+def test_licence_file_must_name_a_source_that_the_payload_contains(tmp_path: Path):
+    """A present source cannot be described as absent.
+
+    The v2-final licence file was copied from the three-source partial snapshot and
+    kept listing xLAM under "Sources not in this release" while the payload carried
+    57,342 xLAM records. Presence is checked by upstream URL, because the stale file
+    did name xLAM and a name-only check would have passed it.
+    """
+    stale = (
+        "| Source | Reason absent |\n"
+        "|---|---|\n"
+        "| `Salesforce/xlam-function-calling-60k` | gated |\n"
+    )
+    errors = validate_release(_staging_with_one_source(tmp_path, stale))
+    assert any("source-licenses.md omits present source" in error for error in errors)
+
+
+def test_licence_file_naming_a_present_source_is_accepted(tmp_path: Path):
+    complete = (
+        "| xLAM | https://huggingface.co/datasets/Salesforce/xlam-function-calling-60k"
+        " | CC-BY-4.0 |\n"
+    )
+    errors = validate_release(_staging_with_one_source(tmp_path, complete))
+    assert not [error for error in errors if "source-licenses.md" in error]
+
+
 def test_rebuilding_an_identical_payload_preserves_the_recorded_manifest(monkeypatch, tmp_path):
     """A release's identity is its payload.
 
