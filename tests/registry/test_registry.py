@@ -6,6 +6,17 @@ from opengrad.registry.validate import validate
 
 
 def test_registries_validate():
+    """The registry validates clean.
+
+    It previously reported one open finding -- `canonical_v2`'s derived identity
+    was not reproducible from committed bytes and two records appeared to
+    disagree about it. Both identities were subsequently recovered from the
+    published artifact and shown to be two editions of the same manifest
+    (reports/ERRATA.md section 11), so the finding is closed. This assertion
+    fails if any finding returns.
+    """
+    from pathlib import Path
+
     assert validate(Path(__file__).parents[2]) == []
 
 

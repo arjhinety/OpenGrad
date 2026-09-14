@@ -17,7 +17,10 @@ models:
   license:
     value: Apache-2.0
     verified: true
-    source: https://huggingface.co/Qwen/Qwen3.5-2B/blob/main/LICENSE
+    # Pinned to the revision recorded below rather than to `blob/main`. A branch
+    # URL is a moving target: it returns whatever the licence text happens to be
+    # when it is fetched, so it pins nothing about what was verified.
+    source: https://huggingface.co/Qwen/Qwen3.5-2B/blob/15852e8c16360a2fea060d615a32b45270f8a8fc/LICENSE
   preferred_precision: bfloat16
   known_runtimes:
   - transformers

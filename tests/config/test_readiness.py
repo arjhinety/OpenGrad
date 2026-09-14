@@ -12,7 +12,12 @@ ROOT = Path(__file__).parents[2]
 def test_repository_status_is_machine_readable_and_reports_the_real_baseline():
     status = repository_status(ROOT)
     assert status["schema_version"] == 1
-    assert status["validation"]["status"] == "PASS"
+    # Repository status projects the registry validator. It reported the open
+    # canonical_v2 identity finding until that identity was recovered from the
+    # published artifact (reports/ERRATA.md section 11), so a clean projection is
+    # now the expected state and this fails if the registry stops validating.
+    assert status["validation"]["status"] == "PASS", status["validation"]
+    assert status["validation"]["errors"] == [], status["validation"]
     # The baseline is now real, so status must say so. This asserts consistency between the
     # projection and the evidence rather than a fixed phase: if the artifacts were removed,
     # `real` must go back to False instead of the projection still claiming a baseline.

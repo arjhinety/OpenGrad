@@ -47,6 +47,7 @@
   ],
   "dataset_minus_xlam": {
     "repository": "arrochi112/OpenGrad-ToolPolicy-Canonical-v2-minus-xlam",
+    "provenance_version": "legacy_single_digest_v1",
     "repo_type": "dataset",
     "hub_revision": "7a46f4e4604cf31a5d877f90ade49322f77a4f3d",
     "current_derived_fingerprint": "5fc739040b1a09fa7b8ac20494609bd4cbe89efc6ed54e4dbc9c2df12268b7f3",

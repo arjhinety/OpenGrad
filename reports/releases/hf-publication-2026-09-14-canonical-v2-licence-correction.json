@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "HF_PUBLICATION_RECORD",
+  "published": "2026-09-14",
+  "dataset": {
+    "repository": "arjhinety/OpenGrad-ToolPolicy-Canonical-v2",
+    "repo_type": "dataset",
+    "hub_revision": "df1a1f5135cc4b08e24b7ff20582084988932c61",
+    "superseded_hub_revision": "cc04d9a818bff3fe244a8532591f022e21ac8405",
+    "event_occurred_at": "2026-09-14",
+    "entry_recorded_at": "2026-09-14",
+    "recorded_retroactively": false,
+    "public": true,
+    "files": 181,
+    "parquet_shards": 176,
+    "record_count": 173237,
+    "corpus_fingerprint": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
+    "correction": "Provenance-only. source-licenses.md was byte-identical to the three-source partial snapshot's file: it stated the release contained records from three sources only and listed Salesforce/xlam-function-calling-60k under 'Sources not in this release', while the payload carries 57,342 xLAM records. It is rewritten for the four-source payload, and CITATIONS.bib gains the APIGen entry the release manifest declares as required for xLAM. Parquet bytes, the 176-shard set, the record count and the corpus fingerprint are unchanged; no data file was written.",
+    "files_replaced": [
+      "source-licenses.md",
+      "CITATIONS.bib"
+    ]
+  },
+  "revision_chain_since_previous_record": [
+    {
+      "repository": "arjhinety/OpenGrad-ToolPolicy-Canonical-v2",
+      "repo_type": "dataset",
+      "hub_revision": "cc04d9a818bff3fe244a8532591f022e21ac8405",
+      "superseded_hub_revision": "459bc01bdd6c4b737cd8fa98e42d8221532a6563",
+      "event_occurred_at": "2026-09-14",
+      "entry_recorded_at": "2026-09-14",
+      "recorded_retroactively": false,
+      "what": "Intermediate revision: source-licenses.md corrected, CITATIONS.bib not yet. The correction was published as two Hub commits rather than one atomic commit, so this half-applied state existed and is recorded rather than tidied away.",
+      "published_atomic": false
+    },
+    {
+      "repository": "arjhinety/OpenGrad-ToolPolicy-Canonical-v2",
+      "repo_type": "dataset",
+      "hub_revision": "459bc01bdd6c4b737cd8fa98e42d8221532a6563",
+      "superseded_hub_revision": "66470c07ed0a79941f49a5cf67c1b3b1a7d8196e",
+      "event_occurred_at": "2026-09-13",
+      "entry_recorded_at": "2026-09-14",
+      "recorded_retroactively": true,
+      "what": "Card corrected against committed artifacts, from the OpenGrad claim audit of 2026-09-13. Published without a publication record, which left every recorded revision stale for three days.",
+      "reconstruction_evidence": {
+        "kind": "HUB_COMMIT_HISTORY",
+        "observed_from": "huggingface.co/api/datasets/arjhinety/OpenGrad-ToolPolicy-Canonical-v2 (repository commit listing)",
+        "immutable_identifier": "459bc01bdd6c4b737cd8fa98e42d8221532a6563",
+        "immutable_because": "A Hugging Face revision is content-addressed: the identifier names the exact tree state that was published on that date. It is the same identifier the hub_revision field records, so the reconstruction names the artifact it describes rather than a summary of it.",
+        "transcribed_not_rederived": true,
+        "contemporaneous_record_exists": false
+      }
+    }
+  ],
+  "why_this_record_exists": "A metadata correction to a frozen release previously left no trace. The release payload is immutable; the published bundle is not, and a repository whose discipline is that identities never move silently needs both recorded separately.",
+  "notes": [
+    "This entry did not exist contemporaneously with the event it records. It was written on 2026-09-14 about a publication that happened on 2026-09-13, and it says so in machine-readable fields rather than only in prose: event_occurred_at, entry_recorded_at and recorded_retroactively distinguish when the event happened from when it was written down.",
+    "Committed records keep the namespace they were written with, so the 2026-09-11 publication of this repository is recorded under arrochi112/. The two names resolve to the same repository, and the revision chain is validated across the rename.",
+    "No shard was written and no record count changed. That is the point of recording this separately from a release: a provenance correction is not a new version of the corpus."
+  ]
+}

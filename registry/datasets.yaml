@@ -344,7 +344,11 @@ datasets:
   license:
     value: COMPOSITE_PER_SOURCE
     verified: true
+    # A repository path is mutable: the same path can hold different bytes
+    # later. The claim therefore carries the digest of the exact bytes it was
+    # verified against.
     source: release/huggingface/toolpolicy-canonical-v2-final/source-licenses.md
+    source_sha256: de9e6cbfe126d6368f509b9587132b1a2cf00b0808c3b7b814f12c3fb6c23ce0
   redistribution: PER_SOURCE
   upstream_access_mode: mixed
   downstream_access_requirement: public_allowed
@@ -443,7 +447,11 @@ datasets:
   license:
     value: COMPOSITE_PER_SOURCE
     verified: true
-    source: .release/hf/toolpolicy-canonical-v2/source-licenses.md
+    # Repointed from .release/hf/, which is build output under .gitignore and so
+    # is not part of the research record; that path no longer resolves at all.
+    # The tracked card directory is where this release's licence file lives.
+    source: release/huggingface/toolpolicy-canonical-v2/source-licenses.md
+    source_sha256: ddcb5390fe89106935febce66c8d848dd2d0a462f001ae0a8303d7daff4d3bfb
   redistribution: PER_SOURCE
   upstream_access_mode: mixed
   downstream_access_requirement: public_allowed
@@ -458,15 +466,36 @@ datasets:
   source_revision:
     value: 7a2a8e7b069bfac8eb98809eff8d24df3eb26e64
     verified: true
-    source: opengrad_git_commit in .release/hf/toolpolicy-canonical-v2/release-manifest.json
+    source: opengrad_git_commit in the release manifest published at
+      arjhinety/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot release-manifest.json
   exact_revision: 7a2a8e7b069bfac8eb98809eff8d24df3eb26e64
   processed_dataset_hash:
     status: FULL_DATA_VALIDATED
     value: 09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1
-  source_repository: .release/hf/toolpolicy-canonical-v2/release-manifest.json
+    # The manifest is not in this repository (it was built on the training host and
+    # .release/ is gitignored), so the identity cannot be re-derived from committed
+    # bytes. It is anchored to the immutable published artifact instead: the file at
+    # this exact revision hashes to the recorded value, and it pins all 104 shards.
+    #
+    # `277a0ae43aa0438894d25fea6c9985ee41732735a18aceb1bb9aa77c70354124` is NOT a
+    # conflicting identity. It is the publish-time edition of the same file, at
+    # revisions 8b43caeb, 5130fb4e and ad70a8ba -- exactly the two revisions the
+    # tracked publication record names. The two editions differ in only
+    # `hub_repository` and `opengrad_git_commit`; their 104 output_shards are
+    # identical. See reports/ERRATA.md section 11.
+    remote_identity:
+      hub_repository: arjhinety/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot
+      hub_revision: bb70545cd486c080c4337fa2fd465df6d14fb0ed
+      path: release-manifest.json
+      sha256: 09018d260731542c804cade53594be1fdaaabd7c80a60d784bd470758b0b87f1
+      verified_at_head: b0de031fdf86694d0e093c75628e4b4862dc658f
+  source_repository: https://huggingface.co/datasets/arjhinety/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot
   sample_count:
     published: 103036
-    verified_from: .release/hf/toolpolicy-canonical-v2/release-manifest.json
+    # The manifest is build output and was never committed for this release, so
+    # it cannot be the evidence anchor. The tracked publication record carries
+    # the same count and resolves from a fresh clone.
+    verified_from: reports/releases/toolpolicy-canonical-v2-publication.json
   retained_after_filtering:
     status: FULL_DATA_VALIDATED
     value: 103036
@@ -539,7 +568,11 @@ datasets:
   license:
     value: COMPOSITE_PER_SOURCE
     verified: true
-    source: .release/hf/toolpolicy-canonical-v1/source-licenses.md
+    # Repointed from .release/hf/, which is build output under .gitignore. That
+    # file still exists on the machine that built the release, which is exactly
+    # why the claim looked sound while being unreproducible from the repository.
+    source: release/huggingface/toolpolicy-canonical-v1/source-licenses.md
+    source_sha256: 7bcc200dc52071a32ee8dac12c24d65bd5bde244051edda0e43e5b089b2682e1
   redistribution: PER_SOURCE
   upstream_access_mode: mixed
   downstream_access_requirement: public_allowed
@@ -584,13 +617,28 @@ datasets:
     source: opengrad_git_commit in .release/hf/toolpolicy-canonical-v1/release-manifest.json
   sample_count:
     published: 213951
-    verified_from: .release/hf/toolpolicy-canonical-v1/release-manifest.json
+    # Same as the partial snapshot: the manifest is uncommitted build output, so the
+    # tracked publication record is the anchor that survives a fresh clone.
+    verified_from: reports/releases/toolpolicy-canonical-v1-publication.json
   retained_after_filtering:
     value: 213951
     status: FULL_DATA_VALIDATED
   processed_dataset_hash:
     value: 181b3fba1d722cddfab9026ffeb0ab47783398e96dac06be6b727183b017a911
     status: FULL_DATA_VALIDATED
+    # The manifest this digest is the identity of is build output under
+    # .gitignore and was never committed for this release, so the digest cannot be
+    # re-derived from the repository. It is independently corroborated rather than
+    # taken on trust: the tracked publication record stores the same sha256 as the
+    # manifest hash of the payload it published, so two records agree on the
+    # identity even though the artifact itself is absent from the record.
+    identity_artifact_unavailable:
+      artifact: .release/hf/toolpolicy-canonical-v1/release-manifest.json
+      reason: >-
+        Uncommitted build output. Reproducing the digest would require the release
+        manifest, which has never been in the repository.
+      corroborated_by: reports/releases/toolpolicy-canonical-v1-publication.json
+      corroborating_field: release_manifest_sha256
   exact_revision: ccb1ddb013103e07a390ccd9125a45bc63e4ca91
   source_repository: https://huggingface.co/datasets/arrochi112/OpenGrad-ToolPolicy-Canonical-v1
   derived_from:
@@ -625,6 +673,7 @@ datasets:
     value: DERIVED_FROM_COMPOSITE_TRAINING_SOURCES
     verified: true
     source: reports/data/m1-calibration-preference-pairs-v1.json
+    source_sha256: 228884aa7f600e0bc1b1eadb95edc83dc23afa62b1e362bc3ac2498fade1a0d2
   redistribution: INTERNAL_RESEARCH_ARTIFACT
   upstream_access_mode: local_derived
   downstream_access_requirement: private

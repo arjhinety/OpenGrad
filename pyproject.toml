@@ -49,6 +49,9 @@ addopts = "-q"
 # Some tests import shared fixtures as `tests.<module>`, which needs the repository root on
 # sys.path. `python -m pytest` adds it implicitly; the `pytest` entry point CI uses does not.
 pythonpath = ["."]
+markers = [
+  "network: resolves upstream pins over the network; excluded from the deterministic suite. The release gate is `scripts/verify_publication.py`, and these tests only guard the machinery behind it.",
+]
 
 [tool.ruff]
 line-length = 100

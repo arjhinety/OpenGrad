@@ -559,3 +559,200 @@ Source: `runs/m1_dpo_canonical_v2_final_v2/eval/dev/selection--dev.json`,
   supervised tokens, against 4.27M for the reference's selected 1800. "Exposure does not explain
   the result" is not supported as stated. The narrower statement the curves do support is in
   section 2.
+
+## 9. Publication provenance
+
+**Added 2026-09-14.** `scripts/verify_publication.py` and the checks it drives
+(`src/opengrad/registry/provenance.py`, `docs/PROVENANCE.md`) were added because OpenGrad had a
+release discipline and no publication discipline: every rule governed the payload, while the act of
+publishing had no gate. Running the new checks over the existing registry found defects no earlier
+check could see. All are corrected forward. No frozen artifact was edited.
+
+- **`canonical_v2` licence evidence did not exist.** `license.source` pointed at
+  `.release/hf/toolpolicy-canonical-v2/source-licenses.md`, and `sample_count.verified_from` at
+  `.release/hf/toolpolicy-canonical-v2/release-manifest.json`. `.release/**` is build output under
+  `.gitignore`; neither path resolves. Both now point at the tracked card directory and the tracked
+  publication record.
+- **`canonical_v1` licence evidence was uncommitted.** `license.source` pointed at
+  `.release/hf/toolpolicy-canonical-v1/source-licenses.md`, which still existed on the machine that
+  built the release. The claim therefore looked sound while being unreproducible from a fresh
+  clone — a worse failure mode than a missing file, because nothing draws attention to it.
+  Repointed to the tracked card directory.
+- **The `qwen3.5-2b` licence evidence was a moving target.**
+  `https://huggingface.co/Qwen/Qwen3.5-2B/blob/main/LICENSE` returns whatever the licence text
+  happens to be at fetch time, so it pinned nothing about what was verified. Repointed to the
+  revision the record already pins (`15852e8c…`).
+- **The v2-final licence file described the wrong corpus.** It was byte-identical to the
+  three-source partial snapshot's file: it stated the release contained three sources only and
+  listed `Salesforce/xlam-function-calling-60k` under "Sources not in this release", while the
+  payload carries 57,342 xLAM records. Its `CITATIONS.bib` omitted the APIGen entry the release
+  manifest declares as required for xLAM. Corrected in the repository and republished; recorded in
+  `reports/releases/hf-publication-2026-09-14-canonical-v2-licence-correction.json`. The payload is
+  unchanged: 176 shards, 173,237 records, fingerprint `8ced403b…`.
+- **Two publication events had left no record.** `459bc01b` (card correction, 2026-09-13) and the
+  commits of the licence correction were published without publication records, leaving every
+  recorded revision stale. All are now recorded, including the intermediate revision in which the
+  licence file was corrected and the citation was not, and including the retroactive entry, which
+  is transcribed from the Hub commit history rather than re-derived.
+- **The minus-xLAM derived fingerprint moved with no recorded input identity.** Kept as the single
+  named legacy exception (`provenance_version: legacy_single_digest_v1`) rather than rewritten. Its
+  superseded and current fingerprints are both preserved.
+
+## 10. Closure: the calibration identity, and a freeze check that was doing nothing
+
+**Added 2026-09-14.** Section 9 closed with one record whose derived identity could not be
+re-derived, and two publication events reconstructed from Hub history. Both are resolved here.
+
+**Two checks were reporting PASS by doing nothing.**
+
+`validate_freeze` obtained the artifact a digest was the identity of via
+`processed_dataset_hash.source` or `findings.release_manifest`. Neither field is present on
+`canonical_v1`, `canonical_v2` or `canonical_v2_final` — they name their manifest in
+`source_repository` — so `_local_manifest_for` returned nothing for all three and the check skipped
+them. The strongest freeze assertion in the repository executed nothing. It now reads
+`source_repository`, and a record whose identity cannot be re-derived must either be re-derivable
+from a committed artifact or declare `identity_artifact_unavailable` with a tracked record
+corroborating the same digest. A declaration with no corroboration is rejected.
+
+`src/opengrad/registry/validate.py` also had no `if __name__ == "__main__"` guard, so
+`python -m opengrad.registry.validate` imported the module, ran nothing and exited **0** — which is
+indistinguishable from a passing validation. Only the `opengrad-validate` console script actually ran
+the check. Any earlier report that this validation passed via `-m` was therefore vacuous, including
+in this errata's own section 9. The guard is added, and both entry points now report the real result.
+
+Turning the freeze check on produced one open finding and confirmed two identities:
+
+- **`m1_calibration_preference_pairs_v1` — `RESOLVED_IDENTITY`.** `d3916894…` is the SHA-256 of
+  `data/processed/m1_calibration_preference_pairs_v1.jsonl`. The artifact was already named by the
+  record (`source_repository`), and `reports/data/m1-calibration-preference-pairs-v1.json` records
+  the same path as its `output` with the same digest. Searching every one of the 987 committed blobs
+  found exactly one match, and the check now re-derives it. Nothing was recomputed into a
+  replacement; the identity was demonstrated.
+  The digest is over the **LF** bytes of the artifact. The Windows working tree holds CRLF for the
+  same file, which is why hashing the file on disk gave `0907ac32…`. `.gitattributes` covers
+  `*.yaml`, `*.json` and `*.md` but not `*.jsonl`, and `core.autocrlf=true`. Content digests are now
+  verified against committed blobs, so a `source_sha256` is a claim about the artifact rather than
+  about the verifier's platform, and evidence paths must be tracked by Git.
+- **`canonical_v2_final` — `RESOLVED_IDENTITY`.** `8ced403b…` is the SHA-256 of
+  `.release/hf/toolpolicy-canonical-v2-final/release-manifest.json`, which is committed. Re-derived,
+  not assumed.
+- **`canonical_v1` — corroborated.** Its manifest is uncommitted build output and cannot be
+  re-derived. The record now says so and names the tracked publication record whose
+  `release_manifest_sha256` carries the same `181b3fba…`, so the identity is backed by a second
+  record rather than by assertion.
+- **`canonical_v2` — `UNRECOVERABLE_IDENTITY`, OPEN.** No committed artifact reproduces
+  `09018d26…`. Separately, the tracked publication record for the same corpus stores
+  `release_manifest_sha256 = 277a0ae4…` and records the manifest at commit `ad70a8ba…`, while the
+  registry records `source_revision = 7a2a8e7b…`. Two records therefore disagree about the identity
+  of the same published corpus, and the repository does not contain the evidence needed to say which
+  is right. **This is not resolved by choosing one.** It is left open deliberately: publication
+  provenance is not PASS while it stands.
+
+**Publication impact.** `d3916894…` is in the evidence chain of a current publication-visible claim:
+the published model card at `arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2` states it,
+as do the M1 publication record, `results/registry.jsonl`, and the registry entry. Because the
+identity resolves, it does not block. `canonical_v2` is also publication-visible
+(`arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot`), and it does block.
+
+**Reconstructed events.** The retroactively recorded 2026-09-13 correction now carries
+`event_occurred_at`, `entry_recorded_at`, `recorded_retroactively: true` and
+`reconstruction_evidence` naming the Hub revision it was transcribed from — so the record states
+that it did not exist contemporaneously with the event. Validation rejects an entry whose dates
+differ while claiming contemporaneity, one that claims reconstruction without dates or evidence, and
+one whose `entry_recorded_at` disagrees with the record it lives in.
+
+How to verify: `python scripts/verify_publication.py` exits 1 with one FAIL — the open `canonical_v2`
+identity — and does not exit 0. With no network it also reports `BLOCKED_NETWORK`. It will exit 0
+only once `canonical_v2`'s identity is resolved from evidence or its claim is corrected.
+
+How to verify: `python scripts/verify_publication.py` must exit 0. At the time this section was
+written it did; section 10 supersedes that, because the freeze check was not yet actually running.
+With no network it exits 2 with `BLOCKED_NETWORK`, which is not a pass.
+
+## 11. Closure: the canonical_v2 identity was recovered, and the verifier contract moved to v2
+
+**Added 2026-09-14.** Section 10 left `canonical_v2` as `UNRECOVERABLE_IDENTITY` with publication
+provenance failing. It is now `RESOLVED_IDENTITY`, and the failure was in the search rather than in
+the evidence. Nothing was chosen because it looked newer or more plausible; both digests were
+recovered and each was reproduced from the published artifact.
+
+**The two digests are not competing identities.** They are two editions of the same
+`release-manifest.json`, and both were reproduced from
+`arjhinety/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot` at full 40-character revisions:
+
+| digest | bytes | revisions carrying it |
+|---|---:|---|
+| `09018d26…` | 23522 | `bb70545cd486c080c4337fa2fd465df6d14fb0ed`, and `b0de031fdf86694d0e093c75628e4b4862dc658f` (HEAD) |
+| `277a0ae4…` | 23525 | `ad70a8ba7a0bb3d9bee6a5a7b5de7433ce019f61`, `5130fb4eb198cc846a42d601dd111dfdcc2e26d5`, `8b43caebf2b96259f8f86611d39f75bcaa3ee130` |
+
+The publication record is therefore self-consistent: both revisions it names (`8b43caeb` as
+`hub_revision`, `ad70a8ba` as `manifest_revision_at_payload_upload`) carry `277a0ae4…`. The registry
+is consistent with HEAD. **The two editions differ in exactly two fields** — `hub_repository`
+(`unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial` versus
+`arrochi112/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot`) and `opengrad_git_commit`
+(`7a2a8e7b…` versus `84d1de61…`) — and their 104 `output_shards` lists are **identical**, with
+`record_count` 103036 in both. So the "conflict" was a record that did not say which revision each
+digest belonged to.
+
+**What was searched.** Version control: `git cat-file --batch-all-objects` hashed all 3648 objects
+(1783 blobs) including the 39 unreachable ones — no blob reproduces either digest, so no manifest was
+ever committed and deleted. All refs, tags, branches, stashes, and full history for any
+`*manifest*` path. The Hub: full commit history and the file list at **every** revision for the
+M0-snapshot repo (6 commits, 109 files at HEAD), with both digests reproduced by download and local
+hash. Also checked: the release config, the publication record, `results/registry.jsonl`,
+`docs/publishing/`, the completion report, and the CI workflow (which has no manifest or upload
+step). Not accessible: the gitignored local staging directory, the training host that built the
+corpus, and any CI artifact.
+
+**A previous misreading is corrected here.** An earlier attempt to reproduce the digests reported
+`RepositoryNotFoundError` for every revision. That was a defect in the attempt, not a fact about the
+artifact: `hf_hub_download` defaults to `repo_type="model"`. With `repo_type="dataset"` both
+download fine. Two further traps are worth recording because they are the same rule the provenance
+module enforces: **abbreviated revisions are not immutable identifiers** (12-character prefixes were
+rejected; full 40-character revisions were not), and `repo_info` succeeding does not imply the file
+is retrievable.
+
+**Non-vacuity is now a first-class invariant.** Contract v2 requires every gate to prove both that
+its assertions passed *and* that they executed. Two checks in this repository were doing neither:
+
+- `validate_freeze` looked for the manifest in `processed_dataset_hash.source` and
+  `findings.release_manifest`. The canonical records name it in `source_repository`, so every corpus
+  was skipped and the gate reported PASS by executing nothing. (Already recorded in section 10.)
+- `python -m opengrad.registry.validate` had no `__main__` guard, so it imported, ran nothing and
+  exited 0. **Any earlier report in this errata, or in review, that this validation passed via `-m`
+  was vacuous.**
+
+Every gate now reports `discovered / checked / passed / failed / blocked / skipped`, asserts
+`discovered == checked + blocked + skipped` and `checked == passed + failed`, and fails when a
+required population discovers nothing or when a counter does not add up. That assertion caught two
+further defects during this work: a deferred candidate was excluded from the census it was skipped
+from, and a sentinel skip was recorded without being discovered. A gate cannot skip what it never
+saw.
+
+**Verifier contract.** `publication_verifier_contract: 2`, defined in
+`src/opengrad/verification/__init__.py` and reported by `scripts/verify_publication.py --json`. It
+adds executable module validation, correct canonical freeze discovery, non-vacuity enforcement,
+immutable provenance enforcement, reconstructed-event validation, and explicit skipped/blocked
+accounting. **A PASS recorded under v1 does not mean what a PASS under v2 means**, because v1 could
+pass without running. Historical results are left as written and are not re-stated as v2 results.
+
+**What changed forward.** `canonical_v2`'s identity is anchored to the immutable published artifact
+(`processed_dataset_hash.remote_identity`: repository, revision, path, digest), replacing a
+`source_repository` that pointed at a gitignored path present in no revision. The local freeze gate
+defers that one corpus and names the deferral; a new **remote freeze-identity gate** downloads the
+named file at the named revision and hashes it. Offline it is `BLOCKED_NETWORK` and the run is not a
+pass. No frozen artifact was rewritten, and the four forward corrections from section 9 are
+unchanged.
+
+**Still open, and not blocking the identity.** The published manifest at HEAD declares
+`hub_repository: unpublished/OpenGrad-ToolPolicy-Canonical-v2-partial` — the live published artifact
+names itself as unpublished. Nothing in the repository accounts for which step rewrote
+`hub_repository` from `unpublished/…` to `arrochi112/…`; the commit message that documents the
+rebuild (`30b0e28`) mentions only `opengrad_git_commit`. This does not affect which artifact each
+digest identifies, so it is recorded here rather than resolved by preference.
+
+How to verify: `python scripts/verify_publication.py` exits 0, and `--json` reports
+`verifier_contract: 2`. Offline it exits 2 with `BLOCKED_NETWORK`, because two required populations
+cannot be resolved without the network. The previous section's instruction that it must exit 1 is
+superseded by this one.
+
