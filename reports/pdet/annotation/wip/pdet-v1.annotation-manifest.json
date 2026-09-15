@@ -1,0 +1,188 @@
+{
+  "adjudication": null,
+  "adjudication_flags": {},
+  "adjudicator_ids": [],
+  "annotation_schema_version": "pdet-annotation-v1",
+  "annotator_ids": [
+    "arjhinety",
+    "model.claude-opus-5"
+  ],
+  "app_version": "opengrad-annotate-1.0.0",
+  "artifact_kind": "ANNOTATION_SNAPSHOT",
+  "completion_state": "COMPLETE",
+  "composite": {
+    "items_by_kind": {
+      "human": 11,
+      "model": 570
+    },
+    "items_by_session": {
+      "model-a": 570,
+      "pass-a": 11
+    },
+    "overlap_disagreements": 0,
+    "overlapping_items": 0,
+    "priority": [
+      "pass-a",
+      "model-a"
+    ],
+    "rule": "each item takes its label from the first session, in this order, that labeled it"
+  },
+  "config_path": "configs/annotation/pdet-v1.yaml",
+  "design": "composite",
+  "disagreements": {
+    "adjudicated": 0,
+    "count": 0,
+    "file": "pdet-v1.disagreements.jsonl",
+    "keys": [
+      "label",
+      "ambiguity_status"
+    ],
+    "metric_eligible": 0,
+    "unresolved": 0
+  },
+  "exported_at": "2026-09-15T08:09:58.121Z",
+  "frozen": false,
+  "gold": null,
+  "incomplete_reasons": [],
+  "independent_annotators": false,
+  "inter_annotator_agreement_claimable": false,
+  "limitations": [
+    "Composite: each gold label comes from the first listed session that labeled the item (label_source_session, label_source_kind on every gold record). Labels whose label_source_kind is 'model' are model judgments, not human annotations; no human inter-annotator agreement may be claimed, and no claim needing human gold may rest on them."
+  ],
+  "manifest_version": 1,
+  "metric_exclusions": {
+    "excluded_items": 3,
+    "groups": [
+      {
+        "document": "docs/research/study-002/27-PDET-EXPOSED-WORKED-EXAMPLES.md",
+        "excluded_from": [
+          "classifier_validation_metrics",
+          "annotator_agreement_statistics",
+          "untouched_human_gold_claims"
+        ],
+        "item_ids": [
+          "when2call-sft:018334f28165d73b082310e0234742a868008cb7c165b23bd0f4e1b607de57c9",
+          "when2call-sft:018cf1afdf22afd0e495992a874cbd506d52dd01832e72e48f0296f613bbb670",
+          "when2call-sft:1f1778c86f62424b1a0ad2d451d252046b50599885dae8d93f67df67873d8682"
+        ],
+        "items": 3,
+        "reason": "Shown with an illustrative label in 23-PDET-ANNOTATION-INSTRUMENT.md §4 before annotation.",
+        "status": "EXPOSED_WORKED_EXAMPLE"
+      }
+    ],
+    "metric_eligible_items": 578,
+    "population_items": 581
+  },
+  "model_annotation": true,
+  "model_annotators": [
+    {
+      "annotator_id": "model.claude-opus-5",
+      "authorization": "docs/research/study-002/28-PDET-MODEL-LABEL-AMENDMENT.md",
+      "model": "claude-opus-5",
+      "procedure": "configs/annotation/pdet-v1.model-procedure.md",
+      "procedure_sha256": "70c48e15a15e89cbd1da2faa5141748c09398c6976c899869b9fa4ebd71523cc"
+    }
+  ],
+  "model_assistance": false,
+  "outputs": {
+    "audit/pdet-v1.history.arjhinety.pass-a.jsonl": {
+      "bytes": 13069,
+      "records": 12,
+      "sha256": "06c852c14e69266f0e29a337fb94843fba72312e763b2ae7cdd6b075b7b9cffb"
+    },
+    "audit/pdet-v1.history.model.claude-opus-5.model-a.jsonl": {
+      "bytes": 776724,
+      "records": 570,
+      "sha256": "6da810a0044644041db7a962e56ed44e64f66246e9aae312cae1d5d7927627ce"
+    },
+    "pdet-v1.annotations.arjhinety.pass-a.jsonl": {
+      "bytes": 9391,
+      "records": 11,
+      "sha256": "7e29bb33f0200626fec758f3985468851d996396f7a94cc7f2ed386b51a54f34"
+    },
+    "pdet-v1.annotations.model.claude-opus-5.model-a.jsonl": {
+      "bytes": 530616,
+      "records": 570,
+      "sha256": "6fb1f6bef662425c9ab34924dba2b3797b67ed5139f6b8cd37a4aef9b46b35aa"
+    },
+    "pdet-v1.disagreements.jsonl": {
+      "bytes": 0,
+      "records": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "package_dir": "reports/pdet/annotation/wip",
+  "record_key_map": {
+    "annotation_schema_version": "annotation_version",
+    "item_id": "pdet_id",
+    "label": "gold_policy_label"
+  },
+  "record_keys": {
+    "annotator_id": "annotator_id",
+    "item_id": "pdet_id",
+    "label": "gold_policy_label"
+  },
+  "review_queue": null,
+  "sessions": [
+    {
+      "annotator_id": "arjhinety",
+      "annotator_kind": "human",
+      "created_at": "2026-09-15T06:55:42.463Z",
+      "file": "pdet-v1.annotations.arjhinety.pass-a.jsonl",
+      "flagged": 0,
+      "history_entries": 12,
+      "history_file": "audit/pdet-v1.history.arjhinety.pass-a.jsonl",
+      "history_head_sha256": "912294f78079e39e1828fc4edb93bcf6442a0cef16a9be1fd24cd651840e8ee1",
+      "label_counts": {
+        "CLARIFY": 6,
+        "UNKNOWN": 1,
+        "UNSUPPORTED": 4
+      },
+      "labeled": 11,
+      "labeled_metric_eligible": 9,
+      "relabels": 1,
+      "role": "annotator",
+      "session_id": "pass-a",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 1,
+      "unlabeled": 570
+    },
+    {
+      "annotator_id": "model.claude-opus-5",
+      "annotator_kind": "model",
+      "created_at": "2026-09-15T07:25:07.676Z",
+      "file": "pdet-v1.annotations.model.claude-opus-5.model-a.jsonl",
+      "flagged": 64,
+      "history_entries": 570,
+      "history_file": "audit/pdet-v1.history.model.claude-opus-5.model-a.jsonl",
+      "history_head_sha256": "ab414c7e47b6625e6c88eefe59b63cf2a3eab118b6e45657587f62b9c78a37c6",
+      "label_counts": {
+        "CLARIFY": 271,
+        "DIRECT": 4,
+        "UNKNOWN": 1,
+        "UNSUPPORTED": 294
+      },
+      "labeled": 570,
+      "labeled_metric_eligible": 569,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-a",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 1,
+      "unlabeled": 11
+    }
+  ],
+  "source": {
+    "format": "jsonl",
+    "items": 581,
+    "path": "reports/pdet/pdet-v1.population.jsonl",
+    "sha256": "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b"
+  },
+  "statement": "Labels in sessions whose annotator_kind is 'model' were produced by the language model named under model_annotators, following the pinned procedure recorded there; they are model judgments, not human annotations. Labels in human sessions were entered through the annotation interface under the annotator and adjudicator identifiers recorded in this package; those identifiers are declared, not authenticated. The interface displays no classifier prediction, model suggestion or pre-filled label to human annotators, and the source population was read but never written. Every change is in the hash-chained change logs listed under outputs. Hashes detect changes to the package; they are not signatures.",
+  "task_definition_sha256": "0f060bb395bfb0bc24cea8091fb9916fe62a717d5a0bc09b61e8004536a4e640",
+  "task_id": "pdet-v1",
+  "task_type": "single_label",
+  "task_version": "1"
+}

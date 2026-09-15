@@ -1,3 +1,8 @@
 *.yaml text eol=lf
 *.json text eol=lf
 *.md text eol=lf
+# JSONL records are hashed byte for byte (P-DET-v1's population_sha256, annotation packages, run ledgers),
+# so git must never convert their line endings: stored and checked out exactly as written.
+*.jsonl -text
+# Packaged audit trails (reports/pdet/provenance/) are pinned by SHA-256.
+*.tar.gz binary

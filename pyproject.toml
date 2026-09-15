@@ -20,6 +20,10 @@ optimization = ["nvidia-modelopt"]
 # Generates the charts and HTML page in `reports/visual/`. Kept out of `dev` because it is a
 # presentation tool rather than a test dependency, and out of the core because the core has none.
 visualization = ["matplotlib>=3.8"]
+# Local human-annotation tool (`opengrad-annotate`). Server and store are standard library; YAML task
+# configs need PyYAML and Parquet sources need pyarrow. The UI is a separate Next.js package in
+# integrations/annotate-ui.
+annotation = ["pyyaml>=6.0", "pyarrow>=15.0"]
 gpu-evaluation = ["torch==2.13.0", "transformers==5.16.1", "pyyaml==6.0.3", "pyarrow>=15.0"]
 benchmark-core = ["pyyaml>=6.0", "jsonschema>=4.23", "pyarrow>=15.0"]
 benchmark-agent = ["pyyaml>=6.0", "jsonschema>=4.23"]
@@ -35,6 +39,7 @@ opengrad-contamination = "opengrad.contamination.cli:main"
 opengrad-data-audit = "opengrad.cli:data_audit_cli"
 opengrad-data = "opengrad.data.cli:main"
 opengrad-benchmark = "opengrad.benchmarks.cli:benchmark_cli"
+opengrad-annotate = "opengrad.annotation.cli:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -64,6 +69,16 @@ extend-exclude = ["third_party", "release"]
 # Must stay byte-identical to the vendored copies in release/*/opengrad_min/policy.py
 # (tests/evaluation/test_executorch_handoff.py), so it cannot be edited for style alone.
 "src/opengrad/promotion/quantization.py" = ["I001", "UP035", "TRY004"]
+# The frozen P-DET-v1 builder/verifier and its tests (docs/research/study-002/22-PDET-PROTOCOL.md §7,
+# 24-PHASE-3-REPORT.md): the frozen population's provenance names this code, so it is not edited for
+# style alone. Only the findings present at the freeze are ignored; any new finding still fails.
+"src/opengrad/verification/pdet.py" = ["UP035", "UP012", "RUF059"]
+"tests/verification/test_pdet.py" = ["I001", "C414", "PLR0402"]
+# canonical-v3 (C1) work in progress (docs/research/study-002/21-C1-IMPLEMENTATION-STATUS.md), left
+# untouched by the P-DET annotation work. Both are one-line `ruff check --fix` autofixes: apply them and
+# drop these two lines the next time the C1 work edits these files.
+"src/opengrad/data/versions.py" = ["UP035"]
+"tests/data/test_source_schema.py" = ["I001"]
 
 [tool.mypy]
 python_version = "3.11"

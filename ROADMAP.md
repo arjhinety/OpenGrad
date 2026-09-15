@@ -56,7 +56,12 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
     MMLU-Pro were later executed on Base → M0 → M1-v2 (step 16), and the other 14 remain frozen.
     Tool-selection and argument/schema validity are still unmeasured by the current evaluator.
 
-10. Preference optimization or on-policy distillation — **DPO EXECUTED / DISTILLATION NOT JUSTIFIED**
+10. Preference optimization or on-policy distillation — **DPO EXECUTED / DISTILLATION NOT JUSTIFIED**.
+    Distillation is deferred to **Study 003**
+    ([`docs/research/study-002/18-STUDY-003-ROADMAP.md`](docs/research/study-002/18-STUDY-003-ROADMAP.md)):
+    `reports/M2_DECISION.md` records that the live path raises `NotImplementedError` and that the one M2 run
+    was mock-only, and its "what remains justified" list is Study 003's requirement set. No GPU cycles are
+    run to fill a schedule.
      M1-v2 DPO started from the selected M0-final checkpoint, preserved its calibrated frontier, and
      was promoted under `tool_use_promotion_v4`. M1-v2 is promoted under a parent-relative gate
      (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that
@@ -88,12 +93,21 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
     so it shows no transfer difference. No post-training on-device study has been executed, so no
     OpenGrad result rests on device measurements.
 
-14. Speculative decoding and inference research — PLANNED / GPU_REQUIRED
+14. Speculative decoding and inference research — PLANNED / GPU_REQUIRED. Deferred to **Study 004**
+    ([`docs/research/study-002/19-STUDY-004-ROADMAP.md`](docs/research/study-002/19-STUDY-004-ROADMAP.md)):
+    a runtime question with no live implementation cannot share a pre-registration with a
+    data-contract question, and its quality constraint needs the four-mode evaluation population
+    Study 002 defines.
     Future comparisons may include autoregressive decoding, external draft speculation, Medusa, EAGLE-3, DFlash, DSpark, and native MTP where supported. A reserved configuration exists; no method is currently implemented, benchmarked, or supported by OpenGrad.
 
 15. Joint capability-efficiency optimization — PLANNED
 
-16. Refusal-supervision ablation — **PLANNED / BLOCKED_ON_PREFLIGHT**
+16. Refusal-supervision ablation — **PLANNED / BLOCKED_ON_PREFLIGHT**. Design set committed as
+    **Study 002** (pre-registration only; no GPU time spent, no results):
+    [`docs/research/study-002/`](docs/research/study-002/README.md). The pre-flight gate below is
+    restated there as a fourteen-check blocking gate, with the detector-precision floor, the
+    answerability-triage agreement requirement and the non-vacuity self-test all made explicit
+    ([`16-GPU-READINESS-GATE.md`](docs/research/study-002/16-GPU-READINESS-GATE.md)).
 
     Diagnosis (executed, see [general-capability regression](reports/GENERAL_CAPABILITY_REGRESSION.md)):
     the post-SFT checkpoints refuse **100% of bare GSM8K questions** while solving 55.5% of the
@@ -167,13 +181,13 @@ B0 baseline                                  -> EXECUTED (REAL_RESULT)
     -> SFT                                   -> EXECUTED (5 arms: 1 negative on corpus v1, 1 partial recovery, 1 definitive, 2 negative joint-removal ablations; 3 corpus-v1 launches FAILED before an evaluated model)
     -> post-SFT evaluation                   -> EXECUTED (see step 9)
     -> preference optimization               -> first DPO identity (on Base) rejected/not reproducible; M1-v2 DPO EXECUTED and PROMOTED under v4 (fails v3; within noise of M0)
-    -> distillation                          -> NOT RUN (scaffold only; live training path unimplemented)
+    -> distillation                          -> NOT RUN (scaffold only; live training path unimplemented) -> Study 003
     -> quantization/runtime                  -> GGUF PTQ EXECUTED and CLOSED (Q6_K recommended; gate inside rerun noise); ExecuTorch exported, no behavioural verdict
     -> OpenWeights device validation         -> ParitySuite run on H200 (Base and M1-v2 both 5/7); no on-device study executed
-    -> speculative decoding                  -> PLANNED / GPU_REQUIRED (no runtime support or benchmark executed)
+    -> speculative decoding                  -> PLANNED / GPU_REQUIRED (no runtime support or benchmark executed) -> Study 004
     -> joint capability-efficiency studies   -> PLANNED
     -> general-capability diagnosis          -> EXECUTED (IFEval/GSM8K/MMLU-Pro across BASE -> M0 -> M1-v2)
-    -> refusal-supervision ablation          -> PLANNED / BLOCKED_ON_PREFLIGHT (step 16)
+    -> refusal-supervision ablation          -> PLANNED / BLOCKED_ON_PREFLIGHT (step 16) -> Study 002 design set committed; no GPU time spent
 
 > **Status update (2026-09-13).** Steps 12 and 13 previously read `INTERFACE_ONLY` / `no study
 > executed`, which was accurate when written. As the earlier drift warning here asked, they were

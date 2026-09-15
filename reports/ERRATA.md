@@ -756,3 +756,99 @@ How to verify: `python scripts/verify_publication.py` exits 0, and `--json` repo
 cannot be resolved without the network. The previous section's instruction that it must exit 1 is
 superseded by this one.
 
+## 12. Amendment `study_002_prereg_v2`: P-DET reference labels from a declared model
+
+**Added 2026-09-15.** Study 002's P-DET protocol names "human P-DET gold" as the reference the ETL
+classifier is validated against
+([`docs/research/study-002/22-PDET-PROTOCOL.md`](../docs/research/study-002/22-PDET-PROTOCOL.md) §6–§7).
+With current resources, human annotation of all 581 items is not feasible, so it is deferred.
+
+**The reference is now a composite:**
+
+- human labels where they exist: Pass A, items #1–#11;
+- labels from the declared model annotator `model.claude-opus-5` everywhere else.
+
+**What stays the same:** no frozen file changes, and no threshold, population or rubric changes.
+
+**What changes for claims:**
+
+- Model labels are recorded and exported as model judgments, never as human labels.
+- Every P-DET metric states its label sources.
+- A classifier qualification measured against this reference is `MODEL_REFERENCE` and provisional.
+- No inter-annotator agreement may be claimed.
+
+No classifier had been scored on P-DET when this was decided, so there is no earlier result to re-state.
+
+The full record, including the model procedure and its limits, is
+[`docs/research/study-002/28-PDET-MODEL-LABEL-AMENDMENT.md`](../docs/research/study-002/28-PDET-MODEL-LABEL-AMENDMENT.md).
+Where this file and 22 disagree about the source of P-DET reference labels, 28 is the correct one.
+
+
+## 13. Amendment `study_002_prereg_v3`: the P-DET rationale becomes optional
+
+**Added 2026-09-15.** The P-DET annotation instrument
+([`docs/research/study-002/23-PDET-ANNOTATION-INSTRUMENT.md`](../docs/research/study-002/23-PDET-ANNOTATION-INSTRUMENT.md) §2)
+marks `annotator_rationale`, one sentence saying why, as required. Writing it for every item made
+continued human review too slow, so it is now **optional**. An UNKNOWN label still needs an ambiguity
+status.
+
+**This is an ergonomics change, not a taxonomy change.**
+
+- No frozen file changes, and 23 is not edited.
+- Labels, definitions, fields, values, constraints and the population are unchanged.
+- Every rationale already written is kept: the 11 human labels and the 570 model judgments.
+- A label without a rationale is not lower-confidence because no rationale was written.
+
+**How it was recorded.** The task store accepts only a declared relaxation. Its hash-chained definition
+history records the change from definition `0f060bb3…` to `c00eab8d…` (only `annotator_rationale.required`
+differs), with 581 annotation records existing at the time.
+
+**Also, as tooling rather than protocol:**
+
+- **Review order.** A pinned `priority-review` queue sets the order in which the human pass may review
+  items. Model judgments stay hidden from the human pass.
+- **Audit trail.** The model-label audit trail is archived in `reports/pdet/provenance/model-a/`.
+
+Nothing is frozen, and no classifier had been scored when this was decided.
+
+The full record is
+[`docs/research/study-002/29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md`](../docs/research/study-002/29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md).
+Where this file and 23 §2 disagree about whether a rationale is required, 29 is the correct one.
+
+## 14. Finding: P-DET-v1 contains no CALL and no DIRECT item, so it cannot authorise C1
+
+**Added 2026-09-15**, after Pass A labeled all 581 P-DET-v1 items (one annotator, not frozen). The human
+labels are:
+
+| Label | Items |
+|---|---:|
+| UNSUPPORTED | 298 |
+| CLARIFY | 281 |
+| UNKNOWN | 2 |
+| DIRECT | 0 |
+| CALL | 0 |
+
+The report on the frozen population
+([`docs/research/study-002/24-PHASE-3-REPORT.md`](../docs/research/study-002/24-PHASE-3-REPORT.md) §7)
+left the per-mode distribution **UNKNOWN** until annotation. It is now known, and it rules out two modes.
+
+**Cause: the source.** The whole candidate population is When2Call `train_sft`, 14,829 records
+([`22-PDET-PROTOCOL.md`](../docs/research/study-002/22-PDET-PROTOCOL.md) §5).
+
+- **No tool calls.** 0 of those 14,829 carry a tool call. The frozen builder's call-payload predicate
+  also matches 0 responses.
+- **No direct answers.** Every reply asks for information or declines.
+- **By design.** In When2Call's own test set, the correct answer is never `direct`.
+
+The sampling and the annotation did not remove anything.
+
+**Consequence under the frozen rules.** No classifier can be granted balancing permission for CALL or
+DIRECT on P-DET-v1, because the coverage rule (22 §5) is not met for either mode. The DIRECT and CALL
+thresholds of 22 §6 cannot be measured. "DIRECT … failing → C1 is not authorised" therefore applies:
+**P-DET-v1 cannot authorise C1.**
+
+**What would cover these modes.** A separately frozen validation population drawn from sources that
+contain tool calls and direct answers. That is a design decision that has not been made.
+
+The details, and the 11 items where the human and the superseded model labels differ, are in
+[`docs/research/study-002/README.md`](../docs/research/study-002/README.md).

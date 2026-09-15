@@ -1,0 +1,224 @@
+# Human annotation of the frozen P-DET-v1 population (Study 002, protocol pdet-002-v1).
+#
+# Rubric: docs/research/study-002/22-PDET-PROTOCOL.md (modes, boundary rules, decision tree)
+# Instrument: docs/research/study-002/23-PDET-ANNOTATION-INSTRUMENT.md (fields, allowed values, passes)
+#
+#   opengrad-annotate start pdet-v1 --annotator <your-id> --session pass-a
+#
+# The population is read-only and hash-pinned: the tool refuses to open if its bytes differ from
+# expected_sha256 (the population_sha256 recorded in reports/pdet/pdet-v1.manifest.json).
+
+task_id: pdet-v1
+version: "1"
+title: P-DET-v1 policy-mode annotation
+task_type: single_label
+annotation_schema_version: pdet-annotation-v1
+
+labels: [CALL, DIRECT, CLARIFY, UNSUPPORTED, UNKNOWN]
+shortcuts: {"1": CALL, "2": DIRECT, "3": CLARIFY, "4": UNSUPPORTED, "5": UNKNOWN}
+unknown_labels: [UNKNOWN]
+
+source:
+  path: reports/pdet/pdet-v1.population.jsonl
+  format: jsonl
+  id_field: pdet_id
+  expected_sha256: 6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b
+  expected_items: 581
+
+fields:
+  context:
+    label: Preceding context
+    path: null            # the frozen record keeps only the first user and last assistant turn
+  user:
+    label: User message
+    path: prompt
+  assistant:
+    label: Assistant response being classified
+    path: response
+  tools:
+    label: Available tools
+    path: tools
+
+metadata:
+  pdet_component: {path: pdet_component, label: P-DET component}
+  source_dataset: {path: source_dataset, label: Source}
+  source_split: {path: source_split, label: Split}
+  upstream_id: {path: upstream_id, label: Upstream id}
+  raw_record_hash: {path: raw_record_hash, label: Raw record hash}
+  response_duplicate_group_size: {path: response_duplicate_group_size, label: Duplicate responses}
+
+filters:
+  source: source_dataset
+  component: pdet_component
+
+# Never displayed, filtered on or sent to the browser. The annotation fields are what this pass
+# produces; challenge_families are the sampling cue predicates (refusal/question cue lists), and
+# showing them before labeling would act as a label suggestion.
+blind_fields:
+  - gold_policy_label
+  - ambiguity_status
+  - annotator_id
+  - annotator_rationale
+  - boundary_rule_cited
+  - annotation_version
+  - challenge_families
+  - classifier_version_at_selection
+
+# 23 §2. annotator_id comes from the session; annotation_version from annotation_schema_version.
+extra_fields:
+  - key: ambiguity_status
+    label: Ambiguity status
+    type: select
+    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT, EMPTY_TOOLSET]
+    default: NONE
+    required: true
+  # Optional since amendment study_002_prereg_v3 (docs/research/study-002/29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md):
+  # an ergonomics change, not a taxonomy change. Rationales already written are kept unchanged.
+  - key: annotator_rationale
+    label: Rationale
+    type: text
+    required: false
+    adjudication: false   # the adjudicator writes the adjudication rationale instead
+    help: Optional. A short note on why, or on what was hard, if you want one (amendment 29).
+  - key: boundary_rule_cited
+    label: Boundary rule (22 §2)
+    type: select
+    options: ["1", "2", "3", "4", "5", "6", "7", "8", "none"]
+    default: "none"
+    required: false
+    help: Cite 1-8 when a boundary discrimination decided the label.
+
+constraints:
+  - when_label_in: [UNKNOWN]
+    field: ambiguity_status
+    forbidden: [NONE]
+    message: UNKNOWN needs an ambiguity reason (23 §2 - set ambiguity_status).
+  - when_label_not_in: [UNKNOWN]
+    field: ambiguity_status
+    allowed: [NONE]
+    message: An ambiguous item is labeled UNKNOWN; a mode label needs ambiguity_status NONE (23 §2).
+
+# 23 §5.2: an item disagrees when the passes differ on gold_policy_label or on ambiguity_status.
+disagreement_keys: [label, ambiguity_status]
+
+# 23 §5.3: adjudication records the deciding rule from the decision tree (22 §3).
+adjudication_fields:
+  - key: decision_tree_step
+    label: Deciding rule (22 §3 step)
+    type: select
+    options: ["1", "2", "3", "4", "5", "6", "7", "8"]
+    required: true
+
+# The rubric panel serves excerpts only (docs/research/study-002/25-PDET-IMPLEMENTATION-ADDENDUM.md, A2.3).
+# Omitted: 22 §5-§7 (sampling design and strata, classifier acceptance, lifecycle) and 23 §1, §4, §6
+# (file handling, worked examples that name challenge families and label population items, per-mode
+# coverage counting). Omitted text never reaches the browser.
+instructions:
+  - title: Checklist (26)
+    file: docs/research/study-002/26-PDET-ANNOTATOR-CHECKLIST.md
+  - title: Protocol - modes, boundaries, decision tree (22 §1-4)
+    file: docs/research/study-002/22-PDET-PROTOCOL.md
+    include_sections: ["1.", "2.", "3.", "4."]
+  - title: Instrument - fields, deciding, passes (23 §2, 3, 5, 7)
+    file: docs/research/study-002/23-PDET-ANNOTATION-INSTRUMENT.md
+    include_sections: ["2.", "3.", "5.", "7."]
+
+# The server refuses to start if any served rubric text contains one of these: every challenge-family
+# identifier used to draw the sample (src/opengrad/verification/pdet.py) and the sampling-stratum names.
+instruction_forbidden_terms:
+  - challenge_families
+  - "families:"
+  - question_mark
+  - question_without_mark
+  - refusal_with_question
+  - refusal_plain
+  - tool_mentioned_no_payload
+  - caveat_then_content
+  - multi_clause_question
+  - no_tools_offered
+  - short_plain
+  - serialized_call_shape
+  - advice_external_service
+  - polite_followup
+  - HEURISTIC_REGEX
+  - refusal_signal
+
+# docs/research/study-002/27-PDET-EXPOSED-WORKED-EXAMPLES.md: 23 §4 shows illustrative labels for these
+# three population items. They stay in the population and are annotated normally, but no metric may use
+# them as untouched gold. Never shown in the interface; recorded in every export manifest and record.
+metric_exclusions:
+  - status: EXPOSED_WORKED_EXAMPLE
+    reason: Shown with an illustrative label in 23-PDET-ANNOTATION-INSTRUMENT.md §4 before annotation.
+    document: docs/research/study-002/27-PDET-EXPOSED-WORKED-EXAMPLES.md
+    excluded_from:
+      - classifier_validation_metrics
+      - annotator_agreement_statistics
+      - untouched_human_gold_claims
+    item_ids:
+      - when2call-sft:018334f28165d73b082310e0234742a868008cb7c165b23bd0f4e1b607de57c9
+      - when2call-sft:018cf1afdf22afd0e495992a874cbd506d52dd01832e72e48f0296f613bbb670
+      - when2call-sft:1f1778c86f62424b1a0ad2d451d252046b50599885dae8d93f67df67873d8682
+
+# Exported records use the instrument's field names.
+record_keys:
+  item_id: pdet_id
+  label: gold_policy_label
+  annotation_schema_version: annotation_version
+
+output:
+  dir: reports/pdet/annotation
+  session_file: "pdet-v1.annotations.{annotator_id}.{session_id}.jsonl"
+  history_file: "audit/pdet-v1.history.{annotator_id}.{session_id}.jsonl"
+  adjudication_history_file: audit/pdet-v1.adjudication-history.jsonl
+  disagreements_file: pdet-v1.disagreements.jsonl
+  adjudication_file: pdet-v1.adjudicated.jsonl
+  gold_file: pdet-v1.gold.jsonl
+  manifest_file: pdet-v1.annotation-manifest.json
+
+protected_paths:
+  - reports/pdet/pdet-v1.population.jsonl
+  - reports/pdet/pdet-v1.manifest.json
+  - reports/pdet/pdet-v1.manifest.json.sha256
+
+state_db: .annotation/pdet-v1.sqlite3
+
+# Amendment study_002_prereg_v2 (docs/research/study-002/28-PDET-MODEL-LABEL-AMENDMENT.md): items without a
+# human label are labeled by this declared model, under the pinned procedure. Its labels are recorded and
+# exported as model judgments (annotator_kind: model), never as human labels.
+model_annotators:
+  - annotator_id: model.claude-opus-5
+    model: claude-opus-5
+    procedure: configs/annotation/pdet-v1.model-procedure.md
+    procedure_sha256: 70c48e15a15e89cbd1da2faa5141748c09398c6976c899869b9fa4ebd71523cc
+    authorization: docs/research/study-002/28-PDET-MODEL-LABEL-AMENDMENT.md
+
+# Declared changes to the annotation definition after labels existed. Each is recorded in the store's
+# definition history (and in every export manifest) when the store first opens under it; only a relaxation
+# (a required field becoming optional) is accepted. Labels, population and definitions are unchanged.
+definition_amendments:
+  - document: docs/research/study-002/29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md
+    from_definition_sha256: 0f060bb395bfb0bc24cea8091fb9916fe62a717d5a0bc09b61e8004536a4e640
+    to_definition_sha256: c00eab8d903cfbf5b3f033763306d063183f5e8c8a22f6ed81e52489695c958e
+
+# Amendment 29, "Review order in the tool": a pinned order in which a human pass may take items first.
+# The screen gets only the queue name and item ids; the reasons in the file name reference labels and are
+# never served. Built by `opengrad-annotate review-queue pdet-v1 --name priority-review --sessions pass-a
+# model-a --seed pdet-v1-priority-review-1 --flagged --label DIRECT --label UNKNOWN --sample CLARIFY=25
+# --sample UNSUPPORTED=25 --out reports/pdet/review/pdet-v1.priority-review.json` (byte-reproducible from
+# the store as it stood: pass-a 11 labels, model-a 570).
+review_queues:
+  - name: priority-review
+    file: reports/pdet/review/pdet-v1.priority-review.json
+    sha256: 2de0267c7a93b6f31f6c5a1c334369121a290c42afb82d81182a358b30f2f5af
+
+freeze:
+  # composite (amendment 28): each item's label from the first listed session that labeled it --
+  # the human pass first, then the model session.
+  allowed_designs: [two_pass, single_annotator, composite]
+  require_adjudication: true
+  # 22 §4, single annotator: re-read every item marked uncertain or whose label rests on a boundary rule.
+  single_annotator_review:
+    flagged: true
+    labels: [UNKNOWN]
+    field_not_in:
+      boundary_rule_cited: ["none"]

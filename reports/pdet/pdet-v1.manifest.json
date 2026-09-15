@@ -1,0 +1,98 @@
+{
+  "annotation_fields": [
+    "gold_policy_label",
+    "ambiguity_status",
+    "annotator_id",
+    "annotator_rationale",
+    "boundary_rule_cited",
+    "annotation_version"
+  ],
+  "artifact_kind": "PDET_FROZEN_POPULATION",
+  "blocked_on": "human annotation under docs/research/study-002/22-PDET-PROTOCOL.md",
+  "candidate_population": {
+    "after_dedup": 12402,
+    "eligible_after_exclusions": 14828,
+    "path": "data\\processed\\normalization-v1\\when2call-sft",
+    "records": 14829
+  },
+  "challenge_assignment_rule": "An item may satisfy several boundary families. Quotas are applied in alphabetical family order and an item is counted once, in the first family that still had quota. Family counts are therefore assignment counts, not the total number of items that exhibit the boundary.",
+  "challenge_family_counts": {
+    "advice_external_service": 20,
+    "caveat_then_content": 20,
+    "no_tools_offered": 20,
+    "polite_followup": 18,
+    "question_mark": 20,
+    "question_without_mark": 20,
+    "refusal_plain": 20,
+    "refusal_with_question": 3,
+    "short_plain": 20,
+    "tool_mentioned_no_payload": 20
+  },
+  "challenge_family_shortfalls": {
+    "polite_followup": {
+      "available": 18,
+      "quota": 20,
+      "shortfall": 2
+    },
+    "refusal_with_question": {
+      "available": 3,
+      "quota": 20,
+      "shortfall": 17
+    }
+  },
+  "classifier_status_at_selection": "NOT_IMPLEMENTED",
+  "coverage_requirement_per_mode": 50,
+  "dedup": {
+    "dropped_duplicate_raw_record_hash": 0,
+    "dropped_duplicate_response_text": 2426,
+    "response_duplicate_groups": 1160
+  },
+  "excluded_populations": [
+    "Study 002 confirmatory partition (1,277 example ids)",
+    "Study 002 DEV partition (2,373 example ids)",
+    "quarantined held-out example ids",
+    "any candidate record whose prompt matches a held-out question"
+  ],
+  "exclusions": {
+    "dropped_by_evaluation_id": 0,
+    "dropped_by_prompt_matching_heldout": 1
+  },
+  "gold_labels_present": false,
+  "population_file": "pdet-v1.population.jsonl",
+  "population_records": 581,
+  "population_sha256": "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b",
+  "protocol_document": "docs/research/study-002/22-PDET-PROTOCOL.md",
+  "protocol_version": "pdet-002-v1",
+  "ranking": "sha256(seed || pdet_id) descending",
+  "schema_version": 1,
+  "seed": "opengrad-pdet-002-v1",
+  "selection_used_classifier": false,
+  "sizes": {
+    "challenge_realized": 181,
+    "challenge_shortfall_total": 19,
+    "challenge_target": 200,
+    "prevalence_realized": 400,
+    "prevalence_target": 400,
+    "total_realized": 581,
+    "total_target": 600
+  },
+  "statement": "Examples were selected from the frozen annotation specification and observable dataset characteristics only. No decision classifier had been implemented, and none was consulted, when these examples were chosen.",
+  "strata_quotas": {
+    "(('has_tools', 'no_tools'), ('length', 'medium'), ('refusal_signal', 'not_refusal_shaped'), ('response_repeated', 'unique'))": 0,
+    "(('has_tools', 'no_tools'), ('length', 'medium'), ('refusal_signal', 'refusal_shaped'), ('response_repeated', 'unique'))": 16,
+    "(('has_tools', 'no_tools'), ('length', 'short'), ('refusal_signal', 'not_refusal_shaped'), ('response_repeated', 'unique'))": 0,
+    "(('has_tools', 'no_tools'), ('length', 'short'), ('refusal_signal', 'refusal_shaped'), ('response_repeated', 'unique'))": 47,
+    "(('has_tools', 'tools'), ('length', 'medium'), ('refusal_signal', 'not_refusal_shaped'), ('response_repeated', 'unique'))": 8,
+    "(('has_tools', 'tools'), ('length', 'medium'), ('refusal_signal', 'refusal_shaped'), ('response_repeated', 'unique'))": 34,
+    "(('has_tools', 'tools'), ('length', 'short'), ('refusal_signal', 'not_refusal_shaped'), ('response_repeated', 'unique'))": 186,
+    "(('has_tools', 'tools'), ('length', 'short'), ('refusal_signal', 'refusal_shaped'), ('response_repeated', 'unique'))": 109
+  },
+  "strata_realized": {
+    "(('has_tools', 'no_tools'), ('length', 'medium'), ('refusal_signal', 'refusal_shaped'), ('response_repeated', 'unique'))": 16,
+    "(('has_tools', 'no_tools'), ('length', 'short'), ('refusal_signal', 'refusal_shaped'), ('response_repeated', 'unique'))": 47,
+    "(('has_tools', 'tools'), ('length', 'medium'), ('refusal_signal', 'not_refusal_shaped'), ('response_repeated', 'unique'))": 8,
+    "(('has_tools', 'tools'), ('length', 'medium'), ('refusal_signal', 'refusal_shaped'), ('response_repeated', 'unique'))": 34,
+    "(('has_tools', 'tools'), ('length', 'short'), ('refusal_signal', 'not_refusal_shaped'), ('response_repeated', 'unique'))": 186,
+    "(('has_tools', 'tools'), ('length', 'short'), ('refusal_signal', 'refusal_shaped'), ('response_repeated', 'unique'))": 109
+  }
+}

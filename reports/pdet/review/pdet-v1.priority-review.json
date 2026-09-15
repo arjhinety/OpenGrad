@@ -1,0 +1,1310 @@
+{
+  "counts": {
+    "by_criterion": {
+      "flagged": 64,
+      "label": 6,
+      "sample": 50
+    },
+    "items": 117
+  },
+  "criteria": [
+    {
+      "criterion": "flagged",
+      "rule": "the record the composite label comes from is flagged uncertain"
+    },
+    {
+      "criterion": "label",
+      "label": "DIRECT",
+      "rule": "the composite label is this label"
+    },
+    {
+      "criterion": "label",
+      "label": "UNKNOWN",
+      "rule": "the composite label is this label"
+    },
+    {
+      "criterion": "sample",
+      "drawn": 25,
+      "label": "CLARIFY",
+      "rule": "model-sourced, metric-eligible items with this composite label, not selected by an earlier criterion, taken in ascending sha256(seed + ':' + item_id)",
+      "size": 25
+    },
+    {
+      "criterion": "sample",
+      "drawn": 25,
+      "label": "UNSUPPORTED",
+      "rule": "model-sourced, metric-eligible items with this composite label, not selected by an earlier criterion, taken in ascending sha256(seed + ':' + item_id)",
+      "size": 25
+    }
+  ],
+  "items": [
+    {
+      "item_id": "when2call-sft:869aad7f993b5216db19ac593e43b7925ba9cad9b184ac51100341440660480c",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:170aa09f6bfafaa003d456b2482d2a7a4461b9307acb85c95a62fedb75631339",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:9e258b1dc8b6c7cf57ff7a3e12fcf4fe5959852346b9cb00eb003da10ccf5471",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:172e6584515710ba2d0ec9170067a4951f64792d6eb6ced69a275f2a5e2bbecc",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:d951c35568c088a67047e79a27ab24537736aa658697651d33469614b4559d31",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:6e46b6d6db4e0312b571421ecca3a1383be25b1129725cc647765d7647b73a65",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:8e89249bc8d02a27c15cc588593ecb2be032b1a8b381f795e48cda0ab13b02f7",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:f23eab22805ec760c95489f4801e5f6264be83be9c88e59753376b8072870de0",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:c858a659442ee48707136094da5a8f11268a4728a9385139d240891d07ea6d95",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:f7ff06ad88c984f2aff35f62a081255716f521ba365555af61ce601cd2489934",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:f48d23b17de91e6e90fe7fff8efa62a2c26f4663343f9777073a4e34291c14fb",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:3cc8acbed55a349148f03378acb3aab438a2ee9f599ca7dd4e33a267d954069b",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:6f8fab4370ff14fc5df1da8d4202998bcec436dd0299cff074ef2ac84b7935ee",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:51a46e8854009ed67a850c6a61af480cfc62b0923b43ca8e95d68b995f69e3fb",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:96a8d232084644d0cc4a0bf0811cd5237b50559490909f3c9558b0647b9179e8",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:1f5e8b9467d13df20ba5a8bff8ca53ed6b386714b44c8cadd8d8d69b08909bb2",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:fd815b29ca97125f583146b6d03c4cabbc3431fed3db07f109cfa26d3c79ce1f",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:48a275e842b26f6ed685d08d01850c4fa6ffc11b59573683d643a4b60cad1e5c",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:8b7883e30f7c0fbd6c75083c3f4887ce8ec4ad4ce8ab4558c24337397a31be59",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "label",
+          "label": "DIRECT",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:f409102a8f7675b1912be6520c0332ae4a73cb9589773fcb7640d21dfaade3d5",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:57f2b854fcc542ae354ec308a81dc64224995aca4abb4e17a40b97465d725477",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:64ad06a1b108a6b34087cf45af2577b60dc4f29f34db22c7dbe67f4ddbedea41",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:cd46e54d1f514cdb1513e7517475eba76bf7447bfd165e0d6d15df143f53462c",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:1148325d1bc777b78caa225ad3e7dc1653230ccd823c904b2dd4b134e6d8bdae",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:266d79e47eb4a7b9b3c42906cfff90dcf98ada35905f5f3e3d3e23f1082a57de",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:a2c9ef40f07b6a9fb282c13c5354e328966a01eccb2db4a223ac6ca6f8172fed",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:c531e5b7d846c5c8a2de6930fa97a1676ec282143d364c45583267c29ff3bbc1",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:4713e0145df73c115ddb48c27ea2175b3d0aac12620510fdcc12aa0a9658f380",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:5e4b06c749c048be93234308da15fde42e24058a2b74af9957b24736f52a9351",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:9179720d22d4cb1b37d32f0a2c64094022f2098dd7410c5f795117e634672cc5",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:e3e6b62056590ab3eed5034f7f90af91f0dc63b4a531678e61a39df385176b04",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:c4ddc4e153651b93066fb0809cd447d3903fd77c3fdee4603172f12efef5dc5b",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:9e183b99e0d34824fb6b39a8a5bd1e85047ac2bd0e7f417809e57c2512fe59ef",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:2f51ebb141f869d6edbc99be1fbd1a365eca07ea51def0c760d99f32a6fd7524",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:a209c164635aa4dd662713760bfff2eaee5801f9b2c294fe6ce3499303fc99fb",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:3b4653a89a677d46d33b015ce5dcb854359ffc1631e81fd82eaa31a8950d7bef",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:0d02fbc2342441721ac377693a34d641dbde17e9032e0994336a14062d6e50a7",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:7dfa904c9416528020fab2b8cff58ce02e23926b184761c587b160dc953f8227",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:3124c4e6ac65b05f88b1615ceee4d8c4508cce9df0c04458656b5a71be3265e6",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:e0359fe67ede5d20be40ea2af4335ba2962b1997be16f5f4c9c677c5a948486e",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        },
+        {
+          "annotator_kind": "model",
+          "criterion": "label",
+          "label": "DIRECT",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:8e7346e17e679ee4558ca79a3c58e60e2bd4144d080ce2c6337ce99946883993",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:2b6783bdbc80e29bb903c72b1f200d9241b2526fa11b026ee859bd663ccfc7e4",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:8bc84edbb8473ca045af3fbd3358ea611740c62855d9bacbd06b0d7f9fbe48a1",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:1f1778c86f62424b1a0ad2d451d252046b50599885dae8d93f67df67873d8682",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "label",
+          "label": "DIRECT",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:e9604e48361e13ceb5c4a175d4d591fb1527178b9efe41fc893038e7628e3805",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:5eb1cc6f941132bb07df9b7a895f9d0b58ab15ec2ce5cdf254866cdb10248236",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:2791acaf0b451519a6757f9385421454d453bba22e6a52974c933830ac465c12",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:018cf1afdf22afd0e495992a874cbd506d52dd01832e72e48f0296f613bbb670",
+      "reasons": [
+        {
+          "annotator_kind": "human",
+          "criterion": "label",
+          "label": "UNKNOWN",
+          "session_id": "pass-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:4a3d49737bcdc6486498a5f41ec4f3a354cfe054937ee2367df6fd5202c8ba1b",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:b3664fec93e8c60a932b416f21cd2dab1f556727b4da7cd9e7f752ee4783adbb",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:3f0040aaa9eedaaafce24214d437a81f60e255794946be1883bedd0764118965",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:d8f25cab7800ea3f7401e4dbe07972b8945ce180c938668e5ce60bbf1eff6fbe",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:14bd22a96e943b4fe312828762553326fa17f6b5948e42d1519cad73ebd8813f",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:a2baa457dcd2906761081d0f3e11f9b1a303d842ae3bc5b72deac7c337eda02d",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:739bd91f01e0384079484fedbddec39dc3682044cc74af672981072ba291684d",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:512968b727e028827245a3896f7a661ee449b6ca341f8a3261ac29e156e125d8",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:bdd9b1ada3d90deac4edc5a1a80597e3e681a12d3d08ea1054b45216840238ae",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:c8d3ea4db4da6f57c263c2750f6453fb714f2da59c4e8bfa07446ff9cf510904",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:944262a776a8c6265dae9b28a0d6600e77b0384412637d97f67fb85d7ad5de5a",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:ae86e154cee7467b22ac011e330ea4dbb195f64875ef8a2ee6d91897198ca23c",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:6c9898192ea47500f60cbdbdd037e7643b4ee4cc1d655da1777ce748231ab45d",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:261e9889f4d0f3ba6328400011a7eaadd4139ebfce6ffc92d05feb700ac8dafe",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:665bc2198aca02b9b64638ca606a1eebc5045f5174b5e6edffe60e3efa6ca872",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:cd5b682e9326b97d1bfdfaabe990b91d1995f4e0a70d304d4ad5b8731e652597",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:569aa8c975c000fdcc63adacc74ae6996936d1512e792ea5e600bbe8af0c0cdb",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:977ba1b7bc9358fa98a9243ecccc6db655ced203e77e7b82059d96e63e248660",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:0d1f4facc7ff6cf8d654d9cd2e98450b280220f576007f078f30e0bc62aaaec3",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:e304d9b37f4d71f1481caafe75397e07cf6b745298b54a3f6ab50eb80f281d88",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:62875a068725d1004c74fee23a384da6e475c3e65998b5dc578407d38d65aac7",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:2304254f25435dfd34fbb22b908df71ff9f1d0c1eff27e3af0c9e65ce99dcf12",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:33bc693f721f4370cc365f22c48bc513fe3a13ad0bff5ad8f3143a924f8adf7d",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:3ee3db2a15246a1f06c8773ac87e3285c92e0d6d2ef0ea846e4f5acb3bab1cf0",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:842d1446a864a43e6928cffe07bb655a3b90a8223e934e9301bda016cce0c6ca",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:cd6d9f6a6c34d8779ea343aac8dd912be1e4946fb62f64f594cbd29cc08e2c12",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:e872f385d69d36f311d413173bc4d82a5f04a825c92fe92bfe933b3285e9ea1f",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:de84e8750862b7f7e94ace9430416717df4f7a7f58200de7509564313943f9c2",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:28fcb87f299bd1fc2638ae7c8f41b2a00d58e338598f31beb76e82af69cdf15c",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:426c99580ab09eee4e9edb2be94ef9dc0cf36cdb8c8f083921c83b661aa9de13",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:95ad964f6596905689fd79ce454e4fa07ecc60d397166f6e4c4805c900ab0fcb",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:9193b45cffb58e7c17e1e1a6f689549be198ee67b9b644aa64e900cca5940660",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:b5cb10021bdcc3e9930494b89449825297b5ea36a01b4e599af549f31162f9dc",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:5fe0a0e32317f0734199c13be235a279f1b973bed8e67f5a5b58ec283bacfc9e",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:3ce96fb2a70a84b155f39ceac08aa4de1993b0e07cc75a17ab252f083187af6e",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:12889fc214119593c4b33d8027ea43c09a199567a077c60344fcc6e99544ab37",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:5261f602a22e3f8e310d1d9956d2aac5fe74ac3b84cd9038dd622a69d9d1e96d",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:941e3a08dc1b274d8d60e1de6737672f79a6d4081321fcabf1e06061c306e559",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:b7ee066405281c5e829058e7a1bed1d90cedc8777344c4ee99d61d35a1e531d0",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        },
+        {
+          "annotator_kind": "model",
+          "criterion": "label",
+          "label": "UNKNOWN",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:090aa2cb3b78e3e43bb11bdb82ed2ba5d89c9bebcb8f98b9a0a7ca3fee919130",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:7dd8f57321822fafaf93bbec61812777d2d7b9cadc3acf34d7ca17466e81a24c",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:dfd5dfa5a065bcadb0a5cd4564b85abd54b729ab6fae80bbfb595882eda9ef8f",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:ca13204869ecb38fea79ad46df2cd446436a41ad39371d2e743ea8711513b717",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:48086d6940324afa1bb529281796e246133da6988766b6e734157cf0f53ffdb7",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        },
+        {
+          "annotator_kind": "model",
+          "criterion": "label",
+          "label": "DIRECT",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:8785aaa2e8c13376069c883926869f22499f9fc9b67c5a5956d3b47095e3ab41",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:940f8b977af4e800ddc975f1043c9b299cc3d4cd311205988e49be9e413c5fca",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:54ba33b6a27c82b6a57a735961dc271a83c9bca6012b9d74e5194e1cff03ce98",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:4a1856d447f501fe326e07717adb2d13f7f091f31130c919739fa249d0ee4fb7",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:703361937181cd2cb78cca4bb6d9d146eb852647c6608671946813c09c086f32",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:77c4dd4ec0f75f2b905424e21676a97cead10fae8eb1cfc92b8f5b0236352e5a",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:593cd3d9855882d42b6fc32c03fc4c1470b7f450b49d56f870b7cb20808dc8d1",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:9cc08d83dfa2fe0938e6ec9425d55a3eec5e1db3b1c7ee26acffe678000bfd69",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:bc53078895ae45684271c3ecd5e7760e2240363a9e2f74f472c0ff91c6fa9167",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:d32a8cf361081a7abb239b8195df8affb38c6818265446b820258cb557b295b5",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:1ff0976cc6b9e79a925012148b6095c451d7baeac319e4f033a326f51ffc58d8",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:87b86e5ac83a3eeb472b8dc2d15bfe4487b82f5943c1f5c5474c373cc746b949",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:40cd58c23a4807f22ec3af4ed4eaaebc100b83269fbcde8b4af47373c87443c4",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:c01a880cc6e2128efdd43ce26953a04c3a5e9539e957e284951d2da87edf08c0",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:ebf0b0d89e2972c0feeb3ed53a68d4d8020422cd58fbbc572598925a289524b4",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:f1c464173910ccc2cf085d7cc62cc024385c0827f13c8f8c5d451f617eb02b08",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "CLARIFY",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:0dc53da0b183525dbf8a0b9a27f15b53f822471f6be82c986374c0fdc61e8e26",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:f1ea2e0a5eefd2b1e60dc704233f019bceecc91306b5a242a60ca7e0884bf82d",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:22ad550c9a580bd912d30f322c92ff41e0c6bf663021442d6397dd060ce4d3dc",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:729fceda5990279b0f66d01b5630a5b8d38b8891e8d44ee0d987e7684a2e9b56",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:78aeb6e997121850d29a8c39e2b5045f860aa902d807d2a2f987ba2d5395724e",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:4380c39f43c1554801179fd8410370c2f40e5c73ccdf70ac11dc5742a03345e5",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:37dcdab8d927986f5077cc10bb2958a217faa13db15b8eda3d7bc09f599ff534",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "flagged",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:350e3af6e2ccddd46f199385716f50ab681cbcccec3c7e72766ffc0d9a28fbe5",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    },
+    {
+      "item_id": "when2call-sft:b095117f5ea6d7e1373e6492c36479cb38022ab84d0b890bbf3ea5c39f141ee2",
+      "reasons": [
+        {
+          "annotator_kind": "model",
+          "criterion": "sample",
+          "label": "UNSUPPORTED",
+          "session_id": "model-a"
+        }
+      ]
+    }
+  ],
+  "name": "priority-review",
+  "order": "ascending sha256(seed + ':order:' + item_id)",
+  "purpose": "Items a human annotator may review first. The annotation screen shows only the item ids, in the order below; it never shows the reasons, the reference labels or which criterion selected an item. The reasons name reference labels: do not read this file before labeling.",
+  "reference": {
+    "priority": [
+      {
+        "annotator_id": "arjhinety",
+        "annotator_kind": "human",
+        "history_head_sha256": "912294f78079e39e1828fc4edb93bcf6442a0cef16a9be1fd24cd651840e8ee1",
+        "labeled_items": 11,
+        "session_id": "pass-a"
+      },
+      {
+        "annotator_id": "model.claude-opus-5",
+        "annotator_kind": "model",
+        "history_head_sha256": "ab414c7e47b6625e6c88eefe59b63cf2a3eab118b6e45657587f62b9c78a37c6",
+        "labeled_items": 570,
+        "session_id": "model-a"
+      }
+    ],
+    "rule": "each item takes its label from the first session, in this order, that labeled it"
+  },
+  "schema": "opengrad-review-queue-v1",
+  "seed": "pdet-v1-priority-review-1",
+  "source_population_sha256": "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b",
+  "task_definition_sha256": "c00eab8d903cfbf5b3f033763306d063183f5e8c8a22f6ed81e52489695c958e",
+  "task_id": "pdet-v1"
+}

@@ -2150,6 +2150,10 @@ version = "0.1.0"
 source = { editable = "." }
 
 [package.optional-dependencies]
+annotation = [
+    { name = "pyarrow" },
+    { name = "pyyaml" },
+]
 benchmark-agent = [
     { name = "jsonschema" },
     { name = "pyyaml" },
@@ -2222,12 +2226,14 @@ requires-dist = [
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.11" },
     { name = "nvidia-modelopt", marker = "extra == 'optimization'" },
     { name = "peft", marker = "extra == 'training'" },
+    { name = "pyarrow", marker = "extra == 'annotation'", specifier = ">=15.0" },
     { name = "pyarrow", marker = "extra == 'benchmark-core'", specifier = ">=15.0" },
     { name = "pyarrow", marker = "extra == 'benchmark-speculative'", specifier = ">=15.0" },
     { name = "pyarrow", marker = "extra == 'data'", specifier = ">=15.0" },
     { name = "pyarrow", marker = "extra == 'dev'", specifier = ">=15.0" },
     { name = "pyarrow", marker = "extra == 'gpu-evaluation'", specifier = ">=15.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pyyaml", marker = "extra == 'annotation'", specifier = ">=6.0" },
     { name = "pyyaml", marker = "extra == 'benchmark-agent'", specifier = ">=6.0" },
     { name = "pyyaml", marker = "extra == 'benchmark-core'", specifier = ">=6.0" },
     { name = "pyyaml", marker = "extra == 'benchmark-speculative'", specifier = ">=6.0" },
@@ -2242,7 +2248,7 @@ requires-dist = [
     { name = "transformers", marker = "extra == 'training'" },
     { name = "trl", marker = "extra == 'training'" },
 ]
-provides-extras = ["research", "data", "evaluation", "training", "inference", "optimization", "visualization", "gpu-evaluation", "benchmark-core", "benchmark-agent", "benchmark-terminal", "benchmark-speculative", "dev"]
+provides-extras = ["research", "data", "evaluation", "training", "inference", "optimization", "visualization", "annotation", "gpu-evaluation", "benchmark-core", "benchmark-agent", "benchmark-terminal", "benchmark-speculative", "dev"]
 
 [[package]]
 name = "packaging"

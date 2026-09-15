@@ -76,6 +76,16 @@ results/*.tmp
 reports/benchmarks/
 openweights/
 android-studio/
+# Annotation working state (SQLite) and the annotation UI's build outputs. Research output from the
+# tool is exported as JSONL packages under reports/ and committed from there.
+/.annotation/
+# Verbatim subagent transcripts of the P-DET model labels: they carry the session's injected context (an
+# e-mail address, local paths), so only their hashes are tracked (reports/pdet/provenance/model-a/).
+reports/pdet/provenance/*/local/
+integrations/annotate-ui/.next/
+integrations/annotate-ui/out/
+integrations/annotate-ui/next-env.d.ts
+integrations/annotate-ui/*.tsbuildinfo
 prompt*.txt
 *.safetensors
 *.gguf
