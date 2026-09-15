@@ -1,0 +1,111 @@
+{
+  "artifact_kind": "NORMALIZATION_V3_PRE_CLASSIFIER",
+  "builder": "opengrad.data.normalization_v3",
+  "config": {
+    "adapter_function": "opengrad.data.adapters.adapt_glaive_v2",
+    "adapter_key": "glaive_v2",
+    "adapter_row_label": "glaive_function_calling_v2_v2",
+    "adapter_version": "2.0.0",
+    "canonical_schema_version": "tool_use_ir_v1",
+    "max_rows": null,
+    "normalization_version": "normalization-v3",
+    "schema_normalization_version": "source-schema-normalization-v1",
+    "schema_translation_applied": false,
+    "shard_size": 10000,
+    "supervision_contract_version": "supervision_contract_v1"
+  },
+  "content_hash": "855cb0847b3b4f07edf034a1ed031127ce29754fa7b8c75eed835738b626a246",
+  "counts": {
+    "accepted": 98339,
+    "duplicates": 13352,
+    "rejected": 1269,
+    "source_rows": 112960
+  },
+  "dispositions": {
+    "file": "dispositions.jsonl",
+    "sha256": "8bc81916801a808759095bb21c14d6f2bca0444dd973aaefce67f292317e1ff7"
+  },
+  "rejected_by_adapter_message": {
+    "Glaive arguments must be an object": 18,
+    "INVALID_ARGUMENTS_JSON": 1,
+    "SCH_ADDITIONAL_PROPERTIES_NOT_BOOLEAN": 47,
+    "SCH_DUPLICATE_REQUIRED": 2,
+    "SCH_REQUIRED_NOT_STRING_LIST": 18,
+    "SCH_SCHEMA_NOT_OBJECT": 2,
+    "SCH_UNSUPPORTED_KEYWORD": 62,
+    "malformed Glaive function call": 228,
+    "malformed Glaive function call at offset N": 866,
+    "unknown tool": 25
+  },
+  "rejected_by_reason": {
+    "ADAPTER_GLAIVE_ARGUMENTS_NOT_OBJECT": 18,
+    "ADAPTER_GLAIVE_MALFORMED_CALL": 1094,
+    "ADAPTER_UNDECLARED_TOOL": 25,
+    "INVALID_ARGUMENTS_JSON": 1,
+    "SCH_ADDITIONAL_PROPERTIES_NOT_BOOLEAN": 47,
+    "SCH_DUPLICATE_REQUIRED": 2,
+    "SCH_REQUIRED_NOT_STRING_LIST": 18,
+    "SCH_SCHEMA_NOT_OBJECT": 2,
+    "SCH_UNSUPPORTED_KEYWORD": 62
+  },
+  "shards": [
+    {
+      "file": "shard-000000.parquet",
+      "rows": 10000,
+      "sha256": "0f8e26f9fb486c915c637142e4edc8aa9fbd19c7e53cd743635295115696e333"
+    },
+    {
+      "file": "shard-000001.parquet",
+      "rows": 10000,
+      "sha256": "0c0840312cd1ba352d2ed12d6e99b16a90ce7fe99822b57090d2633410f8a172"
+    },
+    {
+      "file": "shard-000002.parquet",
+      "rows": 10000,
+      "sha256": "808948173a87cd47efc02a21b32d42523b19a7bed0db1e3051198cad765501e5"
+    },
+    {
+      "file": "shard-000003.parquet",
+      "rows": 10000,
+      "sha256": "384229e19bad02f79fb90ad5635661c38e6cabbbb9cb938b945047567fde5814"
+    },
+    {
+      "file": "shard-000004.parquet",
+      "rows": 10000,
+      "sha256": "908c8a6f4689353b0105a4fb70b0d10708e5ea0bd2851b798238daaa909a3121"
+    },
+    {
+      "file": "shard-000005.parquet",
+      "rows": 10000,
+      "sha256": "f808f6afb6892b49400edc559e23fd469593db081f730fd767e17c5951415744"
+    },
+    {
+      "file": "shard-000006.parquet",
+      "rows": 10000,
+      "sha256": "69128d23e164758641891cb27e4277daf9c7e04d5bfce29b2bd29e8029822ad1"
+    },
+    {
+      "file": "shard-000007.parquet",
+      "rows": 10000,
+      "sha256": "1414541f7b674bda36734c815cf1fc6c4ee3e22e2914f2c4135b54c5dd676f73"
+    },
+    {
+      "file": "shard-000008.parquet",
+      "rows": 10000,
+      "sha256": "735859daf1474bc4ce9f63630489228e566bf89e4c8f2dedbe42525c1754f19b"
+    },
+    {
+      "file": "shard-000009.parquet",
+      "rows": 8339,
+      "sha256": "1463fbde9a29818ad51788dcd891f0b40cf6aa7f9d1b16817e48a9de79d1ea85"
+    }
+  ],
+  "source": {
+    "dataset_id": "glaive-function-calling-v2",
+    "name": "glaive",
+    "raw_artifact_sha256": "7e7e32f0466699513b38923bc4991858e192c9274df22e243b9e77eb2775b6e8",
+    "raw_rows": 112960,
+    "split": "train",
+    "upstream_revision": "e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac"
+  }
+}

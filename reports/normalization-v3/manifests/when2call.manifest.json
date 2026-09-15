@@ -1,0 +1,58 @@
+{
+  "artifact_kind": "NORMALIZATION_V3_PRE_CLASSIFIER",
+  "builder": "opengrad.data.normalization_v3",
+  "config": {
+    "adapter_function": "opengrad.data.adapters.adapt_when2call",
+    "adapter_key": "when2call",
+    "adapter_row_label": "when2call_v1",
+    "adapter_version": "2.0.0",
+    "canonical_schema_version": "tool_use_ir_v1",
+    "max_rows": null,
+    "normalization_version": "normalization-v3",
+    "schema_normalization_version": "source-schema-normalization-v1",
+    "schema_translation_applied": true,
+    "shard_size": 10000,
+    "supervision_contract_version": "supervision_contract_v1"
+  },
+  "content_hash": "50a9451f631072b17b4480b2f21671c8d54e4c1484c13eac4916bc5d156f1cce",
+  "counts": {
+    "accepted": 14701,
+    "duplicates": 124,
+    "rejected": 175,
+    "source_rows": 15000
+  },
+  "dispositions": {
+    "file": "dispositions.jsonl",
+    "sha256": "4467922de912a720e518003c5ab760ca86eef70264d60cba60458bd69d261e73"
+  },
+  "rejected_by_adapter_message": {
+    "SRC_SCHEMA_MULTI_TYPE_UNION": 73,
+    "SRC_SCHEMA_UNREPRESENTABLE_TYPE": 55,
+    "duplicate tool name": 47
+  },
+  "rejected_by_reason": {
+    "ADAPTER_DUPLICATE_TOOL_NAME": 47,
+    "SRC_SCHEMA_MULTI_TYPE_UNION": 73,
+    "SRC_SCHEMA_UNREPRESENTABLE_TYPE": 55
+  },
+  "shards": [
+    {
+      "file": "shard-000000.parquet",
+      "rows": 10000,
+      "sha256": "9b1e7f8f0ef10b292ff4ababa20edb88eccb495b6b8aa2e2524b084c7818f332"
+    },
+    {
+      "file": "shard-000001.parquet",
+      "rows": 4701,
+      "sha256": "46484b12443ddd0ba7437526af9a98d1b7f21611614edbe21d5acfad763d345f"
+    }
+  ],
+  "source": {
+    "dataset_id": "when2call",
+    "name": "when2call",
+    "raw_artifact_sha256": "f992975fe9da9fcb223b2b6ea124771d87016d802a0b1e74e98168376df07ab3",
+    "raw_rows": 15000,
+    "split": "train",
+    "upstream_revision": "0582f7749df63a96fdc3070932e83e72396ace53"
+  }
+}

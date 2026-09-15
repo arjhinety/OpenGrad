@@ -1,0 +1,192 @@
+{
+  "artifact_kind": "PDET_COVERAGE_SUPPLY_PROXY",
+  "preregistration": "docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md",
+  "sources": {
+    "button": {
+      "adapter_version_recorded": null,
+      "artifact": "data/processed/normalization-v1/button",
+      "layer_b_strata": null,
+      "manifest_sha256": "f487d8eb46c12b413d7492965b022473860da4b31f7772864b0691e2e8750acf",
+      "shape": {
+        "final_turn_prose_after_tool_use": 7941,
+        "records": 7941,
+        "records_with_structured_call": 7941,
+        "uses_a_tool": 7941
+      },
+      "single_exchange_responses_with_generic_tool_word": 0,
+      "source_sha256": null
+    },
+    "glaive": {
+      "adapter_version_recorded": "1.0.2",
+      "artifact": "data/processed/normalization-v1/glaive",
+      "layer_b_strata": {
+        "M": {
+          "distinct_responses": 19,
+          "records": 19,
+          "skeletons": 19
+        },
+        "P1": {
+          "distinct_responses": 58,
+          "records": 64,
+          "skeletons": 58
+        },
+        "P2": {
+          "distinct_responses": 65,
+          "records": 65,
+          "skeletons": 65
+        },
+        "Q": {
+          "distinct_responses": 102,
+          "records": 105,
+          "skeletons": 102
+        },
+        "R": {
+          "distinct_responses": 10932,
+          "records": 14076,
+          "skeletons": 10694
+        },
+        "X": {
+          "distinct_responses": 0,
+          "records": 0,
+          "skeletons": 0
+        }
+      },
+      "manifest_sha256": "b80d0868eba3ff457d5e5b7e52395badc8ec6cd6426006ebc32173f9586aa642",
+      "shape": {
+        "final_turn_prose_after_tool_use": 49287,
+        "records": 99794,
+        "tool_free_multi_turn": 34450,
+        "tool_free_single_exchange": 14329,
+        "tool_free_single_exchange_no_tools": 153,
+        "tool_free_single_exchange_tools_offered": 14176,
+        "uses_a_tool": 51015
+      },
+      "single_exchange_responses_with_generic_tool_word": 11002,
+      "source_sha256": "7e7e32f0466699513b38923bc4991858e192c9274df22e243b9e77eb2775b6e8"
+    },
+    "looptool": {
+      "adapter_version_recorded": "1.0.2",
+      "artifact": "data/processed/normalization-v1/looptool",
+      "layer_b_strata": {
+        "M": {
+          "distinct_responses": 15,
+          "records": 15,
+          "skeletons": 15
+        },
+        "P1": {
+          "distinct_responses": 3,
+          "records": 3,
+          "skeletons": 3
+        },
+        "P2": {
+          "distinct_responses": 0,
+          "records": 0,
+          "skeletons": 0
+        },
+        "Q": {
+          "distinct_responses": 152,
+          "records": 153,
+          "skeletons": 152
+        },
+        "R": {
+          "distinct_responses": 148,
+          "records": 153,
+          "skeletons": 145
+        },
+        "X": {
+          "distinct_responses": 0,
+          "records": 0,
+          "skeletons": 0
+        }
+      },
+      "manifest_sha256": "2d2749f767a18547fd1a771666b62284efa2d8453ab4a5f2d0dc71709b2d30c5",
+      "shape": {
+        "final_turn_structured_call": 20192,
+        "records": 20827,
+        "records_with_structured_call": 20192,
+        "tool_free_multi_turn": 311,
+        "tool_free_single_exchange": 324,
+        "tool_free_single_exchange_no_tools": 82,
+        "tool_free_single_exchange_tools_offered": 242,
+        "uses_a_tool": 20192
+      },
+      "single_exchange_responses_with_generic_tool_word": 25,
+      "source_sha256": "189328fc6e9561bf9d58243b58452529882f55167e279dfd66838134ae1533d7"
+    },
+    "toolace": {
+      "adapter_version_recorded": "1.0.2",
+      "artifact": "data/processed/normalization-v1/toolace",
+      "layer_b_strata": {
+        "M": {
+          "distinct_responses": 722,
+          "records": 722,
+          "skeletons": 722
+        },
+        "P1": {
+          "distinct_responses": 377,
+          "records": 381,
+          "skeletons": 375
+        },
+        "P2": {
+          "distinct_responses": 491,
+          "records": 493,
+          "skeletons": 491
+        },
+        "Q": {
+          "distinct_responses": 169,
+          "records": 171,
+          "skeletons": 169
+        },
+        "R": {
+          "distinct_responses": 228,
+          "records": 229,
+          "skeletons": 228
+        },
+        "X": {
+          "distinct_responses": 6,
+          "records": 6,
+          "skeletons": 6
+        }
+      },
+      "manifest_sha256": "a16e9a37a0780b6ff4b42e77bfca7869dad329dc25531e2b6719bc2e84617400",
+      "shape": {
+        "final_turn_prose_after_tool_use": 644,
+        "final_turn_structured_call": 8543,
+        "records": 11190,
+        "records_with_structured_call": 9187,
+        "tool_free_multi_turn": 1,
+        "tool_free_single_exchange": 2002,
+        "tool_free_single_exchange_no_tools": 697,
+        "tool_free_single_exchange_tools_offered": 1305,
+        "uses_a_tool": 9187
+      },
+      "single_exchange_responses_with_generic_tool_word": 1580,
+      "source_sha256": "7a7a6a2c3b1003c789bbabb975335a0a8f843ae7a7df28134f7d242b301ab15f"
+    },
+    "xlam": {
+      "adapter_version_recorded": "1.0.2",
+      "artifact": "data/processed/normalization-v1/xlam",
+      "layer_b_strata": null,
+      "manifest_sha256": "ea15b7e9d3f28d35870e3337a8d1ed9cbc12693afe55122377c1a47b711173d3",
+      "shape": {
+        "final_turn_structured_call": 59370,
+        "records": 59370,
+        "records_with_structured_call": 59370,
+        "uses_a_tool": 59370
+      },
+      "single_exchange_responses_with_generic_tool_word": 0,
+      "source_sha256": "bec51a6997da688a3ad306a4a29b0c2a29ad59600e4ce6f1dfac9ae4addc527b"
+    }
+  },
+  "statement": "Counts over normalization-v1, which is not the representation the future classifier will receive. Feasibility evidence for the P-DET-COVERAGE-v1 draft only; sampling must read the canonical-v3 post-adapter representation and is BLOCKED until it exists.",
+  "status": "PROXY_NOT_FOR_SAMPLING",
+  "strata_priority": [
+    "X",
+    "M",
+    "R",
+    "Q",
+    "P1",
+    "P2"
+  ],
+  "unit": "single-exchange, tool-free records (one user turn, one assistant turn, no tool use)"
+}

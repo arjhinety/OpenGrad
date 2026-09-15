@@ -1,0 +1,365 @@
+{
+  "artifact_fingerprint": "2bd384929a5b870bc3836729c808362c60d0d98717f086587e12af6608104aaa",
+  "artifact_kind": "NORMALIZATION_V3_STRUCTURAL_AUDIT",
+  "artifact_manifest_sha256": "f7a20b04968ff5bb183c4f7d3f4c44ed28d7bddaee9ce5cc10d3056b2617b759",
+  "classifier_input_contract": "prose-decision-input-v1",
+  "heldout_inputs": [
+    [
+      ".cache/normalization/raw/when2call_test_mcq.parquet",
+      "17cdf1a07dad0bb5bb2a6c5663b7ba547e64c681add4a50151622788595d028f"
+    ],
+    [
+      ".cache/normalization/raw/when2call_test_llm_judge.parquet",
+      "2b613123d6643394a1905bc4f5b2b92a25c8acd97806312e19a4474615a9a853"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-partition.json",
+      "56c6abc2e24c524b45c382f42927fa02117b2a04c02f04e89e6a40d8b520f901"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-quarantine.json",
+      "705b9ef68185c3ce7a997e9a9f728633b9f042b2304a96635dea34f891855cf4"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-quarantine--toolpolicy-canonical-v2-final.json",
+      "34173706d01823aa44a2871e72ce278ede6f6c93df6f4009c6270fbfb1b0a2cd"
+    ]
+  ],
+  "sources": {
+    "glaive": {
+      "adapter": {
+        "function": "adapt_glaive_v2",
+        "key": "glaive_v2",
+        "row_label": "glaive_function_calling_v2_v2"
+      },
+      "call_conservation": {
+        "raw_equal_structured": 98339,
+        "raw_rows_with_calls": 63218,
+        "rejected_rows_with_raw_calls": 1242,
+        "unit": "calls per accepted row: raw <functioncall> markers vs structured tool_calls entries"
+      },
+      "counts": {
+        "accepted": 98339,
+        "duplicates": 13352,
+        "rejected": 1269,
+        "source_rows": 112960
+      },
+      "eligibility_all_reasons": {
+        "EVALUATION_ONLY_OR_HELDOUT": 8,
+        "MALFORMED_OR_UNRENDERABLE": 2575,
+        "MULTI_TURN_UNSUPPORTED": 74234,
+        "POST_TOOL_RESULT_RESPONSE": 49586,
+        "STRUCTURAL_CALL": 49423
+      },
+      "eligibility_primary": {
+        "ELIGIBLE": 14303,
+        "EVALUATION_ONLY_OR_HELDOUT": 8,
+        "MALFORMED_OR_UNRENDERABLE": 2572,
+        "MULTI_TURN_UNSUPPORTED": 34446,
+        "STRUCTURAL_CALL": 47010
+      },
+      "eligible_by_tools": {
+        "no_tools": 153,
+        "tools_available": 14150
+      },
+      "exchange_shape": {
+        "leading_system_message": 0,
+        "multi_turn": 84036,
+        "single_exchange": 14303,
+        "system_text_in_metadata": 98339
+      },
+      "final_turn": {
+        "final_other:assistant": 1,
+        "final_other:tool": 295,
+        "final_other:user": 1424,
+        "final_prose_after_tool_result": 47867,
+        "final_prose_no_prior_tool_use": 48752
+      },
+      "invariants": {
+        "adapter_key_not_manifest": 0,
+        "adapter_version_not_authoritative": 0,
+        "behavior_label_present": 0,
+        "rows": 98339,
+        "structure_block_disagrees_with_messages": 0
+      },
+      "manifest_sha256": "41ea7ccd4b70b1d773c32fbe1d551973521587dc7fc61de1cc4b6ec0af98c53c",
+      "rejected_by_reason": {
+        "ADAPTER_GLAIVE_ARGUMENTS_NOT_OBJECT": 18,
+        "ADAPTER_GLAIVE_MALFORMED_CALL": 1094,
+        "ADAPTER_UNDECLARED_TOOL": 25,
+        "INVALID_ARGUMENTS_JSON": 1,
+        "SCH_ADDITIONAL_PROPERTIES_NOT_BOOLEAN": 47,
+        "SCH_DUPLICATE_REQUIRED": 2,
+        "SCH_REQUIRED_NOT_STRING_LIST": 18,
+        "SCH_SCHEMA_NOT_OBJECT": 2,
+        "SCH_UNSUPPORTED_KEYWORD": 62
+      },
+      "residual_call_markers_final_prose_turn": {
+        "json_name_object": 44
+      },
+      "residual_call_markers_prose_turns": {
+        "json_arguments_key": 7,
+        "json_name_object": 368
+      },
+      "residual_special_tokens_prose_turns": {},
+      "residual_textual_calls_prose_turns_by_parseability": {
+        "parseable": 340,
+        "unparseable": 28
+      },
+      "structured_call_turns": {
+        "structured_call_turns": 65767,
+        "structured_call_turns_whose_content_also_holds_call_text": 0,
+        "structured_call_turns_whose_content_starts_with_bracket": 0,
+        "structured_call_turns_with_nonempty_content": 5
+      },
+      "tools": {
+        "no_tools": 34598,
+        "tools_available": 63741
+      },
+      "trajectory_issues": {
+        "ARG_ENUM": 1,
+        "ARG_NONFINITE": 1,
+        "ARG_REQUIRED": 596,
+        "ARG_TYPE": 99,
+        "EMPTY_ASSISTANT_OUTPUT": 2,
+        "EMPTY_MESSAGE": 2,
+        "ORPHAN_TOOL_RESULT": 163,
+        "records_with_any_issue": 864
+      }
+    },
+    "toolace": {
+      "adapter": {
+        "function": "adapt_toolace",
+        "key": "toolace",
+        "row_label": "toolace_v1"
+      },
+      "call_conservation": {
+        "raw_equal_structured": 11051,
+        "raw_rows_with_calls": 9297,
+        "rejected_rows_with_raw_calls": 216,
+        "unit": "call-bearing assistant turns per accepted row: raw turns starting '[' with '(' vs turns with tool_calls (one bracket turn may hold several calls, so calls are not the unit)"
+      },
+      "counts": {
+        "accepted": 11051,
+        "duplicates": 3,
+        "rejected": 246,
+        "source_rows": 11300
+      },
+      "eligibility_all_reasons": {
+        "EVALUATION_ONLY_OR_HELDOUT": 0,
+        "MALFORMED_OR_UNRENDERABLE": 8476,
+        "MULTI_TURN_UNSUPPORTED": 507,
+        "POST_TOOL_RESULT_RESPONSE": 785,
+        "STRUCTURAL_CALL": 9078
+      },
+      "eligibility_primary": {
+        "ELIGIBLE": 1972,
+        "MALFORMED_OR_UNRENDERABLE": 8476,
+        "MULTI_TURN_UNSUPPORTED": 1,
+        "STRUCTURAL_CALL": 602
+      },
+      "eligible_by_tools": {
+        "no_tools": 697,
+        "tools_available": 1275
+      },
+      "exchange_shape": {
+        "leading_system_message": 11051,
+        "multi_turn": 788,
+        "single_exchange": 10263,
+        "system_text_in_metadata": 0
+      },
+      "final_turn": {
+        "final_assistant_structured_call": 8442,
+        "final_prose_after_tool_result": 636,
+        "final_prose_no_prior_tool_use": 1973
+      },
+      "invariants": {
+        "adapter_key_not_manifest": 0,
+        "adapter_version_not_authoritative": 0,
+        "behavior_label_present": 0,
+        "rows": 11051,
+        "structure_block_disagrees_with_messages": 0
+      },
+      "manifest_sha256": "f2a87ad90b4e87b6f378830bae798c8499d4d2dbbaa34973a8185030b385d705",
+      "rejected_by_reason": {
+        "ADAPTER_UNDECLARED_TOOL": 18,
+        "INVALID_ARGUMENT_SYNTAX": 89,
+        "SCH_ADDITIONAL_PROPERTIES_NOT_BOOLEAN": 10,
+        "SCH_ENUM_INVALID": 1,
+        "SCH_PROPERTIES_NOT_OBJECT": 16,
+        "SCH_UNSUPPORTED_KEYWORD": 112
+      },
+      "residual_call_markers_final_prose_turn": {
+        "json_arguments_key": 3,
+        "json_name_object": 6
+      },
+      "residual_call_markers_prose_turns": {
+        "json_arguments_key": 3,
+        "json_name_object": 6
+      },
+      "residual_special_tokens_prose_turns": {},
+      "residual_textual_calls_prose_turns_by_parseability": {
+        "parseable": 6
+      },
+      "structured_call_turns": {
+        "structured_call_turns": 9786,
+        "structured_call_turns_whose_content_also_holds_call_text": 9612,
+        "structured_call_turns_whose_content_starts_with_bracket": 9785,
+        "structured_call_turns_with_nonempty_content": 9785
+      },
+      "tools": {
+        "no_tools": 697,
+        "tools_available": 10354
+      },
+      "trajectory_issues": {
+        "EMPTY_ASSISTANT_OUTPUT": 5,
+        "INVALID_MESSAGE_SEQUENCE": 40,
+        "MISSING_TOOL_RESULT": 8472,
+        "records_with_any_issue": 8476
+      }
+    },
+    "when2call": {
+      "adapter": {
+        "function": "adapt_when2call",
+        "key": "when2call",
+        "row_label": "when2call_v1"
+      },
+      "call_conservation": {
+        "raw_equal_structured": 14701,
+        "raw_rows_with_calls": 0,
+        "rejected_rows_with_raw_calls": 0,
+        "unit": "calls per accepted row: raw <TOOLCALL> markers vs structured tool_calls entries"
+      },
+      "counts": {
+        "accepted": 14701,
+        "duplicates": 124,
+        "rejected": 175,
+        "source_rows": 15000
+      },
+      "eligibility_all_reasons": {
+        "EVALUATION_ONLY_OR_HELDOUT": 1,
+        "MALFORMED_OR_UNRENDERABLE": 0,
+        "MULTI_TURN_UNSUPPORTED": 0,
+        "POST_TOOL_RESULT_RESPONSE": 0,
+        "STRUCTURAL_CALL": 0
+      },
+      "eligibility_primary": {
+        "ELIGIBLE": 14700,
+        "EVALUATION_ONLY_OR_HELDOUT": 1
+      },
+      "eligible_by_tools": {
+        "no_tools": 2217,
+        "tools_available": 12483
+      },
+      "exchange_shape": {
+        "leading_system_message": 0,
+        "single_exchange": 14701,
+        "system_text_in_metadata": 0
+      },
+      "final_turn": {
+        "final_prose_no_prior_tool_use": 14701
+      },
+      "invariants": {
+        "adapter_key_not_manifest": 0,
+        "adapter_version_not_authoritative": 0,
+        "behavior_label_present": 0,
+        "rows": 14701,
+        "structure_block_disagrees_with_messages": 0
+      },
+      "manifest_sha256": "2280f6504d7e0db4878b3d2637428b3f919ae1b1b21ebc7606c7c1eaf4f52c6d",
+      "rejected_by_reason": {
+        "ADAPTER_DUPLICATE_TOOL_NAME": 47,
+        "SRC_SCHEMA_MULTI_TYPE_UNION": 73,
+        "SRC_SCHEMA_UNREPRESENTABLE_TYPE": 55
+      },
+      "residual_call_markers_final_prose_turn": {},
+      "residual_call_markers_prose_turns": {},
+      "residual_special_tokens_prose_turns": {},
+      "residual_textual_calls_prose_turns_by_parseability": {},
+      "structured_call_turns": {},
+      "tools": {
+        "no_tools": 2217,
+        "tools_available": 12484
+      },
+      "trajectory_issues": {
+        "records_with_any_issue": 0
+      }
+    },
+    "xlam": {
+      "adapter": {
+        "function": "adapt_xlam",
+        "key": "xlam",
+        "row_label": "xlam_function_calling_60k_v2"
+      },
+      "call_conservation": {
+        "raw_equal_structured": 57342,
+        "raw_rows_with_calls": 60000,
+        "rejected_rows_with_raw_calls": 2308,
+        "unit": "calls per accepted row: raw named `answers` entries vs structured tool_calls entries"
+      },
+      "counts": {
+        "accepted": 57342,
+        "duplicates": 350,
+        "rejected": 2308,
+        "source_rows": 60000
+      },
+      "eligibility_all_reasons": {
+        "EVALUATION_ONLY_OR_HELDOUT": 0,
+        "MALFORMED_OR_UNRENDERABLE": 1231,
+        "MULTI_TURN_UNSUPPORTED": 0,
+        "POST_TOOL_RESULT_RESPONSE": 0,
+        "STRUCTURAL_CALL": 57342
+      },
+      "eligibility_primary": {
+        "MALFORMED_OR_UNRENDERABLE": 1231,
+        "STRUCTURAL_CALL": 56111
+      },
+      "eligible_by_tools": {},
+      "exchange_shape": {
+        "leading_system_message": 0,
+        "single_exchange": 57342,
+        "system_text_in_metadata": 0
+      },
+      "final_turn": {
+        "final_assistant_structured_call": 57342
+      },
+      "invariants": {
+        "adapter_key_not_manifest": 0,
+        "adapter_version_not_authoritative": 0,
+        "behavior_label_present": 0,
+        "rows": 57342,
+        "structure_block_disagrees_with_messages": 0
+      },
+      "manifest_sha256": "ae630f88f0dd42f6a05c48b5b2a38a21444f87b68043790b2ff3f2603d9d2756",
+      "rejected_by_reason": {
+        "ADAPTER_DUPLICATE_TOOL_NAME": 259,
+        "XLAM_TYPE_UNSUPPORTED_CALLABLE": 538,
+        "XLAM_TYPE_UNSUPPORTED_SET": 286,
+        "XLAM_TYPE_UNSUPPORTED_UNION": 1225
+      },
+      "residual_call_markers_final_prose_turn": {},
+      "residual_call_markers_prose_turns": {},
+      "residual_special_tokens_prose_turns": {},
+      "residual_textual_calls_prose_turns_by_parseability": {},
+      "structured_call_turns": {
+        "structured_call_turns": 57342,
+        "structured_call_turns_whose_content_also_holds_call_text": 0,
+        "structured_call_turns_whose_content_starts_with_bracket": 0,
+        "structured_call_turns_with_nonempty_content": 0
+      },
+      "tools": {
+        "tools_available": 57342
+      },
+      "trajectory_issues": {
+        "ARG_TYPE": 1231,
+        "records_with_any_issue": 1231
+      }
+    }
+  },
+  "statement": "Structural facts about the normalization-v3 pre-classifier artifact. Counts only; no record text. No decision heuristic (refusal, question, direct-answer cue) was run.",
+  "units": {
+    "call_conservation": "accepted records",
+    "counts, exchange_shape, final_turn, tools, trajectory_issues, eligibility_*": "records",
+    "residual_*, structured_call_turns": "assistant turns (prose turns: no tool_calls)"
+  }
+}

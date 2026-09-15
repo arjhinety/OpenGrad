@@ -1,0 +1,204 @@
+# Canonical-v3 source-and-adapter manifest (Study 002, blocker B-1 of
+# docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md).
+#
+# This file is the single authoritative statement of WHICH sources canonical-v3 reads and HOW each
+# is turned into the canonical IR. It is read by `opengrad.data.normalization_v3`, which refuses to
+# build if any value here disagrees with the code or the raw bytes:
+#   - raw_artifact.sha256 must equal the cached upstream file byte for byte;
+#   - adapter.key must be registered in `opengrad.data.adapters.ADAPTERS`, its function name must be
+#     adapter.function, and every row it emits must carry adapter.row_label;
+#   - the version fields must equal `opengrad.data.versions` (the authoritative constants).
+#
+# What it is NOT: it is not the canonical-v3 training corpus. It defines the pre-classifier
+# `normalization-v3` artifact only. No decision classifier has run, no behaviour label exists in
+# the artifact, and no mixture, balancing or C1 membership decision follows from this file.
+#
+# Why these four sources: every Study 002 arm is Canonical-v2-derived (04-ARM-MATRIX.md), and
+# canonical-v2-final (configs/releases/toolpolicy_canonical_v2_final.yaml) contains exactly these
+# four. LoopTool and BUTTON are listed under `excluded_sources` with the reason.
+#
+# Why each adapter is chosen, not inherited: the v2 manifests record `adapter_version: 1.0.2`
+# whichever adapter ran (21-C1-IMPLEMENTATION-STATUS.md, phase 1), so the adapter of canonical-v2
+# cannot be read from them. The choices below are made from the current repository code and are
+# authoritative for canonical-v3. normalization-v1 is not a representation of canonical-v3 and
+# nothing here is inferred from it.
+
+manifest_id: toolpolicy-canonical-v3-sources
+manifest_version: 1
+status: PRE_CLASSIFIER
+normalization_version: normalization-v3
+versions:
+  adapter_version: "2.0.0"
+  schema_normalization_version: source-schema-normalization-v1
+  canonical_schema_version: tool_use_ir_v1
+  supervision_contract_version: supervision_contract_v1
+decision_classifier: NOT_APPLIED
+behavior_labels: ABSENT
+membership_basis: >-
+  The four sources of toolpolicy_canonical_v2_final. Every Study 002 arm is Canonical-v2-derived
+  (04-ARM-MATRIX.md), so canonical-v3 adds no source and drops none.
+dedup: first occurrence of a canonical_hash (tools + messages) within one source wins, as in
+  opengrad.data.materialize; no cross-source dedup.
+
+sources:
+  - name: xlam
+    dataset_id: xlam-function-calling-60k
+    hf_repository: Salesforce/xlam-function-calling-60k
+    upstream_revision: 26d14ebfe18b1f7b524bd39b404b50af5dc97866
+    split: train
+    raw_artifact:
+      path: .cache/normalization/raw/xlam_function_calling_60k.parquet
+      sha256: bec51a6997da688a3ad306a4a29b0c2a29ad59600e4ce6f1dfac9ae4addc527b
+      rows: 60000
+      note: >-
+        The upstream rows themselves. canonical-v2-final re-normalized the 59,370-record v1
+        derivative instead (its xLAM source_rows is 59,370); canonical-v3 reads the upstream rows.
+    adapter:
+      key: xlam
+      function: adapt_xlam
+      row_label: xlam_function_calling_60k_v2
+      tool_schema_path: opengrad.data.xlam_types.normalize_xlam_tools (xLAM's own property-map parser)
+    schema_translation:
+      applied: false
+      reason: >-
+        xLAM parameters are a property-definition map, handled by xlam_types.py with its own reason
+        codes. 21 (item 5) keeps that parser out of C1 because changing it alters xLAM semantics.
+    structured_tool_calls: produced (every `answers` entry with a name becomes a tool_calls entry)
+    textual_call_syntax: none; calls arrive as JSON objects in `answers`, never in prose
+    tool_result_messages: none exist upstream (next-call prediction corpus; CALL_PREDICTION contract)
+    special_token_cleaning: none required
+    multi_turn: not present upstream (query -> answers)
+    system_message: none
+    study002_c1_training: eligible
+    pdet_coverage_v1_sampling:
+      layer_a_structural_call: eligible
+      layer_b_prose: not_eligible
+      reason: every accepted record ends in a structured call, so none is a tool-free exchange (measured)
+
+  - name: glaive
+    dataset_id: glaive-function-calling-v2
+    hf_repository: glaiveai/glaive-function-calling-v2
+    upstream_revision: e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac
+    split: train
+    raw_artifact:
+      path: .cache/normalization/raw/glaive_default_train.parquet
+      sha256: 7e7e32f0466699513b38923bc4991858e192c9274df22e243b9e77eb2775b6e8
+      rows: 112960
+    adapter:
+      key: glaive_v2
+      function: adapt_glaive_v2
+      row_label: glaive_function_calling_v2_v2
+      rejected_alternative:
+        key: glaive
+        function: adapt_glaive
+        reason: >-
+          adapt_glaive requires a closing </functioncall> that this revision never has, so it parses
+          zero calls, leaves the marker as assistant text and emits an orphaned tool result
+          (0 structured-call records and 50,900 SEM_ORPHAN_RESULT rejections on identical input,
+          configs/releases/toolpolicy_canonical_v2.yaml). It is kept only so v1 stays reproducible.
+    schema_translation:
+      applied: false
+      reason: >-
+        Glaive tools are JSON Schema embedded in the system text. The translation targets
+        Python-annotation vocabularies; measured recovery on Glaive is 0 (21, phase 2).
+    structured_tool_calls: produced
+    textual_call_syntax: >-
+      Every `<functioncall>` block is parsed into a structured tool_calls entry (extract_glaive_calls,
+      tolerant of the missing terminator and of single-quoted argument strings) and the marker is
+      removed from the assistant content. A block that cannot be parsed raises, so the record is
+      rejected; a textual Glaive call is never kept as prose.
+    tool_result_messages: retained (FUNCTION RESPONSE -> tool message answering the latest call)
+    special_token_cleaning: >-
+      `<|endoftext|>` replaced by a space; leading ':' and whitespace stripped from assistant turns.
+    multi_turn: retained in full (every USER/ASSISTANT/FUNCTION RESPONSE turn)
+    system_message: kept in metadata.system, not in messages; tools are extracted from it
+    study002_c1_training: eligible
+    pdet_coverage_v1_sampling:
+      layer_a_structural_call: eligible
+      layer_b_prose: eligible
+
+  - name: toolace
+    dataset_id: toolace
+    hf_repository: Team-ACE/ToolACE
+    upstream_revision: 6bda777c88d21e5a204703c1ee45597a8fa4f734
+    split: train
+    raw_artifact:
+      path: .cache/normalization/raw/toolace_default_train.parquet
+      sha256: 7a7a6a2c3b1003c789bbabb975335a0a8f843ae7a7df28134f7d242b301ab15f
+      rows: 11300
+    adapter:
+      key: toolace
+      function: adapt_toolace
+      row_label: toolace_v1
+    schema_translation:
+      applied: false
+      reason: >-
+        ToolACE tools are JSON Schema embedded in the system text; measured translation recovery is
+        0 (21, phase 2). Its losses are keyword-class rejections that translation must not fix.
+    structured_tool_calls: produced
+    textual_call_syntax: >-
+      An assistant turn that starts with '[' and contains '(' is parsed as bracket call syntax into
+      tool_calls; unparseable syntax raises INVALID_ARGUMENT_SYNTAX and the record is rejected.
+      KNOWN DEFECT, recorded not repaired: the adapter removes the bracket text from `content` only
+      when it contains "[Function", so a parsed turn normally keeps its call BOTH as tool_calls AND
+      as the original bracket text in `content` (measured: 9,785 of 9,786 call turns in
+      normalization-v3). No tool-free record is affected, so the prose classifier's input is not;
+      structural-call records and any training target rendered from them are.
+    tool_result_messages: retained (tool turns answer the latest call)
+    special_token_cleaning: none
+    multi_turn: retained in full
+    system_message: kept as the first message; tools are extracted from it
+    study002_c1_training: eligible
+    pdet_coverage_v1_sampling:
+      layer_a_structural_call: eligible
+      layer_b_prose: eligible
+
+  - name: when2call
+    dataset_id: when2call
+    hf_repository: nvidia/When2Call
+    upstream_revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    hf_config: train_sft
+    # The registry allowlists split `train` (registry/datasets.yaml), as it did for the v2-final build.
+    # normalization-v1 recorded `train_sft`, the config name, before that allowlist existed.
+    split: train
+    raw_artifact:
+      path: .cache/normalization/raw/when2call_train_sft_train.parquet
+      sha256: f992975fe9da9fcb223b2b6ea124771d87016d802a0b1e74e98168376df07ab3
+      rows: 15000
+    adapter:
+      key: when2call
+      function: adapt_when2call
+      row_label: when2call_v1
+    schema_translation:
+      applied: true
+      function: opengrad.data.source_schema.translate_source_tools
+      reason: >-
+        When2Call tool schemas are Python/typing annotations ("str, optional", "List[int]"); without
+        translation 8,445 rows fail SCH_UNSUPPORTED_TYPE (21, phase 2). Translation runs on the raw
+        `tools` field before the adapter; raw_record_hash and the upstream id are computed on the
+        untouched raw row.
+    structured_tool_calls: >-
+      produced only from a string conversation with <TOOLCALL> markers; the train_sft split stores
+      messages as a list, which the adapter keeps verbatim
+    textual_call_syntax: kept verbatim in the message list; measured 0 <TOOLCALL> markers in train_sft
+    tool_result_messages: none exist in train_sft
+    special_token_cleaning: none
+    multi_turn: retained as stored
+    system_message: none
+    study002_c1_training: eligible
+    pdet_coverage_v1_sampling:
+      layer_a_structural_call: not_eligible
+      layer_b_prose: not_eligible
+      reason: P-DET-v1 is drawn from When2Call; keeping it out keeps the two populations separate (30, section 6)
+
+excluded_sources:
+  - name: looptool
+    dataset_id: looptool-23k
+    reason: >-
+      Not in canonical-v2-final ("upstream source was not located" at the v2-final build), so
+      including it would give canonical-v3 a source no Study 002 arm is derived from.
+  - name: button
+    dataset_id: button
+    reason: >-
+      Not in canonical-v2-final (upstream gated, HTTP 401); every record also ends in prose after a
+      tool result, which the classifier input contract excludes.

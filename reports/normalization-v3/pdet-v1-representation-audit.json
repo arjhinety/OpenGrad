@@ -1,0 +1,55 @@
+{
+  "artifact_kind": "PDET_V1_REPRESENTATION_AUDIT",
+  "definition_structurally_equivalent": "present in normalization-v3 (not rejected or deduplicated), user message and assistant response byte-identical, tools identical or different only by source-schema-normalization-v1, and eligible under prose-decision-input-v1",
+  "items": 581,
+  "metadata_differences_not_visible_to_the_classifier": {
+    "adapter_version": "v1 rows 1.0.0 (record) / 1.0.2 (manifest); v3 rows 2.0.0",
+    "behavior": "v1 rows carry a message-shape ANSWER default; v3 rows carry none",
+    "split": "normalization-v1 recorded train_sft (the HF config); normalization-v3 records train (the registry-allowlisted split)"
+  },
+  "normalization_v3_fingerprint": "2bd384929a5b870bc3836729c808362c60d0d98717f086587e12af6608104aaa",
+  "not_structurally_equivalent": [
+    {
+      "pdet_id": "when2call-sft:088d349e8d3507c0780d5ac559e03eea0d5c6bc88d2c2b30d89d3af94839cf9d",
+      "presence": "rejected:SRC_SCHEMA_MULTI_TYPE_UNION"
+    },
+    {
+      "pdet_id": "when2call-sft:12889fc214119593c4b33d8027ea43c09a199567a077c60344fcc6e99544ab37",
+      "presence": "rejected:SRC_SCHEMA_MULTI_TYPE_UNION"
+    },
+    {
+      "pdet_id": "when2call-sft:18ecd285a84a73cdb3771c770c9fbe7a3cbc88c9d1a8972dd45e29b42b865b59",
+      "presence": "rejected:SRC_SCHEMA_MULTI_TYPE_UNION"
+    },
+    {
+      "pdet_id": "when2call-sft:990289e0e0c6bb19229fa5aa168d46a44bf7c51ef51e30e402900dd7909a4cad",
+      "presence": "rejected:SRC_SCHEMA_MULTI_TYPE_UNION"
+    },
+    {
+      "pdet_id": "when2call-sft:99319dc22bfe7b62a5002e75a7537a6922e75610d96753f01e31a3eb7c93a30c",
+      "presence": "rejected:SRC_SCHEMA_UNREPRESENTABLE_TYPE"
+    },
+    {
+      "pdet_id": "when2call-sft:a1a6fdfc0e2e4670363cb6951418c9c1f79630d373cf77c0890182eac77d4cc8",
+      "presence": "rejected:SRC_SCHEMA_MULTI_TYPE_UNION"
+    }
+  ],
+  "pdet_v1_manifest_sha256": "a10bcb7866012aed35a04821f164a8165de2c625de8f351d6c68c5f836eae15c",
+  "pdet_v1_population_sha256": "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b",
+  "statement": "An audit, not a migration. P-DET-v1 is unchanged. Each frozen item is matched by raw_record_hash to normalization-v3 When2Call and compared on what the classifier input contract makes visible.",
+  "summary": {
+    "assistant_response:identical": 575,
+    "canonical_hash:different": 474,
+    "canonical_hash:identical": 101,
+    "eligibility:ELIGIBLE": 575,
+    "presence:present": 575,
+    "presence:rejected:SRC_SCHEMA_MULTI_TYPE_UNION": 5,
+    "presence:rejected:SRC_SCHEMA_UNREPRESENTABLE_TYPE": 1,
+    "structurally_equivalent": 575,
+    "tools:identical": 101,
+    "tools:schema_translation_only": 474,
+    "upstream_id:identical": 575,
+    "user_message:identical": 575
+  },
+  "unit": "P-DET-v1 items"
+}

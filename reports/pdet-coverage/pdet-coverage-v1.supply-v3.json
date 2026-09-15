@@ -1,0 +1,154 @@
+{
+  "artifact_kind": "PDET_COVERAGE_SUPPLY_V3",
+  "classifier_input_contract": "prose-decision-input-v1",
+  "coverage_against_quota": {
+    "M": {
+      "quota": 60,
+      "shortage": 0,
+      "supply_distinct_skeletons_all_layer_b_sources": 725
+    },
+    "P1": {
+      "quota": 60,
+      "shortage": 0,
+      "supply_distinct_skeletons_all_layer_b_sources": 423
+    },
+    "P2": {
+      "quota": 30,
+      "shortage": 0,
+      "supply_distinct_skeletons_all_layer_b_sources": 556
+    },
+    "Q": {
+      "quota": 60,
+      "shortage": 0,
+      "supply_distinct_skeletons_all_layer_b_sources": 268
+    },
+    "R": {
+      "quota": 60,
+      "shortage": 0,
+      "supply_distinct_skeletons_all_layer_b_sources": 10902
+    },
+    "X": {
+      "quota": 60,
+      "shortage": 54,
+      "supply_distinct_skeletons_all_layer_b_sources": 6
+    }
+  },
+  "layer_b_sources": [
+    "glaive",
+    "toolace"
+  ],
+  "normalization_v3_fingerprint": "2bd384929a5b870bc3836729c808362c60d0d98717f086587e12af6608104aaa",
+  "preregistration": "docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md",
+  "sources": {
+    "glaive": {
+      "eligible_records": 14303,
+      "strata": {
+        "M": {
+          "distinct_prompts": 14,
+          "distinct_responses": 19,
+          "distinct_skeletons": 19,
+          "records": 19,
+          "tools_offered": 17
+        },
+        "P1": {
+          "distinct_prompts": 14,
+          "distinct_responses": 58,
+          "distinct_skeletons": 58,
+          "records": 64,
+          "tools_offered": 64
+        },
+        "P2": {
+          "distinct_prompts": 65,
+          "distinct_responses": 65,
+          "distinct_skeletons": 65,
+          "records": 65,
+          "tools_offered": 0
+        },
+        "Q": {
+          "distinct_prompts": 93,
+          "distinct_responses": 102,
+          "distinct_skeletons": 102,
+          "records": 105,
+          "tools_offered": 20
+        },
+        "R": {
+          "distinct_prompts": 210,
+          "distinct_responses": 10913,
+          "distinct_skeletons": 10675,
+          "records": 14050,
+          "tools_offered": 14049
+        },
+        "X": {
+          "distinct_prompts": 0,
+          "distinct_responses": 0,
+          "distinct_skeletons": 0,
+          "records": 0,
+          "tools_offered": 0
+        }
+      }
+    },
+    "toolace": {
+      "eligible_records": 1972,
+      "strata": {
+        "M": {
+          "distinct_prompts": 706,
+          "distinct_responses": 706,
+          "distinct_skeletons": 706,
+          "records": 706,
+          "tools_offered": 704
+        },
+        "P1": {
+          "distinct_prompts": 371,
+          "distinct_responses": 367,
+          "distinct_skeletons": 365,
+          "records": 371,
+          "tools_offered": 371
+        },
+        "P2": {
+          "distinct_prompts": 491,
+          "distinct_responses": 491,
+          "distinct_skeletons": 491,
+          "records": 493,
+          "tools_offered": 0
+        },
+        "Q": {
+          "distinct_prompts": 166,
+          "distinct_responses": 166,
+          "distinct_skeletons": 166,
+          "records": 168,
+          "tools_offered": 118
+        },
+        "R": {
+          "distinct_prompts": 227,
+          "distinct_responses": 227,
+          "distinct_skeletons": 227,
+          "records": 228,
+          "tools_offered": 79
+        },
+        "X": {
+          "distinct_prompts": 6,
+          "distinct_responses": 6,
+          "distinct_skeletons": 6,
+          "records": 6,
+          "tools_offered": 3
+        }
+      }
+    }
+  },
+  "statement": "Eligible pools per preregistered stratum, over normalization-v3 under prose-decision-input-v1. Strata are sampling strata, not labels. Nothing was sampled. Draw-time exclusions of the draft's section 9 are not applied.",
+  "status": "SUPPLY_ANALYSIS_NOT_GOLD_NOT_A_DRAW",
+  "stratum_predicates": {
+    "file": "scripts/audit_pdet_coverage_supply.py",
+    "priority": [
+      "X",
+      "M",
+      "R",
+      "Q",
+      "P1",
+      "P2"
+    ],
+    "proxy_clean_applied": false,
+    "sha256_lf": "466ae7874dd82b53eed9567c7c8f45d94e4601924df07b8882a29e77c4804eb1"
+  },
+  "unit": "eligible normalization-v3 records (tool-free single exchanges under the contract)"
+}
