@@ -417,7 +417,9 @@ The raw subgroups of §9.2 are larger than these categories for two reasons, mea
 **Proposed, not added.** If canonical-v3 is later preregistered for Study 002 or 003, the recovered records
 should enter as their own measurable factor, never silently inside another arm. That means an arm or
 ablation that differs from its reference only by including the 8,424 recovered `CALL_PREDICTION` records.
-Adding it requires a numbered amendment decided by the study owner.
+Adding it requires a numbered amendment decided by the study owner. **Deferred by the study owner
+(2026-09-16)** until canonical-v3 enters a study, because the classifier and the mixture it would depend on do
+not exist yet.
 
 ### 9.7 Uncertainty
 

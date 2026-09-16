@@ -559,8 +559,8 @@ and their hashes are recorded in the table above. Next:
 schema inspection printed the key names, not the values, of the first record in the population file: a
 layer A item. That output included two argument names of its structured call, which are also its tool's
 parameter names. No user message, response, value, id, source or stratum was printed. The item is in
-`pdet-coverage-v1-routing`. Whether it counts as exposed (`EXPOSED_WORKED_EXAMPLE`, §9) is the study owner's
-decision at annotation time.
+`pdet-coverage-v1-routing`. **The study owner decided (2026-09-16) not to exclude it:** parameter names carry no
+label cue and are shown on screen when the item is annotated. It stays metric-eligible.
 
 **Exposure disclosure.** Two pieces of pool-adjacent text reached the study owner's session during the
 review, before annotation: §7.2's quoted refusal template (now removed from this document), and, in one
