@@ -12,15 +12,13 @@
   "completion_state": "COMPLETE",
   "composite": {
     "items_by_kind": {
-      "human": 11,
-      "model": 570
+      "human": 581
     },
     "items_by_session": {
-      "model-a": 570,
-      "pass-a": 11
+      "pass-a": 581
     },
-    "overlap_disagreements": 0,
-    "overlapping_items": 0,
+    "overlap_disagreements": 11,
+    "overlapping_items": 570,
     "priority": [
       "pass-a",
       "model-a"
@@ -28,19 +26,239 @@
     "rule": "each item takes its label from the first session, in this order, that labeled it"
   },
   "config_path": "configs/annotation/pdet-v1.yaml",
+  "definition_history": [
+    {
+      "annotations_at_change": 581,
+      "document": "docs/research/study-002/29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md",
+      "entry_sha256": "c95057bf2ce1bc7083b81a2df0316b003c6dd3d66c578f06010409490f0ecf45",
+      "new_definition": {
+        "adjudication_fields": [
+          {
+            "in_adjudication": true,
+            "key": "decision_tree_step",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "required": true,
+            "type": "select"
+          }
+        ],
+        "annotation_schema_version": "pdet-annotation-v1",
+        "candidates": [],
+        "constraints": [
+          {
+            "allowed": null,
+            "field": "ambiguity_status",
+            "forbidden": [
+              "NONE"
+            ],
+            "when_label_in": [
+              "UNKNOWN"
+            ],
+            "when_label_not_in": null
+          },
+          {
+            "allowed": [
+              "NONE"
+            ],
+            "field": "ambiguity_status",
+            "forbidden": null,
+            "when_label_in": null,
+            "when_label_not_in": [
+              "UNKNOWN"
+            ]
+          }
+        ],
+        "disagreement_keys": [
+          "label",
+          "ambiguity_status"
+        ],
+        "extra_fields": [
+          {
+            "in_adjudication": true,
+            "key": "ambiguity_status",
+            "options": [
+              "NONE",
+              "AMBIGUOUS_TWO_MODES",
+              "NON_SUBSTANTIVE",
+              "MISSING_CONTEXT",
+              "EMPTY_TOOLSET"
+            ],
+            "required": true,
+            "type": "select"
+          },
+          {
+            "in_adjudication": false,
+            "key": "annotator_rationale",
+            "options": [],
+            "required": false,
+            "type": "text"
+          },
+          {
+            "in_adjudication": true,
+            "key": "boundary_rule_cited",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "none"
+            ],
+            "required": false,
+            "type": "select"
+          }
+        ],
+        "labels": [
+          "CALL",
+          "DIRECT",
+          "CLARIFY",
+          "UNSUPPORTED",
+          "UNKNOWN"
+        ],
+        "scale": null,
+        "source_id_field": "pdet_id",
+        "task_id": "pdet-v1",
+        "task_type": "single_label",
+        "unknown_labels": [
+          "UNKNOWN"
+        ],
+        "version": "1"
+      },
+      "new_sha256": "c00eab8d903cfbf5b3f033763306d063183f5e8c8a22f6ed81e52489695c958e",
+      "prev_entry_sha256": null,
+      "previous_definition": {
+        "adjudication_fields": [
+          {
+            "in_adjudication": true,
+            "key": "decision_tree_step",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "required": true,
+            "type": "select"
+          }
+        ],
+        "annotation_schema_version": "pdet-annotation-v1",
+        "candidates": [],
+        "constraints": [
+          {
+            "allowed": null,
+            "field": "ambiguity_status",
+            "forbidden": [
+              "NONE"
+            ],
+            "when_label_in": [
+              "UNKNOWN"
+            ],
+            "when_label_not_in": null
+          },
+          {
+            "allowed": [
+              "NONE"
+            ],
+            "field": "ambiguity_status",
+            "forbidden": null,
+            "when_label_in": null,
+            "when_label_not_in": [
+              "UNKNOWN"
+            ]
+          }
+        ],
+        "disagreement_keys": [
+          "label",
+          "ambiguity_status"
+        ],
+        "extra_fields": [
+          {
+            "in_adjudication": true,
+            "key": "ambiguity_status",
+            "options": [
+              "NONE",
+              "AMBIGUOUS_TWO_MODES",
+              "NON_SUBSTANTIVE",
+              "MISSING_CONTEXT",
+              "EMPTY_TOOLSET"
+            ],
+            "required": true,
+            "type": "select"
+          },
+          {
+            "in_adjudication": false,
+            "key": "annotator_rationale",
+            "options": [],
+            "required": true,
+            "type": "text"
+          },
+          {
+            "in_adjudication": true,
+            "key": "boundary_rule_cited",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "none"
+            ],
+            "required": false,
+            "type": "select"
+          }
+        ],
+        "labels": [
+          "CALL",
+          "DIRECT",
+          "CLARIFY",
+          "UNSUPPORTED",
+          "UNKNOWN"
+        ],
+        "scale": null,
+        "source_id_field": "pdet_id",
+        "task_id": "pdet-v1",
+        "task_type": "single_label",
+        "unknown_labels": [
+          "UNKNOWN"
+        ],
+        "version": "1"
+      },
+      "previous_sha256": "0f060bb395bfb0bc24cea8091fb9916fe62a717d5a0bc09b61e8004536a4e640",
+      "recorded_at": "2026-09-15T08:44:48.399Z",
+      "task_id": "pdet-v1"
+    }
+  ],
   "design": "composite",
   "disagreements": {
     "adjudicated": 0,
-    "count": 0,
+    "count": 11,
     "file": "pdet-v1.disagreements.jsonl",
     "keys": [
       "label",
       "ambiguity_status"
     ],
-    "metric_eligible": 0,
-    "unresolved": 0
+    "metric_eligible": 10,
+    "unresolved": 11
   },
-  "exported_at": "2026-09-15T08:09:58.121Z",
+  "exported_at": "2026-09-16T07:29:04.047Z",
   "frozen": false,
   "gold": null,
   "incomplete_reasons": [],
@@ -86,9 +304,9 @@
   "model_assistance": false,
   "outputs": {
     "audit/pdet-v1.history.arjhinety.pass-a.jsonl": {
-      "bytes": 13069,
-      "records": 12,
-      "sha256": "06c852c14e69266f0e29a337fb94843fba72312e763b2ae7cdd6b075b7b9cffb"
+      "bytes": 608640,
+      "records": 595,
+      "sha256": "154bab5ec441cd57721d11ae4fd3dde2c726778363dc1ec312fc1624d7d814a8"
     },
     "audit/pdet-v1.history.model.claude-opus-5.model-a.jsonl": {
       "bytes": 776724,
@@ -96,9 +314,9 @@
       "sha256": "6da810a0044644041db7a962e56ed44e64f66246e9aae312cae1d5d7927627ce"
     },
     "pdet-v1.annotations.arjhinety.pass-a.jsonl": {
-      "bytes": 9391,
-      "records": 11,
-      "sha256": "7e29bb33f0200626fec758f3985468851d996396f7a94cc7f2ed386b51a54f34"
+      "bytes": 471398,
+      "records": 581,
+      "sha256": "c5f52615976d020e38b87a22a730a10cc23908aeffbef2bd6c77bd4461270e1c"
     },
     "pdet-v1.annotations.model.claude-opus-5.model-a.jsonl": {
       "bytes": 530616,
@@ -106,9 +324,9 @@
       "sha256": "6fb1f6bef662425c9ab34924dba2b3797b67ed5139f6b8cd37a4aef9b46b35aa"
     },
     "pdet-v1.disagreements.jsonl": {
-      "bytes": 0,
-      "records": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "bytes": 7317,
+      "records": 11,
+      "sha256": "c840287e8c081266f0a0d16d4c17a05848cb27a310d884c3bfc06774bacd98c5"
     }
   },
   "package_dir": "reports/pdet/annotation/wip",
@@ -130,23 +348,23 @@
       "created_at": "2026-09-15T06:55:42.463Z",
       "file": "pdet-v1.annotations.arjhinety.pass-a.jsonl",
       "flagged": 0,
-      "history_entries": 12,
+      "history_entries": 595,
       "history_file": "audit/pdet-v1.history.arjhinety.pass-a.jsonl",
-      "history_head_sha256": "912294f78079e39e1828fc4edb93bcf6442a0cef16a9be1fd24cd651840e8ee1",
+      "history_head_sha256": "efec05db364bd260b98fd8e879e73621fad987064d20b8eae4f4cc130cc08fee",
       "label_counts": {
-        "CLARIFY": 6,
-        "UNKNOWN": 1,
-        "UNSUPPORTED": 4
+        "CLARIFY": 281,
+        "UNKNOWN": 2,
+        "UNSUPPORTED": 298
       },
-      "labeled": 11,
-      "labeled_metric_eligible": 9,
-      "relabels": 1,
+      "labeled": 581,
+      "labeled_metric_eligible": 578,
+      "relabels": 14,
       "role": "annotator",
       "session_id": "pass-a",
       "skipped": 0,
       "undos": 0,
-      "unknown": 1,
-      "unlabeled": 570
+      "unknown": 2,
+      "unlabeled": 0
     },
     {
       "annotator_id": "model.claude-opus-5",
@@ -181,7 +399,7 @@
     "sha256": "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b"
   },
   "statement": "Labels in sessions whose annotator_kind is 'model' were produced by the language model named under model_annotators, following the pinned procedure recorded there; they are model judgments, not human annotations. Labels in human sessions were entered through the annotation interface under the annotator and adjudicator identifiers recorded in this package; those identifiers are declared, not authenticated. The interface displays no classifier prediction, model suggestion or pre-filled label to human annotators, and the source population was read but never written. Every change is in the hash-chained change logs listed under outputs. Hashes detect changes to the package; they are not signatures.",
-  "task_definition_sha256": "0f060bb395bfb0bc24cea8091fb9916fe62a717d5a0bc09b61e8004536a4e640",
+  "task_definition_sha256": "c00eab8d903cfbf5b3f033763306d063183f5e8c8a22f6ed81e52489695c958e",
   "task_id": "pdet-v1",
   "task_type": "single_label",
   "task_version": "1"
