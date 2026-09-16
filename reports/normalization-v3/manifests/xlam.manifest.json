@@ -5,7 +5,7 @@
     "adapter_function": "opengrad.data.adapters.adapt_xlam",
     "adapter_key": "xlam",
     "adapter_row_label": "xlam_function_calling_60k_v2",
-    "adapter_version": "2.0.0",
+    "adapter_version": "2.1.0",
     "canonical_schema_version": "tool_use_ir_v1",
     "max_rows": null,
     "normalization_version": "normalization-v3",
@@ -14,7 +14,7 @@
     "shard_size": 10000,
     "supervision_contract_version": "supervision_contract_v1"
   },
-  "content_hash": "6da41e1e2b03fa75044f49bb0e18c64fd9749393ab97c6eb05ed535db4afe87c",
+  "content_hash": "8308dec257bc9e36e5872a91bf70e52ed36f85ec5bb0d413f70c3f372930f9a9",
   "counts": {
     "accepted": 57342,
     "duplicates": 350,
@@ -41,32 +41,32 @@
     {
       "file": "shard-000000.parquet",
       "rows": 10000,
-      "sha256": "b8b95d4193581451617d434d43d0404165482a0ba3b536cab35ee65a5aea4e4a"
+      "sha256": "f7cfe0ca315a67393d462c5feaa088ecb9aa4eb749dc4d7929562e291200680e"
     },
     {
       "file": "shard-000001.parquet",
       "rows": 10000,
-      "sha256": "c0eb57f84c52a7b4ad99b51df19fa47d5f465d117549d425868148020e621c5d"
+      "sha256": "21fe705830926015491267cf526f814ea6f9468bbb7b09181b7ffc26781a2a31"
     },
     {
       "file": "shard-000002.parquet",
       "rows": 10000,
-      "sha256": "539822fb96bb392dfac832d595b1e0e610cda017ce2646c9806b4ce5b9dc7e70"
+      "sha256": "db94fbc503ddd7b31db76ac99fd869d0fa549a6b2aba34e9bf14ead211439dbe"
     },
     {
       "file": "shard-000003.parquet",
       "rows": 10000,
-      "sha256": "d55bf1f339d2316e710ebdd1f9721f45a2f1593b12cf31cb84c6950c5e316022"
+      "sha256": "d212e4d90b8d8db930805a4558020445d941fc8d7d2e7dd2aff91ee35d8f6be9"
     },
     {
       "file": "shard-000004.parquet",
       "rows": 10000,
-      "sha256": "9e0c559abd268ddddeba595978cb18f1918c2b863e2cb3fd563b0e95cd00e334"
+      "sha256": "083e9cbbde2803c5f5070519852cf6a64cc090d8c24e514b99b45ba69f1e02cd"
     },
     {
       "file": "shard-000005.parquet",
       "rows": 7342,
-      "sha256": "b786a0d7df1537a92ce89e19227c3a0aee2baab5641c4f8034296e8dc1216ca5"
+      "sha256": "f05330770a9622fb05fb8365200a381cd14ca0ccc49371f9f319c2a4262c9e17"
     }
   ],
   "source": {

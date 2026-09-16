@@ -1,6 +1,6 @@
 # 31 — Canonical-v3 sources and the `normalization-v3` pre-classifier artifact
 
-**Status: BUILT, 2026-09-15.** This resolves blocker **B-1** of
+**Status: BUILT, 2026-09-15; rebuilt 2026-09-16 under adapter version `2.1.0` (ToolACE repair, §5).** This resolves blocker **B-1** of
 [30](30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md). It fixes which sources canonical-v3 reads and how each is
 adapted, and it builds the representation the future prose decision classifier will receive.
 
@@ -13,11 +13,11 @@ It is **not** the canonical-v3 training corpus:
 
 | | |
 |---|---|
-| Source-and-adapter manifest | `configs/releases/toolpolicy_canonical_v3_sources.yaml`, sha256 (LF) `a38f95d71d96967ffc7bc91810b6a3ab09f0223a958fb41bde98f3a53861e215` |
+| Source-and-adapter manifest | `configs/releases/toolpolicy_canonical_v3_sources.yaml`, sha256 (LF) `cc40f64eaa1d6dbff618e64d2ad3f4b7fe46b053d3db31e67bcdf1d272ef0b6b` |
 | Builder | `src/opengrad/data/normalization_v3.py` (`python -m opengrad.data.normalization_v3 --build` / `--verify`) |
 | Artifact | `data/processed/normalization-v3/` (git-ignored data, like v1 and v2) |
-| **Fingerprint** | **`2bd384929a5b870bc3836729c808362c60d0d98717f086587e12af6608104aaa`** |
-| Top manifest sha256 | `f7a20b04968ff5bb183c4f7d3f4c44ed28d7bddaee9ce5cc10d3056b2617b759` |
+| **Fingerprint** | **`56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3`** (adapter version `2.1.0`; supersedes `2bd38492…`, built under `2.0.0` before the ToolACE repair) |
+| Top manifest sha256 | `9ff1f9d658586c2818283b127fc46c92464cd186ec200626c23001049d74e88f` |
 | Tracked anchors | `reports/normalization-v3/manifests/` (copies of all five manifests), `normalization-v3.determinism.json`, `normalization-v3.structural-audit.json`, `pdet-v1-representation-audit.json` |
 | Tests | `tests/data/test_normalization_v3.py` |
 
@@ -30,7 +30,7 @@ The four sources of canonical-v2-final. Every Study 002 arm is Canonical-v2-deri
 |---|---|---|---|---|
 | xLAM | `26d14ebf…97866` | `bec51a69…c527b` (60,000 rows) | `xlam` → `adapt_xlam` | no (xLAM's own `xlam_types` parser) |
 | Glaive | `e7f4b645…23221ac` | `7e7e32f0…6b8` (112,960) | **`glaive_v2` → `adapt_glaive_v2`** | no (JSON Schema already) |
-| ToolACE | `6bda777c…4f734` | `7a7a6a2c…ab15f` (11,300) | `toolace` → `adapt_toolace` | no (JSON Schema already) |
+| ToolACE | `6bda777c…4f734` | `7a7a6a2c…ab15f` (11,300) | **`toolace_v2` → `adapt_toolace_v2`** | no (JSON Schema already) |
 | When2Call | `0582f774…ace53` | `f992975f…07ab3` (15,000) | `when2call` → `adapt_when2call` | **yes** (`translate_source_tools`, before the adapter) |
 
 **Excluded:**
@@ -50,7 +50,7 @@ Per source, the manifest also records the remaining provenance fields:
 
 Every row carries its provenance:
 - `adapter`, `adapter_key` and `adapter_function`;
-- `adapter_version` `2.0.0`, including inside the supervision block;
+- `adapter_version` `2.1.0`, including inside the supervision block;
 - `schema_normalization_version`;
 - `schema_translation`, with every change it made;
 - `normalization_version`;
@@ -90,7 +90,8 @@ record `adapter_version: 1.0.2`.
 
 **Determinism.** Two independent full builds, into different directories, gave the same fingerprint, and
 **all 29 files are byte-identical** (`normalization-v3.determinism.json`). `--verify` re-hashes every shard
-and row and re-checks every row's provenance. It passes on both builds.
+and row and re-checks every row's provenance. It passes on both builds. The check was repeated in full
+for the `2.1.0` rebuild.
 
 ## 3. Structural audit (per source)
 
@@ -188,20 +189,39 @@ All four hold with 0 violations.
 
 **Consequence for P-DET-COVERAGE-v1:** Glaive supplies no textual-call (X) candidates, as 30 §5 predicted.
 
-## 5. Known defect recorded, not repaired: ToolACE keeps call text beside the structured call
+## 5. ToolACE: call text duplicated beside the structured call — repaired in `2.1.0`
 
-`adapt_toolace` sets `tool_calls` from bracket syntax. It removes the bracket text from `content` only when
-the text contains `[Function`, so **9,785 of 9,786** ToolACE call turns hold their call twice: once
-structured, and once as the original text in `content`.
+**The defect (found in the `2.0.0` build, fingerprint `2bd38492…`).** `adapt_toolace` sets `tool_calls` from
+bracket syntax, but removes the bracket text from `content` only when the text contains `[Function`. So
+**9,785 of 9,786** ToolACE call turns held their call twice: once structured, and once as the original
+text in `content`. The prose classifier was never affected, since no eligible record has a structured call
+([32](32-CLASSIFIER-INPUT-CONTRACT.md) §4). Layer-A display and any training target rendered from those
+turns were affected; canonical-v2-final used the same adapter.
 
-- **Not affected: the prose classifier.** No eligible record has a structured call (§4 of
-  [32](32-CLASSIFIER-INPUT-CONTRACT.md)).
-- **Affected:**
-  - layer-A spot-check items drawn from ToolACE, where an annotator sees both forms;
-  - any training target rendered from these turns (canonical-v2-final used the same adapter).
+**The repair.** A new adapter, `adapt_toolace_v2` (key `toolace_v2`), with `ADAPTER_VERSION` bumped to
+`2.1.0` in `src/opengrad/data/versions.py`. `adapt_toolace` is kept unchanged so the v1 and v2 corpora stay
+reproducible, following the `adapt_glaive_v2` precedent. The rule:
+- remove the span that parsed into calls, and only that span (`TOOLACE_CALL_BLOCK`, shared with the parser
+  so the two can never cover different text);
+- keep any prose around it;
+- give a turn that was nothing but the call `content: null`;
+- a block that does not parse still raises, so the record is quarantined, never silently stripped.
 
-Repairing it needs a new adapter version and a new artifact. That is a decision for the study owner. It is
-out of scope here, where the adapters are chosen from current code and not changed.
+**Measured on the rebuilt artifact** (`normalization-v3.structural-audit.json`):
+
+| ToolACE | `2.0.0` (`2bd38492…`) | `2.1.0` (`56e8abf2…`) |
+|---|---:|---:|
+| Accepted / rejected / duplicates | 11,051 / 246 / 3 | 11,051 / 246 / 3 |
+| Structured call turns | 9,786 | 9,786 |
+| Call turns whose content still holds call text | 9,785 | **0** |
+| Call turns with any non-empty content | 9,785 | 0 |
+| Call conservation (call-bearing turns, raw vs structured) | 11,051 / 11,051 | 11,051 / 11,051 |
+
+Every ToolACE call turn in this revision turned out to be the call alone, so no surrounding prose needed
+keeping; the rule is tested on a synthetic turn that has some. The calls, tools, rejections and membership
+of every source are unchanged. Every content hash still moves, because each row now records `2.1.0`. The
+P-DET-v1 representation audit (§7) and the P-DET-COVERAGE supply (30 §7.3) are unchanged, including X at 6:
+those six are JSON-shaped prose in tool-free ToolACE records, not bracket calls.
 
 ## 6. When2Call membership differs from canonical-v2-final
 

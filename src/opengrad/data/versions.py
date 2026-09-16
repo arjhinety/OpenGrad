@@ -28,7 +28,10 @@ from typing import Any, Mapping
 
 #: Adapter that turns a source record into the canonical IR.
 #: 2.0.0 -- behavior is derived by a versioned classifier instead of message shape alone.
-ADAPTER_VERSION = "2.0.0"
+#: 2.1.0 -- ToolACE moves to `adapt_toolace_v2`, which stops leaving the parsed call duplicated as
+#: text beside the structured call (9,785 of 9,786 call turns under 2.0.0). The message text of those
+#: records changes, so records built before and after are not interchangeable.
+ADAPTER_VERSION = "2.1.0"
 
 #: Source-scoped translation of upstream tool-schema type vocabulary into the canonical one.
 SCHEMA_NORMALIZATION_VERSION = "source-schema-normalization-v1"

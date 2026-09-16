@@ -2,10 +2,10 @@
   "artifact_kind": "NORMALIZATION_V3_PRE_CLASSIFIER",
   "builder": "opengrad.data.normalization_v3",
   "config": {
-    "adapter_function": "opengrad.data.adapters.adapt_toolace",
-    "adapter_key": "toolace",
-    "adapter_row_label": "toolace_v1",
-    "adapter_version": "2.0.0",
+    "adapter_function": "opengrad.data.adapters.adapt_toolace_v2",
+    "adapter_key": "toolace_v2",
+    "adapter_row_label": "toolace_v2",
+    "adapter_version": "2.1.0",
     "canonical_schema_version": "tool_use_ir_v1",
     "max_rows": null,
     "normalization_version": "normalization-v3",
@@ -14,7 +14,7 @@
     "shard_size": 10000,
     "supervision_contract_version": "supervision_contract_v1"
   },
-  "content_hash": "42ea71817eb7cafc9a1163805fddc2a45414c90ebd210d24af15fffdeac637bf",
+  "content_hash": "35f0efaec17bc755a3c2a6bd10d3ea4cd4413797c09e64d9948e8e425e0bec18",
   "counts": {
     "accepted": 11051,
     "duplicates": 3,
@@ -45,12 +45,12 @@
     {
       "file": "shard-000000.parquet",
       "rows": 10000,
-      "sha256": "d2a95b8318a7fa67c80144632cef78bdfa0f97142a1e516c05ca7866546b9284"
+      "sha256": "2cfa506871bb366bc7fa08b77a41f008859a4e07be6e3f2d7a8ba74fa8387168"
     },
     {
       "file": "shard-000001.parquet",
       "rows": 1051,
-      "sha256": "4bdecb3880250601e4218b7d2a3dc926a7fcccb4b9edd2570f53f2f48a98b39e"
+      "sha256": "37bc9d28bf7878d2cc0b555c54e5e7106fa50c41df4cbd36e90fa69db6d15582"
     }
   ],
   "source": {

@@ -112,6 +112,10 @@ def test_committed_source_manifest_agrees_with_the_code() -> None:
         "glaive_v2",
         "adapt_glaive_v2",
     )
+    assert (specs["toolace"].adapter_key, specs["toolace"].adapter_function) == (
+        "toolace_v2",
+        "adapt_toolace_v2",
+    )
     assert specs["when2call"].schema_translation and not specs["glaive"].schema_translation
     assert {entry["name"] for entry in manifest["excluded_sources"]} == {"looptool", "button"}
 
@@ -271,3 +275,79 @@ def test_build_refuses_to_overwrite(tiny_root: Path) -> None:
     build(tiny_root / "a", root=tiny_root, source_manifest=Path("sources.yaml"))
     with pytest.raises(NormalizationV3Error):
         build(tiny_root / "a", root=tiny_root, source_manifest=Path("sources.yaml"))
+
+
+# ── ToolACE: the call must not survive as text beside the structured call ────────────────────────────
+
+TOOLACE_SYSTEM = (
+    "You are an expert in composing functions.\n"
+    '[{"name": "get_weather", "description": "Get the weather", "parameters": {"type": "object", '
+    '"properties": {"city": {"type": "string"}}}}]'
+)
+
+
+def toolace_spec() -> SourceSpec:
+    return SourceSpec(
+        name="toolace",
+        dataset_id="toolace",
+        upstream_revision="6bda777c88d21e5a204703c1ee45597a8fa4f734",
+        split="train",
+        raw_path=Path("unused"),
+        raw_sha256="0" * 64,
+        raw_rows=0,
+        adapter_key="toolace_v2",
+        adapter_function="adapt_toolace_v2",
+        row_label="toolace_v2",
+        schema_translation=False,
+    )
+
+
+def toolace_raw(assistant: str) -> dict[str, Any]:
+    return {
+        "system": TOOLACE_SYSTEM,
+        "conversations": [
+            {"from": "user", "value": "What is the weather in Paris?"},
+            {"from": "assistant", "value": assistant},
+        ],
+    }
+
+
+def test_toolace_call_only_turn_keeps_no_call_text() -> None:
+    item = normalize_row(toolace_spec(), toolace_raw('[get_weather(city="Paris")]'), 0)
+    assistant = item["messages"][-1]
+    assert assistant["tool_calls"] == [
+        {"id": "call_0000", "name": "get_weather", "arguments": {"city": "Paris"}}
+    ]
+    assert assistant["content"] is None
+    assert item["metadata"]["adapter"] == "toolace_v2"
+
+
+def test_toolace_keeps_prose_around_the_removed_call() -> None:
+    item = normalize_row(
+        toolace_spec(),
+        toolace_raw('[get_weather(city="Paris")] Let me know if you need another city.'),
+        0,
+    )
+    assistant = item["messages"][-1]
+    assert [call["name"] for call in assistant["tool_calls"]] == ["get_weather"]
+    assert assistant["content"] == "Let me know if you need another city."
+
+
+def test_toolace_malformed_call_is_quarantined_not_stripped() -> None:
+    with pytest.raises(RowRejected) as excinfo:
+        normalize_row(toolace_spec(), toolace_raw("[get_weather(city=)]"), 0)
+    assert excinfo.value.code == "INVALID_ARGUMENT_SYNTAX"
+
+
+def test_toolace_v2_changes_only_the_text_not_the_calls() -> None:
+    """The repair must be representation-only: identical calls, identical tools, no duplicated text."""
+    from opengrad.data.adapters import adapt_toolace, adapt_toolace_v2
+
+    raw = toolace_raw('[get_weather(city="Paris")]')
+    old, new = adapt_toolace(raw, "train"), adapt_toolace_v2(raw, "train")
+    assert [m.get("tool_calls") for m in old.messages] == [
+        m.get("tool_calls") for m in new.messages
+    ]
+    assert old.tools == new.tools
+    assert old.messages[-1]["content"] == '[get_weather(city="Paris")]'  # the defect, still in v1
+    assert new.messages[-1]["content"] is None

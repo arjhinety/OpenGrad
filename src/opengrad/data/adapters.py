@@ -321,9 +321,14 @@ def _toolace_call(text: str) -> dict[str, Any]:
     return calls[0]
 
 
+#: The bracket block ToolACE writes its calls in. Shared so that the parser below and the v2 adapter's
+#: removal of the parsed text can never cover different spans.
+TOOLACE_CALL_BLOCK = re.compile(r"\[(?:Function\s+)?(.*)\]", re.DOTALL)
+
+
 def _toolace_calls(text: str) -> list[dict[str, Any]]:
     """Parse ToolACE's Python-like calls without evaluating source text."""
-    match = re.search(r"\[(?:Function\s+)?(.*)\]", text, re.DOTALL)
+    match = TOOLACE_CALL_BLOCK.search(text)
     if not match:
         raise ValueError("ToolACE call marker not found")
     body = match.group(1).strip()
@@ -470,6 +475,95 @@ def adapt_toolace(record: dict[str, Any], split: str = "train") -> ToolConversat
         # next-call supervision is NOT established by the available bytes, and reclassifying
         # them on structure alone would be guessing. Recorded as an open question in
         # reports/SUPERVISION_CONTRACT_REPORT.md; the yield report counts them explicitly.
+        supervision_kind=SupervisionKind.COMPLETE_TRAJECTORY,
+    )
+    c.validate()
+    return c
+
+
+def adapt_toolace_v2(record: dict[str, Any], split: str = "train") -> ToolConversation:
+    """ToolACE adapter that does not leave the call duplicated as text beside the structured call.
+
+    Registered separately rather than replacing :func:`adapt_toolace`, so the pinned v1 and v2 corpora
+    stay reproducible from the code that produced them. Selecting this adapter is a new corpus version.
+
+    The defect it repairs, measured on normalization-v3 (fingerprint ``2bd38492``): ``adapt_toolace``
+    removes the bracket text from ``content`` only when it contains ``"[Function"``, so **9,785 of 9,786**
+    parsed call turns kept the call twice -- once as structured ``tool_calls``, once as the original text.
+    A target rendered from such a turn asks the model to emit its call twice.
+
+    The rule here is deliberately narrow:
+
+    * the span that actually parsed into calls is removed, and **only** that span;
+    * prose around it is preserved, so a turn that says something besides calling keeps what it said;
+    * a turn that was nothing but the call gets ``content: None``;
+    * a block that does not parse still raises, so the record is quarantined rather than silently stripped.
+    """
+    if "messages" in record and "conversations" not in record:
+        return adapt(record, "toolace", split)
+    conv = record.get("conversations")
+    if conv is None and "from" in record and "value" in record:
+        conv = [{"from": record["from"], "value": record["value"]}]
+    if not isinstance(conv, list):
+        raise TypeError("ToolACE conversations must be a list")
+    tools = _tool(record.get("tools", []))
+    system = record.get("system", "")
+    if isinstance(system, str) and not tools:
+        tools = list(_embedded_tools(system))
+        for block in re.findall(r"<tool>(.*?)</tool>", system, re.DOTALL):
+            try:
+                tools.extend(_tool(block))
+            except (TypeError, ValueError):
+                pass
+    messages = []
+    last_call_id: str | None = None
+    next_call_id = 0
+    for item in conv:
+        if not isinstance(item, dict):
+            raise TypeError("ToolACE conversation item must be an object")
+        role = {
+            "human": "user",
+            "user": "user",
+            "gpt": "assistant",
+            "assistant": "assistant",
+            "tool": "tool",
+        }.get(str(item.get("from", item.get("role"))))
+        if not role:
+            raise ValueError("unknown ToolACE role")
+        content = item.get("value", item.get("content", ""))
+        msg = {"role": role, "content": content}
+        if (
+            role == "assistant"
+            and isinstance(content, str)
+            and content.lstrip().startswith("[")
+            and "(" in content
+        ):
+            calls = _toolace_calls(content)
+            for call in calls:
+                call["id"] = f"call_{next_call_id:04d}"
+                next_call_id += 1
+            last_call_id = calls[-1]["id"]
+            msg["tool_calls"] = calls
+            block = TOOLACE_CALL_BLOCK.search(content)
+            if block is None:  # unreachable: `_toolace_calls` raises when the block is absent
+                raise ValueError("ToolACE call marker not found")
+            msg["content"] = (content[: block.start()] + content[block.end() :]).strip() or None
+        if role == "tool" and last_call_id:
+            msg["tool_call_id"] = last_call_id
+        messages.append(msg)
+    if system:
+        messages.insert(0, {"role": "system", "content": system})
+    c = _base(
+        record,
+        "toolace",
+        split,
+        tools,
+        messages,
+        adapter="toolace_v2",
+        source_format="system/conversations from/value; parsed call text removed from content",
+        # Unchanged from v1: the trajectory contract is not what this adapter repairs. Measured on
+        # normalization-v3, 8,472 records still end on an unresolved call, an open question recorded in
+        # reports/SUPERVISION_CONTRACT_REPORT.md rather than reclassified on structure alone.
         supervision_kind=SupervisionKind.COMPLETE_TRAJECTORY,
     )
     c.validate()
@@ -953,6 +1047,7 @@ ADAPTERS: dict[str, Callable[[dict[str, Any], str], ToolConversation]] = {
     "xlam": adapt_xlam,
     "when2call": adapt_when2call,
     "toolace": adapt_toolace,
+    "toolace_v2": adapt_toolace_v2,
     "button": adapt_button,
     "looptool": adapt_looptool,
     "glaive": adapt_glaive,

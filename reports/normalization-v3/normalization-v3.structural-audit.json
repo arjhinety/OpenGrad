@@ -1,7 +1,7 @@
 {
-  "artifact_fingerprint": "2bd384929a5b870bc3836729c808362c60d0d98717f086587e12af6608104aaa",
+  "artifact_fingerprint": "56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3",
   "artifact_kind": "NORMALIZATION_V3_STRUCTURAL_AUDIT",
-  "artifact_manifest_sha256": "f7a20b04968ff5bb183c4f7d3f4c44ed28d7bddaee9ce5cc10d3056b2617b759",
+  "artifact_manifest_sha256": "9ff1f9d658586c2818283b127fc46c92464cd186ec200626c23001049d74e88f",
   "classifier_input_contract": "prose-decision-input-v1",
   "heldout_inputs": [
     [
@@ -82,7 +82,7 @@
         "rows": 98339,
         "structure_block_disagrees_with_messages": 0
       },
-      "manifest_sha256": "41ea7ccd4b70b1d773c32fbe1d551973521587dc7fc61de1cc4b6ec0af98c53c",
+      "manifest_sha256": "d00e69ab4be74a3d4eadd365cf86eedd4c4fb8f9096abd1fca83393b60573aa8",
       "rejected_by_reason": {
         "ADAPTER_GLAIVE_ARGUMENTS_NOT_OBJECT": 18,
         "ADAPTER_GLAIVE_MALFORMED_CALL": 1094,
@@ -129,9 +129,9 @@
     },
     "toolace": {
       "adapter": {
-        "function": "adapt_toolace",
-        "key": "toolace",
-        "row_label": "toolace_v1"
+        "function": "adapt_toolace_v2",
+        "key": "toolace_v2",
+        "row_label": "toolace_v2"
       },
       "call_conservation": {
         "raw_equal_structured": 11051,
@@ -180,7 +180,7 @@
         "rows": 11051,
         "structure_block_disagrees_with_messages": 0
       },
-      "manifest_sha256": "f2a87ad90b4e87b6f378830bae798c8499d4d2dbbaa34973a8185030b385d705",
+      "manifest_sha256": "345b50fbe22b6d7360b267d1cb303fb9540ac7eaa86a8691f2f3e0c2b30f9dd2",
       "rejected_by_reason": {
         "ADAPTER_UNDECLARED_TOOL": 18,
         "INVALID_ARGUMENT_SYNTAX": 89,
@@ -203,9 +203,9 @@
       },
       "structured_call_turns": {
         "structured_call_turns": 9786,
-        "structured_call_turns_whose_content_also_holds_call_text": 9612,
-        "structured_call_turns_whose_content_starts_with_bracket": 9785,
-        "structured_call_turns_with_nonempty_content": 9785
+        "structured_call_turns_whose_content_also_holds_call_text": 0,
+        "structured_call_turns_whose_content_starts_with_bracket": 0,
+        "structured_call_turns_with_nonempty_content": 0
       },
       "tools": {
         "no_tools": 697,
@@ -266,7 +266,7 @@
         "rows": 14701,
         "structure_block_disagrees_with_messages": 0
       },
-      "manifest_sha256": "2280f6504d7e0db4878b3d2637428b3f919ae1b1b21ebc7606c7c1eaf4f52c6d",
+      "manifest_sha256": "883f806084f4b0578447f550da440563eabbc7ca6665c7a4e744e466d0c0ecfa",
       "rejected_by_reason": {
         "ADAPTER_DUPLICATE_TOOL_NAME": 47,
         "SRC_SCHEMA_MULTI_TYPE_UNION": 73,
@@ -330,7 +330,7 @@
         "rows": 57342,
         "structure_block_disagrees_with_messages": 0
       },
-      "manifest_sha256": "ae630f88f0dd42f6a05c48b5b2a38a21444f87b68043790b2ff3f2603d9d2756",
+      "manifest_sha256": "1958a0c89dec0b90dbfd217955939e477948e71cb96d8c187f7a77cbb6a62f70",
       "rejected_by_reason": {
         "ADAPTER_DUPLICATE_TOOL_NAME": 259,
         "XLAM_TYPE_UNSUPPORTED_CALLABLE": 538,

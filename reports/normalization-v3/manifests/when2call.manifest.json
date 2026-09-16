@@ -5,7 +5,7 @@
     "adapter_function": "opengrad.data.adapters.adapt_when2call",
     "adapter_key": "when2call",
     "adapter_row_label": "when2call_v1",
-    "adapter_version": "2.0.0",
+    "adapter_version": "2.1.0",
     "canonical_schema_version": "tool_use_ir_v1",
     "max_rows": null,
     "normalization_version": "normalization-v3",
@@ -14,7 +14,7 @@
     "shard_size": 10000,
     "supervision_contract_version": "supervision_contract_v1"
   },
-  "content_hash": "50a9451f631072b17b4480b2f21671c8d54e4c1484c13eac4916bc5d156f1cce",
+  "content_hash": "6fd8365499be73768de8ba26af76eb1bdba26695faf422a426887d8c8cfa10c6",
   "counts": {
     "accepted": 14701,
     "duplicates": 124,
@@ -39,12 +39,12 @@
     {
       "file": "shard-000000.parquet",
       "rows": 10000,
-      "sha256": "9b1e7f8f0ef10b292ff4ababa20edb88eccb495b6b8aa2e2524b084c7818f332"
+      "sha256": "e80a28f16d09a39ba31964c77d861b171b85cba26c30176423ac6a0babb3b91c"
     },
     {
       "file": "shard-000001.parquet",
       "rows": 4701,
-      "sha256": "46484b12443ddd0ba7437526af9a98d1b7f21611614edbe21d5acfad763d345f"
+      "sha256": "2c144d54bec1b91c5730bee0c9b5414faf0cff2526410954bcfb4c31d0e1588a"
     }
   ],
   "source": {

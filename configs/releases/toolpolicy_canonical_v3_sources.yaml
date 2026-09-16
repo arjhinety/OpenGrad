@@ -28,7 +28,7 @@ manifest_version: 1
 status: PRE_CLASSIFIER
 normalization_version: normalization-v3
 versions:
-  adapter_version: "2.0.0"
+  adapter_version: "2.1.0"
   schema_normalization_version: source-schema-normalization-v1
   canonical_schema_version: tool_use_ir_v1
   supervision_contract_version: supervision_contract_v1
@@ -127,9 +127,17 @@ sources:
       sha256: 7a7a6a2c3b1003c789bbabb975335a0a8f843ae7a7df28134f7d242b301ab15f
       rows: 11300
     adapter:
-      key: toolace
-      function: adapt_toolace
-      row_label: toolace_v1
+      key: toolace_v2
+      function: adapt_toolace_v2
+      row_label: toolace_v2
+      rejected_alternative:
+        key: toolace
+        function: adapt_toolace
+        reason: >-
+          adapt_toolace removes the bracket text from `content` only when it contains "[Function",
+          so a parsed call turn keeps its call both as tool_calls and as text (9,785 of 9,786 call
+          turns under adapter_version 2.0.0). It is kept only so the v1 and v2 corpora stay
+          reproducible.
     schema_translation:
       applied: false
       reason: >-
@@ -138,12 +146,11 @@ sources:
     structured_tool_calls: produced
     textual_call_syntax: >-
       An assistant turn that starts with '[' and contains '(' is parsed as bracket call syntax into
-      tool_calls; unparseable syntax raises INVALID_ARGUMENT_SYNTAX and the record is rejected.
-      KNOWN DEFECT, recorded not repaired: the adapter removes the bracket text from `content` only
-      when it contains "[Function", so a parsed turn normally keeps its call BOTH as tool_calls AND
-      as the original bracket text in `content` (measured: 9,785 of 9,786 call turns in
-      normalization-v3). No tool-free record is affected, so the prose classifier's input is not;
-      structural-call records and any training target rendered from them are.
+      tool_calls; unparseable syntax raises INVALID_ARGUMENT_SYNTAX and the record is rejected. The
+      span that parsed into calls is then removed from `content`, and only that span: prose around
+      it is kept, and a turn that was nothing but the call gets `content: null`. This repairs the
+      duplication measured under adapter_version 2.0.0, where 9,785 of 9,786 call turns kept the
+      call as text as well; the calls themselves are unchanged.
     tool_result_messages: retained (tool turns answer the latest call)
     special_token_cleaning: none
     multi_turn: retained in full
