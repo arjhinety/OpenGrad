@@ -236,3 +236,20 @@ def test_selector_maps_names_and_rejects_unknown():
     assert select_optimization_backend("deterministic").name == "mock"
     assert select_optimization_backend("modelopt").name == "modelopt"
     assert select_optimization_backend("not-a-backend") is None
+
+
+def test_artifact_directory_name_is_portable_and_keeps_the_id_as_provenance(tmp_path):
+    """Checkpoint ids use "::", which Windows forbids in a filename; the directory name must not."""
+    from pathlib import Path
+
+    from opengrad.optimization.protocol import artifact_directory_name
+
+    assert (
+        artifact_directory_name("exp::checkpoint-1200", "ptq", "fp8")
+        == "exp__checkpoint-1200--ptq--fp8"
+    )
+    source = _source(tmp_path / "checkpoints" / "checkpoint-1200")
+    (tmp_path / "checkpoints" / "checkpoint-1200").mkdir(parents=True)
+    result = MockOptimizationBackend().optimize(source, _recipe(), tmp_path / "out")
+    assert Path(result.output_artifact_path).name == "exp__checkpoint-1200--ptq--fp8"
+    assert result.source_checkpoint_id == "exp::checkpoint-1200"

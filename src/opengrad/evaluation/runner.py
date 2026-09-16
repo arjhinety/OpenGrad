@@ -943,7 +943,8 @@ def run_baseline(
     }
     if (
         not dry_run
-        and {name: str(path.relative_to(root)) for name, path in output_paths.items()}
+        # POSIX form: the canonical paths are written with "/", and str() would use "\\" on Windows.
+        and {name: path.relative_to(root).as_posix() for name, path in output_paths.items()}
         != canonical_outputs
     ):
         raise ValueError("real baseline must write the canonical evidence paths")

@@ -43,7 +43,14 @@ number must trace to an artifact. Correctness here means *provenance and gates h
   source files are CRLF. When editing by script, read and write bytes and preserve the file's existing
   endings. **A changed byte in a hashed file changes its hash**: a trailing newline in `src/opengrad/data/versions.py`
   once invalidated a built artifact.
-- Treat frozen artifacts as byte-exact. Never "normalize" line endings of tracked data files.
+- Treat frozen artifacts as byte-exact. Never "normalize" line endings of tracked data files. A hash-pinned file
+  type needs a `.gitattributes` rule (`-text`) so every platform checks it out byte for byte.
+- **CI runs on Linux; development happens on Windows.** Code must be portable in both directions:
+  - compare repository paths as `relative_to(root).as_posix()`, never `str(path)`;
+  - never build a filename from an id containing `:` or other Windows-forbidden characters;
+  - give every script with a shebang git mode `100755` (`git update-index --chmod=+x`), or ruff `EXE001`
+    fails CI.
+  - GitHub Actions results: `gh run list` and `gh run view <id> --log-failed`.
 
 ## Verify a change the way CI does
 

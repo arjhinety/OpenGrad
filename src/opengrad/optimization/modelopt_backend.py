@@ -27,6 +27,7 @@ from opengrad.optimization.protocol import (
     OptimizationRecipe,
     OptimizationResult,
     SourceCheckpoint,
+    artifact_directory_name,
     build_optimization_result,
     ensure_distinct_output,
     hash_directory,
@@ -272,7 +273,7 @@ class ModelOptBackend:
 
 def _artifact_name(source: SourceCheckpoint, recipe: OptimizationRecipe) -> str:
     fmt = recipe.format or recipe.technique
-    return f"{source.checkpoint_id}--{recipe.technique}--{fmt}"
+    return artifact_directory_name(source.checkpoint_id, recipe.technique, fmt)
 
 
 def _plan_payload(

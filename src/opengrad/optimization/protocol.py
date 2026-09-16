@@ -411,6 +411,21 @@ def build_optimization_result(
     )
 
 
+#: Characters a filename may not contain on Windows. Checkpoint ids use "::" as their separator.
+_UNPORTABLE_FILENAME_CHARACTERS = frozenset('<>:"/\\|?*')
+
+
+def artifact_directory_name(checkpoint_id: str, technique: str, fmt: str) -> str:
+    """The directory an optimized artifact is written to, identical on every platform.
+
+    A checkpoint id such as ``experiment::checkpoint-1200`` is not a legal Windows filename, so each
+    unportable character becomes ``_``. The id itself is unchanged wherever it is recorded as
+    provenance (``source_checkpoint_id``); only the directory name is made portable.
+    """
+    name = f"{checkpoint_id}--{technique}--{fmt}"
+    return "".join("_" if char in _UNPORTABLE_FILENAME_CHARACTERS else char for char in name)
+
+
 def ensure_distinct_output(source_path: str | Path, output_path: str | Path) -> None:
     """Refuse an optimization output that could overwrite its source checkpoint.
 

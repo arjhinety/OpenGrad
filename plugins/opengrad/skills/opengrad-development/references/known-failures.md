@@ -1,17 +1,16 @@
 # Known pre-existing test failures
 
-Failures present on `master` that no current change introduced. Each was confirmed by running the same test on
-a clean `HEAD` worktree. Remove an entry in the commit that fixes it; add one only after that confirmation.
+Failures present on `master` that no current change introduced. Confirm each by running the same test on a clean
+`HEAD` worktree before listing it. Remove an entry in the commit that fixes it.
 
-Last confirmed: 2026-09-16, at commit `cf42c6a`.
+**None known.** As of 2026-09-16 the full suite passes locally on Windows (1179 passed, 6 skipped).
 
-| Test | Symptom | Suspected cause |
+## Resolved (keep the cause; the same class of bug recurs)
+
+| Was failing | Cause | Fix |
 |---|---|---|
-| `tests/evaluation/test_baseline_runner.py::test_real_baseline_registers_canonical_record_and_refuses_overwrite` | `ValueError: real baseline must write the canonical evidence paths` | not yet investigated |
-| `tests/evaluation/test_baseline_runner.py::test_dry_run_baseline_never_writes_canonical_evidence_paths` | fails with the baseline runner test above | not yet investigated |
-| `tests/evaluation/test_capability_benchmarks.py::test_vendored_ifeval_checkers_are_unmodified` | vendored checker hash mismatch | likely CRLF conversion of vendored files under `core.autocrlf=true` |
-| `tests/experiments/test_m0_final_freeze.py::test_freeze_verifies_against_disk` | frozen hashes differ for `runs/central_ledger.jsonl` and two others | working-tree copies are CRLF (`git ls-files --eol` shows `i/lf w/crlf`); passes on a fresh worktree |
-| `tests/optimization/test_optional_import.py::test_modelopt_export_raises_naming_the_extra` | — | not yet investigated |
-| `tests/optimization/test_protocol.py::test_mock_result_carries_full_provenance_and_round_trips` | — | not yet investigated |
-| `tests/optimization/test_protocol.py::test_mock_artifact_hash_is_deterministic` | — | not yet investigated |
-| `tests/optimization/test_protocol.py::test_mock_optimize_never_modifies_the_source` | — | not yet investigated |
+| GitHub CI stopped at `ruff check` (`EXE001`) before pytest ever ran | `scripts/verify_publication.py` had a shebang but git mode `100644` (only fails on Linux) | `git update-index --chmod=+x`; every shebang script must be `100755` |
+| `tests/evaluation/test_baseline_runner.py` (2 tests) | `str(path.relative_to(root))` gives `\` on Windows, compared with `/` canonical paths | compare `relative_to(root).as_posix()` |
+| `tests/optimization/test_protocol.py` (3), `test_optional_import.py` (1) | artifact directory named from a checkpoint id containing `::`, illegal in Windows filenames | `artifact_directory_name` in `src/opengrad/optimization/protocol.py` maps unportable characters to `_` |
+| `test_vendored_ifeval_checkers_are_unmodified` | `core.autocrlf=true` checked the SHA-pinned vendored files out as CRLF | `.gitattributes`: `third_party/** -text` |
+| `tests/experiments/test_m0_final_freeze.py::test_freeze_verifies_against_disk` | run ledgers (`*.jsonl -text`) were checked out as CRLF before that attribute existed | rewrite the working copies with the exact committed bytes after confirming they differ only by line endings |

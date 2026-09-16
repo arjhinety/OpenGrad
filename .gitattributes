@@ -6,3 +6,6 @@
 *.jsonl -text
 # Packaged audit trails (reports/pdet/provenance/) are pinned by SHA-256.
 *.tar.gz binary
+# Vendored third-party code is pinned by SHA-256 against its upstream bytes (PROVENANCE.json in each
+# directory), so it is checked out byte for byte on every platform, never converted to CRLF.
+third_party/** -text

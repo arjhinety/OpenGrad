@@ -26,6 +26,7 @@ from opengrad.optimization.protocol import (
     OptimizationRecipe,
     OptimizationResult,
     SourceCheckpoint,
+    artifact_directory_name,
     build_optimization_result,
     ensure_distinct_output,
     hash_directory,
@@ -96,7 +97,9 @@ class MockOptimizationBackend:
         self.validate_recipe(recipe, model_id=source_checkpoint.model_id)
         output_dir = Path(output_dir)
         fmt = recipe.format or recipe.technique
-        artifact_dir = output_dir / f"{source_checkpoint.checkpoint_id}--{recipe.technique}--{fmt}"
+        artifact_dir = output_dir / artifact_directory_name(
+            source_checkpoint.checkpoint_id, recipe.technique, fmt
+        )
         # Never write over the checkpoint being optimized, even in a mock.
         ensure_distinct_output(source_checkpoint.path, artifact_dir)
 
