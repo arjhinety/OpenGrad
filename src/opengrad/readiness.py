@@ -36,6 +36,11 @@ from opengrad.experiments.schema import ExperimentConfig
 from opengrad.experiments.store import ExperimentStore
 from opengrad.hardware.probe import probe_hardware
 from opengrad.registry.validate import validate as validate_registry
+from opengrad.training.model_components import (
+    MODEL_COMPONENT_POLICY_VERSION,
+    ModelComponentError,
+    resolve_component_settings,
+)
 
 BASELINE_CONFIG = Path("configs/evaluation/tool_calling/qwen35_2b_baseline.yaml")
 BASELINE_MANIFEST = Path("reports/evaluation/behavioral-heldout-v2.manifest.json")
@@ -987,6 +992,69 @@ def _renderability_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, st
     return True, detail, None
 
 
+#: The pre-training gate of `full-model-components-v1` (docs/MODEL_COMPONENT_POLICY.md §10).
+MODEL_COMPONENTS_VALIDATION = Path("reports/training/model-components-validation.json")
+REQUIRED_MODEL_COMPONENT_CHECKS = ("gpu_smoke_test", "gguf_export")
+
+
+def _model_components_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, str | None]:
+    """Block a real run that carries vision or MTP until the component path is validated.
+
+    Vision and MTP training was implemented and tested on a tiny CPU model only. Before any real
+    run depends on it, a GPU smoke test on the pinned model and a GGUF export that keeps the
+    components must both be recorded as PASS, each pointing at evidence that exists. A text-only
+    run (both components excluded, as every Study 002 arm is) never exercises that path and is
+    exempt.
+    """
+    trainer = raw.get("trainer") or {}
+    algorithm = str(trainer.get("type", "")).lower()
+    try:
+        settings = resolve_component_settings(trainer, algorithm=algorithm)
+    except ModelComponentError as exc:
+        return False, str(exc), "CONFIG_INVALID"
+    if settings.vision == "exclude" and settings.mtp == "exclude":
+        return (
+            True,
+            "Text-only run (vision and MTP excluded); component validation is not required",
+            None,
+        )
+    carried = [name for name in ("vision", "mtp") if getattr(settings, name) == "include"]
+    path = root / MODEL_COMPONENTS_VALIDATION
+    payload = _read_json(path)
+    if payload is None:
+        return (
+            False,
+            f"Run carries {carried} but {MODEL_COMPONENTS_VALIDATION} is missing or unreadable",
+            "MODEL_COMPONENTS_UNVALIDATED",
+        )
+    if payload.get("policy_version") != MODEL_COMPONENT_POLICY_VERSION:
+        return (
+            False,
+            (
+                f"{MODEL_COMPONENTS_VALIDATION} validates {payload.get('policy_version')!r}, "
+                f"not the current {MODEL_COMPONENT_POLICY_VERSION!r}"
+            ),
+            "MODEL_COMPONENTS_UNVALIDATED",
+        )
+    checks = payload.get("checks") or {}
+    pending: list[str] = []
+    for name in REQUIRED_MODEL_COMPONENT_CHECKS:
+        check = checks.get(name) or {}
+        evidence = check.get("evidence")
+        if check.get("status") != "PASS" or not evidence or not (root / str(evidence)).exists():
+            pending.append(name)
+    if pending:
+        return (
+            False,
+            (
+                f"Run carries {carried}; pre-training checks not passed with evidence: {pending} "
+                f"({MODEL_COMPONENTS_VALIDATION}). Exclude both components for a text-only run."
+            ),
+            "MODEL_COMPONENTS_UNVALIDATED",
+        )
+    return True, f"Component path validated: {list(REQUIRED_MODEL_COMPONENT_CHECKS)}", None
+
+
 def _dpo_contract_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, str | None]:
     """Validate the DPO-specific identity before a real M1 launch."""
     datasets = _as_dict(raw.get("datasets"))
@@ -1542,6 +1610,20 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         add("dpo_contract", "PASS" if dpo_ok else "FAIL", dpo_detail, dpo_code)
     else:
         add("dpo_contract", "PASS", "Not a DPO configuration; DPO contract deferred")
+    if is_sft_config or is_dpo_config:
+        components_ok, components_detail, components_code = _model_components_state(root, raw)
+        add(
+            "model_components_validation",
+            "PASS" if components_ok else "FAIL",
+            components_detail,
+            components_code,
+        )
+    else:
+        add(
+            "model_components_validation",
+            "PASS",
+            "Not a training configuration; component validation deferred",
+        )
 
     # Baseline execution is the operation that establishes real_b0. It may
     # require the hardware probe and repository/data contracts, but must not
@@ -1573,6 +1655,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "experiment_preflight",
         "renderability_yield",
         "supervision_composition",
+        "model_components_validation",
     }
     ready_for_sft = all(gate_map[name]["status"] == "PASS" for name in sft_names)
     dpo_names = baseline_prerequisites | {
@@ -1581,6 +1664,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "baseline_artifacts",
         "experiment_preflight",
         "dpo_contract",
+        "model_components_validation",
     }
     ready_for_dpo = is_dpo_config and all(gate_map[name]["status"] == "PASS" for name in dpo_names)
     blocking = [gate["name"] for gate in gates if gate["status"] == "FAIL"]

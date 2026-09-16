@@ -1,0 +1,32 @@
+{
+  "applies_to": "Every real SFT or DPO run that carries vision or MTP. A text-only run (trainer.model_components: {vision: exclude, mtp: exclude}) is exempt; every Study 002 arm is text-only by decision of 2026-09-16.",
+  "artifact_kind": "MODEL_COMPONENTS_VALIDATION",
+  "assigned": "2026-09-16",
+  "checks": {
+    "gguf_export": {
+      "evidence": null,
+      "requires": [
+        "convert a full-model-components-v1 checkpoint with llama.cpp convert_hf_to_gguf.py WITHOUT --no-mtp, and record the nextn/MTP block count",
+        "llama.cpp loads the GGUF and generates; record the llama.cpp revision",
+        "produce the vision projector (mmproj) and load it with an image prompt",
+        "text outputs of the GGUF agree with the HF checkpoint on a fixed prompt set within a recorded tolerance"
+      ],
+      "status": "PENDING"
+    },
+    "gpu_smoke_test": {
+      "evidence": null,
+      "requires": [
+        "a short real SFT run on the pinned Qwen/Qwen3.5-2B with the policy defaults (mtp loss_weight 0.3, gradient_scope joint)",
+        "record peak GPU memory, supervised tokens/s and checkpoint size on disk, with and without optimizer state",
+        "the saved checkpoint holds 320 language-model, 297 vision and 15 mtp tensors under the base names",
+        "vLLM loads the checkpoint with Qwen3.5 MTP speculative decoding; record the draft acceptance rate",
+        "train_loss and mtp_loss over the same steps beside a text-only run (both components excluded): the measurement of the untuned MTP weights decided on 2026-09-16"
+      ],
+      "status": "PENDING"
+    }
+  },
+  "gate": "readiness gate model_components_validation (src/opengrad/readiness.py); required for ready_for_sft and ready_for_dpo",
+  "policy_version": "full-model-components-v1",
+  "status": "PENDING",
+  "update_rule": "A check becomes PASS only with an evidence path to a committed report that exists; the gate verifies the path. Do not mark PASS from a plan or a partial run."
+}

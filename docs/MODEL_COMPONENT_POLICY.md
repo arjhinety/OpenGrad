@@ -75,7 +75,8 @@ completion in DPO.
 - SFT `loss_weight: 0.3` is the value already specified in `docs/SPECULATIVE_DECODING_ARCHITECTURE.md`.
 - DPO uses `head_only` so the preference objective stays exactly the preference objective.
 
-No run has yet measured the effect of either choice.
+On 2026-09-16 the decision was to keep both defaults and measure their effect later. The measurement is part
+of the pre-training GPU smoke test (§10).
 
 ## 5. Configuration
 
@@ -158,9 +159,10 @@ curves therefore stay comparable across the boundary, even where the models do n
 - **`head_only` leaves the main-model objective unchanged.** Carrying the extra components does not move the
   main logits, which a test checks. A DPO run can still differ if its initial checkpoint came from a
   post-policy SFT.
-- **Study 002** fixes one trainer setting across all arms (`04-ARM-MATRIX.md`), and its `C0` arm reproduces a
-  Study 001 result that was trained text-only. Which side of the boundary its arms run on is a Study 002
-  decision. This policy does not make that decision, and it does not amend the preregistration.
+- **Study 002 trains text-only** (decided 2026-09-16). It fixes one trainer setting across all arms
+  (`04-ARM-MATRIX.md`), and its `C0` arm reproduces a Study 001 result that was trained text-only. Every arm
+  therefore declares `model_components: {vision: exclude, mtp: exclude}`, and the preregistration is
+  unchanged. The policy applies to later studies and releases.
 
 ## 9. Not covered yet
 
@@ -179,3 +181,24 @@ curves therefore stay comparable across the boundary, even where the models do n
 - **GPU validation.** The tests run on a tiny random Qwen3.5 on CPU (torch 2.13.0, transformers 5.16.1). Memory,
   throughput and the size of a real checkpoint are unmeasured. Weights alone grow by 392,244,736 parameters
   (about 0.73 GiB in bfloat16).
+
+## 10. Pre-training gate
+
+Vision and MTP training has only been exercised on a tiny model on CPU. So **no real run that carries either
+component may start until the path is validated on the real model**.
+
+The gate is readiness gate `model_components_validation` (`src/opengrad/readiness.py`). It is required for
+`ready_for_sft` and `ready_for_dpo`, and `opengrad train` refuses a real SFT or DPO run without them. It reads
+`reports/training/model-components-validation.json` (assigned 2026-09-16, both checks `PENDING`):
+
+| Check | Must show |
+|---|---|
+| `gpu_smoke_test` | A short real SFT run on the pinned model with the policy defaults. Record: <ul><li>peak memory, throughput, and checkpoint size with and without optimizer state;</li><li>the tensor counts per component (320 / 297 / 15);</li><li>that vLLM loads the checkpoint with MTP speculative decoding, and the acceptance rate;</li><li>`train_loss` and `mtp_loss` next to a text-only run of the same steps. This is the measurement of the untuned MTP weights.</li></ul> |
+| `gguf_export` | <ul><li>Conversion **without** `--no-mtp`, with the MTP block count recorded;</li><li>llama.cpp loads and generates;</li><li>a vision projector (mmproj) is produced and loads with an image prompt;</li><li>GGUF text output agrees with the HF checkpoint within a recorded tolerance.</li></ul> |
+
+A check passes only when its `status` is `PASS` **and** its `evidence` path points to a report that exists. The
+gate verifies the path. The file must also name the current policy version, so bumping the policy re-opens the
+gate.
+
+A text-only run, with both components excluded, never exercises this path and is exempt. That covers every
+Study 002 arm.

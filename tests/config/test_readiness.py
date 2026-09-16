@@ -348,3 +348,78 @@ def test_renderability_gate_fails_closed_on_a_missing_report(tmp_path):
     ok, _detail, code = _renderability_state(tmp_path, {"datasets": {"yield_report": "nope.json"}})
     assert ok is False
     assert code == "YIELD_REPORT_MISSING"
+
+
+# ── model components pre-training gate ─────────────────────────────────────────────────────────
+
+
+def _component_root(tmp_path: Path, checks: dict, policy_version: str | None = None) -> Path:
+    import json
+
+    from opengrad.readiness import MODEL_COMPONENTS_VALIDATION
+    from opengrad.training.model_components import MODEL_COMPONENT_POLICY_VERSION
+
+    path = tmp_path / MODEL_COMPONENTS_VALIDATION
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {"policy_version": policy_version or MODEL_COMPONENT_POLICY_VERSION, "checks": checks}
+        ),
+        encoding="utf-8",
+    )
+    return tmp_path
+
+
+def test_text_only_training_is_exempt_from_the_component_gate(tmp_path):
+    from opengrad.readiness import _model_components_state
+
+    raw = {"trainer": {"type": "sft", "model_components": {"vision": "exclude", "mtp": "exclude"}}}
+    ok, detail, code = _model_components_state(tmp_path, raw)
+    assert (ok, code) == (True, None)
+    assert "Text-only" in detail
+
+
+def test_the_committed_component_gate_blocks_training_that_carries_vision_or_mtp():
+    """The gate as committed on 2026-09-16: both checks pending, so a policy run is blocked."""
+    from opengrad.readiness import _model_components_state
+
+    for trainer in ({"type": "sft"}, {"type": "dpo", "model_components": {"vision": "exclude"}}):
+        ok, detail, code = _model_components_state(ROOT, {"trainer": trainer})
+        assert ok is False
+        assert code == "MODEL_COMPONENTS_UNVALIDATED"
+        assert "gpu_smoke_test" in detail and "gguf_export" in detail
+
+
+def test_the_component_gate_passes_only_with_evidence_that_exists(tmp_path):
+    from opengrad.readiness import _model_components_state
+
+    checks = {
+        "gpu_smoke_test": {"status": "PASS", "evidence": "reports/smoke.json"},
+        "gguf_export": {"status": "PASS", "evidence": "reports/gguf.json"},
+    }
+    root = _component_root(tmp_path, checks)
+    raw = {"trainer": {"type": "sft"}}
+    ok, detail, code = _model_components_state(root, raw)
+    assert ok is False and "gpu_smoke_test" in detail  # PASS without the evidence file
+
+    (root / "reports/smoke.json").write_text("{}", encoding="utf-8")
+    (root / "reports/gguf.json").write_text("{}", encoding="utf-8")
+    ok, _detail, code = _model_components_state(root, raw)
+    assert (ok, code) == (True, None)
+
+
+def test_the_component_gate_refuses_validation_of_another_policy_version(tmp_path):
+    from opengrad.readiness import _model_components_state
+
+    root = _component_root(tmp_path, {}, policy_version="full-model-components-v0")
+    ok, detail, code = _model_components_state(root, {"trainer": {"type": "sft"}})
+    assert ok is False and code == "MODEL_COMPONENTS_UNVALIDATED"
+    assert "full-model-components-v0" in detail
+
+
+def test_an_invalid_component_configuration_fails_the_gate(tmp_path):
+    from opengrad.readiness import _model_components_state
+
+    raw = {"trainer": {"type": "sft", "model_components": {"audio": "include"}}}
+    ok, _detail, code = _model_components_state(tmp_path, raw)
+    assert (ok, code) == (False, "CONFIG_INVALID")

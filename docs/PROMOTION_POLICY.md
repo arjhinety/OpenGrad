@@ -85,6 +85,22 @@ Evidence: [`reports/FINAL_CAMPAIGN_AUDIT.md`](../reports/FINAL_CAMPAIGN_AUDIT.md
 
 ---
 
+## 2.6 Pre-training gate: model components (from 2026-09-16)
+
+Before a checkpoint can be a candidate, the path that trains it has to be validated. From
+`full-model-components-v1`, trainers carry and train the vision encoder and the native MTP layer. That path has
+only been tested on a tiny CPU model, so readiness gate `model_components_validation` blocks every real SFT or
+DPO run that carries either component until two checks have committed evidence:
+- **`gpu_smoke_test`:** memory, throughput and checkpoint size on the real model; vLLM loading with MTP
+  drafting; the measurement of the untuned MTP loss weights.
+- **`gguf_export`:** keeps MTP and produces a working vision projector.
+
+Both are tracked, with their exact requirements, in `reports/training/model-components-validation.json`.
+Text-only runs, including every Study 002 arm, are exempt. See
+[`MODEL_COMPONENT_POLICY.md`](MODEL_COMPONENT_POLICY.md) §10.
+
+---
+
 ## 3. Automated Reporting
 
 Every promotion evaluation generates:
