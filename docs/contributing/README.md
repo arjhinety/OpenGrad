@@ -14,3 +14,13 @@ Two project conventions are worth reading before your first pull request. Result
 artifacts are authoritative and the index is not. And a gate is never relaxed to make a run pass:
 if a threshold blocks a correct result, that is a finding about the threshold, and it is recorded
 rather than edited around.
+
+## Development skills
+
+[`.claude/skills/`](../../.claude/skills/) holds the OpenGrad development skills: task instructions for coding
+agents (and a checklist for people). Each covers one area of the repository — data, annotation, experiments
+and readiness, training, evaluation, promotion gates, releases, registries and provenance, research
+guardrails — and `opengrad-development` is the entry point. They ship with the code and are kept current by
+`tests/skills/test_skills.py`, which fails CI when a package, console script or CLI subcommand has no skill
+covering it, or when a skill cites a path that no longer exists. A change that alters a workflow updates its
+skill in the same commit; see `opengrad-skills-maintenance`.
