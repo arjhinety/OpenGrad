@@ -1,0 +1,14 @@
+{
+  "extraKnownMarketplaces": {
+    "opengrad": {
+      "source": {
+        "source": "github",
+        "repo": "arjhinety/OpenGrad"
+      },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "opengrad@opengrad": true
+  }
+}

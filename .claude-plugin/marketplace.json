@@ -1,0 +1,19 @@
+{
+  "name": "opengrad",
+  "owner": {
+    "name": "Arjhine Ty",
+    "url": "https://github.com/arjhinety"
+  },
+  "description": "Claude Code plugins for developing OpenGrad.",
+  "plugins": [
+    {
+      "name": "opengrad",
+      "source": "./plugins/opengrad",
+      "description": "Development skills covering every OpenGrad workflow, kept in step with the repository by its CI.",
+      "category": "development",
+      "homepage": "https://github.com/arjhinety/OpenGrad/tree/master/plugins/opengrad",
+      "repository": "https://github.com/arjhinety/OpenGrad",
+      "license": "Apache-2.0"
+    }
+  ]
+}

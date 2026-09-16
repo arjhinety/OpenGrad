@@ -17,10 +17,18 @@ rather than edited around.
 
 ## Development skills
 
-[`.claude/skills/`](../../.claude/skills/) holds the OpenGrad development skills: task instructions for coding
-agents (and a checklist for people). Each covers one area of the repository — data, annotation, experiments
-and readiness, training, evaluation, promotion gates, releases, registries and provenance, research
-guardrails — and `opengrad-development` is the entry point. They ship with the code and are kept current by
-`tests/skills/test_skills.py`, which fails CI when a package, console script or CLI subcommand has no skill
-covering it, or when a skill cites a path that no longer exists. A change that alters a workflow updates its
-skill in the same commit; see `opengrad-skills-maintenance`.
+The OpenGrad development skills ship with the code as the `opengrad` Claude Code plugin
+([`plugins/opengrad/`](../../plugins/opengrad/README.md)). They are task instructions for coding agents, and a
+checklist for people. Each covers one area of the repository: data, annotation, experiments and readiness,
+training, evaluation, promotion gates, releases, registries and provenance, research guardrails.
+`opengrad-development` is the entry point.
+
+Install them with `/plugin marketplace add arjhinety/OpenGrad` and `/plugin install opengrad@opengrad`. Inside
+this repository, the marketplace is registered for you once you trust the folder.
+
+`tests/skills/test_skills.py` keeps them current. CI fails when:
+- a package, console script or CLI subcommand has no skill covering it;
+- a skill cites a path that no longer exists;
+- the plugin manifests disagree.
+
+A change that alters a workflow updates its skill in the same commit; see `opengrad-skills-maintenance`.

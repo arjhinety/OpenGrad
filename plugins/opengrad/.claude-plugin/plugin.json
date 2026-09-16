@@ -1,0 +1,13 @@
+{
+  "name": "opengrad",
+  "displayName": "OpenGrad development skills",
+  "description": "Development skills for working in the OpenGrad repository: research guardrails, data pipeline, annotation, experiments and readiness gates, training (incl. vision/MTP), evaluation, promotion gates, open-weights release, registries and provenance. Start with /opengrad:opengrad-development. The skills cite repository paths, so use them inside an OpenGrad checkout.",
+  "author": {
+    "name": "Arjhine Ty",
+    "url": "https://github.com/arjhinety"
+  },
+  "homepage": "https://github.com/arjhinety/OpenGrad/tree/master/plugins/opengrad",
+  "repository": "https://github.com/arjhinety/OpenGrad",
+  "license": "Apache-2.0",
+  "keywords": ["opengrad", "post-training", "research", "provenance", "evaluation", "sft", "dpo"]
+}

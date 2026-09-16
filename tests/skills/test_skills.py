@@ -1,12 +1,14 @@
-"""The OpenGrad development skills in `.claude/skills/` must describe the repository as it is.
+"""The OpenGrad development skills (the `opengrad` Claude Code plugin) must describe the repository as it is.
 
 Skills are instructions shipped with the code. They rot in two directions: the repository grows a package or
 command no skill explains, or a skill keeps citing a path that was renamed away. Both fail here, so a change
-that alters a workflow has to update its skill in the same commit (see `opengrad-skills-maintenance`).
+that alters a workflow has to update its skill in the same commit (see `opengrad-skills-maintenance`). The
+plugin is distributed from this repository's marketplace, so its manifests are checked here too.
 """
 
 from __future__ import annotations
 
+import json
 import re
 import tomllib
 from pathlib import Path
@@ -14,7 +16,10 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILLS = ROOT / ".claude" / "skills"
+PLUGIN = ROOT / "plugins" / "opengrad"
+SKILLS = PLUGIN / "skills"
+MARKETPLACE = ROOT / ".claude-plugin" / "marketplace.json"
+PROJECT_SETTINGS = ROOT / ".claude" / "settings.json"
 
 #: Console scripts whose subcommands every skill set must cover, with the file that defines them.
 SUBCOMMAND_SOURCES = {
@@ -42,7 +47,10 @@ PATH_ROOTS = (
     "hf/",
     "manifests/",
     "experiments/",
+    "plugins/",
     ".github/",
+    ".claude-plugin/",
+    ".claude/",
 )
 PLACEHOLDER_MARKS = ("<", "*", "{", "…", "...")
 
@@ -52,7 +60,7 @@ def _skill_dirs() -> list[Path]:
 
 
 def _skill_files() -> list[Path]:
-    return sorted(path for path in SKILLS.rglob("*.md"))
+    return sorted(path for path in PLUGIN.rglob("*.md"))
 
 
 def _corpus() -> str:
@@ -72,7 +80,7 @@ def _frontmatter(text: str) -> dict[str, str]:
 
 def test_skills_exist():
     assert SKILLS.is_dir()
-    assert _skill_dirs(), "no skills under .claude/skills"
+    assert _skill_dirs(), "no skills under plugins/opengrad/skills"
 
 
 @pytest.mark.parametrize(
@@ -145,7 +153,7 @@ def test_every_code_package_has_an_owning_skill():
     ]
     assert not uncovered, (
         f"packages without a skill: {uncovered}. Add them to the owning skill "
-        "(see .claude/skills/opengrad-skills-maintenance)."
+        "(see plugins/opengrad/skills/opengrad-skills-maintenance)."
     )
 
 
@@ -197,3 +205,35 @@ def test_every_subcommand_of_each_tool_has_an_owning_skill(command: str):
         if not (full or listed):
             uncovered.append(name)
     assert not uncovered, f"`{command}` subcommands without a skill: {uncovered}"
+
+
+def test_the_marketplace_publishes_the_plugin_from_this_repository():
+    marketplace = json.loads(MARKETPLACE.read_text(encoding="utf-8"))
+    manifest = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    assert marketplace["name"] == "opengrad"
+    assert marketplace["owner"]["name"]
+    entries = {entry["name"]: entry for entry in marketplace["plugins"]}
+    assert set(entries) == {"opengrad"}, (
+        "one bundled plugin: the skills route to each other by name"
+    )
+    entry = entries["opengrad"]
+    assert entry["source"] == "./plugins/opengrad"
+    assert (ROOT / entry["source"]).resolve() == PLUGIN.resolve()
+    assert manifest["name"] == entry["name"]
+    # Unpinned on purpose: every pushed commit is a release, so users never keep stale instructions.
+    assert "version" not in manifest and "version" not in entry
+
+
+def test_the_plugin_manifest_holds_no_skill_copies_outside_the_plugin():
+    assert not (ROOT / ".claude" / "skills").exists(), "the plugin is the single copy of the skills"
+    manifest_dir = PLUGIN / ".claude-plugin"
+    assert sorted(path.name for path in manifest_dir.iterdir()) == ["plugin.json"], (
+        "only plugin.json belongs in .claude-plugin/; components live at the plugin root"
+    )
+
+
+def test_the_repository_registers_and_enables_its_own_plugin():
+    settings = json.loads(PROJECT_SETTINGS.read_text(encoding="utf-8"))
+    source = settings["extraKnownMarketplaces"]["opengrad"]["source"]
+    assert source == {"source": "github", "repo": "arjhinety/OpenGrad"}
+    assert settings["enabledPlugins"].get("opengrad@opengrad") is True
