@@ -1,12 +1,13 @@
 # 30 — P-DET-COVERAGE-v1: preregistration draft
 
-**Status: DRAFT, 2026-09-15. Not adopted. No example has been drawn.** Both sampling blockers of §12 are
-resolved:
+**Status: DRAFT, 2026-09-15; revised 2026-09-16 after an engineering review and a counts-only dry run
+(§13). Not adopted. No population has been drawn or written; no item has been annotated.** Both sampling
+blockers of §12 are resolved:
 - **B-1**, the canonical-v3 representation: [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md);
 - **B-2**, the classifier input contract: [32](32-CLASSIFIER-INPUT-CONTRACT.md).
 
-Sampling is therefore no longer blocked on a missing artifact. It still waits for this draft's adoption,
-for the recorded hashes (§12), and for the builder, which is not yet written.
+The builder exists (`src/opengrad/verification/pdet_coverage.py`). It refuses to write a population to
+`reports/pdet-coverage/` while this document is a draft. Sampling waits only for adoption.
 
 This document specifies a second classifier-validation population. It **complements** frozen P-DET-v1 and
 does not replace it.
@@ -26,6 +27,10 @@ adopts it, it is recorded as amendment `study_002_prereg_v4` in [03](03-PREREGIS
 | Seed | `opengrad-pdet-coverage-002-v1` |
 | Output (at draw time) | `reports/pdet-coverage/` (never `reports/pdet/`) |
 | Feasibility evidence | `scripts/audit_pdet_coverage_supply.py` → `reports/pdet-coverage/pdet-coverage-v1.supply-proxy.json` (counts only, over a **proxy**; §5) |
+| Builder | `python -m opengrad.verification.pdet_coverage --build \| --verify \| --dry-run --output-dir DIR` |
+| Structural call evidence | `src/opengrad/verification/call_fidelity.py` (§4) |
+| Acceptance rules, as code | `src/opengrad/verification/pdet_coverage_metrics.py` (§11) |
+| Pre-adoption dry run | `reports/pdet-coverage/pdet-coverage-v1.dry-run.json` (counts and hashes only; §13) |
 
 ## 1. Purpose
 
@@ -73,9 +78,9 @@ is not forced into CALL, and is not annotated in this population.
 
 **Rule.** A record in which any tool has been used is out of layer B (§4). A tool has been used when any
 of these appears: an assistant turn with structured `tool_calls`, a `tool`-role message, or (proxy only)
-a Glaive `<functioncall>` marker. The builder records every such record under reason
-`DOWNSTREAM_TOOL_RESULT_RESPONSE` or `STRUCTURAL_CALL`, with counts per source in the manifest. Records
-whose first tool use is a structured call are eligible only for layer A.
+a Glaive `<functioncall>` marker. The builder records every such record under the input contract's reason
+(`STRUCTURAL_CALL` or `POST_TOOL_RESULT_RESPONSE`, 32 §4), with counts per source in the manifest. Records
+whose first assistant turn is a structured call are eligible only for layer A.
 
 Proxy scale, from `pdet-coverage-v1.supply-proxy.json`. The final turn is prose after tool use in:
 
@@ -85,7 +90,7 @@ Proxy scale, from `pdet-coverage-v1.supply-proxy.json`. The final turn is prose 
 | BUTTON | 7,941 (all of them) |
 | ToolACE | 644 |
 
-**Multi-turn tool-free records** are also out of the unit, under reason `MULTI_TURN_UNIT_UNDEFINED`. How
+**Multi-turn tool-free records** are also out of the unit, under reason `MULTI_TURN_UNSUPPORTED` (32 §6). How
 the classifier will label a conversation with several assistant turns is not specified (§12, B-2), so no
 population can yet be built to match it. The proxy has 34,450 such Glaive records and 311 LoopTool
 records. **No classifier permission on multi-turn records follows from P-DET evidence.** Covering them
@@ -98,22 +103,38 @@ structure**. No prose heuristic guesses it. This is today's rule in `_base`
 (`src/opengrad/data/adapters.py`): any structured `tool_calls` or `tool` message gives `decision: CALL`,
 `confidence: derived`. Layer A is validated two ways:
 
-1. **Exhaustively and deterministically**, over the whole canonical-v3 pre-classifier artifact (§5):
-   - every record with a structured call is routed CALL;
-   - no record without one is routed CALL by structure;
-   - the canonical validator's trajectory rejections (for example `SEM_ORPHAN_RESULT`) are counted per
-     source.
+1. **Exhaustively and deterministically**, over every accepted normalization-v3 row of Glaive, ToolACE
+   and xLAM (`call_fidelity.py`, recorded as `structural_call_evidence` in the manifest). "Every structured
+   call is routed CALL" cannot fail, because routing *is* that structure, so the check is one that can:
+   - every call the **raw upstream row** expresses in its own syntax is re-read by a parser that shares no
+     code with the adapters, and must equal the structured call: same count, same name, same arguments,
+     in order. For ToolACE the first reader is Python's own parser (names and argument names masked). A
+     turn it cannot read goes to a second reader written from ToolACE's documented format (names may hold
+     spaces, commas or parentheses; values are Python or JSON literals). That reader shares the adapter's
+     reading of the format, so rows it reads are weaker evidence and are counted separately
+     (`rows_read_by_format_grammar`);
+   - it runs on rows whatever their trajectory-gate status, split by status, so records the input
+     contract rejects (ToolACE's 8,472 `MISSING_TOOL_RESULT` rows) are checked too;
+   - raw rows normalization-v3 did not accept are accounted for from the disposition ledger (raw calls
+     held, by disposition and reason);
+   - status: `FAIL` on any mismatch; `INCOMPLETE` when some rows cannot be read independently (they are
+     unverified, never counted as passing); `PASS` only when every call row was compared and matched.
 
-   This is a code check, not a sample.
+   This is a code check, not a sample. Its dry-run result is in §13.
 2. **A 30-item human spot-check** in a separate annotation task (`pdet-coverage-v1-routing`). It confirms
-   that each structured payload is a real invocation of an offered tool, consistent with the request. It
-   guards against adapter artefacts, such as a wrong extraction in `adapt_glaive_v2`. Allocation:
-   - Glaive 15 (reconstructed from malformed upstream text: the highest risk);
-   - ToolACE 10 (parsed from bracket syntax);
-   - xLAM 5 (natively structured);
-   - LoopTool +5, only if canonical-v3 includes it.
+   that each structured payload is a plausible invocation of an offered tool, consistent with the request.
+   It cannot detect a plausible extraction that changed an argument; item 1 does that. Allocation:
+   - Glaive 15, ToolACE 10, xLAM 5 (LoopTool is not in canonical-v3);
+   - within a source, split across trajectory-gate status in proportion to supply, with at least one
+     item from each status that has supply. Gate-rejected records are eligible here (never for layer B),
+     so the audit also covers the records the renderer rejects.
 
-   With 0 errors in 30, the 95% upper bound on the error rate is 10% by the rule of three (Wilson 11.4%).
+   With 0 errors in n items from one source, the 95% upper bound on that source's error rate is 3/n (rule
+   of three). Bounds are reported **per source, never pooled**: the fixed 15/10/5 split does not represent
+   any corpus.
+
+**What CALL balancing permission rests on.** Layer B textual CALL is `NOT_EVALUABLE` unless stratum X
+yields enough usable gold (§11). Structural CALL rests on item 1, not on the spot check.
 
 **Layer B — prose decision classification.** The semantic classifier is tested on tool-free,
 single-exchange records (§7). There it must decide DIRECT, CLARIFY or UNSUPPORTED. It may output CALL only
@@ -213,8 +234,15 @@ The cue lists and patterns are the ones in `scripts/audit_pdet_coverage_supply.p
 use them byte for byte.
 
 Generic words such as "function", "tool" or "API" are **not** an M cue, and that is measured. In the
-proxy, 11,002 of 14,329 Glaive tool-free single-exchange responses contain one, mostly inside the
-refusal template "my current function allows me to …". Those words would put Glaive's refusals into M.
+proxy, 11,002 of 14,329 Glaive tool-free single-exchange responses contain one, mostly inside a single
+templated refusal. Those words would put Glaive's refusals into M. (No pool text is quoted here: this
+document is annotator-facing, §9.)
+
+**M match kind (reporting only).** An offered tool name can be an ordinary word, so an M item may not
+really mention a tool. For each realized M item the builder records, **in the manifest only**, why it
+matched: `invocation_talk`, `identifier_shaped_tool_name` (underscore, dot, hyphen, digit or camelCase)
+or `word_tool_name`. It never changes the stratum or the draw and is never shown on an annotated item.
+M metrics are reported on all of M and on the genuine-mention subset (the first two kinds).
 
 ### 7.3 Quotas and how they follow from the strata
 
@@ -224,9 +252,11 @@ usable means gold that is not UNKNOWN and not excluded.
 - **Boundary strata (M, R, Q): 60 each.** That allows up to 1 in 6 items to end up unusable
   (60 × 5/6 = 50). The allowance is conservative: P-DET-v1 had 2 UNKNOWN in 581, but these strata sit on
   the ambiguous boundaries on purpose.
-- **DIRECT: P1 60 and P2 30 (90 candidates).** Together they give 50 gold DIRECT if at least 56% of plain
-  responses are gold DIRECT. Any DIRECT gold in R, Q and M adds to that. P1 is weighted over P2 because
-  the DIRECT/CALL decision exists only when a tool is offered.
+- **DIRECT: P1 80 and P2 40 (120 candidates).** Together they give 50 gold DIRECT if at least 42% of plain
+  responses are gold DIRECT (50/120). Any DIRECT gold in R, Q and M adds to that. P1 is weighted over P2
+  because the DIRECT/CALL decision exists only when a tool is offered. *(Raised from P1 60 and P2 30, which
+  needed a 56% yield, before any label existed; §13.)* The hard DIRECT cases sit in R, Q and M, and §11
+  gates them separately, so P1 and P2 cannot carry DIRECT alone.
 - **X: every eligible item, up to 60.** This stratum can't be manufactured.
 - **Layer A: 30 (35 with LoopTool).** This is an audit, not a classifier boundary; see §4.
 
@@ -236,17 +266,18 @@ usable means gold that is not UNKNOWN and not excluded.
 | M | 60 | 19 / 722 / 15 |
 | R | 60 | 10,694 / 228 / 145 |
 | Q | 60 | 102 / 169 / 152 |
-| P1 | 60 | 58 / 375 / 3 |
-| P2 | 30 | 65 / 491 / 0 |
+| P1 | 80 | 58 / 375 / 3 |
+| P2 | 40 | 65 / 491 / 0 |
 
-**Source allocation inside a stratum:**
+**Source allocation inside a stratum** (`allocate`):
 1. Split the quota equally across the included sources that have supply.
-2. When a source runs short, give its remainder to the others, largest remaining supply first.
+2. When a source runs short, split its remainder equally among the others; units too few to split go one
+   each to the sources with the largest remaining supply.
 3. Break ties by source name.
 
 This is allocation, not backfill: it never moves quota *between* strata.
 
-On proxy supply this gives:
+On proxy supply, at the original quotas (P1 60, P2 30), this gives:
 
 | Stratum | With LoopTool (Glaive / ToolACE / LoopTool) | Without LoopTool (Glaive / ToolACE) |
 |---|---|---|
@@ -257,12 +288,14 @@ On proxy supply this gives:
 | P1 | 28 / 29 / 3 | 30 / 30 |
 | P2 | 15 / 15 / 0 | 15 / 15 |
 
-Either way layer B is **276** (at most 330 if X is fully supplied), and the population is 306–311 with
-layer A. The real numbers are computed at draw time from the canonical-v3 artifact and printed in the
-manifest. These proxy figures only show that the design can be supplied.
+At those original quotas layer B was **276** either way. These proxy figures only show that the design can
+be supplied. The real numbers, at the current quotas, are computed from the canonical-v3 artifact: the
+pre-adoption dry run's are in §13, and the draw prints its own in the manifest.
 
-**Measured on the real input** (`reports/pdet-coverage/pdet-coverage-v1.supply-v3.json`). This is supply
-analysis, not gold and not a draw. The pool is every normalization-v3 record of Glaive or ToolACE that is
+**Measured on the real input** (`reports/pdet-coverage/pdet-coverage-v1.supply-v3.json`), before §9's
+exclusions and dedup. This is supply analysis, not gold and not a draw. Its "allocation implied" column is
+an upper bound at the original quotas and is **superseded by the dry run in §13**: after §9, Glaive keeps far
+fewer distinct prompts in M and P1 than this table suggests. The pool is every normalization-v3 record of Glaive or ToolACE that is
 eligible under `prose-decision-input-v1`: Glaive 14,303 and ToolACE 1,972. The stratum predicates are the
 ones above, byte for byte. §9's draw-time exclusions are not applied.
 
@@ -280,7 +313,8 @@ ones above, byte for byte. §9's draw-time exclusions are not applied.
   draw time.
 - **The binding constraint is prompts, not responses.** Glaive's 14,050 R records come from only 210
   distinct user prompts, and its P1 records from 14.
-- **Layer B stays at 276**, with X the only shortage, as predicted.
+- At the original quotas layer B stayed at 276, with X the only shortage. At the current quotas the dry
+  run realizes more (§13), still with X the only shortage.
 
 **No backfill.** An undersupplied stratum takes everything it has. Its shortage is reported *before*
 annotation, and no other stratum grows to make up for it. If fewer than 50 usable gold items result, that
@@ -299,11 +333,15 @@ proxy already predicts that X falls short (6 of 60).
 5. **Neutral ids.** Each record gets the id `pdetcov:` + `sha256(source_dataset + ":" + raw_record_hash)`.
    The id reveals no source; the source is kept in the record, blinded (§10).
 6. **Stratum**, by first match (§7.2).
-7. **Dedup** as in §9. In rank order, the highest-ranked member survives.
+7. **Dedup** as in §9. Layer B strata are processed **scarcest first** (fewest candidates after the §9
+   exclusions; ties in stratum order X, M, R, Q, P1, P2), each in rank order, and the first member of a
+   duplicate group survives. A prompt shared across strata therefore stays in the stratum with least to
+   spare. Layer A is processed in rank order.
 8. **Ranking.** Within each stratum and source, sort by `sha256(seed + "|" + stratum + "|" + id)`,
    descending. This is the P-DET-v1 idiom (`sha256(seed ‖ pdet_id)` descending), with the stratum added so
    strata are independent. There is no RNG state.
-9. **Take** the quota per stratum and source (§7.3), with the skeleton cap.
+9. **Take** the quota per stratum and source (§7.3), with the skeleton cap. Layer A takes each source's
+   quota split across trajectory-gate status (§4).
 10. **Write** `reports/pdet-coverage/pdet-coverage-v1.population.jsonl`,
     `pdet-coverage-v1.manifest.json` and a `.sha256` sidecar. The manifest holds:
     - the input manifest hashes;
@@ -315,9 +353,14 @@ proxy already predicts that X falls short (6 of 60).
 11. **Presentation order** for annotation: `sha256(seed + ":order:" + id)`, so strata, layers and sources
     are interleaved.
 
-New, versioned code: `src/opengrad/verification/pdet_coverage.py` with `--build` and `--verify`. It reads
+Code: `src/opengrad/verification/pdet_coverage.py` with `--build`, `--verify` and `--dry-run`. It reads
 constants from its own module and imports nothing from `pdet.py`. `pdet.py` and `reports/pdet/` are not
-touched.
+touched. The builder:
+- refuses any input whose top manifest, fingerprint, per-source manifests, shards or canonical-v3 source
+  manifest (`cc40f64e…`) differ from the recorded ones, and every exclusion input whose bytes changed;
+- refuses `reports/pdet/` always, and a population in `reports/pdet-coverage/` until adoption;
+- in `--dry-run`, writes counts and hashes only: no item, no item id, no per-item source or stratum. The
+  draw is byte-reproducible, so a written population *is* the future blind sample.
 
 ## 9. Contamination and dedup
 
@@ -347,7 +390,9 @@ classifier that leans on the same cues shows up.
 **Dedup, in order:**
 1. by `raw_record_hash`;
 2. by normalized response text (case-folded, whitespace collapsed);
-3. by normalized user prompt, one per prompt;
+3. by normalized user prompt, **one per prompt across all of layer B** (not per stratum: items sharing a
+   prompt are not independent, and the Wilson intervals of §11 assume independence). Which stratum keeps a
+   shared prompt is fixed by the processing order of §8.7;
 4. at most one item per response **skeleton** per stratum. The skeleton is the case-folded response with
    offered tool names, quoted spans and numbers masked, as in the audit script. Glaive's templated
    refusals are the reason: the proxy has 14,076 R-stratum records but 10,694 distinct skeletons.
@@ -374,6 +419,7 @@ pools. If exposure is found after the freeze, the item stays in the population a
 - **Blind to:**
   - the source dataset (hidden, because it would cue the label: xLAM always calls);
   - the stratum, the layer and the cue flags;
+  - the trajectory-gate status (layer A) and the M match kind, which exist in the manifest only;
   - the adapter;
   - the expected behaviour;
   - any classifier prediction or model suggestion;
@@ -409,33 +455,39 @@ Worst-case half-widths:
 
 For example, 40 of 50 is 0.80, with interval [0.670, 0.888].
 
-**Layer B (prose classifier):**
-- **DIRECT:** recall and precision on P-DET-COVERAGE-v1. The false-DIRECT count and rate on P-DET-v1,
-  where gold DIRECT is 0.
-- **UNSUPPORTED recall and CLARIFY F1:** P-DET-v1 is primary (natural data); strata R and Q are
-  secondary.
-- **Boundary accuracy per stratum:**
-  - R: DIRECT vs UNSUPPORTED;
-  - Q: DIRECT vs CLARIFY;
-  - M: tool mention;
-  - P1: DIRECT with a tool offered.
-- **Prose-layer false CALL:** the count and rate of CALL predictions on items whose gold is not CALL, in
-  both populations. This is the operational form of the 22 §6 CALL-precision risk ("a false CALL injects a
-  wrong tool-call target").
-- **Textual-CALL recall and precision:** only if X gives at least 50 usable gold. Otherwise
-  `NOT_EVALUABLE`, with its n.
-- **Also:** the confusion matrix, macro F1 per population, and the abstention rate.
-- **Challenge-subset recall.** P-DET-COVERAGE-v1 is a challenge set, so the 22 §6 "each mode, challenge
-  subset, recall ≥ 0.60" row is evaluated on it, for every mode with n ≥ 50.
+**The rules are code.** `src/opengrad/verification/pdet_coverage_metrics.py` (`pdet-coverage-metrics-v1`)
+computes every row below from gold labels and predictions, and its tests pin worked numbers
+(`tests/verification/test_pdet_coverage_metrics.py`). It was written before any label or classifier existed,
+so no choice here can follow the results. The thresholds are the frozen 22 §6 values; what 22 left open is
+fixed as follows. The study owner accepted the minimum sizes on 2026-09-16; they bind on adoption.
 
-**Layer A (structural routing):**
-- exhaustive mismatch counts, which must be 0;
-- validator rejections per source;
-- human spot-check agreement, reported only here.
+| Rule | Fixed as |
+|---|---|
+| Usable gold | gold in {CALL, DIRECT, CLARIFY, UNSUPPORTED}, not excluded (e.g. `EXPOSED_WORKED_EXAMPLE`) |
+| Recall row evaluable | at least **50** usable gold of the mode on that population (22 §5) |
+| Precision row evaluable | at least **50** predictions of the mode on that population. So DIRECT precision on P-DET-v1 (0 gold) gates only once there are 50 DIRECT predictions there, and then fails |
+| Across populations | a row must pass on **every** population where it is evaluable; "primary" and "secondary" are reporting labels only. A row evaluable nowhere is `NOT_EVALUABLE`, and its mode does not qualify |
+| Challenge rows | P-DET-COVERAGE-v1: strata **R, Q, M, X only**, never P1/P2; P-DET-v1: its frozen challenge component. At least **30** usable gold of the mode; recall ≥ 0.60 |
+| False CALL | a CALL prediction on UNKNOWN (ambiguous) gold counts in the CALL precision denominator. In stratum M, CALL predictions on UNKNOWN gold are a gated count: **0** allowed |
+| Abstention | a miss for recall, excluded from precision denominators; rate ≤ 0.15 over usable items |
+| Macro F1 | over the modes with at least 50 usable gold in that population |
+| DIRECT precision on the pool | per source, each coverage stratum's DIRECT precision weighted by its share of that source's eligible pool (`pool_strata` in the manifest, before any sampling), with a seeded stratified bootstrap interval. Evaluable with at least **20** DIRECT predictions from the source and a sample in every pool stratum; ≥ 0.80 to pass |
+| Qualification | a mode qualifies when all its rows pass (DIRECT: recall, precision, challenge recall; UNSUPPORTED: recall, challenge; CLARIFY: F1, challenge; CALL: precision, challenge, CALL-on-ambiguous in M) and macro F1 and abstention pass. DIRECT balancing is permitted **only for sources** whose pool-weighted precision passes. C1 needs DIRECT and UNSUPPORTED (22 §6) |
 
-**How the 22 §6 thresholds apply across two populations.** Each threshold is evaluated on every population
-where it is defined (enough gold for recall, enough predictions for precision), and it **must pass on each
-of them**. A threshold defined on no population is `NOT_EVALUABLE`, and that mode does not qualify.
+Why the challenge rule matters: P1 and P2 are cue-free by construction, so they hold the easy DIRECT cases.
+With 80 easy DIRECT right and 15 hard DIRECT wrong, pooled recall is 80/95 = 0.84 and passes, but the
+challenge row sees only the 15 hard items and is not evaluable, so DIRECT does not qualify. Why the pool
+weighting matters: Glaive's eligible pool is almost entirely stratum R, so a small false-DIRECT rate on R
+dominates the DIRECT labels the classifier would write there, however clean P1 looks.
+
+**Also reported, never gated:** boundary accuracy per stratum (R: DIRECT vs UNSUPPORTED; Q: DIRECT vs
+CLARIFY; M: tool mention, on all of M and on its genuine-mention subset; P1: DIRECT with a tool offered),
+the confusion matrix, both sides' gold counts for each boundary, and textual-CALL recall and precision on X
+(`NOT_EVALUABLE` below 50 usable gold, with its n).
+
+**Layer A (structural routing):** the structural call evidence of §4 (mismatches must be 0, unverified
+rows reported), validator rejections per source, and human spot-check agreement with per-source bounds,
+reported only here. Success on layer A is never evidence that the prose classifier recognises CALL.
 
 P-DET-COVERAGE-v1 precision depends on its constructed mix. It is labelled that way and never read as a
 prevalence estimate.
@@ -443,7 +495,7 @@ prevalence estimate.
 A **combined** score over both populations may appear only as a secondary summary. It never feeds a gate,
 and the populations are never merged into one prevalence statistic.
 
-The thresholds themselves are the frozen 22 §6 values. This draft changes none.
+The thresholds themselves are the frozen 22 §6 values. This draft changes none of them.
 
 ## 12. Blockers and unknowns
 
@@ -458,12 +510,83 @@ The thresholds themselves are the frozen 22 §6 values. This draft changes none.
 | U-5 | multi-turn tool-free records (proxy: Glaive 34,450, LoopTool 311) | not covered; no classifier permission on them from P-DET evidence | a separate, preregistered multi-turn component, once B-2 defines the unit |
 | U-6 | whether P-DET-v1's items appear in canonical-v3 When2Call with the same text | P-DET-v1's representation fidelity | **checked**: 575 of 581 equivalent, 6 quarantined in v3 (§5; 31 §7) |
 | U-7 | the source of P-CONF's `ANSWER` set | cross-exclusion | handled by the "whichever freezes second" rule (§9) |
+| U-8 | why 8,472 ToolACE records fail `MISSING_TOOL_RESULT` | none for this population (layer A audits them, §4); possibly large for canonical-v3 training | open item in [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md). The structural call evidence shows their calls are extracted exactly, so the gap is the missing tool result, not the call |
+| U-9 | ToolACE call rows the first independent reader could not parse | structural call evidence was `INCOMPLETE` | **resolved** (study owner, 2026-09-16): a second, format-grammar reader reads them; every call row is now compared, and those rows are counted as weaker evidence (§4, §13) |
 
-This draft contains no unresolved design choice of its own. The DIRECT definition, the post-tool
-exclusion, the two-layer split and the sampling rule are fixed by the study owner's instructions. The
-rest follows from them and from the repository evidence cited above. **B-1 and B-2 are resolved**
-([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md), [32](32-CLASSIFIER-INPUT-CONTRACT.md)), and their
-hashes are recorded in the table above. Next:
-1. `pdet_coverage.py` is written against the normalization-v3 fingerprint and `prose-decision-input-v1`;
-2. the draft goes to the study owner for adoption;
+The DIRECT definition, the post-tool exclusion, the two-layer split and the sampling rule are fixed by the
+study owner's instructions; each revision in §13 was decided by the study owner. **B-1 and B-2 are
+resolved** ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md), [32](32-CLASSIFIER-INPUT-CONTRACT.md)),
+and their hashes are recorded in the table above. Next:
+1. done: `pdet_coverage.py`, its structural call evidence and the metric code are written and tested;
+2. the study owner adopts this draft (amendment `study_002_prereg_v4`), which makes the minimum sizes of
+   §11 binding;
 3. only then is anything drawn.
+
+## 13. Pre-adoption engineering review and dry run (2026-09-16)
+
+**What happened, in order.** No label was involved at any step.
+1. The builder was written and run twice into a scratch directory. Both draws were byte-identical. Their
+   population files were deleted unread: no item text was printed, and the study owner was shown counts
+   only.
+2. An engineering review (gstack `/plan-eng-review`) examined this draft, the builder and those counts,
+   with two independent outside reviews (Codex, and a separate Claude Opus 5 session) that read the plan
+   and counts, not the pools.
+3. The study owner decided each finding. The design changes below were made because of what the counts
+   showed about supply, never because of any outcome.
+4. The revised builder was dry-run in counts-only mode twice, byte-identically, and the record was written
+   to `reports/pdet-coverage/pdet-coverage-v1.dry-run.json`. It holds counts and hashes, no item and no
+   item id. `test_the_real_draw_reproduces_the_recorded_dry_run` re-draws and compares where the inputs
+   exist.
+
+**Exposure disclosure.** Two pieces of pool-adjacent text reached the study owner's session during the
+review, before annotation: §7.2's quoted refusal template (now removed from this document), and, in one
+tool output, Glaive refusal records from the tracked quantization calibration manifests. Neither names an
+item of this population, but templated Glaive refusals may resemble items in R. If the study owner judges
+any item exposed at annotation time, it gets the `EXPOSED_WORKED_EXAMPLE` exclusion (§9, 27).
+
+**Decisions (study owner, 2026-09-16).**
+
+| # | Finding | Decision |
+|---|---|---|
+| D1, D7 | one-per-prompt dedup kept a shared prompt in whichever stratum ranked it higher; Glaive fell to 2 of 60 in M and 1 of 60 in P1 | keep one per prompt across layer B; process strata scarcest first (§8.7, §9) |
+| D2 | 50 usable DIRECT needed a 56% yield from 90 candidates, with no prior estimate | P1 80, P2 40: a 42% yield (§7.3) |
+| D3, D8 | the promised exhaustive layer A check had no code, and routing-vs-structure cannot fail | independent re-read of every raw call, all rows including gate-rejected ones; spot check split by gate status (§4) |
+| D4 | a written dry-run population is the future blind sample | populations deleted; `--dry-run` writes counts only (§8) |
+| D5 | the design changed after a (label-free) dry run | this section |
+| D6 | untested refusal and failure branches | tests for every branch, plus a real-artifact reproduction test that skips, never passes, without inputs |
+| D9 | pooled DIRECT recall can pass on the easy P1/P2 items alone | challenge rows on R, Q, M, X only, minimum 30 (§11) |
+| D10 | nothing checked DIRECT precision on the pool the classifier will label | pool-weighted precision per source; DIRECT permission per source (§11) |
+| D11 | CALL on ambiguous gold escaped every metric | counted as false CALL; 0 allowed in M (§11) |
+| D12 | "defined" had no numbers | numeric minimums and the rules as tested code (§11) |
+| D13 | nothing named would justify CALL permission | structural call evidence is the basis; spot-check bounds per source (§4) |
+| D14 | §7.2 quoted pool text | quote removed; a test keeps quoted pool text out of this document |
+| D15 | the source manifest's hash was recorded but not enforced | the builder refuses any other source manifest (§8) |
+| D16 | M may catch ordinary-word tool names | manifest-only match kind; M reported on its genuine-mention subset (§7.2, §11) |
+| D17 | 8,472 ToolACE records fail `MISSING_TOOL_RESULT` | open item in 31 (U-8) |
+| U-9 | 120 ToolACE call rows were unreadable by the first independent reader, so the evidence was `INCOMPLETE` | extend the reader: a second, format-grammar reader, its rows counted as weaker evidence (§4) |
+| §11 minimums | 50 gold (recall), 50 predictions (precision), 30 hard gold (challenge), 20 DIRECT predictions per source | accepted as proposed |
+
+**The revised dry run** (generated from the record; `test_dry_run_table_in_the_preregistration_is_generated`
+keeps this block equal to it):
+
+<!-- dry-run-table:start (generated by pdet_coverage.render_dry_run_table) -->
+| Stratum | Quota | Supply after dedup | Realized | Shortage | glaive | toolace |
+|---|---:|---:|---:|---:|---:|---:|
+| X | 60 | 6 | 6 | 54 | 0 | 6 |
+| M | 60 | 712 | 60 | 0 | 11 | 49 |
+| R | 60 | 410 | 60 | 0 | 30 | 30 |
+| Q | 60 | 254 | 60 | 0 | 30 | 30 |
+| P1 | 80 | 370 | 80 | 0 | 6 | 74 |
+| P2 | 40 | 551 | 40 | 0 | 20 | 20 |
+
+| Layer A source | Quota | Realized | Gate-rejected realized / supply | Valid realized / supply |
+|---|---:|---:|---:|---:|
+| glaive | 15 | 15 | 1 / 107 | 14 / 5943 |
+| toolace | 10 | 10 | 9 / 8374 | 1 / 552 |
+| xlam | 5 | 5 | 1 / 1211 | 4 / 54356 |
+
+- Realized: layer B 306, layer A 30, total 336.
+- Population sha256 (not written): `4c7ca7b509874ad049a1ba0766ba477d94a952ea0d19969a6e60fc1c9ec10443`.
+- Stratum M match kinds: identifier_shaped_tool_name 44, invocation_talk 2, word_tool_name 14.
+- Structural call evidence: **PASS**; mismatched rows glaive 0, toolace 0, xlam 0; rows the independent readers could not parse (unverified) glaive 0, toolace 0, xlam 0; rows read only by the format-grammar fallback (weaker evidence) glaive 0, toolace 120, xlam 0.
+<!-- dry-run-table:end -->

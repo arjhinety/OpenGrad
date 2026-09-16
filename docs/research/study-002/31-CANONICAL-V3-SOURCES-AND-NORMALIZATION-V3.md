@@ -272,3 +272,19 @@ Two metadata differences are invisible to the classifier:
 - No training.
 - No change to any v1/v2 artifact, to P-DET-v1 or to `reports/pdet/`. Checked by a before-and-after hash
   diff: only the new files and `versions.py` differ.
+
+## 9. Open items
+
+- **ToolACE's trajectory-gate losses (from the P-DET-COVERAGE-v1 review, 30 §12 U-8, 2026-09-16).** 8,472 of
+  the 11,051 accepted ToolACE records fail `MISSING_TOOL_RESULT` (§3), and §3 also counts 8,442 whose final
+  assistant turn is a structured call. The same trajectory gate runs before `render_sft`, so those records
+  cannot be rendered for training, and a canonical-v3 mixture would silently lose most of ToolACE.
+  - **What is known.** `call_fidelity.py` (30 §4) re-reads every ToolACE call from the raw rows without
+    the adapter and finds no count, name or argument mismatch on these records, so the calls are extracted
+    correctly. What is missing is a tool result after the call.
+  - **What is not known.** Whether these conversations genuinely end at the call (a call-prediction
+    record, like xLAM's, which `semantic.py` exempts through its supervision contract) or whether a result
+    was lost. Start by comparing the supervision contract `adapters.py` assigns to ToolACE with the raw
+    conversation endings.
+  - **Effect.** None on P-DET-COVERAGE-v1: layer A audits these records and layer B never takes them.
+    Changing the contract would be a new normalization version, decided before any training mixture.

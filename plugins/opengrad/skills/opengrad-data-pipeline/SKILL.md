@@ -56,7 +56,10 @@ Follow the `glaive_v2` / `toolace_v2` precedent in `src/opengrad/data/adapters.p
 - **Re-anchor every copy of the fingerprint and top-manifest sha** (G15):
   - `reports/normalization-v3/manifests/`;
   - `docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md`,
-    `31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md` and the study-002 `README.md`.
+    `31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md` and the study-002 `README.md`;
+  - the pinned constants in `src/opengrad/verification/pdet_coverage.py` (`INPUT_FINGERPRINT`,
+    `INPUT_TOP_MANIFEST_SHA256`, `SOURCE_MANIFEST_SHA256`), which refuse any other input. Then re-record the
+    counts-only dry run (`opengrad-annotation` covers it) and regenerate 30 §13's table.
 
   Grep for the old hash afterwards. Only deliberate "supersedes" history may remain.
 - The classifier may read only what `prose-decision-input-v1` allows (`src/opengrad/data/classifier_input.py`,
