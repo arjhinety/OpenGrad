@@ -16,7 +16,7 @@
     "scripts/audit_pdet_coverage_supply.py": "466ae7874dd82b53eed9567c7c8f45d94e4601924df07b8882a29e77c4804eb1",
     "src/opengrad/data/classifier_input.py": "22b699a048fa7948b07e45e1c0616554c50ae28acc41eaf497d2b07653f633b8",
     "src/opengrad/verification/call_fidelity.py": "059b4a8c10e47e5b2bee8dc49c426a026d8f6bb7ecd6aad680b2bfca565aa366",
-    "src/opengrad/verification/pdet_coverage.py": "b65bef3a73fb5ffddc5f2f410ffc3d2d11d27a7d28ce834265b428ffd0dbfde7"
+    "src/opengrad/verification/pdet_coverage.py": "1611ba0563f2a84b81ed38d6d4530f5743ac3caf39ecfd40172b08ee4fdefb25"
   },
   "counts": {
     "after_dedup": {
@@ -106,12 +106,12 @@
         "toolace": {
           "per_gate": {
             "trajectory_issue": {
-              "realized": 9,
-              "supply": 8374
+              "realized": 1,
+              "supply": 41
             },
             "valid": {
-              "realized": 1,
-              "supply": 552
+              "realized": 9,
+              "supply": 8885
             }
           },
           "quota": 10,
@@ -328,16 +328,16 @@
   ],
   "id_rule": "pdetcov: + sha256(source_dataset : raw_record_hash)",
   "input": {
-    "fingerprint": "56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3",
+    "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
     "path": "data/processed/normalization-v3",
-    "source_manifest_sha256_lf": "cc40f64eaa1d6dbff618e64d2ad3f4b7fe46b053d3db31e67bcdf1d272ef0b6b",
+    "source_manifest_sha256_lf": "5bb4961cd100b4d5975a9596bee345e5234ce527029a4d6183f0b9a662bf2f90",
     "source_manifests_sha256_lf": {
-      "glaive": "d00e69ab4be74a3d4eadd365cf86eedd4c4fb8f9096abd1fca83393b60573aa8",
-      "toolace": "345b50fbe22b6d7360b267d1cb303fb9540ac7eaa86a8691f2f3e0c2b30f9dd2",
-      "when2call": "883f806084f4b0578447f550da440563eabbc7ca6665c7a4e744e466d0c0ecfa",
-      "xlam": "1958a0c89dec0b90dbfd217955939e477948e71cb96d8c187f7a77cbb6a62f70"
+      "glaive": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69",
+      "toolace": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2",
+      "when2call": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b",
+      "xlam": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
     },
-    "top_manifest_sha256_lf": "da651a46dc3848cb7cfe9755e113a815f18a078a095978a65b36f8b739a00c29",
+    "top_manifest_sha256_lf": "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e",
     "upstream_disposition_counts": {
       "glaive": {
         "accepted": 98339,
@@ -373,7 +373,7 @@
   "min_usable_gold_per_mode_or_boundary": 50,
   "population_id": "P-DET-COVERAGE-v1",
   "population_records": 336,
-  "population_sha256": "4c7ca7b509874ad049a1ba0766ba477d94a952ea0d19969a6e60fc1c9ec10443",
+  "population_sha256": "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c",
   "population_written": false,
   "preregistration": {
     "adoption_amendment": null,
@@ -520,26 +520,26 @@
           "trajectory_issue": {
             "argument_mismatch": 0,
             "count_mismatch": 0,
-            "exact": 8476,
+            "exact": 52,
             "name_mismatch": 0,
-            "raw_calls": 16697,
+            "raw_calls": 158,
             "raw_unparseable_independently": 0,
-            "rows": 8476,
-            "rows_read_by_format_grammar": 106,
-            "rows_with_calls": 8476,
-            "structured_calls": 16697
+            "rows": 52,
+            "rows_read_by_format_grammar": 2,
+            "rows_with_calls": 52,
+            "structured_calls": 158
           },
           "trajectory_valid": {
             "argument_mismatch": 0,
             "count_mismatch": 0,
-            "exact": 602,
+            "exact": 9026,
             "name_mismatch": 0,
-            "raw_calls": 1101,
+            "raw_calls": 17640,
             "raw_unparseable_independently": 0,
-            "rows": 2575,
-            "rows_read_by_format_grammar": 14,
-            "rows_with_calls": 602,
-            "structured_calls": 1101
+            "rows": 10999,
+            "rows_read_by_format_grammar": 118,
+            "rows_with_calls": 9026,
+            "structured_calls": 17640
           }
         },
         "mismatch_record_ids_first": {},

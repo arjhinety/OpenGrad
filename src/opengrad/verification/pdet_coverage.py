@@ -78,11 +78,11 @@ DRY_RUN_NAME = "pdet-coverage-v1.dry-run.json"
 CLASSIFIER_STATUS_AT_SELECTION = "NOT_IMPLEMENTED"
 
 #: The recorded canonical-v3 pre-classifier artifact (30 §12, B-1). Anything else is refused.
-INPUT_FINGERPRINT = "56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3"
-INPUT_TOP_MANIFEST_SHA256 = "da651a46dc3848cb7cfe9755e113a815f18a078a095978a65b36f8b739a00c29"
+INPUT_FINGERPRINT = "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a"
+INPUT_TOP_MANIFEST_SHA256 = "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e"
 
 #: The canonical-v3 source manifest (30 §12, B-1), LF-normalized. It decides which sources feed each layer.
-SOURCE_MANIFEST_SHA256 = "cc40f64eaa1d6dbff618e64d2ad3f4b7fe46b053d3db31e67bcdf1d272ef0b6b"
+SOURCE_MANIFEST_SHA256 = "5bb4961cd100b4d5975a9596bee345e5234ce527029a4d6183f0b9a662bf2f90"
 
 #: Layer B quotas (30 §7.3). X takes every eligible item up to its quota; no stratum is backfilled.
 #: P1 80 and P2 40 (raised from 60 and 30 before any label existed): 50 usable DIRECT needs a 42% yield.

@@ -12,9 +12,15 @@ exact-checkpoint step (`src/opengrad/data/renderers.py`, `docs/models/renderer-m
 
 ## Invariants
 
-- **Supervision is declared, never inferred.** Every record carries a supervision contract, such as
-  `COMPLETE_TRAJECTORY` or `CALL_PREDICTION`. A new shape gets a new contract. An existing contract is never
-  widened, and no source-name conditional is added to a validator.
+- **Supervision is declared by the adapter, never inferred by a validator or at training time.** Every
+  record carries a supervision contract, such as `COMPLETE_TRAJECTORY` or `CALL_PREDICTION`. A new shape
+  gets a new contract. An existing contract is never widened, and no source-name conditional is added to a
+  validator.
+- **An adapter's structural reading is never presented as upstream's.** `upstream_declared` is only for
+  what upstream documents (xLAM's card). A per-record rule the adapter applies from measured corpus
+  structure uses `source_adapter`, with a note naming the evidence artifact (`toolace_v3`:
+  `toolace_call_prediction_shape`, evidence `reports/normalization-v3/toolace-call-final-shape.json`).
+  Admit only the validated shape; subgroups outside it keep the stricter contract.
 - **Malformed input is quarantined with a reason code, never repaired into plausibility.** Nothing may
   fabricate a tool result.
 - **Versions come from one place:** `src/opengrad/data/versions.py`. Never write a version string literal
@@ -23,7 +29,8 @@ exact-checkpoint step (`src/opengrad/data/renderers.py`, `docs/models/renderer-m
 
 ## Changing an adapter's behaviour
 
-Follow the `glaive_v2` / `toolace_v2` precedent in `src/opengrad/data/adapters.py`:
+Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/data/adapters.py`
+(`toolace_v3` wraps v2 and changes only the declared supervision):
 1. Keep the old adapter byte-for-byte, so older corpora stay reproducible.
 2. Add `adapt_<source>_v2` and register it in `ADAPTERS` under a new key, with a new `row_label` and
    `source_format`.
@@ -53,6 +60,8 @@ Follow the `glaive_v2` / `toolace_v2` precedent in `src/opengrad/data/adapters.p
   - `scripts/audit_normalization_v3_structure.py` → `normalization-v3.structural-audit.json`
   - `scripts/audit_pdet_v1_representation.py` → `pdet-v1-representation-audit.json`
   - `scripts/audit_pdet_coverage_supply_v3.py` → `reports/pdet-coverage/pdet-coverage-v1.supply-v3.json`
+  - `scripts/audit_toolace_call_final_shape.py` → `toolace-call-final-shape.json` (raw rows only, so it
+    changes only with the raw artifact; `tests/data/test_toolace_call_prediction.py` regenerates it)
 - **Re-anchor every copy of the fingerprint and top-manifest sha** (G15):
   - `reports/normalization-v3/manifests/`;
   - `docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md`,

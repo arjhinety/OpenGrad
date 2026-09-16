@@ -1,7 +1,7 @@
 # 30 — P-DET-COVERAGE-v1: preregistration draft
 
 **Status: DRAFT, 2026-09-15; revised 2026-09-16 after an engineering review and a counts-only dry run
-(§13). Not adopted. No population has been drawn or written; no item has been annotated.** Both sampling
+(§13), and re-anchored the same day to normalization-v3 under adapter version `2.2.0` (U-8). Not adopted. No population has been drawn or written; no item has been annotated.** Both sampling
 blockers of §12 are resolved:
 - **B-1**, the canonical-v3 representation: [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md);
 - **B-2**, the classifier input contract: [32](32-CLASSIFIER-INPUT-CONTRACT.md).
@@ -114,7 +114,8 @@ structure**. No prose heuristic guesses it. This is today's rule in `_base`
      reading of the format, so rows it reads are weaker evidence and are counted separately
      (`rows_read_by_format_grammar`);
    - it runs on rows whatever their trajectory-gate status, split by status, so records the input
-     contract rejects (ToolACE's 8,472 `MISSING_TOOL_RESULT` rows) are checked too;
+     contract rejects are checked too (under adapter version `2.1.0` that was ToolACE's 8,472
+     `MISSING_TOOL_RESULT` rows; from `2.2.0` most of them declare `CALL_PREDICTION` and pass the gate, 31 §9);
    - raw rows normalization-v3 did not accept are accounted for from the disposition ledger (raw calls
      held, by disposition and reason);
    - status: `FAIL` on any mismatch; `INCOMPLETE` when some rows cannot be read independently (they are
@@ -156,7 +157,7 @@ What the repository establishes:
 |---|---|---|---|
 | `normalization-v1` (the local artifact) | `adapt_glaive` (v1) | as **text**: `: <functioncall> {…} <|endoftext|>` in assistant content, with `tool_calls: []`. **0 of 99,794** records carry a structured call. | measured; [`reports/data-normalization-v1.md`](../../../reports/data-normalization-v1.md), Glaive caveat |
 | canonical-v2 and canonical-v2-final (the corpus M0 trained on) | `adapt_glaive_v2` (`glaive_v2`) | **structured**; markers, the leading `:` and end tokens stripped | `configs/releases/toolpolicy_canonical_v2.yaml` header: on identical input, the v1 adapter gave 0 records with tool calls and 50,900 `SEM_ORPHAN_RESULT` rejections, the v2 adapter 48,726 records with tool calls. [`M0_SFT_EXECUTION_REPORT.md`](../../../reports/M0_SFT_EXECUTION_REPORT.md) §11.1: 66,467 of 67,481 call turns read, 1,014 malformed ones refused. |
-| canonical-v3 (`normalization-v3`, [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)) | **`adapt_glaive_v2`** (`glaive_v2`), chosen and recorded in `configs/releases/toolpolicy_canonical_v3_sources.yaml` | **structured**. On all 98,339 accepted records, raw `<functioncall>` markers equal the structured calls; 0 markers remain as text; unparseable calls are rejected | built and measured (fingerprint `56e8abf2…`, adapter version `2.1.0`); reproduces v2-final's Glaive counts reason for reason |
+| canonical-v3 (`normalization-v3`, [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)) | **`adapt_glaive_v2`** (`glaive_v2`), chosen and recorded in `configs/releases/toolpolicy_canonical_v3_sources.yaml` | **structured**. On all 98,339 accepted records, raw `<functioncall>` markers equal the structured calls; 0 markers remain as text; unparseable calls are rejected | built and measured (fingerprint `60d3123e…`, adapter version `2.2.0`; Glaive unchanged since `2.1.0`); reproduces v2-final's Glaive counts reason for reason |
 
 Two consequences:
 - **The manifests can't settle it.** Every normalization and release manifest records `adapter_version:
@@ -196,7 +197,7 @@ figures are from `.release/hf/toolpolicy-canonical-v2-final/release-manifest.jso
 | | Glaive | ToolACE | xLAM | LoopTool |
 |---|---|---|---|---|
 | **Upstream revision** | `7e7e32f0…` (source sha256) | `7a7a6a2c3b1003c7…` | v2-final `26d14ebf…` (rebuilt from the v1 derivative); proxy `bec51a69…` | `189328fc…` |
-| **Artifact / adapter** | proxy: `adapt_glaive` (v1); v2-final: `adapt_glaive_v2`; v3: **`adapt_glaive_v2`** (31) | `adapt_toolace` (one version); v3: **`adapt_toolace`** (31) | `adapt_xlam` + `xlam_types.py`; v3: **`adapt_xlam`** (31) | `adapt_looptool`; not in canonical-v2-final ("upstream source was not located"); **not in v3** (31) |
+| **Artifact / adapter** | proxy: `adapt_glaive` (v1); v2-final: `adapt_glaive_v2`; v3: **`adapt_glaive_v2`** (31) | proxy and v2-final: `adapt_toolace`; v3: **`adapt_toolace_v3`** (31 §5, §9) | `adapt_xlam` + `xlam_types.py`; v3: **`adapt_xlam`** (31) | `adapt_looptool`; not in canonical-v2-final ("upstream source was not located"); **not in v3** (31) |
 | **What the classifier would see** (if v3 keeps the v2-final adapters) | tool-free prose, prefix and end tokens stripped; calls structured, no textual calls | tool-free prose; calls structured, with 6 textual-call-shaped responses in the proxy | structured calls only | structured calls; a few tool-free single exchanges |
 | **Records** | raw 112,960 · v2-final 98,339 · proxy 99,794 | raw 11,300 · v2-final 11,051 · proxy 11,190 | raw 60,000 · v2-final 57,342 · proxy 59,370 | raw 23,040 · proxy 20,827 |
 | **Tool-free single exchanges (proxy)** | 14,329 (14,176 with tools offered) | 2,002 (1,305 with tools offered) | 0 | 324 (242 with tools offered) |
@@ -357,7 +358,7 @@ Code: `src/opengrad/verification/pdet_coverage.py` with `--build`, `--verify` an
 constants from its own module and imports nothing from `pdet.py`. `pdet.py` and `reports/pdet/` are not
 touched. The builder:
 - refuses any input whose top manifest, fingerprint, per-source manifests, shards or canonical-v3 source
-  manifest (`cc40f64e…`) differ from the recorded ones, and every exclusion input whose bytes changed;
+  manifest (`5bb4961c…`) differ from the recorded ones, and every exclusion input whose bytes changed;
 - refuses `reports/pdet/` always, and a population in `reports/pdet-coverage/` until adoption;
 - in `--dry-run`, writes counts and hashes only: no item, no item id, no per-item source or stratum. The
   draw is byte-reproducible, so a written population *is* the future blind sample.
@@ -501,7 +502,7 @@ The thresholds themselves are the frozen 22 §6 values. This draft changes none 
 
 | Id | Item | Effect | What resolves it |
 |---|---|---|---|
-| **B-1** | canonical-v3 post-adapter representation: sources, the adapter for each (Glaive above all), versions, a pre-classifier artifact | **RESOLVED** ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)) | source manifest `configs/releases/toolpolicy_canonical_v3_sources.yaml` (sha256 LF `cc40f64eaa1d6dbff618e64d2ad3f4b7fe46b053d3db31e67bcdf1d272ef0b6b`); `normalization-v3` fingerprint `56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3`, top manifest sha256 `da651a46dc3848cb7cfe9755e113a815f18a078a095978a65b36f8b739a00c29` (adapter version `2.1.0`, after the ToolACE repair; supersedes `2bd38492…`) |
+| **B-1** | canonical-v3 post-adapter representation: sources, the adapter for each (Glaive above all), versions, a pre-classifier artifact | **RESOLVED** ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)) | source manifest `configs/releases/toolpolicy_canonical_v3_sources.yaml` (sha256 LF `5bb4961cd100b4d5975a9596bee345e5234ce527029a4d6183f0b9a662bf2f90`); `normalization-v3` fingerprint `60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a`, top manifest sha256 `88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e` (adapter version `2.2.0`, after the U-8 decision; supersedes `56e8abf2…` under `2.1.0` and `2bd38492…` under `2.0.0`) |
 | **B-2** | classifier input contract: which fields it reads (system message? tools? which assistant turn?), and how it labels multi-turn records | **RESOLVED** ([32](32-CLASSIFIER-INPUT-CONTRACT.md)) | `prose-decision-input-v1`: user message, final response, presented tools, structural-call flag. The system message is **not** shown, so §10 shows no system message. Multi-turn and post-tool records are ineligible |
 | U-1 | whether LoopTool and BUTTON are in canonical-v3 | source allocation (§7.3 shows both cases) | **resolved: neither is** (31 §1). The "without LoopTool" column of §7.3 applies, and layer A is 30 |
 | U-2 | ToolACE's representation in v3 | X supply | **resolved and repaired** (31 §5): structured calls. Under `2.0.0`, 9,785 of 9,786 call turns also kept the call text in `content`; `adapt_toolace_v2` (`2.1.0`) removes it (0 remain). Layer B and X supply are unchanged |
@@ -510,7 +511,7 @@ The thresholds themselves are the frozen 22 §6 values. This draft changes none 
 | U-5 | multi-turn tool-free records (proxy: Glaive 34,450, LoopTool 311) | not covered; no classifier permission on them from P-DET evidence | a separate, preregistered multi-turn component, once B-2 defines the unit |
 | U-6 | whether P-DET-v1's items appear in canonical-v3 When2Call with the same text | P-DET-v1's representation fidelity | **checked**: 575 of 581 equivalent, 6 quarantined in v3 (§5; 31 §7) |
 | U-7 | the source of P-CONF's `ANSWER` set | cross-exclusion | handled by the "whichever freezes second" rule (§9) |
-| U-8 | why 8,472 ToolACE records fail `MISSING_TOOL_RESULT` | none for this population (layer A audits them, §4); possibly large for canonical-v3 training | open item in [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md). The structural call evidence shows their calls are extracted exactly, so the gap is the missing tool result, not the call |
+| U-8 | why 8,472 ToolACE records fail `MISSING_TOOL_RESULT` | none on layer B; layer A's ToolACE gate split | **decided** (study owner, 2026-09-16; [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md) §9): from adapter version `2.2.0`, call-final records of one measured shape declare `CALL_PREDICTION`, as OpenGrad's structural inference, not ToolACE's statement. The calls were already extracted exactly (§4). Canonical-v2 and every Study 002 arm are unchanged |
 | U-9 | ToolACE call rows the first independent reader could not parse | structural call evidence was `INCOMPLETE` | **resolved** (study owner, 2026-09-16): a second, format-grammar reader reads them; every call row is now compared, and those rows are counted as weaker evidence (§4, §13) |
 
 The DIRECT definition, the post-tool exclusion, the two-layer split and the sampling rule are fixed by the
@@ -537,6 +538,11 @@ and their hashes are recorded in the table above. Next:
    to `reports/pdet-coverage/pdet-coverage-v1.dry-run.json`. It holds counts and hashes, no item and no
    item id. `test_the_real_draw_reproduces_the_recorded_dry_run` re-draws and compares where the inputs
    exist.
+5. After the U-8 decision, normalization-v3 was rebuilt under adapter version `2.2.0`, the builder's pins
+   were moved to it, and the dry run was re-recorded twice, byte-identically. Layer B is unchanged in every
+   count. Only layer A's ToolACE split across gate status moved, because most call-final ToolACE records now
+   pass the gate. The undrawn population's sha256 therefore moved from `4c7ca7b5…` to the value below. No
+   population was written at any step.
 
 **Exposure disclosure.** Two pieces of pool-adjacent text reached the study owner's session during the
 review, before annotation: §7.2's quoted refusal template (now removed from this document), and, in one
@@ -563,6 +569,7 @@ any item exposed at annotation time, it gets the `EXPOSED_WORKED_EXAMPLE` exclus
 | D15 | the source manifest's hash was recorded but not enforced | the builder refuses any other source manifest (§8) |
 | D16 | M may catch ordinary-word tool names | manifest-only match kind; M reported on its genuine-mention subset (§7.2, §11) |
 | D17 | 8,472 ToolACE records fail `MISSING_TOOL_RESULT` | open item in 31 (U-8) |
+| U-8 | the construction pattern of ToolACE's call-final rows (31 §9) | read qualifying records as `CALL_PREDICTION` prospectively (adapter version `2.2.0`); the pins and the dry run below were re-recorded on the rebuilt artifact |
 | U-9 | 120 ToolACE call rows were unreadable by the first independent reader, so the evidence was `INCOMPLETE` | extend the reader: a second, format-grammar reader, its rows counted as weaker evidence (§4) |
 | §11 minimums | 50 gold (recall), 50 predictions (precision), 30 hard gold (challenge), 20 DIRECT predictions per source | accepted as proposed |
 
@@ -582,11 +589,11 @@ keeps this block equal to it):
 | Layer A source | Quota | Realized | Gate-rejected realized / supply | Valid realized / supply |
 |---|---:|---:|---:|---:|
 | glaive | 15 | 15 | 1 / 107 | 14 / 5943 |
-| toolace | 10 | 10 | 9 / 8374 | 1 / 552 |
+| toolace | 10 | 10 | 1 / 41 | 9 / 8885 |
 | xlam | 5 | 5 | 1 / 1211 | 4 / 54356 |
 
 - Realized: layer B 306, layer A 30, total 336.
-- Population sha256 (not written): `4c7ca7b509874ad049a1ba0766ba477d94a952ea0d19969a6e60fc1c9ec10443`.
+- Population sha256 (not written): `755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c`.
 - Stratum M match kinds: identifier_shaped_tool_name 44, invocation_talk 2, word_tool_name 14.
 - Structural call evidence: **PASS**; mismatched rows glaive 0, toolace 0, xlam 0; rows the independent readers could not parse (unverified) glaive 0, toolace 0, xlam 0; rows read only by the format-grammar fallback (weaker evidence) glaive 0, toolace 120, xlam 0.
 <!-- dry-run-table:end -->

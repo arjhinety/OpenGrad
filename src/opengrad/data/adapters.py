@@ -570,6 +570,94 @@ def adapt_toolace_v2(record: dict[str, Any], split: str = "train") -> ToolConver
     return c
 
 
+#: Where the evidence for :func:`toolace_call_prediction_shape` is generated and recorded.
+TOOLACE_CALL_PREDICTION_EVIDENCE = "reports/normalization-v3/toolace-call-final-shape.json"
+
+TOOLACE_CALL_PREDICTION_NOTE = (
+    "OpenGrad corpus-level structural inference, not an upstream ToolACE annotation: the record ends on "
+    "an assistant turn that is only a call, answering a user turn, and every earlier call has its "
+    f"results; evidence {TOOLACE_CALL_PREDICTION_EVIDENCE}"
+)
+
+
+def toolace_call_prediction_shape(messages: list[dict[str, Any]]) -> bool:
+    """Whether an adapted ToolACE conversation has the shape validated as next-call supervision.
+
+    Measured on the pinned raw rows (``TOOLACE_CALL_PREDICTION_EVIDENCE``): no row ends on a tool result
+    or a user turn, no row is a proper prefix of another, and 8,641 of the 8,650 call-final rows put the
+    final call directly after a user turn. The rule admits only that validated shape:
+
+    * the final message is an assistant turn with structured calls and no other content;
+    * the message before it is a user turn (a call that follows a tool result is a mid-execution step,
+      where a lost result is most plausible, so it stays a trajectory);
+    * every earlier assistant call turn is followed by exactly as many tool results as it has calls.
+
+    Anything else keeps the complete-trajectory contract, and is quarantined exactly as before.
+    """
+    turns = [message for message in messages if message.get("role") != "system"]
+    if len(turns) < 2:
+        return False
+    final, before = turns[-1], turns[-2]
+    if final.get("role") != "assistant" or not final.get("tool_calls"):
+        return False
+    if final.get("content") is not None or before.get("role") != "user":
+        return False
+    for index, turn in enumerate(turns[:-1]):
+        calls = turn.get("tool_calls") if turn.get("role") == "assistant" else None
+        if not calls:
+            continue
+        answered = 0
+        while (
+            index + 1 + answered < len(turns) and turns[index + 1 + answered].get("role") == "tool"
+        ):
+            answered += 1
+        if answered != len(calls):
+            return False
+    return True
+
+
+def adapt_toolace_v3(record: dict[str, Any], split: str = "train") -> ToolConversation:
+    """:func:`adapt_toolace_v2`, with call-final records of the validated shape read as next-call targets.
+
+    The messages, tools and identity are exactly those of ``adapt_toolace_v2``; only the declared
+    supervision differs. A record that satisfies :func:`toolace_call_prediction_shape` declares
+    ``CALL_PREDICTION``. Its assignment is ``source_adapter`` and never ``upstream_declared``, because
+    ToolACE does not say so: the note records that this is OpenGrad's structural inference. Every other
+    record keeps ``COMPLETE_TRAJECTORY``. ``adapt_toolace_v2`` is left unchanged so the corpora built
+    under it stay reproducible.
+    """
+    base = adapt_toolace_v2(record, split)
+    if (
+        base.metadata.get("adapter") != "toolace_v2"
+    ):  # the generic `messages` format: not this rule's input
+        return base
+    if toolace_call_prediction_shape(base.messages):
+        kind, note = SupervisionKind.CALL_PREDICTION, TOOLACE_CALL_PREDICTION_NOTE
+    else:
+        kind, note = SupervisionKind.COMPLETE_TRAJECTORY, ""
+    metadata = {
+        **base.metadata,
+        "adapter": "toolace_v3",
+        "source_features": {
+            **base.metadata["source_features"],
+            "source_format": (
+                "system/conversations from/value; parsed call text removed from content; "
+                "call-final records of the validated shape declare CALL_PREDICTION"
+            ),
+        },
+        "supervision": supervision_block(
+            kind,
+            assignment=SupervisionAssignment.SOURCE_ADAPTER,
+            adapter="toolace_v3",
+            adapter_version=ADAPTER_VERSION,
+            note=note,
+        ),
+    }
+    c = ToolConversation(base.id, base.source, base.tools, base.messages, metadata)
+    c.validate()
+    return c
+
+
 def _tagged_messages(
     record: dict[str, Any],
     source: str,
@@ -1048,6 +1136,7 @@ ADAPTERS: dict[str, Callable[[dict[str, Any], str], ToolConversation]] = {
     "when2call": adapt_when2call,
     "toolace": adapt_toolace,
     "toolace_v2": adapt_toolace_v2,
+    "toolace_v3": adapt_toolace_v3,
     "button": adapt_button,
     "looptool": adapt_looptool,
     "glaive": adapt_glaive,

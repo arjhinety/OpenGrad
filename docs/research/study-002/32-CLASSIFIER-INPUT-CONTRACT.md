@@ -81,7 +81,7 @@ Every applicable reason is returned, in this precedence order. The first is the 
 
 A record that is not a normalization-v3 row raises `ContractViolation` instead of returning a reason:
 - no `normalization_version: normalization-v3`;
-- an adapter version other than the authoritative one (`versions.ADAPTER_VERSION`, currently `2.1.0`);
+- an adapter version other than the authoritative one (`versions.ADAPTER_VERSION`, currently `2.2.0`);
 - or any `metadata.behavior`.
 
 So a normalization-v1 row, or a row that has already been classified, can never be fed to the classifier

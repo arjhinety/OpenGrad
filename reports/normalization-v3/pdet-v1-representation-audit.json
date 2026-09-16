@@ -7,7 +7,7 @@
     "behavior": "v1 rows carry a message-shape ANSWER default; v3 rows carry none",
     "split": "normalization-v1 recorded train_sft (the HF config); normalization-v3 records train (the registry-allowlisted split)"
   },
-  "normalization_v3_fingerprint": "56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3",
+  "normalization_v3_fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
   "not_structurally_equivalent": [
     {
       "pdet_id": "when2call-sft:088d349e8d3507c0780d5ac559e03eea0d5c6bc88d2c2b30d89d3af94839cf9d",

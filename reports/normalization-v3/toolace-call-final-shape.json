@@ -1,0 +1,48 @@
+{
+  "artifact_kind": "TOOLACE_CALL_FINAL_SHAPE_AUDIT",
+  "question": "reports/SUPERVISION_CONTRACT_REPORT.md \u00a74: are ToolACE's call-final rows next-call targets or truncated trajectories?",
+  "raw_artifact": {
+    "path": ".cache/normalization/raw/toolace_default_train.parquet",
+    "sha256": "7a7a6a2c3b1003c789bbabb975335a0a8f843ae7a7df28134f7d242b301ab15f",
+    "upstream_revision": "6bda777c88d21e5a204703c1ee45597a8fa4f734"
+  },
+  "result": {
+    "call_final_rows": {
+      "by_shape": {
+        "user_turns=1|earlier_calls=0|earlier_results=0": 8498,
+        "user_turns=1|earlier_calls=1|earlier_results=1": 6,
+        "user_turns=1|earlier_calls=2|earlier_results=2": 1,
+        "user_turns=3|earlier_calls=0|earlier_results=0": 2,
+        "user_turns=3|earlier_calls=1|earlier_results=1": 114,
+        "user_turns=3|earlier_calls=2|earlier_results=2": 29
+      },
+      "earlier_call_turns_by_result_count": {
+        "results_equal_calls": 170,
+        "results_fewer_than_calls": 10
+      },
+      "final_call_follows": {
+        "tool_result": 9,
+        "user": 8641
+      },
+      "final_turn_is_only_the_call_block": 8645,
+      "single_exchange_user_then_call": 8498,
+      "total": 8650,
+      "with_an_earlier_call_lacking_a_result": 0
+    },
+    "distinct_conversations": 11297,
+    "prose_final_rows_containing_calls": 647,
+    "row_endings": {
+      "assistant_call": 8650,
+      "assistant_prose": 2650
+    },
+    "rows": 11300,
+    "rows_that_are_a_proper_prefix_of_another_row": 0,
+    "rows_with_an_exact_duplicate": 6,
+    "turn_roles": {
+      "assistant": 13819,
+      "tool": 1367,
+      "user": 12452
+    }
+  },
+  "status": "COUNTS_ONLY_NOT_A_RECLASSIFICATION"
+}

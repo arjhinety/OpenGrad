@@ -120,6 +120,15 @@ def _raw_call_counts(name: str, raw_path: Path) -> list[int]:
     raise ValueError(name)
 
 
+def _nest(counts: Counter[str]) -> dict[str, dict[str, int]]:
+    """``kind|assignment|field`` counts as ``{"kind|assignment": {field: n}}``."""
+    nested: dict[str, dict[str, int]] = {}
+    for key, value in sorted(counts.items()):
+        group, _, field = key.rpartition("|")
+        nested.setdefault(group, {})[field] = value
+    return nested
+
+
 def audit_source(spec: Any, heldout: HeldoutIndex) -> dict[str, Any]:
     directory = ARTIFACT / spec.name
     manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
@@ -144,6 +153,7 @@ def audit_source(spec: Any, heldout: HeldoutIndex) -> dict[str, Any]:
     invariants: Counter[str] = Counter()
     conservation: Counter[str] = Counter()
     call_turns: Counter[str] = Counter()
+    supervision: Counter[str] = Counter()
 
     for record in iter_rows(ARTIFACT, spec.name):
         metadata = record["metadata"]
@@ -168,6 +178,15 @@ def audit_source(spec: Any, heldout: HeldoutIndex) -> dict[str, Any]:
         for code in structure["trajectory_issue_codes"]:
             trajectory[code] += 1
         trajectory["records_with_any_issue"] += bool(structure["trajectory_issue_codes"])
+        block = metadata["supervision"]
+        kind = f"{block['kind']}|{block['assignment']}"
+        supervision[f"{kind}|records"] += 1
+        supervision[f"{kind}|trajectory_valid"] += not structure["trajectory_issue_codes"]
+        supervision[f"{kind}|final_assistant_structured_call"] += bool(
+            structure["final_assistant_structured_call"]
+        )
+        for code in structure["trajectory_issue_codes"]:
+            supervision[f"{kind}|issue:{code}"] += 1
 
         last = messages[-1] if messages else {}
         any_call = structure["structured_calls"] > 0
@@ -247,6 +266,7 @@ def audit_source(spec: Any, heldout: HeldoutIndex) -> dict[str, Any]:
         "final_turn": dict(sorted(final.items())),
         "tools": dict(sorted(tools.items())),
         "trajectory_issues": dict(sorted(trajectory.items())),
+        "supervision_kind_assignment": _nest(supervision),
         "residual_call_markers_prose_turns": dict(sorted(markers_any.items())),
         "residual_call_markers_final_prose_turn": dict(sorted(markers_final.items())),
         "residual_textual_calls_prose_turns_by_parseability": dict(sorted(textual_calls.items())),
@@ -282,7 +302,7 @@ def main() -> int:
         "classifier_input_contract": versions.CLASSIFIER_INPUT_CONTRACT_VERSION,
         "heldout_inputs": [list(item) for item in heldout.inputs],
         "units": {
-            "counts, exchange_shape, final_turn, tools, trajectory_issues, eligibility_*": "records",
+            "counts, exchange_shape, final_turn, tools, trajectory_issues, supervision_kind_assignment, eligibility_*": "records",
             "residual_*, structured_call_turns": "assistant turns (prose turns: no tool_calls)",
             "call_conservation": "accepted records",
         },

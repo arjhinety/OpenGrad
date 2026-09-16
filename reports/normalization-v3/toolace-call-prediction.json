@@ -1,0 +1,75 @@
+{
+  "adapter_version": "2.2.0",
+  "artifact_kind": "TOOLACE_CALL_PREDICTION_RECLASSIFICATION",
+  "evidence": "reports/normalization-v3/toolace-call-final-shape.json",
+  "normalization_v3_fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+  "rejected_by_reason": {
+    "ADAPTER_UNDECLARED_TOOL": 18,
+    "INVALID_ARGUMENT_SYNTAX": 89,
+    "SCH_ADDITIONAL_PROPERTIES_NOT_BOOLEAN": 10,
+    "SCH_ENUM_INVALID": 1,
+    "SCH_PROPERTIES_NOT_OBJECT": 16,
+    "SCH_UNSUPPORTED_KEYWORD": 112
+  },
+  "result": {
+    "after_declared_supervision": {
+      "accepted": 11051,
+      "declared_CALL_PREDICTION": 8425,
+      "declared_COMPLETE_TRAJECTORY": 2626,
+      "newly_quarantined": 0,
+      "quarantined": 52,
+      "recovered_call_prediction": 8424,
+      "trajectory_valid": 10999,
+      "trajectory_valid_CALL_PREDICTION": 8424,
+      "trajectory_valid_COMPLETE_TRAJECTORY": 2575
+    },
+    "before_complete_trajectory_for_every_record": {
+      "accepted": 11051,
+      "quarantined": 8476,
+      "quarantined_call_final": 8442,
+      "trajectory_valid": 2575
+    },
+    "residual_quarantine_by_category": {
+      "CALL_PREDICTION|empty_assistant_turn": {
+        "issue_codes": {
+          "EMPTY_ASSISTANT_OUTPUT": 1
+        },
+        "records": 1
+      },
+      "COMPLETE_TRAJECTORY|call_final_after_tool_result": {
+        "issue_codes": {
+          "INVALID_MESSAGE_SEQUENCE": 1,
+          "MISSING_TOOL_RESULT": 8
+        },
+        "records": 8
+      },
+      "COMPLETE_TRAJECTORY|call_final_result_count_mismatch": {
+        "issue_codes": {
+          "INVALID_MESSAGE_SEQUENCE": 9,
+          "MISSING_TOOL_RESULT": 9
+        },
+        "records": 9
+      },
+      "COMPLETE_TRAJECTORY|empty_assistant_turn": {
+        "issue_codes": {
+          "EMPTY_ASSISTANT_OUTPUT": 4
+        },
+        "records": 4
+      },
+      "COMPLETE_TRAJECTORY|prose_final_result_count_mismatch": {
+        "issue_codes": {
+          "INVALID_MESSAGE_SEQUENCE": 30,
+          "MISSING_TOOL_RESULT": 30
+        },
+        "records": 30
+      }
+    }
+  },
+  "source_counts": {
+    "accepted": 11051,
+    "duplicates": 3,
+    "rejected": 246,
+    "source_rows": 11300
+  },
+  "statement": "ToolACE call-final records of the validated shape declare CALL_PREDICTION from adapter version 2.2.0. This is an OpenGrad corpus-level structural inference, not an upstream ToolACE annotation. Canonical-v2 is unchanged. Counts only; no record text."
+}

@@ -44,6 +44,12 @@ sources:
     # instructed. ANOMALY is reported and does not block readiness, which is the intended
     # outcome: a reader sees that 79.6% of this source is quarantined by decision, rather than
     # seeing a green tick that hides it.
+    #
+    # All of the above describes Canonical-v2, which is unchanged. From adapter version 2.2.0,
+    # canonical-v3 reads the call-final records of one measured structural shape as CALL_PREDICTION
+    # (adapt_toolace_v3), prospectively and as OpenGrad's inference, not ToolACE's statement
+    # (docs/research/study-002/31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md §9). The floor is not
+    # moved for that: it is a collapse detector, and a canonical-v3 yield report is not yet measured.
     min_yield_ratio: 0.3
     min_tool_call_target_ratio: 0.3
   looptool-23k:

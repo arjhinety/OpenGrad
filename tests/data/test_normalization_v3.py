@@ -113,8 +113,8 @@ def test_committed_source_manifest_agrees_with_the_code() -> None:
         "adapt_glaive_v2",
     )
     assert (specs["toolace"].adapter_key, specs["toolace"].adapter_function) == (
-        "toolace_v2",
-        "adapt_toolace_v2",
+        "toolace_v3",
+        "adapt_toolace_v3",
     )
     assert specs["when2call"].schema_translation and not specs["glaive"].schema_translation
     assert {entry["name"] for entry in manifest["excluded_sources"]} == {"looptool", "button"}

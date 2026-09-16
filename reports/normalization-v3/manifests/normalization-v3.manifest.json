@@ -3,14 +3,14 @@
   "behavior_labels": "ABSENT",
   "builder": "opengrad.data.normalization_v3",
   "code_sha256_lf": {
-    "src/opengrad/data/adapters.py": "3cff67968df73b0cd10bedefcb402899fc2f23060be529a3c6f96fa3240c1760",
+    "src/opengrad/data/adapters.py": "124cbed23978dd461e33ea96b2800cfb1dfa4a037cedfcba824fb879f1d7f785",
     "src/opengrad/data/canonical.py": "fac4488b0a7589f48c96856c0151d659b8ab49bad5c7c9619d663bb6294d2e4c",
     "src/opengrad/data/normalization_v3.py": "1f006c8b2c030ab20cd5c24efd0f7bd49d157b5aeebb70aebbc52381d8a1c86b",
     "src/opengrad/data/schema.py": "214cf6dc6fc3ad488fb3ebd4bae3dbf918122c009d4ed8d965420f3eff79ef84",
     "src/opengrad/data/semantic.py": "08bfc3d9f6c595460bcd26827b50f7f839b432a447446e2f84270f3a4405cef3",
     "src/opengrad/data/source_schema.py": "b4a831b7a73589195aa26f6f3ae17e1575aa45daf7fc334ee9d551d259e2f5cd",
     "src/opengrad/data/supervision.py": "6fc849d1c151c936cb80fe5b234a0a7f33c8444c60307d187591eb9dac89413d",
-    "src/opengrad/data/versions.py": "d879043dd4ad42e65a70e582aad15a10e2d237c2e93ce5e05e626f38e95e5b28",
+    "src/opengrad/data/versions.py": "0d242fc2df03c7e2a9d892c66bed0e5232f3e73ea92a48da231c36b0508aaefe",
     "src/opengrad/data/xlam_types.py": "a26caba0173315abf5b966cf00c42c804ece23f219e6065b89d0b6e973523a26"
   },
   "decision_classifier": "NOT_APPLIED",
@@ -18,58 +18,58 @@
     "pyarrow": "25.0.1",
     "python": "3.11.15"
   },
-  "fingerprint": "56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3",
+  "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
   "max_rows": null,
   "normalization_version": "normalization-v3",
   "source_manifest": {
     "path": "configs/releases/toolpolicy_canonical_v3_sources.yaml",
-    "sha256_lf": "cc40f64eaa1d6dbff618e64d2ad3f4b7fe46b053d3db31e67bcdf1d272ef0b6b"
+    "sha256_lf": "5bb4961cd100b4d5975a9596bee345e5234ce527029a4d6183f0b9a662bf2f90"
   },
   "sources": {
     "glaive": {
-      "content_hash": "547aa8f1b3e1036e479d099c3a6d7e7c2c62dfb04c5d9a469a9cb2dbbbd5f8bc",
+      "content_hash": "c044389fd91b2bb0753dedc2ed6e3bb0c871e7df17cc8f04a069d94b1084c7df",
       "counts": {
         "accepted": 98339,
         "duplicates": 13352,
         "rejected": 1269,
         "source_rows": 112960
       },
-      "manifest_sha256": "d00e69ab4be74a3d4eadd365cf86eedd4c4fb8f9096abd1fca83393b60573aa8"
+      "manifest_sha256": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69"
     },
     "toolace": {
-      "content_hash": "35f0efaec17bc755a3c2a6bd10d3ea4cd4413797c09e64d9948e8e425e0bec18",
+      "content_hash": "ddc6187b37283997186ba72994af39180977e0e6b8166ef4f900c3c3855e9889",
       "counts": {
         "accepted": 11051,
         "duplicates": 3,
         "rejected": 246,
         "source_rows": 11300
       },
-      "manifest_sha256": "345b50fbe22b6d7360b267d1cb303fb9540ac7eaa86a8691f2f3e0c2b30f9dd2"
+      "manifest_sha256": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2"
     },
     "when2call": {
-      "content_hash": "6fd8365499be73768de8ba26af76eb1bdba26695faf422a426887d8c8cfa10c6",
+      "content_hash": "fed5c5530d9762708007f2211c69c410edff431390c5606fa148e74eb7164615",
       "counts": {
         "accepted": 14701,
         "duplicates": 124,
         "rejected": 175,
         "source_rows": 15000
       },
-      "manifest_sha256": "883f806084f4b0578447f550da440563eabbc7ca6665c7a4e744e466d0c0ecfa"
+      "manifest_sha256": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b"
     },
     "xlam": {
-      "content_hash": "8308dec257bc9e36e5872a91bf70e52ed36f85ec5bb0d413f70c3f372930f9a9",
+      "content_hash": "85bd405b12c200698ee4db0890c579022021db6272684fc28016241866eac209",
       "counts": {
         "accepted": 57342,
         "duplicates": 350,
         "rejected": 2308,
         "source_rows": 60000
       },
-      "manifest_sha256": "1958a0c89dec0b90dbfd217955939e477948e71cb96d8c187f7a77cbb6a62f70"
+      "manifest_sha256": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
     }
   },
   "statement": "Pre-classifier normalization-v3: normalized messages, tools, structured tool calls, structural facts and provenance. No behaviour label is present and no decision classifier has run. This is not the canonical-v3 training corpus and implies no mixture, balancing or C1 membership decision.",
   "versions": {
-    "adapter_version": "2.1.0",
+    "adapter_version": "2.2.0",
     "canonical_schema_version": "tool_use_ir_v1",
     "normalization_version": "normalization-v3",
     "provenance_invariant_version": "provenance-version-agreement-v1",

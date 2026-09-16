@@ -5,7 +5,7 @@
     "adapter_function": "opengrad.data.adapters.adapt_glaive_v2",
     "adapter_key": "glaive_v2",
     "adapter_row_label": "glaive_function_calling_v2_v2",
-    "adapter_version": "2.1.0",
+    "adapter_version": "2.2.0",
     "canonical_schema_version": "tool_use_ir_v1",
     "max_rows": null,
     "normalization_version": "normalization-v3",
@@ -14,7 +14,7 @@
     "shard_size": 10000,
     "supervision_contract_version": "supervision_contract_v1"
   },
-  "content_hash": "547aa8f1b3e1036e479d099c3a6d7e7c2c62dfb04c5d9a469a9cb2dbbbd5f8bc",
+  "content_hash": "c044389fd91b2bb0753dedc2ed6e3bb0c871e7df17cc8f04a069d94b1084c7df",
   "counts": {
     "accepted": 98339,
     "duplicates": 13352,
@@ -52,52 +52,52 @@
     {
       "file": "shard-000000.parquet",
       "rows": 10000,
-      "sha256": "348d29bb8a0d4a72b13aa2930e7b926f2f0440050c3684cae757c9be7fa6cb65"
+      "sha256": "98b46107fd9c7abc4db0bed29e68567de08d1ea2de1f6040137a9dd8a8cce69a"
     },
     {
       "file": "shard-000001.parquet",
       "rows": 10000,
-      "sha256": "e0601cf0ed1a52b655136c4a2819bccd795d79676e4f1632fafc3ae90e2ea5bb"
+      "sha256": "b461229984f451175fac88c21fb9c2edf22f95a42b36bfcfaa8dfde13908ab14"
     },
     {
       "file": "shard-000002.parquet",
       "rows": 10000,
-      "sha256": "991f5bb117eb28ccb309aba221f7f85efa9b9fd1f24dfae04999602d58a054c2"
+      "sha256": "4766efbd0866ae4b9c89246704e66f23b031bbf402c61693126b772cf580a981"
     },
     {
       "file": "shard-000003.parquet",
       "rows": 10000,
-      "sha256": "9f02a8ba8ba657b59ccb76721c41e2110eac3769f45938edb3d5f3a0feace654"
+      "sha256": "22472a24df11979a27582bf1195012428d5c1b1a30232bcc4105d0728b951b63"
     },
     {
       "file": "shard-000004.parquet",
       "rows": 10000,
-      "sha256": "f1e3988bc954351766e14500ea3cb575b5308b0a1451613e23fb892172e08a41"
+      "sha256": "18d4d8519e8789677cd259c92705f5e9e01bb05625e4858b4970f30fbfe2dfe5"
     },
     {
       "file": "shard-000005.parquet",
       "rows": 10000,
-      "sha256": "772edce539eae5ab8f55e86b234ac39b4e1f3333eb44861f97a15bb70a96dc8b"
+      "sha256": "5d4c450f165edcd430b646f9df16a6131ec6f2c4a9aa7863ef7dc532a1e6a48b"
     },
     {
       "file": "shard-000006.parquet",
       "rows": 10000,
-      "sha256": "0e1e8b37ce852e6487d426c9dad4017adb7dbd4a505f914000f964e5dfc04eb8"
+      "sha256": "60971be9010ff5d3d70b0cece0cc4fcdd6c7243118d02118b5ae91db6e4db06d"
     },
     {
       "file": "shard-000007.parquet",
       "rows": 10000,
-      "sha256": "12cb4bda8701c5e282bd4d2c4a1749b5004c1511716c5deca424e7002a3c08e6"
+      "sha256": "f6cf3ea4f30fc831465f7041db479e8a9e91acbf8707a9cac2bf52a8a98b06c4"
     },
     {
       "file": "shard-000008.parquet",
       "rows": 10000,
-      "sha256": "76da613af9f9d598759c3a767c9476d85822fb147a64ba19d5f997bde38443cb"
+      "sha256": "88528c945eacfff38e97825e9a547d0b1210cb280c84d18ebb1e6dabb249953b"
     },
     {
       "file": "shard-000009.parquet",
       "rows": 8339,
-      "sha256": "2f03252d676494b813d440251f9a3a666d2afd915f8823c97d7e7a5ed3c02a37"
+      "sha256": "fe5a9f17c52db452528c543ee74343ff73e581f4222ae62f82ea185ba93e5681"
     }
   ],
   "source": {
