@@ -11,6 +11,12 @@ Two paths, deliberately separated:
 The real path refuses to guess anything it cannot read from the immutable experiment config:
 the tuning method, the dataset hash, and the model/tokenizer revisions are all required, and a
 mismatch fails closed rather than training on a different corpus.
+
+The real path carries every component the base checkpoint declares -- for Qwen3.5-2B the vision
+encoder and the native MTP layer as well as the language model -- and trains MTP with a weighted
+next-next-token loss next to the SFT loss (``full-model-components-v1``,
+:mod:`opengrad.training.model_components`). ``train_loss`` stays the SFT loss alone, so loss curves
+remain comparable with runs from before the policy; ``mtp_loss`` is logged beside it.
 """
 
 from __future__ import annotations
@@ -379,13 +385,25 @@ def run_real_sft(
     if pad_token_id is None:
         raise TrainingConfigError("tokenizer exposes neither pad_token_id nor eos_token_id")
 
-    model = transformers.AutoModelForCausalLM.from_pretrained(
-        resume_from if resume_from is not None else model_id,
-        revision=None if resume_from is not None else str(model_revision),
-        trust_remote_code=False,
-        dtype=dtype,
-        device_map="auto",
+    from opengrad.training.model_components import (
+        component_lineage,
+        component_parameter_report,
     )
+    from opengrad.training.mtp import FinalHiddenCapture, load_training_model, mtp_loss
+
+    # Every component the base declares and the configuration does not exclude. A resume
+    # checkpoint from before the policy has the missing components grafted from the base revision.
+    components = settings.model_components
+    loaded = load_training_model(
+        transformers,
+        base_id=str(model_id),
+        base_revision=str(model_revision),
+        checkpoint=resume_from,
+        dtype=dtype,
+        settings=components,
+    )
+    model = loaded.model
+    mtp_layer = loaded.mtp
     if settings.gradient_checkpointing:
         model.gradient_checkpointing_enable()
         if hasattr(model, "config"):
@@ -411,7 +429,22 @@ def run_real_sft(
         model = peft.get_peft_model(model, config_obj)
 
     parameters = parameter_report(model, settings.tuning_method)
-    emit("model_loaded", **parameters, device=str(next(model.parameters()).device))
+    component_parameters = component_parameter_report(model.named_parameters())
+    emit(
+        "model_loaded",
+        **parameters,
+        device=str(next(model.parameters()).device),
+        model_components={
+            "declared": loaded.declared,
+            "carried": loaded.carried,
+            "initialized_from": loaded.initialized_from,
+            "parameters": component_parameters,
+            "settings": components.to_dict(),
+        },
+    )
+    # The MTP loss reads the post-final-norm hidden state from the output head's input, so the
+    # main forward pass is exactly the one that ran before MTP was trained.
+    capture = FinalHiddenCapture(model) if mtp_layer is not None else None
 
     trainable = [p for p in model.parameters() if p.requires_grad]
     if not trainable:
@@ -427,7 +460,21 @@ def run_real_sft(
         "epoch": 0,
         "interrupted": False,
         "signal": None,
+        # What the optional components actually received, for the lineage's `trained` block.
+        "image_batches_seen": 0,
+        "mtp_loss_steps": 0,
     }
+
+    def components_record() -> dict[str, Any]:
+        return component_lineage(
+            settings=components,
+            declared=loaded.declared,
+            carried=loaded.carried,
+            initialized_from=loaded.initialized_from,
+            image_batches_seen=world["image_batches_seen"],
+            mtp_loss_steps=world["mtp_loss_steps"],
+        )
+
     if resume_from is not None:
         state = torch.load(
             resume_from / "training_state.pt", map_location="cpu", weights_only=False
@@ -437,6 +484,9 @@ def run_real_sft(
         world["examples_seen"] = int(state["examples_seen"])
         world["supervised_tokens_seen"] = int(state["supervised_tokens_seen"])
         world["epoch"] = int(state["epoch"])
+        # Absent from a pre-policy state, where neither component was carried.
+        world["image_batches_seen"] = int(state.get("image_batches_seen", 0))
+        world["mtp_loss_steps"] = int(state.get("mtp_loss_steps", 0))
         torch.set_rng_state(state["torch_rng"])
         if state.get("cuda_rng") is not None and torch.cuda.is_available():
             torch.cuda.set_rng_state_all(state["cuda_rng"])
@@ -466,8 +516,10 @@ def run_real_sft(
     grad_accum = settings.gradient_accumulation_steps
     started = time.monotonic()
     running_loss = 0.0
+    running_mtp_loss = 0.0
     running_steps = 0
     last_loss = float("nan")
+    last_mtp_loss = float("nan")
     last_grad_norm = 0.0
     stop_reason = "max_steps"
 
@@ -493,19 +545,43 @@ def run_real_sft(
                 batch = build_batch(batch_rows, pad_token_id, device, torch)
                 outputs = model(**batch)
                 loss = outputs.loss
-                if not torch.isfinite(loss):
-                    emit("non_finite_loss", step=world["optimizer_step"] + 1, loss=float(loss))
+                total_loss = loss
+                step_mtp_loss = None
+                if capture is not None and mtp_layer is not None:
+                    step_mtp_loss, _ = mtp_loss(
+                        model=model,
+                        mtp=mtp_layer,
+                        final_hidden=capture.take(),
+                        input_ids=batch["input_ids"],
+                        attention_mask=batch["attention_mask"],
+                        labels=batch["labels"],
+                        gradient_scope=components.mtp_gradient_scope,
+                        has_images="pixel_values" in batch,
+                    )
+                    total_loss = loss + components.mtp_loss_weight * step_mtp_loss
+                if not torch.isfinite(total_loss):
+                    emit(
+                        "non_finite_loss",
+                        step=world["optimizer_step"] + 1,
+                        loss=float(loss),
+                        mtp_loss=float(step_mtp_loss) if step_mtp_loss is not None else None,
+                    )
                     raise TrainingConfigError(
-                        f"non-finite loss at step {world['optimizer_step'] + 1}: {float(loss)}"
+                        f"non-finite loss at step {world['optimizer_step'] + 1}: "
+                        f"loss={float(loss)} total={float(total_loss)}"
                     )
                 # Scale by the number of micro-batches so gradient accumulation sums to the
                 # mean over the effective batch rather than a multiple of it.
-                (loss / grad_accum).backward()
+                (total_loss / grad_accum).backward()
 
                 supervised = sum(len(row["supervised"]) for row in batch_rows)
                 world["examples_seen"] += len(batch_rows)
                 world["supervised_tokens_seen"] += supervised
+                if "pixel_values" in batch:
+                    world["image_batches_seen"] += 1
                 running_loss += float(loss.detach())
+                if step_mtp_loss is not None:
+                    running_mtp_loss += float(step_mtp_loss.detach())
                 running_steps += 1
                 micro_in_window += 1
 
@@ -522,7 +598,11 @@ def run_real_sft(
                     world["optimizer_step"] += 1
                     micro_in_window = 0
                     last_loss = running_loss / max(1, running_steps)
+                    if mtp_layer is not None:
+                        last_mtp_loss = running_mtp_loss / max(1, running_steps)
+                        world["mtp_loss_steps"] += 1
                     running_loss = 0.0
+                    running_mtp_loss = 0.0
                     running_steps = 0
 
                     allocated = torch.cuda.memory_allocated() / 2**30
@@ -549,12 +629,19 @@ def run_real_sft(
                         "gpu_reserved_gib": round(reserved, 4),
                         "gpu_peak_gib": round(peak, 4),
                     }
+                    if mtp_layer is not None:
+                        # `train_loss` stays the SFT loss alone; the weighted sum is not logged
+                        # under that name, so curves compare with pre-policy runs.
+                        entry["mtp_loss"] = round(last_mtp_loss, 6)
                     history.append(entry)
                     write_events(events_path, {"event": "step", "timestamp": time.time(), **entry})
                     if world["optimizer_step"] % 10 == 0 or world["optimizer_step"] == 1:
+                        mtp_text = (
+                            f"mtp_loss={entry['mtp_loss']:.4f} " if "mtp_loss" in entry else ""
+                        )
                         print(
                             f"  step {world['optimizer_step']}/{settings.max_steps} "
-                            f"loss={entry['train_loss']:.4f} lr={lr_now:.3e} "
+                            f"loss={entry['train_loss']:.4f} {mtp_text}lr={lr_now:.3e} "
                             f"grad_norm={entry['grad_norm']:.3f} "
                             f"tok/s={entry['supervised_tokens_per_second']:.0f} "
                             f"peak={entry['gpu_peak_gib']:.1f}GiB",
@@ -574,6 +661,7 @@ def run_real_sft(
                             dataset_hashes,
                             provenance["sha"],
                             lineage_parent=str(resume_from) if resume_from is not None else None,
+                            model_components=components_record(),
                         )
                         created_checkpoints.append(str(path))
                         last_saved_step = world["optimizer_step"]
@@ -598,6 +686,8 @@ def run_real_sft(
                 world["epoch"] = epoch
     finally:
         restore_interrupt_handlers(previous_handlers)
+        if capture is not None:
+            capture.remove()
 
     elapsed = time.monotonic() - started
     if world["interrupted"]:
@@ -621,6 +711,7 @@ def run_real_sft(
             provenance["sha"],
             suffix="" if not world["interrupted"] else "interrupted",
             lineage_parent=str(resume_from) if resume_from is not None else None,
+            model_components=components_record(),
         )
         created_checkpoints.append(str(final_path))
     emit(
@@ -652,6 +743,8 @@ def run_real_sft(
         "optimizer_state": settings.optimizer_state,
         "peak_gpu_gib": round(torch.cuda.max_memory_allocated() / 2**30, 4),
         "summary": summarise_history(history),
+        "model_components": components_record(),
+        "component_parameters": component_parameters,
         **parameters,
     }
     return TrainingRunResult(
@@ -691,8 +784,13 @@ def _save_checkpoint(
     *,
     suffix: str = "",
     lineage_parent: str | None = None,
+    model_components: dict[str, Any] | None = None,
 ) -> Path:
-    """Persist a resumable checkpoint with the lineage the registry requires."""
+    """Persist a resumable checkpoint with the lineage the registry requires.
+
+    ``save_pretrained`` writes every carried component, including the attached ``mtp.*`` layer,
+    under the base checkpoint's tensor names.
+    """
     import torch
 
     step = world["optimizer_step"]
@@ -709,6 +807,8 @@ def _save_checkpoint(
             "examples_seen": world["examples_seen"],
             "supervised_tokens_seen": world["supervised_tokens_seen"],
             "epoch": world["epoch"],
+            "image_batches_seen": world.get("image_batches_seen", 0),
+            "mtp_loss_steps": world.get("mtp_loss_steps", 0),
             "torch_rng": torch.get_rng_state(),
             "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
             "python_rng": __import__("random").getstate(),
@@ -727,6 +827,7 @@ def _save_checkpoint(
                 dataset_manifest_ids=dataset_ids,
                 dataset_hashes=dataset_hashes,
                 parent_checkpoint=lineage_parent,
+                model_components=model_components,
             ),
             indent=2,
             sort_keys=True,

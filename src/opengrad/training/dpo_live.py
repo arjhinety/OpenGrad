@@ -16,6 +16,13 @@ identity that resolves to the *evaluation* source's revision, and the only prefe
 present is four deterministic placeholder rows. Training on either would produce a number that
 means nothing, so this path refuses to start without a real preference file it can hash and
 count, and it records that hash in the run.
+
+The policy carries every component its base declares (``full-model-components-v1``): the vision
+encoder and the native MTP layer are loaded, kept and saved, and grafted from the base revision
+when the initial checkpoint predates the policy. MTP trains on the chosen completion with
+``gradient_scope: head_only`` by default, so the preference objective itself is unchanged and the
+MTP layer still tracks the policy it will draft for. The reference model stays a text-only,
+frozen scorer: neither extra component can change the log-probabilities it contributes.
 """
 
 from __future__ import annotations
@@ -253,15 +260,38 @@ def run_real_dpo(
     if pad_token_id is None:
         raise TrainingConfigError("tokenizer exposes neither pad_token_id nor eos_token_id")
 
-    model = transformers.AutoModelForCausalLM.from_pretrained(
-        str(initial_checkpoint),
-        trust_remote_code=False,
-        torch_dtype=dtype,
-        device_map="auto",
+    from opengrad.training.model_components import component_lineage
+    from opengrad.training.mtp import (
+        IGNORE_INDEX,
+        FinalHiddenCapture,
+        load_training_model,
+        mtp_loss,
     )
+
+    components = settings.model_components
+    loaded = load_training_model(
+        transformers,
+        base_id=str(model_id),
+        base_revision=str(model_revision),
+        checkpoint=initial_checkpoint,
+        dtype=dtype,
+        settings=components,
+    )
+    model = loaded.model
+    mtp_layer = loaded.mtp
     model.gradient_checkpointing_enable()
     model.train()
+    emit(
+        "model_components",
+        declared=loaded.declared,
+        carried=loaded.carried,
+        initialized_from=loaded.initialized_from,
+        settings=components.to_dict(),
+    )
+    capture = FinalHiddenCapture(model) if mtp_layer is not None else None
 
+    # A frozen scorer of text log-probabilities: vision and MTP cannot change what it returns, so
+    # it is loaded text-only whatever format the reference checkpoint is in.
     reference = transformers.AutoModelForCausalLM.from_pretrained(
         str(reference_checkpoint),
         trust_remote_code=False,
@@ -317,7 +347,20 @@ def run_real_dpo(
         "interrupted": False,
         "examples_seen": 0,
         "supervised_tokens_seen": 0,
+        "image_batches_seen": 0,
+        "mtp_loss_steps": 0,
     }
+
+    def components_record() -> dict[str, Any]:
+        return component_lineage(
+            settings=components,
+            declared=loaded.declared,
+            carried=loaded.carried,
+            initialized_from=loaded.initialized_from,
+            image_batches_seen=world["image_batches_seen"],
+            mtp_loss_steps=world["mtp_loss_steps"],
+        )
+
     history: list[dict[str, Any]] = []
     created: list[str] = []
     started = time.monotonic()
@@ -336,11 +379,36 @@ def run_real_dpo(
             rejected = pad_batch([(r, m) for _, _, r, m in batch], pad_token_id, torch, device)
 
             policy_chosen = sequence_logprob(
-                model(**chosen).logits, chosen["input_ids"], chosen["completion_mask"]
+                model(
+                    input_ids=chosen["input_ids"], attention_mask=chosen["attention_mask"]
+                ).logits,
+                chosen["input_ids"],
+                chosen["completion_mask"],
             )
+            step_mtp_loss = None
+            if capture is not None and mtp_layer is not None:
+                # MTP learns the completions the policy is pushed towards, never the rejected ones.
+                chosen_labels = torch.where(
+                    chosen["completion_mask"].bool(), chosen["input_ids"], IGNORE_INDEX
+                )
+                step_mtp_loss, _ = mtp_loss(
+                    model=model,
+                    mtp=mtp_layer,
+                    final_hidden=capture.take(),
+                    input_ids=chosen["input_ids"],
+                    attention_mask=chosen["attention_mask"],
+                    labels=chosen_labels,
+                    gradient_scope=components.mtp_gradient_scope,
+                )
             policy_rejected = sequence_logprob(
-                model(**rejected).logits, rejected["input_ids"], rejected["completion_mask"]
+                model(
+                    input_ids=rejected["input_ids"], attention_mask=rejected["attention_mask"]
+                ).logits,
+                rejected["input_ids"],
+                rejected["completion_mask"],
             )
+            if capture is not None:
+                capture.take()  # the rejected pass's hidden state trains nothing
             with torch.no_grad():
                 reference_chosen = sequence_logprob(
                     reference(**chosen).logits, chosen["input_ids"], chosen["completion_mask"]
@@ -352,11 +420,15 @@ def run_real_dpo(
             loss, margin, accuracy = dpo_loss(
                 policy_chosen, policy_rejected, reference_chosen, reference_rejected, settings.beta
             )
-            if not torch.isfinite(loss):
+            total_loss = loss
+            if step_mtp_loss is not None:
+                total_loss = loss + components.mtp_loss_weight * step_mtp_loss
+            if not torch.isfinite(total_loss):
                 raise TrainingConfigError(
-                    f"non-finite DPO loss at step {world['optimizer_step'] + 1}: {float(loss)}"
+                    f"non-finite DPO loss at step {world['optimizer_step'] + 1}: "
+                    f"loss={float(loss)} total={float(total_loss)}"
                 )
-            (loss / settings.gradient_accumulation_steps).backward()
+            (total_loss / settings.gradient_accumulation_steps).backward()
             accum += 1
             if accum < settings.gradient_accumulation_steps:
                 continue
@@ -369,6 +441,8 @@ def run_real_dpo(
             optimizer.zero_grad(set_to_none=True)
             accum = 0
             world["optimizer_step"] += 1
+            if step_mtp_loss is not None:
+                world["mtp_loss_steps"] += 1
             world["examples_seen"] += len(batch)
             world["supervised_tokens_seen"] += sum(
                 sum(chosen_mask) + sum(rejected_mask) for _, chosen_mask, _, rejected_mask in batch
@@ -384,6 +458,9 @@ def run_real_dpo(
                 "elapsed_seconds": round(time.monotonic() - started, 3),
                 "gpu_peak_gib": round(torch.cuda.max_memory_allocated() / 2**30, 4),
             }
+            if step_mtp_loss is not None:
+                # The last micro-batch's MTP loss, matching how `loss` is reported here.
+                entry["mtp_loss"] = round(float(step_mtp_loss.detach()), 6)
             history.append(entry)
             write_events(events_path, {"event": "step", "timestamp": time.time(), **entry})
             if world["optimizer_step"] % 5 == 0 or world["optimizer_step"] == 1:
@@ -406,6 +483,7 @@ def run_real_dpo(
                     optimizer=optimizer,
                     scheduler=scheduler,
                     parent_checkpoint_id=parent_checkpoint_id,
+                    model_components=components_record(),
                 )
                 created.append(str(path))
                 prune_checkpoints(output_dir / "checkpoints", settings.max_checkpoints)
@@ -422,6 +500,7 @@ def run_real_dpo(
         optimizer=optimizer,
         scheduler=scheduler,
         parent_checkpoint_id=parent_checkpoint_id,
+        model_components=components_record(),
     )
     if not created or created[-1] != str(final):
         created.append(str(final))
@@ -431,6 +510,8 @@ def run_real_dpo(
     (output_dir / "metrics" / "dpo_log.jsonl").write_text(
         "".join(json.dumps(entry, sort_keys=True) + "\n" for entry in history), encoding="utf-8"
     )
+    if capture is not None:
+        capture.remove()
     emit("run_end", optimizer_step=world["optimizer_step"], final_checkpoint=str(final))
 
     return TrainingRunResult(
@@ -454,6 +535,7 @@ def run_real_dpo(
             "final_reward_margin": history[-1]["reward_margin"] if history else None,
             "preference_accuracy": history[-1]["preference_accuracy"] if history else None,
             "peak_gpu_gib": round(torch.cuda.max_memory_allocated() / 2**30, 4),
+            "model_components": components_record(),
             "evidence": True,
         },
     )
@@ -472,6 +554,7 @@ def _save_dpo_checkpoint(
     optimizer: Any,
     scheduler: Any,
     parent_checkpoint_id: str,
+    model_components: dict[str, Any] | None = None,
 ) -> Path:
     import torch
 
@@ -502,6 +585,7 @@ def _save_dpo_checkpoint(
         dataset_manifest_ids=list(datasets.get("manifest_ids") or ["preference"]),
         dataset_hashes=dict(datasets.get("hashes") or {"preference": str(identity["sha256"])}),
         parent_checkpoint=parent_checkpoint_id,
+        model_components=model_components,
     )
     lineage["parent_checkpoint_sha256"] = _checkpoint_identity(
         _project_path(

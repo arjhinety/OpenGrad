@@ -119,6 +119,7 @@ def test_full_tuning_resolves_and_records_every_field():
         "gradient_clipping",
         "gradient_checkpointing",
         "lora",
+        "model_components",
     ):
         assert key in recorded, key
 

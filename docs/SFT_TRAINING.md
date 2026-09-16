@@ -20,6 +20,23 @@ The interface carries the full experiment config (`TrainerBackend.train(..., exp
 root=)`), because the real path needs the dataset and model identity that the `trainer` block
 does not contain.
 
+## Vision and MTP are carried and trained (`full-model-components-v1`, from 2026-09-16)
+
+The real path loads **every component the base checkpoint declares**. For Qwen3.5-2B that is the
+language model, the vision encoder and the native multi-token-prediction (MTP) layer. Each carried
+component goes into the optimizer and is written into every checkpoint.
+
+MTP is trained with a weighted next-next-token loss beside the SFT loss. Defaults:
+`gradient_scope: joint`, `loss_weight: 0.3`. The vision encoder only receives gradients from
+batches carrying images, and the current corpora have none.
+
+Runs before this date loaded `AutoModelForCausalLM`, which drops both components, so their
+checkpoints are text-only. Post-policy runs are not interchangeable with them.
+
+`trainer.model_components: {vision: exclude, mtp: exclude}` reproduces a pre-policy run. The full
+contract, the MTP objective and the comparability rules are in
+[`MODEL_COMPONENT_POLICY.md`](MODEL_COMPONENT_POLICY.md).
+
 ## Loss falls only on assistant turns
 
 The corpus stores model-independent `messages`; training text is produced by the model-family
@@ -161,7 +178,9 @@ Every run writes, alongside its artifacts:
 * `events.jsonl` — append-only ledger, written by the training loop itself, carrying
   `step`, `optimizer_step`, `epoch`, `train_loss`, `learning_rate`, `grad_norm`,
   `examples_seen`, `supervised_tokens_seen`, throughput, GPU allocated/reserved/peak, and
-  checkpoint events;
+  checkpoint events. `train_loss` is the SFT loss alone. When MTP is carried, `mtp_loss` is logged
+  beside it, and `model_loaded` records which components were declared, carried and initialized
+  from where;
 * `rendering_report.json`, `overflow_report.json`, `dataset_manifest.json`;
 * `metrics/train_log.jsonl`.
 

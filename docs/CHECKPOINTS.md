@@ -85,3 +85,22 @@ checkpoint set is bounded and known in advance: a full-parameter 2B checkpoint w
 state is ~3.8 GiB, so four retained checkpoints are ~15 GiB. If that does not fit, delete
 something else, raise `max_checkpoints`, or stop the run — never delete weights that exist
 nowhere else.
+
+The ~3.8 GiB figure was measured on text-only checkpoints. From `full-model-components-v1` a checkpoint
+also carries the vision encoder and the MTP layer: 392,244,736 more parameters, about 0.73 GiB more
+in bfloat16 for the weights alone. The real size has not been measured yet.
+
+---
+
+## 4. Model components in the lineage
+
+From `full-model-components-v1` (2026-09-16), every `checkpoint_metadata.json` carries a
+`model_components` block:
+- `declared`, `carried`: which optional components the checkpoint has;
+- `initialized_from`: base revision, parent checkpoint, or the checkpoint itself;
+- `trained`: what actually received gradients. `vision` stays `false` until a batch with images is
+  seen;
+- the MTP loss settings.
+
+A lineage **without** the block predates the policy and describes a **text-only** checkpoint. See
+[`MODEL_COMPONENT_POLICY.md`](MODEL_COMPONENT_POLICY.md).

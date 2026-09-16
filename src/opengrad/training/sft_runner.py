@@ -26,6 +26,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from opengrad.training.model_components import (
+    ComponentSettings,
+    ModelComponentError,
+    resolve_component_settings,
+)
+
 # Loss is ignored at these positions; -100 is torch's cross-entropy ignore index.
 IGNORE_INDEX = -100
 
@@ -63,6 +69,7 @@ class ResolvedSettings:
     max_checkpoints: int
     shuffle_seed_offset: int
     lora: dict[str, Any] | None
+    model_components: ComponentSettings
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -87,6 +94,7 @@ class ResolvedSettings:
             "save_steps": self.save_steps,
             "max_checkpoints": self.max_checkpoints,
             "lora": self.lora,
+            "model_components": self.model_components.to_dict(),
         }
 
 
@@ -146,6 +154,12 @@ def resolve_settings(experiment: dict[str, Any], trainer: dict[str, Any]) -> Res
 
     gradient_checkpointing = bool(trainer.get("gradient_checkpointing", False))
 
+    # Which checkpoint components the run carries and how MTP trains (full-model-components-v1).
+    try:
+        model_components = resolve_component_settings(trainer, algorithm="sft")
+    except ModelComponentError as exc:
+        raise TrainingConfigError(str(exc)) from exc
+
     return ResolvedSettings(
         tuning_method=str(tuning_method),
         learning_rate=float(trainer.get("learning_rate", 2e-5)),
@@ -169,6 +183,7 @@ def resolve_settings(experiment: dict[str, Any], trainer: dict[str, Any]) -> Res
         max_checkpoints=int((experiment.get("checkpointing") or {}).get("max_checkpoints", 3) or 0),
         shuffle_seed_offset=int(trainer.get("shuffle_seed_offset", 0)),
         lora=lora,
+        model_components=model_components,
     )
 
 
@@ -260,10 +275,17 @@ def checkpoint_lineage(
     dataset_manifest_ids: list[str],
     dataset_hashes: dict[str, str],
     parent_checkpoint: str | None,
+    model_components: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """The lineage the checkpoint registry requires, in one place."""
+    """The lineage the checkpoint registry requires, in one place.
+
+    ``model_components`` is the block built by
+    :func:`opengrad.training.model_components.component_lineage`: which components the checkpoint
+    carries, where each one's weights came from, and which were actually trained. A lineage without
+    it predates ``full-model-components-v1`` and describes a text-only checkpoint.
+    """
     model = experiment.get("model", {})
-    return {
+    lineage = {
         "base_model": model.get("model_id"),
         "base_model_revision": model.get("model_revision"),
         "tokenizer_revision": model.get("tokenizer_revision"),
@@ -283,6 +305,9 @@ def checkpoint_lineage(
         "parent_checkpoint": parent_checkpoint,
         "status": "CANDIDATE",
     }
+    if model_components is not None:
+        lineage["model_components"] = model_components
+    return lineage
 
 
 def install_interrupt_handler(state: dict[str, Any]) -> Any:

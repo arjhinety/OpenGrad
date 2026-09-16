@@ -50,7 +50,23 @@ external API (`reports/data/m1-calibration-preference-pairs-v1.json`).
 
 ---
 
-## 4. Diagnostics & Telemetry
+## 4. Model Components (`full-model-components-v1`, from 2026-09-16)
+
+The policy model carries every component its base declares: for Qwen3.5-2B, the vision encoder and the native
+MTP layer as well as the language model. An initial checkpoint from before the policy is text-only. Its
+missing components are grafted from the pinned base revision, and the lineage's
+`model_components.initialized_from` names the source.
+
+MTP trains on the **chosen** completion only. The default `gradient_scope: head_only` keeps the gradient on the
+`mtp.*` parameters, so the DPO objective itself is unchanged. `mtp_loss` is logged beside `loss`.
+
+The reference model stays a text-only frozen scorer.
+
+See [`MODEL_COMPONENT_POLICY.md`](MODEL_COMPONENT_POLICY.md).
+
+---
+
+## 5. Diagnostics & Telemetry
 
 During DPO execution, `DPOTrainerBackend` tracks:
 - `reward_margin`: $\beta \log \frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \beta \log \frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}$

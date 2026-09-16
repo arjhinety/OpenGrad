@@ -18,17 +18,21 @@ Multi-Token Prediction (MTP) attaches $K$ lightweight auxiliary prediction heads
 ```
 
 ### Integration Points:
-1. **Training Boundary (`src/opengrad/training/sft.py`)**:
-   - The forward pass computes joint cross-entropy loss:
-     $$\mathcal{L} = \mathcal{L}_{\text{primary}} + \sum_{k=1}^K \lambda_k \mathcal{L}_{\text{mtp}, k}$$
-   - When training native MTP heads, the `training_config` declares:
+1. **Training Boundary (`src/opengrad/training/sft.py`, `dpo_live.py`, `mtp.py`)**:
+   - **Implemented** for the model's native MTP depth, which is one layer for Qwen3.5-2B
+     (`full-model-components-v1`, [`MODEL_COMPONENT_POLICY.md`](MODEL_COMPONENT_POLICY.md)). Every trainer
+     carries the checkpoint's `mtp.*` layer and trains it:
+     $$\mathcal{L} = \mathcal{L}_{\text{primary}} + \lambda \, \mathcal{L}_{\text{mtp}}$$
+     The layer's output at position $t$, built from $h_t$ and the embedding of $x_{t+1}$, is scored against
+     $x_{t+2}$. This is the pairing vLLM's proposer drafts with.
+   - The configuration is the checkpoint's native layer count, not a free `num_heads`:
      ```yaml
      trainer:
-       type: sft
        mtp:
-         num_heads: 3
-         loss_weight: 0.3
+         loss_weight: 0.3          # SFT default; DPO defaults to 1.0
+         gradient_scope: joint     # SFT default; DPO defaults to head_only
      ```
+   - Recursive multi-step MTP ($K > 1$ on one native layer) is not implemented.
 2. **Inference Backend Boundary (`src/opengrad/benchmarks/backends/protocol.py`)**:
    - The model generates draft tokens across heads $\{1, \dots, K\}$ concurrently.
    - The verifier validates candidates against the primary logits in a single parallel verification pass.

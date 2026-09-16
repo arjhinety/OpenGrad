@@ -20,6 +20,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from opengrad.training.model_components import (
+    ComponentSettings,
+    ModelComponentError,
+    resolve_component_settings,
+)
+
 
 class PreferenceDataError(ValueError):
     """The preference dataset is missing, malformed, or too small to train on."""
@@ -210,6 +216,7 @@ class DPOSettings:
     max_checkpoints: int
     reference: str
     scheduler: str
+    model_components: ComponentSettings
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -226,6 +233,7 @@ class DPOSettings:
             "max_checkpoints": self.max_checkpoints,
             "reference": self.reference,
             "scheduler": self.scheduler,
+            "model_components": self.model_components.to_dict(),
         }
 
 
@@ -256,6 +264,12 @@ def resolve_dpo_settings(experiment: dict[str, Any], trainer: dict[str, Any]) ->
     grad_accum = int(trainer.get("gradient_accumulation_steps", 1))
     if micro_batch < 1 or grad_accum < 1:
         raise PreferenceDataError("batch sizes must be positive")
+    # Components carried and how MTP trains. DPO defaults to `head_only`, so the MTP layer keeps
+    # up with the moving policy without adding a likelihood term to the preference objective.
+    try:
+        model_components = resolve_component_settings(trainer, algorithm="dpo")
+    except ModelComponentError as exc:
+        raise PreferenceDataError(str(exc)) from exc
     return DPOSettings(
         beta=beta,
         learning_rate=float(trainer.get("learning_rate", 5e-6)),
@@ -270,4 +284,5 @@ def resolve_dpo_settings(experiment: dict[str, Any], trainer: dict[str, Any]) ->
         max_checkpoints=int((experiment.get("checkpointing") or {}).get("max_checkpoints", 2) or 0),
         reference=str(reference),
         scheduler=str(trainer.get("scheduler", "constant")),
+        model_components=model_components,
     )
