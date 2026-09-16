@@ -33,12 +33,13 @@ renders).
 ```
 
 - **P-DET-COVERAGE-v1 is not drawn, and the study owner is its blind annotator.** Its builder is
-  `src/opengrad/verification/pdet_coverage.py` (preregistration draft
-  `docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md`).
+  `src/opengrad/verification/pdet_coverage.py` (preregistration
+  `docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md`, adopted as `study_002_prereg_v4`).
   - The draw is byte-reproducible, so any written population *is* the future blind sample. Before adoption,
     use only `--dry-run`, which writes counts and hashes, never items. Never print item text, ids, sources
     or strata, and never quote pool text in an annotator-facing document (a test scans 30 for it).
-  - `--build` refuses `reports/pdet-coverage/` until 30 is adopted, and `reports/pdet/` always.
+  - `--build` may write `reports/pdet-coverage/` only since adoption, never overwrites a written
+    population, and always refuses `reports/pdet/`.
   - Structural CALL evidence is `src/opengrad/verification/call_fidelity.py`; the acceptance rules are code
     in `src/opengrad/verification/pdet_coverage_metrics.py`. Change either only through 30.
 

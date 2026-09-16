@@ -139,6 +139,30 @@ seeing data is a new study, and it goes into the next study
 - **Nature:** not a defect repair. It is a resource-driven change made before any result exists.
 - **Full record:** [29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md](29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md).
 
+### `study_002_prereg_v4` — 2026-09-16
+
+- **Item changed:** classifier validation gains a second population, P-DET-COVERAGE-v1, adopted as
+  preregistered in [30](30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md). It covers the modes P-DET-v1 cannot:
+  P-DET-v1 holds no CALL and no DIRECT item, so it cannot authorise C1 (`reports/ERRATA.md` §14). Fixed by
+  this amendment:
+  - the population: seed, strata and quotas (§7), the dedup and exclusion rules (§8–§9) and blinding
+    (§10), drawn from normalization-v3 fingerprint `60d3123e…`;
+  - the acceptance rules and their minimum sizes, 50 / 50 / 30 / 20 (§11). These are executable in
+    `src/opengrad/verification/pdet_coverage_metrics.py`;
+  - the structural CALL evidence basis (§4).
+- **Reason:** a defect in coverage. Without a population containing CALL and DIRECT, no classifier can be
+  qualified for those modes, and the C1 authorisation rule (22 §6) cannot be met.
+- **Not changed:**
+  - P-DET-v1, its population, labels and freeze state, and 22 and 23;
+  - every threshold of the study, the partition, the arms, the seed count and the corpus of every arm.
+  30 adds a population; it modifies nothing.
+- **Candidates already scored:** none. No classifier has been implemented or scored on either population.
+- **Arms launched under an earlier version:** none. Nothing has been trained.
+- **Nature:** a defect repair (missing coverage), made before the population was drawn and before any label
+  or result on it existed.
+- **Full record:** [30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md](30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md).
+  Its file name keeps `-DRAFT` because committed reports cite that path; its status line says ADOPTED.
+
 ## Registration of the unit of analysis
 
 - The **unit of inference** is the seed, clustered by item ([10](10-STATISTICS-PLAN.md)).

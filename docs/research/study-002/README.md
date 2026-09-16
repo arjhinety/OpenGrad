@@ -131,7 +131,7 @@ frozen population. It is a design decision for the study owner, and none has bee
 | 28 | P-DET addendum — three exposed worked examples, excluded from metrics | [27-PDET-EXPOSED-WORKED-EXAMPLES.md](27-PDET-EXPOSED-WORKED-EXAMPLES.md) |
 | 29 | P-DET amendment `study_002_prereg_v2` — model reference labels, human annotation deferred | [28-PDET-MODEL-LABEL-AMENDMENT.md](28-PDET-MODEL-LABEL-AMENDMENT.md) |
 | 30 | P-DET amendment `study_002_prereg_v3` — the rationale becomes optional (ergonomics, not taxonomy); review order | [29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md](29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md) |
-| 31 | P-DET-COVERAGE-v1 preregistration draft — DIRECT and tool-boundary coverage (not adopted, not drawn; revised after an engineering review and a counts-only dry run, 30 §13) | [30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md](30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md) |
+| 31 | P-DET-COVERAGE-v1 preregistration — DIRECT and tool-boundary coverage; **adopted as `study_002_prereg_v4`** (2026-09-16) after an engineering review and a counts-only dry run (30 §13) | [30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md](30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md) |
 | 32 | Canonical-v3 sources and adapters; the `normalization-v3` pre-classifier artifact and its structural audit | [31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md) |
 | 33 | Classifier input contract `prose-decision-input-v1` — what the prose classifier may read; eligibility | [32-CLASSIFIER-INPUT-CONTRACT.md](32-CLASSIFIER-INPUT-CONTRACT.md) |
 

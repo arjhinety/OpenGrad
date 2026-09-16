@@ -852,3 +852,27 @@ contain tool calls and direct answers. That is a design decision that has not be
 
 The details, and the 11 items where the human and the superseded model labels differ, are in
 [`docs/research/study-002/README.md`](../docs/research/study-002/README.md).
+
+
+## 15. Amendment `study_002_prereg_v4`: P-DET-COVERAGE-v1 adopted as a second validation population
+
+**Added 2026-09-16.** §14 found that P-DET-v1 contains no CALL and no DIRECT item, so no classifier can
+be qualified for those modes on it, and C1 cannot be authorised. The study owner adopted
+[`docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md`](../docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md)
+as the population that covers them.
+
+**What it fixes:**
+- the population design: seed, strata, quotas, dedup, exclusions and blinding;
+- the acceptance rules, with minimum sizes of 50 gold (recall), 50 predictions (precision), 30 hard gold
+  (challenge) and 20 DIRECT predictions per source;
+- its input: normalization-v3 fingerprint `60d3123e…`.
+
+**What stays the same:**
+- P-DET-v1 and its labels;
+- 22 and 23;
+- every study threshold, partition, arm, seed count and arm corpus.
+
+No frozen file changes. Adopted before the population was drawn and before any label existed, and no
+classifier had been scored on either population.
+
+The full record is 30, and the amendment entry is in `docs/research/study-002/03-PREREGISTRATION.md`.

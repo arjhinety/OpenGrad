@@ -12,10 +12,10 @@ complements P-DET-v1 and never replaces it: this module imports nothing from
 ``--verify --output-dir DIR``
     Re-hash the written artifacts, re-derive the draw, and report whether they are unchanged.
 
-**Adoption gate.** While 30 is a draft (:data:`PREREGISTRATION_STATUS`), the build refuses
-``reports/pdet-coverage/``. A draw can only be made into a scratch directory as a dry run, and nothing
-drawn there is a population. Adopting 30 (amendment ``study_002_prereg_v4``) changes the status here in
-the same commit.
+**Adoption gate.** While 30 was a draft (:data:`PREREGISTRATION_STATUS`), the build refused
+``reports/pdet-coverage/``, and a draw could only be a counts-only dry run. 30 was adopted as amendment
+``study_002_prereg_v4`` on 2026-09-16, and the status here changed in that commit. The build still never
+overwrites a written population and always refuses ``reports/pdet/``.
 
 What this module does **not** do: it labels nothing, imports or emulates no classifier, and writes no gold
 label. Strata are sampling strata (30 §7.2), never labels.
@@ -66,9 +66,10 @@ POPULATION_ID = "P-DET-COVERAGE-v1"
 PROTOCOL_VERSION = "pdet-coverage-002-v1"
 SEED = "opengrad-pdet-coverage-002-v1"
 PREREGISTRATION = Path("docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md")
-#: ``DRAFT`` until the study owner adopts 30; then ``ADOPTED`` with the amendment id, in one commit.
-PREREGISTRATION_STATUS = "DRAFT"
-ADOPTION_AMENDMENT: str | None = None
+#: ``DRAFT`` until the study owner adopted 30; ``ADOPTED`` with the amendment id since 2026-09-16.
+#: The file name keeps ``-DRAFT``: the committed supply and dry-run reports cite that path.
+PREREGISTRATION_STATUS = "ADOPTED"
+ADOPTION_AMENDMENT: str | None = "study_002_prereg_v4"
 
 OUTPUT_DIR = Path("reports/pdet-coverage")
 FORBIDDEN_OUTPUT_DIR = Path("reports/pdet")

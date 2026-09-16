@@ -1,13 +1,17 @@
-# 30 — P-DET-COVERAGE-v1: preregistration draft
+# 30 — P-DET-COVERAGE-v1: preregistration (adopted as `study_002_prereg_v4`)
 
-**Status: DRAFT, 2026-09-15; revised 2026-09-16 after an engineering review and a counts-only dry run
-(§13), and re-anchored the same day to normalization-v3 under adapter version `2.2.0` (U-8). Not adopted. No population has been drawn or written; no item has been annotated.** Both sampling
+**Status: ADOPTED, 2026-09-16, as amendment `study_002_prereg_v4`** ([03](03-PREREGISTRATION.md),
+[`reports/ERRATA.md`](../../../reports/ERRATA.md) §15). Drafted 2026-09-15; revised 2026-09-16 after an
+engineering review and a counts-only dry run (§13), and re-anchored the same day to normalization-v3 under
+adapter version `2.2.0` (U-8). **At adoption no population had been drawn or written and no item had been
+annotated.** The file name keeps `-DRAFT` because committed reports cite that path. Both sampling
 blockers of §12 are resolved:
 - **B-1**, the canonical-v3 representation: [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md);
 - **B-2**, the classifier input contract: [32](32-CLASSIFIER-INPUT-CONTRACT.md).
 
-The builder exists (`src/opengrad/verification/pdet_coverage.py`). It refuses to write a population to
-`reports/pdet-coverage/` while this document is a draft. Sampling waits only for adoption.
+The builder exists (`src/opengrad/verification/pdet_coverage.py`). It refused to write a population to
+`reports/pdet-coverage/` while this document was a draft; since adoption it may, once, and never
+overwrites what it wrote.
 
 This document specifies a second classifier-validation population. It **complements** frozen P-DET-v1 and
 does not replace it.
@@ -16,9 +20,10 @@ It modifies nothing:
 - not P-DET-v1, `src/opengrad/verification/pdet.py`, `reports/pdet/`, 22 or 23;
 - not canonical-v2 or any other frozen artifact.
 
-No classifier is implemented, no canonical-v3 artifact is built, and nothing is trained. When the study owner
-adopts it, it is recorded as amendment `study_002_prereg_v4` in [03](03-PREREGISTRATION.md) and in
-[`reports/ERRATA.md`](../../../reports/ERRATA.md). Until then it binds nothing.
+No classifier is implemented, no canonical-v3 training artifact is built, and nothing is trained. The study
+owner adopted it as amendment `study_002_prereg_v4`, recorded in [03](03-PREREGISTRATION.md) and in
+[`reports/ERRATA.md`](../../../reports/ERRATA.md). From then on it binds, and it changes only through a
+further numbered amendment.
 
 | | |
 |---|---|
@@ -519,8 +524,8 @@ study owner's instructions; each revision in §13 was decided by the study owner
 resolved** ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md), [32](32-CLASSIFIER-INPUT-CONTRACT.md)),
 and their hashes are recorded in the table above. Next:
 1. done: `pdet_coverage.py`, its structural call evidence and the metric code are written and tested;
-2. the study owner adopts this draft (amendment `study_002_prereg_v4`), which makes the minimum sizes of
-   §11 binding;
+2. done (2026-09-16): the study owner adopted this document as amendment `study_002_prereg_v4`, which makes
+   the minimum sizes of §11 binding;
 3. only then is anything drawn.
 
 ## 13. Pre-adoption engineering review and dry run (2026-09-16)

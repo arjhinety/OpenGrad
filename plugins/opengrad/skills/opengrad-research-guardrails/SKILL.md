@@ -18,7 +18,9 @@ follows is the operational core.
 - **A committed preregistration:** `docs/research/study-002/03-PREREGISTRATION.md` and the numbered design docs
   it fixes, such as `04-ARM-MATRIX.md`. Change one only through a new numbered amendment that states its
   version (the precedents are `28-PDET-MODEL-LABEL-AMENDMENT.md` → `study_002_prereg_v2`, and
-  `29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md` → `study_002_prereg_v3`), written *before* results it could
+  `29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md` → `study_002_prereg_v3`, and
+  `30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md` → `study_002_prereg_v4`, adopted in place with its status line
+  changed), written *before* results it could
   influence (G1).
 - **A gate or threshold, to make a run pass.** A threshold that blocks a correct result is a finding about the
   threshold and is recorded, not edited around (`docs/contributing/README.md`).

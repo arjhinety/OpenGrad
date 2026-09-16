@@ -479,8 +479,29 @@ def test_draw_exclusions_are_counted_per_layer_and_rule():
 # ── adoption gate, writing and verification ────────────────────────────────────────────────────────
 
 
-def test_output_is_refused_under_reports_pdet_and_before_adoption(tmp_path):
-    assert coverage.PREREGISTRATION_STATUS == "DRAFT"
+def test_30_is_adopted_as_study_002_prereg_v4():
+    assert coverage.PREREGISTRATION_STATUS == "ADOPTED"
+    assert coverage.ADOPTION_AMENDMENT == "study_002_prereg_v4"
+    assert "### `study_002_prereg_v4`" in (
+        ROOT / "docs/research/study-002/03-PREREGISTRATION.md"
+    ).read_text(encoding="utf-8")
+    assert "Amendment `study_002_prereg_v4`" in (ROOT / "reports/ERRATA.md").read_text(
+        encoding="utf-8"
+    )
+
+
+def test_reports_pdet_is_refused_even_after_adoption(tmp_path):
+    for refused in ("reports/pdet", "reports/pdet/sub"):
+        with pytest.raises(CoverageOutputError):
+            resolve_output_dir(ROOT, Path(refused))
+    assert (
+        resolve_output_dir(ROOT, Path("reports/pdet-coverage"))
+        == (ROOT / "reports/pdet-coverage").resolve()
+    )
+
+
+def test_output_is_refused_under_reports_pdet_and_before_adoption(tmp_path, monkeypatch):
+    monkeypatch.setattr(coverage, "PREREGISTRATION_STATUS", "DRAFT")
     for refused in (
         "reports/pdet",
         "reports/pdet/sub",
@@ -868,6 +889,7 @@ def test_build_into_the_official_directory_is_refused_before_any_draw(monkeypatc
         raise AssertionError("the draw ran before the output directory was checked")
 
     monkeypatch.setattr(coverage, "build_population", forbidden)
+    monkeypatch.setattr(coverage, "PREREGISTRATION_STATUS", "DRAFT")
     with pytest.raises(CoverageOutputError, match="DRAFT"):
         coverage.main(["--root", str(ROOT), "--build", "--output-dir", "reports/pdet-coverage"])
 

@@ -60,7 +60,7 @@ THRESHOLDS = {
     "challenge.recall": 0.60,
     "DIRECT.poststratified_precision": 0.80,
 }
-#: Accepted by the study owner on 2026-09-16 (30 §13); binding when 30 is adopted.
+#: Accepted by the study owner on 2026-09-16 (30 §13); binding since `study_002_prereg_v4`.
 MIN_GOLD = 50  # 22 §5's coverage rule
 MIN_PREDICTIONS = 50
 MIN_GOLD_CHALLENGE = 30
