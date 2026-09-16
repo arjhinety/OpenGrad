@@ -17,7 +17,7 @@ It is **not** the canonical-v3 training corpus:
 | Builder | `src/opengrad/data/normalization_v3.py` (`python -m opengrad.data.normalization_v3 --build` / `--verify`) |
 | Artifact | `data/processed/normalization-v3/` (git-ignored data, like v1 and v2) |
 | **Fingerprint** | **`56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3`** (adapter version `2.1.0`; supersedes `2bd38492…`, built under `2.0.0` before the ToolACE repair) |
-| Top manifest sha256 | `9ff1f9d658586c2818283b127fc46c92464cd186ec200626c23001049d74e88f` |
+| Top manifest sha256 | `da651a46dc3848cb7cfe9755e113a815f18a078a095978a65b36f8b739a00c29` |
 | Tracked anchors | `reports/normalization-v3/manifests/` (copies of all five manifests), `normalization-v3.determinism.json`, `normalization-v3.structural-audit.json`, `pdet-v1-representation-audit.json` |
 | Tests | `tests/data/test_normalization_v3.py` |
 

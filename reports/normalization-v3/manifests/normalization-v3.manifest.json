@@ -10,7 +10,7 @@
     "src/opengrad/data/semantic.py": "08bfc3d9f6c595460bcd26827b50f7f839b432a447446e2f84270f3a4405cef3",
     "src/opengrad/data/source_schema.py": "b4a831b7a73589195aa26f6f3ae17e1575aa45daf7fc334ee9d551d259e2f5cd",
     "src/opengrad/data/supervision.py": "6fc849d1c151c936cb80fe5b234a0a7f33c8444c60307d187591eb9dac89413d",
-    "src/opengrad/data/versions.py": "9ff5e36dc33439b8046f352a176bdd31c11e915e1d7c0c38777ca4ea20811028",
+    "src/opengrad/data/versions.py": "d879043dd4ad42e65a70e582aad15a10e2d237c2e93ce5e05e626f38e95e5b28",
     "src/opengrad/data/xlam_types.py": "a26caba0173315abf5b966cf00c42c804ece23f219e6065b89d0b6e973523a26"
   },
   "decision_classifier": "NOT_APPLIED",

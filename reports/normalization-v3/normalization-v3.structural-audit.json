@@ -1,7 +1,7 @@
 {
   "artifact_fingerprint": "56e8abf2f952907c0e936ac9397bde5b0a0c4a14eda3a3ccbbd47960bff2fda3",
   "artifact_kind": "NORMALIZATION_V3_STRUCTURAL_AUDIT",
-  "artifact_manifest_sha256": "9ff1f9d658586c2818283b127fc46c92464cd186ec200626c23001049d74e88f",
+  "artifact_manifest_sha256": "da651a46dc3848cb7cfe9755e113a815f18a078a095978a65b36f8b739a00c29",
   "classifier_input_contract": "prose-decision-input-v1",
   "heldout_inputs": [
     [
