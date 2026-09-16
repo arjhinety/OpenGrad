@@ -211,3 +211,77 @@ def test_incomplete_freeze_exits_3_with_reasons(cli_task: list[str], tmp_path: P
     err = capsys.readouterr().err
     assert "session 'pass-b': 4 of 5 items not labeled" in err
     assert not (tmp_path / "gold").exists()
+
+
+# ── source selection, call rendering and the blinded-key preflight ─────────────────────────────────
+
+
+def _selected_task(tmp_path: Path, **source: Any) -> list[str]:
+    data = rows(6)
+    for index, row in enumerate(data):
+        row["layer"] = "A" if index < 2 else "B"
+        row["calls"] = [{"name": f"tool_{index}", "arguments": {"x": index}}] if index < 2 else []
+    write_source(tmp_path, data)
+    config = {
+        **BASE_CONFIG,
+        "source": {**BASE_CONFIG["source"], **source},
+        "fields": {**BASE_CONFIG["fields"], "calls": {"path": "calls", "render": "calls"}},
+        "blind_fields": [*BASE_CONFIG["blind_fields"], "layer"],
+    }
+    (tmp_path / "task.yaml").write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
+    return [str(tmp_path / "task.yaml"), "--root", str(tmp_path), "--state-db", str(tmp_path / "s.sqlite3")]
+
+
+def test_source_select_keeps_only_matching_rows_in_file_order(tmp_path: Path) -> None:
+    from opengrad.annotation.config import load_task_config
+    from opengrad.annotation.items import load_source
+
+    task = _selected_task(tmp_path, select={"field": "layer", "equals": "B"}, expected_items=4)
+    config = load_task_config(Path(task[0]), root=tmp_path)
+    _, items = load_source(config)
+    assert [item.item_id for item in items] == ["item-002", "item-003", "item-004", "item-005"]
+    assert config.definition()["source_select"] == {"field": "layer", "equals": "B"}
+    assert main(["check", *task]) == 0
+
+
+def test_source_select_counts_selected_rows_and_refuses_an_empty_selection(tmp_path: Path) -> None:
+    from opengrad.annotation.config import load_task_config
+    from opengrad.annotation.items import SourceError, SourceIntegrityError, load_source
+
+    task = _selected_task(tmp_path, select={"field": "layer", "equals": "A"}, expected_items=6)
+    with pytest.raises(SourceIntegrityError):
+        load_source(load_task_config(Path(task[0]), root=tmp_path))
+    task = _selected_task(tmp_path, select={"field": "layer", "equals": "C"})
+    with pytest.raises(SourceError, match="no row"):
+        load_source(load_task_config(Path(task[0]), root=tmp_path))
+
+
+def test_a_definition_without_selection_keeps_its_hash(tmp_path: Path) -> None:
+    from opengrad.annotation.config import load_task_config
+
+    config = load_task_config(Path(_selected_task(tmp_path)[0]), root=tmp_path)
+    assert "source_select" not in config.definition()
+
+
+def test_calls_render_and_missing_text_reach_the_public_task(tmp_path: Path) -> None:
+    from opengrad.annotation.config import load_task_config
+
+    task = _selected_task(tmp_path)
+    data = yaml.safe_load(Path(task[0]).read_text(encoding="utf-8"))
+    data["fields"]["assistant"] = {"path": "response", "missing_text": "Only a call."}
+    Path(task[0]).write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    display = {item["key"]: item for item in load_task_config(Path(task[0]), root=tmp_path).public()["display"]}
+    assert display["calls"]["render"] == "calls"
+    assert display["assistant"]["missing_text"] == "Only a call."
+
+
+def test_check_flags_a_blinded_key_but_not_the_name_inside_prose(tmp_path: Path) -> None:
+    task = _selected_task(tmp_path)
+    source = tmp_path / "data" / "source.jsonl"
+    data = [json.loads(line) for line in source.read_text(encoding="utf-8").splitlines()]
+    data[0]["response"] = "The player picked a layer of paint."
+    write_source(tmp_path, data)
+    assert main(["check", *task]) == 0
+    data[1]["calls"] = [{"name": "t", "arguments": {"layer": "A"}}]
+    write_source(tmp_path, data)
+    assert main(["check", *task]) == 1

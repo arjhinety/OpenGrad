@@ -149,6 +149,17 @@ def load_source(config: TaskConfig) -> tuple[str, list[Item]]:
     rows = parse_rows(data, config.source.format, config.source.path)
     if not rows:
         raise SourceError(f"source {config.source.path} contains no rows")
+    if config.source.select_field is not None:
+        rows = [
+            row
+            for row in rows
+            if get_path(row, config.source.select_field) == config.source.select_equals
+        ]
+        if not rows:
+            raise SourceError(
+                f"source {config.source.path} has no row with {config.source.select_field} == "
+                f"{config.source.select_equals!r}"
+            )
     if config.source.expected_items is not None and len(rows) != config.source.expected_items:
         raise SourceIntegrityError(
             f"source {config.source.path} has {len(rows)} rows, but the task pins "

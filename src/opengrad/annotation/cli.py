@@ -288,10 +288,14 @@ def cmd_check(args: argparse.Namespace) -> int:
     ids = [item.item_id for item in items]
     if len(set(ids)) != len(ids):
         problems.append("item ids are not unique")
+    # A blinded column leaks when it reaches the browser as a key of the projected view (a display path that
+    # returns a mapping holding it). The bare name inside prose or a tool description ("player" holds
+    # "layer") carries no blinded value, so only key occurrences count.
+    blinded_keys = [json.dumps(name) + ":" for name in config.blind_fields]
     exposed = [
         item.item_id
         for item in items
-        if any(name in json.dumps(project(config, item.row)) for name in config.blind_fields)
+        if any(key in json.dumps(project(config, item.row)) for key in blinded_keys)
     ]
     if exposed:
         problems.append(f"{len(exposed)} items would expose a blinded field")

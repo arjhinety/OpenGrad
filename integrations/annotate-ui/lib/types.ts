@@ -13,9 +13,10 @@ export type TaskType =
 export interface DisplayField {
   key: string;
   label: string;
-  render: "text" | "json" | "tools" | "conversation";
+  render: "text" | "json" | "tools" | "conversation" | "calls";
   emphasis: boolean;
   available: boolean;
+  missing_text?: string;
 }
 
 export interface ExtraField {

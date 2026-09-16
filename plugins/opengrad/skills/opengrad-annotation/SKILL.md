@@ -45,9 +45,18 @@ renders).
     in `src/opengrad/verification/pdet_coverage_metrics.py`. Change either only through 30.
 
 ```bash
-.venv/Scripts/python.exe -m opengrad.verification.pdet_coverage --dry-run --output-dir reports/pdet-coverage
+.venv/Scripts/python.exe -m opengrad.verification.pdet_coverage --verify --output-dir reports/pdet-coverage
 .venv/Scripts/python.exe -m opengrad.verification.call_fidelity   # counts only
+opengrad-annotate check pdet-coverage-v1           # layer B, 306 items (configs/annotation/pdet-coverage-v1.yaml)
+opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-routing.yaml)
 ```
+
+  - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
+    layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters
+    (`tests/annotation/test_annotation_pdet_coverage_tasks.py`). Gold is human only: no model annotator, no
+    composite.
+  - When inspecting the population for engineering, print counts only. Never dump a record's keys or values:
+    tool parameter names are item content too.
 
 ## Common workflows
 

@@ -8,7 +8,9 @@ annotated.** The file name keeps `-DRAFT` because committed reports cite that pa
 
 **Drawn 2026-09-16, after adoption:** `reports/pdet-coverage/pdet-coverage-v1.population.jsonl`, 336 records
 (layer B 306, layer A 30), population sha256 `755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c`.
-It equals the adopted dry run (§13), and `--verify` passes. No item has been annotated or displayed. Both sampling
+It equals the adopted dry run (§13), and `--verify` passes. No item has been annotated. The two tasks of
+§10 are set up (`configs/annotation/pdet-coverage-v1.yaml`, 306 items; `pdet-coverage-v1-routing.yaml`, 30
+items), and their preflight passes. Their state files are created when annotation starts. Both sampling
 blockers of §12 are resolved:
 - **B-1**, the canonical-v3 representation: [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md);
 - **B-2**, the classifier input contract: [32](32-CLASSIFIER-INPUT-CONTRACT.md).
@@ -552,6 +554,13 @@ and their hashes are recorded in the table above. Next:
    count. Only layer A's ToolACE split across gate status moved, because most call-final ToolACE records now
    pass the gate. The undrawn population's sha256 therefore moved from `4c7ca7b5…` to the value below. No
    population was written at any step.
+
+**Exposure disclosure (after the draw, 2026-09-16).** While the annotation tasks were being set up, a
+schema inspection printed the key names, not the values, of the first record in the population file: a
+layer A item. That output included two argument names of its structured call, which are also its tool's
+parameter names. No user message, response, value, id, source or stratum was printed. The item is in
+`pdet-coverage-v1-routing`. Whether it counts as exposed (`EXPOSED_WORKED_EXAMPLE`, §9) is the study owner's
+decision at annotation time.
 
 **Exposure disclosure.** Two pieces of pool-adjacent text reached the study owner's session during the
 review, before annotation: §7.2's quoted refusal template (now removed from this document), and, in one

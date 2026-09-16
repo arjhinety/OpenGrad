@@ -291,11 +291,15 @@ source:
   format: parquet                # jsonl | json | csv | parquet
   id_field: example_id           # omit to use a content hash as the id
   expected_sha256: <hash>        # optional: refuse to open if the bytes differ
+  select: {field: layer, equals: B}   # optional: annotate only matching rows; the whole file is still hashed,
+                                 # expected_items counts the selected rows, and the field may be blinded
 fields:                          # what the annotator sees, in order
   context: messages              # dotted paths: messages.0.content, messages.-1.content
   user: {path: prompt, label: User}
   assistant: response            # "assistant" is outlined as the thing being annotated
   tools: tools                   # "tools" renders as schema tables
+  calls: {path: structured_calls, render: calls}   # each call's name and arguments; hidden when there are none
+  # any field may set missing_text: the wording shown when the record holds no value there
 metadata: {split: split}         # chips above the item
 filters: {split: split}          # navigator filters
 blind_fields: [model_prediction] # never displayed, filtered on or sent to the browser

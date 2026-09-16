@@ -1,0 +1,184 @@
+# Human spot check of P-DET-COVERAGE-v1, layer A: structural CALL routing (Study 002, study_002_prereg_v4).
+#
+# Preregistration: docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md §4 item 2 and §10.
+# Each item is a response whose turn is a structured tool call. The label records the annotator's reading of
+# the turn with the same modes as layer B; CALL confirms the payload is a plausible invocation of an offered
+# tool, consistent with the request. Structural CALL permission rests on the structural call evidence (30 §4
+# item 1), not on this check.
+#
+#   opengrad-annotate start pdet-coverage-v1-routing --annotator <your-id> --session pass-a
+#
+# Same hash-pinned population file as pdet-coverage-v1; this task selects layer A on the server. Source and
+# trajectory-gate status are blinded (30 §10). Gold is human only.
+
+task_id: pdet-coverage-v1-routing
+version: "1"
+title: P-DET-COVERAGE-v1 structural-call spot check
+task_type: single_label
+annotation_schema_version: pdet-coverage-routing-annotation-v1
+
+labels: [CALL, DIRECT, CLARIFY, UNSUPPORTED, UNKNOWN]
+shortcuts: {"1": CALL, "2": DIRECT, "3": CLARIFY, "4": UNSUPPORTED, "5": UNKNOWN}
+unknown_labels: [UNKNOWN]
+
+source:
+  path: reports/pdet-coverage/pdet-coverage-v1.population.jsonl
+  format: jsonl
+  id_field: pdetcov_id
+  expected_sha256: 755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c
+  select: {field: layer, equals: A}
+  expected_items: 30
+
+# 30 §10: the user message, the offered tools, the response and, for layer A, its structured call payload,
+# shown as part of the response being annotated. No system message (32 §2).
+fields:
+  user:
+    label: User message
+    path: user_message
+  assistant:
+    label: Assistant response being classified - text
+    path: assistant_response
+    missing_text: No text in this turn; the turn is only the tool call below.
+  calls:
+    label: Assistant response being classified - structured tool call
+    path: structured_calls
+    render: calls
+    emphasis: true
+  tools:
+    label: Available tools
+    path: tools
+
+blind_fields:
+  - gold_policy_label
+  - ambiguity_status
+  - annotator_id
+  - annotator_rationale
+  - boundary_rule_cited
+  - annotation_version
+  - layer
+  - stratum
+  - trajectory_gate
+  - source_dataset
+  - source_name
+  - source_revision
+  - upstream_id
+  - record_id
+  - raw_record_hash
+  - canonical_hash
+  - features_sha256
+  - classifier_input_contract
+  - classifier_version_at_selection
+
+extra_fields:
+  - key: ambiguity_status
+    label: Ambiguity status
+    type: select
+    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT, EMPTY_TOOLSET]
+    default: NONE
+    required: true
+  - key: annotator_rationale
+    label: Rationale
+    type: text
+    required: false
+    adjudication: false
+    help: Optional. A short note on why, or on what was hard, if you want one.
+  - key: boundary_rule_cited
+    label: Boundary rule (22 §2)
+    type: select
+    options: ["1", "2", "3", "4", "5", "6", "7", "8", "none"]
+    default: "none"
+    required: false
+    help: Cite 1-8 when a boundary discrimination decided the label.
+
+constraints:
+  - when_label_in: [UNKNOWN]
+    field: ambiguity_status
+    forbidden: [NONE]
+    message: UNKNOWN needs an ambiguity reason (23 §2 - set ambiguity_status).
+  - when_label_not_in: [UNKNOWN]
+    field: ambiguity_status
+    allowed: [NONE]
+    message: An ambiguous item is labeled UNKNOWN; a mode label needs ambiguity_status NONE (23 §2).
+
+disagreement_keys: [label, ambiguity_status]
+
+adjudication_fields:
+  - key: decision_tree_step
+    label: Deciding rule (22 §3 step)
+    type: select
+    options: ["1", "2", "3", "4", "5", "6", "7", "8"]
+    required: true
+
+instructions:
+  - title: Checklist (26)
+    file: docs/research/study-002/26-PDET-ANNOTATOR-CHECKLIST.md
+  - title: Protocol - modes, boundaries, decision tree (22 §1-4)
+    file: docs/research/study-002/22-PDET-PROTOCOL.md
+    include_sections: ["1.", "2.", "3.", "4."]
+  - title: Instrument - fields, deciding, passes (23 §2, 3, 5, 7)
+    file: docs/research/study-002/23-PDET-ANNOTATION-INSTRUMENT.md
+    include_sections: ["2.", "3.", "5.", "7."]
+  - title: This population - DIRECT and post-tool responses (30 §2-3)
+    file: docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md
+    include_sections: ["2.", "3."]
+
+instruction_forbidden_terms:
+  - challenge_families
+  - "families:"
+  - question_mark
+  - question_without_mark
+  - refusal_with_question
+  - refusal_plain
+  - tool_mentioned_no_payload
+  - caveat_then_content
+  - multi_clause_question
+  - no_tools_offered
+  - short_plain
+  - serialized_call_shape
+  - advice_external_service
+  - polite_followup
+  - HEURISTIC_REGEX
+  - refusal_signal
+  - stratum
+  - strata
+  - QUESTION_CUES
+  - HEDGE_CUES
+  - TEXTUAL_CALL
+  - INVOCATION_TALK
+  - invocation_talk
+  - identifier_shaped_tool_name
+  - word_tool_name
+  - trajectory_gate
+  - trajectory_issue
+  - pdetcov_index
+
+record_keys:
+  item_id: pdetcov_id
+  label: gold_policy_label
+  annotation_schema_version: annotation_version
+
+output:
+  dir: reports/pdet-coverage/routing-annotation
+  session_file: "pdet-coverage-v1-routing.annotations.{annotator_id}.{session_id}.jsonl"
+  history_file: "audit/pdet-coverage-v1-routing.history.{annotator_id}.{session_id}.jsonl"
+  adjudication_history_file: audit/pdet-coverage-v1-routing.adjudication-history.jsonl
+  disagreements_file: pdet-coverage-v1-routing.disagreements.jsonl
+  adjudication_file: pdet-coverage-v1-routing.adjudicated.jsonl
+  gold_file: pdet-coverage-v1-routing.gold.jsonl
+  manifest_file: pdet-coverage-v1-routing.annotation-manifest.json
+
+protected_paths:
+  - reports/pdet-coverage/pdet-coverage-v1.population.jsonl
+  - reports/pdet-coverage/pdet-coverage-v1.manifest.json
+  - reports/pdet-coverage/pdet-coverage-v1.manifest.json.sha256
+
+state_db: .annotation/pdet-coverage-v1-routing.sqlite3
+
+freeze:
+  allowed_designs: [two_pass, single_annotator]
+  require_adjudication: true
+  single_annotator_review:
+    flagged: true
+    labels: [UNKNOWN]
+    field_not_in:
+      boundary_rule_cited: ["none"]

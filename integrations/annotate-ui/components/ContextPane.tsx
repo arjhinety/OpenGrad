@@ -3,8 +3,9 @@
 import type { DisplayField, ItemCore, TaskPublic } from "@/lib/types";
 import { ToolList } from "./ToolList";
 
-function Text({ value }: { value: unknown }) {
-  if (value === null || value === undefined) return <div className="body empty">Missing in the source record.</div>;
+function Text({ value, missing }: { value: unknown; missing?: string }) {
+  if (value === null || value === undefined)
+    return <div className="body empty">{missing || "Missing in the source record."}</div>;
   if (typeof value === "string") {
     // An empty or whitespace-only response is itself evidence (e.g. non-substantive), so say so plainly.
     if (!value.trim()) return <div className="body empty">(empty — {value.length} whitespace characters)</div>;
@@ -30,13 +31,33 @@ function Conversation({ value }: { value: unknown }) {
   );
 }
 
+// Structured tool calls of the turn being annotated: each call's name and its arguments, nothing else.
+function Calls({ value }: { value: unknown[] }) {
+  return (
+    <div className="body">
+      {value.map((raw, index) => {
+        const call = (raw ?? {}) as { name?: unknown; arguments?: unknown };
+        return (
+          <div className="turn" key={index}>
+            <div className="role">{String(call.name ?? "call")}</div>
+            <pre className="json">{JSON.stringify(call.arguments ?? {}, null, 2)}</pre>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function Field({ field, value }: { field: DisplayField; value: unknown }) {
   let body: React.ReactNode;
+  // A turn without calls shows no call section at all.
+  if (field.render === "calls" && (!Array.isArray(value) || !value.length)) return null;
   if (!field.available) body = <div className="body empty">Not present in the source record.</div>;
+  else if (field.render === "calls") body = <Calls value={value as unknown[]} />;
   else if (field.render === "tools") body = <ToolList tools={value} />;
   else if (field.render === "conversation") body = <Conversation value={value} />;
   else if (field.render === "json") body = <pre className="json">{JSON.stringify(value, null, 2)}</pre>;
-  else body = <Text value={value} />;
+  else body = <Text value={value} missing={field.missing_text} />;
   return (
     <section className={`field${field.emphasis ? " emphasis" : ""}`}>
       <div className="label">

@@ -23,7 +23,7 @@ APP_VERSION = "opengrad-annotate-1.0.0"
 TASK_TYPES = ("single_label", "multi_label", "binary", "rating", "free_text", "pairwise", "ranking")
 LABEL_TASK_TYPES = frozenset({"single_label", "multi_label", "binary", "pairwise"})
 SOURCE_FORMATS = ("jsonl", "json", "csv", "parquet")
-RENDER_KINDS = ("text", "json", "tools", "conversation")
+RENDER_KINDS = ("text", "json", "tools", "conversation", "calls")
 FIELD_TYPES = ("text", "select")
 
 #: The value key that carries the annotator's primary decision, per task type.
@@ -93,6 +93,11 @@ class SourceConfig:
     id_field: str | None
     expected_sha256: str | None
     expected_items: int | None = None
+    #: Annotate only the rows whose ``select_field`` equals ``select_equals`` (a population holding several
+    #: tasks' items in one hash-pinned file). The whole file is still hashed; ``expected_items`` counts the
+    #: selected rows. The field may be blinded: it decides membership on the server and is never sent.
+    select_field: str | None = None
+    select_equals: str | None = None
 
 
 @dataclass(frozen=True)
@@ -102,6 +107,8 @@ class DisplayField:
     path: str | None
     render: str = "text"
     emphasis: bool = False
+    #: What the interface says when the record holds no value here; empty keeps the default wording.
+    missing_text: str = ""
 
 
 @dataclass(frozen=True)
@@ -332,6 +339,17 @@ class TaskConfig:
             ],
             "disagreement_keys": list(self.disagreement_keys),
             "source_id_field": self.source.id_field,
+            # Only when set, so every definition written before selection existed keeps its hash.
+            **(
+                {
+                    "source_select": {
+                        "field": self.source.select_field,
+                        "equals": self.source.select_equals,
+                    }
+                }
+                if self.source.select_field is not None
+                else {}
+            ),
         }
 
     def definition_sha256(self) -> str:
@@ -437,6 +455,7 @@ def _display_public(item: DisplayField) -> dict[str, Any]:
         "render": item.render,
         "emphasis": item.emphasis,
         "available": item.path is not None,
+        "missing_text": item.missing_text,
     }
 
 
@@ -526,6 +545,7 @@ def _parse_display(value: Any, where: str, infer: bool) -> tuple[DisplayField, .
                 path=None if path is None else str(path),
                 render=render,
                 emphasis=bool(entry.get("emphasis", infer and key == "assistant")),
+                missing_text=str(entry.get("missing_text") or ""),
             )
         )
     return tuple(parsed)
@@ -836,12 +856,23 @@ def parse_task_config(data: dict[str, Any], *, root: Path, config_path: Path) ->
         isinstance(expected_items, bool) or not isinstance(expected_items, int) or expected_items < 1
     ):
         raise TaskConfigError("source.expected_items must be a positive integer")
+    select = source_raw.get("select")
+    if select is not None and (
+        not isinstance(select, dict)
+        or set(select) != {"field", "equals"}
+        or not isinstance(select["field"], str)
+        or not select["field"]
+        or not isinstance(select["equals"], str)
+    ):
+        raise TaskConfigError("source.select must be a mapping {field: <path>, equals: <string>}")
     source = SourceConfig(
         path=_require_str(source_raw, "path", "source"),
         format=source_format,
         id_field=None if source_raw.get("id_field") is None else str(source_raw["id_field"]),
         expected_sha256=None if expected is None else str(expected).lower(),
         expected_items=expected_items,
+        select_field=None if select is None else select["field"],
+        select_equals=None if select is None else select["equals"],
     )
 
     display = _parse_display(data.get("fields"), "fields", infer=True)
