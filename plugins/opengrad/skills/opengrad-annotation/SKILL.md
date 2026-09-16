@@ -32,11 +32,12 @@ renders).
 .venv/Scripts/python.exe -m opengrad.verification.pdet --verify
 ```
 
-- **P-DET-COVERAGE-v1 is not drawn, and the study owner is its blind annotator.** Its builder is
+- **P-DET-COVERAGE-v1 is drawn (`reports/pdet-coverage/pdet-coverage-v1.population.jsonl`, 336 records),
+  and the study owner is its blind annotator.** Its builder is
   `src/opengrad/verification/pdet_coverage.py` (preregistration
   `docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md`, adopted as `study_002_prereg_v4`).
-  - The draw is byte-reproducible, so any written population *is* the future blind sample. Before adoption,
-    use only `--dry-run`, which writes counts and hashes, never items. Never print item text, ids, sources
+  - The draw is byte-reproducible, so the written population *is* the blind sample. Never open, print or
+    summarise the population file; `--verify` and `--dry-run` report counts and hashes only. Never print item text, ids, sources
     or strata, and never quote pool text in an annotator-facing document (a test scans 30 for it).
   - `--build` may write `reports/pdet-coverage/` only since adoption, never overwrites a written
     population, and always refuses `reports/pdet/`.

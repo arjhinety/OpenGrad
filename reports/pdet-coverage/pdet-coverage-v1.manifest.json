@@ -1,0 +1,711 @@
+{
+  "annotation_fields": [
+    "gold_policy_label",
+    "ambiguity_status",
+    "annotator_id",
+    "annotator_rationale",
+    "boundary_rule_cited",
+    "annotation_version"
+  ],
+  "artifact_kind": "PDET_COVERAGE_POPULATION",
+  "backfill": "none: an undersupplied stratum takes all it has and reports its shortage",
+  "call_permission_basis": "Layer B textual CALL is NOT_EVALUABLE unless stratum X yields enough usable gold. Structural CALL rests on structural_call_evidence: every call re-read from the raw upstream row by a parser independent of the adapters must equal the structured call (count, name, arguments), on every accepted row whatever its trajectory-gate status. The human layer A spot check audits plausibility only, with error bounds per source, never pooled.",
+  "classifier_input_contract": "prose-decision-input-v1",
+  "classifier_status_at_selection": "NOT_IMPLEMENTED",
+  "code_sha256_lf": {
+    "scripts/audit_pdet_coverage_supply.py": "466ae7874dd82b53eed9567c7c8f45d94e4601924df07b8882a29e77c4804eb1",
+    "src/opengrad/data/classifier_input.py": "22b699a048fa7948b07e45e1c0616554c50ae28acc41eaf497d2b07653f633b8",
+    "src/opengrad/verification/call_fidelity.py": "059b4a8c10e47e5b2bee8dc49c426a026d8f6bb7ecd6aad680b2bfca565aa366",
+    "src/opengrad/verification/pdet_coverage.py": "1c06fc288fa52bc3919eb7eaa689001ed1ba5ebe246d79ab96386162cd32117c"
+  },
+  "counts": {
+    "after_dedup": {
+      "A": 70543,
+      "B": 2303
+    },
+    "candidates": {
+      "A": 93198,
+      "B": 16275
+    },
+    "dedup": {
+      "A": {
+        "raw_record_hash": 0,
+        "user_prompt": 21786
+      },
+      "B": {
+        "raw_record_hash": 0,
+        "response_text": 33,
+        "skeleton": 2,
+        "user_prompt": 1960
+      }
+    },
+    "dispositions": {
+      "glaive": {
+        "EVALUATION_ONLY_OR_HELDOUT": 8,
+        "LAYER_A_CANDIDATE": 26843,
+        "LAYER_B_CANDIDATE": 14303,
+        "MALFORMED_OR_UNRENDERABLE": 1881,
+        "MULTI_TURN_UNSUPPORTED": 34446,
+        "STRUCTURAL_CALL_NOT_IN_FIRST_ASSISTANT_TURN": 20858
+      },
+      "toolace": {
+        "LAYER_A_CANDIDATE": 9013,
+        "LAYER_B_CANDIDATE": 1972,
+        "MULTI_TURN_UNSUPPORTED": 1,
+        "STRUCTURAL_CALL_NOT_IN_FIRST_ASSISTANT_TURN": 65
+      },
+      "xlam": {
+        "LAYER_A_CANDIDATE": 57342
+      }
+    },
+    "draw_exclusions": {
+      "A": {
+        "distinct_prompts_matched": {
+          "PDET_V1_OVERLAP": 304,
+          "QAD_RECOVERY_SET": 301
+        },
+        "matched": {
+          "PDET_V1_OVERLAP": 318,
+          "QAD_RECOVERY_SET": 554
+        },
+        "primary": {
+          "PDET_V1_OVERLAP": 315,
+          "QAD_RECOVERY_SET": 554
+        }
+      },
+      "B": {
+        "distinct_prompts_matched": {
+          "QAD_RECOVERY_SET": 10
+        },
+        "matched": {
+          "QAD_RECOVERY_SET": 11977
+        },
+        "primary": {
+          "QAD_RECOVERY_SET": 11977
+        }
+      }
+    },
+    "layer_a": {
+      "per_source": {
+        "glaive": {
+          "per_gate": {
+            "trajectory_issue": {
+              "realized": 1,
+              "supply": 107
+            },
+            "valid": {
+              "realized": 14,
+              "supply": 5943
+            }
+          },
+          "quota": 15,
+          "realized": 15,
+          "shortage": 0,
+          "supply": 6050
+        },
+        "toolace": {
+          "per_gate": {
+            "trajectory_issue": {
+              "realized": 1,
+              "supply": 41
+            },
+            "valid": {
+              "realized": 9,
+              "supply": 8885
+            }
+          },
+          "quota": 10,
+          "realized": 10,
+          "shortage": 0,
+          "supply": 8926
+        },
+        "xlam": {
+          "per_gate": {
+            "trajectory_issue": {
+              "realized": 1,
+              "supply": 1211
+            },
+            "valid": {
+              "realized": 4,
+              "supply": 54356
+            }
+          },
+          "quota": 5,
+          "realized": 5,
+          "shortage": 0,
+          "supply": 55567
+        }
+      },
+      "quota": 30,
+      "realized": 30
+    },
+    "layer_b": {
+      "M": {
+        "per_source": {
+          "glaive": {
+            "realized": 11,
+            "supply": 11
+          },
+          "toolace": {
+            "realized": 49,
+            "supply": 701
+          }
+        },
+        "quota": 60,
+        "realized": 60,
+        "shortage": 0,
+        "supply": 712
+      },
+      "P1": {
+        "per_source": {
+          "glaive": {
+            "realized": 6,
+            "supply": 6
+          },
+          "toolace": {
+            "realized": 74,
+            "supply": 364
+          }
+        },
+        "quota": 80,
+        "realized": 80,
+        "shortage": 0,
+        "supply": 370
+      },
+      "P2": {
+        "per_source": {
+          "glaive": {
+            "realized": 20,
+            "supply": 65
+          },
+          "toolace": {
+            "realized": 20,
+            "supply": 486
+          }
+        },
+        "quota": 40,
+        "realized": 40,
+        "shortage": 0,
+        "supply": 551
+      },
+      "Q": {
+        "per_source": {
+          "glaive": {
+            "realized": 30,
+            "supply": 88
+          },
+          "toolace": {
+            "realized": 30,
+            "supply": 166
+          }
+        },
+        "quota": 60,
+        "realized": 60,
+        "shortage": 0,
+        "supply": 254
+      },
+      "R": {
+        "per_source": {
+          "glaive": {
+            "realized": 30,
+            "supply": 183
+          },
+          "toolace": {
+            "realized": 30,
+            "supply": 227
+          }
+        },
+        "quota": 60,
+        "realized": 60,
+        "shortage": 0,
+        "supply": 410
+      },
+      "X": {
+        "per_source": {
+          "glaive": {
+            "realized": 0,
+            "supply": 0
+          },
+          "toolace": {
+            "realized": 6,
+            "supply": 6
+          }
+        },
+        "quota": 60,
+        "realized": 6,
+        "shortage": 54,
+        "supply": 6
+      }
+    },
+    "m_match_kind": {
+      "identifier_shaped_tool_name": 44,
+      "invocation_talk": 2,
+      "word_tool_name": 14
+    },
+    "m_match_kind_by_id": {
+      "pdetcov:0fb487bbb53defd72d6520503315a80f6bfbd750d0d72606921c21eb33852a20": "identifier_shaped_tool_name",
+      "pdetcov:15b6b49059d61916173002b8633bf5f75bc5908a3f497070bb57b82794610a43": "identifier_shaped_tool_name",
+      "pdetcov:1e26925b5ccff75a93b69ea84cc79ff59c28a52bf945624b15bc62599ee63001": "identifier_shaped_tool_name",
+      "pdetcov:1f64c8f9ac8c4d5d40bf17da39101b1d0817227e57f3b14fc7bc220dc535b96d": "identifier_shaped_tool_name",
+      "pdetcov:20bf0779f883ea7314af5df96cf0dcb95d8cacdedbba9e7fb0654e5ccef2efa5": "word_tool_name",
+      "pdetcov:26091817f6f12ad3d7d593c3e53e3951cf50006cb839f904f057e10680f38ef7": "word_tool_name",
+      "pdetcov:293d505ab92d72c318321fcacddc3a4ad2c98e7d90fd839ef719e52130c1e7d3": "identifier_shaped_tool_name",
+      "pdetcov:2cbbae2d6cb130e96920954eeb48f11185c7c37412672f278ffcf493fe597a07": "identifier_shaped_tool_name",
+      "pdetcov:2debe89c2ddbfa6a756be58e04a8522021e5e98b819150b5918a2cef1de39501": "word_tool_name",
+      "pdetcov:37954597e9dcf74f1752ccb65d6db0fd12a87b2c9aa19537cda5c8936897f70c": "identifier_shaped_tool_name",
+      "pdetcov:37ae8942bdc1c60f2417bf9b9b63116244ac8fc0467f88e38aa409d42d1dd010": "identifier_shaped_tool_name",
+      "pdetcov:3b607d219c5781a2e6f9cb27995fdaddbfa2830d85fce9722b5f5e43878d38f2": "identifier_shaped_tool_name",
+      "pdetcov:3ff69f608203b980422a0ec4220465ddc38ba694b9023864f419014e61cc93ec": "identifier_shaped_tool_name",
+      "pdetcov:46c593962dd6d78d3af5ad57385e36d191b5162d55322f7459dbc0921584a598": "identifier_shaped_tool_name",
+      "pdetcov:4709ce5c4e60469c50872421319e1eb2d6facc981adf7b68fa0ebb82dc958d1d": "identifier_shaped_tool_name",
+      "pdetcov:484331136e412a782d48197c9d5fd78033c6087557675802e95d015dfa400625": "word_tool_name",
+      "pdetcov:55040c48a5ea31c379db7382ef2beac05b3e9634213930dcb51c1b56e7a34654": "identifier_shaped_tool_name",
+      "pdetcov:55adb2f992e035df59cc28c23abf09b46610c2f15a8d48c8601ce7cc3041b21e": "identifier_shaped_tool_name",
+      "pdetcov:5f54db614ce2029bde352cf9ce8a42249995ce4165708118bfa48696d8196844": "identifier_shaped_tool_name",
+      "pdetcov:65889a8945c598d9eb2c1f5151173584166fa548fbbac3cef0843b168bd191ba": "word_tool_name",
+      "pdetcov:659670f37ebf40520f40034e0422cd7650471f24ce23131c0596d160e7c5d8ed": "identifier_shaped_tool_name",
+      "pdetcov:680e195aef30542deec97a52473e12e320cf2d42b704a6dc9d4f73d0e9c78e38": "invocation_talk",
+      "pdetcov:6bcd420bdfd7367aa1e5f64517a19b5dd0feb133a3277a801a22667fdac79ddb": "identifier_shaped_tool_name",
+      "pdetcov:6e084d55d4bd3e6276463101d32759ee48b6e17cbc43ff939720001022f37f4d": "identifier_shaped_tool_name",
+      "pdetcov:6e1e92af632ef5225b69b23b686ae210e326b512a22e92c2743202c6528f9636": "identifier_shaped_tool_name",
+      "pdetcov:6fdae41442e600caa8258f993d77ad73c1cd55202712056e889053b0a53c1693": "identifier_shaped_tool_name",
+      "pdetcov:6ffb63bf10a11c697ba171e56fffa81491305df5c6502ed8fa58fc0a8b672904": "identifier_shaped_tool_name",
+      "pdetcov:70d2d9d02aa109d8a892664a6a9b84c697c13ad1a45a7eb3e1bf943185bfbc33": "word_tool_name",
+      "pdetcov:78c0f4cab7eee087c00770d9be389759f5c6ac4f2422984dffaf0e6e3799add9": "word_tool_name",
+      "pdetcov:7901e85332fa911dc38d0a56e3b5cc53370fa4b586165ecbece8ab252bf58133": "identifier_shaped_tool_name",
+      "pdetcov:7a2d5fb2320e6832e031c71ccf43cb8063b3f35491bdd966bb4139081836845d": "identifier_shaped_tool_name",
+      "pdetcov:83465cac8045d3352889644d13d0784bd392f0528cf078770f59583e54c4831d": "identifier_shaped_tool_name",
+      "pdetcov:8cc3cae886098621f2b09a4b814af852d50005a55b2f66315e83188ca5374b3c": "word_tool_name",
+      "pdetcov:94e60b10121ce4b75fe09fd5da2448ac8495640deb184966fb5ad88d6a081b76": "identifier_shaped_tool_name",
+      "pdetcov:97feffed59ea0d29f90e0e2a2c8a3fb07be1fefc1488dd2208913376cd20c5d0": "identifier_shaped_tool_name",
+      "pdetcov:9ad6935037c70c8e44590f87c9a882df8268a746142ba682f95ecfa581a5289e": "identifier_shaped_tool_name",
+      "pdetcov:9eda57e62942f0248074f6a8bea7b2061bd20499a22e38dfe8f3964270546cf3": "identifier_shaped_tool_name",
+      "pdetcov:a2857e210a5b64b6162a9e71917c6b70e4142a359df155329af4d9dfd05bbe78": "word_tool_name",
+      "pdetcov:a5efce1115d6ed66482aa0f28a888dbd3d1c3eee9acdd65a1b22b84291528d79": "identifier_shaped_tool_name",
+      "pdetcov:b8da21cfc25c610eeef4d42561a795632b46438251b2e63bbe652c9f6399643e": "word_tool_name",
+      "pdetcov:bc0dd4bddb62b546a15552983640ac54ca2363b4c701586c01d6fd296e16dd39": "identifier_shaped_tool_name",
+      "pdetcov:bf90724434e6b2d56799cb450d2e98e80640dc3d91763c11fced5009a48cdd2e": "identifier_shaped_tool_name",
+      "pdetcov:c10ff812e949e87353abca1a4f5a4c83539ad2ec187309695b523e6e5151d1af": "identifier_shaped_tool_name",
+      "pdetcov:c5443dba8f09da30f27ab77bf52843dda6a71f96495be7fcbb6fa7fa52516fc5": "identifier_shaped_tool_name",
+      "pdetcov:c56615a1ded9d96e13b5eade275c0179310a82ce01253b0df95634b0157f3900": "identifier_shaped_tool_name",
+      "pdetcov:c9f7c9091b62e34737f10e9cef5a0791fc2d6703efaf95d561619fc7018b5a75": "identifier_shaped_tool_name",
+      "pdetcov:ce97e9905b8867f45764b842a24ea98e2d91364f77fc24a309d3ddb4de144e82": "identifier_shaped_tool_name",
+      "pdetcov:cfeae5e58879f3f012d29438c67d914d788549bba26a5bf6be58c6163f53782e": "identifier_shaped_tool_name",
+      "pdetcov:d1fde01534eb22a2f598d34284544deece8370971036cd2f5f7bdf12c3247309": "word_tool_name",
+      "pdetcov:d582f86696fd83c692bc498cf54af07a7d4089a35e5b836a4521894adca8b8c7": "word_tool_name",
+      "pdetcov:d975ce3d3988f139bfb8a9114bd3acea4d829134319cf0d5e8822f73f86ea9a2": "identifier_shaped_tool_name",
+      "pdetcov:de8bafa815dbd0cce748937398727c4269b23a68c65ed397453a6ce66801e30d": "identifier_shaped_tool_name",
+      "pdetcov:e0f76763a5c425291346eeebf50d1cce9a5b76d4a12e011d5cb8aaace411d63f": "identifier_shaped_tool_name",
+      "pdetcov:e17b59d6c14f53fd4229e5d6f4d15f97ef63f54ddb4c5ef026df30310e06a262": "invocation_talk",
+      "pdetcov:ee392fb56e71b412be3847d6c32fc5afba53a56ed8e2ed2e5ad39cf41b4a8a30": "identifier_shaped_tool_name",
+      "pdetcov:ee87eef2a236c6eef5c97305181450b7472a6720690d54343cb21263550c5759": "word_tool_name",
+      "pdetcov:f51cd3666f544240285bba9a6e5bb1e619d0bb4baf1cd2ae94baee64d3307cb2": "word_tool_name",
+      "pdetcov:f5942bced328af3940af34c5be96a8d1d4d3da252f3143d10577a77d9d037d1a": "identifier_shaped_tool_name",
+      "pdetcov:fe1e0f41c8f0308f3fb53f5dbf3dd93310045f58764e97ffd7a22ac0e79f57ae": "identifier_shaped_tool_name",
+      "pdetcov:fec479bcbf2c656ddaab75c4bf38d9ca11e7bc010964fe6df13110cb6f7b0572": "identifier_shaped_tool_name"
+    },
+    "pool_strata": {
+      "glaive": {
+        "M": 19,
+        "P1": 64,
+        "P2": 65,
+        "Q": 105,
+        "R": 14050
+      },
+      "toolace": {
+        "M": 706,
+        "P1": 371,
+        "P2": 493,
+        "Q": 168,
+        "R": 228,
+        "X": 6
+      }
+    },
+    "realized": {
+      "A": 30,
+      "B": 306,
+      "total": 336
+    },
+    "shortages": {
+      "layer_a": {},
+      "layer_b": {
+        "X": 54
+      }
+    }
+  },
+  "dedup_order": "layer B strata scarcest first (candidates after exclusions), each in rank order",
+  "draw_exclusion_inputs": [
+    [
+      "results/benchmarks/datasets/gsm8k_v1.jsonl",
+      "8081f50e43fb5e4adca928ba1c8d7b1a60dd57e47e39ee8f316ae3de52dee297"
+    ],
+    [
+      "results/benchmarks/datasets/ifeval_v1.jsonl",
+      "15b8afe856ca52535155eb7905f942a4896475ae825e26e62e306d020a949ac4"
+    ],
+    [
+      "results/benchmarks/datasets/mmlu_pro_v1.jsonl",
+      "f0e3e6bee2d13058e94ac8b1cd8f29b4b8a8c9a8a9aa3c7d16117d70f5755781"
+    ],
+    [
+      "results/benchmarks/openweights_parity_cases_v1.json",
+      "2de2e6e7c9b74811706a3fb6a4f85e777b34fe0a2c75944ae673913b5127a82f"
+    ],
+    [
+      "manifests/quantization/m1_v2_qad_recovery_v1.jsonl",
+      "a26982e42d13e2e94c48aa776f12256222c91a53ce19ebda53283dac42dfa211"
+    ],
+    [
+      "reports/pdet/pdet-v1.population.jsonl",
+      "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b"
+    ]
+  ],
+  "draw_exclusion_order": [
+    "SENTINEL_PROMPT",
+    "QAD_RECOVERY_SET",
+    "PDET_V1_OVERLAP"
+  ],
+  "gold_labels_present": false,
+  "heldout_inputs": [
+    [
+      ".cache/normalization/raw/when2call_test_mcq.parquet",
+      "17cdf1a07dad0bb5bb2a6c5663b7ba547e64c681add4a50151622788595d028f"
+    ],
+    [
+      ".cache/normalization/raw/when2call_test_llm_judge.parquet",
+      "2b613123d6643394a1905bc4f5b2b92a25c8acd97806312e19a4474615a9a853"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-partition.json",
+      "56c6abc2e24c524b45c382f42927fa02117b2a04c02f04e89e6a40d8b520f901"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-quarantine.json",
+      "705b9ef68185c3ce7a997e9a9f728633b9f042b2304a96635dea34f891855cf4"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-quarantine--toolpolicy-canonical-v2-final.json",
+      "34173706d01823aa44a2871e72ce278ede6f6c93df6f4009c6270fbfb1b0a2cd"
+    ]
+  ],
+  "id_rule": "pdetcov: + sha256(source_dataset : raw_record_hash)",
+  "input": {
+    "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+    "path": "data/processed/normalization-v3",
+    "source_manifest_sha256_lf": "5bb4961cd100b4d5975a9596bee345e5234ce527029a4d6183f0b9a662bf2f90",
+    "source_manifests_sha256_lf": {
+      "glaive": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69",
+      "toolace": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2",
+      "when2call": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b",
+      "xlam": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
+    },
+    "top_manifest_sha256_lf": "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e",
+    "upstream_disposition_counts": {
+      "glaive": {
+        "accepted": 98339,
+        "duplicates": 13352,
+        "rejected": 1269,
+        "source_rows": 112960
+      },
+      "toolace": {
+        "accepted": 11051,
+        "duplicates": 3,
+        "rejected": 246,
+        "source_rows": 11300
+      },
+      "when2call": {
+        "accepted": 14701,
+        "duplicates": 124,
+        "rejected": 175,
+        "source_rows": 15000
+      },
+      "xlam": {
+        "accepted": 57342,
+        "duplicates": 350,
+        "rejected": 2308,
+        "source_rows": 60000
+      }
+    }
+  },
+  "later_evaluation_sets": {
+    "P-CONF ANSWER": "NOT_FROZEN (whichever of it and this population freezes second excludes the other)",
+    "P-SEALED": "NOT_FROZEN",
+    "P-UNANS": "NOT_FROZEN"
+  },
+  "min_usable_gold_per_mode_or_boundary": 50,
+  "population_file": "pdet-coverage-v1.population.jsonl",
+  "population_id": "P-DET-COVERAGE-v1",
+  "population_records": 336,
+  "population_sha256": "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c",
+  "preregistration": {
+    "adoption_amendment": "study_002_prereg_v4",
+    "document": "docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md",
+    "status_at_build": "ADOPTED"
+  },
+  "presentation_order": "sha256(seed :order: pdetcov_id) ascending",
+  "protocol_version": "pdet-coverage-002-v1",
+  "quotas": {
+    "layer_a": {
+      "glaive": 15,
+      "toolace": 10,
+      "xlam": 5
+    },
+    "layer_b": {
+      "M": 60,
+      "P1": 80,
+      "P2": 40,
+      "Q": 60,
+      "R": 60,
+      "X": 60
+    }
+  },
+  "ranking": "sha256(seed | stratum | pdetcov_id) descending; layer A uses stratum 'A'",
+  "sampling_roles": {
+    "glaive": {
+      "A": true,
+      "B": true
+    },
+    "toolace": {
+      "A": true,
+      "B": true
+    },
+    "when2call": {
+      "A": false,
+      "B": false
+    },
+    "xlam": {
+      "A": true,
+      "B": false
+    }
+  },
+  "schema_version": 1,
+  "seed": "opengrad-pdet-coverage-002-v1",
+  "selection_used_classifier": false,
+  "statement": "A constructed boundary-coverage population. It estimates no natural prevalence and its class mix is not a property of any corpus. Items were selected from the preregistered stratum predicates and structural facts only; no decision classifier existed or was consulted. Strata are sampling strata, not labels.",
+  "stratum_predicates": {
+    "priority": [
+      "X",
+      "M",
+      "R",
+      "Q",
+      "P1",
+      "P2"
+    ],
+    "source": "scripts/audit_pdet_coverage_supply.py"
+  },
+  "structural_call_evidence": {
+    "sources": {
+      "glaive": {
+        "accepted_rows": {
+          "trajectory_issue": {
+            "argument_mismatch": 0,
+            "count_mismatch": 0,
+            "exact": 697,
+            "name_mismatch": 0,
+            "raw_calls": 1403,
+            "raw_unparseable_independently": 0,
+            "rows": 864,
+            "rows_read_by_format_grammar": 0,
+            "rows_with_calls": 697,
+            "structured_calls": 1403
+          },
+          "trajectory_valid": {
+            "argument_mismatch": 0,
+            "count_mismatch": 0,
+            "exact": 48726,
+            "name_mismatch": 0,
+            "raw_calls": 64364,
+            "raw_unparseable_independently": 0,
+            "rows": 97475,
+            "rows_read_by_format_grammar": 0,
+            "rows_with_calls": 48726,
+            "structured_calls": 64364
+          }
+        },
+        "mismatch_record_ids_first": {},
+        "mismatched_rows": 0,
+        "not_accepted_rows": {
+          "duplicate:DUPLICATE_CANONICAL_HASH": {
+            "raw_calls": 16636,
+            "rows": 13352,
+            "rows_with_calls": 12553
+          },
+          "rejected:ADAPTER_GLAIVE_ARGUMENTS_NOT_OBJECT": {
+            "raw_calls": 19,
+            "rows": 18,
+            "rows_with_calls": 18
+          },
+          "rejected:ADAPTER_GLAIVE_MALFORMED_CALL": {
+            "raw_calls": 997,
+            "raw_unparseable_independently": 122,
+            "rows": 972,
+            "rows_with_calls": 972
+          },
+          "rejected:ADAPTER_UNDECLARED_TOOL": {
+            "raw_calls": 51,
+            "rows": 25,
+            "rows_with_calls": 25
+          },
+          "rejected:INVALID_ARGUMENTS_JSON": {
+            "raw_unparseable_independently": 1
+          },
+          "rejected:SCH_ADDITIONAL_PROPERTIES_NOT_BOOLEAN": {
+            "raw_calls": 67,
+            "rows": 47,
+            "rows_with_calls": 35
+          },
+          "rejected:SCH_DUPLICATE_REQUIRED": {
+            "raw_calls": 3,
+            "rows": 2,
+            "rows_with_calls": 1
+          },
+          "rejected:SCH_REQUIRED_NOT_STRING_LIST": {
+            "raw_calls": 26,
+            "rows": 18,
+            "rows_with_calls": 18
+          },
+          "rejected:SCH_SCHEMA_NOT_OBJECT": {
+            "raw_calls": 2,
+            "rows": 2,
+            "rows_with_calls": 2
+          },
+          "rejected:SCH_UNSUPPORTED_KEYWORD": {
+            "raw_calls": 118,
+            "rows": 62,
+            "rows_with_calls": 48
+          }
+        },
+        "unverified_rows": 0
+      },
+      "toolace": {
+        "accepted_rows": {
+          "trajectory_issue": {
+            "argument_mismatch": 0,
+            "count_mismatch": 0,
+            "exact": 52,
+            "name_mismatch": 0,
+            "raw_calls": 158,
+            "raw_unparseable_independently": 0,
+            "rows": 52,
+            "rows_read_by_format_grammar": 2,
+            "rows_with_calls": 52,
+            "structured_calls": 158
+          },
+          "trajectory_valid": {
+            "argument_mismatch": 0,
+            "count_mismatch": 0,
+            "exact": 9026,
+            "name_mismatch": 0,
+            "raw_calls": 17640,
+            "raw_unparseable_independently": 0,
+            "rows": 10999,
+            "rows_read_by_format_grammar": 118,
+            "rows_with_calls": 9026,
+            "structured_calls": 17640
+          }
+        },
+        "mismatch_record_ids_first": {},
+        "mismatched_rows": 0,
+        "not_accepted_rows": {
+          "duplicate:DUPLICATE_CANONICAL_HASH": {
+            "raw_calls": 3,
+            "rows": 3,
+            "rows_with_calls": 3
+          },
+          "rejected:ADAPTER_UNDECLARED_TOOL": {
+            "raw_calls": 32,
+            "rows": 18,
+            "rows_with_calls": 18
+          },
+          "rejected:INVALID_ARGUMENT_SYNTAX": {
+            "raw_calls": 131,
+            "raw_unparseable_independently": 32,
+            "rows": 57,
+            "rows_with_calls": 57
+          },
+          "rejected:SCH_ADDITIONAL_PROPERTIES_NOT_BOOLEAN": {
+            "raw_calls": 11,
+            "rows": 10,
+            "rows_with_calls": 9
+          },
+          "rejected:SCH_ENUM_INVALID": {
+            "raw_calls": 5,
+            "rows": 1,
+            "rows_with_calls": 1
+          },
+          "rejected:SCH_PROPERTIES_NOT_OBJECT": {
+            "raw_calls": 0,
+            "rows": 16,
+            "rows_with_calls": 0
+          },
+          "rejected:SCH_UNSUPPORTED_KEYWORD": {
+            "raw_calls": 182,
+            "rows": 112,
+            "rows_with_calls": 99
+          }
+        },
+        "unverified_rows": 0
+      },
+      "xlam": {
+        "accepted_rows": {
+          "trajectory_issue": {
+            "argument_mismatch": 0,
+            "count_mismatch": 0,
+            "exact": 1231,
+            "name_mismatch": 0,
+            "raw_calls": 2053,
+            "raw_unparseable_independently": 0,
+            "rows": 1231,
+            "rows_read_by_format_grammar": 0,
+            "rows_with_calls": 1231,
+            "structured_calls": 2053
+          },
+          "trajectory_valid": {
+            "argument_mismatch": 0,
+            "count_mismatch": 0,
+            "exact": 56111,
+            "name_mismatch": 0,
+            "raw_calls": 93928,
+            "raw_unparseable_independently": 0,
+            "rows": 56111,
+            "rows_read_by_format_grammar": 0,
+            "rows_with_calls": 56111,
+            "structured_calls": 93928
+          }
+        },
+        "mismatch_record_ids_first": {},
+        "mismatched_rows": 0,
+        "not_accepted_rows": {
+          "duplicate:DUPLICATE_CANONICAL_HASH": {
+            "raw_calls": 475,
+            "rows": 350,
+            "rows_with_calls": 350
+          },
+          "rejected:ADAPTER_DUPLICATE_TOOL_NAME": {
+            "raw_calls": 427,
+            "rows": 259,
+            "rows_with_calls": 259
+          },
+          "rejected:XLAM_TYPE_UNSUPPORTED_CALLABLE": {
+            "raw_calls": 786,
+            "rows": 538,
+            "rows_with_calls": 538
+          },
+          "rejected:XLAM_TYPE_UNSUPPORTED_SET": {
+            "raw_calls": 383,
+            "rows": 286,
+            "rows_with_calls": 286
+          },
+          "rejected:XLAM_TYPE_UNSUPPORTED_UNION": {
+            "raw_calls": 1959,
+            "rows": 1225,
+            "rows_with_calls": 1225
+          }
+        },
+        "unverified_rows": 0
+      }
+    },
+    "status": "PASS",
+    "version": "call-fidelity-v1"
+  }
+}

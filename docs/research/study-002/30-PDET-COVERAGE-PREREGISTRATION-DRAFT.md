@@ -4,7 +4,11 @@
 [`reports/ERRATA.md`](../../../reports/ERRATA.md) §15). Drafted 2026-09-15; revised 2026-09-16 after an
 engineering review and a counts-only dry run (§13), and re-anchored the same day to normalization-v3 under
 adapter version `2.2.0` (U-8). **At adoption no population had been drawn or written and no item had been
-annotated.** The file name keeps `-DRAFT` because committed reports cite that path. Both sampling
+annotated.** The file name keeps `-DRAFT` because committed reports cite that path.
+
+**Drawn 2026-09-16, after adoption:** `reports/pdet-coverage/pdet-coverage-v1.population.jsonl`, 336 records
+(layer B 306, layer A 30), population sha256 `755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c`.
+It equals the adopted dry run (§13), and `--verify` passes. No item has been annotated or displayed. Both sampling
 blockers of §12 are resolved:
 - **B-1**, the canonical-v3 representation: [31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md);
 - **B-2**, the classifier input contract: [32](32-CLASSIFIER-INPUT-CONTRACT.md).
