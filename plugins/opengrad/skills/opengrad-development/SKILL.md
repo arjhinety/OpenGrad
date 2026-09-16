@@ -62,6 +62,10 @@ CI (`.github/workflows/ci.yml`) runs three commands. Run all three before commit
 .venv/Scripts/opengrad-validate.exe
 ```
 
+- `pytest` deselects `network` tests by default (they reach external hosts). Run them explicitly with
+  `pytest -m network` when a change touches publication resolution.
+- Git-ignored data (`data/`, `.cache/`) does not exist in CI. A check that needs it must report a `BLOCKED_*`
+  status there, never PASS and never a content FAIL (`src/opengrad/verification/accounting.py`).
 - Also run `ruff format --check` **on the files you changed**. Many existing files are not formatted, so
   never reformat untouched files; that buries the real diff.
 - Report failures faithfully. Separate pre-existing failures from new ones by running the same tests on a
@@ -73,8 +77,11 @@ CI (`.github/workflows/ci.yml`) runs three commands. Run all three before commit
 
 - Commit only when the user asks, or when a task the user started naturally ends in a commit. Push only when
   asked.
-- Never commit `docs/research/study-002/HANDOFF.md` (the user keeps it untracked), credentials, transcripts
-  containing personal e-mail, bulk data, or checkpoints.
+- Never commit:
+  - the Study 002 handoff file (docs/research/study-002/HANDOFF.md), which the user keeps untracked;
+  - credentials;
+  - transcripts containing personal e-mail;
+  - bulk data or checkpoints.
 - Commit messages explain *why* and state measured facts (counts, hashes), the way `git log` already does.
 - GitHub push protection can block a push that contains a secret-like string. Never bypass it for the user.
   Verify whether the token is real, report it, and let the user decide or unblock it.

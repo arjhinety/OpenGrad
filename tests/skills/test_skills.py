@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import tomllib
 from pathlib import Path
 
@@ -112,7 +113,27 @@ def _backticked_paths(text: str) -> set[str]:
     return paths
 
 
+def _tracked_paths() -> set[str] | None:
+    """Every tracked file and every directory containing one, or None outside a git checkout.
+
+    A skill must cite what a fresh clone has. A path that exists only in one working copy (an untracked
+    file, git-ignored data) passes a plain existence check locally and then fails in CI.
+    """
+    try:
+        listing = subprocess.run(
+            ["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, check=True
+        ).stdout.decode("utf-8")
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    tracked: set[str] = set()
+    for name in filter(None, listing.split("\0")):
+        parts = name.split("/")
+        tracked.update("/".join(parts[:end]) for end in range(1, len(parts) + 1))
+    return tracked
+
+
 def test_skills_cite_only_paths_that_exist():
+    tracked = _tracked_paths()
     cited = {
         (path, reference)
         for path in _skill_files()
@@ -124,8 +145,9 @@ def test_skills_cite_only_paths_that_exist():
         f"{path.relative_to(ROOT)}: {reference}"
         for path, reference in cited
         if not (ROOT / reference).exists()
+        or (tracked is not None and reference.rstrip("/") not in tracked)
     }
-    assert not missing, "skills cite paths that do not exist:\n" + "\n".join(sorted(missing))
+    assert not missing, "skills cite paths not in the repository:\n" + "\n".join(sorted(missing))
 
 
 def test_skills_cite_only_python_modules_that_exist():

@@ -50,7 +50,9 @@ packages = ["src/opengrad"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+# `network` tests are deselected here, as their marker says: they reach huggingface.co and api.github.com,
+# which a shared CI runner cannot rely on. Run them explicitly with `pytest -m network`.
+addopts = "-q -m 'not network'"
 # Some tests import shared fixtures as `tests.<module>`, which needs the repository root on
 # sys.path. `python -m pytest` adds it implicitly; the `pytest` entry point CI uses does not.
 pythonpath = ["."]

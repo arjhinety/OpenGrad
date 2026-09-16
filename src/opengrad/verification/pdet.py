@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from opengrad.verification.accounting import (
+    BLOCKED_INPUT_MISSING,
     FAIL,
     PASS,
     REQUIRED_NONEMPTY,
@@ -476,6 +477,20 @@ def write_frozen(root: Path, sample: list[dict[str, Any]], manifest: dict[str, A
     return manifest
 
 
+def derivation_inputs_missing(root: Path) -> list[str]:
+    """The inputs a fresh derivation reads that are absent from this checkout.
+
+    Both are git-ignored normalization outputs, so a clean clone (CI) has neither. Without them the sample
+    cannot be re-derived and held-out prompts cannot be loaded, which blocks those two checks rather than
+    letting them pass vacuously or fail as if the freeze were wrong.
+    """
+    return [
+        directory.as_posix()
+        for directory in (POPULATION_DIR, MCQ_DIR)
+        if not any((root / directory).glob("*.parquet"))
+    ]
+
+
 def verify_frozen(root: Path) -> tuple[ValidationResult, dict[str, Any]]:
     """Prove the frozen population and manifest have not changed, and that they are reproducible.
 
@@ -489,6 +504,10 @@ def verify_frozen(root: Path) -> tuple[ValidationResult, dict[str, Any]]:
        evaluation id;
     6. no frozen item carries a gold label or an annotation (annotation has not happened yet);
     7. the manifest records that no classifier was used to select the examples.
+
+    Checks 4 and 5 need git-ignored derivation inputs. When those are absent the result is
+    ``BLOCKED_INPUT_MISSING``, never ``PASS``: the other checks still run, and any failure among them is
+    still ``FAIL``.
     """
     output = root / OUTPUT_DIR
     population_path = output / POPULATION_NAME
@@ -522,12 +541,24 @@ def verify_frozen(root: Path) -> tuple[ValidationResult, dict[str, Any]]:
     ):
         errors.append("FAIL_HASH: manifest bytes do not match the recorded .sha256 sidecar")
 
-    rebuilt, rebuilt_manifest = build_sample(root)
-    if population_bytes(rebuilt) != populated:
-        errors.append("FAIL_REPRODUCIBILITY: re-deriving the sample did not reproduce the frozen bytes")
-    for key in ("sizes", "exclusions", "dedup", "challenge_family_counts"):
-        if manifest.get(key) != rebuilt_manifest.get(key):
-            errors.append(f"FAIL_PROVENANCE: manifest field {key!r} differs from a fresh derivation")
+    missing_inputs = derivation_inputs_missing(root)
+    blocked_reasons: list[str] = []
+    if missing_inputs:
+        blocked_reasons.append(
+            f"{BLOCKED_INPUT_MISSING}: derivation inputs absent from this checkout {missing_inputs}; "
+            "reproducibility (check 4) and contamination (check 5) were not verified"
+        )
+    else:
+        rebuilt, rebuilt_manifest = build_sample(root)
+        if population_bytes(rebuilt) != populated:
+            errors.append(
+                "FAIL_REPRODUCIBILITY: re-deriving the sample did not reproduce the frozen bytes"
+            )
+        for key in ("sizes", "exclusions", "dedup", "challenge_family_counts"):
+            if manifest.get(key) != rebuilt_manifest.get(key):
+                errors.append(
+                    f"FAIL_PROVENANCE: manifest field {key!r} differs from a fresh derivation"
+                )
 
     exclusions = load_exclusions(root)
     heldout = exclusions["heldout_prompts"]
@@ -566,17 +597,28 @@ def verify_frozen(root: Path) -> tuple[ValidationResult, dict[str, Any]]:
     if set(components) - {"prevalence", "challenge"}:
         errors.append(f"FAIL_COMPONENT: unexpected component values {sorted(set(components))}")
 
+    # A failure found by the checks that did run is a FAIL whatever else was blocked; otherwise a blocked
+    # check makes the whole freeze BLOCKED, with every item counted as blocked rather than passed.
+    is_blocked = bool(blocked_reasons) and not errors
     result = ValidationResult(
         name="pdet freeze",
         policy=REQUIRED_NONEMPTY,
         discovered=len(frozen),
-        checked=len(frozen),
-        passed=len(frozen) if not errors else 0,
+        checked=0 if is_blocked else len(frozen),
+        passed=len(frozen) if not errors and not is_blocked else 0,
         failed=0 if not errors else len(frozen),
+        blocked=len(frozen) if is_blocked else 0,
         errors=errors,
+        blocked_reasons=blocked_reasons,
         detail=detail,
+        blocked_status=BLOCKED_INPUT_MISSING if is_blocked else None,
     )
-    status = PASS if not errors and not result.accounting_errors() else FAIL
+    if errors or result.accounting_errors():
+        status = FAIL
+    elif is_blocked:
+        status = BLOCKED_INPUT_MISSING
+    else:
+        status = PASS
     summary = {
         "status": status,
         "protocol_version": manifest.get("protocol_version"),
@@ -587,6 +629,7 @@ def verify_frozen(root: Path) -> tuple[ValidationResult, dict[str, Any]]:
         "labelled_items": detail["labelled_items"],
         "gold_labels_present": manifest.get("gold_labels_present"),
         "errors": errors + result.accounting_errors(),
+        "blocked": blocked_reasons,
     }
     return result, summary
 

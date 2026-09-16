@@ -254,6 +254,7 @@ def frozen_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         "gold_labels_present": False,
     }
     monkeypatch.setattr(pdet, "build_sample", lambda root: (population, manifest))
+    monkeypatch.setattr(pdet, "derivation_inputs_missing", lambda root: [])
     monkeypatch.setattr(
         pdet,
         "load_exclusions",
@@ -312,9 +313,20 @@ def test_verification_reports_missing_artifacts(tmp_path: Path) -> None:
     reason="frozen P-DET artifacts are not present in this checkout",
 )
 def test_the_real_frozen_population_verifies_and_has_no_labels() -> None:
-    """The committed freeze must verify, must carry no labels, and must be reproducible."""
+    """The committed freeze must verify, must carry no labels, and must be reproducible.
+
+    Reproducibility and contamination need git-ignored derivation inputs. A checkout without them (CI) must
+    report BLOCKED_INPUT_MISSING with every other check passing, and must never report PASS.
+    """
+    import opengrad.verification.pdet as pdet
+
     _result, summary = verify_frozen(ROOT)
-    assert summary["status"] == PASS, summary["errors"]
+    assert summary["errors"] == [], summary["errors"]
+    if pdet.derivation_inputs_missing(ROOT):
+        assert summary["status"] == pdet.BLOCKED_INPUT_MISSING
+        assert summary["blocked"]
+    else:
+        assert summary["status"] == PASS
     assert summary["gold_labels_present"] is False
     assert summary["labelled_items"] == 0
     assert summary["prevalence"] == PREVALENCE_SIZE
@@ -336,3 +348,46 @@ def test_frozen_population_carries_no_gold_labels_and_no_classifier_output() -> 
     assert all(record["gold_policy_label"] is None for record in rows)
     assert all(record["classifier_version_at_selection"] == "NOT_IMPLEMENTED" for record in rows)
     assert {record["pdet_component"] for record in rows} <= {"prevalence", "challenge"}
+
+
+def test_missing_derivation_inputs_block_verification_instead_of_passing(
+    frozen_root: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import opengrad.verification.pdet as pdet
+
+    def must_not_run(root: Path):
+        raise AssertionError("a derivation must not run without its inputs")
+
+    monkeypatch.setattr(
+        pdet, "derivation_inputs_missing", lambda root: [pdet.POPULATION_DIR.as_posix()]
+    )
+    monkeypatch.setattr(pdet, "build_sample", must_not_run)
+    result, summary = verify_frozen(frozen_root)
+    assert summary["status"] == pdet.BLOCKED_INPUT_MISSING
+    assert summary["errors"] == []
+    assert summary["blocked"] and "reproducibility" in summary["blocked"][0]
+    assert (result.checked, result.blocked, result.passed) == (0, 10, 0)
+    assert result.accounting_errors() == []
+    assert pdet.main(["--root", str(frozen_root), "--verify"]) == 1
+
+
+def test_a_failure_still_fails_when_derivation_inputs_are_missing(
+    frozen_root: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import opengrad.verification.pdet as pdet
+
+    monkeypatch.setattr(pdet, "derivation_inputs_missing", lambda root: [pdet.MCQ_DIR.as_posix()])
+    path = frozen_root / "reports/pdet/pdet-v1.population.jsonl"
+    path.write_bytes(path.read_bytes() + b"\n")
+    _result, summary = verify_frozen(frozen_root)
+    assert summary["status"] == "FAIL"
+    assert any("FAIL_HASH" in error for error in summary["errors"])
+
+
+def test_derivation_inputs_are_reported_missing_in_an_empty_checkout(tmp_path: Path) -> None:
+    import opengrad.verification.pdet as pdet
+
+    assert pdet.derivation_inputs_missing(tmp_path) == [
+        pdet.POPULATION_DIR.as_posix(),
+        pdet.MCQ_DIR.as_posix(),
+    ]
