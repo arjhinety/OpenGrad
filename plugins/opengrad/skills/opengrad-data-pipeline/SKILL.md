@@ -73,7 +73,10 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
   Grep for the old hash afterwards. Only deliberate "supersedes" history may remain.
 - The classifier may read only what `prose-decision-input-v1` allows (`src/opengrad/data/classifier_input.py`,
   doc `32-CLASSIFIER-INPUT-CONTRACT.md`). Changing a feature, an exclusion or the serialization requires a new
-  contract version.
+  contract version. `prose-decision-input-v2` (36 §2, `study_002_prereg_v6`) is added alongside v1:
+  `first_reply_eligibility` and `build_first_reply_input` admit the first assistant reply of any record, whatever
+  follows, with the same features; later turns are never read, and `unit_kind` is provenance only
+  (`tests/data/test_classifier_input_v2.py`). v1 and everything built under it are unchanged.
 - The classifier is `src/opengrad/data/decision_classifier.py` (`prose-decision-classifier-v1`, plan
   `33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md`). It takes `ClassifierFeatures` only and returns a
   `Decision` naming the 22 §3 tree step and the matched evidence. Rules:

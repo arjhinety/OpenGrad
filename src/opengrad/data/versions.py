@@ -60,6 +60,10 @@ NORMALIZATION_VERSION = "normalization-v3"
 #: What the future prose decision classifier may read (docs/research/study-002/32).
 CLASSIFIER_INPUT_CONTRACT_VERSION = "prose-decision-input-v1"
 
+#: Contract v2 (docs/research/study-002/36 §2): the first assistant reply of any record, whatever follows it.
+#: v1 stays in force for everything built under it.
+CLASSIFIER_INPUT_CONTRACT_V2_VERSION = "prose-decision-input-v2"
+
 #: Manifest/config field -> the constant it must equal. Used by the invariant below and by
 #: ``opengrad.data.provenance_gate``. Keys are the field names actually written today, so a manifest
 #: that already exists can be checked without being rewritten.

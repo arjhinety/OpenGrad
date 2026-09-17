@@ -899,3 +899,28 @@ qualifications are `MODEL_REFERENCE` and provisional; agreement is reported as m
 
 The full record is
 [`docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md`](../docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md).
+
+
+## 17. Amendment `study_002_prereg_v6`: first replies, P-DET-COVERAGE-v2 and classifier v2
+
+**Added 2026-09-17, after `prose-decision-classifier-v1`'s one-shot test, before anything was drawn under it.**
+v1 qualified for UNSUPPORTED and CLARIFY but not DIRECT, so C1 stayed unauthorised
+(`docs/research/study-002/33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md` §8). Counts-only audits then showed
+why no single-exchange population could fix that: about 22 DIRECT items remain in the unused single-exchange
+pool, while Study 001's training corpus holds thousands of direct answers as the first reply of conversations
+that continue, a shape the classifier input contract excluded (35 §4–§6).
+
+**What changes:**
+- contract `prose-decision-input-v2` admits the first assistant reply of any record, with the same features;
+  later turns are never read;
+- P-DET-COVERAGE-v2, 420 first replies, becomes the validation population for `prose-decision-classifier-v2`;
+- P-DET-v1 and P-DET-COVERAGE-v1 are development-exposed for v2.
+
+**What stays the same:** every threshold and minimum size, the C1 rule, the arms, P-DET-v1, P-DET-COVERAGE-v1,
+contract v1, and classifier v1 with its recorded result.
+
+**Correction recorded alongside:** 35 §5 first claimed the whole corpus held almost no direct answers. It had
+counted single exchanges only; 35 §6 corrects it.
+
+The full record is
+[`docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md`](../docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md).

@@ -1,7 +1,8 @@
-# 36 — Draft amendment: the first-reply input contract, P-DET-COVERAGE-v2 and classifier v2
+# 36 — Amendment: the first-reply input contract, P-DET-COVERAGE-v2 and classifier v2
 
-**Status: DRAFT, 2026-09-17. Not adopted. Nothing in it binds, and nothing has been implemented, drawn or
-labelled under it.** Written at the study owner's direction after [35](35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md)
+**Status: ADOPTED as written, 2026-09-17, by the study owner, as `study_002_prereg_v6`.** Adopted before
+anything was implemented, drawn or labelled under it. The file name keeps `-DRAFT` so the paths already cited
+stay valid. Written at the study owner's direction after [35](35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md)
 §6 (decision: "admit first replies"). Its supply figures come from a counts-only dry run,
 `scripts/audit_first_reply_supply.py` → `reports/pdet-coverage-v2/first-reply.supply-dry-run.json`.
 

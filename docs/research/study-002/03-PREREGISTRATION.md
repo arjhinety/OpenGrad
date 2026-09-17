@@ -178,6 +178,29 @@ seeing data is a new study, and it goes into the next study
   are `MODEL_REFERENCE` and provisional; whether they may grant balancing permission is decided separately.
 - **Full record:** [34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md](34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md).
 
+### `study_002_prereg_v6` — 2026-09-17
+
+- **Item changed:** what the prose decision classifier may be validated on, for a new classifier version.
+  - The classifier input contract gains `prose-decision-input-v2`, whose unit is the first assistant reply of
+    any record, whatever follows it (36 §2). v1 stays in force.
+  - A third validation population, P-DET-COVERAGE-v2: 420 first replies from Glaive and ToolACE, drawn under
+    30 §7–§9 with a new seed and new quotas, labelled like P-DET-COVERAGE-v1 under 34 (36 §3).
+  - `prose-decision-classifier-v2` is developed on first-reply data and tested once on P-DET-COVERAGE-v2; P-DET-v1
+    and P-DET-COVERAGE-v1 are development-exposed for it (36 §4).
+- **Reason:** a defect in coverage found after `prose-decision-classifier-v1`'s one-shot test. DIRECT, which C1
+  needs, could not qualify: the unused single-exchange pool holds about 22 DIRECT items, while Study 001's
+  corpus holds thousands of direct answers as first replies of longer conversations, which contract v1 excluded
+  (35 §4–§6).
+- **Not changed:** every threshold and minimum size (22 §6, 30 §11, `pdet-coverage-metrics-v1`), the C1 rule
+  (DIRECT and UNSUPPORTED), the arms, the seed count, the partition, P-DET-v1, P-DET-COVERAGE-v1, contract v1 and
+  classifier v1 with its result.
+- **Candidates already scored:** `prose-decision-classifier-v1`, on P-DET-v1 and P-DET-COVERAGE-v1 (33 §8). Its
+  result stands as recorded; no rule it was scored under changes, so there is nothing to re-run.
+- **Arms launched under an earlier version:** none. Nothing has been trained.
+- **Nature:** a defect repair (the validation unit excluded where DIRECT lives), made **after** v1's result was
+  visible, which is disclosed. The new population is drawn after adoption and scored only for v2.
+- **Full record:** [36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md](36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md).
+
 ## Registration of the unit of analysis
 
 - The **unit of inference** is the seed, clustered by item ([10](10-STATISTICS-PLAN.md)).

@@ -18,6 +18,10 @@ The contract (docs/research/study-002/32-CLASSIFIER-INPUT-CONTRACT.md) in brief:
 * **Post-tool-result responses** are excluded; a later, separately preregistered classifier may handle
   that stage.
 * **Multi-turn records** are excluded. No multi-turn conversation is reduced to its final message.
+
+Contract ``prose-decision-input-v2`` (docs/research/study-002/36 §2) is added alongside, not in place of, v1:
+:func:`first_reply_eligibility` and :func:`build_first_reply_input` admit the **first assistant reply** of any
+record, whatever follows it, with the same four features. Later turns are never read.
 """
 
 from __future__ import annotations
@@ -382,3 +386,109 @@ def build_classifier_input(record: Mapping[str, Any], heldout: HeldoutIndex) -> 
         schema_normalization_version=str(metadata["schema_normalization_version"]),
     )
     return ClassifierInput(features, provenance)
+
+
+# ── contract v2: the first reply (docs/research/study-002/36 §2) ────────────────────────────────────
+#
+# The unit is the first assistant reply of a record: the first assistant turn, directly after exactly one
+# user turn (a leading system message allowed), with text and no structured call, whatever follows it. A v1
+# single exchange is the special case with nothing after it. The features are v1's four fields; nothing after
+# the first reply is ever read, and whether the record continues is provenance only, because it would
+# identify the source.
+
+CONTRACT_V2_VERSION = versions.CLASSIFIER_INPUT_CONTRACT_V2_VERSION
+
+FIRST_TURN_NOT_ONE_USER_THEN_ASSISTANT = "FIRST_TURN_NOT_ONE_USER_THEN_ASSISTANT"
+FIRST_REPLY_IS_STRUCTURAL_CALL = "FIRST_REPLY_IS_STRUCTURAL_CALL"
+FIRST_REPLY_EMPTY = "FIRST_REPLY_EMPTY"
+
+FIRST_REPLY_EXCLUSION_ORDER = (
+    EVALUATION_ONLY_OR_HELDOUT,
+    MALFORMED_OR_UNRENDERABLE,
+    FIRST_TURN_NOT_ONE_USER_THEN_ASSISTANT,
+    FIRST_REPLY_IS_STRUCTURAL_CALL,
+    FIRST_REPLY_EMPTY,
+)
+
+#: v1 malformation checks about the record's *final* message, which a first reply does not depend on.
+FINAL_MESSAGE_CHECKS = ("final_role:", "final_assistant_empty")
+
+UNIT_SINGLE_EXCHANGE = "single_exchange"
+UNIT_HAS_CONTINUATION = "has_continuation"
+
+
+def _first_reply_body(messages: list[Any]) -> list[Any]:
+    leading_system = bool(messages) and isinstance(messages[0], Mapping) and messages[0].get("role") == "system"
+    return messages[1:] if leading_system else messages
+
+
+def first_reply_eligibility(record: Mapping[str, Any], heldout: HeldoutIndex) -> Eligibility:
+    """Is this record's first assistant reply eligible under ``prose-decision-input-v2``?
+
+    Structural, like :func:`eligibility`: held-out membership over every turn, v1's malformation checks over the
+    whole record except the two about the final message, then the shape of the first exchange. It never reads
+    what a response says.
+    """
+    metadata = _require_v3(record)
+    reasons: list[str] = []
+    details: list[str] = []
+    hits = _heldout_hits(record, metadata, heldout)
+    if hits:
+        reasons.append(EVALUATION_ONLY_OR_HELDOUT)
+        details.extend(hits)
+    malformed = [
+        problem for problem in _malformations(record, metadata) if not problem.startswith(FINAL_MESSAGE_CHECKS)
+    ]
+    if malformed:
+        reasons.append(MALFORMED_OR_UNRENDERABLE)
+        details.extend(malformed)
+    body = _first_reply_body(record["messages"])
+    head = [message.get("role") if isinstance(message, Mapping) else "?" for message in body[:2]]
+    if head != ["user", "assistant"]:
+        reasons.append(FIRST_TURN_NOT_ONE_USER_THEN_ASSISTANT)
+        details.append("head:" + "-".join(str(role)[:1].upper() for role in head))
+    else:
+        reply = body[1]
+        if reply.get("tool_calls"):
+            reasons.append(FIRST_REPLY_IS_STRUCTURAL_CALL)
+        elif not (isinstance(reply.get("content"), str) and reply["content"].strip()):
+            reasons.append(FIRST_REPLY_EMPTY)
+    return Eligibility(not reasons, tuple(reasons), tuple(details))
+
+
+@dataclass(frozen=True)
+class FirstReplyProvenance(ClassifierProvenance):
+    """v1's provenance plus whether the record continues after the first reply. Never a feature."""
+
+    unit_kind: str = UNIT_SINGLE_EXCHANGE
+
+
+def build_first_reply_input(record: Mapping[str, Any], heldout: HeldoutIndex) -> ClassifierInput:
+    """The ``prose-decision-input-v2`` input for an eligible first reply; :class:`IneligibleRecord` otherwise."""
+    result = first_reply_eligibility(record, heldout)
+    if not result.eligible:
+        raise IneligibleRecord(result)
+    metadata = record["metadata"]
+    body = _first_reply_body(record["messages"])
+    user, reply = body[0], body[1]
+    source = metadata["source"]
+    features = ClassifierFeatures(
+        user_message=user["content"],
+        assistant_response=reply["content"],
+        tools=tuple(json.loads(stable_json(tool)) for tool in record["tools"]),
+        structured_call_present=False,
+    )
+    provenance = FirstReplyProvenance(
+        record_key=f"{source['source_name']}:{metadata['raw_record_hash']}",
+        record_id=str(record["id"]),
+        source_name=str(source["source_name"]),
+        dataset_id=str(source["dataset_id"]),
+        raw_record_hash=str(metadata["raw_record_hash"]),
+        canonical_hash=str(record["canonical_hash"]),
+        normalization_version=str(metadata["normalization_version"]),
+        adapter_key=str(metadata["adapter_key"]),
+        adapter_version=str(metadata["adapter_version"]),
+        schema_normalization_version=str(metadata["schema_normalization_version"]),
+        unit_kind=UNIT_SINGLE_EXCHANGE if len(body) == 2 else UNIT_HAS_CONTINUATION,
+    )
+    return ClassifierInput(features, provenance, contract_version=CONTRACT_V2_VERSION)
