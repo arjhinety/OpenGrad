@@ -108,8 +108,9 @@ round, the owner chose one more round, the last §4 allows. This is recorded bef
 check set 1's disagreements. From here **`prose-classifier-v2-devcheck-1` is exposed**: it becomes development
 data, and its 118 / 125 above is the only unexposed score it will ever give. Round-2 rules are committed before
 `prose-classifier-v2-devcheck-2` (150 first replies, its own seed, excluding dev-v2, check set 1 and everything
-they exclude) is drawn, then labelled the same way and scored once. After it, §4 allows no further check round:
-the owner chooses between freezing and stopping.
+they exclude) is drawn, then labelled the same way and scored once. After it, §4's stopping rule applies: the
+owner chooses between freezing and a further round. (Corrected 2026-09-17: this line first said §4 allowed no
+further round.)
 
 **Round 2 rules** (source sha256 LF `0d5cce9a…`), made after reading check set 1's seven disagreements and
 committed before check set 2 is drawn. Each change is a general wording or structure rule, tested on
@@ -139,3 +140,24 @@ while the request is also outside that function's scope (model label UNSUPPORTED
 Across the 950 development items, eight predictions moved to agree with the model labels and none that agreed
 moved away. The in-sample gain on check set 1 is expected and says nothing about unseen replies; check set 2
 measures that.
+
+- **Check set 2.** `prose-classifier-v2-devcheck-2`: 150 first replies (sha `8358c344…`, 87 continuing, 63
+  single), drawn after the round-2 rules were committed (587098e). Labelled by session `model-v2-devcheck-2` (17
+  flagged, WIP export verify PASS), then scored **once**, without printing any item or disagreement. The same
+  disclosure applies: the subagents' final answers and rationales reached the developer session before scoring.
+
+| Round 2 rules | Agree | Rate | DIRECT predictions agreeing | Model DIRECT labels predicted DIRECT |
+|---|---:|---:|---:|---:|
+| **Check set 2 (unexposed, scored once)** | **122 / 126** | **0.968** | **60 / 63** | **60 / 61** |
+| Check set 1 (round 1, for comparison) | 118 / 125 | 0.944 | 58 / 61 | 58 / 59 |
+
+On check set 2, continuing conversations agreed 71 / 73 and single exchanges 51 / 53. The four disagreements by
+model label → prediction: CLARIFY → DIRECT 2, UNSUPPORTED → DIRECT 1, DIRECT → UNSUPPORTED 1. Per mode against
+model labels: UNSUPPORTED 35 / 36, CLARIFY 26 / 28, CALL 1 / 1 (the first textual call in any v2 set). Of 24
+items the model labelled UNKNOWN, the classifier abstained on 23 and predicted UNSUPPORTED on 1. The same limits
+hold: agreement with one Claude labeller, not accuracy; 63 DIRECT predictions cannot settle precision against the
+0.80 threshold; one CALL label says almost nothing about CALL precision's 0.95 threshold. Report:
+`reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round2.v2-check-2-agreement.json`.
+
+**Next (§4):** two check rounds are done. The study owner chooses between freezing the round-2 rules and a
+further round.
