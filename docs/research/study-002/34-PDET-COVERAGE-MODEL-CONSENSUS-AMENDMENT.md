@@ -52,7 +52,9 @@ one of CALL, DIRECT, CLARIFY, UNSUPPORTED, UNKNOWN).
   developer, does not read their item text or the answers' rationales (22 §7, 30 §9). Only labels and value
   fields are checked, by `model-ingest`.
 - **Provenance.** Every batch, raw answer, procedure and CLI version is archived with a hash manifest, as
-  for `model-a`.
+  for `model-a`. Done 2026-09-17: `reports/pdet-coverage/provenance/external-models/`
+  (`scripts/archive_external_model_labels.py`). The raw CLI stdout and stderr are kept locally with their
+  hashes recorded; a scan found no e-mail address or credential in any file.
 
 ## 4. What changes for claims
 
