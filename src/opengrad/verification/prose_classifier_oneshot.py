@@ -229,9 +229,11 @@ def load_inputs(root: Path) -> dict[str, Any]:
     pdet_bytes = (root / PDET_POPULATION).read_bytes()
     if _sha256(pdet_bytes) != PDET_POPULATION_SHA256:
         raise TestRunError("P-DET-v1 population is not the frozen one")
-    result, package = verify_package(root / PDET_PACKAGE, root, require_source=True)
-    if result.errors:
+    # verify_package returns the validation result and a status summary, not the manifest itself.
+    result, verification = verify_package(root / PDET_PACKAGE, root, require_source=True)
+    if result.all_errors() or verification.get("status") != "PASS":
         raise TestRunError("the P-DET-v1 annotation package failed verification")
+    package = json.loads((root / PDET_PACKAGE).read_text(encoding="utf-8"))
     sessions = {s["session_id"]: s for s in package.get("sessions") or []}
     if PDET_HUMAN_SESSION not in sessions:
         raise TestRunError(f"the P-DET-v1 package has no {PDET_HUMAN_SESSION} session")

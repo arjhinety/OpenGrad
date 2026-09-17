@@ -1,0 +1,207 @@
+{
+  "adjudication": null,
+  "adjudication_flags": {},
+  "adjudicator_ids": [],
+  "annotation_schema_version": "pdet-coverage-annotation-v1",
+  "annotator_ids": [
+    "model.deepseek-v4.1-flash",
+    "model.gemini-3.8-flash-high",
+    "model.gpt-5.6-sol"
+  ],
+  "app_version": "opengrad-annotate-1.0.0",
+  "artifact_kind": "ANNOTATION_SNAPSHOT",
+  "completion_state": "INCOMPLETE",
+  "composite": null,
+  "config_path": "configs/annotation/pdet-coverage-v1.yaml",
+  "definition_history": [],
+  "design": "model_passes",
+  "disagreements": {
+    "adjudicated": 0,
+    "count": 0,
+    "file": null,
+    "keys": [
+      "label",
+      "ambiguity_status"
+    ],
+    "metric_eligible": 0,
+    "unresolved": 0
+  },
+  "exported_at": "2026-09-17T11:53:32.126Z",
+  "frozen": false,
+  "gold": null,
+  "incomplete_reasons": [
+    "gold freezes compare at most two passes"
+  ],
+  "independent_annotators": false,
+  "inter_annotator_agreement_claimable": false,
+  "limitations": [
+    "Model annotation: at least one session was labeled by a language model. A model pass is not an independent human annotator; no inter-annotator agreement may be claimed."
+  ],
+  "manifest_version": 1,
+  "metric_exclusions": {
+    "excluded_items": 0,
+    "groups": [],
+    "metric_eligible_items": 306,
+    "population_items": 306
+  },
+  "model_annotation": true,
+  "model_annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "authorization": "docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/pdet-coverage-v1.model-procedure.md",
+      "procedure_sha256": "4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab"
+    },
+    {
+      "annotator_id": "model.gpt-5.6-sol",
+      "authorization": "docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md",
+      "model": "gpt-5.6-sol",
+      "procedure": "configs/annotation/pdet-coverage-v1.model-procedure.md",
+      "procedure_sha256": "4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "authorization": "docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/pdet-coverage-v1.model-procedure.md",
+      "procedure_sha256": "4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab"
+    }
+  ],
+  "model_assistance": false,
+  "outputs": {
+    "audit/pdet-coverage-v1.history.model.deepseek-v4.1-flash.model-deepseek.jsonl": {
+      "bytes": 442327,
+      "records": 306,
+      "sha256": "43956d11880d5fba8005932ae2c6c0bffe7746e792f6c9707b05c2f8c4ef13c0"
+    },
+    "audit/pdet-coverage-v1.history.model.gemini-3.8-flash-high.model-gemini.jsonl": {
+      "bytes": 431795,
+      "records": 306,
+      "sha256": "11739572f6edd8b9b6a04bc2868ff4bfbe343ecae09bf6be7b55e487cd08cb4f"
+    },
+    "audit/pdet-coverage-v1.history.model.gpt-5.6-sol.model-gpt.jsonl": {
+      "bytes": 421936,
+      "records": 306,
+      "sha256": "d39323159dfa8f93f20e7380c350730d30838efa037bc93cc67d7fe5399fb015"
+    },
+    "pdet-coverage-v1.annotations.model.deepseek-v4.1-flash.model-deepseek.jsonl": {
+      "bytes": 308441,
+      "records": 306,
+      "sha256": "6adffbdd95377190f82f4822fe09f29f791f6eae787a0d1bacec4c6738371ce2"
+    },
+    "pdet-coverage-v1.annotations.model.gemini-3.8-flash-high.model-gemini.jsonl": {
+      "bytes": 297935,
+      "records": 306,
+      "sha256": "2ba584e5448593eff523d7d29998a11b9926faf2fdee35b31398e7607265aa02"
+    },
+    "pdet-coverage-v1.annotations.model.gpt-5.6-sol.model-gpt.jsonl": {
+      "bytes": 288075,
+      "records": 306,
+      "sha256": "3f43510e0217e20b40c45eda110193ffe83acafe2ced4852a1ee1b6372b1ff50"
+    }
+  },
+  "package_dir": "reports/pdet-coverage/annotation/wip",
+  "record_key_map": {
+    "annotation_schema_version": "annotation_version",
+    "item_id": "pdetcov_id",
+    "label": "gold_policy_label"
+  },
+  "record_keys": {
+    "annotator_id": "annotator_id",
+    "item_id": "pdetcov_id",
+    "label": "gold_policy_label"
+  },
+  "review_queue": null,
+  "sessions": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "annotator_kind": "model",
+      "created_at": "2026-09-17T07:03:06.804Z",
+      "file": "pdet-coverage-v1.annotations.model.gemini-3.8-flash-high.model-gemini.jsonl",
+      "flagged": 4,
+      "history_entries": 306,
+      "history_file": "audit/pdet-coverage-v1.history.model.gemini-3.8-flash-high.model-gemini.jsonl",
+      "history_head_sha256": "6fcd19d0966506c7e3883e22922b67927a09ca753f148d980a5181004529cbd1",
+      "label_counts": {
+        "CALL": 3,
+        "CLARIFY": 54,
+        "DIRECT": 44,
+        "UNKNOWN": 25,
+        "UNSUPPORTED": 180
+      },
+      "labeled": 306,
+      "labeled_metric_eligible": 306,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-gemini",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 25,
+      "unlabeled": 0
+    },
+    {
+      "annotator_id": "model.gpt-5.6-sol",
+      "annotator_kind": "model",
+      "created_at": "2026-09-17T06:56:41.406Z",
+      "file": "pdet-coverage-v1.annotations.model.gpt-5.6-sol.model-gpt.jsonl",
+      "flagged": 5,
+      "history_entries": 306,
+      "history_file": "audit/pdet-coverage-v1.history.model.gpt-5.6-sol.model-gpt.jsonl",
+      "history_head_sha256": "ef320f14483ee6af72652d9773750f42e3e6813707b5445840df48a8ac7f3085",
+      "label_counts": {
+        "CALL": 3,
+        "CLARIFY": 55,
+        "DIRECT": 46,
+        "UNKNOWN": 22,
+        "UNSUPPORTED": 180
+      },
+      "labeled": 306,
+      "labeled_metric_eligible": 306,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-gpt",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 22,
+      "unlabeled": 0
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "annotator_kind": "model",
+      "created_at": "2026-09-17T06:56:02.709Z",
+      "file": "pdet-coverage-v1.annotations.model.deepseek-v4.1-flash.model-deepseek.jsonl",
+      "flagged": 30,
+      "history_entries": 306,
+      "history_file": "audit/pdet-coverage-v1.history.model.deepseek-v4.1-flash.model-deepseek.jsonl",
+      "history_head_sha256": "5cee72d8c9bcb95a54b683f3e9259108d075185d8886c227ee0269277be6097b",
+      "label_counts": {
+        "CALL": 7,
+        "CLARIFY": 57,
+        "DIRECT": 43,
+        "UNKNOWN": 19,
+        "UNSUPPORTED": 180
+      },
+      "labeled": 306,
+      "labeled_metric_eligible": 306,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-deepseek",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 19,
+      "unlabeled": 0
+    }
+  ],
+  "source": {
+    "format": "jsonl",
+    "items": 306,
+    "path": "reports/pdet-coverage/pdet-coverage-v1.population.jsonl",
+    "sha256": "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c"
+  },
+  "statement": "Labels in sessions whose annotator_kind is 'model' were produced by the language model named under model_annotators, following the pinned procedure recorded there; they are model judgments, not human annotations. Labels in human sessions were entered through the annotation interface under the annotator and adjudicator identifiers recorded in this package; those identifiers are declared, not authenticated. The interface displays no classifier prediction, model suggestion or pre-filled label to human annotators, and the source population was read but never written. Every change is in the hash-chained change logs listed under outputs. Hashes detect changes to the package; they are not signatures.",
+  "task_definition_sha256": "f242fa609f8c591c7195a3cf2f01fcfdddfa09be16fb2030d2d3e0ca5d331d57",
+  "task_id": "pdet-coverage-v1",
+  "task_type": "single_label",
+  "task_version": "1"
+}

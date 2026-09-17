@@ -141,9 +141,12 @@ def load_package(task: str, package: Path, root: Path = ROOT) -> tuple[dict[str,
     from opengrad.annotation.export import verify_package
     from opengrad.annotation.items import load_source
 
-    result, manifest = verify_package(package, root, require_source=True)
-    if result.errors:
-        raise ReferenceError("the package failed verification:\n  - " + "\n  - ".join(result.errors[:20]))
+    # verify_package returns the validation result and a status summary, not the manifest itself.
+    result, verification = verify_package(package, root, require_source=True)
+    errors = result.all_errors()
+    if errors or verification.get("status") != "PASS":
+        raise ReferenceError("the package failed verification:\n  - " + "\n  - ".join(map(str, errors[:20])))
+    manifest = json.loads(package.read_text(encoding="utf-8"))
     if manifest.get("task_id") != task:
         raise ReferenceError(f"the package is for {manifest.get('task_id')!r}, not {task!r}")
     config = load_task_config(root / "configs" / "annotation" / f"{task}.yaml", root=root)

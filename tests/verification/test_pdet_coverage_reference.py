@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections import Counter
+from pathlib import Path
+
 import pytest
 
 from opengrad.verification.pdet_coverage_reference import (
@@ -12,6 +15,7 @@ from opengrad.verification.pdet_coverage_reference import (
     ReferenceError,
     build_reference,
     consensus,
+    load_package,
 )
 
 GEMINI, GPT, DEEPSEEK = ANNOTATORS
@@ -101,6 +105,19 @@ def test_an_incomplete_annotator_blocks_the_reference() -> None:
     partial = [r for r in records(table) if not (r["pdetcov_id"] == "i2" and r["annotator_id"] == GPT)]
     with pytest.raises(ReferenceError, match="incomplete"):
         build_reference(partial, list(table))
+
+
+PACKAGE = Path(__file__).resolve().parents[2] / "reports/pdet-coverage/annotation/wip/pdet-coverage-v1.annotation-manifest.json"
+
+
+@pytest.mark.skipif(not PACKAGE.is_file(), reason="coverage annotation package not exported")
+def test_the_real_package_loads_through_its_verified_manifest() -> None:
+    """verify_package returns a status summary, not the manifest; load_package must read the manifest itself.
+    Counts only: no label is inspected."""
+    root = PACKAGE.parents[4]
+    manifest, records, item_ids = load_package("pdet-coverage-v1", PACKAGE, root)
+    assert manifest["task_id"] == "pdet-coverage-v1" and len(item_ids) == 306
+    assert Counter(record["annotator_id"] for record in records) == {annotator: 306 for annotator in ANNOTATORS}
 
 
 def test_other_sessions_are_ignored_and_foreign_items_refused() -> None:
