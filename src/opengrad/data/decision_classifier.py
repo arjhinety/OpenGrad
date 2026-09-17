@@ -224,7 +224,9 @@ _DECLINE = _rx(
 # The missing thing is a capability, tool or scope (22 §2 rows 2 and 6).
 _CAPABILITY = _rx(
     r"\b(none|neither) of (the|these|those|them)\b[^.!?]{0,40}\b(functions?|tools?|apis?)?\b",
-    r"\bno (available |suitable |relevant |specific |such |appropriate )?(functions?|tools?|apis?)\b",
+    r"\bno (available |suitable |relevant |specific |such |appropriate |defined |matching |corresponding )?"
+    r"(functions?|tools?|apis?)\b",
+    r"\b(does|do|did) not apply\b|\b(doesn't|don't) apply\b|\bunrelated to\b",
     r"\b(functions?|tools?|apis?) (list )?(is|are) empty\b|\bempty (functions?|tools?) list\b",
     r"\bnot covered by\b|\bwould be (necessary|needed|required) to fulfil",
     r"\b(functions?|tools?|apis?|capabilities)\b[^.!?]{0,120}\b(do|does|did) not (directly |currently )?(support|include|"
@@ -262,7 +264,7 @@ _EXTERNAL_SERVICE = _rx(
 )
 _OFFER = _rx(
     r"\b(i|we) (can|could|would be happy to|'d be happy to|am happy to|'m happy to) (still )?(help|assist)\b",
-    r"\bif you (need|want|would like|'d like|have)\b",
+    r"\bif you(?: would|'d)? (like|need|want|prefer|wish)\b|\bif you have\b",
     r"\bfeel free\b",
     r"\bis there (anything|something|a specific|any)\b",
     r"\b(would|do) you (like|want) (me )?to\b",
@@ -298,7 +300,13 @@ _REQUEST = _rx(
     r"\b(parameters?|arguments?|information|details|fields?|inputs?|values?|id|identifier)\b",
     r"\b(parameters?|arguments?)\b[^.!?]{0,40}\b(missing|not (been )?(provided|specified|given))\b",
     r"\b(does not|doesn't|did not|didn't) (provide|include|specify)\b[^.!?]{0,40}\b(sufficient|enough|required|"
-    r"necessary|the)\b",
+    r"necessary|the|a|an|any)\b",
+    # A statement of what the user left out asks for it (22 §2 row 6).
+    r"\b(you|the (query|question|request|user)) (have|has|did|does) not (provided?|specif(y|ied)|given?|"
+    r"mention(ed)?|include[d]?|supplied|supply)\b",
+    r"\b(you|the (query|question|request|user)) (haven't|hasn't|didn't|doesn't) (provided?|specif(y|ied)|given?|"
+    r"mention(ed)?|include[d]?|supplied|supply)\b",
+    r"\bto proceed\b[^.!?]*\b(is|are) (needed|required)\b|\b(is|are) (needed|required) to proceed\b",
     r"\bfor which\b[^.!?]*\?",
     r"\b(needs?|requires?|need to know) (more|additional|further|some|a few) (information|details|input|context)\b",
     r"\b(is|are) missing\s*:|\b(missing|need|require) the following\b",
@@ -342,6 +350,7 @@ _ACKNOWLEDGEMENT = _rx(
     r"^(sure|certainly|of course|absolutely|okay|ok|great|got it|i understand|i see|understood)\b",
     r"^to (assist|help|provide|proceed|give|find|get|check|fetch|retrieve)\b[^.!?]*$",
 )
+_DELIVERY = re.compile(r"^(here's|here is|here are)\b", re.IGNORECASE)
 _LEAD_IN = re.compile(r"^(i can tell you (that )?|i can say (that )?|here is what i know:?\s*)", re.IGNORECASE)
 
 
@@ -402,6 +411,12 @@ def classify(features: ClassifierFeatures) -> Decision:
             if tail:
                 return Decision(DIRECT, STEP_DECLINE_WITH_CONTENT, (decline.group(0), tail[:80]))
         rest = _strip(sentences, _DECLINE, _CAPABILITY, _OFFER, _EXTERNAL_SERVICE, _COURTESY, _REQUEST)
+        # "Here's the answer: ..." after a note that the tools don't fit delivers the answer (22 §1.4 exclusion).
+        delivery = next((i for i, s in enumerate(sentences) if _DELIVERY.match(s) and not _any(_OFFER, s)), None)
+        if delivery is not None:
+            delivered = " ".join(sentences[delivery:])
+            if _words(delivered) >= CONTENT_WORDS_IN_BUT_CLAUSE and not _any(_EXTERNAL_SERVICE, delivered):
+                return Decision(DIRECT, STEP_DECLINE_WITH_CONTENT, (decline.group(0), sentences[delivery][:80]))
         if has_code or _content_words(rest) >= CONTENT_WORDS_AFTER_DECLINE:
             return Decision(DIRECT, STEP_DECLINE_WITH_CONTENT, (decline.group(0),))
         if capability is None:

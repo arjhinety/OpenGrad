@@ -59,6 +59,14 @@ def decide(response: str, tools: list[dict] | None = None, user: str = "Help me,
         # ... but an epistemic hedge inside a delivered answer is DIRECT (22 §2 rows 3 and 7).
         ("I can't know your exact location, but at latitude 40 north the sun sets around 7:45 pm in June.", [], dc.DIRECT),
         ("I'm not certain of today's rate. Last week one euro was worth about 1.08 dollars.", [RATES], dc.DIRECT),
+        # An offer after a decline delivers nothing (22 §1.4).
+        ("I'm sorry, I can't book flights. However, I can tell you about Lisbon if you'd like.", [WEATHER], dc.UNSUPPORTED),
+        ("The only tool gives exchange rates, so it does not apply to finding hotels.", [RATES], dc.UNSUPPORTED),
+        ("The listed tool is unrelated to train timetables.", [RATES], dc.UNSUPPORTED),
+        # Saying what the user left out asks for it (22 §2 row 6).
+        ("You have not provided the city. Please specify it.", [WEATHER], dc.CLARIFY),
+        # A mismatch note followed by the answer itself is DIRECT (22 §1.4 exclusion).
+        ("None of the tools fit this request. Here's the answer anyway: 12 times 12 is 144 and 9 plus 6 is 15.", [RATES], dc.DIRECT),
     ],
 )
 def test_rubric_boundary_cases(response: str, tools: list[dict], label: str) -> None:

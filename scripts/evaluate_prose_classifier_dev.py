@@ -36,7 +36,16 @@ SETS = {
         / "prose-classifier-devcheck-v1.annotations.model.claude-opus-5.model-devcheck.jsonl",
         DEV_DIR / f"{CLASSIFIER_VERSION}.devcheck-agreement.json",
     ),
+    "devcheck-v2": (
+        DEV_DIR / "prose-classifier-devcheck-v2.population.jsonl",
+        Path("reports/prose-classifier/devcheck-v2/annotation/wip/")
+        / "prose-classifier-devcheck-v2.annotations.model.claude-opus-5.model-devcheck-v2.jsonl",
+        DEV_DIR / f"{CLASSIFIER_VERSION}.devcheck-v2-agreement.json",
+    ),
 }
+#: Check sets whose items the developer has not read. devcheck (v1) was read in round 2 (33 §5a).
+UNEXPOSED = frozenset({"devcheck-v2"})
+CLASSIFIER_MODULE = Path("src/opengrad/data/decision_classifier.py")
 POPULATION, LABELS_FILE, REPORT = SETS["dev"]
 UNKNOWN = "UNKNOWN"
 MODES = ("CALL", "DIRECT", "CLARIFY", "UNSUPPORTED")
@@ -118,10 +127,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--set", choices=sorted(SETS), default="dev")
     parser.add_argument("--show", type=int, default=0, help="print up to N disagreements (development items only)")
     parser.add_argument("--write", action="store_true", help="write the agreement report")
+    parser.add_argument("--round", type=int, help="development round; names the report ...round<N>.<set>-agreement.json")
     args = parser.parse_args(argv)
     population, labels_file, report_path = SETS[args.set]
-    if args.set == "devcheck" and args.show:
-        parser.error("check-set items are never printed (33 §5a)")
+    if args.round is not None:
+        report_path = report_path.with_name(report_path.name.replace(f"{CLASSIFIER_VERSION}.", f"{CLASSIFIER_VERSION}.round{args.round}."))
+    if args.set in UNEXPOSED and args.show:
+        parser.error("items of an unexposed check set are never printed (33 §5a)")
 
     results = rows(args.root, population, labels_file)
     summary = summarise(results)
@@ -142,20 +154,24 @@ def main(argv: list[str] | None = None) -> int:
     if args.write:
         report = {
             "artifact_kind": (
-                "PROSE_CLASSIFIER_DEVELOPMENT_AGREEMENT"
-                if args.set == "dev"
-                else "PROSE_CLASSIFIER_DEVELOPMENT_CHECK_AGREEMENT"
+                "PROSE_CLASSIFIER_DEVELOPMENT_CHECK_AGREEMENT"
+                if args.set in UNEXPOSED
+                else "PROSE_CLASSIFIER_DEVELOPMENT_AGREEMENT"
             ),
             "statement": (
-                "Agreement of the classifier with model judgments (model.claude-opus-5) on its own development "
-                "set. The rules were developed against these labels, so this is in-sample agreement with a model, "
-                "not accuracy and not evidence of qualification."
-                if args.set == "dev"
-                else "Agreement of the classifier with model judgments (model.claude-opus-5) on the held-out "
-                "development check set (33 §5a), scored once before freezing; the developer never read its items. "
-                "Agreement with a model, not accuracy and not evidence of qualification."
+                "Agreement of the classifier with model judgments (model.claude-opus-5) on a held-out development "
+                "check set (33 §5a), scored once; the developer has not read its items. Agreement with a model, not "
+                "accuracy and not evidence of qualification."
+                if args.set in UNEXPOSED
+                else "Agreement of the classifier with model judgments (model.claude-opus-5) on a set the developer "
+                "has read while adjusting the rules, so this is in-sample agreement with a model, not accuracy and "
+                "not evidence of qualification."
             ),
             "classifier_version": CLASSIFIER_VERSION,
+            "classifier_source_sha256_lf": hashlib.sha256(
+                (args.root / CLASSIFIER_MODULE).read_bytes().replace(b"\r\n", b"\n")
+            ).hexdigest(),
+            "round": args.round,
             "input_contract": CONTRACT_VERSION,
             "population": {"path": population.as_posix(), "sha256": sha256(args.root / population)},
             "labels": {"path": labels_file.as_posix(), "sha256": sha256(args.root / labels_file)},

@@ -109,6 +109,12 @@ owner. The study owner later decided (2026-09-17) to annotate nothing, which rul
   few to estimate it, and model labels are not the reference. Neither set has a stratum X item, so textual
   CALL is untested before the test. Reports: `reports/prose-classifier/dev/prose-decision-classifier-v1.dev-agreement.json`
   and `…devcheck-agreement.json`.
+
+  **Second round (decided by the study owner, 2026-09-17).** The owner chose one more development round before
+  freezing. The developer then read the check set's 11 disagreements, so **`prose-classifier-devcheck-v1` is
+  now exposed**: it becomes development data, and its 102/110 result above is the only unexposed score it will
+  ever give. The rule changes that follow are measured on a fresh check set, `prose-classifier-devcheck-v2`,
+  which excludes both earlier sets.
 - **Freeze:** when development ends, the rules are committed and tagged under `prose-decision-classifier-v1`
   before any test result exists. Any later change is a new version, and 22 §6's consequences apply:
   the used population is marked `DEVELOPMENT_EXPOSED`, and a new untouched population is required before

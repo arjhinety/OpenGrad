@@ -55,6 +55,31 @@ def test_quota_is_25_per_stratum_and_the_seed_differs_from_the_development_set()
     assert devcheck.rank_key("P1", "x") != devset.rank_key("P1", "x")
 
 
+def test_the_second_check_set_excludes_both_earlier_sets_and_has_its_own_seed() -> None:
+    v1, v2 = devcheck.CHECKS["v1"], devcheck.CHECKS["v2"]
+    assert {path.name for path, _sha in v2.excludes} == {devset.POPULATION_NAME, v1.population_name}
+    assert v2.seed not in {v1.seed, devset.SEED} and v2.id_prefix != v1.id_prefix
+    units = [unit(n) for n in range(40)]
+    first, _ = devcheck.draw(units, coverage.DrawExclusions(), devset.CoverageExclusion(), devset.CoverageExclusion(), v1)
+    second, _ = devcheck.draw(units, coverage.DrawExclusions(), devset.CoverageExclusion(), devset.CoverageExclusion(), v2)
+    assert all(item["dev_id"].startswith("devcheck-v2:") for item in second)
+    assert [u["pdetcov_id"] for u in first] != [u["pdetcov_id"] for u in second]  # different seeds, different order
+
+
+@pytest.mark.skipif(
+    not (ROOT / devcheck.OUTPUT_DIR / devcheck.CHECKS["v2"].population_name).is_file(), reason="check set v2 not built"
+)
+def test_the_written_second_check_set_shares_nothing_with_any_earlier_set() -> None:
+    v2 = devcheck.CHECKS["v2"]
+    items = [
+        json.loads(line)
+        for line in (ROOT / devcheck.OUTPUT_DIR / v2.population_name).read_text(encoding="utf-8").splitlines()
+    ]
+    earlier = devcheck.load_devset_exclusion(ROOT, v2)
+    assert not any(earlier.hits(item) for item in items)
+    assert not any(devset.load_coverage_exclusion(ROOT).hits(item) for item in items)
+
+
 @pytest.mark.skipif(
     not (ROOT / devcheck.OUTPUT_DIR / devcheck.POPULATION_NAME).is_file(), reason="check set not built"
 )
