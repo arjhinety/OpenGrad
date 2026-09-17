@@ -223,6 +223,26 @@ TRAILS = {
         procedure="configs/annotation/prose-classifier-dev-v2.model-procedure.md",
         authorization="docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md",
     ),
+    "prose-classifier-v2-devcheck-5": Trail(
+        task="prose-classifier-v2-devcheck-5",
+        session="model-v2-devcheck-5",
+        out=ROOT / "reports" / "prose-classifier" / "v2-devcheck-5" / "provenance" / "model-v2-devcheck-5",
+        parts=(
+            ("1", "aa07ac4f7d6423d96", 1, 50),
+            ("2", "a5046cc360dfa0bad", 51, 100),
+            ("3", "a7bb4567f78974531", 101, 150),
+        ),
+        split=(
+            "One batch labelled by three Claude subagents run in parallel, one per 50-item range. Each prompt was the "
+            "v2 procedure text followed by one line naming the batch file and its range. The three answer arrays were "
+            "merged in batch order and ingested once. The first subagent for items 101-150 returned 49 objects, "
+            "skipping item 106, against the procedure; its answers failed the range check, were discarded unused, and "
+            "the range was relabelled by a fresh subagent with the identical prompt."
+        ),
+        procedure="configs/annotation/prose-classifier-dev-v2.model-procedure.md",
+        authorization="docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md",
+        discarded=(("3", "aeadfe93dbd29e926"),),
+    ),
 }
 BATCH_LINE = re.compile(
     r"Batch file: (?P<path>\S+batch-01\.md) -- read the rubric \(lines 1-284\), then label only items "

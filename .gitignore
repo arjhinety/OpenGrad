@@ -90,6 +90,7 @@ reports/prose-classifier/v2-devcheck-1/provenance/*/local/
 reports/prose-classifier/v2-devcheck-2/provenance/*/local/
 reports/prose-classifier/v2-devcheck-3/provenance/*/local/
 reports/prose-classifier/v2-devcheck-4/provenance/*/local/
+reports/prose-classifier/v2-devcheck-5/provenance/*/local/
 reports/pdet-coverage/provenance/*/local/
 reports/pdet-coverage-v2/provenance/*/local/
 integrations/annotate-ui/.next/
