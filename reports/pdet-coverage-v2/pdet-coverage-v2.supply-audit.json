@@ -1,0 +1,550 @@
+{
+  "artifact_kind": "PDET_COVERAGE_V2_SUPPLY_AUDIT",
+  "authorization": "docs/research/study-002/35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md \u00a72 step 1",
+  "excluded_sets": {
+    "construction_exclusions": "as P-DET-COVERAGE-v1's draw (30 \u00a79), including P-DET-v1",
+    "development_and_check_sets": {
+      "reports/prose-classifier/dev/prose-classifier-dev-v1.population.jsonl": "abbdfc497dca61821bcdf35624988e82aa12ba5b562564c9aa2fe36fb0c72456",
+      "reports/prose-classifier/dev/prose-classifier-devcheck-v1.population.jsonl": "56564d85fa0db4abbc971b16bac5557edea8391620ccc3c3816a144cea651348",
+      "reports/prose-classifier/dev/prose-classifier-devcheck-v2.population.jsonl": "2f4eb1354903661c7d998dc4920b33110a70281b2eb17380247feeab26708c1f"
+    },
+    "pdet_coverage_v1_population_sha256": "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c"
+  },
+  "input_sha256": {
+    "reports/pdet-coverage/reference/pdet-coverage-v1.reference.jsonl": "51a2d6a81ee02cf4142f95037c737370eb346cf4cd72658f2be5f35e7f63be00",
+    "reports/prose-classifier/dev/annotation/wip/prose-classifier-dev-v1.annotations.model.claude-opus-5.model-dev.jsonl": "7ce773aef3c0b92bb7199d261861e9859e46c12da65c6135f911dddd39cc4d70",
+    "reports/prose-classifier/devcheck-v2/annotation/wip/prose-classifier-devcheck-v2.annotations.model.claude-opus-5.model-devcheck-v2.jsonl": "fe35d7cf18eae82b72800701388f277ba579a31c4839be50113d810aee9a5d42",
+    "reports/prose-classifier/devcheck/annotation/wip/prose-classifier-devcheck-v1.annotations.model.claude-opus-5.model-devcheck.jsonl": "d63cf24caf54e70f2359856c1ed7a6a317e7f46ad1f83bee86b0d61da1ecf411"
+  },
+  "label_counts_by_stratum_and_source": {
+    "development_and_check_set_model_labels": {
+      "M": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 1,
+          "items": 1
+        },
+        "toolace": {
+          "CALL": 2,
+          "CLARIFY": 41,
+          "DIRECT": 0,
+          "UNKNOWN": 3,
+          "UNSUPPORTED": 5,
+          "items": 51
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 43,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 5,
+          "items": 48
+        }
+      },
+      "P1": {
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 7,
+          "DIRECT": 0,
+          "UNKNOWN": 2,
+          "UNSUPPORTED": 74,
+          "items": 83
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 17,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 0,
+          "items": 17
+        }
+      },
+      "P2": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 45,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 0,
+          "items": 45
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 41,
+          "UNSUPPORTED": 11,
+          "items": 52
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 3,
+          "items": 3
+        }
+      },
+      "Q": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 3,
+          "DIRECT": 25,
+          "UNKNOWN": 4,
+          "UNSUPPORTED": 0,
+          "items": 32
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 13,
+          "DIRECT": 1,
+          "UNKNOWN": 1,
+          "UNSUPPORTED": 18,
+          "items": 33
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 35,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 0,
+          "items": 35
+        }
+      },
+      "R": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 32,
+          "items": 32
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 33,
+          "items": 33
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 35,
+          "items": 35
+        }
+      }
+    },
+    "pdet_coverage_v1_consensus_reference": {
+      "M": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 2,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 9,
+          "items": 11
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 38,
+          "DIRECT": 0,
+          "UNKNOWN": 1,
+          "UNSUPPORTED": 10,
+          "items": 49
+        }
+      },
+      "P1": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 6,
+          "items": 6
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 2,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 72,
+          "items": 74
+        }
+      },
+      "P2": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 19,
+          "UNKNOWN": 1,
+          "UNSUPPORTED": 0,
+          "items": 20
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 13,
+          "UNSUPPORTED": 7,
+          "items": 20
+        }
+      },
+      "Q": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 5,
+          "DIRECT": 22,
+          "UNKNOWN": 1,
+          "UNSUPPORTED": 2,
+          "items": 30
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 11,
+          "DIRECT": 0,
+          "UNKNOWN": 4,
+          "UNSUPPORTED": 15,
+          "items": 30
+        }
+      },
+      "R": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 1,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 29,
+          "items": 30
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 30,
+          "items": 30
+        }
+      },
+      "X": {
+        "toolace": {
+          "CALL": 3,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 3,
+          "UNSUPPORTED": 0,
+          "items": 6
+        }
+      }
+    }
+  },
+  "projection": {
+    "development_and_check_set_model_labels": {
+      "available_items_without_yield_estimate": 0,
+      "cells": {
+        "M/glaive": {
+          "available_after_dedup": 0,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 1
+        },
+        "M/toolace": {
+          "available_after_dedup": 606,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 23.8,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 51
+        },
+        "P1/glaive": {
+          "available_after_dedup": 0,
+          "direct_yield": null,
+          "expected_call_if_all_drawn": null,
+          "expected_direct_if_all_drawn": null,
+          "yield_items_observed": 0
+        },
+        "P1/toolace": {
+          "available_after_dedup": 208,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 83
+        },
+        "P2/glaive": {
+          "available_after_dedup": 0,
+          "direct_yield": 1.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 45
+        },
+        "P2/toolace": {
+          "available_after_dedup": 415,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 52
+        },
+        "Q/glaive": {
+          "available_after_dedup": 25,
+          "direct_yield": 0.781,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 19.5,
+          "yield_items_observed": 32
+        },
+        "Q/toolace": {
+          "available_after_dedup": 97,
+          "direct_yield": 0.03,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 2.9,
+          "yield_items_observed": 33
+        },
+        "R/glaive": {
+          "available_after_dedup": 121,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 32
+        },
+        "R/toolace": {
+          "available_after_dedup": 164,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 33
+        },
+        "X/glaive": {
+          "available_after_dedup": 0,
+          "direct_yield": null,
+          "expected_call_if_all_drawn": null,
+          "expected_direct_if_all_drawn": null,
+          "yield_items_observed": 0
+        },
+        "X/toolace": {
+          "available_after_dedup": 0,
+          "direct_yield": null,
+          "expected_call_if_all_drawn": null,
+          "expected_direct_if_all_drawn": null,
+          "yield_items_observed": 0
+        }
+      },
+      "expected_direct_from_toolace_if_all_drawn": 2.9,
+      "expected_direct_if_all_drawn": 22.4,
+      "expected_direct_in_challenge_strata_if_all_drawn": 22.4,
+      "expected_textual_call_if_all_drawn": 23.8,
+      "minimum_direct": 50,
+      "minimum_direct_challenge": 30
+    },
+    "pdet_coverage_v1_consensus_reference": {
+      "available_items_without_yield_estimate": 0,
+      "cells": {
+        "M/glaive": {
+          "available_after_dedup": 0,
+          "direct_yield": 0.182,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 11
+        },
+        "M/toolace": {
+          "available_after_dedup": 606,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 49
+        },
+        "P1/glaive": {
+          "available_after_dedup": 0,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 6
+        },
+        "P1/toolace": {
+          "available_after_dedup": 208,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 74
+        },
+        "P2/glaive": {
+          "available_after_dedup": 0,
+          "direct_yield": 0.95,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 20
+        },
+        "P2/toolace": {
+          "available_after_dedup": 415,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 20
+        },
+        "Q/glaive": {
+          "available_after_dedup": 25,
+          "direct_yield": 0.733,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 18.3,
+          "yield_items_observed": 30
+        },
+        "Q/toolace": {
+          "available_after_dedup": 97,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 30
+        },
+        "R/glaive": {
+          "available_after_dedup": 121,
+          "direct_yield": 0.033,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 4.0,
+          "yield_items_observed": 30
+        },
+        "R/toolace": {
+          "available_after_dedup": 164,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 30
+        },
+        "X/glaive": {
+          "available_after_dedup": 0,
+          "direct_yield": null,
+          "expected_call_if_all_drawn": null,
+          "expected_direct_if_all_drawn": null,
+          "yield_items_observed": 0
+        },
+        "X/toolace": {
+          "available_after_dedup": 0,
+          "direct_yield": 0.0,
+          "expected_call_if_all_drawn": 0.0,
+          "expected_direct_if_all_drawn": 0.0,
+          "yield_items_observed": 6
+        }
+      },
+      "expected_direct_from_toolace_if_all_drawn": 0.0,
+      "expected_direct_if_all_drawn": 22.3,
+      "expected_direct_in_challenge_strata_if_all_drawn": 22.3,
+      "expected_textual_call_if_all_drawn": 0.0,
+      "minimum_direct": 50,
+      "minimum_direct_challenge": 30
+    }
+  },
+  "status": "COUNTS ONLY. Not a draw, not a preregistration, not gold. Yields come from model labels.",
+  "supply": {
+    "by_stratum": {
+      "M": {
+        "glaive": {
+          "after_dedup": 0,
+          "records": 0
+        },
+        "toolace": {
+          "after_dedup": 606,
+          "records": 606
+        },
+        "when2call": {
+          "after_dedup": 446,
+          "records": 477
+        }
+      },
+      "P1": {
+        "glaive": {
+          "after_dedup": 0,
+          "records": 0
+        },
+        "toolace": {
+          "after_dedup": 208,
+          "records": 209
+        },
+        "when2call": {
+          "after_dedup": 0,
+          "records": 0
+        }
+      },
+      "P2": {
+        "glaive": {
+          "after_dedup": 0,
+          "records": 0
+        },
+        "toolace": {
+          "after_dedup": 415,
+          "records": 418
+        },
+        "when2call": {
+          "after_dedup": 0,
+          "records": 0
+        }
+      },
+      "Q": {
+        "glaive": {
+          "after_dedup": 25,
+          "records": 25
+        },
+        "toolace": {
+          "after_dedup": 97,
+          "records": 104
+        },
+        "when2call": {
+          "after_dedup": 5032,
+          "records": 6104
+        }
+      },
+      "R": {
+        "glaive": {
+          "after_dedup": 121,
+          "records": 260
+        },
+        "toolace": {
+          "after_dedup": 164,
+          "records": 165
+        },
+        "when2call": {
+          "after_dedup": 5099,
+          "records": 6659
+        }
+      },
+      "X": {
+        "glaive": {
+          "after_dedup": 0,
+          "records": 0
+        },
+        "toolace": {
+          "after_dedup": 0,
+          "records": 0
+        },
+        "when2call": {
+          "after_dedup": 0,
+          "records": 0
+        }
+      }
+    },
+    "counts": {
+      "after_construction_exclusions": 17768,
+      "after_dedup": 12213,
+      "dedup": {
+        "raw_record_hash": 0,
+        "response_text": 1574,
+        "skeleton": 934,
+        "user_prompt": 306
+      },
+      "development_and_check_set_overlap_removed": 931,
+      "layer_b_candidates": 30975,
+      "pdet_coverage_v1_overlap_removed": 1810
+    },
+    "layer_b_candidate_sources": [
+      "glaive",
+      "toolace"
+    ],
+    "sources": [
+      "glaive",
+      "toolace",
+      "when2call"
+    ]
+  }
+}

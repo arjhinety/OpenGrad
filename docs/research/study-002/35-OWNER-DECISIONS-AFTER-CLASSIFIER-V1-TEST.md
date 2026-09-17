@@ -68,3 +68,38 @@ qualify. Any later report that relies on this decision cites this file.
 - P-DET-COVERAGE-v1, its consensus reference and the v1 test result.
 - `prose-decision-classifier-v1` and its tag.
 - Every threshold and minimum of 22 §6 and 30 §11, including the rule that C1 needs DIRECT and UNSUPPORTED.
+
+## 4. Step 1 result: the unused pool cannot supply 50 DIRECT items (2026-09-17)
+
+Counts-only supply audit, `scripts/audit_pdet_coverage_v2_supply.py`, written to
+`reports/pdet-coverage-v2/pdet-coverage-v2.supply-audit.json`. The pool is every layer B candidate of the two
+sources 30 §6 allows (Glaive, ToolACE), after 30 §9's exclusions, minus P-DET-COVERAGE-v1 and the three
+development and check sets, deduplicated. DIRECT yield per stratum and source is taken from labels that already
+exist, on two bases reported separately.
+
+| Stratum / source | Unused, after dedup | DIRECT yield: coverage reference | DIRECT yield: development labels |
+|---|---:|---:|---:|
+| Q / Glaive | 25 | 22 of 30 | 25 of 32 |
+| R / Glaive | 121 | 1 of 30 | 0 of 32 |
+| M, P1, P2 / Glaive | 0 | – | – |
+| M / ToolACE | 606 | 0 of 49 | 0 of 51 |
+| P1 / ToolACE | 208 | 0 of 74 | 0 of 83 |
+| P2 / ToolACE | 415 | 0 of 20 | 0 of 52 |
+| Q / ToolACE | 97 | 0 of 30 | 1 of 33 |
+| R / ToolACE | 164 | 0 of 30 | 0 of 33 |
+| X (textual call), both | 0 | – | – |
+
+**Expected reference DIRECT if the whole unused pool were drawn: about 22 on either basis**, all in the challenge
+strata. Both minimums (50 overall, 30 challenge) are out of reach, before any `NO_CONSENSUS` or `UNKNOWN` loss.
+
+- **What the counts show.** Of the 115 DIRECT labels that exist on these sources (44 reference, 71 development),
+  114 are Glaive items and 1 is ToolACE. When2Call, which 30 §6 keeps out of layer B, has 0 DIRECT in P-DET-v1's
+  581 human labels and 0 of 138 development labels. Glaive's plain strata (P1, P2) and M are used up: every
+  distinct Glaive prompt there is already in P-DET-COVERAGE-v1 or a development set. No textual-call item is left.
+- **Estimates only.** Yields come from model labels; the development yields are Claude's, and the coverage
+  reference is a two-of-three model consensus. The two bases agree closely (22.3 and 22.4).
+- **Consequence.** A new untouched population drawn from canonical-v3's allowed sources cannot make DIRECT
+  measurable, so step 2 onwards of §2 cannot proceed as written. Under 22 §5 this is a coverage finding: DIRECT
+  gets no balancing permission from this corpus, and C1 is not authorised. How to continue is the owner's next
+  decision. No population was drawn and nothing else changed.
+
