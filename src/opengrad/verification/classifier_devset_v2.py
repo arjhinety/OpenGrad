@@ -99,6 +99,28 @@ SETS = {
             "the v1 development and check sets."
         ),
     ),
+    "check2": SetSpec(
+        set_id="prose-classifier-v2-devcheck-2",
+        seed="opengrad-prose-classifier-v2-devcheck-2",
+        quota=25,
+        id_prefix="v2check2",
+        excludes=(
+            (
+                "reports/prose-classifier/dev-v2/prose-classifier-dev-v2.population.jsonl",
+                "ec4c67566a4adb7eb6d41b381feb3435f2b171fbaa11d338970d87f36eb10f8f",
+            ),
+            (
+                "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-1.population.jsonl",
+                "b4477eae3be5f8d96496e3f7de23fef65d898e90f3899d3d2b1778242f60076a",
+            ),
+        ),
+        statement=(
+            "The second and last held-out check set of first replies for prose-decision-classifier-v2 (37 §4, §7), scored "
+            "once on the committed round-2 candidate rules; the developer does not read its items. Model judgments, never "
+            "gold. It shares no item, prompt or response with prose-classifier-dev-v2, prose-classifier-v2-devcheck-1, "
+            "P-DET-COVERAGE-v2, P-DET-COVERAGE-v1 or the v1 development and check sets."
+        ),
+    ),
 }
 
 
