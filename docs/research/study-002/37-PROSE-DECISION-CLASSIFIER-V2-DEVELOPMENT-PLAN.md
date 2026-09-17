@@ -310,7 +310,7 @@ DIRECT to abstain, and nothing that agreed moved away.
   flagged, WIP export verify PASS). The first subagent for items 101-150 skipped one item; its answers failed the
   range check and were discarded unused, and a fresh subagent relabelled the range with the identical prompt.
   **Process slip, disclosed:** before the relabel, a chained command whose failures were masked by pipes exported
-  an empty snapshot, committed it (reverted before any further commit, never pushed), and ran the scoring script on
+  an empty snapshot, committed it (the local commit was undone with a soft reset before any further commit, never pushed), and ran the scoring script on
   zero labelled items, writing a 0 / 0 report that was deleted. No prediction was compared with any label, so the
   set stayed unscored. It was then scored **once** on its complete labels, without printing any item or
   disagreement.
