@@ -1,0 +1,115 @@
+{
+  "adjudication": null,
+  "adjudication_flags": {},
+  "adjudicator_ids": [],
+  "annotation_schema_version": "prose-classifier-dev-annotation-v1",
+  "annotator_ids": [
+    "model.claude-opus-5"
+  ],
+  "app_version": "opengrad-annotate-1.0.0",
+  "artifact_kind": "ANNOTATION_SNAPSHOT",
+  "completion_state": "COMPLETE",
+  "composite": null,
+  "config_path": "configs/annotation/prose-classifier-v2-devcheck-1.yaml",
+  "definition_history": [],
+  "design": "single_model",
+  "disagreements": {
+    "adjudicated": 0,
+    "count": 0,
+    "file": null,
+    "keys": [
+      "label"
+    ],
+    "metric_eligible": 0,
+    "unresolved": 0
+  },
+  "exported_at": "2026-09-17T15:06:49.062Z",
+  "frozen": false,
+  "gold": null,
+  "incomplete_reasons": [],
+  "independent_annotators": false,
+  "inter_annotator_agreement_claimable": false,
+  "limitations": [
+    "Model annotation: at least one session was labeled by a language model. A model pass is not an independent human annotator; no inter-annotator agreement may be claimed."
+  ],
+  "manifest_version": 1,
+  "metric_exclusions": {
+    "excluded_items": 0,
+    "groups": [],
+    "metric_eligible_items": 150,
+    "population_items": 150
+  },
+  "model_annotation": true,
+  "model_annotators": [
+    {
+      "annotator_id": "model.claude-opus-5",
+      "authorization": "docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md",
+      "model": "claude-opus-5",
+      "procedure": "configs/annotation/prose-classifier-dev-v2.model-procedure.md",
+      "procedure_sha256": "8ecf27c1c67da750730ef77465b7b8cdcc87e07f78a22eca305fe3d43d142738"
+    }
+  ],
+  "model_assistance": false,
+  "outputs": {
+    "audit/prose-classifier-v2-devcheck-1.history.model.claude-opus-5.model-v2-devcheck-1.jsonl": {
+      "bytes": 211537,
+      "records": 150,
+      "sha256": "56ef8dbc8f86ca35a8de908e320e97a7358675b2887a51d311759e43cf75a339"
+    },
+    "prose-classifier-v2-devcheck-1.annotations.model.claude-opus-5.model-v2-devcheck-1.jsonl": {
+      "bytes": 144330,
+      "records": 150,
+      "sha256": "f6ce245d09b7a5898a61d19ee730185888044f84dcef82e21e013cab068f4ba5"
+    }
+  },
+  "package_dir": "reports/prose-classifier/v2-devcheck-1/annotation/wip",
+  "record_key_map": {
+    "annotation_schema_version": "annotation_version",
+    "item_id": "dev_id",
+    "label": "gold_policy_label"
+  },
+  "record_keys": {
+    "annotator_id": "annotator_id",
+    "item_id": "dev_id",
+    "label": "gold_policy_label"
+  },
+  "review_queue": 0,
+  "sessions": [
+    {
+      "annotator_id": "model.claude-opus-5",
+      "annotator_kind": "model",
+      "created_at": "2026-09-17T15:02:16.087Z",
+      "file": "prose-classifier-v2-devcheck-1.annotations.model.claude-opus-5.model-v2-devcheck-1.jsonl",
+      "flagged": 21,
+      "history_entries": 150,
+      "history_file": "audit/prose-classifier-v2-devcheck-1.history.model.claude-opus-5.model-v2-devcheck-1.jsonl",
+      "history_head_sha256": "8ac7865ed4c5d7cc275007b80ba065fe1b488d54a4af78bf3702baa93bfd42ef",
+      "label_counts": {
+        "CLARIFY": 26,
+        "DIRECT": 59,
+        "UNKNOWN": 25,
+        "UNSUPPORTED": 40
+      },
+      "labeled": 150,
+      "labeled_metric_eligible": 150,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-v2-devcheck-1",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 25,
+      "unlabeled": 0
+    }
+  ],
+  "source": {
+    "format": "jsonl",
+    "items": 150,
+    "path": "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-1.population.jsonl",
+    "sha256": "b4477eae3be5f8d96496e3f7de23fef65d898e90f3899d3d2b1778242f60076a"
+  },
+  "statement": "Labels in sessions whose annotator_kind is 'model' were produced by the language model named under model_annotators, following the pinned procedure recorded there; they are model judgments, not human annotations. Labels in human sessions were entered through the annotation interface under the annotator and adjudicator identifiers recorded in this package; those identifiers are declared, not authenticated. The interface displays no classifier prediction, model suggestion or pre-filled label to human annotators, and the source population was read but never written. Every change is in the hash-chained change logs listed under outputs. Hashes detect changes to the package; they are not signatures.",
+  "task_definition_sha256": "a4cd7331ef70a81e485352ad916ce019af2388e859999c2c2516662648d56e82",
+  "task_id": "prose-classifier-v2-devcheck-1",
+  "task_type": "single_label",
+  "task_version": "1"
+}
