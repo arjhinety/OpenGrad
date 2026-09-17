@@ -55,6 +55,12 @@ TRAILS = {
         ROOT / "reports" / "prose-classifier" / "v2-devcheck-2" / "provenance" / "model-v2-devcheck-2",
         [(1, 50), (51, 100), (101, 150)],
     ),
+    "v2-devcheck-3": (
+        "prose-classifier-v2-devcheck-3",
+        "model-v2-devcheck-3",
+        ROOT / "reports" / "prose-classifier" / "v2-devcheck-3" / "provenance" / "model-v2-devcheck-3",
+        [(1, 50), (51, 100), (101, 150)],
+    ),
 }
 
 
