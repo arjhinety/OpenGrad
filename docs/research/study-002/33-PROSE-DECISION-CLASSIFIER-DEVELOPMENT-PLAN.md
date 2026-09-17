@@ -37,7 +37,7 @@ eligible records have no labels.
 **Decision (study owner, 2026-09-17):** development is guided by a **model-labelled development set**,
 used only for development and never as gold. The alternatives considered were rules from the written
 definitions alone, with no measured estimate before the test, and a development set labelled by the study
-owner, which costs annotation time that P-DET-COVERAGE-v1 needs.
+owner. The study owner later decided (2026-09-17) to annotate nothing, which rules that alternative out.
 
 ## 3. The development set
 
@@ -53,8 +53,8 @@ owner, which costs annotation time that P-DET-COVERAGE-v1 needs.
 - **Order and dedup:** ranked by `sha256(seed | stratum | id)` with seed
   `opengrad-prose-classifier-dev-v1`, at most one item per normalized prompt. The draw is byte-reproducible
   and hashed.
-- **Who sees it:** the model annotator and the classifier developer. It is not shown to the study owner,
-  who annotates P-DET-COVERAGE-v1, a population drawn from the same kind of records.
+- **Who sees it:** the model annotator and the classifier developer, both Claude Opus 5. It is never given
+  to the three external models that label P-DET-COVERAGE-v1 (34), so their labelling is not shaped by it.
 
 ## 4. How the development labels are made
 
@@ -70,16 +70,18 @@ owner, which costs annotation time that P-DET-COVERAGE-v1 needs.
 
 - The developer may run drafts against the development set as often as needed.
 - Development results are reported as **agreement with model labels**, never as accuracy. The model is
-  not ground truth, and rules tuned to agree with it can inherit its habits. The test on human labels is
-  what detects that.
+  not ground truth, and rules tuned to agree with it can inherit its habits. The test on independent
+  references is what detects that: P-DET-COVERAGE-v1's three-model non-Claude consensus (34) and P-DET-v1's
+  human labels.
 - **P-DET-v1 and P-DET-COVERAGE-v1 files are never opened while developing.** A test fails if the
   classifier module reads either population path.
 - **Freeze:** when development ends, the rules are committed and tagged under `prose-decision-classifier-v1`
   before any test result exists. Any later change is a new version, and 22 §6's consequences apply:
   the used population is marked `DEVELOPMENT_EXPOSED`, and a new untouched population is required before
   balancing permission.
-- **The test:** it runs once, on human labels only, after the study owner has annotated. On P-DET-v1 it
-  uses whatever labels exist at that time, and its report states whether they are frozen gold.
+- **The test:** it runs once, after the references exist: on P-DET-COVERAGE-v1 against its three-model
+  consensus (`study_002_prereg_v5`, 34), reported as `MODEL_REFERENCE`, and on P-DET-v1 against its human
+  labels, stating whether they are frozen gold. The study owner annotates nothing (decided 2026-09-17).
 
 ## 6. Exposure disclosure
 

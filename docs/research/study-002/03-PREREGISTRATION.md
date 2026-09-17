@@ -163,6 +163,21 @@ seeing data is a new study, and it goes into the next study
 - **Full record:** [30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md](30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md).
   Its file name keeps `-DRAFT` because committed reports cite that path; its status line says ADOPTED.
 
+### `study_002_prereg_v5` — 2026-09-17
+
+- **Item changed:** who produces P-DET-COVERAGE-v1's reference labels (30 §10). Before: human gold only.
+  After: three declared non-Claude model annotators (Gemini 3.8 Flash High, gpt-5.6-sol,
+  deepseek-v4.1-flash) label every item independently and blind, and an item's reference label is the one at
+  least two give; a three-way split is `NO_CONSENSUS` and is excluded from metrics.
+- **Reason:** the study owner will not annotate and no human annotator is available. Claude is excluded
+  because it builds the classifier under test (28 item 3).
+- **Not changed:** the population, the tasks, the rubric, the blinding, the acceptance rules and minimum
+  sizes (now counted on consensus items), the arms, the seed count, and P-DET-v1.
+- **Candidates already scored:** none. No label and no classifier exist.
+- **Nature:** resource-driven, before any label or result exists. Qualifications against this reference
+  are `MODEL_REFERENCE` and provisional; whether they may grant balancing permission is decided separately.
+- **Full record:** [34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md](34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md).
+
 ## Registration of the unit of analysis
 
 - The **unit of inference** is the seed, clustered by item ([10](10-STATISTICS-PLAN.md)).

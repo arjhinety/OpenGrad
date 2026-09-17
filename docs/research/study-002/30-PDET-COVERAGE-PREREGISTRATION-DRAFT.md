@@ -1,4 +1,9 @@
-# 30 — P-DET-COVERAGE-v1: preregistration (adopted as `study_002_prereg_v4`)
+# 30 — P-DET-COVERAGE-v1: preregistration (adopted as `study_002_prereg_v4`, amended by `study_002_prereg_v5`)
+
+**Amended 2026-09-17 by `study_002_prereg_v5`
+([34](34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md)): the reference labels come from a three-model
+consensus, not from a human annotator. Where this document says the reference is human, 34 is the correct
+one.**
 
 **Status: ADOPTED, 2026-09-16, as amendment `study_002_prereg_v4`** ([03](03-PREREGISTRATION.md),
 [`reports/ERRATA.md`](../../../reports/ERRATA.md) §15). Drafted 2026-09-15; revised 2026-09-16 after an
@@ -449,7 +454,8 @@ pools. If exposure is found after the freeze, the item stays in the population a
     boundary-cited items) before any freeze.
   - With a second independent annotator it becomes two passes plus adjudication.
   - **Gold is human only.** No model-generated labels and no composite; amendment 28 does not extend to
-    this population.
+    this population. *Superseded by `study_002_prereg_v5` (34): the reference is a three-model non-Claude
+    consensus, two of three.*
 
 ## 11. Planned metrics
 

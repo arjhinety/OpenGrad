@@ -876,3 +876,26 @@ No frozen file changes. Adopted before the population was drawn and before any l
 classifier had been scored on either population.
 
 The full record is 30, and the amendment entry is in `docs/research/study-002/03-PREREGISTRATION.md`.
+
+
+## 16. Amendment `study_002_prereg_v5`: P-DET-COVERAGE-v1's reference comes from a three-model consensus
+
+**Added 2026-09-17, before any P-DET-COVERAGE-v1 label existed.** §15 adopted P-DET-COVERAGE-v1 with a
+human-only reference (30 §10). The study owner will not annotate, and no human annotator is available.
+
+**The reference is now a three-model consensus:**
+- three declared non-Claude models label every item independently and blind: Gemini 3.8 Flash (High) via
+  the Antigravity CLI, gpt-5.6-sol via the Codex CLI, and deepseek-v4.1-flash via the Cline CLI;
+- an item's reference label is the one at least two give;
+- items where all three differ are `NO_CONSENSUS`, reported and excluded from metrics.
+
+Claude is excluded because it builds the classifier under test.
+
+**What stays the same:** the population, the rubric, the blinding, the acceptance rules and minimum sizes,
+and P-DET-v1.
+
+**What changes for claims:** metrics name the three-model reference and are never called human-validated;
+qualifications are `MODEL_REFERENCE` and provisional; agreement is reported as model–model agreement.
+
+The full record is
+[`docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md`](../docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md).

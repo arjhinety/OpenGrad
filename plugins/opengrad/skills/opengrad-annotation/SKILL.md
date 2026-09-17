@@ -33,7 +33,7 @@ renders).
 ```
 
 - **P-DET-COVERAGE-v1 is drawn (`reports/pdet-coverage/pdet-coverage-v1.population.jsonl`, 336 records),
-  and the study owner is its blind annotator.** Its builder is
+  and labelled by three non-Claude models (`study_002_prereg_v5`, doc 34); the study owner annotates nothing.** Its builder is
   `src/opengrad/verification/pdet_coverage.py` (preregistration
   `docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md`, adopted as `study_002_prereg_v4`).
   - The draw is byte-reproducible, so the written population *is* the blind sample. Never open, print or
@@ -53,8 +53,9 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters
-    (`tests/annotation/test_annotation_pdet_coverage_tasks.py`). Gold is human only: no model annotator, no
-    composite.
+    (`tests/annotation/test_annotation_pdet_coverage_tasks.py`). Since `study_002_prereg_v5` the reference is a
+    two-of-three consensus of Gemini 3.8 Flash (High), gpt-5.6-sol and deepseek-v4.1-flash; no Claude model labels it,
+    because Claude builds the classifier under test.
   - When inspecting the population for engineering, print counts only. Never dump a record's keys or values:
     tool parameter names are item content too.
 
