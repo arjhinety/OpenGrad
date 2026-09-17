@@ -224,6 +224,9 @@ _DECLINE = _rx(
     r"fetch|browse|search|generate|find|check|process|make|place|call|use|get|answer)\b",
     r"\bnot possible to\b|\bit is not possible\b|\bimpossible to\b",
     r"\b(cannot|can't|could not|couldn't) (be )?(fulfill|fulfil|fulfilled|achieved|addressed|obtained|retrieved)\b",
+    # v2 round 2: having no information about the subject, stated as the reply.
+    r"\b(i|we) (don't|do not) have (any )?(specific |further |additional |more |enough |sufficient )?"
+    r"(information|data|details|knowledge) (about|on|regarding|of)\b",
 )
 # The missing thing is a capability, tool or scope (22 §2 rows 2 and 6).
 _CAPABILITY = _rx(
@@ -244,11 +247,18 @@ _CAPABILITY = _rx(
     r"\b(are|is) (only )?(meant|designed|tailored|intended|specific(ally)?( designed)?|limited|focused) (for|to|on)\b",
     r"\b(outside|beyond) (of )?(the |my )?(scope|capabilit)",
     r"\bfalls? outside\b",
+    # v2 round 2: only a negated or limited ability ("lawyers have the ability to see" is not inability).
+    r"(\bnot|n't|\bno|\bcannot|\blacks?|\blacking|\bwithout|\bunable|\bbeyond|\boutside|\blimited)\b[^.!?]{0,60}"
     r"\b(capability|capabilities|ability) to\b",
     r"\bcapabilities are\b|\bmy (current )?(capabilities|functions?|abilities)\b",
     r"\b(real-?time|physical|external) (data|tasks?|information|access|actions?)\b",
     r"\b(can't|cannot|unable to|not able to) (directly )?(call|use|invoke)\b[^.!?]{0,40}\b(functions?|tools?|apis?)\b",
     r"\bno function (in|from|provided|available|that|can)\b",
+    # v2 round 2: the tools are lacking, or cannot do the task.
+    r"\b(lacks?|lacking|without) (the |any )?(necessary |required |appropriate |relevant |suitable |needed )?"
+    r"(functions?|tools?|apis?)\b",
+    r"\b(functions?|tools?|apis?)\b[^.!?]{0,40}\b(cannot|can't|can not|could not|couldn't|(is|are) unable to) \w+",
+    r"\b(none|neither) of which (is|are) (relevant|applicable|suitable|useful|related)\b",
     # Asking whether a capability exists: the missing thing is a tool, not user input (22 §1.3 boundary).
     r"\bdo you have (a|an|any|another) [\w\- ]{0,30}(tool|function|api|integration|plugin)\b",
     r"\bonly (allow|support|provide|cover|retrieve|pertain|relate|focus|convert|generate|search|give|return)s?\b",
@@ -266,6 +276,8 @@ _EXTERNAL_SERVICE = _rx(
     r"\b(check|use|visit|try) (a|an|the) (reliable |official |specialized |specialised |dedicated )?(online |weather |news )?"
     r"(source|website|site|service|generator|database|app|platform)\b",
     r"\byou would need (access to|to use|to consult)\b",
+    # v2 round 2: a referral phrased as a need.
+    r"\byou (may|might|could|would|will) (need|want|have) to (consult|check|visit|contact|refer to)\b",
     r"\b(please )?(consult|contact|refer to|check with) (a|an|the|your)\b",
     r"\bonline (generator|tool|service|source|resource)s?\b",
 )
@@ -299,7 +311,7 @@ _REQUEST = _rx(
     r"\bplease (provide|specify|share|tell|give|confirm|clarify|let me know|send|enter|supply|indicate|include)\b",
     r"^[-*\d.\s]*(provide|specify|supply|enter|share) (the|your|a|an|me|us)\b",
     r"\b(i|i'll|i will|we|we'll) (would )?(first )?need (to know |you to (provide|specify|tell|give) )?"
-    r"(the|your|a|an|some|more|additional|further|to know|which|what|details|information)\b",
+    r"(the|your|a|an|some|more|additional|further|to know|which|what|details|information|specific|certain|particular)\b",
     r"\byou('ll| will)? (need|have) to (provide|specify|give|supply|tell)\b",
     r"\b(required|necessary|mandatory)\b[^.!?]{0,60}\b(parameters?|arguments?|information|details|fields?|inputs?)\b"
     r"[^.!?]{0,40}\b(missing|not (been )?(provided|specified|given)|lack)",
@@ -343,7 +355,7 @@ _ABOUT_FUNCTIONS = re.compile(
     r"|\b(functions?|tools?|apis?)\b[^.!?]{0,80}\b(can|could|will|would) (help|be used|provide|retrieve|find|get|"
     r"search|fetch|collect|add|update|generate|check)\b"
     r"|\b(parameters?|arguments?)\b"
-    r"|\b(the|your|this) (query|question|request)\b"
+    r"|\b(the|your|this) (given |user's |original )?(query|question|request)\b"
     r"|\b(helpful|useful|necessary|needed) to (have|know)\b|\bfollowing (information|details)\b"
     r"|\b(missing|lacks?|ambiguous|once provided|not explicitly|not given)\b"
     r"|`[^`\s]+`",
@@ -446,11 +458,23 @@ def classify(features: ClassifierFeatures) -> Decision:
                 return Decision(DIRECT, STEP_DECLINE_WITH_CONTENT, (decline.group(0), tail[:80]))
         rest = _strip(sentences, _DECLINE, _CAPABILITY, _OFFER, _EXTERNAL_SERVICE, _COURTESY, _REQUEST)
         # "Here's the answer: ..." after a note that the tools don't fit delivers the answer (22 §1.4 exclusion).
-        delivery = next((i for i, s in enumerate(sentences) if _DELIVERY.match(s) and not _any(_OFFER, s)), None)
+        # v2 round 2: "Here is why I cannot proceed:" introduces the decline's reasons, not an answer.
+        delivery = next(
+            (i for i, s in enumerate(sentences) if _DELIVERY.match(s) and not _any(_OFFER, s) and not _any(_DECLINE, s)),
+            None,
+        )
         if delivery is not None:
             delivered = " ".join(sentences[delivery:])
             if _words(delivered) >= CONTENT_WORDS_IN_BUT_CLAUSE and not _any(_EXTERNAL_SERVICE, delivered):
                 return Decision(DIRECT, STEP_DECLINE_WITH_CONTENT, (decline.group(0), sentences[delivery][:80]))
+        # v2 round 2: with no capability gap stated, what lies between the first and last request (a list of the
+        # missing fields) belongs to the request, as in step 4, not to delivered content.
+        asks = [i for i, s in enumerate(sentences) if _any(_REQUEST, s)]
+        if capability is None and asks:
+            rest = _strip(
+                sentences[: asks[0]] + sentences[asks[-1] + 1 :],
+                _DECLINE, _CAPABILITY, _OFFER, _EXTERNAL_SERVICE, _COURTESY, _REQUEST,
+            )
         if has_code or _content_words(rest) >= CONTENT_WORDS_AFTER_DECLINE:
             return Decision(DIRECT, STEP_DECLINE_WITH_CONTENT, (decline.group(0),))
         if capability is None:

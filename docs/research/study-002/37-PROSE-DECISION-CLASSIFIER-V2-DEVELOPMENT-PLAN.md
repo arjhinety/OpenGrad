@@ -95,8 +95,9 @@ abstained on 48 of 52 and gave a mode to 4.
 | **Check set 1 (unexposed, scored once)** | **118 / 125** | **0.944** | **58 / 61** | **58 / 59** |
 
 On check set 1, continuing conversations agreed 68 / 70 and single exchanges 50 / 55. The seven disagreements
-by model label → prediction: UNSUPPORTED → DIRECT 2, CLARIFY → UNSUPPORTED 3, CLARIFY → DIRECT 1,
-DIRECT → UNSUPPORTED 1. Per mode against model labels: UNSUPPORTED 35 / 40, CLARIFY 25 / 26. The drop from
+by model label → prediction: UNSUPPORTED → DIRECT 2, UNSUPPORTED → CLARIFY 3, CLARIFY → DIRECT 1,
+DIRECT → UNSUPPORTED 1. (Corrected 2026-09-17: the first version of this line read the confusion matrix
+backwards for the three UNSUPPORTED → CLARIFY items, and the owner was told the same; the report was right.) Per mode against model labels: UNSUPPORTED 35 / 40, CLARIFY 25 / 26. The drop from
 0.988 in-sample to 0.944 is the expected cost of tuning on the development items. As with v1, 61 DIRECT
 predictions are far too few to estimate precision against the 0.80 threshold, model labels are not the
 reference, and neither dev-v2 nor check set 1 has a model CALL label, so textual CALL is untested before the test.
@@ -109,3 +110,32 @@ data, and its 118 / 125 above is the only unexposed score it will ever give. Rou
 `prose-classifier-v2-devcheck-2` (150 first replies, its own seed, excluding dev-v2, check set 1 and everything
 they exclude) is drawn, then labelled the same way and scored once. After it, §4 allows no further check round:
 the owner chooses between freezing and stopping.
+
+**Round 2 rules** (source sha256 LF `0d5cce9a…`), made after reading check set 1's seven disagreements and
+committed before check set 2 is drawn. Each change is a general wording or structure rule, tested on
+paraphrased examples:
+
+1. an ability counts as inability only when negated or limited ("have the ability to see" is not a decline);
+2. tools that are lacking ("lacks the necessary functions", "without the appropriate functions"), tools that
+   cannot do the task, and "none/neither of which are relevant" are capability wordings;
+3. "I do not have (any specific) information about X" is a decline;
+4. "you may need to consult …" is a referral elsewhere, and "the given question" is talk about the task;
+5. "I'll need specific …" is a request;
+6. "Here is why I cannot proceed:" introduces reasons, not a delivered answer;
+7. in a decline with no capability gap, text between the first and last request (a list of the missing
+   fields) belongs to the request, as step 4 already treats it.
+
+One disagreement is left as a genuine boundary: a reply that the offered function "lacks the parameters"
+while the request is also outside that function's scope (model label UNSUPPORTED, prediction CLARIFY).
+
+| Round 2 rules, in-sample | Agree | Round 1 |
+|---|---:|---:|
+| dev-v2 | 245 / 248 | 245 / 248 |
+| dev-v1 | 223 / 226 | 223 / 226 |
+| devcheck-v1 | 110 / 110 | 110 / 110 |
+| devcheck-v2 | 109 / 113 | 108 / 113 |
+| v2 check set 1 (exposed) | 124 / 125 | 118 / 125 |
+
+Across the 950 development items, eight predictions moved to agree with the model labels and none that agreed
+moved away. The in-sample gain on check set 1 is expected and says nothing about unseen replies; check set 2
+measures that.

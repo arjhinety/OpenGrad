@@ -189,3 +189,47 @@ def test_a_tool_limit_after_but_is_not_delivered_content() -> None:
 
 def test_an_exclamation_of_disbelief_is_not_a_decline() -> None:
     assert decide("Wow, I can't believe it!").label == dc.DIRECT
+
+
+# ── v2 round 2 (37 §7): capability wording, affirmative abilities, referrals and request lists ────────
+
+
+def test_an_affirmative_ability_is_not_a_decline() -> None:
+    response = "A teacher is like a gardener: gardeners have the ability to see what each plant needs to grow."
+    assert decide(response).label == dc.DIRECT
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        "The question lacks the functions required to translate documents. Without the appropriate functions, "
+        "I am unable to do the translation.",
+        "The given functions cannot retrieve exchange rates. They pertain to weather lookups, neither of which are "
+        "relevant, so the question lacks the appropriate parameters and the necessary functions.",
+        "I do not have any specific information about Jane Roe's research area.",
+    ],
+)
+def test_a_lack_of_tools_or_of_information_about_the_subject_is_unsupported(response: str) -> None:
+    assert decide(response, [WEATHER]).label == dc.UNSUPPORTED
+
+
+def test_a_referral_phrased_as_a_need_is_not_delivered_content() -> None:
+    response = (
+        "The given question asks for detailed information about the history of every medieval castle in Europe and "
+        "their architects. Since there are no functions provided for historical data, it is not possible to make "
+        "any function calls. To finish your research, you may need to consult history books, archives or databases "
+        "about medieval architecture."
+    )
+    assert decide(response).label == dc.UNSUPPORTED
+
+
+def test_the_reasons_for_not_proceeding_and_a_list_of_missing_ids_belong_to_the_request() -> None:
+    response = (
+        "To answer your query, I'll need specific identifiers for each city you mentioned. The functions require "
+        "the city_id parameter. Here is why I cannot proceed:\n1. **Forecast**: Requires the city_id of the city.\n"
+        "2. **Alerts**: Requires the city_id of the city.\nYou need to provide the city_id values for Paris and Rome "
+        "in order to call these functions.\nExample of missing information:\n- city_id for Paris (e.g., 2988507)\n"
+        "- city_id for Rome\nOnce the identifiers are provided, I can proceed to collect the forecast and alerts for "
+        "these cities."
+    )
+    assert decide(response, [WEATHER]).label == dc.CLARIFY

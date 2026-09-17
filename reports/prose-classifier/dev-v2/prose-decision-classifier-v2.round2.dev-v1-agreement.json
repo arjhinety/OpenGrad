@@ -1,0 +1,89 @@
+{
+  "artifact_kind": "PROSE_CLASSIFIER_V2_DEVELOPMENT_AGREEMENT",
+  "by_unit_kind": null,
+  "classifier_source_sha256_lf": "0d5cce9a2507eab6b522ae86f81c80f953e7762de2c78d3dad3102441510287a",
+  "classifier_version": "prose-decision-classifier-v2",
+  "input_contract": "prose-decision-input-v2",
+  "labels": {
+    "path": "reports/prose-classifier/dev/annotation/wip/prose-classifier-dev-v1.annotations.model.claude-opus-5.model-dev.jsonl",
+    "sha256": "7ce773aef3c0b92bb7199d261861e9859e46c12da65c6135f911dddd39cc4d70"
+  },
+  "population": {
+    "path": "reports/prose-classifier/dev/prose-classifier-dev-v1.population.jsonl",
+    "sha256": "abbdfc497dca61821bcdf35624988e82aa12ba5b562564c9aa2fe36fb0c72456"
+  },
+  "round": 2,
+  "statement": "Agreement of prose-decision-classifier-v2 with Claude model judgments on development data (37 \u00a73). In-sample where the developer has read the items; agreement with a model, not accuracy.",
+  "summary": {
+    "abstentions_on_mode_labels": 0,
+    "agreement_on_mode_labels": 223,
+    "agreement_rate_on_mode_labels": 0.9867,
+    "confusion_model_label_by_prediction": {
+      "CALL": {
+        "CALL": 1
+      },
+      "CLARIFY": {
+        "CLARIFY": 84,
+        "DIRECT": 2
+      },
+      "DIRECT": {
+        "DIRECT": 35
+      },
+      "UNKNOWN": {
+        "ABSTAIN": 20,
+        "CLARIFY": 1,
+        "DIRECT": 3
+      },
+      "UNSUPPORTED": {
+        "CLARIFY": 1,
+        "UNSUPPORTED": 103
+      }
+    },
+    "decisions_by_step": {
+      "1_call_payload_unverifiable": 19,
+      "1_textual_call": 1,
+      "2_non_substantive": 1,
+      "3_decline": 103,
+      "4_optional_request_after_content": 2,
+      "4_required_request": 86,
+      "7_delivered": 38
+    },
+    "items": 250,
+    "items_with_a_mode_label": 226,
+    "per_mode": {
+      "CALL": {
+        "agree": 1,
+        "model_labels": 1,
+        "predictions_on_mode_labels": 1,
+        "share_of_model_labels_agreed": 1.0,
+        "share_of_predictions_agreed": 1.0
+      },
+      "CLARIFY": {
+        "agree": 84,
+        "model_labels": 86,
+        "predictions_on_mode_labels": 85,
+        "share_of_model_labels_agreed": 0.9767,
+        "share_of_predictions_agreed": 0.9882
+      },
+      "DIRECT": {
+        "agree": 35,
+        "model_labels": 35,
+        "predictions_on_mode_labels": 37,
+        "share_of_model_labels_agreed": 1.0,
+        "share_of_predictions_agreed": 0.9459
+      },
+      "UNSUPPORTED": {
+        "agree": 103,
+        "model_labels": 104,
+        "predictions_on_mode_labels": 103,
+        "share_of_model_labels_agreed": 0.9904,
+        "share_of_predictions_agreed": 1.0
+      }
+    },
+    "predictions_on_unknown_labels": {
+      "ABSTAIN": 20,
+      "CLARIFY": 1,
+      "DIRECT": 3
+    }
+  }
+}
