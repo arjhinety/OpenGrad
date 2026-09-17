@@ -1,0 +1,481 @@
+{
+  "artifact_kind": "PROSE_CLASSIFIER_ONE_SHOT_TEST",
+  "classifier_source_sha256_lf": "64293c51917a54a649bad9e96960302dd5df1b39eabd0d260d3784b3eeb6687c",
+  "classifier_tag": "prose-decision-classifier-v1",
+  "classifier_version": "prose-decision-classifier-v1",
+  "evaluation": {
+    "c1_authorised": false,
+    "direct_poststratified_precision": {
+      "glaive": {
+        "bootstrap95": [
+          0.9210874552607163,
+          1.0
+        ],
+        "direct_predictions": 42,
+        "status": "PASS",
+        "strata_without_sample": [],
+        "threshold": 0.8,
+        "value": 0.9749759965699611,
+        "weights": {
+          "M": 0.0013283926448996715,
+          "P1": 0.004474585751240999,
+          "P2": 0.004544501153604139,
+          "Q": 0.007341117248129763,
+          "R": 0.9823114032021254
+        }
+      },
+      "toolace": {
+        "bootstrap95": [
+          0.0,
+          0.0
+        ],
+        "direct_predictions": 9,
+        "status": "NOT_EVALUABLE",
+        "strata_without_sample": [],
+        "threshold": 0.8,
+        "value": 0.0,
+        "weights": {
+          "M": 0.3580121703853955,
+          "P1": 0.1881338742393509,
+          "P2": 0.25,
+          "Q": 0.08519269776876268,
+          "R": 0.11561866125760649,
+          "X": 0.0030425963488843813
+        }
+      }
+    },
+    "global_rows": {
+      "abstention_rate": "PASS",
+      "macro_f1": "PASS"
+    },
+    "populations": {
+      "P-DET-COVERAGE-v1": {
+        "confusion": {
+          "CALL->CALL": 3,
+          "CLARIFY->CLARIFY": 50,
+          "CLARIFY->DIRECT": 6,
+          "DIRECT->CLARIFY": 1,
+          "DIRECT->DIRECT": 41,
+          "DIRECT->UNSUPPORTED": 2,
+          "UNKNOWN->ABSTAIN": 16,
+          "UNKNOWN->CLARIFY": 4,
+          "UNKNOWN->DIRECT": 3,
+          "UNSUPPORTED->CLARIFY": 1,
+          "UNSUPPORTED->DIRECT": 4,
+          "UNSUPPORTED->UNSUPPORTED": 175
+        },
+        "items": 306,
+        "per_mode": {
+          "CALL": {
+            "f1": 1.0,
+            "gold": 3,
+            "precision": 1.0,
+            "precision_denominator": 3,
+            "predicted": 3,
+            "predicted_on_ambiguous": 0,
+            "recall": 1.0,
+            "true_positive": 3
+          },
+          "CLARIFY": {
+            "f1": 0.9259259259259259,
+            "gold": 56,
+            "precision": 0.9615384615384616,
+            "precision_denominator": 52,
+            "predicted": 52,
+            "predicted_on_ambiguous": 4,
+            "recall": 0.8928571428571429,
+            "true_positive": 50
+          },
+          "DIRECT": {
+            "f1": 0.8631578947368421,
+            "gold": 44,
+            "precision": 0.803921568627451,
+            "precision_denominator": 51,
+            "predicted": 51,
+            "predicted_on_ambiguous": 3,
+            "recall": 0.9318181818181818,
+            "true_positive": 41
+          },
+          "UNSUPPORTED": {
+            "f1": 0.9803921568627451,
+            "gold": 180,
+            "precision": 0.9887005649717514,
+            "precision_denominator": 177,
+            "predicted": 177,
+            "predicted_on_ambiguous": 0,
+            "recall": 0.9722222222222222,
+            "true_positive": 175
+          }
+        },
+        "population": "P-DET-COVERAGE-v1",
+        "rows": {
+          "CALL.challenge_recall": {
+            "k": 3,
+            "n": 3,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.6,
+            "value": 1.0,
+            "wilson95": [
+              0.4385029682449546,
+              1.0
+            ]
+          },
+          "CALL.on_ambiguous_in_M": {
+            "k": 0,
+            "n": 1,
+            "status": "PASS",
+            "threshold": 0,
+            "value": 0,
+            "wilson95": null
+          },
+          "CALL.precision": {
+            "k": 3,
+            "n": 3,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.95,
+            "value": 1.0,
+            "wilson95": [
+              0.4385029682449546,
+              1.0
+            ]
+          },
+          "CLARIFY.challenge_recall": {
+            "k": 48,
+            "n": 54,
+            "status": "PASS",
+            "threshold": 0.6,
+            "value": 0.8888888888888888,
+            "wilson95": [
+              0.7780529897881872,
+              0.9480697750300044
+            ]
+          },
+          "CLARIFY.f1": {
+            "k": 50,
+            "n": 56,
+            "status": "PASS",
+            "threshold": 0.7,
+            "value": 0.9259259259259259,
+            "wilson95": [
+              0.7853155482892853,
+              0.9499606442888293
+            ]
+          },
+          "DIRECT.challenge_recall": {
+            "k": 23,
+            "n": 25,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.6,
+            "value": 0.92,
+            "wilson95": [
+              0.7503389104960468,
+              0.9777795987151524
+            ]
+          },
+          "DIRECT.precision": {
+            "k": 41,
+            "n": 51,
+            "status": "PASS",
+            "threshold": 0.8,
+            "value": 0.803921568627451,
+            "wilson95": [
+              0.6754192051863439,
+              0.889846574875333
+            ]
+          },
+          "DIRECT.recall": {
+            "k": 41,
+            "n": 44,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.8,
+            "value": 0.9318181818181818,
+            "wilson95": [
+              0.8177495562977846,
+              0.9765406040926183
+            ]
+          },
+          "UNSUPPORTED.challenge_recall": {
+            "k": 94,
+            "n": 95,
+            "status": "PASS",
+            "threshold": 0.6,
+            "value": 0.9894736842105263,
+            "wilson95": [
+              0.9427612985868637,
+              0.9981394237376521
+            ]
+          },
+          "UNSUPPORTED.recall": {
+            "k": 175,
+            "n": 180,
+            "status": "PASS",
+            "threshold": 0.75,
+            "value": 0.9722222222222222,
+            "wilson95": [
+              0.936631929551566,
+              0.9880778779669105
+            ]
+          },
+          "abstention_rate": {
+            "k": 0,
+            "n": 283,
+            "status": "PASS",
+            "threshold": 0.15,
+            "value": 0.0,
+            "wilson95": [
+              8.673617379884035e-19,
+              0.013392271941746883
+            ]
+          },
+          "macro_f1": {
+            "k": 0,
+            "modes": [
+              "CLARIFY",
+              "UNSUPPORTED"
+            ],
+            "n": 283,
+            "status": "PASS",
+            "threshold": 0.75,
+            "value": 0.9531590413943355,
+            "wilson95": null
+          }
+        },
+        "usable": 283
+      },
+      "P-DET-v1": {
+        "confusion": {
+          "CLARIFY->CLARIFY": 267,
+          "CLARIFY->DIRECT": 4,
+          "CLARIFY->UNSUPPORTED": 5,
+          "UNKNOWN->DIRECT": 1,
+          "UNKNOWN->UNSUPPORTED": 1,
+          "UNSUPPORTED->CLARIFY": 2,
+          "UNSUPPORTED->DIRECT": 4,
+          "UNSUPPORTED->UNSUPPORTED": 291
+        },
+        "items": 575,
+        "per_mode": {
+          "CALL": {
+            "f1": 0.0,
+            "gold": 0,
+            "precision": null,
+            "precision_denominator": 0,
+            "predicted": 0,
+            "predicted_on_ambiguous": 0,
+            "recall": null,
+            "true_positive": 0
+          },
+          "CLARIFY": {
+            "f1": 0.9798165137614679,
+            "gold": 276,
+            "precision": 0.9925650557620818,
+            "precision_denominator": 269,
+            "predicted": 269,
+            "predicted_on_ambiguous": 0,
+            "recall": 0.967391304347826,
+            "true_positive": 267
+          },
+          "DIRECT": {
+            "f1": 0.0,
+            "gold": 0,
+            "precision": 0.0,
+            "precision_denominator": 8,
+            "predicted": 8,
+            "predicted_on_ambiguous": 0,
+            "recall": null,
+            "true_positive": 0
+          },
+          "UNSUPPORTED": {
+            "f1": 0.9813874788494077,
+            "gold": 296,
+            "precision": 0.9830508474576272,
+            "precision_denominator": 295,
+            "predicted": 295,
+            "predicted_on_ambiguous": 0,
+            "recall": 0.9797297297297297,
+            "true_positive": 290
+          }
+        },
+        "population": "P-DET-v1",
+        "rows": {
+          "CALL.challenge_recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.6,
+            "value": null,
+            "wilson95": null
+          },
+          "CALL.precision": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.95,
+            "value": null,
+            "wilson95": null
+          },
+          "CLARIFY.challenge_recall": {
+            "k": 78,
+            "n": 81,
+            "status": "PASS",
+            "threshold": 0.6,
+            "value": 0.9629629629629629,
+            "wilson95": [
+              0.8966768869310617,
+              0.9873248858167019
+            ]
+          },
+          "CLARIFY.f1": {
+            "k": 267,
+            "n": 276,
+            "status": "PASS",
+            "threshold": 0.7,
+            "value": 0.9798165137614679,
+            "wilson95": [
+              0.9391992365036425,
+              0.9827513604066999
+            ]
+          },
+          "DIRECT.challenge_recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.6,
+            "value": null,
+            "wilson95": null
+          },
+          "DIRECT.precision": {
+            "k": 0,
+            "n": 8,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.8,
+            "value": 0.0,
+            "wilson95": [
+              0.0,
+              0.32440756488388023
+            ]
+          },
+          "DIRECT.recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.8,
+            "value": null,
+            "wilson95": null
+          },
+          "UNSUPPORTED.challenge_recall": {
+            "k": 89,
+            "n": 93,
+            "status": "PASS",
+            "threshold": 0.6,
+            "value": 0.956989247311828,
+            "wilson95": [
+              0.8945744042948608,
+              0.9831488460062415
+            ]
+          },
+          "UNSUPPORTED.recall": {
+            "k": 290,
+            "n": 296,
+            "status": "PASS",
+            "threshold": 0.75,
+            "value": 0.9797297297297297,
+            "wilson95": [
+              0.9564895747522926,
+              0.990677641939488
+            ]
+          },
+          "abstention_rate": {
+            "k": 0,
+            "n": 572,
+            "status": "PASS",
+            "threshold": 0.15,
+            "value": 0.0,
+            "wilson95": [
+              0.0,
+              0.006671035511339035
+            ]
+          },
+          "macro_f1": {
+            "k": 0,
+            "modes": [
+              "CLARIFY",
+              "UNSUPPORTED"
+            ],
+            "n": 572,
+            "status": "PASS",
+            "threshold": 0.75,
+            "value": 0.9806019963054378,
+            "wilson95": null
+          }
+        },
+        "usable": 572
+      }
+    },
+    "qualification": {
+      "CALL": {
+        "qualifies": false,
+        "rows": {
+          "CALL.challenge_recall": "NOT_EVALUABLE",
+          "CALL.on_ambiguous_in_M": "PASS",
+          "CALL.precision": "NOT_EVALUABLE"
+        }
+      },
+      "CLARIFY": {
+        "qualifies": true,
+        "rows": {
+          "CLARIFY.challenge_recall": "PASS",
+          "CLARIFY.f1": "PASS"
+        }
+      },
+      "DIRECT": {
+        "permitted_sources": [],
+        "qualifies": false,
+        "rows": {
+          "DIRECT.challenge_recall": "NOT_EVALUABLE",
+          "DIRECT.precision": "PASS",
+          "DIRECT.recall": "NOT_EVALUABLE"
+        }
+      },
+      "UNSUPPORTED": {
+        "qualifies": true,
+        "rows": {
+          "UNSUPPORTED.challenge_recall": "PASS",
+          "UNSUPPORTED.recall": "PASS"
+        }
+      }
+    },
+    "version": "pdet-coverage-metrics-v1"
+  },
+  "input_contract": "prose-decision-input-v1",
+  "metrics_version": "pdet-coverage-metrics-v1",
+  "normalization_version": "normalization-v3",
+  "predictions_file": "prose-decision-classifier-v1.test-predictions.jsonl",
+  "predictions_sha256": "5215efe8fd64500f65a7b8e565a86e9671b410563cfc0696bfcd71379b4963c6",
+  "references": {
+    "P-DET-COVERAGE-v1": {
+      "counts": {
+        "consensus": {
+          "two_of_three": 15,
+          "unanimous": 291
+        },
+        "layer_b_items": 306
+      },
+      "kind": "MODEL_REFERENCE (provisional)",
+      "reference_manifest_sha256": "fc461314338b55635a64905efba9ed1567e7ce76d1cc564b55cc201d859653a3",
+      "what": "two-of-three consensus of Gemini 3.8 Flash (High), gpt-5.6-sol and deepseek-v4.1-flash (34)"
+    },
+    "P-DET-v1": {
+      "counts": {
+        "EXPOSED_WORKED_EXAMPLE": 3,
+        "NOT_IN_NORMALIZATION_V3": 6,
+        "classified": 575
+      },
+      "exposure": "The classifier's developer (Claude Opus 5) produced the model-a labels on P-DET-v1 and so read its items before development (33 \u00a76). It never saw the human labels or any classifier result on them.",
+      "kind": "HUMAN, single annotator, not frozen gold",
+      "package_manifest_sha256": "942a4ba22e907b1dc30357b88d48868d08e43ec9ec7e81fc3072b2f389268ca2",
+      "session": "pass-a"
+    }
+  },
+  "statement": "The single preregistered test of the frozen prose decision classifier. Coverage results are measured against a model reference and are provisional; P-DET-v1 results against one unfrozen human annotator. A qualification grants nothing by itself: balancing permission from a MODEL_REFERENCE qualification and C1 both need the study owner's decision (34 \u00a74, 22 \u00a76)."
+}
