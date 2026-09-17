@@ -188,3 +188,28 @@ UNKNOWN item predicted UNSUPPORTED, committed before check set 3 is drawn. Gener
 
 Across the 1,100 development items, four predictions moved to agree with the model labels, none that agreed moved
 away, and one UNKNOWN item moved from UNSUPPORTED to CLARIFY (not counted either way).
+
+- **Check set 3.** `prose-classifier-v2-devcheck-3`: 150 first replies (sha `7e541757…`, 85 continuing, 65
+  single), drawn after the round-3 rules were committed (944c5a7). Labelled by session `model-v2-devcheck-3` (26
+  flagged, WIP export verify PASS), then scored **once** without printing any item or disagreement. Same
+  disclosure as before about subagent rationales.
+
+| Unexposed check, scored once | Rules | Agree | Rate | DIRECT predictions agreeing | Model DIRECT labels predicted DIRECT |
+|---|---|---:|---:|---:|---:|
+| Check set 1 | round 1 | 118 / 125 | 0.944 | 58 / 61 | 58 / 59 |
+| Check set 2 | round 2 | 122 / 126 | 0.968 | 60 / 63 | 60 / 61 |
+| **Check set 3** | **round 3** | **114 / 122** | **0.934** | **58 / 62** | **58 / 60** |
+
+On check set 3, continuing conversations agreed 68 / 71 and single exchanges 46 / 51. The eight disagreements by
+model label → prediction: DIRECT → UNSUPPORTED 1, DIRECT → abstain 1, CLARIFY → DIRECT 2, UNSUPPORTED → DIRECT 2,
+UNSUPPORTED → CLARIFY 2. Per mode against model labels: DIRECT 58 / 60, CLARIFY 21 / 23, UNSUPPORTED 35 / 39; no
+CALL label. Of 28 items the model labelled UNKNOWN, the classifier abstained on 24 and predicted CLARIFY on 4.
+
+The three unexposed scores (0.944, 0.968, 0.934) come from different sets of about 125 items each; differences
+of a few items are within what sampling alone produces, so they show no clear trend across rounds. Pooled, the
+three rounds agree on 354 / 373 (0.949), with DIRECT predictions agreeing 176 / 186 (0.946). Each round fixed
+every disagreement it read without moving any development item away from its label, yet unseen agreement stayed
+near 95%: the remaining errors are different on each new set. Report:
+`reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round3.v2-check-3-agreement.json`.
+
+**Next (§4):** the study owner chooses between freezing the round-3 rules and a further round.
