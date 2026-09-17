@@ -148,3 +148,44 @@ def test_the_classifier_opens_no_file_while_classifying(monkeypatch: pytest.Monk
     decide("I can't retrieve today's rate.")
     decide('{"name": "get_weather", "arguments": {}}', [WEATHER])
     decide("Which city would you like the weather for?", [WEATHER])
+
+
+# ── v2 round 1 (37 §4): first replies of continuing conversations and tool-limit wording ──────────────
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        "Sure, let me check the weather for you.",
+        "Of course, I can help with that. Let me look up the exchange rate.",
+        "Certainly! I'll get that information now.",
+    ],
+)
+def test_a_reply_that_only_announces_the_next_action_abstains(response: str) -> None:
+    decision = decide(response, [WEATHER, RATES])
+    assert decision.label == dc.ABSTAIN and decision.step == dc.STEP_NARRATED_CALL
+
+
+def test_announcing_an_explanation_that_follows_is_not_an_empty_announcement() -> None:
+    response = "Sure, let me explain. Rain forms when water vapour condenses into droplets heavy enough to fall."
+    assert decide(response).label == dc.DIRECT
+
+
+@pytest.mark.parametrize(
+    "response",
+    ["May I have the city you want the forecast for?", "How long would you like the password to be?"],
+)
+def test_a_polite_or_measure_question_that_withholds_the_answer_is_clarify(response: str) -> None:
+    assert decide(response, [WEATHER]).label == dc.CLARIFY
+
+
+def test_a_tool_limit_after_but_is_not_delivered_content() -> None:
+    response = (
+        "The available tools are designed for weather lookups, but they do not provide exchange rates for any "
+        "currency pair."
+    )
+    assert decide(response, [WEATHER]).label == dc.UNSUPPORTED
+
+
+def test_an_exclamation_of_disbelief_is_not_a_decline() -> None:
+    assert decide("Wow, I can't believe it!").label == dc.DIRECT

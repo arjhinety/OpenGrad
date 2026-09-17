@@ -208,6 +208,8 @@ _EPISTEMIC = _rx(
     r"\b(can't|cannot|can not) (be (sure|certain)|say for (sure|certain)|guarantee|know for (sure|certain))\b",
     r"\bi'?m not (sure|certain)\b",
     r"\bi don't know (for sure|exactly)\b",
+    # v2 round 1: an exclamation, not inability.
+    r"\b(can't|cannot) believe\b",
 )
 _DECLINE = _rx(
     r"\b(i|we)\s*(?:'m| am)?\s*(?:really |truly )?(sorry|afraid|apologi[sz]e)\b[^.!?]{0,80}"
@@ -236,6 +238,9 @@ _CAPABILITY = _rx(
     r"\b(functions?|tools?|apis?|capabilities)\b[^.!?]{0,120}\b(don't|doesn't) (directly |currently )?(support|include|cover|provide|have|"
     r"match|allow|offer|pertain|relate|address|fit)\b",
     r"\b(not|isn't|aren't) (applicable|suitable|designed|capable|relevant|meant|related)\b",
+    # v2 round 1: the request is outside what the listed functions do.
+    r"\b(not|isn't|aren't) supported by\b|\b(do|does) not align with\b",
+    r"\bcannot be (accomplished|done|performed|completed|carried out) with\b",
     r"\b(are|is) (only )?(meant|designed|tailored|intended|specific(ally)?( designed)?|limited|focused) (for|to|on)\b",
     r"\b(outside|beyond) (of )?(the |my )?(scope|capabilit)",
     r"\bfalls? outside\b",
@@ -312,9 +317,15 @@ _REQUEST = _rx(
     r"\bfor which\b[^.!?]*\?",
     r"\b(needs?|requires?|need to know) (more|additional|further|some|a few) (information|details|input|context)\b",
     r"\b(is|are) missing\s*:|\b(missing|need|require) the following\b",
+    # v2 round 1: statements that information is still needed.
+    r"\b(additional|more|further|this|that|the following) (information|details|input|data) (is|are) (lacking|missing|"
+    r"needed|required)\b",
     r"\b(shall|should|may) i (go ahead|proceed|continue|call|use|run)\b",
     r"\bdo you want me to (go ahead|proceed|continue|call|use|run)\b",
     r"^(what|which|who|where|when|how many|how much|do you|would you prefer|should i)\b[^.!?]*\?",
+    # v2 round 1: polite and measure questions that withhold the answer.
+    r"^(may|can|could) i (have|know|get|ask( for)?)\b[^.!?]*\?",
+    r"^how (long|big|large|old|often|far|soon)\b[^.!?]*\?",
 )
 _INVOCATION_TALK = _rx(
     r"\b(i('ll| will| would| could| can| am going to|'m going to)|let me) (use|call|run|invoke|check)\b[^.!?]{0,60}"
@@ -353,6 +364,24 @@ _ACKNOWLEDGEMENT = _rx(
     r"^to (assist|help|provide|proceed|give|find|get|check|fetch|retrieve)\b[^.!?]*$",
 )
 _DELIVERY = re.compile(r"^(here's|here is|here are)\b", re.IGNORECASE)
+# v2 round 1: a sentence that only announces what the assistant is about to do ("Let me check that for you."), the
+# usual first reply before a call in a continuing conversation. It delivers nothing (22 §3 step 2).
+_ANNOUNCEMENT = re.compile(
+    r"^(?:(?:sure|certainly|of course|absolutely|okay|ok|great|alright|no problem)[,!.]?\s*)?"
+    r"(let me|let's|let us|i'll|i will|i am going to|i'm going to)\s+(?!know\b|explain\b|help\b|tell\b|share\b|"
+    r"describe\b|walk\b|break\b|give\b|provide\b|list\b|show\b|summari[sz]e\b|outline\b)\w+\b[^:]{0,80}[.!]?$",
+    re.IGNORECASE,
+)
+_HELP_OFFER = re.compile(
+    r"^(i can|i'd be happy to|i would be happy to|happy to) (definitely |certainly )?help( you)?( with (that|this))?[.!]?$",
+    re.IGNORECASE,
+)
+ANNOUNCEMENT_MAX_WORDS = 30
+_TOOL_LIMIT_TAIL = re.compile(
+    r"^(they|it|this|these|those)( functions?| tools?)? (do|does|did|can|could) ?(not|n't) (directly |currently )?"
+    r"(support|include|cover|provide|have|offer|retrieve|handle|return|fetch|find|get|allow|perform)\b",
+    re.IGNORECASE,
+)
 _LEAD_IN = re.compile(r"^(i can tell you (that )?|i can say (that )?|here is what i know:?\s*)", re.IGNORECASE)
 
 
@@ -366,6 +395,9 @@ def _but_clause_content(sentence: str) -> str | None:
     if not tail or _any(_DECLINE, tail) or _any(_CAPABILITY, tail) or _any(_OFFER, tail):
         return None
     if _any(_EXTERNAL_SERVICE, tail) or _any(_REQUEST, tail) or _ABOUT_FUNCTIONS.search(tail):
+        return None
+    # v2 round 1: "..., but they do not retrieve X" restates what the tools cannot do.
+    if _TOOL_LIMIT_TAIL.search(tail):
         return None
     return tail if _words(tail) >= CONTENT_WORDS_IN_BUT_CLAUSE else None
 
@@ -456,7 +488,16 @@ def classify(features: ClassifierFeatures) -> Decision:
     if external and not has_code and _content_words(_strip(sentences, _EXTERNAL_SERVICE, _OFFER, _COURTESY)) < CONTENT_WORDS_AFTER_DECLINE:
         return Decision(UNSUPPORTED, STEP_EXTERNAL_SERVICE, (external.group(0),))
 
-    # 6. A call that is only described or proposed, in a short response.
+    # 6. A call that is only described or proposed, in a short response. A reply made only of acknowledgements and an
+    #    announcement of the next action delivers nothing either (v2 round 1).
+    if (
+        not has_code
+        and _words(prose) <= ANNOUNCEMENT_MAX_WORDS
+        and any(_ANNOUNCEMENT.match(s.strip()) for s in sentences)
+        and all(_ANNOUNCEMENT.match(s.strip()) or _any(_ACKNOWLEDGEMENT, s) or _HELP_OFFER.match(s.strip()) for s in sentences)
+    ):
+        announced = next(s for s in sentences if _ANNOUNCEMENT.match(s.strip()))
+        return Decision(ABSTAIN, STEP_NARRATED_CALL, (announced[:80],))
     narrated = _any(_INVOCATION_TALK, prose)
     evidence = narrated.group(0) if narrated else None
     if evidence is None and _INVOCATION_VERB.search(prose):
