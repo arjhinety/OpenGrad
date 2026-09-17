@@ -279,3 +279,28 @@ check set 4's disagreements. From here **`prose-classifier-v2-devcheck-4` is exp
 data; its 122 / 124 above is the only unexposed score it will ever give. Round-5 rules are committed before
 `prose-classifier-v2-devcheck-5` (150 first replies, its own seed, excluding dev-v2, check sets 1-4 and everything
 they exclude) is drawn, labelled the same way and scored once; then the owner chooses again.
+
+**Round 5 rules** (source sha256 LF `47436ca9…`), made after reading check set 4's two disagreements and the two
+UNKNOWN items given a mode, committed before check set 5 is drawn. Tested on paraphrases that fail on the round-4
+rules:
+
+1. "the functions provided do not **perform** / **handle** X" is a capability wording;
+2. "none of the required arguments / parameters / details are given" is missing input, no longer caught by the
+   "none of the …" capability wording;
+3. a reply made only of plans for later ("I will start by analyzing … Then, I will … I will keep you updated"),
+   up to 80 words, with no code or worked result, delivers nothing and abstains.
+
+The remaining UNKNOWN item (a request for the parameters of a function when no tool was offered) is the case
+round 4 tried and dropped; it stays predicted CLARIFY.
+
+| Round 5 rules, in-sample | Agree | Round 4 |
+|---|---:|---:|
+| dev-v2 | 245 / 248 | 245 / 248 |
+| dev-v1 | 225 / 226 | 225 / 226 |
+| devcheck-v1 | 110 / 110 | 110 / 110 |
+| devcheck-v2 | 109 / 113 | 109 / 113 |
+| v2 check sets 1-3 (exposed) | 124 / 125, 126 / 126, 122 / 122 | same |
+| v2 check set 4 (exposed) | 124 / 124 | 122 / 124 |
+
+Across the 1,400 development items, two predictions moved to agree with the model labels, one UNKNOWN item moved from
+DIRECT to abstain, and nothing that agreed moved away.

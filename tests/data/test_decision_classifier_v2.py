@@ -331,3 +331,29 @@ def test_a_worked_result_is_not_a_narrated_call() -> None:
 )
 def test_round_4_scope_wordings_are_unsupported(response: str) -> None:
     assert decide(response, [WEATHER]).label == dc.UNSUPPORTED
+
+
+# ── v2 round 5 (37 §7): tools that do not perform, missing arguments, and plan-only replies ─────────
+
+
+def test_functions_that_do_not_perform_the_task_are_a_capability_gap() -> None:
+    response = "The given question lacks the parameters required by the functions listed. The functions provided do not perform currency conversion."
+    assert decide(response, [WEATHER]).label == dc.UNSUPPORTED
+
+
+def test_none_of_the_required_arguments_given_is_missing_input_not_a_missing_tool() -> None:
+    response = (
+        'Let\'s check the "Forecast" function. Required arguments: "city", "days". Provided details: None of the '
+        'required arguments are given. We are missing the "city" and "days" arguments.'
+    )
+    assert decide(response, [WEATHER]).label == dc.CLARIFY
+
+
+def test_a_reply_made_only_of_plans_abstains() -> None:
+    response = (
+        "Thank you for the puzzle! I will start by reading every line of the file to find the repeated word pairs, even "
+        "those split across lines. Then, I will use the order of their first appearances to rebuild the hidden "
+        "sentence. I will keep you updated on my progress."
+    )
+    decision = decide(response)
+    assert decision.label == dc.ABSTAIN and decision.step == dc.STEP_NARRATED_CALL

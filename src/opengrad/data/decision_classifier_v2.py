@@ -230,16 +230,20 @@ _DECLINE = _rx(
 )
 # The missing thing is a capability, tool or scope (22 §2 rows 2 and 6).
 _CAPABILITY = _rx(
-    r"\b(none|neither) of (the|these|those|them)\b[^.!?]{0,40}\b(functions?|tools?|apis?)?\b",
+    # v2 round 5: "none of the required arguments are given" is missing input, not a missing tool.
+    r"\b(none|neither) of (the|these|those|them)\b"
+    r"(?! (required |necessary |needed |mandatory )?(arguments?|parameters?|details|information|fields?|inputs?|values?)\b)"
+    r"[^.!?]{0,40}\b(functions?|tools?|apis?)?\b",
     r"\bno (available |suitable |relevant |specific |such |appropriate |defined |matching |corresponding )?"
     r"(functions?|tools?|apis?)\b",
     r"\b(does|do|did) not apply\b|\b(doesn't|don't) apply\b|\bunrelated to\b",
     r"\b(functions?|tools?|apis?) (list )?(is|are) empty\b|\bempty (functions?|tools?) list\b",
     r"\bnot covered by\b|\bwould be (necessary|needed|required) to fulfil",
+    # v2 round 5: "perform" and "handle" added.
     r"\b(functions?|tools?|apis?|capabilities)\b[^.!?]{0,120}\b(do|does|did) not (directly |currently )?(support|include|"
-    r"cover|provide|have|match|allow|offer|pertain|relate|address|fit)\b",
+    r"cover|provide|have|match|allow|offer|pertain|relate|address|fit|perform|handle)\b",
     r"\b(functions?|tools?|apis?|capabilities)\b[^.!?]{0,120}\b(don't|doesn't) (directly |currently )?(support|include|cover|provide|have|"
-    r"match|allow|offer|pertain|relate|address|fit)\b",
+    r"match|allow|offer|pertain|relate|address|fit|perform|handle)\b",
     r"\b(not|isn't|aren't) (applicable|suitable|designed|capable|relevant|meant|related)\b",
     # v2 round 1: the request is outside what the listed functions do.
     r"\b(not|isn't|aren't) supported by\b|\b(do|does) not align with\b",
@@ -443,6 +447,16 @@ _HELP_OFFER = re.compile(
     re.IGNORECASE,
 )
 ANNOUNCEMENT_MAX_WORDS = 30
+# v2 round 5: a reply made only of plans for later ("I will start by analyzing ... Then, I will ... I will keep you
+# updated") delivers nothing yet, however long the plan.
+_PLAN = re.compile(
+    r"^(?:(?:then|first|next|after that|finally|afterwards),?\s+)?(i will|i'll|i am going to|i'm going to|let me)\s+"
+    r"(?!know\b|explain\b|help\b|tell\b|share\b|describe\b|walk\b|break\b|give\b|provide\b|list\b|show\b|"
+    r"summari[sz]e\b|outline\b)\w+",
+    re.IGNORECASE,
+)
+_THANKS = re.compile(r"^(thank(s| you)|great|sure|certainly|of course|okay|ok|absolutely)\b[^.?]{0,40}[.!]?$", re.IGNORECASE)
+PLAN_MAX_WORDS = 80
 _TOOL_LIMIT_TAIL = re.compile(
     r"^(they|it|this|these|those)( functions?| tools?)? (do|does|did|can|could) ?(not|n't) (directly |currently )?"
     r"(support|include|cover|provide|have|offer|retrieve|handle|return|fetch|find|get|allow|perform)\b",
@@ -585,6 +599,15 @@ def classify(features: ClassifierFeatures) -> Decision:
     ):
         announced = next(s for s in sentences if _ANNOUNCEMENT.match(s.strip()))
         return Decision(ABSTAIN, STEP_NARRATED_CALL, (announced[:80],))
+    if (
+        not has_code
+        and _words(prose) <= PLAN_MAX_WORDS
+        and not _WORKED_RESULT.search(prose)
+        and any(_PLAN.match(s.strip()) for s in sentences)
+        and all(_PLAN.match(s.strip()) or _THANKS.match(s.strip()) or _HELP_OFFER.match(s.strip()) for s in sentences)
+    ):
+        planned = next(s for s in sentences if _PLAN.match(s.strip()))
+        return Decision(ABSTAIN, STEP_NARRATED_CALL, (planned[:80],))
     narrated = _any(_INVOCATION_TALK, prose)
     evidence = narrated.group(0) if narrated else None
     if evidence is None and _INVOCATION_VERB.search(prose):
