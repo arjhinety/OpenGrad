@@ -212,4 +212,9 @@ every disagreement it read without moving any development item away from its lab
 near 95%: the remaining errors are different on each new set. Report:
 `reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round3.v2-check-3-agreement.json`.
 
-**Next (§4):** the study owner chooses between freezing the round-3 rules and a further round.
+**Fourth round (decided by the study owner, 2026-09-17).** Offered freezing the round-3 rules or a further round,
+with the developer recommending a freeze, the owner chose a further round. Recorded before the developer reads any of
+check set 3's disagreements. From here **`prose-classifier-v2-devcheck-3` is exposed** and becomes development
+data; its 114 / 122 above is the only unexposed score it will ever give. Round-4 rules are committed before
+`prose-classifier-v2-devcheck-4` (150 first replies, its own seed, excluding dev-v2, check sets 1-3 and everything
+they exclude) is drawn, labelled the same way and scored once; then the owner chooses again.
