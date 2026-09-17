@@ -159,5 +159,9 @@ hold: agreement with one Claude labeller, not accuracy; 63 DIRECT predictions ca
 0.80 threshold; one CALL label says almost nothing about CALL precision's 0.95 threshold. Report:
 `reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round2.v2-check-2-agreement.json`.
 
-**Next (§4):** two check rounds are done. The study owner chooses between freezing the round-2 rules and a
-further round.
+**Third round (decided by the study owner, 2026-09-17).** After both check rounds, offered freezing the round-2
+rules or a further round, the owner chose a further round under §4's stopping rule. Recorded before the developer
+reads any of check set 2's disagreements. From here **`prose-classifier-v2-devcheck-2` is exposed** and becomes
+development data; its 122 / 126 above is the only unexposed score it will ever give. Round-3 rules are committed
+before `prose-classifier-v2-devcheck-3` (150 first replies, its own seed, excluding dev-v2, check sets 1 and 2
+and everything they exclude) is drawn, labelled the same way and scored once; then the owner chooses again.
