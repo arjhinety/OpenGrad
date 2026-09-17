@@ -1,0 +1,223 @@
+{
+  "artifact_kind": "PROSE_CLASSIFIER_V2_DEVELOPMENT_SET",
+  "classifier_input_contract": "prose-decision-input-v2",
+  "code_sha256_lf": {
+    "src/opengrad/data/classifier_input.py": "d2c958397d6b2aad16177b44e8ef641ae7f3ca47d3b0f8efb3a7b92150fa2ab6",
+    "src/opengrad/verification/classifier_devset_v2.py": "a6d3c20944fab8e3798b39755b7b92d799800d638036ad7d5510f5c6b97bdc1c",
+    "src/opengrad/verification/pdet_coverage.py": "1c06fc288fa52bc3919eb7eaa689001ed1ba5ebe246d79ab96386162cd32117c",
+    "src/opengrad/verification/pdet_coverage_v2.py": "b9a0f7933c07062df1deafba6a23f10e626119a13c9049ead2d9121d5dba95c3"
+  },
+  "counts": {
+    "after_dedup": 36638,
+    "construction_exclusions": {
+      "distinct_prompts_matched": {
+        "QAD_RECOVERY_SET": 66
+      },
+      "matched": {
+        "QAD_RECOVERY_SET": 12120
+      },
+      "primary": {
+        "QAD_RECOVERY_SET": 12120
+      }
+    },
+    "dedup": {
+      "raw_record_hash": 0,
+      "response_text": 3320,
+      "skeleton": 510,
+      "user_prompt": 2504
+    },
+    "first_reply_units": 71726,
+    "realized": 150,
+    "realized_unit_kind": {
+      "has_continuation": 89,
+      "single_exchange": 61
+    },
+    "strata": {
+      "M": {
+        "per_source": {
+          "glaive": {
+            "realized": 12,
+            "supply": 180
+          },
+          "toolace": {
+            "realized": 13,
+            "supply": 490
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 670
+      },
+      "P1": {
+        "per_source": {
+          "glaive": {
+            "realized": 13,
+            "supply": 592
+          },
+          "toolace": {
+            "realized": 12,
+            "supply": 121
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 713
+      },
+      "P2": {
+        "per_source": {
+          "glaive": {
+            "realized": 13,
+            "supply": 23335
+          },
+          "toolace": {
+            "realized": 12,
+            "supply": 334
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 23669
+      },
+      "Q": {
+        "per_source": {
+          "glaive": {
+            "realized": 13,
+            "supply": 11229
+          },
+          "toolace": {
+            "realized": 12,
+            "supply": 38
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 11267
+      },
+      "R": {
+        "per_source": {
+          "glaive": {
+            "realized": 13,
+            "supply": 119
+          },
+          "toolace": {
+            "realized": 12,
+            "supply": 65
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 184
+      },
+      "X": {
+        "per_source": {
+          "glaive": {
+            "realized": 25,
+            "supply": 135
+          },
+          "toolace": {
+            "realized": 0,
+            "supply": 0
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 135
+      }
+    },
+    "used_items_removed": 16634
+  },
+  "excludes": {
+    "construction_exclusions": "30 \u00a79, including P-DET-v1, and held-out material",
+    "used_populations": [
+      [
+        "reports/pdet-coverage/pdet-coverage-v1.population.jsonl",
+        "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c"
+      ],
+      [
+        "reports/prose-classifier/dev/prose-classifier-dev-v1.population.jsonl",
+        "abbdfc497dca61821bcdf35624988e82aa12ba5b562564c9aa2fe36fb0c72456"
+      ],
+      [
+        "reports/prose-classifier/dev/prose-classifier-devcheck-v1.population.jsonl",
+        "56564d85fa0db4abbc971b16bac5557edea8391620ccc3c3816a144cea651348"
+      ],
+      [
+        "reports/prose-classifier/dev/prose-classifier-devcheck-v2.population.jsonl",
+        "2f4eb1354903661c7d998dc4920b33110a70281b2eb17380247feeab26708c1f"
+      ],
+      [
+        "reports/pdet-coverage-v2/pdet-coverage-v2.population.jsonl",
+        "8fa4868c64845a93b0627cd4463887b03181e6479f2e9f48d75e8c80f626f013"
+      ],
+      [
+        "reports/prose-classifier/dev-v2/prose-classifier-dev-v2.population.jsonl",
+        "ec4c67566a4adb7eb6d41b381feb3435f2b171fbaa11d338970d87f36eb10f8f"
+      ],
+      [
+        "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-1.population.jsonl",
+        "b4477eae3be5f8d96496e3f7de23fef65d898e90f3899d3d2b1778242f60076a"
+      ],
+      [
+        "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-2.population.jsonl",
+        "8358c3443f1b467593688ec95792a693d51122ee886d61ac9ba6952c14f3d627"
+      ],
+      [
+        "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-3.population.jsonl",
+        "7e5417571f8d03055d3e02be38c4729af4d6f2bd66dfadb9457e29108635394c"
+      ]
+    ]
+  },
+  "input": {
+    "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+    "path": "data/processed/normalization-v3",
+    "source_manifests_sha256_lf": {
+      "glaive": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69",
+      "toolace": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2",
+      "when2call": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b",
+      "xlam": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
+    },
+    "top_manifest_sha256_lf": "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e",
+    "upstream_disposition_counts": {
+      "glaive": {
+        "accepted": 98339,
+        "duplicates": 13352,
+        "rejected": 1269,
+        "source_rows": 112960
+      },
+      "toolace": {
+        "accepted": 11051,
+        "duplicates": 3,
+        "rejected": 246,
+        "source_rows": 11300
+      },
+      "when2call": {
+        "accepted": 14701,
+        "duplicates": 124,
+        "rejected": 175,
+        "source_rows": 15000
+      },
+      "xlam": {
+        "accepted": 57342,
+        "duplicates": 350,
+        "rejected": 2308,
+        "source_rows": 60000
+      }
+    }
+  },
+  "plan": "docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md",
+  "population_file": "prose-classifier-v2-devcheck-4.population.jsonl",
+  "population_sha256": "817ab7cf0d653adb0fabe22f4d6f7d542af0f97ef61196a045f4c0cb8558b78a",
+  "presentation_order": "sha256(seed :order: pdetcov_id) ascending",
+  "quota_per_stratum": 25,
+  "ranking": "sha256(seed | stratum | pdetcov_id) descending",
+  "seed": "opengrad-prose-classifier-v2-devcheck-4",
+  "set_id": "prose-classifier-v2-devcheck-4",
+  "statement": "The fourth held-out check set of first replies for prose-decision-classifier-v2 (37 \u00a77), scored once on the committed round-4 candidate rules; the developer does not read its items. Model judgments, never gold. It shares no item, prompt or response with prose-classifier-dev-v2, prose-classifier-v2-devcheck-1 to -3, P-DET-COVERAGE-v2, P-DET-COVERAGE-v1 or the v1 development and check sets.",
+  "status": "DEVELOPMENT_ONLY_NEVER_GOLD"
+}
