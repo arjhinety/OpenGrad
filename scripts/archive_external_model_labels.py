@@ -43,13 +43,27 @@ from opengrad.annotation.provenance import ANNOTATION_ENTRY_FIELDS, verify_chain
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "reports" / "pdet-coverage" / "provenance" / "external-models"
-TASKS = ("pdet-coverage-v1", "pdet-coverage-v1-routing")
+#: task -> (output directory, procedure, authorizing document). P-DET-COVERAGE-v2 (36) is archived beside its
+#: own population.
+TASK_SPECS = {
+    "pdet-coverage-v1": (OUT, "configs/annotation/pdet-coverage-v1.model-procedure.md", "docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md"),
+    "pdet-coverage-v1-routing": (
+        OUT,
+        "configs/annotation/pdet-coverage-v1.model-procedure.md",
+        "docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md",
+    ),
+    "pdet-coverage-v2": (
+        ROOT / "reports" / "pdet-coverage-v2" / "provenance" / "external-models",
+        "configs/annotation/pdet-coverage-v2.model-procedure.md",
+        "docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md",
+    ),
+}
+TASKS = tuple(TASK_SPECS)
 SESSIONS = {
     "model-gemini": "model.gemini-3.8-flash-high",
     "model-gpt": "model.gpt-5.6-sol",
     "model-deepseek": "model.deepseek-v4.1-flash",
 }
-PROCEDURE = "configs/annotation/pdet-coverage-v1.model-procedure.md"
 RUNNER = "scripts/run_external_annotation.py"
 SCHEMA = "opengrad-external-model-label-audit-trail-v1"
 STREAM = re.compile(r"batch-\d+\.attempt-\d+\.(stdout|stderr)\.txt")
@@ -166,8 +180,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--task", choices=TASKS, required=True)
     task = parser.parse_args(argv).task
+    out, procedure, authorization = TASK_SPECS[task]
     members: dict[str, bytes] = {
-        f"procedure/{Path(PROCEDURE).name}": (ROOT / PROCEDURE).read_bytes(),
+        f"procedure/{Path(procedure).name}": (ROOT / procedure).read_bytes(),
         f"runner/{Path(RUNNER).name}": (ROOT / RUNNER).read_bytes(),
     }
     streams: dict[str, bytes] = {}
@@ -179,12 +194,12 @@ def main(argv: list[str] | None = None) -> int:
     manifest = {
         "schema": SCHEMA,
         "task_id": task,
-        "authorization": "docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md",
+        "authorization": authorization,
         "status": (
             "Model judgments by three declared non-Claude annotators, each blind and independent. They form the "
-            "provisional MODEL_REFERENCE of study_002_prereg_v5; not human labels and not human gold."
+            f"provisional MODEL_REFERENCE of the three-model consensus ({authorization}); not human labels and not human gold."
         ),
-        "procedure": {"path": PROCEDURE, "sha256": sha256(members[f"procedure/{Path(PROCEDURE).name}"])},
+        "procedure": {"path": procedure, "sha256": sha256(members[f"procedure/{Path(procedure).name}"])},
         "runner": {"path": RUNNER, "sha256": sha256(members[f"runner/{Path(RUNNER).name}"])},
         "sessions": sessions,
         "archive": {"file": f"{stem}.tar.gz", "sha256": sha256(archive), "bytes": len(archive), "members": listing(members)},
@@ -204,11 +219,11 @@ def main(argv: list[str] | None = None) -> int:
         "built_by": "scripts/archive_external_model_labels.py",
     }
     manifest_bytes = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
-    write_new(OUT / f"{stem}.tar.gz", archive)
-    write_new(OUT / f"{stem}.tar.gz.sha256", f"{sha256(archive)}  {stem}.tar.gz\n".encode())
-    write_new(OUT / f"{stem}.manifest.json", manifest_bytes)
-    write_new(OUT / f"{stem}.manifest.json.sha256", f"{sha256(manifest_bytes)}  {stem}.manifest.json\n".encode())
-    write_new(OUT / "local" / local_name, local)
+    write_new(out / f"{stem}.tar.gz", archive)
+    write_new(out / f"{stem}.tar.gz.sha256", f"{sha256(archive)}  {stem}.tar.gz\n".encode())
+    write_new(out / f"{stem}.manifest.json", manifest_bytes)
+    write_new(out / f"{stem}.manifest.json.sha256", f"{sha256(manifest_bytes)}  {stem}.manifest.json\n".encode())
+    write_new(out / "local" / local_name, local)
     print(f"archive  {len(archive)} bytes  sha256 {sha256(archive)}")
     print(f"manifest sha256 {sha256(manifest_bytes)}")
     print(f"streams  {len(local)} bytes  sha256 {sha256(local)}  (not tracked)")

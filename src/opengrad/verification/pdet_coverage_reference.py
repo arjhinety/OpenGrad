@@ -36,8 +36,19 @@ AMENDMENT = "study_002_prereg_v5"
 AMENDMENT_DOCUMENT = "docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md"
 #: The declared annotators of 34 §1, in a fixed order.
 ANNOTATORS = ("model.gemini-3.8-flash-high", "model.gpt-5.6-sol", "model.deepseek-v4.1-flash")
-TASKS = ("pdet-coverage-v1", "pdet-coverage-v1-routing")
 OUTPUT_DIR = Path("reports/pdet-coverage/reference")
+#: task -> (authorizing amendment, its document, output directory). P-DET-COVERAGE-v2 (36 §3.7) keeps 34's
+#: three-model consensus under amendment study_002_prereg_v6.
+TASK_SPECS: dict[str, tuple[str, str, Path]] = {
+    "pdet-coverage-v1": (AMENDMENT, AMENDMENT_DOCUMENT, OUTPUT_DIR),
+    "pdet-coverage-v1-routing": (AMENDMENT, AMENDMENT_DOCUMENT, OUTPUT_DIR),
+    "pdet-coverage-v2": (
+        "study_002_prereg_v6",
+        "docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md",
+        Path("reports/pdet-coverage-v2/reference"),
+    ),
+}
+TASKS = tuple(TASK_SPECS)
 UNANIMOUS = "unanimous"
 MAJORITY = "two_of_three"
 NO_CONSENSUS = "NO_CONSENSUS"
@@ -162,8 +173,8 @@ def load_package(task: str, package: Path, root: Path = ROOT) -> tuple[dict[str,
 
 
 def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
-    """Write ``<task>.reference.jsonl`` and its manifest under :data:`OUTPUT_DIR`. Never overwrites a
-    different reference: a rebuild must reproduce the same bytes."""
+    """Write ``<task>.reference.jsonl`` and its manifest under the task's output directory
+    (:data:`TASK_SPECS`). Never overwrites a different reference: a rebuild must reproduce the same bytes."""
     from opengrad.annotation.config import load_task_config
 
     manifest, records, item_ids = load_package(task, package, root)
@@ -173,7 +184,8 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
     payload = b"".join(
         (json.dumps(ref, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8") for ref in references
     )
-    out = root / OUTPUT_DIR
+    amendment, amendment_document, output_dir = TASK_SPECS[task]
+    out = root / output_dir
     out.mkdir(parents=True, exist_ok=True)
     reference_path = out / f"{task}.reference.jsonl"
     manifest_path = out / f"{task}.reference.manifest.json"
@@ -186,8 +198,8 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
             "agreement below is model-model agreement."
         ),
         "task_id": task,
-        "amendment": AMENDMENT,
-        "amendment_document": AMENDMENT_DOCUMENT,
+        "amendment": amendment,
+        "amendment_document": amendment_document,
         "annotators": [
             {
                 "annotator_id": annotator,
