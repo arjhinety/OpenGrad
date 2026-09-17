@@ -177,6 +177,40 @@ SETS = {
             "P-DET-COVERAGE-v2, P-DET-COVERAGE-v1 or the v1 development and check sets."
         ),
     ),
+    "check5": SetSpec(
+        set_id="prose-classifier-v2-devcheck-5",
+        seed="opengrad-prose-classifier-v2-devcheck-5",
+        quota=25,
+        id_prefix="v2check5",
+        excludes=(
+            (
+                "reports/prose-classifier/dev-v2/prose-classifier-dev-v2.population.jsonl",
+                "ec4c67566a4adb7eb6d41b381feb3435f2b171fbaa11d338970d87f36eb10f8f",
+            ),
+            (
+                "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-1.population.jsonl",
+                "b4477eae3be5f8d96496e3f7de23fef65d898e90f3899d3d2b1778242f60076a",
+            ),
+            (
+                "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-2.population.jsonl",
+                "8358c3443f1b467593688ec95792a693d51122ee886d61ac9ba6952c14f3d627",
+            ),
+            (
+                "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-3.population.jsonl",
+                "7e5417571f8d03055d3e02be38c4729af4d6f2bd66dfadb9457e29108635394c",
+            ),
+            (
+                "reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-4.population.jsonl",
+                "817ab7cf0d653adb0fabe22f4d6f7d542af0f97ef61196a045f4c0cb8558b78a",
+            ),
+        ),
+        statement=(
+            "The fifth held-out check set of first replies for prose-decision-classifier-v2 (37 §7), scored once on the "
+            "committed round-5 candidate rules; the developer does not read its items. Model judgments, never gold. It "
+            "shares no item, prompt or response with prose-classifier-dev-v2, prose-classifier-v2-devcheck-1 to -4, "
+            "P-DET-COVERAGE-v2, P-DET-COVERAGE-v1 or the v1 development and check sets."
+        ),
+    ),
 }
 
 
