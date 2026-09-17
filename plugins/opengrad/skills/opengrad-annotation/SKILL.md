@@ -87,6 +87,11 @@ opengrad-annotate verify <manifest>                       # re-hash an exported 
   `model-ingest` validates and records its answers. Keep every batch, raw answer and audit.
   `reports/pdet/provenance/model-a/` is the precedent, archived byte for byte with a hash manifest. Transcripts
   containing a personal e-mail address stay untracked, and only their hashes are committed.
+- **Classifier development labels:** `prose-classifier-dev-v1` (`configs/annotation/prose-classifier-dev-v1.yaml`,
+  250 items, 33 §3) was labelled by session `model-dev` (Claude): one batch split across five parallel
+  subagents, answers merged in batch order and ingested once. `scripts/archive_devset_model_labels.py` audits
+  each subagent's transcript into `reports/prose-classifier/dev/provenance/model-dev/`. These labels only
+  develop the classifier; they are never gold or evidence of accuracy.
 - **Review:** `review-queue` writes a pinned queue from the composite reference. `adjudicate` compares two
   finished passes, or reviews one.
 - **Starting the UI** needs a build (`npm install && npm run build` in `integrations/annotate-ui`). For UI
