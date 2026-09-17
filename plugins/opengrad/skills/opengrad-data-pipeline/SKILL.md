@@ -86,7 +86,9 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
     development data now;
   - **frozen** on 2026-09-17: git tag `prose-decision-classifier-v1`, source sha256 (LF) `64293c51…` (33 §5a).
     Any rule change is a new classifier version (33 §5, 22 §6). Run it on P-DET-v1 or P-DET-COVERAGE-v1 only
-    as the single preregistered test.
+    as the single preregistered test: `python -m opengrad.verification.prose_classifier_oneshot --preflight`,
+    then `--run` once (`src/opengrad/verification/prose_classifier_oneshot.py`). It refuses a changed
+    classifier, unpinned inputs or an existing result, and prints counts and verdicts only.
 
 ## Releases, mixtures and yield
 
