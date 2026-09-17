@@ -84,7 +84,11 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
   lives in `src/opengrad/data/decision_classifier_v2.py`, which started as a copy of v1, with tests
   `tests/data/test_decision_classifier_v2.py`. v2 is **frozen** on 2026-09-18 after five check rounds (37 §7): git tag
   `prose-decision-classifier-v2`, source sha256 (LF) `47436ca9…`; never edit `decision_classifier_v2.py` either; any
-  rule change is a new version. Its development sets and check sets 1-5 are scored with
+  rule change is a new version. Its single test is `python -m opengrad.verification.prose_classifier_v2_oneshot
+  --preflight`, then `--run` once, after the P-DET-COVERAGE-v2 consensus reference exists: it gates on
+  P-DET-COVERAGE-v2 alone and reports per-`unit_kind` and DEVELOPMENT_EXPOSED (P-DET-v1, P-DET-COVERAGE-v1)
+  rows without gating (37 §5); tests `tests/verification/test_prose_classifier_v2_oneshot.py`. Its development
+  sets and check sets 1-5 are scored with
   `scripts/evaluate_prose_classifier_v2_dev.py` and built by `src/opengrad/verification/classifier_devset_v2.py`.
   Rules (written for v1, applying to v2 the same way):
   - develop only against `reports/prose-classifier/dev/` (`python scripts/evaluate_prose_classifier_dev.py
