@@ -140,6 +140,7 @@ frozen population. It is a design decision for the study owner, and none has bee
 | 35 | P-DET-COVERAGE-v1 amendment `study_002_prereg_v5` — the reference is a three-model non-Claude consensus (two of three); no human annotator | [34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md](34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md) |
 | 36 | Owner decisions after the v1 test — a model-reference qualification may count toward balancing permission, provisionally; DIRECT via classifier v2 and a new untouched population | [35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md](35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md) |
 | 37 | Amendment `study_002_prereg_v6`: input contract `prose-decision-input-v2` (the first reply of any conversation), population P-DET-COVERAGE-v2 (420 items) and classifier v2; **adopted** 2026-09-17 | [36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md](36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md) |
+| 38 | Classifier v2 development plan — development data from first replies, check rounds, freeze, one test on P-DET-COVERAGE-v2 (plan, before any v2 rule exists) | [37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md](37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md) |
 
 Frozen P-DET artifacts live outside this directory, beside the other evaluation artifacts:
 `reports/pdet/pdet-v1.population.jsonl` and `reports/pdet/pdet-v1.manifest.json`, verified by
