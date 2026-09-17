@@ -91,3 +91,35 @@ def test_the_two_tasks_partition_the_population() -> None:
     ids = {task: {item.item_id for item in load_source(config(task))[1]} for task in TASKS}
     assert not ids["pdet-coverage-v1"] & ids["pdet-coverage-v1-routing"]
     assert sum(len(value) for value in ids.values()) == sum(1 for _ in POPULATION.open("rb"))
+
+
+# ── P-DET-COVERAGE-v2 (36 §3, study_002_prereg_v6) ────────────────────────────────────────────────────
+
+POPULATION_V2 = ROOT / "reports/pdet-coverage-v2/pdet-coverage-v2.population.jsonl"
+
+
+def test_the_v2_task_shows_the_first_reply_view_and_blinds_continuation() -> None:
+    cfg = config("pdet-coverage-v2")
+    assert {item.key for item in cfg.display} == {"user", "assistant", "tools"}
+    assert cfg.metadata == () and cfg.filters == ()
+    assert MUST_BE_BLIND | {"unit_kind"} <= set(cfg.blind_fields)
+    assert (cfg.source.select_field, cfg.source.select_equals) == ("layer", "B")
+    assert cfg.source.expected_items == 420
+    assert {item.annotator_id for item in cfg.model_annotators} == NON_CLAUDE_ANNOTATORS
+    assert {item.procedure for item in cfg.model_annotators} == {"configs/annotation/pdet-coverage-v2.model-procedure.md"}
+    assert "composite" not in cfg.freeze.allowed_designs
+    pinned = json.loads(
+        (ROOT / "reports/pdet-coverage-v2/pdet-coverage-v2.manifest.json").read_text(encoding="utf-8")
+    )["population_sha256"]
+    assert cfg.source.expected_sha256 == pinned
+
+
+@pytest.mark.skipif(not POPULATION_V2.is_file(), reason="BLOCKED_INPUT_MISSING: population not present")
+def test_every_served_v2_item_carries_no_blinded_key() -> None:
+    cfg = config("pdet-coverage-v2")
+    _, items = load_source(cfg)
+    assert len(items) == 420
+    blinded_keys = [json.dumps(name) + ":" for name in cfg.blind_fields]
+    for item in items:
+        served = json.dumps(project(cfg, item.row))
+        assert not any(key in served for key in blinded_keys)
