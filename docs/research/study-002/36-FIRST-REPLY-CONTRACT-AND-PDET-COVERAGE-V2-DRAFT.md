@@ -142,3 +142,16 @@ Steps 4 and 5 can run side by side, because the developer never reads the refere
   canonical-v2-final, 35 §6).
 - **What explains Study 001's regression.** 35 §6 showed missing direct answers do not.
 - **P-DET-v1's freeze**, which stays optional.
+
+## 7. Record of work under this amendment
+
+- **Contract v2 in code** (§5 step 2): `first_reply_eligibility` and `build_first_reply_input` in
+  `src/opengrad/data/classifier_input.py`, tests `tests/data/test_classifier_input_v2.py`.
+- **Builder committed before the draw** (§5 step 3): `src/opengrad/verification/pdet_coverage_v2.py`, with its
+  counts-only dry run `reports/pdet-coverage-v2/pdet-coverage-v2.dry-run.json`.
+- **Drawn 2026-09-17:** `reports/pdet-coverage-v2/pdet-coverage-v2.population.jsonl`, 420 items, population sha256
+  `8fa4868c64845a93b0627cd4463887b03181e6479f2e9f48d75e8c80f626f013`, equal to the dry run's. Every stratum met
+  its quota (no shortage). 210 items are single exchanges and 210 have a continuation. Of 71,726 first-reply
+  units, 12,120 records matched the QAD recovery set and 2,581 matched an earlier population or development set.
+  `--verify` re-derives the bytes and checks contamination: PASS. No item was read.
+

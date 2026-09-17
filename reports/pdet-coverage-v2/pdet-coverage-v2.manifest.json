@@ -1,0 +1,456 @@
+{
+  "annotation_fields": [
+    "gold_policy_label",
+    "ambiguity_status",
+    "annotator_id",
+    "annotator_rationale",
+    "boundary_rule_cited",
+    "annotation_version"
+  ],
+  "artifact_kind": "PDET_COVERAGE_POPULATION",
+  "backfill": "none: an undersupplied stratum takes all it has and reports its shortage",
+  "blinded_fields": [
+    "source_name",
+    "source_dataset",
+    "stratum",
+    "unit_kind",
+    "layer",
+    "m_match_kind"
+  ],
+  "classifier_input_contract": "prose-decision-input-v2",
+  "classifier_status_at_selection": "NOT_CONSULTED",
+  "code_sha256_lf": {
+    "src/opengrad/data/classifier_input.py": "d2c958397d6b2aad16177b44e8ef641ae7f3ca47d3b0f8efb3a7b92150fa2ab6",
+    "src/opengrad/verification/pdet_coverage.py": "1c06fc288fa52bc3919eb7eaa689001ed1ba5ebe246d79ab96386162cd32117c",
+    "src/opengrad/verification/pdet_coverage_v2.py": "b9a0f7933c07062df1deafba6a23f10e626119a13c9049ead2d9121d5dba95c3"
+  },
+  "counts": {
+    "after_dedup": 37817,
+    "dedup": {
+      "raw_record_hash": 0,
+      "response_text": 12960,
+      "skeleton": 508,
+      "user_prompt": 5740
+    },
+    "dispositions": {
+      "glaive": {
+        "EVALUATION_ONLY_OR_HELDOUT": 8,
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 27770,
+        "FIRST_REPLY_UNIT": 69697,
+        "MALFORMED_OR_UNRENDERABLE": 864
+      },
+      "toolace": {
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 8970,
+        "FIRST_REPLY_UNIT": 2029,
+        "MALFORMED_OR_UNRENDERABLE": 52
+      }
+    },
+    "draw_exclusions": {
+      "distinct_prompts_matched": {
+        "QAD_RECOVERY_SET": 66
+      },
+      "matched": {
+        "QAD_RECOVERY_SET": 12120
+      },
+      "primary": {
+        "QAD_RECOVERY_SET": 12120
+      }
+    },
+    "first_reply_units": 71726,
+    "layer_b": {
+      "M": {
+        "per_source": {
+          "glaive": {
+            "realized": 50,
+            "supply": 293
+          },
+          "toolace": {
+            "realized": 50,
+            "supply": 609
+          }
+        },
+        "quota": 100,
+        "realized": 100,
+        "shortage": 0,
+        "supply": 902
+      },
+      "P1": {
+        "per_source": {
+          "glaive": {
+            "realized": 30,
+            "supply": 707
+          },
+          "toolace": {
+            "realized": 30,
+            "supply": 212
+          }
+        },
+        "quota": 60,
+        "realized": 60,
+        "shortage": 0,
+        "supply": 919
+      },
+      "P2": {
+        "per_source": {
+          "glaive": {
+            "realized": 20,
+            "supply": 23418
+          },
+          "toolace": {
+            "realized": 20,
+            "supply": 414
+          }
+        },
+        "quota": 40,
+        "realized": 40,
+        "shortage": 0,
+        "supply": 23832
+      },
+      "Q": {
+        "per_source": {
+          "glaive": {
+            "realized": 50,
+            "supply": 11331
+          },
+          "toolace": {
+            "realized": 50,
+            "supply": 144
+          }
+        },
+        "quota": 100,
+        "realized": 100,
+        "shortage": 0,
+        "supply": 11475
+      },
+      "R": {
+        "per_source": {
+          "glaive": {
+            "realized": 40,
+            "supply": 223
+          },
+          "toolace": {
+            "realized": 40,
+            "supply": 166
+          }
+        },
+        "quota": 80,
+        "realized": 80,
+        "shortage": 0,
+        "supply": 389
+      },
+      "X": {
+        "per_source": {
+          "glaive": {
+            "realized": 40,
+            "supply": 300
+          },
+          "toolace": {
+            "realized": 0,
+            "supply": 0
+          }
+        },
+        "quota": 40,
+        "realized": 40,
+        "shortage": 0,
+        "supply": 300
+      }
+    },
+    "m_match_kind": {
+      "identifier_shaped_tool_name": 39,
+      "invocation_talk": 50,
+      "word_tool_name": 11
+    },
+    "m_match_kind_by_id": {
+      "pdetcov2:005822f15115e3c807cb5eb619be8ceb666ddf544c4575f6f1bc2ba5d7293022": "identifier_shaped_tool_name",
+      "pdetcov2:00bcb8fad44a2540c586ffef0f2d3850fa84b89b1cf67fef134212f48a33372c": "invocation_talk",
+      "pdetcov2:011d616665c5396cee8785a70b6fd458b095a3a2bafd864ca7732d5be23a73b3": "identifier_shaped_tool_name",
+      "pdetcov2:050d20c7f3ce76acc2481d0ebae4205551a65a85debd5c8280d586de7a8d9cb4": "identifier_shaped_tool_name",
+      "pdetcov2:06099c5da6102f69158ac5f30beff7ef2dd9988302951cf0b6fedebd6cb4bd2e": "identifier_shaped_tool_name",
+      "pdetcov2:081cdd3b905f7a32d757329e84d8ba2840988b775f28d24f90465568cdc0cfd0": "word_tool_name",
+      "pdetcov2:09b95588a347917394415d4560592a4f33b1119eab8942c982f6ae01c1c21922": "identifier_shaped_tool_name",
+      "pdetcov2:119c3d589cc05de4e0d81d6f6e1252a6bb461996c213e6c3609cb9332b18378d": "invocation_talk",
+      "pdetcov2:15d87769919650364c9d3c8b91a013066c41bac45d40ca8412004218d84e7cd4": "identifier_shaped_tool_name",
+      "pdetcov2:166adc614e9e77f4af5bb24ad3d4e908db552cf9c4ad16fd757f20cfbb41c319": "identifier_shaped_tool_name",
+      "pdetcov2:1f2c62de446fbf4c94d7b2d1e58827b70b428a8d5832b05b98ab12003a075504": "word_tool_name",
+      "pdetcov2:20d1065a6326627bdc086c361876302d71cb8bff90218f2acf9353cb80ac750e": "invocation_talk",
+      "pdetcov2:2704da5f25a7364e4a5630c46e52bd9243749bd4d59981ac2acebacdb59eb20d": "invocation_talk",
+      "pdetcov2:29a4eee21bd51482f37448567bcb55ebc6c63d4e2382f67992d94ef2c8ac24d3": "identifier_shaped_tool_name",
+      "pdetcov2:2bec405d46eacfeb1a3c2a1eac91c995864f12416e15b12867a63e1bcbd0685d": "invocation_talk",
+      "pdetcov2:2ce5c4ec9919a3a2b683c84fbf3c363bf3725216603272f855084a41d49d91ea": "invocation_talk",
+      "pdetcov2:2d444030c1de4bb02af06ef185634995a90973001f5df4bcb081578bf791d033": "invocation_talk",
+      "pdetcov2:2e04aa5b2bc97fd5d170b552aa95c73c9831ce17ce57645048b197244595144b": "identifier_shaped_tool_name",
+      "pdetcov2:2ef7f8dff43782324eefeb8c19ba8b69891a74115c316bec85b632ccd7daafed": "invocation_talk",
+      "pdetcov2:31d8393809546017e63b3ec29472a419d300ab802f944012c125705bfdd30f98": "identifier_shaped_tool_name",
+      "pdetcov2:35061967b66c9340ac2eb1f03a48efc02dd63ad36bbe50de6d64cba53edaefa3": "identifier_shaped_tool_name",
+      "pdetcov2:387c85c8305763c51d57d135026d736ad5797268d8fb9657ac8907cb26e5e06d": "invocation_talk",
+      "pdetcov2:3a0bd989726a06939a3feb55dd122d7d6592916ba254140dea9b9c975860ad2a": "invocation_talk",
+      "pdetcov2:3f16130f8d275611edd5279cd5db1cddfb9e45d846be36b855c5b161e684272b": "invocation_talk",
+      "pdetcov2:43b9913f06e2f3c10b1361f6f074b266271911ac45bfdd521b6bcddcf402ce00": "invocation_talk",
+      "pdetcov2:43beb13cae1b1e83722f2823d3fbd56234fbe92acee1a1b2445bf0c5e524398e": "invocation_talk",
+      "pdetcov2:461e06d4480af29dccd1d0162b9d1276a30419db53da9f61d7c30cae5807ca02": "identifier_shaped_tool_name",
+      "pdetcov2:4fe7fcf51b8e1e4cd523ee219d053358cdbb41c3e13dc712472eef98199e5466": "identifier_shaped_tool_name",
+      "pdetcov2:50f95bac79ea59fc8930dd22112054a3f613c19b00b43dc00449981ad12696fe": "invocation_talk",
+      "pdetcov2:5331cee00097aa2882431ebbfb1ca8af878bc77f30954f0e1c0849e0d4215738": "identifier_shaped_tool_name",
+      "pdetcov2:56f3839d43e4706a4c89f12100382a71e70d0b5d126d8fd5abbb980aa606eb22": "invocation_talk",
+      "pdetcov2:57021881c853caf7e7f0f287e2510a3a75479f89c8c775ee7f61b24f5432ccf0": "identifier_shaped_tool_name",
+      "pdetcov2:5abf541ff4891af52a0dd62bab05061c909e4b14947de2f73313c1f8931f637c": "invocation_talk",
+      "pdetcov2:5adbc64036152facbaea73bd369e2e493540412c9622b15eb777f89e798bf731": "invocation_talk",
+      "pdetcov2:5cc8bd2becdf27bcf6480906036664e207ae180fa8748f1b0f1a2889456a500d": "word_tool_name",
+      "pdetcov2:5d4f841a290a61560d8da86c88f49afc86fd886336b47fb95e3e1bf9c9259037": "invocation_talk",
+      "pdetcov2:5d7e17ac961a4f93eb53135529a4917c4c1d94986c0005a14f8a0f5e3d31aca5": "identifier_shaped_tool_name",
+      "pdetcov2:5f26ce91176c5fab9c19b84a2d0063a28215f69d7cfb34d28ad5c8e1b8bbd654": "identifier_shaped_tool_name",
+      "pdetcov2:6155f05e5ac32504fc3626bfbee386e41d68fb5731b129b8b99fae403536700c": "identifier_shaped_tool_name",
+      "pdetcov2:693b32677ca4f66097d307529c1c9afea4143e29fba465105d557c16a03c4225": "identifier_shaped_tool_name",
+      "pdetcov2:6a12814a4381ae91a2c4ad76cc25d615f18dfcaa28ac2a0a68f337cbaaa7785c": "identifier_shaped_tool_name",
+      "pdetcov2:6d80b1ef4b55f00e7d6bf37d6b1a8a05b836e2441149183315434fd5a98b18df": "word_tool_name",
+      "pdetcov2:6e5f79390402a12fb29d610b6d34ee174b1498a35c2a0b16af291408c8f0e2f2": "identifier_shaped_tool_name",
+      "pdetcov2:740445362626b53fc211333e5b0049201c36ba69dbd99afa9f7ce950d649fcba": "identifier_shaped_tool_name",
+      "pdetcov2:7935ff229d42e543cd2c8ba23401b0faa28bfd95dfc64f16cc8981d70197b87c": "invocation_talk",
+      "pdetcov2:7a10000f29ca0108e3c2cf2a993c5247f392897c67f6f5c679c2b8a03954fcc5": "identifier_shaped_tool_name",
+      "pdetcov2:7b0bcf647bf59252765df859b54e14a4382e8c2730c9670ebd0dba87c1012277": "invocation_talk",
+      "pdetcov2:7b40e5ea73a36130db1ea6388ae1d1eb3b003e1f99164daa9540ca7d3f8dcd7d": "identifier_shaped_tool_name",
+      "pdetcov2:7dc78111ecdfe71c0b75747d64ea3b63e1f971dea086f314fcbeb09bf35adf91": "identifier_shaped_tool_name",
+      "pdetcov2:86006ab77d81d56abd7156229c607f298b797534acfbe9e11bee5fc47d29e053": "invocation_talk",
+      "pdetcov2:891cd5efc3559a8e8e6c562204c7e053c3daea12f6744dd27b8e4423f79ed0a4": "invocation_talk",
+      "pdetcov2:89df6c8db26c38291cd25f4dc76717fdac2ff29b00e72f0e2d5f268cd66272a7": "identifier_shaped_tool_name",
+      "pdetcov2:8b0c9c8cb7a0fc1112bcd021d716942f650a24e48881d170768648530b596a8f": "identifier_shaped_tool_name",
+      "pdetcov2:8c6589dccf1b3e71d7e2a66a7570c302ea649e9d3989061e7b72bb051860d6e6": "word_tool_name",
+      "pdetcov2:931ba59580fb09eb07956c651823197144d89319188f56f358a1cf21fe309bc9": "word_tool_name",
+      "pdetcov2:966e03216e148d3c2173980a9dafb2927cfe636111a8d939c88bf647285ef473": "invocation_talk",
+      "pdetcov2:967eb2ce683bc565f16245e69728b32a713342b26b2108daa7cd071a70b6f99c": "invocation_talk",
+      "pdetcov2:98d8bb3797b6a9ed2e2d9ea9f77c334244d8f850a99b1d91a1e1304201925c4f": "invocation_talk",
+      "pdetcov2:a159afd7f734846d170272c05f3f19d0572b1fb8df94f52428316aabf2cd8c29": "identifier_shaped_tool_name",
+      "pdetcov2:a3667ce1c863a63ced8db03f977b43a9162b273574a8a3b82e5e3e65f810b9ba": "invocation_talk",
+      "pdetcov2:a3b72fa6bafe9972be7d3e3ae4d713c4b11ccfd7a445738d897c6325131ffec9": "invocation_talk",
+      "pdetcov2:a408b92c9a2fd174910de6f22dc2b3fda2fb65b311ce4c200a632a1b39c0fa3f": "identifier_shaped_tool_name",
+      "pdetcov2:a8c8e1bf7cfa23cc98c9f2e55d856b711ab78bddd612702995b4797f275aa211": "invocation_talk",
+      "pdetcov2:a8d9355494968d36add959f11a14ba4cbedda0e26d727a5df5b60a096b74c68c": "invocation_talk",
+      "pdetcov2:ab61d762bf646b4ab0e0e0dc895a222bb0a4c5262f7d40dbe5044f8091c560b5": "identifier_shaped_tool_name",
+      "pdetcov2:acd5230e1668c75e93c55cfbe3bbc83e6ac0e07144fd28f9ce4dd77664247a9c": "invocation_talk",
+      "pdetcov2:ad6bf3b2e8a3b497a14f9af0e530563f524409a1cc5010ea6372e825e69a6b65": "invocation_talk",
+      "pdetcov2:b273fb029680314c71c0f7575b71f07e9d469147b9339c477d94be2225445439": "word_tool_name",
+      "pdetcov2:b6031260d489cbf477e25865f2123090987906437fe00e5be6831b112e562da8": "invocation_talk",
+      "pdetcov2:b6394a89d990165d1e4994a2a7a24adaaf9dba2882d8dc5629c46a7fa6b7bc0a": "invocation_talk",
+      "pdetcov2:b7c35cfc36349d2f77e44bf9410f19d462f6378424ddc7e1adfc50a39eec8fa0": "invocation_talk",
+      "pdetcov2:bef91ca978aa9fb841c960855de566b2fd84f7d4c88e8b2d369f66475e239146": "invocation_talk",
+      "pdetcov2:c0c67e003f3b185987bd79a073a6d94a26d454fa55edd81b5e894136ed3a6ce6": "invocation_talk",
+      "pdetcov2:c2dde4c53664cbdff19c284d308c983f215c332e607da53cd5c5ff718026e186": "invocation_talk",
+      "pdetcov2:c52d6ad0c0452b2a4355ed1bccbfd9eeb85b824159eca7c92f507b9c97a0d953": "identifier_shaped_tool_name",
+      "pdetcov2:c7b318e8eddbbe81adbf6983a9ffbc6151b340028a9f66da52b728e463206915": "identifier_shaped_tool_name",
+      "pdetcov2:cc0f3b8be968db6984b5530ae0c25c35744b6428e1f651fe9b202c00f8865cb5": "invocation_talk",
+      "pdetcov2:cc51b3b1bd54d0660c58bccf2dc3a8dbe1e1b3b2cf40346a76a5895145fb4d6a": "identifier_shaped_tool_name",
+      "pdetcov2:cec669ff60b213419be9a394cb3993358847ff33407c2ad787fb61f9224cbb84": "word_tool_name",
+      "pdetcov2:d28592ab56f1dc1ccc6522b232eee3cef07033b1728d6eb33006c69852d4d42e": "word_tool_name",
+      "pdetcov2:d28e28bdb3a5546cc04c31f995c3f25930217ab0c8bbd58b04475588657a6ba6": "identifier_shaped_tool_name",
+      "pdetcov2:d6a1a735e180b2d0bf24c4cebd93d3b344fdf9233b0455b5644bc6625a67ead2": "identifier_shaped_tool_name",
+      "pdetcov2:dd7b3248f2d64e42024475deba536a16276798500f8ad3bed485baf3e2764caa": "identifier_shaped_tool_name",
+      "pdetcov2:de274f766d75ca8d58abf1e57bcb91bd57f37e0779012d675e78b2bcfee6169e": "invocation_talk",
+      "pdetcov2:dfbe53b1a60ae1a69a02ea3918f9bdd41da51a9eb68c0d5ddcf82fe462421e84": "invocation_talk",
+      "pdetcov2:e4bf94bef11835dff31f53f91685ef351d6981d6fd057daf9fc0cbb2f712616c": "invocation_talk",
+      "pdetcov2:e52b00edf76571632c9c7d0d52273c02b4abc59090e150222d3f88b02e18b52f": "identifier_shaped_tool_name",
+      "pdetcov2:e5b8a7c8a1dd4fd834919e6e5a9988cf90488bfb8310b2cea904633c357a4f98": "invocation_talk",
+      "pdetcov2:e7f6e75025c98b755d70ebb59db89b51dacb8b3d83da17fdf02747bd6e91a9fc": "identifier_shaped_tool_name",
+      "pdetcov2:e95536be6147d39f3d9c5c5ad5359769598812132d1bc1476707bdb7a19187be": "invocation_talk",
+      "pdetcov2:f083b356b5ae26abc0539bbf15dd8c3f689b093a7a2eee51c056e498d3bcc71c": "word_tool_name",
+      "pdetcov2:f173a83f0d305d1c5d9eeed456c33d6623a576d8b5dfe89df3d98d8207321687": "word_tool_name",
+      "pdetcov2:f40b92f8e748d8243b8c490990afd866730cca9f901e02afc7ba25bb5951fae3": "invocation_talk",
+      "pdetcov2:f56e0c2b43bf300319646370244912a87b8f515ee3ac705d7298b6d953a95665": "identifier_shaped_tool_name",
+      "pdetcov2:fb013e80673090d5fc152b32b2288b98cd7530e89f5bde17714c6c431aa4b7b0": "invocation_talk",
+      "pdetcov2:fce69e1639db2fa6829e269b181fb73a33422e3d766d1ddbe343f97fcf235e44": "invocation_talk",
+      "pdetcov2:fce795e60be2602db54707b46a1bd7be9f046fd4c5a4f5ecad797beb249466ba": "invocation_talk",
+      "pdetcov2:fcf7a57e335236e6da64062f208f9b8609d14be53092196ee2ce267167f20dce": "invocation_talk",
+      "pdetcov2:fd7b5d5e31cbc14aad7ef26ef045b7fdc32d8dc98d474ee8b20f632cce7c52f2": "invocation_talk",
+      "pdetcov2:fe65f8f29878d79544c27fe7cdefc402c4080658950c818455e83baf7999dcbc": "invocation_talk"
+    },
+    "pool_strata": {
+      "glaive": {
+        "M": 448,
+        "P1": 7419,
+        "P2": 24058,
+        "Q": 23315,
+        "R": 14157,
+        "X": 300
+      },
+      "toolace": {
+        "M": 710,
+        "P1": 375,
+        "P2": 493,
+        "Q": 215,
+        "R": 230,
+        "X": 6
+      }
+    },
+    "realized": 420,
+    "realized_unit_kind": {
+      "has_continuation": 210,
+      "single_exchange": 210
+    },
+    "shortages": {},
+    "unit_kind_of_units": {
+      "has_continuation": 55451,
+      "single_exchange": 16275
+    },
+    "used_items_removed": 2581
+  },
+  "dedup_order": "strata scarcest first (units after exclusions), each in rank order",
+  "draw_exclusion_inputs": [
+    [
+      "results/benchmarks/datasets/gsm8k_v1.jsonl",
+      "8081f50e43fb5e4adca928ba1c8d7b1a60dd57e47e39ee8f316ae3de52dee297"
+    ],
+    [
+      "results/benchmarks/datasets/ifeval_v1.jsonl",
+      "15b8afe856ca52535155eb7905f942a4896475ae825e26e62e306d020a949ac4"
+    ],
+    [
+      "results/benchmarks/datasets/mmlu_pro_v1.jsonl",
+      "f0e3e6bee2d13058e94ac8b1cd8f29b4b8a8c9a8a9aa3c7d16117d70f5755781"
+    ],
+    [
+      "results/benchmarks/openweights_parity_cases_v1.json",
+      "2de2e6e7c9b74811706a3fb6a4f85e777b34fe0a2c75944ae673913b5127a82f"
+    ],
+    [
+      "manifests/quantization/m1_v2_qad_recovery_v1.jsonl",
+      "a26982e42d13e2e94c48aa776f12256222c91a53ce19ebda53283dac42dfa211"
+    ],
+    [
+      "reports/pdet/pdet-v1.population.jsonl",
+      "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b"
+    ]
+  ],
+  "draw_exclusion_order": [
+    "SENTINEL_PROMPT",
+    "QAD_RECOVERY_SET",
+    "PDET_V1_OVERLAP"
+  ],
+  "gold_labels_present": false,
+  "heldout_inputs": [
+    [
+      ".cache/normalization/raw/when2call_test_mcq.parquet",
+      "17cdf1a07dad0bb5bb2a6c5663b7ba547e64c681add4a50151622788595d028f"
+    ],
+    [
+      ".cache/normalization/raw/when2call_test_llm_judge.parquet",
+      "2b613123d6643394a1905bc4f5b2b92a25c8acd97806312e19a4474615a9a853"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-partition.json",
+      "56c6abc2e24c524b45c382f42927fa02117b2a04c02f04e89e6a40d8b520f901"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-quarantine.json",
+      "705b9ef68185c3ce7a997e9a9f728633b9f042b2304a96635dea34f891855cf4"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-quarantine--toolpolicy-canonical-v2-final.json",
+      "34173706d01823aa44a2871e72ce278ede6f6c93df6f4009c6270fbfb1b0a2cd"
+    ]
+  ],
+  "id_rule": "pdetcov2: + sha256(source_dataset : raw_record_hash)",
+  "input": {
+    "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+    "path": "data/processed/normalization-v3",
+    "source_manifest_sha256_lf": "5bb4961cd100b4d5975a9596bee345e5234ce527029a4d6183f0b9a662bf2f90",
+    "source_manifests_sha256_lf": {
+      "glaive": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69",
+      "toolace": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2",
+      "when2call": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b",
+      "xlam": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
+    },
+    "top_manifest_sha256_lf": "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e",
+    "upstream_disposition_counts": {
+      "glaive": {
+        "accepted": 98339,
+        "duplicates": 13352,
+        "rejected": 1269,
+        "source_rows": 112960
+      },
+      "toolace": {
+        "accepted": 11051,
+        "duplicates": 3,
+        "rejected": 246,
+        "source_rows": 11300
+      },
+      "when2call": {
+        "accepted": 14701,
+        "duplicates": 124,
+        "rejected": 175,
+        "source_rows": 15000
+      },
+      "xlam": {
+        "accepted": 57342,
+        "duplicates": 350,
+        "rejected": 2308,
+        "source_rows": 60000
+      }
+    }
+  },
+  "later_evaluation_sets": {
+    "P-CONF ANSWER": "NOT_FROZEN (whichever of it and this population freezes second excludes the other)",
+    "P-SEALED": "NOT_FROZEN",
+    "P-UNANS": "NOT_FROZEN"
+  },
+  "min_usable_gold_per_mode_or_boundary": 50,
+  "population_file": "pdet-coverage-v2.population.jsonl",
+  "population_id": "P-DET-COVERAGE-v2",
+  "population_records": 420,
+  "population_sha256": "8fa4868c64845a93b0627cd4463887b03181e6479f2e9f48d75e8c80f626f013",
+  "preregistration": {
+    "adoption_amendment": "study_002_prereg_v6",
+    "document": "docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md",
+    "status_at_build": "ADOPTED"
+  },
+  "presentation_order": "sha256(seed :order: pdetcov_id) ascending",
+  "protocol_version": "pdet-coverage-002-v2",
+  "quota_sizing_disclosure": "The quotas (36 §3) were sized by the classifier's developer from aggregate predictions of the frozen prose-decision-classifier-v1 on the unused pool, per stratum and source. No prediction is computed here and none selects an item.",
+  "quotas": {
+    "layer_b": {
+      "M": 100,
+      "P1": 60,
+      "P2": 40,
+      "Q": 100,
+      "R": 80,
+      "X": 40
+    }
+  },
+  "ranking": "sha256(seed | stratum | pdetcov_id) descending",
+  "schema_version": 1,
+  "seed": "opengrad-pdet-coverage-002-v2",
+  "selection_used_classifier": false,
+  "sources": [
+    "glaive",
+    "toolace"
+  ],
+  "statement": "A constructed boundary-coverage population of first replies. It estimates no natural prevalence and its class mix is not a property of any corpus. Items were selected from the preregistered stratum predicates and structural facts only. Strata are sampling strata, not labels.",
+  "stratum_predicates": {
+    "priority": [
+      "X",
+      "M",
+      "R",
+      "Q",
+      "P1",
+      "P2"
+    ],
+    "source": "scripts/audit_pdet_coverage_supply.py"
+  },
+  "unit": "the first assistant reply of a record, under prose-decision-input-v2 (36 §2)",
+  "used_populations_excluded": [
+    [
+      "reports/pdet-coverage/pdet-coverage-v1.population.jsonl",
+      "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c"
+    ],
+    [
+      "reports/prose-classifier/dev/prose-classifier-dev-v1.population.jsonl",
+      "abbdfc497dca61821bcdf35624988e82aa12ba5b562564c9aa2fe36fb0c72456"
+    ],
+    [
+      "reports/prose-classifier/dev/prose-classifier-devcheck-v1.population.jsonl",
+      "56564d85fa0db4abbc971b16bac5557edea8391620ccc3c3816a144cea651348"
+    ],
+    [
+      "reports/prose-classifier/dev/prose-classifier-devcheck-v2.population.jsonl",
+      "2f4eb1354903661c7d998dc4920b33110a70281b2eb17380247feeab26708c1f"
+    ]
+  ]
+}
