@@ -162,3 +162,53 @@ two argument names of one layer A item, which never reaches this classifier.
 - It does not change a threshold, a population, the input contract or any preregistered rule.
 - It does not authorise C1 balancing, a mixture or training.
 - It creates no gold label.
+
+## 8. The one-shot test (run 2026-09-17)
+
+Run once on the frozen classifier (tag `prose-decision-classifier-v1`) by
+`python -m opengrad.verification.prose_classifier_oneshot --run`, with the preregistered rules of
+`pdet-coverage-metrics-v1`. Result: `reports/prose-classifier/test/prose-decision-classifier-v1.test-result.json`
+(committed as produced, e32d510).
+
+**References.**
+- **P-DET-COVERAGE-v1:** the three-model consensus (`MODEL_REFERENCE`, provisional, 34) on 306 layer B items.
+  291 were unanimous and 15 two-of-three, with no `NO_CONSENSUS`. Labels: UNSUPPORTED 180, CLARIFY 56,
+  DIRECT 44, UNKNOWN 23, CALL 3.
+- **P-DET-v1:** the study owner's `pass-a` labels, one annotator and not frozen gold. 575 items were classified;
+  6 are not in normalization-v3 and cannot reach the classifier; 3 are excluded as `EXPOSED_WORKED_EXAMPLE`.
+  The developer had read these items as the `model-a` annotator (§6).
+
+| Row | P-DET-v1 (human, not frozen) | P-DET-COVERAGE-v1 (model reference) | Verdict |
+|---|---|---|---|
+| UNSUPPORTED recall (≥ 0.75) | 0.980 (290/296) | 0.972 (175/180) | PASS |
+| UNSUPPORTED challenge recall (≥ 0.60) | 0.957 (89/93) | 0.989 (94/95) | PASS |
+| CLARIFY F1 (≥ 0.70) | 0.980 | 0.926 | PASS |
+| CLARIFY challenge recall (≥ 0.60) | 0.963 (78/81) | 0.889 (48/54) | PASS |
+| DIRECT recall (≥ 0.80) | no DIRECT item | 0.932 (41/44), not evaluable: 44 < 50 | NOT_EVALUABLE |
+| DIRECT precision (≥ 0.80) | 0/8, not evaluable: 8 < 50 predictions | 0.804 (41/51), 95% Wilson [0.675, 0.890] | PASS |
+| DIRECT challenge recall | no DIRECT item | 0.920 (23/25), not evaluable: 25 < 30 | NOT_EVALUABLE |
+| DIRECT precision on the pool, per source (≥ 0.80) | – | Glaive 0.975, PASS; ToolACE 0 of 9 DIRECT predictions agree, not evaluable (< 20) | – |
+| CALL precision / challenge recall | no CALL item | 3/3, not evaluable | NOT_EVALUABLE |
+| CALL on ambiguous items in M (= 0) | – | 0 | PASS |
+| Macro F1 (≥ 0.75) | 0.981 | 0.953 | PASS |
+| Abstention rate (≤ 0.15) | 0.000 | 0.000 | PASS |
+
+**By the preregistered rules:**
+- UNSUPPORTED and CLARIFY qualify.
+- DIRECT does not qualify, because its recall cannot be evaluated on either population.
+- CALL does not qualify, because its rows are not evaluable.
+- C1 is therefore not authorised.
+
+Caveats that go with these numbers:
+1. **The P-DET-COVERAGE qualifications rest on a model reference.** Whether a `MODEL_REFERENCE` qualification
+   may grant balancing permission is the study owner's separate decision (34 §4).
+2. **The P-DET-v1 rows rest on one annotator's unfrozen labels, from a pass with a label-timing finding.**
+   The developer had also read those items before development.
+3. **DIRECT could not qualify under any classifier.** Neither population holds 50 reference DIRECT items; this
+   was known from the reference counts before the classifier ran.
+4. **False DIRECT is concentrated in two places.** On ToolACE, none of the 9 DIRECT predictions agree with the
+   reference. On P-DET-v1, which has no DIRECT item, 8 DIRECT predictions were made. Both counts are below
+   their evaluability minimums, but they point to the same weakness the development checks showed.
+5. **No change may follow from these results inside v1.** Any rule change is `prose-decision-classifier-v2`,
+   and 22 §6 then marks both populations `DEVELOPMENT_EXPOSED` and requires a new untouched population before
+   balancing permission.
