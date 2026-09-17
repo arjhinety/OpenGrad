@@ -103,3 +103,54 @@ strata. Both minimums (50 overall, 30 challenge) are out of reach, before any `N
   gets no balancing permission from this corpus, and C1 is not authorised. How to continue is the owner's next
   decision. No population was drawn and nothing else changed.
 
+## 5. How rare DIRECT is across the whole corpus (2026-09-17)
+
+Decided by the owner after §4: measure DIRECT across all of normalization-v3 before choosing between a new
+DIRECT-bearing source and a redesign of C1. Counts only, `scripts/audit_corpus_direct_prevalence.py`, written to
+`reports/pdet-coverage-v2/normalization-v3.direct-prevalence.json`.
+
+**Where the 181,433 records sit.** 93,198 carry a structured call in the first assistant turn (xLAM
+57,342, Glaive 26,843, ToolACE 9,013). 30,975 are prose single exchanges, the only records that can be DIRECT
+in the 22 §2 sense (Glaive 14,303, When2Call 14,700, ToolACE 1,972). The rest cannot be sampled as a prose
+single exchange: 34,447 multi-turn (34,446 of them Glaive), 20,923 with the call after the first assistant turn,
+1,881 malformed, 9 held-out. Of the prose single exchanges, 27,908 offer tools and 3,067 do not.
+
+**Three estimates of DIRECT among the prose single exchanges:**
+
+| Source, tools | Records | Development-label yields | Coverage-reference yields | Frozen classifier v1 |
+|---|---:|---:|---:|---:|
+| Glaive, no tools | 153 | 131 | 125 | 139 |
+| Glaive, tools offered | 14,150 | 16 | 486 | 25 |
+| ToolACE, no tools | 697 | 2 | 0 | 13 |
+| ToolACE, tools offered | 1,275 | 4 | 0 | 92 |
+| When2Call, no tools | 2,217 | 0 | no labels | 29 |
+| When2Call, tools offered | 12,483 | 0 | no labels | 150 |
+
+- **Glaive without tools: about 125 to 139 DIRECT records, and the three estimates agree.** They come from about
+  150 distinct prompts.
+- **Glaive with tools offered: probably about 16 to 25 records.** The reference-yield figure of 486 is one
+  labelled refusal-stratum item (1 of 30) multiplied across 14,049 records that repeat 209 prompts; the
+  development labels (0 of 32) and the classifier (25 of 14,150) both point low. Treat 486 as an artefact of
+  weighting one item, not an estimate.
+- **ToolACE and When2Call: probably close to none.** Label yields give 0 to 4. The classifier's 284 DIRECT
+  predictions there match its known false-DIRECT behaviour: 0 of 9 agreed on ToolACE (33 §8), and on P-DET-v1,
+  a natural When2Call sample with 0 human DIRECT labels, it predicted 8 of 575 (1.4%, against 1.2% here).
+
+**Best reading.** Roughly 150 to 165 DIRECT records exist, all from Glaive: about 0.5% of prose single exchanges
+and under 0.1% of all records. **Direct answers while tools are offered number about 20 records, around 0.07%
+of the 27,908 prose exchanges that offer tools.**
+
+- **Directly shown:** the disposition and record counts; the classifier counts; the label counts.
+- **Strongly suggested:** DIRECT with tools offered is nearly absent from the corpus, since three estimates
+  built differently agree except where one label is multiplied by 14,049 records.
+- **Hypothesis only:** that this absence contributed to Study 001's loss of direct answering. Study 001's own
+  corpus composition has not been measured this way.
+- **Unknown:** DIRECT behaviour inside the 34,447 multi-turn records and later assistant turns, which no
+  population or classifier covers; and whether an available licensed dataset holds natural direct answers with
+  tools offered.
+
+**Consequence for C1.** Rebalancing reweights what the corpus holds. With about 20 DIRECT-with-tools records,
+there is almost nothing to upweight, whatever classifier labels them. So a classifier-based C1 cannot restore
+direct answering from this corpus, independent of whether DIRECT can be measured. No population was drawn and
+nothing else changed.
+

@@ -1,0 +1,571 @@
+{
+  "artifact_kind": "NORMALIZATION_V3_DIRECT_PREVALENCE_AUDIT",
+  "authorization": "docs/research/study-002/35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md \u00a74 (owner decision 2026-09-17)",
+  "dispositions_by_source": {
+    "glaive": {
+      "EVALUATION_ONLY_OR_HELDOUT": 8,
+      "LAYER_A_CANDIDATE": 26843,
+      "LAYER_B_CANDIDATE": 14303,
+      "MALFORMED_OR_UNRENDERABLE": 1881,
+      "MULTI_TURN_UNSUPPORTED": 34446,
+      "STRUCTURAL_CALL_NOT_IN_FIRST_ASSISTANT_TURN": 20858
+    },
+    "toolace": {
+      "LAYER_A_CANDIDATE": 9013,
+      "LAYER_B_CANDIDATE": 1972,
+      "MULTI_TURN_UNSUPPORTED": 1,
+      "STRUCTURAL_CALL_NOT_IN_FIRST_ASSISTANT_TURN": 65
+    },
+    "when2call": {
+      "EVALUATION_ONLY_OR_HELDOUT": 1,
+      "LAYER_B_CANDIDATE": 14700
+    },
+    "xlam": {
+      "LAYER_A_CANDIDATE": 57342
+    }
+  },
+  "frozen_classifier": {
+    "layer_b_units_matching_validation_or_construction_exclusions": 15017,
+    "predictions_by_source_and_tools": {
+      "all_layer_b_units": {
+        "glaive": {
+          "no_tools": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 11,
+            "DIRECT": 139,
+            "UNSUPPORTED": 3
+          },
+          "tools_offered": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 25,
+            "UNSUPPORTED": 14125
+          }
+        },
+        "toolace": {
+          "no_tools": {
+            "ABSTAIN": 359,
+            "CALL": 0,
+            "CLARIFY": 37,
+            "DIRECT": 13,
+            "UNSUPPORTED": 288
+          },
+          "tools_offered": {
+            "ABSTAIN": 7,
+            "CALL": 12,
+            "CLARIFY": 616,
+            "DIRECT": 92,
+            "UNSUPPORTED": 548
+          }
+        },
+        "when2call": {
+          "no_tools": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 10,
+            "DIRECT": 29,
+            "UNSUPPORTED": 2178
+          },
+          "tools_offered": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 7177,
+            "DIRECT": 150,
+            "UNSUPPORTED": 5156
+          }
+        }
+      },
+      "without_exclusion_matches": {
+        "glaive": {
+          "no_tools": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 6,
+            "DIRECT": 94,
+            "UNSUPPORTED": 1
+          },
+          "tools_offered": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 1,
+            "UNSUPPORTED": 629
+          }
+        },
+        "toolace": {
+          "no_tools": {
+            "ABSTAIN": 343,
+            "CALL": 0,
+            "CLARIFY": 32,
+            "DIRECT": 13,
+            "UNSUPPORTED": 252
+          },
+          "tools_offered": {
+            "ABSTAIN": 7,
+            "CALL": 9,
+            "CLARIFY": 570,
+            "DIRECT": 82,
+            "UNSUPPORTED": 451
+          }
+        },
+        "when2call": {
+          "no_tools": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 9,
+            "DIRECT": 27,
+            "UNSUPPORTED": 1966
+          },
+          "tools_offered": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 6586,
+            "DIRECT": 127,
+            "UNSUPPORTED": 4753
+          }
+        }
+      }
+    },
+    "source_sha256_lf": "64293c51917a54a649bad9e96960302dd5df1b39eabd0d260d3784b3eeb6687c",
+    "version": "prose-decision-classifier-v1"
+  },
+  "input": {
+    "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+    "path": "data/processed/normalization-v3",
+    "source_manifests_sha256_lf": {
+      "glaive": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69",
+      "toolace": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2",
+      "when2call": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b",
+      "xlam": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
+    },
+    "top_manifest_sha256_lf": "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e",
+    "upstream_disposition_counts": {
+      "glaive": {
+        "accepted": 98339,
+        "duplicates": 13352,
+        "rejected": 1269,
+        "source_rows": 112960
+      },
+      "toolace": {
+        "accepted": 11051,
+        "duplicates": 3,
+        "rejected": 246,
+        "source_rows": 11300
+      },
+      "when2call": {
+        "accepted": 14701,
+        "duplicates": 124,
+        "rejected": 175,
+        "source_rows": 15000
+      },
+      "xlam": {
+        "accepted": 57342,
+        "duplicates": 350,
+        "rejected": 2308,
+        "source_rows": 60000
+      }
+    }
+  },
+  "label_counts_by_stratum_and_source": {
+    "development_and_check_set_model_labels": {
+      "M": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 1,
+          "items": 1
+        },
+        "toolace": {
+          "CALL": 2,
+          "CLARIFY": 41,
+          "DIRECT": 0,
+          "UNKNOWN": 3,
+          "UNSUPPORTED": 5,
+          "items": 51
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 43,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 5,
+          "items": 48
+        }
+      },
+      "P1": {
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 7,
+          "DIRECT": 0,
+          "UNKNOWN": 2,
+          "UNSUPPORTED": 74,
+          "items": 83
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 17,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 0,
+          "items": 17
+        }
+      },
+      "P2": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 45,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 0,
+          "items": 45
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 41,
+          "UNSUPPORTED": 11,
+          "items": 52
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 3,
+          "items": 3
+        }
+      },
+      "Q": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 3,
+          "DIRECT": 25,
+          "UNKNOWN": 4,
+          "UNSUPPORTED": 0,
+          "items": 32
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 13,
+          "DIRECT": 1,
+          "UNKNOWN": 1,
+          "UNSUPPORTED": 18,
+          "items": 33
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 35,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 0,
+          "items": 35
+        }
+      },
+      "R": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 32,
+          "items": 32
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 33,
+          "items": 33
+        },
+        "when2call": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 35,
+          "items": 35
+        }
+      }
+    },
+    "pdet_coverage_v1_consensus_reference": {
+      "M": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 2,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 9,
+          "items": 11
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 38,
+          "DIRECT": 0,
+          "UNKNOWN": 1,
+          "UNSUPPORTED": 10,
+          "items": 49
+        }
+      },
+      "P1": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 6,
+          "items": 6
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 2,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 72,
+          "items": 74
+        }
+      },
+      "P2": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 19,
+          "UNKNOWN": 1,
+          "UNSUPPORTED": 0,
+          "items": 20
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 13,
+          "UNSUPPORTED": 7,
+          "items": 20
+        }
+      },
+      "Q": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 5,
+          "DIRECT": 22,
+          "UNKNOWN": 1,
+          "UNSUPPORTED": 2,
+          "items": 30
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 11,
+          "DIRECT": 0,
+          "UNKNOWN": 4,
+          "UNSUPPORTED": 15,
+          "items": 30
+        }
+      },
+      "R": {
+        "glaive": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 1,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 29,
+          "items": 30
+        },
+        "toolace": {
+          "CALL": 0,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 0,
+          "UNSUPPORTED": 30,
+          "items": 30
+        }
+      },
+      "X": {
+        "toolace": {
+          "CALL": 3,
+          "CLARIFY": 0,
+          "DIRECT": 0,
+          "UNKNOWN": 3,
+          "UNSUPPORTED": 0,
+          "items": 6
+        }
+      }
+    }
+  },
+  "label_yield_projection": {
+    "development_and_check_set_model_labels": {
+      "glaive": {
+        "expected_direct_no_tools": 131.4,
+        "expected_direct_tools_offered": 15.6,
+        "layer_b_records_no_tools": 153,
+        "layer_b_records_tools_offered": 14150,
+        "records_without_yield_tools_offered": 64
+      },
+      "toolace": {
+        "expected_direct_no_tools": 1.5,
+        "expected_direct_tools_offered": 3.6,
+        "layer_b_records_no_tools": 697,
+        "layer_b_records_tools_offered": 1275,
+        "records_without_yield_no_tools": 3,
+        "records_without_yield_tools_offered": 3
+      },
+      "when2call": {
+        "expected_direct_no_tools": 0.0,
+        "expected_direct_tools_offered": 0.0,
+        "layer_b_records_no_tools": 2217,
+        "layer_b_records_tools_offered": 12483
+      },
+      "xlam": {}
+    },
+    "pdet_coverage_v1_consensus_reference": {
+      "glaive": {
+        "expected_direct_no_tools": 124.5,
+        "expected_direct_tools_offered": 486.1,
+        "layer_b_records_no_tools": 153,
+        "layer_b_records_tools_offered": 14150
+      },
+      "toolace": {
+        "expected_direct_no_tools": 0.0,
+        "expected_direct_tools_offered": 0.0,
+        "layer_b_records_no_tools": 697,
+        "layer_b_records_tools_offered": 1275
+      },
+      "when2call": {
+        "layer_b_records_no_tools": 2217,
+        "layer_b_records_tools_offered": 12483,
+        "records_without_yield_no_tools": 2217,
+        "records_without_yield_tools_offered": 12483
+      },
+      "xlam": {}
+    }
+  },
+  "layer_b_records_by_source_tools_and_stratum": {
+    "glaive": {
+      "no_tools": {
+        "M": {
+          "distinct_prompts": 2,
+          "records": 2
+        },
+        "P2": {
+          "distinct_prompts": 65,
+          "records": 65
+        },
+        "Q": {
+          "distinct_prompts": 85,
+          "records": 85
+        },
+        "R": {
+          "distinct_prompts": 1,
+          "records": 1
+        }
+      },
+      "tools_offered": {
+        "M": {
+          "distinct_prompts": 12,
+          "records": 17
+        },
+        "P1": {
+          "distinct_prompts": 14,
+          "records": 64
+        },
+        "Q": {
+          "distinct_prompts": 8,
+          "records": 20
+        },
+        "R": {
+          "distinct_prompts": 209,
+          "records": 14049
+        }
+      }
+    },
+    "toolace": {
+      "no_tools": {
+        "M": {
+          "distinct_prompts": 2,
+          "records": 2
+        },
+        "P2": {
+          "distinct_prompts": 491,
+          "records": 493
+        },
+        "Q": {
+          "distinct_prompts": 50,
+          "records": 50
+        },
+        "R": {
+          "distinct_prompts": 148,
+          "records": 149
+        },
+        "X": {
+          "distinct_prompts": 3,
+          "records": 3
+        }
+      },
+      "tools_offered": {
+        "M": {
+          "distinct_prompts": 704,
+          "records": 704
+        },
+        "P1": {
+          "distinct_prompts": 371,
+          "records": 371
+        },
+        "Q": {
+          "distinct_prompts": 118,
+          "records": 118
+        },
+        "R": {
+          "distinct_prompts": 79,
+          "records": 79
+        },
+        "X": {
+          "distinct_prompts": 3,
+          "records": 3
+        }
+      }
+    },
+    "when2call": {
+      "no_tools": {
+        "M": {
+          "distinct_prompts": 1,
+          "records": 1
+        },
+        "P2": {
+          "distinct_prompts": 3,
+          "records": 3
+        },
+        "R": {
+          "distinct_prompts": 2210,
+          "records": 2213
+        }
+      },
+      "tools_offered": {
+        "M": {
+          "distinct_prompts": 588,
+          "records": 598
+        },
+        "P1": {
+          "distinct_prompts": 32,
+          "records": 32
+        },
+        "Q": {
+          "distinct_prompts": 6461,
+          "records": 6703
+        },
+        "R": {
+          "distinct_prompts": 5063,
+          "records": 5150
+        }
+      }
+    },
+    "xlam": {
+      "no_tools": {},
+      "tools_offered": {}
+    }
+  },
+  "status": "COUNTS ONLY. Descriptive estimates from model labels and a frozen classifier; not gold, not a draw."
+}
