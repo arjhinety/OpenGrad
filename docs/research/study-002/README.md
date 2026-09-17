@@ -136,6 +136,7 @@ frozen population. It is a design decision for the study owner, and none has bee
 | 31 | P-DET-COVERAGE-v1 preregistration — DIRECT and tool-boundary coverage; **adopted as `study_002_prereg_v4`** (2026-09-16) after an engineering review and a counts-only dry run (30 §13); **drawn** the same day (336 records, sha `755bc16e…`); annotation tasks `pdet-coverage-v1` and `pdet-coverage-v1-routing` set up, not annotated | [30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md](30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md) |
 | 32 | Canonical-v3 sources and adapters; the `normalization-v3` pre-classifier artifact and its structural audit | [31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md) |
 | 33 | Classifier input contract `prose-decision-input-v1` — what the prose classifier may read; eligibility | [32-CLASSIFIER-INPUT-CONTRACT.md](32-CLASSIFIER-INPUT-CONTRACT.md) |
+| 34 | Prose decision classifier development plan — a model-labelled development set, used only for development; freeze before any test (plan, before implementation) | [33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md](33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md) |
 
 Frozen P-DET artifacts live outside this directory, beside the other evaluation artifacts:
 `reports/pdet/pdet-v1.population.jsonl` and `reports/pdet/pdet-v1.manifest.json`, verified by
