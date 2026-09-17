@@ -102,6 +102,10 @@ predictions are far too few to estimate precision against the 0.80 threshold, mo
 reference, and neither dev-v2 nor check set 1 has a model CALL label, so textual CALL is untested before the test.
 Report: `reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round1.v2-check-1-agreement.json`.
 
-**Next (§4):** this is the first of at most two check rounds. Freezing now, or reading check set 1's
-disagreements (making it development data) for a second round with a fresh check set 2, is the study owner's
-decision.
+**Second round (decided by the study owner, 2026-09-17).** Offered freezing the round-1 rules or one more
+round, the owner chose one more round, the last §4 allows. This is recorded before the developer reads any of
+check set 1's disagreements. From here **`prose-classifier-v2-devcheck-1` is exposed**: it becomes development
+data, and its 118 / 125 above is the only unexposed score it will ever give. Round-2 rules are committed before
+`prose-classifier-v2-devcheck-2` (150 first replies, its own seed, excluding dev-v2, check set 1 and everything
+they exclude) is drawn, then labelled the same way and scored once. After it, §4 allows no further check round:
+the owner chooses between freezing and stopping.
