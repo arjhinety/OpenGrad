@@ -70,6 +70,7 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     `scripts/audit_corpus_direct_prevalence.py` does the same for every single exchange of normalization-v3 (35 §5),
     and `scripts/audit_canonical_v2_final_direct.py` counts Study 001's corpus turn by turn, multi-turn included
     (35 §6). Single-exchange counts miss most of Glaive's prose, which sits in multi-turn conversations.
+    `scripts/audit_first_reply_supply.py` dry-runs draft 36's first-reply unit (counts only; v1 predictions for sizing).
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters

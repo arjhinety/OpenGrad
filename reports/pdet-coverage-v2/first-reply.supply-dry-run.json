@@ -1,0 +1,420 @@
+{
+  "artifact_kind": "FIRST_REPLY_UNIT_SUPPLY_DRY_RUN",
+  "authorization": "docs/research/study-002/35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md \u00a76; draft 36",
+  "continuations_after_dedup": {
+    "glaive": {
+      "prose_only_later": 33799,
+      "uses_tools_later": 2317
+    },
+    "toolace": {
+      "prose_only_later": 1,
+      "uses_tools_later": 54
+    }
+  },
+  "counts": {
+    "after_dedup": 37806,
+    "construction_exclusions": {
+      "distinct_prompts_matched": {
+        "QAD_RECOVERY_SET": 66
+      },
+      "matched": {
+        "QAD_RECOVERY_SET": 12120
+      },
+      "primary": {
+        "QAD_RECOVERY_SET": 12120
+      }
+    },
+    "dedup": {
+      "raw_record_hash": 0,
+      "response_text": 12913,
+      "skeleton": 514,
+      "user_prompt": 5792
+    },
+    "development_and_check_set_overlap_removed": 703,
+    "first_reply_units": 71726,
+    "pdet_coverage_v1_overlap_removed": 1878
+  },
+  "dispositions_by_source": {
+    "glaive": {
+      "EVALUATION_ONLY_OR_HELDOUT": 8,
+      "FIRST_REPLY_IS_STRUCTURAL_CALL": 27770,
+      "FIRST_REPLY_UNIT": 69697,
+      "FIRST_REPLY_UNIT:has_continuation": 55394,
+      "FIRST_REPLY_UNIT:single_exchange": 14303,
+      "MALFORMED_OR_UNRENDERABLE": 864
+    },
+    "toolace": {
+      "FIRST_REPLY_IS_STRUCTURAL_CALL": 8970,
+      "FIRST_REPLY_UNIT": 2029,
+      "FIRST_REPLY_UNIT:has_continuation": 57,
+      "FIRST_REPLY_UNIT:single_exchange": 1972,
+      "MALFORMED_OR_UNRENDERABLE": 52
+    }
+  },
+  "input": {
+    "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+    "path": "data/processed/normalization-v3",
+    "source_manifests_sha256_lf": {
+      "glaive": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69",
+      "toolace": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2",
+      "when2call": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b",
+      "xlam": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
+    },
+    "top_manifest_sha256_lf": "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e",
+    "upstream_disposition_counts": {
+      "glaive": {
+        "accepted": 98339,
+        "duplicates": 13352,
+        "rejected": 1269,
+        "source_rows": 112960
+      },
+      "toolace": {
+        "accepted": 11051,
+        "duplicates": 3,
+        "rejected": 246,
+        "source_rows": 11300
+      },
+      "when2call": {
+        "accepted": 14701,
+        "duplicates": 124,
+        "rejected": 175,
+        "source_rows": 15000
+      },
+      "xlam": {
+        "accepted": 57342,
+        "duplicates": 350,
+        "rejected": 2308,
+        "source_rows": 60000
+      }
+    }
+  },
+  "sizing_only_frozen_classifier_v1": {
+    "predictions_after_dedup": {
+      "glaive": {
+        "M": {
+          "has_continuation": {
+            "ABSTAIN": 11,
+            "CALL": 0,
+            "CLARIFY": 14,
+            "DIRECT": 266,
+            "UNSUPPORTED": 1
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "P1": {
+          "has_continuation": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 19,
+            "DIRECT": 686,
+            "UNSUPPORTED": 0
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "P2": {
+          "has_continuation": {
+            "ABSTAIN": 45,
+            "CALL": 0,
+            "CLARIFY": 30,
+            "DIRECT": 23257,
+            "UNSUPPORTED": 86
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "Q": {
+          "has_continuation": {
+            "ABSTAIN": 23,
+            "CALL": 0,
+            "CLARIFY": 2080,
+            "DIRECT": 9183,
+            "UNSUPPORTED": 13
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 3,
+            "DIRECT": 21,
+            "UNSUPPORTED": 1
+          }
+        },
+        "R": {
+          "has_continuation": {
+            "ABSTAIN": 1,
+            "CALL": 0,
+            "CLARIFY": 2,
+            "DIRECT": 83,
+            "UNSUPPORTED": 16
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 121
+          }
+        },
+        "X": {
+          "has_continuation": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 300,
+            "UNSUPPORTED": 0
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        }
+      },
+      "toolace": {
+        "M": {
+          "has_continuation": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 3,
+            "DIRECT": 1,
+            "UNSUPPORTED": 0
+          },
+          "single_exchange": {
+            "ABSTAIN": 2,
+            "CALL": 7,
+            "CLARIFY": 465,
+            "DIRECT": 50,
+            "UNSUPPORTED": 81
+          }
+        },
+        "P1": {
+          "has_continuation": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 4,
+            "UNSUPPORTED": 0
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 20,
+            "DIRECT": 16,
+            "UNSUPPORTED": 172
+          }
+        },
+        "P2": {
+          "has_continuation": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          },
+          "single_exchange": {
+            "ABSTAIN": 302,
+            "CALL": 0,
+            "CLARIFY": 7,
+            "DIRECT": 7,
+            "UNSUPPORTED": 98
+          }
+        },
+        "Q": {
+          "has_continuation": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 27,
+            "DIRECT": 18,
+            "UNSUPPORTED": 0
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 38,
+            "DIRECT": 9,
+            "UNSUPPORTED": 51
+          }
+        },
+        "R": {
+          "has_continuation": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 2
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 4,
+            "DIRECT": 4,
+            "UNSUPPORTED": 156
+          }
+        },
+        "X": {
+          "has_continuation": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          },
+          "single_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        }
+      }
+    },
+    "source_sha256_lf": "64293c51917a54a649bad9e96960302dd5df1b39eabd0d260d3784b3eeb6687c",
+    "version": "prose-decision-classifier-v1"
+  },
+  "status": "COUNTS ONLY. A dry run of a drafted unit; nothing adopted or drawn. Predictions are for sizing only.",
+  "supply_after_dedup": {
+    "glaive": {
+      "M": {
+        "no_tools": {
+          "has_continuation": 251,
+          "single_exchange": 0
+        },
+        "tools_offered": {
+          "has_continuation": 41,
+          "single_exchange": 0
+        }
+      },
+      "P1": {
+        "no_tools": {
+          "has_continuation": 0,
+          "single_exchange": 0
+        },
+        "tools_offered": {
+          "has_continuation": 705,
+          "single_exchange": 0
+        }
+      },
+      "P2": {
+        "no_tools": {
+          "has_continuation": 23418,
+          "single_exchange": 0
+        },
+        "tools_offered": {
+          "has_continuation": 0,
+          "single_exchange": 0
+        }
+      },
+      "Q": {
+        "no_tools": {
+          "has_continuation": 9733,
+          "single_exchange": 24
+        },
+        "tools_offered": {
+          "has_continuation": 1566,
+          "single_exchange": 1
+        }
+      },
+      "R": {
+        "no_tools": {
+          "has_continuation": 96,
+          "single_exchange": 0
+        },
+        "tools_offered": {
+          "has_continuation": 6,
+          "single_exchange": 121
+        }
+      },
+      "X": {
+        "no_tools": {
+          "has_continuation": 300,
+          "single_exchange": 0
+        },
+        "tools_offered": {
+          "has_continuation": 0,
+          "single_exchange": 0
+        }
+      }
+    },
+    "toolace": {
+      "M": {
+        "no_tools": {
+          "has_continuation": 0,
+          "single_exchange": 2
+        },
+        "tools_offered": {
+          "has_continuation": 4,
+          "single_exchange": 603
+        }
+      },
+      "P1": {
+        "no_tools": {
+          "has_continuation": 0,
+          "single_exchange": 0
+        },
+        "tools_offered": {
+          "has_continuation": 4,
+          "single_exchange": 208
+        }
+      },
+      "P2": {
+        "no_tools": {
+          "has_continuation": 0,
+          "single_exchange": 414
+        },
+        "tools_offered": {
+          "has_continuation": 0,
+          "single_exchange": 0
+        }
+      },
+      "Q": {
+        "no_tools": {
+          "has_continuation": 0,
+          "single_exchange": 32
+        },
+        "tools_offered": {
+          "has_continuation": 45,
+          "single_exchange": 66
+        }
+      },
+      "R": {
+        "no_tools": {
+          "has_continuation": 0,
+          "single_exchange": 105
+        },
+        "tools_offered": {
+          "has_continuation": 2,
+          "single_exchange": 59
+        }
+      },
+      "X": {
+        "no_tools": {
+          "has_continuation": 0,
+          "single_exchange": 0
+        },
+        "tools_offered": {
+          "has_continuation": 0,
+          "single_exchange": 0
+        }
+      }
+    }
+  }
+}
