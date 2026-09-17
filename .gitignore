@@ -83,6 +83,7 @@ android-studio/
 # e-mail address, local paths), so only their hashes are tracked (reports/pdet/provenance/model-a/).
 reports/pdet/provenance/*/local/
 reports/prose-classifier/dev/provenance/*/local/
+reports/prose-classifier/devcheck/provenance/*/local/
 integrations/annotate-ui/.next/
 integrations/annotate-ui/out/
 integrations/annotate-ui/next-env.d.ts

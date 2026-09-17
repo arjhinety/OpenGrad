@@ -91,7 +91,10 @@ opengrad-annotate verify <manifest>                       # re-hash an exported 
   250 items, 33 §3) was labelled by session `model-dev` (Claude): one batch split across five parallel
   subagents, answers merged in batch order and ingested once. `scripts/archive_devset_model_labels.py` audits
   each subagent's transcript into `reports/prose-classifier/dev/provenance/model-dev/`. These labels only
-  develop the classifier; they are never gold or evidence of accuracy.
+  develop the classifier; they are never gold or evidence of accuracy. The held-out check set
+  `prose-classifier-devcheck-v1` (`configs/annotation/prose-classifier-devcheck-v1.yaml`, 125 items, 33 §5a) is
+  labelled the same way under session `model-devcheck`, with the same procedure file, and archived with
+  `--task prose-classifier-devcheck-v1`.
 - **Review:** `review-queue` writes a pinned queue from the composite reference. `adjudicate` compares two
   finished passes, or reviews one.
 - **Starting the UI** needs a build (`npm install && npm run build` in `integrations/annotate-ui`). For UI

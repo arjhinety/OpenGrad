@@ -74,6 +74,16 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
 - The classifier may read only what `prose-decision-input-v1` allows (`src/opengrad/data/classifier_input.py`,
   doc `32-CLASSIFIER-INPUT-CONTRACT.md`). Changing a feature, an exclusion or the serialization requires a new
   contract version.
+- The classifier is `src/opengrad/data/decision_classifier.py` (`prose-decision-classifier-v1`, plan
+  `33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md`). It takes `ClassifierFeatures` only and returns a
+  `Decision` naming the 22 §3 tree step and the matched evidence. Rules:
+  - develop only against `reports/prose-classifier/dev/` (`python scripts/evaluate_prose_classifier_dev.py
+    --show N`), and report the numbers as agreement with model labels, never accuracy;
+  - never open P-DET-v1 or P-DET-COVERAGE-v1 files while developing
+    (`tests/data/test_decision_classifier.py` checks that the module reads no file);
+  - the held-out check set (`--set devcheck`, `src/opengrad/verification/classifier_devcheck.py`) is scored,
+    not read, and never tuned against;
+  - once frozen, any rule change is a new classifier version (33 §5, 22 §6).
 
 ## Releases, mixtures and yield
 

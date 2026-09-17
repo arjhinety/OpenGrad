@@ -1,4 +1,6 @@
-"""The archived `model-dev` audit trail (reports/prose-classifier/dev/provenance/model-dev) proves what it records."""
+"""The archived model-label audit trails of the classifier's development sets prove what they record.
+
+`model-dev` on prose-classifier-dev-v1 (33 §3) and `model-devcheck` on the held-out check set (33 §5a)."""
 
 from __future__ import annotations
 
@@ -15,29 +17,50 @@ from opengrad.annotation.items import canonical_json
 from opengrad.annotation.provenance import ANNOTATION_ENTRY_FIELDS, verify_chain
 
 ROOT = Path(__file__).resolve().parents[2]
-DIRECTORY = ROOT / "reports" / "prose-classifier" / "dev" / "provenance" / "model-dev"
-STEM = "prose-classifier-dev-v1.model-dev.audit-trail"
-MANIFEST = DIRECTORY / f"{STEM}.manifest.json"
-
-pytestmark = pytest.mark.skipif(not MANIFEST.is_file(), reason="model-dev audit trail not present")
+#: task, session, archive directory, expected item ranges
+TRAILS = {
+    "dev": (
+        "prose-classifier-dev-v1",
+        "model-dev",
+        ROOT / "reports" / "prose-classifier" / "dev" / "provenance" / "model-dev",
+        [(1, 50), (51, 100), (101, 150), (151, 200), (201, 250)],
+    ),
+    "devcheck": (
+        "prose-classifier-devcheck-v1",
+        "model-devcheck",
+        ROOT / "reports" / "prose-classifier" / "devcheck" / "provenance" / "model-devcheck",
+        [(1, 50), (51, 100), (101, 125)],
+    ),
+}
 
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+@pytest.fixture(scope="module", params=sorted(TRAILS))
+def trail(request: pytest.FixtureRequest) -> tuple:
+    task, session, directory, ranges = TRAILS[request.param]
+    stem = f"{task}.{session}.audit-trail"
+    if not (directory / f"{stem}.manifest.json").is_file():
+        pytest.skip(f"{session} audit trail not present")
+    return task, session, directory, ranges, stem
+
+
 @pytest.fixture(scope="module")
-def manifest() -> dict:
-    data = MANIFEST.read_bytes()
-    assert (DIRECTORY / f"{STEM}.manifest.json.sha256").read_text(encoding="utf-8").split()[0] == sha256(data)
+def manifest(trail: tuple) -> dict:
+    _task, _session, directory, _ranges, stem = trail
+    data = (directory / f"{stem}.manifest.json").read_bytes()
+    assert (directory / f"{stem}.manifest.json.sha256").read_text(encoding="utf-8").split()[0] == sha256(data)
     return json.loads(data)
 
 
 @pytest.fixture(scope="module")
-def members(manifest: dict) -> dict[str, bytes]:
-    archive = (DIRECTORY / manifest["archive"]["file"]).read_bytes()
+def members(trail: tuple, manifest: dict) -> dict[str, bytes]:
+    _task, _session, directory, _ranges, stem = trail
+    archive = (directory / manifest["archive"]["file"]).read_bytes()
     assert sha256(archive) == manifest["archive"]["sha256"]
-    assert (DIRECTORY / f"{STEM}.tar.gz.sha256").read_text(encoding="utf-8").split()[0] == sha256(archive)
+    assert (directory / f"{stem}.tar.gz.sha256").read_text(encoding="utf-8").split()[0] == sha256(archive)
     with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tar:
         return {info.name: tar.extractfile(info).read() for info in tar.getmembers() if info.isfile()}  # type: ignore[union-attr]
 
@@ -51,11 +74,12 @@ def test_every_member_is_the_one_the_manifest_names(manifest: dict, members: dic
     assert "not human gold" in manifest["status"]
 
 
-def test_the_five_parts_cover_the_batch_once_and_were_audited(manifest: dict, members: dict[str, bytes]) -> None:
-    config = load_task_config(ROOT / "configs" / "annotation" / "prose-classifier-dev-v1.yaml")
+def test_the_parts_cover_the_batch_once_and_were_audited(trail: tuple, manifest: dict, members: dict[str, bytes]) -> None:
+    task, session, _directory, expected_ranges, _stem = trail
+    config = load_task_config(ROOT / "configs" / "annotation" / f"{task}.yaml")
     (declared,) = config.model_annotators
     assert sha256(members["procedure/prose-classifier-dev-v1.model-procedure.md"]) == declared.procedure_sha256
-    batch = json.loads(members["model-dev/batch-01.json"])
+    batch = json.loads(members[f"{session}/batch-01.json"])
     content = sha256(canonical_json({"items": batch["items"], "instructions": batch["instructions"]}).encode("utf-8"))
     assert content == batch["content_sha256"] == manifest["batch"]["content_sha256"]
     assert batch["procedure_sha256"] == declared.procedure_sha256
@@ -63,7 +87,7 @@ def test_the_five_parts_cover_the_batch_once_and_were_audited(manifest: dict, me
     merged: list[dict] = []
     ranges = []
     for row in manifest["parts"]:
-        answers = json.loads(members[f"model-dev/batch-01.part-{row['part']}.answers.json"])
+        answers = json.loads(members[f"{session}/batch-01.part-{row['part']}.answers.json"])
         assert [a["item_id"] for a in answers] == batch["item_ids"][row["first_number"] - 1 : row["last_number"]]
         assert row["subagent_models"] == ["claude-opus-5"]
         assert row["prompt_equals_procedure_plus_batch_line"] and row["prompt_range_matches"]
@@ -73,15 +97,16 @@ def test_the_five_parts_cover_the_batch_once_and_were_audited(manifest: dict, me
         )
         ranges.append((row["first_number"], row["last_number"]))
         merged.extend(answers)
-    assert ranges == [(1, 50), (51, 100), (101, 150), (151, 200), (201, 250)]
-    assert json.loads(members["model-dev/batch-01.answers.json"]) == merged
-    assert [a["item_id"] for a in merged] == batch["item_ids"] and len(merged) == 250
+    assert ranges == expected_ranges
+    assert json.loads(members[f"{session}/batch-01.answers.json"]) == merged
+    assert [a["item_id"] for a in merged] == batch["item_ids"] and len(merged) == expected_ranges[-1][1]
 
 
-def test_the_ingest_log_is_an_intact_chain_naming_the_batch(manifest: dict, members: dict[str, bytes]) -> None:
-    entries = [json.loads(line) for line in members["ingest/model-dev.history.jsonl"].decode("utf-8").splitlines()]
-    assert verify_chain(entries, ANNOTATION_ENTRY_FIELDS, "model-dev") == []
-    assert len(entries) == manifest["ingest"]["history_entries"] == 250
+def test_the_ingest_log_is_an_intact_chain_naming_the_batch(trail: tuple, manifest: dict, members: dict[str, bytes]) -> None:
+    _task, session, _directory, ranges, _stem = trail
+    entries = [json.loads(line) for line in members[f"ingest/{session}.history.jsonl"].decode("utf-8").splitlines()]
+    assert verify_chain(entries, ANNOTATION_ENTRY_FIELDS, session) == []
+    assert len(entries) == manifest["ingest"]["history_entries"] == ranges[-1][1]
     assert entries[-1]["entry_sha256"] == manifest["ingest"]["history_head_sha256"]
     for entry in entries:
         assert entry["actor_id"] == "model.claude-opus-5" and entry["action"] == "label"
@@ -89,8 +114,8 @@ def test_the_ingest_log_is_an_intact_chain_naming_the_batch(manifest: dict, memb
         assert manifest["procedure"]["sha256"] in entry["reason"]
 
 
-def test_the_untracked_transcripts_match_their_recorded_hashes_when_present(manifest: dict) -> None:
-    local = DIRECTORY / manifest["transcripts"]["file"]
+def test_the_untracked_transcripts_match_their_recorded_hashes_when_present(trail: tuple, manifest: dict) -> None:
+    local = trail[2] / manifest["transcripts"]["file"]
     assert manifest["transcripts"]["tracked"] is False
     if not local.is_file():
         pytest.skip("the verbatim transcripts are kept locally only")

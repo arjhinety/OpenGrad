@@ -20,15 +20,20 @@ parses to the saved part answers; the part covers exactly its range, in order. T
 session's injected context (the operator's e-mail address, local paths), so they stay out of version control;
 their hashes are recorded. The archive is deterministic and never replaces a different existing one.
 
-    python scripts/archive_devset_model_labels.py
+    python scripts/archive_devset_model_labels.py [--task prose-classifier-devcheck-v1]
+
+The held-out check set ``prose-classifier-devcheck-v1`` (33 §5a, session ``model-devcheck``, three subagents) is
+archived the same way under reports/prose-classifier/devcheck/provenance/model-devcheck/.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sqlite3
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -42,28 +47,76 @@ from archive_pdet_model_batches import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-TASK = "prose-classifier-dev-v1"
-SESSION = "model-dev"
-BATCHES = ROOT / ".annotation" / f"{TASK}.model-batches" / SESSION
-STATE = ROOT / ".annotation" / f"{TASK}.sqlite3"
-PROCEDURE = f"configs/annotation/{TASK}.model-procedure.md"
-OUT = ROOT / "reports" / "prose-classifier" / "dev" / "provenance" / SESSION
-STEM = f"{TASK}.{SESSION}.audit-trail"
-TRANSCRIPTS = f"{TASK}.{SESSION}.transcripts.tar.gz"
 SUBAGENTS = Path.home() / ".claude/projects/C--Users-arro-DOwnloads-OpenGrad/a4718da9-447f-4538-88d4-459232648e01/subagents"
-#: (part, subagent id, first item number, last item number), in batch order.
-PARTS = (
-    ("1", "a0cb84d2dac24535a", 1, 50),
-    ("2", "af27fd02dcfa0ed1d", 51, 100),
-    ("3", "a066a49406314937b", 101, 150),
-    ("4", "a4ce9c59605a40b5c", 151, 200),
-    ("5", "a1cb22f6d78593a44", 201, 250),
-)
 SCHEMA = "opengrad-model-label-audit-trail-v1"
+PROCEDURE = "configs/annotation/prose-classifier-dev-v1.model-procedure.md"
+
+
+@dataclass(frozen=True)
+class Trail:
+    task: str
+    session: str
+    out: Path
+    #: (part, subagent id, first item number, last item number), in batch order.
+    parts: tuple[tuple[str, str, int, int], ...]
+    split: str
+
+    @property
+    def batches(self) -> Path:
+        return ROOT / ".annotation" / f"{self.task}.model-batches" / self.session
+
+    @property
+    def state(self) -> Path:
+        return ROOT / ".annotation" / f"{self.task}.sqlite3"
+
+    @property
+    def stem(self) -> str:
+        return f"{self.task}.{self.session}.audit-trail"
+
+    @property
+    def transcripts(self) -> str:
+        return f"{self.task}.{self.session}.transcripts.tar.gz"
+
+
+TRAILS = {
+    "prose-classifier-dev-v1": Trail(
+        task="prose-classifier-dev-v1",
+        session="model-dev",
+        out=ROOT / "reports" / "prose-classifier" / "dev" / "provenance" / "model-dev",
+        parts=(
+            ("1", "a0cb84d2dac24535a", 1, 50),
+            ("2", "af27fd02dcfa0ed1d", 51, 100),
+            ("3", "a066a49406314937b", 101, 150),
+            ("4", "a4ce9c59605a40b5c", 151, 200),
+            ("5", "a1cb22f6d78593a44", 201, 250),
+        ),
+        split=(
+            "One batch labelled by five Claude subagents run in parallel, one per 50-item range. Each prompt was "
+            "the procedure text followed by one line naming the batch file and its range; each subagent read "
+            "the rubric and its own range. The five answer arrays were merged in batch order and ingested once."
+        ),
+    ),
+    "prose-classifier-devcheck-v1": Trail(
+        task="prose-classifier-devcheck-v1",
+        session="model-devcheck",
+        out=ROOT / "reports" / "prose-classifier" / "devcheck" / "provenance" / "model-devcheck",
+        parts=(
+            ("1", "a11de46dbc0a00480", 1, 50),
+            ("2", "abc070a04a66904ec", 51, 100),
+            ("3", "ab092a60dac9cd75d", 101, 125),
+        ),
+        split=(
+            "One batch labelled by three Claude subagents run in parallel, over items 1-50, 51-100 and 101-125. "
+            "Each prompt was the procedure text followed by one line naming the batch file and its range; each "
+            "subagent read the rubric and its own range. The three answer arrays were merged in batch order and "
+            "ingested once."
+        ),
+    ),
+}
 BATCH_LINE = re.compile(
     r"Batch file: (?P<path>\S+batch-01\.md) -- read the rubric \(lines 1-284\), then label only items "
     r"#(?P<first>\d+) to #(?P<last>\d+) \(lines \d+-\d+ of that file\), returning exactly one object for each "
-    r"of those 50 items, in item order\."
+    r"of those (?P<count>\d+) items, in item order\."
 )
 
 
@@ -78,7 +131,9 @@ def text_of(content: Any) -> str:
     return "".join(block.get("text", "") for block in content if isinstance(block, dict) and block.get("type") == "text")
 
 
-def audit_part(part: str, agent: str, first: int, last: int, body: str, batch: dict[str, Any]) -> tuple[dict[str, Any], bytes, bytes]:
+def audit_part(
+    trail: Trail, part: str, agent: str, first: int, last: int, body: str, batch: dict[str, Any]
+) -> tuple[dict[str, Any], bytes, bytes]:
     path = SUBAGENTS / f"agent-{agent}.jsonl"
     transcript = path.read_bytes()
     meta = path.with_suffix(".meta.json").read_bytes()
@@ -96,7 +151,7 @@ def audit_part(part: str, agent: str, first: int, last: int, body: str, batch: d
     ]
     final = [text_of(e["message"]["content"]).strip() for e in events if e.get("type") == "assistant"]
     final_text = [t for t in final if t][-1]
-    answers_bytes = (BATCHES / f"batch-01.part-{part}.answers.json").read_bytes()
+    answers_bytes = (trail.batches / f"batch-01.part-{part}.answers.json").read_bytes()
     answers = json.loads(answers_bytes)
     expected = [item["item_id"] for item in batch["items"]][first - 1 : last]
     row = {
@@ -106,7 +161,8 @@ def audit_part(part: str, agent: str, first: int, last: int, body: str, batch: d
         "subagent_id": agent,
         "subagent_models": models,
         "prompt_equals_procedure_plus_batch_line": head.strip() == body and match is not None,
-        "prompt_range_matches": bool(match) and (int(match["first"]), int(match["last"])) == (first, last),
+        "prompt_range_matches": bool(match)
+        and (int(match["first"]), int(match["last"]), int(match["count"])) == (first, last, last - first + 1),
         "tool_calls": calls,
         "only_reads_of_the_batch_file": bool(calls) and all(
             c["name"] == "Read" and str(c["file_path"]).endswith("batch-01.md") for c in calls
@@ -123,7 +179,13 @@ def audit_part(part: str, agent: str, first: int, last: int, body: str, batch: d
     return row, transcript, meta
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--task", choices=sorted(TRAILS), default="prose-classifier-dev-v1")
+    trail = TRAILS[parser.parse_args(argv).task]
+    TASK, SESSION, BATCHES, STATE, OUT, STEM, TRANSCRIPTS = (
+        trail.task, trail.session, trail.batches, trail.state, trail.out, trail.stem, trail.transcripts
+    )
     procedure = (ROOT / PROCEDURE).read_bytes()
     body = procedure_body(procedure.decode("utf-8").replace("\r\n", "\n"))
     batch_json = (BATCHES / "batch-01.json").read_bytes()
@@ -140,21 +202,21 @@ def main() -> int:
     transcripts: dict[str, bytes] = {}
     parts = []
     merged: list[Any] = []
-    for part, agent, first, last in PARTS:
-        row, transcript, meta = audit_part(part, agent, first, last, body, batch)
+    for part, agent, first, last in trail.parts:
+        row, transcript, meta = audit_part(trail, part, agent, first, last, body, batch)
         checks = ("prompt_equals_procedure_plus_batch_line", "prompt_range_matches", "only_reads_of_the_batch_file",
                   "final_message_equals_part_answers", "item_ids_match_range_in_order")
         failed = [c for c in checks if not row[c]] + ([] if row["subagent_models"] == ["claude-opus-5"] else ["models"])
         if failed:
             raise SystemExit(f"part {part}: audit failed: {failed}")
         parts.append(row)
-        members[f"{SESSION}/batch-01.part-{part}.answers.json"] = (BATCHES / f"batch-01.part-{part}.answers.json").read_bytes()
+        members[f"{SESSION}/batch-01.part-{part}.answers.json"] = (trail.batches / f"batch-01.part-{part}.answers.json").read_bytes()
         merged.extend(json.loads(members[f"{SESSION}/batch-01.part-{part}.answers.json"]))
         transcripts[f"transcripts/agent-{agent}.jsonl"] = transcript
         transcripts[f"transcripts/agent-{agent}.meta.json"] = meta
     merged_bytes = (BATCHES / "batch-01.answers.json").read_bytes()
     if json.loads(merged_bytes) != merged:
-        raise SystemExit("batch-01.answers.json is not the five parts merged in batch order")
+        raise SystemExit("batch-01.answers.json is not the parts merged in batch order")
     members[f"{SESSION}/batch-01.answers.json"] = merged_bytes
 
     with sqlite3.connect(f"file:{STATE.as_posix()}?mode=ro", uri=True) as conn:
@@ -196,11 +258,7 @@ def main() -> int:
             "answers": len(merged),
             "flagged": sum(1 for a in merged if a.get("flag")),
         },
-        "split": (
-            "One batch labelled by five Claude subagents run in parallel, one per 50-item range. Each prompt was "
-            "the procedure text followed by one line naming the batch file and its range; each subagent read "
-            "the rubric and its own range. The five answer arrays were merged in batch order and ingested once."
-        ),
+        "split": trail.split,
         "parts": parts,
         "archive": {"file": f"{STEM}.tar.gz", "sha256": sha256(archive), "bytes": len(archive), "members": listing(members)},
         "ingest": {

@@ -75,6 +75,40 @@ owner. The study owner later decided (2026-09-17) to annotate nothing, which rul
   human labels.
 - **P-DET-v1 and P-DET-COVERAGE-v1 files are never opened while developing.** A test fails if the
   classifier module reads either population path.
+- **Held-out development check (§5a, added 2026-09-17 before any check result existed).** Agreement on the
+  development set is in-sample: the rules were adjusted while reading those items, so it overstates how well
+  they carry to new text. Before freezing, the candidate rules are committed and then scored **once** on a
+  second, disjoint set, `prose-classifier-devcheck-v1`:
+  - 125 items, 25 per stratum (X is empty again), drawn like the development set with its own seed
+    `opengrad-prose-classifier-devcheck-v1` (`src/opengrad/verification/classifier_devcheck.py`);
+  - it excludes everything the development set excludes, plus every development-set item by identity,
+    normalized prompt and normalized response (545 candidates removed);
+  - labelled by Claude Opus 5 subagents with the same pinned procedure, under session `model-devcheck`;
+  - the developer never reads its items: the evaluation script refuses to print them.
+
+  Its result is reported next to the development result, as agreement with model labels. The candidate
+  rules are not tuned against it. If the rules change after the check, both check results are reported,
+  and the check set counts as exposed.
+
+  **Disclosure.** The labelling subagents' answers, one-sentence rationales included, return to the
+  developer's session. So before scoring, the developer saw short descriptions of check items, not their
+  text. The candidate rules were committed (6545ef1) before any score existed and were not changed in
+  response.
+
+  **Result (2026-09-17), agreement with model labels, not accuracy.** Counts are over items the model gave a
+  mode (CALL, DIRECT, CLARIFY or UNSUPPORTED):
+
+  | Set | Agree | Rate | DIRECT predictions agreeing | Model DIRECT labels predicted DIRECT |
+  |---|---:|---:|---:|---:|
+  | Development (in-sample, rules tuned on it) | 223 / 226 | 0.987 | 35 / 37 | 35 / 35 |
+  | Held-out check (scored once) | 102 / 110 | 0.927 | 18 / 23 | 18 / 19 |
+
+  The six-point drop is the expected cost of tuning on the development items, and it's why the check exists.
+  The direction to watch is false DIRECT: on the check set, 5 of 23 DIRECT predictions were labelled CLARIFY
+  or UNSUPPORTED by the model. DIRECT precision has a 0.80 threshold (22 §6), but 23 predictions are far too
+  few to estimate it, and model labels are not the reference. Neither set has a stratum X item, so textual
+  CALL is untested before the test. Reports: `reports/prose-classifier/dev/prose-decision-classifier-v1.dev-agreement.json`
+  and `…devcheck-agreement.json`.
 - **Freeze:** when development ends, the rules are committed and tagged under `prose-decision-classifier-v1`
   before any test result exists. Any later change is a new version, and 22 §6's consequences apply:
   the used population is marked `DEVELOPMENT_EXPOSED`, and a new untouched population is required before
