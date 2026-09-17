@@ -1,0 +1,354 @@
+{
+  "annotation_fields": [
+    "gold_policy_label",
+    "ambiguity_status",
+    "annotator_id",
+    "annotator_rationale",
+    "boundary_rule_cited",
+    "annotation_version"
+  ],
+  "artifact_kind": "PDET_COVERAGE_DRY_RUN",
+  "backfill": "none: an undersupplied stratum takes all it has and reports its shortage",
+  "blinded_fields": [
+    "source_name",
+    "source_dataset",
+    "stratum",
+    "unit_kind",
+    "layer",
+    "m_match_kind"
+  ],
+  "classifier_input_contract": "prose-decision-input-v2",
+  "classifier_status_at_selection": "NOT_CONSULTED",
+  "code_sha256_lf": {
+    "src/opengrad/data/classifier_input.py": "d2c958397d6b2aad16177b44e8ef641ae7f3ca47d3b0f8efb3a7b92150fa2ab6",
+    "src/opengrad/verification/pdet_coverage.py": "1c06fc288fa52bc3919eb7eaa689001ed1ba5ebe246d79ab96386162cd32117c",
+    "src/opengrad/verification/pdet_coverage_v2.py": "b9a0f7933c07062df1deafba6a23f10e626119a13c9049ead2d9121d5dba95c3"
+  },
+  "counts": {
+    "after_dedup": 37817,
+    "dedup": {
+      "raw_record_hash": 0,
+      "response_text": 12960,
+      "skeleton": 508,
+      "user_prompt": 5740
+    },
+    "dispositions": {
+      "glaive": {
+        "EVALUATION_ONLY_OR_HELDOUT": 8,
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 27770,
+        "FIRST_REPLY_UNIT": 69697,
+        "MALFORMED_OR_UNRENDERABLE": 864
+      },
+      "toolace": {
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 8970,
+        "FIRST_REPLY_UNIT": 2029,
+        "MALFORMED_OR_UNRENDERABLE": 52
+      }
+    },
+    "draw_exclusions": {
+      "distinct_prompts_matched": {
+        "QAD_RECOVERY_SET": 66
+      },
+      "matched": {
+        "QAD_RECOVERY_SET": 12120
+      },
+      "primary": {
+        "QAD_RECOVERY_SET": 12120
+      }
+    },
+    "first_reply_units": 71726,
+    "layer_b": {
+      "M": {
+        "per_source": {
+          "glaive": {
+            "realized": 50,
+            "supply": 293
+          },
+          "toolace": {
+            "realized": 50,
+            "supply": 609
+          }
+        },
+        "quota": 100,
+        "realized": 100,
+        "shortage": 0,
+        "supply": 902
+      },
+      "P1": {
+        "per_source": {
+          "glaive": {
+            "realized": 30,
+            "supply": 707
+          },
+          "toolace": {
+            "realized": 30,
+            "supply": 212
+          }
+        },
+        "quota": 60,
+        "realized": 60,
+        "shortage": 0,
+        "supply": 919
+      },
+      "P2": {
+        "per_source": {
+          "glaive": {
+            "realized": 20,
+            "supply": 23418
+          },
+          "toolace": {
+            "realized": 20,
+            "supply": 414
+          }
+        },
+        "quota": 40,
+        "realized": 40,
+        "shortage": 0,
+        "supply": 23832
+      },
+      "Q": {
+        "per_source": {
+          "glaive": {
+            "realized": 50,
+            "supply": 11331
+          },
+          "toolace": {
+            "realized": 50,
+            "supply": 144
+          }
+        },
+        "quota": 100,
+        "realized": 100,
+        "shortage": 0,
+        "supply": 11475
+      },
+      "R": {
+        "per_source": {
+          "glaive": {
+            "realized": 40,
+            "supply": 223
+          },
+          "toolace": {
+            "realized": 40,
+            "supply": 166
+          }
+        },
+        "quota": 80,
+        "realized": 80,
+        "shortage": 0,
+        "supply": 389
+      },
+      "X": {
+        "per_source": {
+          "glaive": {
+            "realized": 40,
+            "supply": 300
+          },
+          "toolace": {
+            "realized": 0,
+            "supply": 0
+          }
+        },
+        "quota": 40,
+        "realized": 40,
+        "shortage": 0,
+        "supply": 300
+      }
+    },
+    "m_match_kind": {
+      "identifier_shaped_tool_name": 39,
+      "invocation_talk": 50,
+      "word_tool_name": 11
+    },
+    "pool_strata": {
+      "glaive": {
+        "M": 448,
+        "P1": 7419,
+        "P2": 24058,
+        "Q": 23315,
+        "R": 14157,
+        "X": 300
+      },
+      "toolace": {
+        "M": 710,
+        "P1": 375,
+        "P2": 493,
+        "Q": 215,
+        "R": 230,
+        "X": 6
+      }
+    },
+    "realized": 420,
+    "realized_unit_kind": {
+      "has_continuation": 210,
+      "single_exchange": 210
+    },
+    "shortages": {},
+    "unit_kind_of_units": {
+      "has_continuation": 55451,
+      "single_exchange": 16275
+    },
+    "used_items_removed": 2581
+  },
+  "dedup_order": "strata scarcest first (units after exclusions), each in rank order",
+  "draw_exclusion_inputs": [
+    [
+      "results/benchmarks/datasets/gsm8k_v1.jsonl",
+      "8081f50e43fb5e4adca928ba1c8d7b1a60dd57e47e39ee8f316ae3de52dee297"
+    ],
+    [
+      "results/benchmarks/datasets/ifeval_v1.jsonl",
+      "15b8afe856ca52535155eb7905f942a4896475ae825e26e62e306d020a949ac4"
+    ],
+    [
+      "results/benchmarks/datasets/mmlu_pro_v1.jsonl",
+      "f0e3e6bee2d13058e94ac8b1cd8f29b4b8a8c9a8a9aa3c7d16117d70f5755781"
+    ],
+    [
+      "results/benchmarks/openweights_parity_cases_v1.json",
+      "2de2e6e7c9b74811706a3fb6a4f85e777b34fe0a2c75944ae673913b5127a82f"
+    ],
+    [
+      "manifests/quantization/m1_v2_qad_recovery_v1.jsonl",
+      "a26982e42d13e2e94c48aa776f12256222c91a53ce19ebda53283dac42dfa211"
+    ],
+    [
+      "reports/pdet/pdet-v1.population.jsonl",
+      "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b"
+    ]
+  ],
+  "draw_exclusion_order": [
+    "SENTINEL_PROMPT",
+    "QAD_RECOVERY_SET",
+    "PDET_V1_OVERLAP"
+  ],
+  "gold_labels_present": false,
+  "heldout_inputs": [
+    [
+      ".cache/normalization/raw/when2call_test_mcq.parquet",
+      "17cdf1a07dad0bb5bb2a6c5663b7ba547e64c681add4a50151622788595d028f"
+    ],
+    [
+      ".cache/normalization/raw/when2call_test_llm_judge.parquet",
+      "2b613123d6643394a1905bc4f5b2b92a25c8acd97806312e19a4474615a9a853"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-partition.json",
+      "56c6abc2e24c524b45c382f42927fa02117b2a04c02f04e89e6a40d8b520f901"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-quarantine.json",
+      "705b9ef68185c3ce7a997e9a9f728633b9f042b2304a96635dea34f891855cf4"
+    ],
+    [
+      "reports/evaluation/behavioral-heldout-v2-quarantine--toolpolicy-canonical-v2-final.json",
+      "34173706d01823aa44a2871e72ce278ede6f6c93df6f4009c6270fbfb1b0a2cd"
+    ]
+  ],
+  "id_rule": "pdetcov2: + sha256(source_dataset : raw_record_hash)",
+  "input": {
+    "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+    "path": "data/processed/normalization-v3",
+    "source_manifest_sha256_lf": "5bb4961cd100b4d5975a9596bee345e5234ce527029a4d6183f0b9a662bf2f90",
+    "source_manifests_sha256_lf": {
+      "glaive": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69",
+      "toolace": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2",
+      "when2call": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b",
+      "xlam": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
+    },
+    "top_manifest_sha256_lf": "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e",
+    "upstream_disposition_counts": {
+      "glaive": {
+        "accepted": 98339,
+        "duplicates": 13352,
+        "rejected": 1269,
+        "source_rows": 112960
+      },
+      "toolace": {
+        "accepted": 11051,
+        "duplicates": 3,
+        "rejected": 246,
+        "source_rows": 11300
+      },
+      "when2call": {
+        "accepted": 14701,
+        "duplicates": 124,
+        "rejected": 175,
+        "source_rows": 15000
+      },
+      "xlam": {
+        "accepted": 57342,
+        "duplicates": 350,
+        "rejected": 2308,
+        "source_rows": 60000
+      }
+    }
+  },
+  "later_evaluation_sets": {
+    "P-CONF ANSWER": "NOT_FROZEN (whichever of it and this population freezes second excludes the other)",
+    "P-SEALED": "NOT_FROZEN",
+    "P-UNANS": "NOT_FROZEN"
+  },
+  "min_usable_gold_per_mode_or_boundary": 50,
+  "population_id": "P-DET-COVERAGE-v2",
+  "population_records": 420,
+  "population_sha256": "8fa4868c64845a93b0627cd4463887b03181e6479f2e9f48d75e8c80f626f013",
+  "population_written": false,
+  "preregistration": {
+    "adoption_amendment": "study_002_prereg_v6",
+    "document": "docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md",
+    "status_at_build": "ADOPTED"
+  },
+  "presentation_order": "sha256(seed :order: pdetcov_id) ascending",
+  "protocol_version": "pdet-coverage-002-v2",
+  "quota_sizing_disclosure": "The quotas (36 §3) were sized by the classifier's developer from aggregate predictions of the frozen prose-decision-classifier-v1 on the unused pool, per stratum and source. No prediction is computed here and none selects an item.",
+  "quotas": {
+    "layer_b": {
+      "M": 100,
+      "P1": 60,
+      "P2": 40,
+      "Q": 100,
+      "R": 80,
+      "X": 40
+    }
+  },
+  "ranking": "sha256(seed | stratum | pdetcov_id) descending",
+  "schema_version": 1,
+  "seed": "opengrad-pdet-coverage-002-v2",
+  "selection_used_classifier": false,
+  "sources": [
+    "glaive",
+    "toolace"
+  ],
+  "statement": "Counts-only dry run. No population file was written, and no item or item id is recorded here. A constructed boundary-coverage population of first replies. It estimates no natural prevalence and its class mix is not a property of any corpus. Items were selected from the preregistered stratum predicates and structural facts only. Strata are sampling strata, not labels.",
+  "stratum_predicates": {
+    "priority": [
+      "X",
+      "M",
+      "R",
+      "Q",
+      "P1",
+      "P2"
+    ],
+    "source": "scripts/audit_pdet_coverage_supply.py"
+  },
+  "unit": "the first assistant reply of a record, under prose-decision-input-v2 (36 §2)",
+  "used_populations_excluded": [
+    [
+      "reports/pdet-coverage/pdet-coverage-v1.population.jsonl",
+      "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c"
+    ],
+    [
+      "reports/prose-classifier/dev/prose-classifier-dev-v1.population.jsonl",
+      "abbdfc497dca61821bcdf35624988e82aa12ba5b562564c9aa2fe36fb0c72456"
+    ],
+    [
+      "reports/prose-classifier/dev/prose-classifier-devcheck-v1.population.jsonl",
+      "56564d85fa0db4abbc971b16bac5557edea8391620ccc3c3816a144cea651348"
+    ],
+    [
+      "reports/prose-classifier/dev/prose-classifier-devcheck-v2.population.jsonl",
+      "2f4eb1354903661c7d998dc4920b33110a70281b2eb17380247feeab26708c1f"
+    ]
+  ]
+}

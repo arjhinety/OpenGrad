@@ -71,6 +71,12 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     and `scripts/audit_canonical_v2_final_direct.py` counts Study 001's corpus turn by turn, multi-turn included
     (35 §6). Single-exchange counts miss most of Glaive's prose, which sits in multi-turn conversations.
     `scripts/audit_first_reply_supply.py` dry-runs draft 36's first-reply unit (counts only; v1 predictions for sizing).
+- **P-DET-COVERAGE-v2** (36, `study_002_prereg_v6`) is built by `src/opengrad/verification/pdet_coverage_v2.py`:
+  420 first replies (contract `prose-decision-input-v2`) from Glaive and ToolACE, excluding P-DET-COVERAGE-v1 and
+  every development and check set, with its own seed and quotas; `unit_kind` is blinded like source and stratum.
+  The same counts-only rules apply: never open, print or summarise its population file.
+  `python -m opengrad.verification.pdet_coverage_v2 --dry-run | --build | --verify` (default output
+  `reports/pdet-coverage-v2/`; refuses `reports/pdet/` and `reports/pdet-coverage/`, never overwrites).
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters
