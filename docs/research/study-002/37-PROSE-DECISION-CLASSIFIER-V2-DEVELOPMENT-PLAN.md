@@ -69,3 +69,39 @@ Run once, after P-DET-COVERAGE-v2's consensus reference exists, with `pdet-cover
 - It changes no threshold, population, contract or rule.
 - It authorises no C1 balancing, mixture change or training.
 - It creates no gold label.
+
+## 7. Record
+
+Agreement with Claude model labels, not accuracy. "Agree" counts items the model gave a mode label; items it
+labelled UNKNOWN are counted separately: on check set 1 the classifier abstained on all 25; on dev-v2 it
+abstained on 48 of 52 and gave a mode to 4.
+
+- **Development data.** `prose-classifier-dev-v2`: 300 first replies (sha `ec4c6756…`), labelled by session
+  `model-dev-v2` (35 flagged). Round 0, the v1 rules unchanged, agreed on 234 / 248 items with a mode label
+  (continuing conversations 132 / 137, single exchanges 102 / 111).
+- **Round 1 rules** (commit fbbe5db, source sha256 LF `f2b99e17…`). Additions: capability wordings,
+  statements that information is missing, two request question forms, "can't believe" as doubt, a short
+  acknowledgement + "let me …" reply read as a narrated call, and a tool-limit tail after "but".
+- **Check set 1.** `prose-classifier-v2-devcheck-1`: 150 first replies (sha `b4477eae…`, 85 continuing,
+  65 single), drawn after the round-1 rules were committed. Labelled by session `model-v2-devcheck-1`
+  (21 flagged, WIP export verify PASS), then scored **once**. As with v1's check sets, the subagents' final
+  answers, one-sentence rationales included, reached the developer session before scoring. The developer did
+  not print any item or disagreement.
+
+| Round 1 rules | Agree | Rate | DIRECT predictions agreeing | Model DIRECT labels predicted DIRECT |
+|---|---:|---:|---:|---:|
+| dev-v2 (in-sample) | 245 / 248 | 0.988 | 117 / 119 | 117 / 117 |
+| dev-v1, devcheck-v1, devcheck-v2 (in-sample) | 223 / 226, 110 / 110, 108 / 113 | | | |
+| **Check set 1 (unexposed, scored once)** | **118 / 125** | **0.944** | **58 / 61** | **58 / 59** |
+
+On check set 1, continuing conversations agreed 68 / 70 and single exchanges 50 / 55. The seven disagreements
+by model label → prediction: UNSUPPORTED → DIRECT 2, CLARIFY → UNSUPPORTED 3, CLARIFY → DIRECT 1,
+DIRECT → UNSUPPORTED 1. Per mode against model labels: UNSUPPORTED 35 / 40, CLARIFY 25 / 26. The drop from
+0.988 in-sample to 0.944 is the expected cost of tuning on the development items. As with v1, 61 DIRECT
+predictions are far too few to estimate precision against the 0.80 threshold, model labels are not the
+reference, and neither dev-v2 nor check set 1 has a model CALL label, so textual CALL is untested before the test.
+Report: `reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round1.v2-check-1-agreement.json`.
+
+**Next (§4):** this is the first of at most two check rounds. Freezing now, or reading check set 1's
+disagreements (making it development data) for a second round with a fresh check set 2, is the study owner's
+decision.
