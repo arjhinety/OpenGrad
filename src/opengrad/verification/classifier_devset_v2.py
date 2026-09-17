@@ -81,6 +81,24 @@ SETS = {
             "prompt or response with P-DET-COVERAGE-v2, P-DET-COVERAGE-v1 or the v1 development and check sets."
         ),
     ),
+    "check1": SetSpec(
+        set_id="prose-classifier-v2-devcheck-1",
+        seed="opengrad-prose-classifier-v2-devcheck-1",
+        quota=25,
+        id_prefix="v2check1",
+        excludes=(
+            (
+                "reports/prose-classifier/dev-v2/prose-classifier-dev-v2.population.jsonl",
+                "ec4c67566a4adb7eb6d41b381feb3435f2b171fbaa11d338970d87f36eb10f8f",
+            ),
+        ),
+        statement=(
+            "The first held-out check set of first replies for prose-decision-classifier-v2 (37 §4), scored once on the "
+            "committed round-1 candidate rules; the developer does not read its items. Model judgments, never gold. It "
+            "shares no item, prompt or response with prose-classifier-dev-v2, P-DET-COVERAGE-v2, P-DET-COVERAGE-v1 or "
+            "the v1 development and check sets."
+        ),
+    ),
 }
 
 
