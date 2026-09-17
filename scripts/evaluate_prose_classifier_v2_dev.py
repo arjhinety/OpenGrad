@@ -66,9 +66,16 @@ SETS: dict[str, tuple[Path, Path]] = {
             "prose-classifier-v2-devcheck-4.annotations.model.claude-opus-5.model-v2-devcheck-4.jsonl"
         ),
     ),
+    "v2-check-5": (
+        Path("reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-5.population.jsonl"),
+        Path(
+            "reports/prose-classifier/v2-devcheck-5/annotation/wip/"
+            "prose-classifier-v2-devcheck-5.annotations.model.claude-opus-5.model-v2-devcheck-5.jsonl"
+        ),
+    ),
 }
 #: v2 check sets whose items the developer has not read (37 §4); never printed.
-UNEXPOSED: frozenset[str] = frozenset()  # v2-check-1..4 exposed for rounds 2-5 (37 §7)
+UNEXPOSED: frozenset[str] = frozenset({"v2-check-5"})  # v2-check-1..4 exposed for rounds 2-5 (37 §7)
 
 
 def rows(root: Path, population: Path, labels_file: Path) -> list[dict[str, Any]]:

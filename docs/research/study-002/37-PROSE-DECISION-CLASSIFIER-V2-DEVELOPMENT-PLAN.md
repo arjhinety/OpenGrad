@@ -304,3 +304,33 @@ round 4 tried and dropped; it stays predicted CLARIFY.
 
 Across the 1,400 development items, two predictions moved to agree with the model labels, one UNKNOWN item moved from
 DIRECT to abstain, and nothing that agreed moved away.
+
+- **Check set 5.** `prose-classifier-v2-devcheck-5`: 150 first replies (sha `8bf08a00…`, 91 continuing, 59
+  single), drawn after the round-5 rules were committed (d0fdbcd). Labelled by session `model-v2-devcheck-5` (21
+  flagged, WIP export verify PASS). The first subagent for items 101-150 skipped one item; its answers failed the
+  range check and were discarded unused, and a fresh subagent relabelled the range with the identical prompt.
+  **Process slip, disclosed:** before the relabel, a chained command whose failures were masked by pipes exported
+  an empty snapshot, committed it (reverted before any further commit, never pushed), and ran the scoring script on
+  zero labelled items, writing a 0 / 0 report that was deleted. No prediction was compared with any label, so the
+  set stayed unscored. It was then scored **once** on its complete labels, without printing any item or
+  disagreement.
+
+| Unexposed check, scored once | Rules | Agree | Rate | DIRECT predictions agreeing | Model DIRECT labels predicted DIRECT |
+|---|---|---:|---:|---:|---:|
+| Check set 1 | round 1 | 118 / 125 | 0.944 | 58 / 61 | 58 / 59 |
+| Check set 2 | round 2 | 122 / 126 | 0.968 | 60 / 63 | 60 / 61 |
+| Check set 3 | round 3 | 114 / 122 | 0.934 | 58 / 62 | 58 / 60 |
+| Check set 4 | round 4 | 122 / 124 | 0.984 | 63 / 63 | 63 / 63 |
+| **Check set 5** | **round 5** | **118 / 125** | **0.944** | **66 / 70** | **66 / 68** |
+| All five | | 594 / 622 | 0.955 | 305 / 319 | 305 / 311 |
+
+On check set 5, continuing conversations agreed 74 / 78 and single exchanges 44 / 47. The seven disagreements by
+model label → prediction: CLARIFY → DIRECT 4, DIRECT → UNSUPPORTED 2, UNSUPPORTED → CLARIFY 1. Per mode against
+model labels: DIRECT 66 / 68, CLARIFY 20 / 24, UNSUPPORTED 32 / 33; no CALL label. Of 25 items the model labelled
+UNKNOWN, the classifier abstained on 22 and predicted CLARIFY on 2 and DIRECT on 1.
+
+Check set 4's 122 / 124 was not repeated: round 5 scores 0.944 on its own set, the same as round 1. Over five rounds
+the unexposed scores range from 0.934 to 0.984 with no upward trend, and the pooled rate is 0.955. Report:
+`reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round5.v2-check-5-agreement.json`.
+
+**Next (§4):** the study owner chooses between freezing the round-5 rules and a further round.
