@@ -249,3 +249,28 @@ the two cases, so the rule was removed.
 
 Across the 1,250 development items, ten predictions moved to agree with the model labels and none that agreed moved
 away. The four UNKNOWN items stay predicted CLARIFY.
+
+- **Check set 4.** `prose-classifier-v2-devcheck-4`: 150 first replies (sha `817ab7cf…`, 89 continuing, 61
+  single), drawn after the round-4 rules were committed (5943983). Labelled by session `model-v2-devcheck-4` (16
+  flagged, WIP export verify PASS), then scored **once** without printing any item or disagreement. Same
+  disclosure about subagent rationales.
+
+| Unexposed check, scored once | Rules | Agree | Rate | DIRECT predictions agreeing | Model DIRECT labels predicted DIRECT |
+|---|---|---:|---:|---:|---:|
+| Check set 1 | round 1 | 118 / 125 | 0.944 | 58 / 61 | 58 / 59 |
+| Check set 2 | round 2 | 122 / 126 | 0.968 | 60 / 63 | 60 / 61 |
+| Check set 3 | round 3 | 114 / 122 | 0.934 | 58 / 62 | 58 / 60 |
+| **Check set 4** | **round 4** | **122 / 124** | **0.984** | **63 / 63** | **63 / 63** |
+| All four | | 476 / 497 | 0.958 | 239 / 249 | 239 / 243 |
+
+On check set 4, continuing conversations agreed 75 / 75 and single exchanges 47 / 49. The two disagreements by model
+label → prediction: CLARIFY → UNSUPPORTED 1, UNSUPPORTED → CLARIFY 1. Per mode against model labels: DIRECT 63 / 63,
+CLARIFY 27 / 28, UNSUPPORTED 32 / 33; no CALL label. Of 26 items the model labelled UNKNOWN, the classifier abstained
+on 24 and predicted DIRECT on 1 and CLARIFY on 1. No false DIRECT among the items with a mode label.
+
+Check set 4 is the best single result, but one set of 124 cannot separate a real gain from a favourable draw: at
+the pooled rate of about 96%, a set of this size would show 2 or fewer disagreements by chance a noticeable fraction
+of the time. The pooled figures are the steadier estimate. Report:
+`reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round4.v2-check-4-agreement.json`.
+
+**Next (§4):** the study owner chooses between freezing the round-4 rules and a further round.
