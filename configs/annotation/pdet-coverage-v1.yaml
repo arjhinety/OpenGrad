@@ -1,13 +1,13 @@
-# Human annotation of P-DET-COVERAGE-v1, layer B: the prose decision (Study 002, study_002_prereg_v4).
+# Annotation of P-DET-COVERAGE-v1, layer B: the prose decision (Study 002, study_002_prereg_v4).
 #
 # Preregistration: docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md §10 (adopted).
 # Rubric: 22 §1-4 as for P-DET-v1, narrowed by 30 §2-3 (DIRECT at the pre-action decision point).
 #
-#   opengrad-annotate start pdet-coverage-v1 --annotator <your-id> --session pass-a
+#   python scripts/run_external_annotation.py pdet-coverage-v1 --annotator model.gpt-5.6-sol
 #
 # The population file holds both layers and is hash-pinned whole; this task selects layer B on the server.
-# The layer is blinded: it decides membership and is never sent to the browser. Gold is human only
-# (30 §10): no model annotator and no composite reference.
+# The layer is blinded: it decides membership and is never sent to the browser or to a model annotator.
+# The reference is a three-model consensus (amendment study_002_prereg_v5, doc 34), declared below.
 
 task_id: pdet-coverage-v1
 version: "1"
@@ -175,8 +175,8 @@ protected_paths:
 
 state_db: .annotation/pdet-coverage-v1.sqlite3
 
-# 30 §10: human gold only. One owner pass plus the 22 §4 single-annotator re-read, or two passes plus
-# adjudication. No composite.
+# Human gold designs, kept for any human pass that is ever added (34 §4 item 4). The three-model consensus
+# reference is computed separately (34), never frozen as human gold, so no composite design is allowed.
 freeze:
   allowed_designs: [two_pass, single_annotator]
   require_adjudication: true
@@ -185,3 +185,24 @@ freeze:
     labels: [UNKNOWN]
     field_not_in:
       boundary_rule_cited: ["none"]
+
+# Amendment study_002_prereg_v5 (docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md): the
+# reference labels come from these three non-Claude models, each labelling every item independently and blind,
+# run by scripts/run_external_annotation.py. Their labels are model judgments (annotator_kind: model), never
+# human labels. No Claude model is declared: Claude builds the classifier this population tests.
+model_annotators:
+  - annotator_id: model.gemini-3.8-flash-high
+    model: Gemini 3.8 Flash (High)
+    procedure: configs/annotation/pdet-coverage-v1.model-procedure.md
+    procedure_sha256: 4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab
+    authorization: docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md
+  - annotator_id: model.gpt-5.6-sol
+    model: gpt-5.6-sol
+    procedure: configs/annotation/pdet-coverage-v1.model-procedure.md
+    procedure_sha256: 4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab
+    authorization: docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md
+  - annotator_id: model.deepseek-v4.1-flash
+    model: deepseek-v4.1-flash
+    procedure: configs/annotation/pdet-coverage-v1.model-procedure.md
+    procedure_sha256: 4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab
+    authorization: docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md

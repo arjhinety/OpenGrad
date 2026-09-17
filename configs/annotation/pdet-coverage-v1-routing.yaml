@@ -1,4 +1,4 @@
-# Human spot check of P-DET-COVERAGE-v1, layer A: structural CALL routing (Study 002, study_002_prereg_v4).
+# Spot check of P-DET-COVERAGE-v1, layer A: structural CALL routing (Study 002, study_002_prereg_v4).
 #
 # Preregistration: docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md §4 item 2 and §10.
 # Each item is a response whose turn is a structured tool call. The label records the annotator's reading of
@@ -6,10 +6,10 @@
 # tool, consistent with the request. Structural CALL permission rests on the structural call evidence (30 §4
 # item 1), not on this check.
 #
-#   opengrad-annotate start pdet-coverage-v1-routing --annotator <your-id> --session pass-a
+#   python scripts/run_external_annotation.py pdet-coverage-v1-routing --annotator model.gpt-5.6-sol
 #
 # Same hash-pinned population file as pdet-coverage-v1; this task selects layer A on the server. Source and
-# trajectory-gate status are blinded (30 §10). Gold is human only.
+# trajectory-gate status are blinded (30 §10). The reference is a three-model consensus (study_002_prereg_v5, 34).
 
 task_id: pdet-coverage-v1-routing
 version: "1"
@@ -182,3 +182,24 @@ freeze:
     labels: [UNKNOWN]
     field_not_in:
       boundary_rule_cited: ["none"]
+
+# Amendment study_002_prereg_v5 (docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md): the
+# reference labels come from these three non-Claude models, each labelling every item independently and blind,
+# run by scripts/run_external_annotation.py. Their labels are model judgments (annotator_kind: model), never
+# human labels. No Claude model is declared: Claude builds the classifier this population tests.
+model_annotators:
+  - annotator_id: model.gemini-3.8-flash-high
+    model: Gemini 3.8 Flash (High)
+    procedure: configs/annotation/pdet-coverage-v1.model-procedure.md
+    procedure_sha256: 4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab
+    authorization: docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md
+  - annotator_id: model.gpt-5.6-sol
+    model: gpt-5.6-sol
+    procedure: configs/annotation/pdet-coverage-v1.model-procedure.md
+    procedure_sha256: 4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab
+    authorization: docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md
+  - annotator_id: model.deepseek-v4.1-flash
+    model: deepseek-v4.1-flash
+    procedure: configs/annotation/pdet-coverage-v1.model-procedure.md
+    procedure_sha256: 4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab
+    authorization: docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md

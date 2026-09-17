@@ -49,7 +49,15 @@ renders).
 .venv/Scripts/python.exe -m opengrad.verification.call_fidelity   # counts only
 opengrad-annotate check pdet-coverage-v1           # layer B, 306 items (configs/annotation/pdet-coverage-v1.yaml)
 opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-routing.yaml)
+# the three declared external annotators (amendment study_002_prereg_v5); run each until done:
+.venv/Scripts/python.exe scripts/run_external_annotation.py pdet-coverage-v1 --annotator model.gpt-5.6-sol --size 20
 ```
+
+  - `scripts/run_external_annotation.py` runs `agy` (Gemini, the input as `input.md` in an otherwise empty
+    temporary directory, because agy ignores standard input started from Python), `codex exec` (standard input,
+    read-only sandbox) and `cline --json` (standard input; its text output interleaves colour codes) outside the
+    repository, then records answers through `model-ingest`'s validator. Network drops ("no such host") are
+    common: it waits and retries. It never prints item text, labels or rationales.
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters

@@ -20,6 +20,11 @@ TASKS = {
     "pdet-coverage-v1": ("B", 306, {"user", "assistant", "tools"}),
     "pdet-coverage-v1-routing": ("A", 30, {"user", "assistant", "calls", "tools"}),
 }
+NON_CLAUDE_ANNOTATORS = {
+    "model.gemini-3.8-flash-high",
+    "model.gpt-5.6-sol",
+    "model.deepseek-v4.1-flash",
+}
 #: 30 §10: never shown to the annotator.
 MUST_BE_BLIND = {
     "layer",
@@ -51,7 +56,12 @@ def test_the_task_declares_only_the_preregistered_view(task: str) -> None:
     assert {item.path for item in cfg.display} & MUST_BE_BLIND == set()
     assert (cfg.source.select_field, cfg.source.select_equals) == ("layer", layer)
     assert cfg.source.expected_items == count
-    assert not cfg.model_annotators  # 30 §10: gold is human only
+    # 34 (study_002_prereg_v5): exactly the three declared non-Claude annotators, one pinned procedure.
+    assert {item.annotator_id for item in cfg.model_annotators} == NON_CLAUDE_ANNOTATORS
+    assert not any("claude" in f"{item.annotator_id} {item.model}".lower() for item in cfg.model_annotators)
+    assert {item.procedure for item in cfg.model_annotators} == {
+        "configs/annotation/pdet-coverage-v1.model-procedure.md"
+    }
     assert "composite" not in cfg.freeze.allowed_designs
     pinned = json.loads(
         (ROOT / "reports/pdet-coverage/pdet-coverage-v1.manifest.json").read_text(encoding="utf-8")
