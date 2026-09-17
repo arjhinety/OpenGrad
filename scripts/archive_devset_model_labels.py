@@ -172,6 +172,23 @@ TRAILS = {
         procedure="configs/annotation/prose-classifier-dev-v2.model-procedure.md",
         authorization="docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md",
     ),
+    "prose-classifier-v2-devcheck-2": Trail(
+        task="prose-classifier-v2-devcheck-2",
+        session="model-v2-devcheck-2",
+        out=ROOT / "reports" / "prose-classifier" / "v2-devcheck-2" / "provenance" / "model-v2-devcheck-2",
+        parts=(
+            ("1", "a36dc5b239cda1d32", 1, 50),
+            ("2", "ad375ecbddf365774", 51, 100),
+            ("3", "a362830cb1e3f8cdb", 101, 150),
+        ),
+        split=(
+            "One batch labelled by three Claude subagents run in parallel, one per 50-item range. Each prompt was the "
+            "v2 procedure text followed by one line naming the batch file and its range. The three answer arrays were "
+            "merged in batch order and ingested once."
+        ),
+        procedure="configs/annotation/prose-classifier-dev-v2.model-procedure.md",
+        authorization="docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md",
+    ),
 }
 BATCH_LINE = re.compile(
     r"Batch file: (?P<path>\S+batch-01\.md) -- read the rubric \(lines 1-284\), then label only items "

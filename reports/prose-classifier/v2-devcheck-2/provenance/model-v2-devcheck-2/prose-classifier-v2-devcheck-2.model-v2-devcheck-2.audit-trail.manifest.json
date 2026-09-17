@@ -1,0 +1,282 @@
+{
+  "annotator_id": "model.claude-opus-5",
+  "archive": {
+    "bytes": 214619,
+    "file": "prose-classifier-v2-devcheck-2.model-v2-devcheck-2.audit-trail.tar.gz",
+    "members": [
+      {
+        "bytes": 213983,
+        "path": "ingest/model-v2-devcheck-2.history.jsonl",
+        "sha256": "17c5c310dfe7968c879b05fd967bf2697e1d11012131f547377f0cc8c8fa5274"
+      },
+      {
+        "bytes": 174,
+        "path": "ingest/model-v2-devcheck-2.session.json",
+        "sha256": "d89bee50653aaca9a5bd906306a54e66e2757f4fec4f34f0a49f181cac87fef3"
+      },
+      {
+        "bytes": 50789,
+        "path": "model-v2-devcheck-2/batch-01.answers.json",
+        "sha256": "3024efd8d715f4a6e6579cfe376155800de2a73c20d94d40e313893f243d9182"
+      },
+      {
+        "bytes": 350871,
+        "path": "model-v2-devcheck-2/batch-01.json",
+        "sha256": "eea7ee834aabea3cdf7029093d9c55d29bc246704fa08552c358cff0f7d898dc"
+      },
+      {
+        "bytes": 292788,
+        "path": "model-v2-devcheck-2/batch-01.md",
+        "sha256": "3482af86123637e781df69e46cb765be11ad297cd70754c9ae60c3a66832fa65"
+      },
+      {
+        "bytes": 17113,
+        "path": "model-v2-devcheck-2/batch-01.part-1.answers.json",
+        "sha256": "2a3a80534d96eb1c6e450633a4069f403ee82d00dc5011ffcea8b7bd0ce2f006"
+      },
+      {
+        "bytes": 17543,
+        "path": "model-v2-devcheck-2/batch-01.part-2.answers.json",
+        "sha256": "7dcd9444e4c58cb892db83c34eb91adea5e3c500b4a3d2f971fe21254ccbe6b6"
+      },
+      {
+        "bytes": 17345,
+        "path": "model-v2-devcheck-2/batch-01.part-3.answers.json",
+        "sha256": "1b5f212d82e2034703b334133e680fcc70405ad3e09a34b446d794a817db2d4e"
+      },
+      {
+        "bytes": 3515,
+        "path": "procedure/prose-classifier-dev-v2.model-procedure.md",
+        "sha256": "8ecf27c1c67da750730ef77465b7b8cdcc87e07f78a22eca305fe3d43d142738"
+      }
+    ],
+    "sha256": "a74c13b32b607b7291d79385ef61727cf3db3af64a3760210b82ab676b1b2dd6"
+  },
+  "authorization": "docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md",
+  "batch": {
+    "answers": 150,
+    "batch_id": "01",
+    "batch_json_sha256": "eea7ee834aabea3cdf7029093d9c55d29bc246704fa08552c358cff0f7d898dc",
+    "batch_md_sha256": "3482af86123637e781df69e46cb765be11ad297cd70754c9ae60c3a66832fa65",
+    "content_sha256": "f4a24dc2fbf5e27fc6d7782fa98cf87ef691fde24ce7b3301f188b863dc4c6ed",
+    "created_at": "2026-09-17T15:17:35.329Z",
+    "flagged": 17,
+    "items": 150,
+    "merged_answers_sha256": "3024efd8d715f4a6e6579cfe376155800de2a73c20d94d40e313893f243d9182"
+  },
+  "built_by": "scripts/archive_devset_model_labels.py",
+  "ingest": {
+    "first_recorded_at": "2026-09-17T15:20:38.011Z",
+    "history_entries": 150,
+    "history_head_sha256": "05e3357b3565003ba0d8eb4181435c96a28b0800914707825ce5589d5979b534",
+    "labeled_items": 150,
+    "last_recorded_at": "2026-09-17T15:20:38.173Z"
+  },
+  "model": "claude-opus-5",
+  "parts": [
+    {
+      "answers": 50,
+      "final_message_equals_part_answers": true,
+      "final_message_sha256": "56ebb986edc5dcc7478a9ab658c80d1072a23d8d58aa1af1ad54bb1bb58e1867",
+      "first_number": 1,
+      "flagged": 7,
+      "item_ids_match_range_in_order": true,
+      "last_number": 50,
+      "only_reads_of_the_batch_file": true,
+      "part": "1",
+      "part_answers_file_sha256": "2a3a80534d96eb1c6e450633a4069f403ee82d00dc5011ffcea8b7bd0ce2f006",
+      "prompt_equals_procedure_plus_batch_line": true,
+      "prompt_range_matches": true,
+      "subagent_id": "a36dc5b239cda1d32",
+      "subagent_models": [
+        "claude-opus-5"
+      ],
+      "tool_calls": [
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 290,
+          "name": "Read",
+          "offset": null
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 750,
+          "name": "Read",
+          "offset": 287
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 750,
+          "name": "Read",
+          "offset": 1036
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 730,
+          "name": "Read",
+          "offset": 1785
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 4,
+          "name": "Read",
+          "offset": 2515
+        }
+      ],
+      "transcript_file": "agent-a36dc5b239cda1d32.jsonl",
+      "transcript_sha256": "ee4dfa984fa254d8474a88ce62a430e37709174bc817b98b437b5f72ea0893bb"
+    },
+    {
+      "answers": 50,
+      "final_message_equals_part_answers": true,
+      "final_message_sha256": "1a406836d16d5555dab179adab87235cf1436de124316207e5022e533056d5ee",
+      "first_number": 51,
+      "flagged": 5,
+      "item_ids_match_range_in_order": true,
+      "last_number": 100,
+      "only_reads_of_the_batch_file": true,
+      "part": "2",
+      "part_answers_file_sha256": "7dcd9444e4c58cb892db83c34eb91adea5e3c500b4a3d2f971fe21254ccbe6b6",
+      "prompt_equals_procedure_plus_batch_line": true,
+      "prompt_range_matches": true,
+      "subagent_id": "ad375ecbddf365774",
+      "subagent_models": [
+        "claude-opus-5"
+      ],
+      "tool_calls": [
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 284,
+          "name": "Read",
+          "offset": null
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 750,
+          "name": "Read",
+          "offset": 2514
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 750,
+          "name": "Read",
+          "offset": 3263
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 720,
+          "name": "Read",
+          "offset": 4012
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 705,
+          "name": "Read",
+          "offset": 4731
+        }
+      ],
+      "transcript_file": "agent-ad375ecbddf365774.jsonl",
+      "transcript_sha256": "6318f640883655b03f4ff2fd92e21ced73f1e3b0aa6fb6d9063758b55226ddfe"
+    },
+    {
+      "answers": 50,
+      "final_message_equals_part_answers": true,
+      "final_message_sha256": "b56b08bb9a85b048ba25aee965227690dc332d33f4ee06720adefb2bde7208c4",
+      "first_number": 101,
+      "flagged": 5,
+      "item_ids_match_range_in_order": true,
+      "last_number": 150,
+      "only_reads_of_the_batch_file": true,
+      "part": "3",
+      "part_answers_file_sha256": "1b5f212d82e2034703b334133e680fcc70405ad3e09a34b446d794a817db2d4e",
+      "prompt_equals_procedure_plus_batch_line": true,
+      "prompt_range_matches": true,
+      "subagent_id": "a362830cb1e3f8cdb",
+      "subagent_models": [
+        "claude-opus-5"
+      ],
+      "tool_calls": [
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 284,
+          "name": "Read",
+          "offset": null
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 800,
+          "name": "Read",
+          "offset": 5434
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 800,
+          "name": "Read",
+          "offset": 6233
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 800,
+          "name": "Read",
+          "offset": 7029
+        },
+        {
+          "file_path": "C:/Users/arro/Downloads/OpenGrad/.annotation/prose-classifier-v2-devcheck-2.model-batches/model-v2-devcheck-2/batch-01.md",
+          "limit": 700,
+          "name": "Read",
+          "offset": 7829
+        }
+      ],
+      "transcript_file": "agent-a362830cb1e3f8cdb.jsonl",
+      "transcript_sha256": "bb6e46036e8e67d4449c7bdfbf22772c2bc69b4ef16dc216d04d3ce2c0c792ec"
+    }
+  ],
+  "procedure": {
+    "path": "configs/annotation/prose-classifier-dev-v2.model-procedure.md",
+    "sha256": "8ecf27c1c67da750730ef77465b7b8cdcc87e07f78a22eca305fe3d43d142738"
+  },
+  "schema": "opengrad-model-label-audit-trail-v1",
+  "session_id": "model-v2-devcheck-2",
+  "split": "One batch labelled by three Claude subagents run in parallel, one per 50-item range. Each prompt was the v2 procedure text followed by one line naming the batch file and its range. The three answer arrays were merged in batch order and ingested once.",
+  "status": "Model judgments by a declared model annotator, used only to develop the prose decision classifier. Not human labels, not human gold, never evidence of accuracy.",
+  "task_id": "prose-classifier-v2-devcheck-2",
+  "transcripts": {
+    "bytes": 430748,
+    "file": "local/prose-classifier-v2-devcheck-2.model-v2-devcheck-2.transcripts.tar.gz",
+    "members": [
+      {
+        "bytes": 600868,
+        "path": "transcripts/agent-a362830cb1e3f8cdb.jsonl",
+        "sha256": "bb6e46036e8e67d4449c7bdfbf22772c2bc69b4ef16dc216d04d3ce2c0c792ec"
+      },
+      {
+        "bytes": 199,
+        "path": "transcripts/agent-a362830cb1e3f8cdb.meta.json",
+        "sha256": "a115ed70b649f320d53e6d4666874d41ffa01fc3ad65daf6fb30dc48145b70bb"
+      },
+      {
+        "bytes": 534728,
+        "path": "transcripts/agent-a36dc5b239cda1d32.jsonl",
+        "sha256": "ee4dfa984fa254d8474a88ce62a430e37709174bc817b98b437b5f72ea0893bb"
+      },
+      {
+        "bytes": 196,
+        "path": "transcripts/agent-a36dc5b239cda1d32.meta.json",
+        "sha256": "845d9733a48023c74e09cc246124cb58eb6d4d37bc86342381deefd65f423ed1"
+      },
+      {
+        "bytes": 610793,
+        "path": "transcripts/agent-ad375ecbddf365774.jsonl",
+        "sha256": "6318f640883655b03f4ff2fd92e21ced73f1e3b0aa6fb6d9063758b55226ddfe"
+      },
+      {
+        "bytes": 198,
+        "path": "transcripts/agent-ad375ecbddf365774.meta.json",
+        "sha256": "d37670dad17782c04c9a94225963c21fabe4cd457d7f2844aa41847fe31acf8b"
+      }
+    ],
+    "sha256": "526a158865bac9f8972647ee9526b1c35347d7b3ac41a35d584321ae73f2565e",
+    "tracked": false,
+    "why": "The subagent transcripts are kept verbatim and never edited. They include the session's injected context -- the operator's e-mail address and local file paths -- so the archive holding them stays out of version control. Its hash, and each transcript's, are recorded here."
+  }
+}
