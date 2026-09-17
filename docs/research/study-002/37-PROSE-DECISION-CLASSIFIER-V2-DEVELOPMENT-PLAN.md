@@ -333,4 +333,10 @@ Check set 4's 122 / 124 was not repeated: round 5 scores 0.944 on its own set, t
 the unexposed scores range from 0.934 to 0.984 with no upward trend, and the pooled rate is 0.955. Report:
 `reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round5.v2-check-5-agreement.json`.
 
-**Next (§4):** the study owner chooses between freezing the round-5 rules and a further round.
+**Frozen (decided by the study owner, 2026-09-18).** After five check rounds, offered freezing the round-5 rules or
+a sixth round, the owner chose to freeze. `prose-decision-classifier-v2` is the round-5 rules unchanged since d0fdbcd,
+source sha256 (LF) `47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382`, tagged
+`prose-decision-classifier-v2`. It was frozen before any P-DET-COVERAGE-v2 reference or result existed (the reference
+is still being labelled). Any rule change from here is a new classifier version. The one-shot runner (§4) is written
+and committed next, before the test is run; the test runs once, after the three-model consensus reference exists
+(§5).

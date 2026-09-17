@@ -81,8 +81,12 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
   `33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md`). It takes `ClassifierFeatures` only and returns a
   `Decision` naming the 22 §3 tree step and the matched evidence. v1 is frozen (tag, hash-checked by the one-shot
   runner): never edit `decision_classifier.py`. `prose-decision-classifier-v2` (plan `37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md`)
-  is developed in `src/opengrad/data/decision_classifier_v2.py`, which started as a copy of v1, with tests
-  `tests/data/test_decision_classifier_v2.py`. Rules:
+  lives in `src/opengrad/data/decision_classifier_v2.py`, which started as a copy of v1, with tests
+  `tests/data/test_decision_classifier_v2.py`. v2 is **frozen** on 2026-09-18 after five check rounds (37 §7): git tag
+  `prose-decision-classifier-v2`, source sha256 (LF) `47436ca9…`; never edit `decision_classifier_v2.py` either; any
+  rule change is a new version. Its development sets and check sets 1-5 are scored with
+  `scripts/evaluate_prose_classifier_v2_dev.py` and built by `src/opengrad/verification/classifier_devset_v2.py`.
+  Rules (written for v1, applying to v2 the same way):
   - develop only against `reports/prose-classifier/dev/` (`python scripts/evaluate_prose_classifier_dev.py
     --show N`), and report the numbers as agreement with model labels, never accuracy;
   - never open P-DET-v1 or P-DET-COVERAGE-v1 files while developing
