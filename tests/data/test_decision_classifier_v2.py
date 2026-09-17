@@ -270,3 +270,64 @@ def test_naming_the_function_that_does_the_job_is_not_delivered_content() -> Non
 def test_asking_which_thing_the_user_means_is_clarify() -> None:
     response = "I'm sorry but your request is too broad. Are you interested in a particular city, region, country or the general weather trends worldwide? Could you please specify?"
     assert decide(response, [WEATHER]).label == dc.CLARIFY
+
+
+# ── v2 round 4 (37 §7): task lists, rewritten text, worked results and scope wording ─────────────────
+
+
+def test_a_list_restating_unsupported_needs_belongs_to_the_decline() -> None:
+    response = (
+        "It appears that the given functions do not support the capabilities required for your specific needs:\n"
+        "1. Retrieving detailed information about the hotels and guest houses in a specific district of central Lisbon.\n"
+        "2. Obtaining a list of all regions in Portugal and the villages available in each one.\n"
+        "3. Fetching postal details for specific coordinates near the river.\n"
+        "None of these are suitable for the tasks related to locations in Portugal."
+    )
+    assert decide(response, [WEATHER]).label == dc.UNSUPPORTED
+
+
+def test_a_list_restating_the_task_belongs_to_the_request() -> None:
+    response = (
+        "The query mentions two tasks:\n1. Convert the uploaded audio files to mp3, trim them to thirty seconds and "
+        "normalise their volume for a presentation.\n2. Browse through uploaded files.\nThe query does not provide "
+        "these two required arguments."
+    )
+    assert decide(response, [WEATHER]).label == dc.CLARIFY
+
+
+def test_what_happens_once_the_input_arrives_is_part_of_the_request() -> None:
+    response = (
+        "Sure, I can help you with that. However, I would need some additional information about the dates of your "
+        "trip. Could you please provide that information? Once I have that information, I can use it to estimate the "
+        "expected rainfall in the region based on factors such as the season, the altitude of the towns you visit, the "
+        "prevailing winds along the coast, the typical storm tracks for that month and the historical averages recorded "
+        "by nearby weather stations over the past thirty years."
+    )
+    assert decide(response, [WEATHER]).label == dc.CLARIFY
+
+
+def test_rewritten_text_after_a_label_is_content_not_a_decline() -> None:
+    response = "i cant open the door its locked\nCorrected sentence:\nI can't open the door; it's locked."
+    assert decide(response).label == dc.DIRECT
+
+
+def test_a_worked_result_is_not_a_narrated_call() -> None:
+    response = "Using the factorial function, we can evaluate it: factorial(4) = 24 and factorial(3) = 6, so the sum is 24 + 6 = 30."
+    assert decide(response).label == dc.DIRECT
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        "The given functions do not provide train timetables. Therefore, I cannot make the necessary function calls. "
+        "For the trip, you may need to look up the timetable on the rail operator's website, which lists every "
+        "departure, platform, delay, connection, ticket price and seat reservation option for each of the lines and "
+        "stations you plan to use on the journey.",
+        "The question lacks the parameters required by the functions. The available functions only deal with weather, "
+        "not stocks. Therefore, I cannot retrieve the list of stocks.",
+        "The request is about stock prices. Therefore, the available functions "
+        "cannot be used to achieve the requested purpose. The question also lacks the parameters required.",
+    ],
+)
+def test_round_4_scope_wordings_are_unsupported(response: str) -> None:
+    assert decide(response, [WEATHER]).label == dc.UNSUPPORTED

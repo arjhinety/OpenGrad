@@ -259,13 +259,15 @@ _CAPABILITY = _rx(
     r"(functions?|tools?|apis?)\b",
     # v2 round 3: "the functions cannot be called" for want of arguments is not a capability gap.
     r"\b(functions?|tools?|apis?)\b[^.!?]{0,40}\b(cannot|can't|can not|could not|couldn't|(is|are) unable to) "
-    r"(?!be (called|invoked|used|executed|run|made)\b)\w+",
+    # v2 round 4: "cannot be used to achieve the purpose" stays a capability gap; only uncallable is excluded.
+    r"(?!be (called|invoked|executed|run|made)\b)\w+",
     r"\bcannot be (processed|handled|answered|addressed|fulfilled|resolved) (using|with|by) (the )?(given|provided|"
     r"available|listed|offered) (functions?|tools?|apis?)\b",
     r"\b(none|neither) of which (is|are) (relevant|applicable|suitable|useful|related)\b",
     # Asking whether a capability exists: the missing thing is a tool, not user input (22 §1.3 boundary).
     r"\bdo you have (a|an|any|another) [\w\- ]{0,30}(tool|function|api|integration|plugin)\b",
-    r"\bonly (allow|support|provide|cover|retrieve|pertain|relate|focus|convert|generate|search|give|return)s?\b",
+    r"\bonly (allow|support|provide|cover|retrieve|pertain|relate|focus|convert|generate|search|give|return|deal|work|"
+    r"handle)s?\b",
     r"\bdon't have (access|the ability)\b|\bdo not have (access|the ability)\b",
 )
 # A decline whose stated reason is missing user input (22 §1.4 exclusion to CLARIFY).
@@ -281,7 +283,7 @@ _EXTERNAL_SERVICE = _rx(
     r"(source|website|site|service|generator|database|app|platform)\b",
     r"\byou would need (access to|to use|to consult)\b",
     # v2 round 2: a referral phrased as a need.
-    r"\byou (may|might|could|would|will) (need|want|have) to (consult|check|visit|contact|refer to)\b",
+    r"\byou (may|might|could|would|will) (need|want|have) to (consult|check|visit|contact|refer to|look up|use|search)\b",
     r"\b(please )?(consult|contact|refer to|check with) (a|an|the|your)\b",
     r"\bonline (generator|tool|service|source|resource)s?\b",
 )
@@ -363,6 +365,8 @@ _ABOUT_FUNCTIONS = re.compile(
     r"|\b(parameters?|arguments?)\b"
     # v2 round 3: naming which offered function does the job ("The function that retrieves X is ...").
     r"|\b(functions?|tools?|apis?) (that|which) (retrieves?|returns?|gets?|fetches?|provides?|lists?|finds?|searches)\b"
+    # v2 round 4: what the assistant will do once the requested input arrives.
+    r"|^once (i have|i receive|i get|you provide|you've provided|you have provided)\b"
     r"|\b(the|your|this) (given |user's |original )?(query|question|request)\b"
     r"|\b(helpful|useful|necessary|needed) to (have|know)\b|\bfollowing (information|details)\b"
     r"|\b(missing|lacks?|ambiguous|once provided|not explicitly|not given)\b"
@@ -374,6 +378,48 @@ _ABOUT_FUNCTIONS = re.compile(
 def _strip(sentences: list[str], *groups: tuple[re.Pattern[str], ...]) -> list[str]:
     return [s for s in sentences if not any(_any(group, s) for group in groups)]
 
+
+_LIST_MARKER = re.compile(r"^\s*(\d+[.)]|[-*•])\s*$")
+_LIST_ITEM = re.compile(r"^\s*([-*•]|\d+[.)])\s+")
+
+
+def _task_list_items(sentences: list[str]) -> set[int]:
+    """v2 round 4: indexes of list items introduced by a sentence ending in ":" that talks about the task, the
+    tools or a decline ("…the given functions do not support: 1. X 2. Y"). The items restate what was asked or
+    what is missing; they are part of that sentence, not delivered content."""
+    items: set[int] = set()
+    for i, sentence in enumerate(sentences):
+        intro = sentence.rstrip().endswith(":") and (
+            _ABOUT_FUNCTIONS.search(sentence) or _any(_DECLINE, sentence) or _any(_CAPABILITY, sentence)
+        )
+        if not intro:
+            continue
+        j, after_marker = i + 1, False
+        while j < len(sentences):
+            current = sentences[j]
+            if _LIST_MARKER.match(current):
+                after_marker = True
+            elif _LIST_ITEM.match(current) or after_marker:
+                after_marker = False
+            else:
+                break
+            items.add(j)
+            j += 1
+    return items
+
+
+def _without(sentences: list[str], drop: set[int], start: int = 0) -> list[str]:
+    return [s for i, s in enumerate(sentences, start) if i not in drop]
+
+
+# v2 round 4: a label introducing rewritten text ("Corrected sentence: I can't find it."): what follows is content.
+_REWRITE_LABEL = re.compile(
+    r"^\W*(corrected|revised|rewritten|edited|fixed|improved|rephrased|paraphrased|translated|condensed|shortened)"
+    r"( \w+)?( (sentence|version|text|paragraph|passage)s?)?\s*:",
+    re.IGNORECASE,
+)
+# v2 round 4: a worked result ("gamma(3) = 2", "≈ 1.79") delivers an answer, whatever functions it names.
+_WORKED_RESULT = re.compile(r"[\d)]\s*[=≈]\s*-?\d")
 
 def _content_words(sentences: list[str]) -> int:
     return sum(_words(s) for s in sentences if not _ABOUT_FUNCTIONS.search(s))
@@ -456,7 +502,11 @@ def classify(features: ClassifierFeatures) -> Decision:
         return Decision(ABSTAIN, STEP_NON_SUBSTANTIVE)
 
     sentences = _sentences(prose)
-    epistemic_free = [s for s in sentences if not _any(_EPISTEMIC, s)]
+    # v2 round 4: the rewritten text after "Corrected sentence:" is content, even when it reads like a decline.
+    label_at = next((i for i, s in enumerate(sentences) if _REWRITE_LABEL.match(s)), None)
+    rewritten = set(range(label_at, len(sentences))) if label_at is not None else set()
+    epistemic_free = [s for i, s in enumerate(sentences) if not _any(_EPISTEMIC, s) and i not in rewritten]
+    listed = _task_list_items(sentences)
 
     # 3. A decline or statement of inability.
     decline = next((m for s in epistemic_free if (m := _any(_DECLINE, s) or _any(_CAPABILITY, s))), None)
@@ -468,7 +518,7 @@ def classify(features: ClassifierFeatures) -> Decision:
             tail = _but_clause_content(sentence)
             if tail:
                 return Decision(DIRECT, STEP_DECLINE_WITH_CONTENT, (decline.group(0), tail[:80]))
-        rest = _strip(sentences, _DECLINE, _CAPABILITY, _OFFER, _EXTERNAL_SERVICE, _COURTESY, _REQUEST)
+        rest = _strip(_without(sentences, listed), _DECLINE, _CAPABILITY, _OFFER, _EXTERNAL_SERVICE, _COURTESY, _REQUEST)
         # "Here's the answer: ..." after a note that the tools don't fit delivers the answer (22 §1.4 exclusion).
         # v2 round 2: "Here is why I cannot proceed:" introduces the decline's reasons, not an answer.
         delivery = next(
@@ -484,7 +534,7 @@ def classify(features: ClassifierFeatures) -> Decision:
         asks = [i for i, s in enumerate(sentences) if _any(_REQUEST, s)]
         if capability is None and asks:
             rest = _strip(
-                sentences[: asks[0]] + sentences[asks[-1] + 1 :],
+                _without(sentences[: asks[0]], listed) + _without(sentences[asks[-1] + 1 :], listed, asks[-1] + 1),
                 _DECLINE, _CAPABILITY, _OFFER, _EXTERNAL_SERVICE, _COURTESY, _REQUEST,
             )
         if has_code or _content_words(rest) >= CONTENT_WORDS_AFTER_DECLINE:
@@ -509,8 +559,9 @@ def classify(features: ClassifierFeatures) -> Decision:
         # An answer delivered before the question makes the question optional; text after the question usually
         # explains what is asked (formats, defaults, options), so only a long passage there counts as delivery
         # (an opening rhetorical question followed by the answer).
-        before = _strip(non_courtesy[: asks[0]], _REQUEST, _OFFER, _ACKNOWLEDGEMENT)
-        after = _strip(non_courtesy[asks[-1] + 1 :], _REQUEST, _OFFER, _ACKNOWLEDGEMENT)
+        listed_here = _task_list_items(non_courtesy)
+        before = _strip(_without(non_courtesy[: asks[0]], listed_here), _REQUEST, _OFFER, _ACKNOWLEDGEMENT)
+        after = _strip(_without(non_courtesy[asks[-1] + 1 :], listed_here, asks[-1] + 1), _REQUEST, _OFFER, _ACKNOWLEDGEMENT)
         if (
             has_code
             or _content_words(before) >= CONTENT_WORDS_BEFORE_REQUEST
@@ -539,7 +590,7 @@ def classify(features: ClassifierFeatures) -> Decision:
     if evidence is None and _INVOCATION_VERB.search(prose):
         low = prose.casefold()
         evidence = next((name for name in sorted(offered) if len(name) >= 4 and name in low), None)
-    if evidence and not has_code and _words(prose) <= NARRATION_MAX_WORDS:
+    if evidence and not has_code and _words(prose) <= NARRATION_MAX_WORDS and not _WORKED_RESULT.search(prose):
         return Decision(ABSTAIN, STEP_NARRATED_CALL, (evidence,))
 
     # 7. Delivered content, including an ordinary conversational reply.

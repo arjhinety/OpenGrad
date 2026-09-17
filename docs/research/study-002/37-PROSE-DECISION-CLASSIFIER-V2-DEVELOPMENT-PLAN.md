@@ -218,3 +218,34 @@ check set 3's disagreements. From here **`prose-classifier-v2-devcheck-3` is exp
 data; its 114 / 122 above is the only unexposed score it will ever give. Round-4 rules are committed before
 `prose-classifier-v2-devcheck-4` (150 first replies, its own seed, excluding dev-v2, check sets 1-3 and everything
 they exclude) is drawn, labelled the same way and scored once; then the owner chooses again.
+
+**Round 4 rules** (source sha256 LF `309ab4df…`), made after reading check set 3's eight disagreements and the
+four UNKNOWN items predicted CLARIFY, committed before check set 4 is drawn. General rules, tested on paraphrases
+that fail on the round-3 rules:
+
+1. list items introduced by a sentence ending in ":" that talks about the task, the tools or a decline restate
+   what was asked or is missing; they are part of that sentence, not delivered content;
+2. "Once I have that information, I can …" is part of the request;
+3. text after a rewrite label ("Corrected sentence:") is content, even when it reads like a decline;
+4. a worked result ("gamma(3) = 2") is not a narrated call;
+5. "you may need to look up / use …" is a referral; "only deal with / work with / handle" is a scope limit;
+6. "the functions cannot be **used** to achieve the purpose" is a capability gap again. Round 3's exclusion
+   (rule 3) had wrongly caught "used" along with "called".
+
+**Tried and dropped.** A rule to abstain when no tool is offered and the reply asks for a named function's
+parameters (the four UNKNOWN items) moved seven items the model had labelled CLARIFY away from their label. It
+gained eight abstentions on UNKNOWN items, which are not counted either way. The model's own labels do not separate
+the two cases, so the rule was removed.
+
+| Round 4 rules, in-sample | Agree | Round 3 |
+|---|---:|---:|
+| dev-v2 | 245 / 248 | 245 / 248 |
+| dev-v1 | 225 / 226 | 223 / 226 |
+| devcheck-v1 | 110 / 110 | 110 / 110 |
+| devcheck-v2 | 109 / 113 | 109 / 113 |
+| v2 check set 1 (exposed) | 124 / 125 | 124 / 125 |
+| v2 check set 2 (exposed) | 126 / 126 | 126 / 126 |
+| v2 check set 3 (exposed) | 122 / 122 | 114 / 122 |
+
+Across the 1,250 development items, ten predictions moved to agree with the model labels and none that agreed moved
+away. The four UNKNOWN items stay predicted CLARIFY.

@@ -114,6 +114,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--round", type=int, help="development round, recorded in the report name")
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args(argv)
+    # Item text holds characters (e.g. "≈") a Windows console code page cannot print.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     names = sorted(SETS) if args.set == "all" else [args.set]
     if args.show and any(name in UNEXPOSED for name in names):
         parser.error("items of an unexposed check set are never printed (37 §4)")
