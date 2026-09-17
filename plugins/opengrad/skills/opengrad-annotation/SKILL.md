@@ -66,9 +66,10 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     `local/`, untracked).
   - **Supply for a next population** (35 §2, §4): `scripts/audit_pdet_coverage_v2_supply.py` counts the unused
     layer B pool (after P-DET-COVERAGE-v1 and every development and check set) and projects DIRECT from existing
-    label yields. Counts only. Its 2026-09-17 run found about 22 expected DIRECT, short of 50.
-    `scripts/audit_corpus_direct_prevalence.py` estimates DIRECT across all of normalization-v3 (label yields and
-    the frozen classifier, counts only; 35 §5).
+    label yields. Counts only. Its 2026-09-17 run found about 22 expected DIRECT among single exchanges, short of 50.
+    `scripts/audit_corpus_direct_prevalence.py` does the same for every single exchange of normalization-v3 (35 §5),
+    and `scripts/audit_canonical_v2_final_direct.py` counts Study 001's corpus turn by turn, multi-turn included
+    (35 §6). Single-exchange counts miss most of Glaive's prose, which sits in multi-turn conversations.
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters

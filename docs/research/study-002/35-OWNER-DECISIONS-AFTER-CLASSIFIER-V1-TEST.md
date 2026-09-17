@@ -103,7 +103,13 @@ strata. Both minimums (50 overall, 30 challenge) are out of reach, before any `N
   gets no balancing permission from this corpus, and C1 is not authorised. How to continue is the owner's next
   decision. No population was drawn and nothing else changed.
 
-## 5. How rare DIRECT is across the whole corpus (2026-09-17)
+## 5. How rare DIRECT is among single-exchange prose records (2026-09-17)
+
+> **Correction (§6).** This section was first titled "across the whole corpus", and its best reading and
+> consequence below claimed that the corpus holds almost no direct answers and that rebalancing cannot restore
+> them. That was wrong. It measured only prose *single exchanges*, the records the input contract admits
+> (32). The multi-turn records it set aside hold thousands of direct answers, with and without tools (§6). The
+> counts below stand; the conclusions are rescoped.
 
 Decided by the owner after §4: measure DIRECT across all of normalization-v3 before choosing between a new
 DIRECT-bearing source and a redesign of C1. Counts only, `scripts/audit_corpus_direct_prevalence.py`, written to
@@ -136,21 +142,65 @@ single exchange: 34,447 multi-turn (34,446 of them Glaive), 20,923 with the call
   predictions there match its known false-DIRECT behaviour: 0 of 9 agreed on ToolACE (33 §8), and on P-DET-v1,
   a natural When2Call sample with 0 human DIRECT labels, it predicted 8 of 575 (1.4%, against 1.2% here).
 
-**Best reading.** Roughly 150 to 165 DIRECT records exist, all from Glaive: about 0.5% of prose single exchanges
-and under 0.1% of all records. **Direct answers while tools are offered number about 20 records, around 0.07%
-of the 27,908 prose exchanges that offer tools.**
+**Best reading, for single exchanges only.** Roughly 150 to 165 single-exchange DIRECT records exist, all from
+Glaive: about 0.5% of prose single exchanges. Direct answers with tools offered number about 20 of the 27,908
+single exchanges that offer tools.
 
 - **Directly shown:** the disposition and record counts; the classifier counts; the label counts.
 - **Strongly suggested:** DIRECT with tools offered is nearly absent from the corpus, since three estimates
   built differently agree except where one label is multiplied by 14,049 records.
 - **Hypothesis only:** that this absence contributed to Study 001's loss of direct answering. Study 001's own
   corpus composition has not been measured this way.
-- **Unknown:** DIRECT behaviour inside the 34,447 multi-turn records and later assistant turns, which no
-  population or classifier covers; and whether an available licensed dataset holds natural direct answers with
-  tools offered.
+- **Unknown when written, answered in §6:** DIRECT behaviour inside the multi-turn records and later assistant
+  turns.
 
-**Consequence for C1.** Rebalancing reweights what the corpus holds. With about 20 DIRECT-with-tools records,
-there is almost nothing to upweight, whatever classifier labels them. So a classifier-based C1 cannot restore
-direct answering from this corpus, independent of whether DIRECT can be measured. No population was drawn and
-nothing else changed.
+**Consequence, rescoped.** Under the current input contract, which admits single exchanges only, a
+classifier-based C1 sees about 20 DIRECT-with-tools records and has almost nothing to upweight. That is a
+limit of the contract's scope, not of the corpus (§6). No population was drawn and nothing else changed.
+
+## 6. Study 001's training corpus, turn by turn (2026-09-17)
+
+Decided by the owner after §5: test the hypothesis on the corpus M0 actually trained on. Counts only,
+`scripts/audit_canonical_v2_final_direct.py`, written to
+`reports/pdet-coverage-v2/canonical-v2-final.direct-prevalence.json`. The `canonical-v2-final` release
+(173,237 records) was downloaded from `arrochi112/OpenGrad-ToolPolicy-Canonical-v2` at revision `df1a1f51…`,
+and all 176 shards match the release manifest that `runs/m0_sft_canonical_v2_final/dataset_manifest.json` pins
+(`8ced403b…`). M0 trained 161,966 of these records.
+
+SFT supervises every assistant turn, so turns are counted. Of 388,988 assistant turns: 132,895 carry a
+structured call, 66,656 are prose right after a tool result, **78,514 are prose first answers to one user
+message, and 110,923 are other prose turns in multi-turn conversations.** Most of the prose sits in Glaive
+conversations that continue past the first exchange, which the input contract (32) and every P-DET population
+exclude.
+
+**Frozen classifier v1 on the prose turns** (input: the turn and the nearest preceding user message):
+
+| Prose turns | Turns | Predicted DIRECT | Glaive DIRECT, distinct user messages |
+|---|---:|---:|---:|
+| First answer, tools offered | 41,002 | 9,455 | 3,137 |
+| Later turn, tools offered | 22,915 | 13,182 | 1,614 |
+| First answer, no tools | 37,512 | 33,831 | 33,756 |
+| Later turn, no tools | 88,008 | 87,281 | 62,267 |
+
+Nearly all predicted DIRECT is Glaive: 9,288 of the 9,455 tools-offered first answers, and 33,789 of the
+33,831 without tools.
+
+- **Directly shown:** the turn counts and the classifier's outputs.
+- **Strongly suggested:** Study 001's corpus holds thousands of direct answers with tools offered, and tens of
+  thousands without. The classifier's DIRECT precision on Glaive single exchanges was 0.975 (33 §8). Even if its
+  precision on these first answers were far lower, the count would stay in the thousands.
+- **Not shown:** the classifier was never tested on turns taken from multi-turn conversations. For later turns
+  its input drops the conversation, so those counts are rough. The label-yield projection in the report is
+  not used here: its Glaive yields come from single exchanges that mostly offer no tools, and do not carry over.
+- **The hypothesis of §5 is not supported.** A lack of direct answers in the training data does not explain
+  Study 001's loss of direct answering: the corpus holds many, including tens of thousands with no tools offered.
+  M0's measured failure was on bare zero-shot GSM8K questions (README).
+
+**Consequences.**
+1. **§4 is scoped to the current population unit.** The unused pool of *single exchanges* cannot supply 50
+   DIRECT items. First answers inside multi-turn Glaive conversations could: about 3,100 distinct user
+   messages with tools offered are predicted DIRECT. Using them needs a new input contract and population unit.
+2. **§5's C1 consequence is a limit of the contract, not the corpus.** Direct answers exist to reweight; C1 as
+   specified cannot see them.
+3. How to continue is the owner's next decision. Nothing was drawn and no rule changed.
 

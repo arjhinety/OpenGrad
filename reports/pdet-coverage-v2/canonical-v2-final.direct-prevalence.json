@@ -1,0 +1,485 @@
+{
+  "artifact_kind": "CANONICAL_V2_FINAL_DIRECT_PREVALENCE_AUDIT",
+  "assistant_turns_by_source_tools_and_kind": {
+    "glaive": {
+      "no_tools": {
+        "after_tool_result": 0,
+        "call": 0,
+        "first_exchange": 34598,
+        "later_turn": 88008
+      },
+      "tools_offered": {
+        "after_tool_result": 65635,
+        "call": 65767,
+        "first_exchange": 35373,
+        "later_turn": 22217
+      }
+    },
+    "toolace": {
+      "no_tools": {
+        "after_tool_result": 0,
+        "call": 0,
+        "first_exchange": 697,
+        "later_turn": 0
+      },
+      "tools_offered": {
+        "after_tool_result": 1021,
+        "call": 9786,
+        "first_exchange": 1341,
+        "later_turn": 698
+      }
+    },
+    "when2call": {
+      "no_tools": {
+        "after_tool_result": 0,
+        "call": 0,
+        "first_exchange": 2217,
+        "later_turn": 0
+      },
+      "tools_offered": {
+        "after_tool_result": 0,
+        "call": 0,
+        "first_exchange": 4288,
+        "later_turn": 0
+      }
+    },
+    "xlam": {
+      "no_tools": {
+        "after_tool_result": 0,
+        "call": 0,
+        "first_exchange": 0,
+        "later_turn": 0
+      },
+      "tools_offered": {
+        "after_tool_result": 0,
+        "call": 57342,
+        "first_exchange": 0,
+        "later_turn": 0
+      }
+    }
+  },
+  "authorization": "docs/research/study-002/35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md \u00a75 (owner decision 2026-09-17)",
+  "corpus": {
+    "record_count": 173237,
+    "release_manifest_sha256": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
+    "repository": "arrochi112/OpenGrad-ToolPolicy-Canonical-v2",
+    "revision": "df1a1f5135cc4b08e24b7ff20582084988932c61",
+    "shards_verified": 176
+  },
+  "first_exchange_distinct_prompts": {
+    "glaive": {
+      "no_tools": 34564,
+      "tools_offered": 5222
+    },
+    "toolace": {
+      "no_tools": 694,
+      "tools_offered": 1339
+    },
+    "when2call": {
+      "no_tools": 2214,
+      "tools_offered": 4229
+    },
+    "xlam": {
+      "no_tools": 0,
+      "tools_offered": 0
+    }
+  },
+  "first_exchange_strata": {
+    "glaive": {
+      "no_tools": {
+        "M": 255,
+        "P2": 24059,
+        "Q": 9884,
+        "R": 98,
+        "X": 301
+      },
+      "tools_offered": {
+        "M": 351,
+        "P1": 7463,
+        "Q": 13493,
+        "R": 14060,
+        "X": 6
+      }
+    },
+    "toolace": {
+      "no_tools": {
+        "M": 2,
+        "P2": 493,
+        "Q": 50,
+        "R": 149,
+        "X": 3
+      },
+      "tools_offered": {
+        "M": 709,
+        "P1": 380,
+        "Q": 168,
+        "R": 81,
+        "X": 3
+      }
+    },
+    "when2call": {
+      "no_tools": {
+        "M": 1,
+        "P2": 3,
+        "R": 2213
+      },
+      "tools_offered": {
+        "M": 202,
+        "P1": 9,
+        "Q": 2270,
+        "R": 1807
+      }
+    },
+    "xlam": {
+      "no_tools": {},
+      "tools_offered": {}
+    }
+  },
+  "frozen_classifier": {
+    "distinct_user_messages_by_source_tools_and_kind": {
+      "glaive": {
+        "no_tools": {
+          "first_exchange": {
+            "ABSTAIN": 72,
+            "CALL": 0,
+            "CLARIFY": 620,
+            "DIRECT": 33756,
+            "UNSUPPORTED": 116
+          },
+          "later_turn": {
+            "ABSTAIN": 21,
+            "CALL": 0,
+            "CLARIFY": 80,
+            "DIRECT": 62267,
+            "UNSUPPORTED": 549
+          }
+        },
+        "tools_offered": {
+          "first_exchange": {
+            "ABSTAIN": 13,
+            "CALL": 6,
+            "CLARIFY": 1943,
+            "DIRECT": 3137,
+            "UNSUPPORTED": 217
+          },
+          "later_turn": {
+            "ABSTAIN": 1,
+            "CALL": 0,
+            "CLARIFY": 82,
+            "DIRECT": 1614,
+            "UNSUPPORTED": 2756
+          }
+        }
+      },
+      "toolace": {
+        "no_tools": {
+          "first_exchange": {
+            "ABSTAIN": 359,
+            "CALL": 0,
+            "CLARIFY": 37,
+            "DIRECT": 13,
+            "UNSUPPORTED": 285
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "tools_offered": {
+          "first_exchange": {
+            "ABSTAIN": 12,
+            "CALL": 12,
+            "CLARIFY": 649,
+            "DIRECT": 116,
+            "UNSUPPORTED": 550
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 41,
+            "DIRECT": 613,
+            "UNSUPPORTED": 43
+          }
+        }
+      },
+      "when2call": {
+        "no_tools": {
+          "first_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 10,
+            "DIRECT": 29,
+            "UNSUPPORTED": 2175
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "tools_offered": {
+          "first_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 2406,
+            "DIRECT": 50,
+            "UNSUPPORTED": 1792
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        }
+      },
+      "xlam": {
+        "no_tools": {
+          "first_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "tools_offered": {
+          "first_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        }
+      }
+    },
+    "predictions_by_source_tools_and_kind": {
+      "glaive": {
+        "no_tools": {
+          "first_exchange": {
+            "ABSTAIN": 72,
+            "CALL": 0,
+            "CLARIFY": 620,
+            "DIRECT": 33789,
+            "UNSUPPORTED": 116
+          },
+          "later_turn": {
+            "ABSTAIN": 21,
+            "CALL": 0,
+            "CLARIFY": 80,
+            "DIRECT": 87281,
+            "UNSUPPORTED": 625
+          }
+        },
+        "tools_offered": {
+          "first_exchange": {
+            "ABSTAIN": 13,
+            "CALL": 6,
+            "CLARIFY": 11928,
+            "DIRECT": 9288,
+            "UNSUPPORTED": 14138
+          },
+          "later_turn": {
+            "ABSTAIN": 1,
+            "CALL": 0,
+            "CLARIFY": 185,
+            "DIRECT": 12569,
+            "UNSUPPORTED": 9462
+          }
+        }
+      },
+      "toolace": {
+        "no_tools": {
+          "first_exchange": {
+            "ABSTAIN": 359,
+            "CALL": 0,
+            "CLARIFY": 37,
+            "DIRECT": 13,
+            "UNSUPPORTED": 288
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "tools_offered": {
+          "first_exchange": {
+            "ABSTAIN": 12,
+            "CALL": 12,
+            "CLARIFY": 651,
+            "DIRECT": 116,
+            "UNSUPPORTED": 550
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 41,
+            "DIRECT": 613,
+            "UNSUPPORTED": 44
+          }
+        }
+      },
+      "when2call": {
+        "no_tools": {
+          "first_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 10,
+            "DIRECT": 29,
+            "UNSUPPORTED": 2178
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "tools_offered": {
+          "first_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 2436,
+            "DIRECT": 51,
+            "UNSUPPORTED": 1801
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        }
+      },
+      "xlam": {
+        "no_tools": {
+          "first_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        },
+        "tools_offered": {
+          "first_exchange": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          },
+          "later_turn": {
+            "ABSTAIN": 0,
+            "CALL": 0,
+            "CLARIFY": 0,
+            "DIRECT": 0,
+            "UNSUPPORTED": 0
+          }
+        }
+      }
+    },
+    "source_sha256_lf": "64293c51917a54a649bad9e96960302dd5df1b39eabd0d260d3784b3eeb6687c",
+    "version": "prose-decision-classifier-v1"
+  },
+  "label_yield_projection_first_exchanges": {
+    "development_and_check_set_model_labels": {
+      "glaive": {
+        "expected_direct_first_exchanges_no_tools": 31780.9,
+        "expected_direct_first_exchanges_tools_offered": 10541.4,
+        "first_exchanges_without_yield_no_tools": 301,
+        "first_exchanges_without_yield_tools_offered": 7469
+      },
+      "toolace": {
+        "expected_direct_first_exchanges_no_tools": 1.5,
+        "expected_direct_first_exchanges_tools_offered": 5.1,
+        "first_exchanges_without_yield_no_tools": 3,
+        "first_exchanges_without_yield_tools_offered": 3
+      },
+      "when2call": {
+        "expected_direct_first_exchanges_no_tools": 0.0,
+        "expected_direct_first_exchanges_tools_offered": 0.0
+      },
+      "xlam": {}
+    },
+    "pdet_coverage_v1_consensus_reference": {
+      "glaive": {
+        "expected_direct_first_exchanges_no_tools": 30153.9,
+        "expected_direct_first_exchanges_tools_offered": 10427.4,
+        "first_exchanges_without_yield_no_tools": 301,
+        "first_exchanges_without_yield_tools_offered": 6
+      },
+      "toolace": {
+        "expected_direct_first_exchanges_no_tools": 0.0,
+        "expected_direct_first_exchanges_tools_offered": 0.0
+      },
+      "when2call": {
+        "first_exchanges_without_yield_no_tools": 2217,
+        "first_exchanges_without_yield_tools_offered": 4288
+      },
+      "xlam": {}
+    }
+  },
+  "m0_trainable_records_by_source": {
+    "glaive": 97112,
+    "toolace": 2259,
+    "when2call": 6505,
+    "xlam": 56090
+  },
+  "prose_turns_without_text": {
+    "first_exchange": 1,
+    "later_turn": 1
+  },
+  "records_by_source_and_tools": {
+    "glaive": {
+      "no_tools": 34598,
+      "tools_offered": 63741
+    },
+    "toolace": {
+      "no_tools": 697,
+      "tools_offered": 10354
+    },
+    "when2call": {
+      "no_tools": 2217,
+      "tools_offered": 4288
+    },
+    "xlam": {
+      "no_tools": 0,
+      "tools_offered": 57342
+    }
+  },
+  "status": "COUNTS ONLY. Descriptive estimates from model labels and a frozen classifier; not gold."
+}
