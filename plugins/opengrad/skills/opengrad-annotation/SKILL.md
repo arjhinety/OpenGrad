@@ -80,6 +80,11 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   Its annotation task is `pdet-coverage-v2` (`configs/annotation/pdet-coverage-v2.yaml`, procedure
   `pdet-coverage-v2.model-procedure.md`: v1's plus a first-reply instruction), run with the same three external
   annotators and the same finish-up steps.
+- **Classifier v2 development sets** (37 §3): `src/opengrad/verification/classifier_devset_v2.py --set dev --build |
+  --verify` draws first replies into `reports/prose-classifier/dev-v2/`, excluding P-DET-COVERAGE-v2 and everything
+  it excludes. Task `prose-classifier-dev-v2` (`configs/annotation/prose-classifier-dev-v2.yaml`) is labelled by
+  Claude subagents under `prose-classifier-dev-v2.model-procedure.md` (v1's plus the first-reply instruction),
+  session `model-dev-v2`. Development labels only, never gold.
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters

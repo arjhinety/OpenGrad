@@ -1,0 +1,171 @@
+# Development labels of first replies for prose-decision-classifier-v2 (docs/research/study-002/37 §3).
+#
+# Labelled like the v1 development sets (Claude Opus 5 subagents through `opengrad-annotate model-batch` /
+# `model-ingest`) under the v2 procedure, which adds 36 §3.7's first-reply instruction. Model judgments: never gold,
+# never a test, never evidence of accuracy. The set shares no item, prompt or response with P-DET-COVERAGE-v2,
+# P-DET-COVERAGE-v1 or the v1 development and check sets. unit_kind is blinded like the source.
+
+task_id: prose-classifier-dev-v2
+version: "1"
+title: Prose classifier v2 development labels (first replies)
+task_type: single_label
+annotation_schema_version: prose-classifier-dev-annotation-v1
+
+labels: [CALL, DIRECT, CLARIFY, UNSUPPORTED, UNKNOWN]
+shortcuts: {"1": CALL, "2": DIRECT, "3": CLARIFY, "4": UNSUPPORTED, "5": UNKNOWN}
+unknown_labels: [UNKNOWN]
+
+source:
+  path: reports/prose-classifier/dev-v2/prose-classifier-dev-v2.population.jsonl
+  format: jsonl
+  id_field: dev_id
+  expected_sha256: ec4c67566a4adb7eb6d41b381feb3435f2b171fbaa11d338970d87f36eb10f8f
+  expected_items: 300
+
+fields:
+  user:
+    label: User message
+    path: user_message
+  assistant:
+    label: Assistant response being classified
+    path: assistant_response
+  tools:
+    label: Available tools
+    path: tools
+
+# The source and stratum would cue the label; they are never shown to the annotator.
+blind_fields:
+  - gold_policy_label
+  - ambiguity_status
+  - annotator_id
+  - annotator_rationale
+  - boundary_rule_cited
+  - annotation_version
+  - layer
+  - stratum
+  - source_dataset
+  - source_name
+  - source_revision
+  - upstream_id
+  - record_id
+  - raw_record_hash
+  - canonical_hash
+  - features_sha256
+  - classifier_input_contract
+  - unit_kind
+
+extra_fields:
+  - key: ambiguity_status
+    label: Ambiguity status
+    type: select
+    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT, EMPTY_TOOLSET]
+    default: NONE
+    required: true
+  # Optional from the start (30 §10, as under amendment 29).
+  - key: annotator_rationale
+    label: Rationale
+    type: text
+    required: false
+    adjudication: false
+    help: Optional. A short note on why, or on what was hard, if you want one.
+  - key: boundary_rule_cited
+    label: Boundary rule (22 §2)
+    type: select
+    options: ["1", "2", "3", "4", "5", "6", "7", "8", "none"]
+    default: "none"
+    required: false
+    help: Cite 1-8 when a boundary discrimination decided the label.
+
+constraints:
+  - when_label_in: [UNKNOWN]
+    field: ambiguity_status
+    forbidden: [NONE]
+    message: UNKNOWN needs an ambiguity reason (23 §2 - set ambiguity_status).
+  - when_label_not_in: [UNKNOWN]
+    field: ambiguity_status
+    allowed: [NONE]
+    message: An ambiguous item is labeled UNKNOWN; a mode label needs ambiguity_status NONE (23 §2).
+
+adjudication_fields:
+  - key: decision_tree_step
+    label: Deciding rule (22 §3 step)
+    type: select
+    options: ["1", "2", "3", "4", "5", "6", "7", "8"]
+    required: true
+
+
+instructions:
+  - title: Checklist (26)
+    file: docs/research/study-002/26-PDET-ANNOTATOR-CHECKLIST.md
+  - title: Protocol - modes, boundaries, decision tree (22 §1-4)
+    file: docs/research/study-002/22-PDET-PROTOCOL.md
+    include_sections: ["1.", "2.", "3.", "4."]
+  - title: Instrument - fields, deciding, passes (23 §2, 3, 5, 7)
+    file: docs/research/study-002/23-PDET-ANNOTATION-INSTRUMENT.md
+    include_sections: ["2.", "3.", "5.", "7."]
+  - title: This population - DIRECT and post-tool responses (30 §2-3)
+    file: docs/research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md
+    include_sections: ["2.", "3."]
+
+
+instruction_forbidden_terms:
+  - challenge_families
+  - "families:"
+  - question_mark
+  - question_without_mark
+  - refusal_with_question
+  - refusal_plain
+  - tool_mentioned_no_payload
+  - caveat_then_content
+  - multi_clause_question
+  - no_tools_offered
+  - short_plain
+  - serialized_call_shape
+  - advice_external_service
+  - polite_followup
+  - HEURISTIC_REGEX
+  - refusal_signal
+  - stratum
+  - strata
+  - QUESTION_CUES
+  - HEDGE_CUES
+  - TEXTUAL_CALL
+  - INVOCATION_TALK
+  - invocation_talk
+  - identifier_shaped_tool_name
+  - word_tool_name
+  - trajectory_gate
+  - trajectory_issue
+  - pdetcov_index
+  - unit_kind
+  - has_continuation
+  - single_exchange
+
+
+record_keys:
+  item_id: dev_id
+  label: gold_policy_label
+  annotation_schema_version: annotation_version
+
+output:
+  dir: reports/prose-classifier/dev-v2/annotation
+  session_file: "prose-classifier-dev-v2.annotations.{annotator_id}.{session_id}.jsonl"
+  history_file: "audit/prose-classifier-dev-v2.history.{annotator_id}.{session_id}.jsonl"
+  adjudication_history_file: audit/prose-classifier-dev-v2.adjudication-history.jsonl
+  disagreements_file: prose-classifier-dev-v2.disagreements.jsonl
+  adjudication_file: prose-classifier-dev-v2.adjudicated.jsonl
+  gold_file: prose-classifier-dev-v2.gold.jsonl
+  manifest_file: prose-classifier-dev-v2.annotation-manifest.json
+
+protected_paths:
+  - reports/prose-classifier/dev-v2/prose-classifier-dev-v2.population.jsonl
+  - reports/prose-classifier/dev-v2/prose-classifier-dev-v2.manifest.json
+
+state_db: .annotation/prose-classifier-dev-v2.sqlite3
+
+model_annotators:
+  - annotator_id: model.claude-opus-5
+    model: claude-opus-5
+    procedure: configs/annotation/prose-classifier-dev-v2.model-procedure.md
+    procedure_sha256: 8ecf27c1c67da750730ef77465b7b8cdcc87e07f78a22eca305fe3d43d142738
+    authorization: docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md
