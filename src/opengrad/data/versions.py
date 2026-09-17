@@ -44,6 +44,10 @@ SCHEMA_NORMALIZATION_VERSION = "source-schema-normalization-v1"
 #: Deterministic prose classifier that infers a decision where the source provides no label.
 DECISION_CLASSIFIER_VERSION = "prose-decision-classifier-v1"
 
+#: Under development (docs/research/study-002/37): reads contract prose-decision-input-v2 (first replies). v1 above
+#: stays frozen and is still what every existing artifact names.
+DECISION_CLASSIFIER_V2_VERSION = "prose-decision-classifier-v2"
+
 #: Versioned concerns owned elsewhere but named here so one call reports the whole set.
 BEHAVIOR_TAXONOMY_VERSION = "tool-use-behavior-taxonomy-v1"
 CANONICAL_SCHEMA_VERSION = "tool_use_ir_v1"
