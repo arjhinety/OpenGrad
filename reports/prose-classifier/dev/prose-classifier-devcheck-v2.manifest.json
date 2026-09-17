@@ -1,0 +1,220 @@
+{
+  "artifact_kind": "PROSE_CLASSIFIER_DEVELOPMENT_CHECK_SET",
+  "classifier_input_contract": "prose-decision-input-v1",
+  "code_sha256_lf": {
+    "src/opengrad/verification/classifier_devcheck.py": "42c3c11984cbca70cc79687a71ee47f32f9149636063c0b786250f2865d6b16b",
+    "src/opengrad/verification/classifier_devset.py": "729a7bb15bcfa779c824fe0ae9b4f683272805594501f1a3c834e887e8f6ade4",
+    "src/opengrad/verification/pdet_coverage.py": "1c06fc288fa52bc3919eb7eaa689001ed1ba5ebe246d79ab96386162cd32117c"
+  },
+  "counts": {
+    "after_dedup": 12339,
+    "construction_exclusions": {
+      "distinct_prompts_matched": {
+        "PDET_V1_OVERLAP": 998,
+        "QAD_RECOVERY_SET": 143
+      },
+      "matched": {
+        "PDET_V1_OVERLAP": 1089,
+        "QAD_RECOVERY_SET": 12123
+      },
+      "primary": {
+        "PDET_V1_OVERLAP": 1084,
+        "QAD_RECOVERY_SET": 12123
+      }
+    },
+    "dedup": {
+      "raw_record_hash": 0,
+      "response_text": 1612,
+      "skeleton": 936,
+      "user_prompt": 353
+    },
+    "devset_overlap_removed": 718,
+    "layer_b_candidates": 30975,
+    "pdet_coverage_v1_overlap_removed": 1810,
+    "realized": 125,
+    "strata": {
+      "M": {
+        "per_source": {
+          "glaive": {
+            "realized": 0,
+            "supply": 0
+          },
+          "toolace": {
+            "realized": 13,
+            "supply": 619
+          },
+          "when2call": {
+            "realized": 12,
+            "supply": 458
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 1077
+      },
+      "P1": {
+        "per_source": {
+          "glaive": {
+            "realized": 0,
+            "supply": 0
+          },
+          "toolace": {
+            "realized": 25,
+            "supply": 233
+          },
+          "when2call": {
+            "realized": 0,
+            "supply": 0
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 233
+      },
+      "P2": {
+        "per_source": {
+          "glaive": {
+            "realized": 10,
+            "supply": 10
+          },
+          "toolace": {
+            "realized": 15,
+            "supply": 430
+          },
+          "when2call": {
+            "realized": 0,
+            "supply": 0
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 440
+      },
+      "Q": {
+        "per_source": {
+          "glaive": {
+            "realized": 8,
+            "supply": 33
+          },
+          "toolace": {
+            "realized": 8,
+            "supply": 105
+          },
+          "when2call": {
+            "realized": 9,
+            "supply": 5039
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 5177
+      },
+      "R": {
+        "per_source": {
+          "glaive": {
+            "realized": 8,
+            "supply": 129
+          },
+          "toolace": {
+            "realized": 8,
+            "supply": 172
+          },
+          "when2call": {
+            "realized": 9,
+            "supply": 5111
+          }
+        },
+        "quota": 25,
+        "realized": 25,
+        "shortage": 0,
+        "supply": 5412
+      },
+      "X": {
+        "per_source": {
+          "glaive": {
+            "realized": 0,
+            "supply": 0
+          },
+          "toolace": {
+            "realized": 0,
+            "supply": 0
+          },
+          "when2call": {
+            "realized": 0,
+            "supply": 0
+          }
+        },
+        "quota": 25,
+        "realized": 0,
+        "shortage": 25,
+        "supply": 0
+      }
+    }
+  },
+  "devset_id": "prose-classifier-devcheck-v2",
+  "excludes": {
+    "construction_exclusions": "as P-DET-COVERAGE-v1's draw (30 \u00a79), including P-DET-v1",
+    "earlier_sets": {
+      "reports/prose-classifier/dev/prose-classifier-dev-v1.population.jsonl": "abbdfc497dca61821bcdf35624988e82aa12ba5b562564c9aa2fe36fb0c72456",
+      "reports/prose-classifier/dev/prose-classifier-devcheck-v1.population.jsonl": "56564d85fa0db4abbc971b16bac5557edea8391620ccc3c3816a144cea651348"
+    },
+    "pdet_coverage_v1_population_sha256": "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c"
+  },
+  "input": {
+    "fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+    "path": "data/processed/normalization-v3",
+    "source_manifests_sha256_lf": {
+      "glaive": "3bba3a38efa5485263a7f3c3a030d09a3d8770169cd351770bc002a72febcb69",
+      "toolace": "1e1a9221c28ee09c1e2ffd1a201d2f769c19024e607038400e8f6b65f8acd6c2",
+      "when2call": "e49ede072f2629d80d73509274668c211b44acc619a770aa75cfe71c5c64742b",
+      "xlam": "0f3dcbe50acab8aaa940bd021db1519228c6624730e90531a01dc98766ae3f89"
+    },
+    "top_manifest_sha256_lf": "88b22ccc8ead4d0ba95156ab4a6c6a4232011d2d0ce490916982aca37752ee9e",
+    "upstream_disposition_counts": {
+      "glaive": {
+        "accepted": 98339,
+        "duplicates": 13352,
+        "rejected": 1269,
+        "source_rows": 112960
+      },
+      "toolace": {
+        "accepted": 11051,
+        "duplicates": 3,
+        "rejected": 246,
+        "source_rows": 11300
+      },
+      "when2call": {
+        "accepted": 14701,
+        "duplicates": 124,
+        "rejected": 175,
+        "source_rows": 15000
+      },
+      "xlam": {
+        "accepted": 57342,
+        "duplicates": 350,
+        "rejected": 2308,
+        "source_rows": 60000
+      }
+    }
+  },
+  "plan": "docs/research/study-002/33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md",
+  "population_file": "prose-classifier-devcheck-v2.population.jsonl",
+  "population_sha256": "2f4eb1354903661c7d998dc4920b33110a70281b2eb17380247feeab26708c1f",
+  "presentation_order": "sha256(seed :order: pdetcov_id) ascending",
+  "quotas": {
+    "M": 25,
+    "P1": 25,
+    "P2": 25,
+    "Q": 25,
+    "R": 25,
+    "X": 25
+  },
+  "ranking": "sha256(seed | stratum | pdetcov_id) descending; strata scarcest first for dedup",
+  "seed": "opengrad-prose-classifier-devcheck-v2",
+  "statement": "The second held-out development check for the prose decision classifier (33 \u00a75a): scored once on the round-2 rules, because the first check set was read in round 2. Its labels are model judgments, never gold. It shares no item, prompt or response with prose-classifier-dev-v1, prose-classifier-devcheck-v1, P-DET-v1 or P-DET-COVERAGE-v1.",
+  "status": "DEVELOPMENT_ONLY_NEVER_GOLD"
+}

@@ -115,6 +115,29 @@ owner. The study owner later decided (2026-09-17) to annotate nothing, which rul
   now exposed**: it becomes development data, and its 102/110 result above is the only unexposed score it will
   ever give. The rule changes that follow are measured on a fresh check set, `prose-classifier-devcheck-v2`,
   which excludes both earlier sets.
+
+  Round 2 fixed four general gaps: offers after a decline counted as content; missing capability wordings;
+  statements of what the user left out not read as requests; and "Here's the answer" after a tool-mismatch
+  note. The rules were committed (a011954) before check set v2 was drawn. Set v2 has 125 items, 718
+  earlier-set overlaps removed, seed `opengrad-prose-classifier-devcheck-v2`. It was labelled the same way
+  (session `model-devcheck-v2`) and scored once. The same disclosure applies: the subagents' one-sentence
+  rationales reached the developer before scoring.
+
+  | Round 2 rules (source sha256, LF, `64293c51…`) | Agree | Rate | DIRECT predictions agreeing | Model DIRECT labels predicted DIRECT |
+  |---|---:|---:|---:|---:|
+  | Development set (in-sample) | 223 / 226 | 0.987 | 35 / 37 | 35 / 35 |
+  | Check set v1 (exposed in round 2, in-sample) | 110 / 110 | 1.000 | 19 / 19 | 19 / 19 |
+  | **Check set v2 (unexposed, scored once)** | **108 / 113** | **0.956** | **16 / 19** | 16 / 17 |
+
+  Against its own fresh set, round 2 agrees more often than round 1 did against its (0.956 vs 0.927), and
+  false DIRECT fell from 5 of 23 predictions to 3 of 19. These are different sets, so the comparison is
+  suggestive, not a controlled measurement. Set v2 held the first textual CALL item, and the rules agreed on
+  it. Reports: `reports/prose-classifier/dev/prose-decision-classifier-v1.round2.*-agreement.json`.
+
+  **Frozen (2026-09-17).** The study owner chose one more round followed by freezing. The round-2 rules are
+  frozen as `prose-decision-classifier-v1`: source sha256 (LF)
+  `64293c51917a54a649bad9e96960302dd5df1b39eabd0d260d3784b3eeb6687c`, git tag `prose-decision-classifier-v1`.
+  No result on P-DET-v1 or P-DET-COVERAGE-v1 existed at freezing. Every later change is a new version.
 - **Freeze:** when development ends, the rules are committed and tagged under `prose-decision-classifier-v1`
   before any test result exists. Any later change is a new version, and 22 §6's consequences apply:
   the used population is marked `DEVELOPMENT_EXPOSED`, and a new untouched population is required before

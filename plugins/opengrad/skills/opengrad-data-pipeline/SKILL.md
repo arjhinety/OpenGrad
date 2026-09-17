@@ -81,9 +81,12 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
     --show N`), and report the numbers as agreement with model labels, never accuracy;
   - never open P-DET-v1 or P-DET-COVERAGE-v1 files while developing
     (`tests/data/test_decision_classifier.py` checks that the module reads no file);
-  - the held-out check set (`--set devcheck`, `src/opengrad/verification/classifier_devcheck.py`) is scored,
-    not read, and never tuned against;
-  - once frozen, any rule change is a new classifier version (33 §5, 22 §6).
+  - a held-out check set (`--set devcheck-v2`, `src/opengrad/verification/classifier_devcheck.py`
+    `--check v2`) is scored, not read, and never tuned against. `devcheck` (v1) was read in round 2 and is
+    development data now;
+  - **frozen** on 2026-09-17: git tag `prose-decision-classifier-v1`, source sha256 (LF) `64293c51…` (33 §5a).
+    Any rule change is a new classifier version (33 §5, 22 §6). Run it on P-DET-v1 or P-DET-COVERAGE-v1 only
+    as the single preregistered test.
 
 ## Releases, mixtures and yield
 

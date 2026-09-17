@@ -94,7 +94,10 @@ opengrad-annotate verify <manifest>                       # re-hash an exported 
   develop the classifier; they are never gold or evidence of accuracy. The held-out check set
   `prose-classifier-devcheck-v1` (`configs/annotation/prose-classifier-devcheck-v1.yaml`, 125 items, 33 §5a) is
   labelled the same way under session `model-devcheck`, with the same procedure file, and archived with
-  `--task prose-classifier-devcheck-v1`.
+  `--task prose-classifier-devcheck-v1`. The second check set `prose-classifier-devcheck-v2`
+  (`configs/annotation/prose-classifier-devcheck-v2.yaml`, session `model-devcheck-v2`) follows the same route.
+  Its `check` reports one item because an offered tool has a parameter named `source_name`, which is a key
+  collision, not a leak of the item's source.
 - **Review:** `review-queue` writes a pinned queue from the composite reference. `adjudicate` compares two
   finished passes, or reviews one.
 - **Starting the UI** needs a build (`npm install && npm run build` in `integrations/annotate-ui`). For UI

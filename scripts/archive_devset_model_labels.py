@@ -112,6 +112,22 @@ TRAILS = {
             "ingested once."
         ),
     ),
+    "prose-classifier-devcheck-v2": Trail(
+        task="prose-classifier-devcheck-v2",
+        session="model-devcheck-v2",
+        out=ROOT / "reports" / "prose-classifier" / "devcheck-v2" / "provenance" / "model-devcheck-v2",
+        parts=(
+            ("1", "aaaae539809f59826", 1, 50),
+            ("2", "a873a1d9cead65fc2", 51, 100),
+            ("3", "afede724526697362", 101, 125),
+        ),
+        split=(
+            "One batch labelled by three Claude subagents run in parallel, over items 1-50, 51-100 and 101-125. "
+            "Each prompt was the procedure text followed by one line naming the batch file and its range; each "
+            "subagent read the rubric and its own range. The three answer arrays were merged in batch order and "
+            "ingested once."
+        ),
+    ),
 }
 BATCH_LINE = re.compile(
     r"Batch file: (?P<path>\S+batch-01\.md) -- read the rubric \(lines 1-284\), then label only items "
