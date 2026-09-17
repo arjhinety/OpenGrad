@@ -255,9 +255,13 @@ _CAPABILITY = _rx(
     r"\b(can't|cannot|unable to|not able to) (directly )?(call|use|invoke)\b[^.!?]{0,40}\b(functions?|tools?|apis?)\b",
     r"\bno function (in|from|provided|available|that|can)\b",
     # v2 round 2: the tools are lacking, or cannot do the task.
-    r"\b(lacks?|lacking|without) (the |any )?(necessary |required |appropriate |relevant |suitable |needed )?"
+    r"\b(lacks?|lacking|without) (the |any |a |an )?(necessary |required |appropriate |relevant |suitable |needed )?"
     r"(functions?|tools?|apis?)\b",
-    r"\b(functions?|tools?|apis?)\b[^.!?]{0,40}\b(cannot|can't|can not|could not|couldn't|(is|are) unable to) \w+",
+    # v2 round 3: "the functions cannot be called" for want of arguments is not a capability gap.
+    r"\b(functions?|tools?|apis?)\b[^.!?]{0,40}\b(cannot|can't|can not|could not|couldn't|(is|are) unable to) "
+    r"(?!be (called|invoked|used|executed|run|made)\b)\w+",
+    r"\bcannot be (processed|handled|answered|addressed|fulfilled|resolved) (using|with|by) (the )?(given|provided|"
+    r"available|listed|offered) (functions?|tools?|apis?)\b",
     r"\b(none|neither) of which (is|are) (relevant|applicable|suitable|useful|related)\b",
     # Asking whether a capability exists: the missing thing is a tool, not user input (22 §1.3 boundary).
     r"\bdo you have (a|an|any|another) [\w\- ]{0,30}(tool|function|api|integration|plugin)\b",
@@ -338,6 +342,8 @@ _REQUEST = _rx(
     # v2 round 1: polite and measure questions that withhold the answer.
     r"^(may|can|could) i (have|know|get|ask( for)?)\b[^.!?]*\?",
     r"^how (long|big|large|old|often|far|soon)\b[^.!?]*\?",
+    # v2 round 3: asking which of several things the user means.
+    r"^(are|were) you (interested in|looking for|asking about|referring to)\b[^.!?]*\?",
 )
 _INVOCATION_TALK = _rx(
     r"\b(i('ll| will| would| could| can| am going to|'m going to)|let me) (use|call|run|invoke|check)\b[^.!?]{0,60}"
@@ -355,6 +361,8 @@ _ABOUT_FUNCTIONS = re.compile(
     r"|\b(functions?|tools?|apis?)\b[^.!?]{0,80}\b(can|could|will|would) (help|be used|provide|retrieve|find|get|"
     r"search|fetch|collect|add|update|generate|check)\b"
     r"|\b(parameters?|arguments?)\b"
+    # v2 round 3: naming which offered function does the job ("The function that retrieves X is ...").
+    r"|\b(functions?|tools?|apis?) (that|which) (retrieves?|returns?|gets?|fetches?|provides?|lists?|finds?|searches)\b"
     r"|\b(the|your|this) (given |user's |original )?(query|question|request)\b"
     r"|\b(helpful|useful|necessary|needed) to (have|know)\b|\bfollowing (information|details)\b"
     r"|\b(missing|lacks?|ambiguous|once provided|not explicitly|not given)\b"
@@ -402,7 +410,11 @@ def _but_clause_content(sentence: str) -> str | None:
     itself content rather than a decline, an offer, a request or advice to go elsewhere."""
     parts = re.split(r"\b(?:but|however|that said|nevertheless)\b,?", sentence, maxsplit=1, flags=re.IGNORECASE)
     if len(parts) < 2:
-        return None
+        # v2 round 3: a concessive disclaimer ("Though I can't give medical advice, it's a good idea to ...").
+        concessive = re.match(r"\s*(?:though|although|while|even though)\b[^,]*,\s*(.+)$", sentence, re.IGNORECASE)
+        if not concessive:
+            return None
+        parts = [sentence[: concessive.start(1)], concessive.group(1)]
     tail = _LEAD_IN.sub("", parts[1].strip())
     if not tail or _any(_DECLINE, tail) or _any(_CAPABILITY, tail) or _any(_OFFER, tail):
         return None

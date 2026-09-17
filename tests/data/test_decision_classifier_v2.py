@@ -233,3 +233,40 @@ def test_the_reasons_for_not_proceeding_and_a_list_of_missing_ids_belong_to_the_
         "these cities."
     )
     assert decide(response, [WEATHER]).label == dc.CLARIFY
+
+
+# ── v2 round 3 (37 §7): concessive disclaimers, uncallable functions and which-one questions ─────────
+
+
+def test_lacking_a_function_is_a_capability_gap() -> None:
+    response = "The provided question lacks a function related to booking hotels. Therefore, it cannot be processed using the given functions."
+    assert decide(response, [WEATHER]).label == dc.UNSUPPORTED
+
+
+def test_a_concessive_disclaimer_before_an_answer_is_direct() -> None:
+    response = (
+        "Though I can't give legal advice, it's usually wise to keep copies of every signed contract and read the "
+        "termination clause before you sign."
+    )
+    assert decide(response).label == dc.DIRECT
+
+
+def test_functions_that_cannot_be_called_for_want_of_arguments_is_not_a_capability_gap() -> None:
+    response = (
+        "The query does not provide the city_id required by the API. Without this identifier, the functions cannot "
+        "be called."
+    )
+    assert decide(response, [WEATHER]).label == dc.CLARIFY
+
+
+def test_naming_the_function_that_does_the_job_is_not_delivered_content() -> None:
+    response = (
+        'The function that retrieves a list of daily weather forecasts for a city is "Forecast". The required arguments are: 1. "days" '
+        '(integer) Your query names the city but does not provide the "days" argument which is required.'
+    )
+    assert decide(response, [WEATHER]).label == dc.CLARIFY
+
+
+def test_asking_which_thing_the_user_means_is_clarify() -> None:
+    response = "I'm sorry but your request is too broad. Are you interested in a particular city, region, country or the general weather trends worldwide? Could you please specify?"
+    assert decide(response, [WEATHER]).label == dc.CLARIFY

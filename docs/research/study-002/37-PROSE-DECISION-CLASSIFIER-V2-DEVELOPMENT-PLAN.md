@@ -165,3 +165,26 @@ reads any of check set 2's disagreements. From here **`prose-classifier-v2-devch
 development data; its 122 / 126 above is the only unexposed score it will ever give. Round-3 rules are committed
 before `prose-classifier-v2-devcheck-3` (150 first replies, its own seed, excluding dev-v2, check sets 1 and 2
 and everything they exclude) is drawn, labelled the same way and scored once; then the owner chooses again.
+
+**Round 3 rules** (source sha256 LF `39494c4f…`), made after reading check set 2's four disagreements and the one
+UNKNOWN item predicted UNSUPPORTED, committed before check set 3 is drawn. General rules, tested on paraphrases:
+
+1. "lacks a function …" and "cannot be processed using the given functions" are capability wordings;
+2. a concessive disclaimer ("Though I can't give medical advice, it's a good idea to …") is read like a "but"
+   clause, so the answer after it counts as delivered;
+3. "the functions cannot be called / used" for want of arguments is no longer a capability gap. This narrows
+   round 2's rule 2, which had caught it;
+4. "The function that retrieves X is …" is talk about the tools, not content;
+5. "Are you interested in / looking for / asking about …?" is a request.
+
+| Round 3 rules, in-sample | Agree | Round 2 |
+|---|---:|---:|
+| dev-v2 | 245 / 248 | 245 / 248 |
+| dev-v1 | 223 / 226 | 223 / 226 |
+| devcheck-v1 | 110 / 110 | 110 / 110 |
+| devcheck-v2 | 109 / 113 | 109 / 113 |
+| v2 check set 1 (exposed) | 124 / 125 | 124 / 125 |
+| v2 check set 2 (exposed) | 126 / 126 | 122 / 126 |
+
+Across the 1,100 development items, four predictions moved to agree with the model labels, none that agreed moved
+away, and one UNKNOWN item moved from UNSUPPORTED to CLARIFY (not counted either way).
