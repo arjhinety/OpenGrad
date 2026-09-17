@@ -1,4 +1,7 @@
-# 33 — How the prose decision classifier is developed (plan, before implementation)
+# 33 — How the prose decision classifier is developed
+
+> **Now:** `prose-decision-classifier-v1` was built, frozen and tested once under this plan (§5a, §8). The owner's
+> decisions that followed are in [35](35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md). The plan below is kept as written.
 
 **Status: PLAN, 2026-09-17. Written before any classifier code, development set or result exists.** It
 records how `prose-decision-classifier-v1` will be built and frozen, so that the procedure cannot be shaped

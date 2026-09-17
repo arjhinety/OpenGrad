@@ -64,7 +64,8 @@ one of CALL, DIRECT, CLARIFY, UNSUPPORTED, UNKNOWN).
 2. **Qualifications are provisional.** A classifier qualification measured against this reference is
    recorded as `MODEL_REFERENCE`. As under 28 item 2, this amendment does not decide whether a
    `MODEL_REFERENCE` qualification may grant balancing permission. The study owner records that decision
-   separately, before it is used.
+   separately, before it is used. Decided 2026-09-17: it may, provisionally
+   ([35](35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md) §1).
 3. **Agreement is model–model agreement.** Report, with item counts: how many items all three agreed on,
    how many had a two-of-three majority, how many are `NO_CONSENSUS`, and each pair's agreement. It is never
    called inter-annotator agreement, which refers to human annotators.
