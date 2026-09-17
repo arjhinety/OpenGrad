@@ -273,4 +273,9 @@ the pooled rate of about 96%, a set of this size would show 2 or fewer disagreem
 of the time. The pooled figures are the steadier estimate. Report:
 `reports/prose-classifier/dev-v2/prose-decision-classifier-v2.round4.v2-check-4-agreement.json`.
 
-**Next (§4):** the study owner chooses between freezing the round-4 rules and a further round.
+**Fifth round (decided by the study owner, 2026-09-17).** Offered freezing the round-4 rules or a further round,
+with the developer recommending a freeze, the owner chose a further round. Recorded before the developer reads any of
+check set 4's disagreements. From here **`prose-classifier-v2-devcheck-4` is exposed** and becomes development
+data; its 122 / 124 above is the only unexposed score it will ever give. Round-5 rules are committed before
+`prose-classifier-v2-devcheck-5` (150 first replies, its own seed, excluding dev-v2, check sets 1-4 and everything
+they exclude) is drawn, labelled the same way and scored once; then the owner chooses again.
