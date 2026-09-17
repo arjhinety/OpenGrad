@@ -37,6 +37,12 @@ TRAILS = {
         ROOT / "reports" / "prose-classifier" / "devcheck-v2" / "provenance" / "model-devcheck-v2",
         [(1, 50), (51, 100), (101, 125)],
     ),
+    "dev-v2": (
+        "prose-classifier-dev-v2",
+        "model-dev-v2",
+        ROOT / "reports" / "prose-classifier" / "dev-v2" / "provenance" / "model-dev-v2",
+        [(1, 50), (51, 100), (101, 150), (151, 200), (201, 250), (251, 300)],
+    ),
 }
 
 
@@ -84,7 +90,7 @@ def test_the_parts_cover_the_batch_once_and_were_audited(trail: tuple, manifest:
     task, session, _directory, expected_ranges, _stem = trail
     config = load_task_config(ROOT / "configs" / "annotation" / f"{task}.yaml")
     (declared,) = config.model_annotators
-    assert sha256(members["procedure/prose-classifier-dev-v1.model-procedure.md"]) == declared.procedure_sha256
+    assert sha256(members[f"procedure/{Path(manifest['procedure']['path']).name}"]) == declared.procedure_sha256
     batch = json.loads(members[f"{session}/batch-01.json"])
     content = sha256(canonical_json({"items": batch["items"], "instructions": batch["instructions"]}).encode("utf-8"))
     assert content == batch["content_sha256"] == manifest["batch"]["content_sha256"]

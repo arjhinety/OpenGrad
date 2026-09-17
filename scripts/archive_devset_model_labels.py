@@ -60,6 +60,10 @@ class Trail:
     #: (part, subagent id, first item number, last item number), in batch order.
     parts: tuple[tuple[str, str, int, int], ...]
     split: str
+    procedure: str = PROCEDURE
+    authorization: str = "docs/research/study-002/33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md"
+    #: Subagents whose answers were discarded and replaced (their transcripts are kept locally and listed).
+    discarded: tuple[tuple[str, str], ...] = ()
 
     @property
     def batches(self) -> Path:
@@ -127,6 +131,29 @@ TRAILS = {
             "subagent read the rubric and its own range. The three answer arrays were merged in batch order and "
             "ingested once."
         ),
+    ),
+    "prose-classifier-dev-v2": Trail(
+        task="prose-classifier-dev-v2",
+        session="model-dev-v2",
+        out=ROOT / "reports" / "prose-classifier" / "dev-v2" / "provenance" / "model-dev-v2",
+        parts=(
+            ("1", "aa417047caf7617f3", 1, 50),
+            ("2", "a12b63fe0c136599e", 51, 100),
+            ("3", "a13013f108451d882", 101, 150),
+            ("4", "a98c4c7ccd56cfd45", 151, 200),
+            ("5", "acff01e23e6f1adca", 201, 250),
+            ("6", "a4086bd49d4719ebf", 251, 300),
+        ),
+        split=(
+            "One batch labelled by six Claude subagents run in parallel, one per 50-item range. Each prompt was the "
+            "v2 procedure text followed by one line naming the batch file and its range. The six answer arrays were "
+            "merged in batch order and ingested once. The first subagent for items 51-100 returned two arrays with a "
+            "correction note between them instead of one array, against the procedure; its answers were discarded "
+            "unused and the range was relabelled by a fresh subagent with the identical prompt."
+        ),
+        procedure="configs/annotation/prose-classifier-dev-v2.model-procedure.md",
+        authorization="docs/research/study-002/37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md",
+        discarded=(("2", "adc5585cf6560adc7"),),
     ),
 }
 BATCH_LINE = re.compile(
@@ -202,7 +229,7 @@ def main(argv: list[str] | None = None) -> int:
     TASK, SESSION, BATCHES, STATE, OUT, STEM, TRANSCRIPTS = (
         trail.task, trail.session, trail.batches, trail.state, trail.out, trail.stem, trail.transcripts
     )
-    procedure = (ROOT / PROCEDURE).read_bytes()
+    procedure = (ROOT / trail.procedure).read_bytes()
     body = procedure_body(procedure.decode("utf-8").replace("\r\n", "\n"))
     batch_json = (BATCHES / "batch-01.json").read_bytes()
     batch = json.loads(batch_json)
@@ -211,7 +238,7 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("batch-01: content or procedure hash no longer matches")
 
     members: dict[str, bytes] = {
-        f"procedure/{Path(PROCEDURE).name}": procedure,
+        f"procedure/{Path(trail.procedure).name}": procedure,
         f"{SESSION}/batch-01.json": batch_json,
         f"{SESSION}/batch-01.md": (BATCHES / "batch-01.md").read_bytes(),
     }
@@ -230,6 +257,9 @@ def main(argv: list[str] | None = None) -> int:
         merged.extend(json.loads(members[f"{SESSION}/batch-01.part-{part}.answers.json"]))
         transcripts[f"transcripts/agent-{agent}.jsonl"] = transcript
         transcripts[f"transcripts/agent-{agent}.meta.json"] = meta
+    for part, agent in trail.discarded:
+        for suffix in ("jsonl", "meta.json"):
+            transcripts[f"transcripts/discarded/part-{part}.agent-{agent}.{suffix}"] = (SUBAGENTS / f"agent-{agent}.{suffix}").read_bytes()
     merged_bytes = (BATCHES / "batch-01.answers.json").read_bytes()
     if json.loads(merged_bytes) != merged:
         raise SystemExit("batch-01.answers.json is not the parts merged in batch order")
@@ -257,12 +287,12 @@ def main(argv: list[str] | None = None) -> int:
         "session_id": SESSION,
         "annotator_id": session["annotator_id"],
         "model": "claude-opus-5",
-        "authorization": "docs/research/study-002/33-PROSE-DECISION-CLASSIFIER-DEVELOPMENT-PLAN.md",
+        "authorization": trail.authorization,
         "status": (
             "Model judgments by a declared model annotator, used only to develop the prose decision classifier. "
             "Not human labels, not human gold, never evidence of accuracy."
         ),
-        "procedure": {"path": PROCEDURE, "sha256": sha256(procedure)},
+        "procedure": {"path": trail.procedure, "sha256": sha256(procedure)},
         "batch": {
             "batch_id": "01",
             "items": len(batch["item_ids"]),
@@ -275,6 +305,8 @@ def main(argv: list[str] | None = None) -> int:
             "flagged": sum(1 for a in merged if a.get("flag")),
         },
         "split": trail.split,
+        # Only present when a subagent's answers were discarded, so earlier manifests rebuild byte for byte.
+        **({"discarded_subagents": [{"part": part, "agent": agent} for part, agent in trail.discarded]} if trail.discarded else {}),
         "parts": parts,
         "archive": {"file": f"{STEM}.tar.gz", "sha256": sha256(archive), "bytes": len(archive), "members": listing(members)},
         "ingest": {
