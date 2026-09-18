@@ -1,0 +1,76 @@
+{
+  "amendment": "study_002_prereg_v6",
+  "amendment_document": "docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md",
+  "annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/pdet-coverage-v2.model-procedure.md",
+      "procedure_sha256": "04d76cdc423268e8c122ea12b345b9b833033507850550bb569abb659bf90cea"
+    },
+    {
+      "annotator_id": "model.gpt-5.6-sol",
+      "model": "gpt-5.6-sol",
+      "procedure": "configs/annotation/pdet-coverage-v2.model-procedure.md",
+      "procedure_sha256": "04d76cdc423268e8c122ea12b345b9b833033507850550bb569abb659bf90cea"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/pdet-coverage-v2.model-procedure.md",
+      "procedure_sha256": "04d76cdc423268e8c122ea12b345b9b833033507850550bb569abb659bf90cea"
+    }
+  ],
+  "artifact_kind": "PDET_COVERAGE_MODEL_CONSENSUS_REFERENCE",
+  "package_manifest": "reports/pdet-coverage-v2/annotation/wip/pdet-coverage-v2.annotation-manifest.json",
+  "package_manifest_sha256": "f8450f2845f7ba50f519ca30cc8cb919c55554eacf300e2548e958dd3a8c62aa",
+  "population_sha256": "8fa4868c64845a93b0627cd4463887b03181e6479f2e9f48d75e8c80f626f013",
+  "reference_file": "pdet-coverage-v2.reference.jsonl",
+  "reference_sha256": "46197c27389d1fd83084424dfbe4645cb4bc53441a0dc739700f45b971cef7ec",
+  "statement": "Reference labels from a two-of-three consensus of three non-Claude models, each labelling blind. Model judgments, not human gold; qualifications against it are MODEL_REFERENCE and provisional; agreement below is model-model agreement.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "summary": {
+    "annotator_label_counts": {
+      "model.deepseek-v4.1-flash": {
+        "CLARIFY": 98,
+        "DIRECT": 131,
+        "UNKNOWN": 52,
+        "UNSUPPORTED": 139
+      },
+      "model.gemini-3.8-flash-high": {
+        "CLARIFY": 100,
+        "DIRECT": 131,
+        "UNKNOWN": 51,
+        "UNSUPPORTED": 138
+      },
+      "model.gpt-5.6-sol": {
+        "CLARIFY": 96,
+        "DIRECT": 133,
+        "UNKNOWN": 50,
+        "UNSUPPORTED": 141
+      }
+    },
+    "consensus": {
+      "two_of_three": 8,
+      "unanimous": 412
+    },
+    "dissent_by_annotator": {
+      "model.deepseek-v4.1-flash": 3,
+      "model.gemini-3.8-flash-high": 1,
+      "model.gpt-5.6-sol": 4
+    },
+    "items": 420,
+    "pairwise_agreement": {
+      "model.gemini-3.8-flash-high|model.deepseek-v4.1-flash": 416,
+      "model.gemini-3.8-flash-high|model.gpt-5.6-sol": 415,
+      "model.gpt-5.6-sol|model.deepseek-v4.1-flash": 413
+    },
+    "reference_labels": {
+      "CLARIFY": 99,
+      "DIRECT": 132,
+      "UNKNOWN": 51,
+      "UNSUPPORTED": 138
+    }
+  },
+  "task_id": "pdet-coverage-v2"
+}
