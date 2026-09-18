@@ -8,6 +8,9 @@
 > not wired into `adapt_when2call`, which is unchanged. Phases 3–4 (the classifier and the mixture) are
 > still not started. So no canonical-v3 *training* artifact exists, and nothing below is otherwise revised.
 
+> **Status note, 2026-09-18 (later).** Phases 3 and 4 landed: every record carries a behaviour label, and a
+> decision-balanced selection plan exists (39). Phase 5 has not started; nothing is rendered and nothing trained.
+>
 > **Status note, 2026-09-18.** The classifier gate is passed: `prose-decision-classifier-v2` is frozen and
 > tested once on P-DET-COVERAGE-v2 (37 §7-§8), and **C1 is authorised** to proceed to phases 3-5 under the
 > conditions of [38](38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md) §3, with balancing permission granted
@@ -23,9 +26,9 @@ canonical-v2 code path is byte-identical to before and its outputs cannot drift.
 |---|---|---|
 | 1 | Provenance repair: one authoritative version source + disagreement invariant | **DONE** |
 | 2 | Source-scoped schema normalization (shared validator untouched) | **DONE** |
-| 3 | Deterministic versioned behaviour classifier | **NOT STARTED** |
-| 4 | Wire decisions/capabilities into mixture machinery + materialized balance | **NOT STARTED** |
-| 5 | New immutable canonical-v3 artifacts | **NOT STARTED** (blocked on 3–4) |
+| 3 | Deterministic versioned behaviour classifier | **DONE** (frozen `prose-decision-classifier-v2`, applied to all 181,433 records by `behaviour_labels.py`) |
+| 4 | Wire decisions/capabilities into mixture machinery + materialized balance | **DONE for decisions** (`decision_balanced` mixture class + `canonical_v3_balance.py`, spec 39); capabilities remain unlabelled, so `balanced_policy_v1.yaml` stays HYPOTHESIS_ONLY |
+| 5 | New immutable canonical-v3 artifacts | **NOT STARTED** (unblocked by 3–4; needs contamination, renderability and supervision re-checks first, 39 §4) |
 | 6 | Pre-GPU validation gates | **PARTIAL** (the two invariants from phases 1–2 only) |
 | 7 | Renderer unchanged, with equality proof | **NOT YET PROVEN** |
 | 8 | Study 002 preregistration update | **NOT STARTED** |

@@ -1,0 +1,31 @@
+# canonical-v3 decision balance, specified in docs/research/study-002/39-CANONICAL-V3-DECISION-BALANCE-SPEC.md
+# before any selection was computed. Decisions, not capabilities: the frozen prose decision classifier and record
+# structure produce these four and nothing finer (39 §1).
+#
+# Authorised by 38 §3 (C1). This is a selection plan, not a corpus and not an arm: materializing canonical-v3 and
+# entering a study are separate steps (39 §4).
+config_id: decision-balance-v1
+schema_version: 2
+status: SCHEMA_READY
+phase: 3
+mixture_class: decision_balanced
+source_manifests: [glaive-function-calling-v2, toolace, when2call, xlam-function-calling-60k]
+source_weights: {}
+# Equal shares, supply-limited: each stratum contributes min(supply) records (39 §2).
+decision_weights:
+  CALL: 0.25
+  ANSWER: 0.25
+  CLARIFY: 0.25
+  UNSUPPORTED: 0.25
+selection:
+  rule: equal_shares_supply_limited
+  seed: opengrad-canonical-v3-decision-balance-v1
+  # CALL membership is structural (30 §4), never a classifier CALL label; the other three are classifier labels
+  # whose weight 38 §2 permits (ANSWER = DIRECT on glaive only).
+  call_stratum_from: structure
+  answer_stratum_from: classifier_label_direct_weight_permitted
+weights_are_not_final: false
+label_uncertainty_allowed: [known, derived, heuristic]
+normalization: canonical_then_decision_labels_then_model_native_renderer
+contamination_scan_required: true
+sft_excludes_evaluation_and_preference: true

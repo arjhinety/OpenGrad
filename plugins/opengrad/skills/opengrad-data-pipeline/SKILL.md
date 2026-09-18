@@ -87,7 +87,15 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
   rule change is a new version. **Applied to the corpus** by `src/opengrad/data/behaviour_labels.py`
   (`python -m opengrad.data.behaviour_labels --build|--verify`, 21 phase 3): one behaviour label per
   normalization-v3 record from its first reply, written to `data/processed/behaviour-labels-v1/` with counts in
-  `reports/canonical-v3/behaviour-labels-v1.counts.json`. It never writes into normalization-v3, whose `verify`
+  `reports/canonical-v3/behaviour-labels-v1.counts.json`.
+  The balanced selection those labels feed is `src/opengrad/data/canonical_v3_balance.py`
+  (`python -m opengrad.data.canonical_v3_balance --build|--verify`, 21 phase 4, spec 39): equal shares over the
+  four decisions of `behavior.DECISIONS`, supply-limited, seeded and deterministic, written to
+  `reports/canonical-v3/decision-balance-v1.json`. Its config is
+  `configs/data/tool_calling/decision_balance_v1.yaml` (`mixture_class: decision_balanced`, validated by
+  `mixture.validate_mixture` against the decision vocabulary, not capability ids). It is a selection plan only:
+  no shard, no arm, no training. `balanced_policy_v1.yaml` weights *capabilities*, which no labeller produces,
+  and stays HYPOTHESIS_ONLY. It never writes into normalization-v3, whose `verify`
   still refuses any behaviour label on a record. `weight_permitted` follows 38 §2: UNSUPPORTED and CLARIFY
   always, DIRECT on glaive only, never CALL/CALL_BY_STRUCTURE/ABSTAIN/UNLABELLED. Its single test is `python -m opengrad.verification.prose_classifier_v2_oneshot
   --preflight`, then `--run` once, after the P-DET-COVERAGE-v2 consensus reference exists: it gates on

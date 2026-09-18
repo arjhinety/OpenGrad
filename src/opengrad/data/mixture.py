@@ -3,10 +3,13 @@ from typing import Any
 
 import yaml
 
-from opengrad.data.behavior import capability_ids, validate_weights
+from opengrad.data.behavior import DECISIONS, capability_ids, validate_weights
 from opengrad.data.stats import analyze as _analyze
 
-MIXTURE_CLASSES = frozenset({"source_oriented", "behavior_balanced", "residual_driven"})
+#: ``decision_balanced`` (21 phase 4, 39): shares over the four decisions of :data:`DECISIONS`, which the frozen
+#: prose decision classifier and record structure can actually produce. ``behavior_balanced`` weights
+#: capabilities, which no labeller produces.
+MIXTURE_CLASSES = frozenset({"source_oriented", "behavior_balanced", "decision_balanced", "residual_driven"})
 
 
 def analyze(
@@ -41,7 +44,9 @@ def validate_mixture(config: dict[str, Any], known_sources: set[str] | None = No
         unknown = set(sources) - known_sources
         if unknown:
             raise ValueError(f"unknown dataset source: {sorted(unknown)}")
-    for key in ("source_weights", "behavior_weights"):
+    if mixture_class == "decision_balanced" and not config.get("decision_weights"):
+        raise ValueError("decision-balanced mixture requires decision_weights")
+    for key in ("source_weights", "behavior_weights", "decision_weights"):
         weights = config.get(key)
         if weights is None:
             continue
@@ -49,8 +54,15 @@ def validate_mixture(config: dict[str, Any], known_sources: set[str] | None = No
             continue
         if not isinstance(weights, dict):
             raise TypeError(f"{key} must be a mapping")
-        if weights:
-            validate_weights(weights, set(weights) if key == "source_weights" else capability_ids())
+        if not weights:
+            continue
+        if key == "source_weights":
+            allowed: set[str] | frozenset[str] = set(weights)
+        elif key == "behavior_weights":
+            allowed = capability_ids()
+        else:
+            allowed = DECISIONS
+        validate_weights(weights, allowed)
 
 
 def select_by_behavior(records: list[dict[str, Any]], behavior: str) -> list[dict[str, Any]]:
