@@ -8,6 +8,12 @@
 > not wired into `adapt_when2call`, which is unchanged. Phases 3–4 (the classifier and the mixture) are
 > still not started. So no canonical-v3 *training* artifact exists, and nothing below is otherwise revised.
 
+> **Status note, 2026-09-18.** The classifier gate is passed: `prose-decision-classifier-v2` is frozen and
+> tested once on P-DET-COVERAGE-v2 (37 §7-§8), and **C1 is authorised** to proceed to phases 3-5 under the
+> conditions of [38](38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md) §3, with balancing permission granted
+> provisionally (DIRECT on glaive only, no CALL). Phases 3-5 are still **NOT STARTED**; no canonical-v3 artifact
+> exists and no training run is authorised.
+
 This is a **new Study 002 intervention**, not a repair of Study 001. Nothing historical was touched: no v1/v2
 artifact, manifest, hash, report or commit was modified or rewritten, and no Study 001 conclusion was
 revised. Only three files were **added** in this phase; **zero existing files were changed**, so the

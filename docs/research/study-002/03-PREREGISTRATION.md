@@ -209,6 +209,23 @@ seeing data is a new study, and it goes into the next study
 - The **unit of reporting** is `(arm, partition, protocol, device_class)`. A row missing any of the
   four is not renderable ([07](07-METRIC-SPEC.md), [15](15-PROVENANCE-VALIDATORS.md)).
 
+### `study_002_prereg_v7` — 2026-09-18
+
+- **Item changed:** the two permissions 22 §6 and 35 §1 left to the study owner, now taken under the owner's
+  explicit delegation of authority (38).
+  - Balancing permission is granted, provisionally: UNSUPPORTED and CLARIFY on both layer B sources, DIRECT on
+    **glaive only**, and **not** CALL, which was `NOT_EVALUABLE` in the test (37 §8).
+  - **C1 is authorised** to proceed past its classifier gate: 21's phases 3-5 (classifier wired into the mixture
+    machinery, materialized balance, new canonical-v3 artifacts), under 38 §3's conditions.
+- **Reason:** `prose-decision-classifier-v2`, frozen before the reference existed, passed every gating row on
+  P-DET-COVERAGE-v2 against a three-model consensus with no `NO_CONSENSUS` item: DIRECT recall 0.985 and
+  precision 0.929, UNSUPPORTED recall 0.964, CLARIFY f1 0.942, macro F1 0.956, abstention 0.003 (37 §8). DIRECT,
+  the mode C1 exists to restore and the one v1 could not measure, qualifies.
+- **Not changed:** every threshold and minimum (22 §6, 30 §11, `pdet-coverage-metrics-v1`), the C1 rule itself,
+  the arms, the seeds, the partition, both contracts, and every population. No training run is authorised: that
+  stays a separate decision (38 §4). No gold is frozen; P-DET-v1 remains unfrozen. The qualifications stay
+  `MODEL_REFERENCE` and provisional, and 38 §5 names what withdraws them.
+
 ## Why there is no "best arm" selection
 
 Study 002 does not select a best arm. It tests one mechanism and one correction: `C0` versus `R1` under
