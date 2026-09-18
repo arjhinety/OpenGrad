@@ -84,7 +84,12 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
   lives in `src/opengrad/data/decision_classifier_v2.py`, which started as a copy of v1, with tests
   `tests/data/test_decision_classifier_v2.py`. v2 is **frozen** on 2026-09-18 after five check rounds (37 §7): git tag
   `prose-decision-classifier-v2`, source sha256 (LF) `47436ca9…`; never edit `decision_classifier_v2.py` either; any
-  rule change is a new version. Its single test is `python -m opengrad.verification.prose_classifier_v2_oneshot
+  rule change is a new version. **Applied to the corpus** by `src/opengrad/data/behaviour_labels.py`
+  (`python -m opengrad.data.behaviour_labels --build|--verify`, 21 phase 3): one behaviour label per
+  normalization-v3 record from its first reply, written to `data/processed/behaviour-labels-v1/` with counts in
+  `reports/canonical-v3/behaviour-labels-v1.counts.json`. It never writes into normalization-v3, whose `verify`
+  still refuses any behaviour label on a record. `weight_permitted` follows 38 §2: UNSUPPORTED and CLARIFY
+  always, DIRECT on glaive only, never CALL/CALL_BY_STRUCTURE/ABSTAIN/UNLABELLED. Its single test is `python -m opengrad.verification.prose_classifier_v2_oneshot
   --preflight`, then `--run` once, after the P-DET-COVERAGE-v2 consensus reference exists: it gates on
   P-DET-COVERAGE-v2 alone and reports per-`unit_kind` and DEVELOPMENT_EXPOSED (P-DET-v1, P-DET-COVERAGE-v1)
   rows without gating (37 §5); tests `tests/verification/test_prose_classifier_v2_oneshot.py`. Its development

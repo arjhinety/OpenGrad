@@ -1,0 +1,149 @@
+{
+  "artifact_kind": "BEHAVIOUR_LABELS",
+  "authorisation": "docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md",
+  "classifier": {
+    "source_sha256_lf": "47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382",
+    "tag": "prose-decision-classifier-v2",
+    "version": "prose-decision-classifier-v2"
+  },
+  "corpus_fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+  "input_contract": "prose-decision-input-v2",
+  "labels_version": "behaviour-labels-v1",
+  "normalization_version": "normalization-v3",
+  "sources": {
+    "glaive": {
+      "file": "glaive.labels.jsonl",
+      "labels": {
+        "ABSTAIN": 7425,
+        "CALL_BY_STRUCTURE": 27770,
+        "CLARIFY": 14128,
+        "DIRECT": 33927,
+        "UNLABELLED": 872,
+        "UNSUPPORTED": 14217
+      },
+      "records": 98339,
+      "sha256": "89d1e31d4863a6f4450546f211e3e08aaf0afcb4e967859977828022b01f63da",
+      "unit_kind": {
+        "has_continuation": 55394,
+        "single_exchange": 14303
+      },
+      "unlabelled_reasons": {
+        "EVALUATION_ONLY_OR_HELDOUT": 8,
+        "FIRST_REPLY_EMPTY": 1,
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 28368,
+        "MALFORMED_OR_UNRENDERABLE": 864
+      },
+      "weight_permitted": {
+        "CLARIFY": 14128,
+        "DIRECT": 33927,
+        "UNSUPPORTED": 14217
+      }
+    },
+    "toolace": {
+      "file": "toolace.labels.jsonl",
+      "labels": {
+        "ABSTAIN": 366,
+        "CALL": 12,
+        "CALL_BY_STRUCTURE": 8970,
+        "CLARIFY": 697,
+        "DIRECT": 86,
+        "UNLABELLED": 52,
+        "UNSUPPORTED": 868
+      },
+      "records": 11051,
+      "sha256": "80ed68292c4ad691daf73532c4c6e1fbce90c0de602c1fe2f53fcf8bce717fe3",
+      "unit_kind": {
+        "has_continuation": 57,
+        "single_exchange": 1972
+      },
+      "unlabelled_reasons": {
+        "FIRST_REPLY_EMPTY": 5,
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 9013,
+        "MALFORMED_OR_UNRENDERABLE": 52
+      },
+      "weight_permitted": {
+        "CLARIFY": 697,
+        "UNSUPPORTED": 868
+      }
+    },
+    "when2call": {
+      "file": "when2call.labels.jsonl",
+      "labels": {
+        "CLARIFY": 7189,
+        "DIRECT": 177,
+        "UNLABELLED": 1,
+        "UNSUPPORTED": 7334
+      },
+      "records": 14701,
+      "sha256": "34c33715c173090ab7a23c834b096db49b417aecc39f519734650b9022085b1e",
+      "unit_kind": {
+        "single_exchange": 14700
+      },
+      "unlabelled_reasons": {
+        "EVALUATION_ONLY_OR_HELDOUT": 1
+      },
+      "weight_permitted": {
+        "CLARIFY": 7189,
+        "UNSUPPORTED": 7334
+      }
+    },
+    "xlam": {
+      "file": "xlam.labels.jsonl",
+      "labels": {
+        "CALL_BY_STRUCTURE": 56111,
+        "UNLABELLED": 1231
+      },
+      "records": 57342,
+      "sha256": "ab2ddc0f95507b0853b23b42a50a0182f82e18396ffe8bd4ae3b7c0453c23c3c",
+      "unit_kind": {},
+      "unlabelled_reasons": {
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 57342,
+        "MALFORMED_OR_UNRENDERABLE": 1231
+      },
+      "weight_permitted": {}
+    }
+  },
+  "statement": "Behaviour labels for normalization-v3 from the frozen prose-decision-classifier-v2 (21 phase 3). Labels only: no mixture, no sampling weight, no training corpus. The qualifications behind weight_permitted are provisional MODEL_REFERENCE ones (37 \u00a78, 38 \u00a72), never human gold, and never evidence of accuracy.",
+  "totals": {
+    "labels": {
+      "ABSTAIN": 7791,
+      "CALL": 12,
+      "CALL_BY_STRUCTURE": 92851,
+      "CLARIFY": 22014,
+      "DIRECT": 34190,
+      "UNLABELLED": 2156,
+      "UNSUPPORTED": 22419
+    },
+    "records": 181433,
+    "unit_kind": {
+      "has_continuation": 55451,
+      "single_exchange": 30975
+    },
+    "unlabelled_reasons": {
+      "EVALUATION_ONLY_OR_HELDOUT": 9,
+      "FIRST_REPLY_EMPTY": 6,
+      "FIRST_REPLY_IS_STRUCTURAL_CALL": 94723,
+      "MALFORMED_OR_UNRENDERABLE": 2147
+    },
+    "weight_permitted": {
+      "CLARIFY": 22014,
+      "DIRECT": 33927,
+      "UNSUPPORTED": 22419
+    }
+  },
+  "weight_rule": {
+    "direct_permitted_sources": [
+      "glaive"
+    ],
+    "never_weighted": [
+      "CALL",
+      "CALL_BY_STRUCTURE",
+      "ABSTAIN",
+      "UNLABELLED"
+    ],
+    "permitted_modes": [
+      "CLARIFY",
+      "UNSUPPORTED"
+    ]
+  }
+}
