@@ -1,12 +1,13 @@
 # 21 — C1 implementation status (provenance + schema normalization)
 
-**Status: `PARTIAL — 2 of 9 phases landed`. No canonical-v3 artifact exists yet. No training was run.**
+**Status: `PARTIAL — 5 of 9 phases landed` (updated 2026-09-18). canonical-v3 exists: 88,056 records, decision-balanced, every gate recorded. It is no arm's corpus, and no training was run.**
 
 > **Status note, 2026-09-15.** Sources, adapters and the pre-classifier `normalization-v3` artifact now exist
 > ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)), as does the classifier input contract
 > ([32](32-CLASSIFIER-INPUT-CONTRACT.md)). Schema translation is applied in the normalization-v3 builder,
 > not wired into `adapt_when2call`, which is unchanged. Phases 3–4 (the classifier and the mixture) are
 > still not started. So no canonical-v3 *training* artifact exists, and nothing below is otherwise revised.
+> *(Superseded by the 2026-09-18 notes below: phases 3-5 have since landed. Kept as written, dated.)*
 
 > **Status note, 2026-09-18 (later).** Phases 3, 4 and 5 landed: every normalization-v3 record carries a
 > behaviour label, a decision-balanced selection plan exists (39), and **canonical-v3 is built** -- 88,056
@@ -17,8 +18,8 @@
 > **Status note, 2026-09-18.** The classifier gate is passed: `prose-decision-classifier-v2` is frozen and
 > tested once on P-DET-COVERAGE-v2 (37 §7-§8), and **C1 is authorised** to proceed to phases 3-5 under the
 > conditions of [38](38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md) §3, with balancing permission granted
-> provisionally (DIRECT on glaive only, no CALL). Phases 3-5 are still **NOT STARTED**; no canonical-v3 artifact
-> exists and no training run is authorised.
+> provisionally (DIRECT on glaive only, no CALL). At the time of this note phases 3-5 had not started; they
+> landed the same day, as the note above records. No training run is authorised.
 
 This is a **new Study 002 intervention**, not a repair of Study 001. Nothing historical was touched: no v1/v2
 artifact, manifest, hash, report or commit was modified or rewritten, and no Study 001 conclusion was
