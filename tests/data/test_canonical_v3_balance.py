@@ -78,7 +78,7 @@ def test_the_selection_is_deterministic_and_seed_dependent() -> None:
     first, _ = balance.select(rows, SEED)
     again, _ = balance.select(list(reversed(rows)), SEED)
     other, _ = balance.select(rows, "another-seed")
-    ids = lambda chosen: {stratum: [r["id"] for r in items] for stratum, items in chosen.items()}  # noqa: E731
+    ids = lambda chosen: {stratum: [r["id"] for r in items] for stratum, items in chosen.items()}
     assert ids(first) == ids(again)
     assert ids(first)["CALL"] != ids(other)["CALL"]
 

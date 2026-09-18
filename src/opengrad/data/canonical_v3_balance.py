@@ -72,7 +72,7 @@ def stratum_of(row: Mapping[str, Any]) -> str | None:
 
 
 def rank_key(seed: str, record_id: str) -> str:
-    return _sha256(f"{seed}|{record_id}".encode("utf-8"))
+    return _sha256(f"{seed}|{record_id}".encode())
 
 
 def select(rows: list[Mapping[str, Any]], seed: str) -> tuple[dict[str, list[Mapping[str, Any]]], dict[str, Any]]:

@@ -202,10 +202,10 @@ def test_an_affirmative_ability_is_not_a_decline() -> None:
 @pytest.mark.parametrize(
     "response",
     [
-        "The question lacks the functions required to translate documents. Without the appropriate functions, "
-        "I am unable to do the translation.",
-        "The given functions cannot retrieve exchange rates. They pertain to weather lookups, neither of which are "
-        "relevant, so the question lacks the appropriate parameters and the necessary functions.",
+        ("The question lacks the functions required to translate documents. Without the appropriate functions, "
+        "I am unable to do the translation."),
+        ("The given functions cannot retrieve exchange rates. They pertain to weather lookups, neither of which are "
+        "relevant, so the question lacks the appropriate parameters and the necessary functions."),
         "I do not have any specific information about Jane Roe's research area.",
     ],
 )
@@ -319,14 +319,14 @@ def test_a_worked_result_is_not_a_narrated_call() -> None:
 @pytest.mark.parametrize(
     "response",
     [
-        "The given functions do not provide train timetables. Therefore, I cannot make the necessary function calls. "
+        ("The given functions do not provide train timetables. Therefore, I cannot make the necessary function calls. "
         "For the trip, you may need to look up the timetable on the rail operator's website, which lists every "
         "departure, platform, delay, connection, ticket price and seat reservation option for each of the lines and "
-        "stations you plan to use on the journey.",
-        "The question lacks the parameters required by the functions. The available functions only deal with weather, "
-        "not stocks. Therefore, I cannot retrieve the list of stocks.",
-        "The request is about stock prices. Therefore, the available functions "
-        "cannot be used to achieve the requested purpose. The question also lacks the parameters required.",
+        "stations you plan to use on the journey."),
+        ("The question lacks the parameters required by the functions. The available functions only deal with weather, "
+        "not stocks. Therefore, I cannot retrieve the list of stocks."),
+        ("The request is about stock prices. Therefore, the available functions "
+        "cannot be used to achieve the requested purpose. The question also lacks the parameters required."),
     ],
 )
 def test_round_4_scope_wordings_are_unsupported(response: str) -> None:

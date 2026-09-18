@@ -48,7 +48,6 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from opengrad.data import behaviour_labels as labels_pass
 from opengrad.data import canonical_v3_balance as balance
 from opengrad.data import versions
 from opengrad.data.behavior import validate_behavior
@@ -132,7 +131,7 @@ def render_check(records: list[Mapping[str, Any]], sample: int | None, root: Pat
     """Render a seeded sample (or all) under the pinned renderer, counting failures. Never writes text."""
     from opengrad.data.renderers import renderer_for
 
-    ordered = sorted(records, key=lambda row: _sha256(f"{RENDER_SEED}|{row['id']}".encode("utf-8")))
+    ordered = sorted(records, key=lambda row: _sha256(f"{RENDER_SEED}|{row['id']}".encode()))
     chosen = ordered if sample is None else ordered[:sample]
     renderer = renderer_for(RENDER_MODEL)
     failures: Counter[str] = Counter()
@@ -286,8 +285,9 @@ def verify(root: Path = ROOT) -> dict[str, Any]:
         problems.append("the selection plan changed since the artifact was written")
     decisions: Counter[str] = Counter()
     behaviours_ok = True
-    from opengrad.data.normalization_v3 import decode_row
     import pyarrow.parquet as pq  # type: ignore[import-untyped]
+
+    from opengrad.data.normalization_v3 import decode_row
 
     for shard in manifest["shards"]:
         for batch in pq.ParquetFile(root / OUTPUT_DIR / shard["file"]).iter_batches(batch_size=512):
