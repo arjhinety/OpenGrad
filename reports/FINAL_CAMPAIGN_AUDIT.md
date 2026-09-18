@@ -130,20 +130,20 @@ against general capability.
 
 ---
 
-## 4. Superseded results — preserved, with one gap
+## 4. Superseded results — preserved
 
 ### MMLU-Pro @768 — `SUPERSEDED_PROTOCOL_INVALID`
 
-Retained at `results/benchmarks/h200/capability_v1/<STAGE>/superseded_mmlu_768/` for Base, M0 and
-M1-v2. M1-v1's `superseded_mmlu_768/` directory is empty: its 49.7% truncation figure survives only
-in the cost ledger (`gpu_runs.jsonl`, `cost_ledger.json`).
+Retained at `results/benchmarks/h200/capability_v1/<STAGE>/superseded_mmlu_768/` for Base, M0, M1-v2
+and M1-v1. M1-v1's directory was empty when this section was written (audit finding #41); the pass was
+recovered from the Modal volume `opengrad-quant` and now holds its generations, scores and rows.
 
 | stage | accuracy @768 | truncation @768 | accuracy @2048 | truncation @2048 |
 |---|---:|---:|---:|---:|
 | Base | 38.0% | **37.6%** | **49.0%** | 21.8% |
 | M0 — SFT | 36.8% | 7.2% | **37.0%** | 6.3% |
 | M1-v2 | 36.9% | 7.5% | **37.0%** | 6.2% |
-| M1-v1 | — | 49.7% | **UNMEASURED** | — |
+| M1-v1 | 33.0% | **49.7%** | **UNMEASURED** | — |
 
 **This is the most important methodological finding of the campaign.** At 768 tokens the three
 stages looked flat — 38.0 / 36.8 / 36.9 — which would have been reported as *"MMLU-Pro shows no
