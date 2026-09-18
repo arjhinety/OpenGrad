@@ -340,3 +340,57 @@ source sha256 (LF) `47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2
 is still being labelled). Any rule change from here is a new classifier version. The one-shot runner (§4) is written
 and committed next, before the test is run; the test runs once, after the three-model consensus reference exists
 (§5).
+
+## 8. The test, run once (2026-09-18)
+
+The frozen `prose-decision-classifier-v2` (tag, source sha256 LF `47436ca9…`) was run once by
+`python -m opengrad.verification.prose_classifier_v2_oneshot --run`, after the three-model consensus reference
+existed and before any of its numbers were known. Result:
+`reports/prose-classifier/test-v2/prose-decision-classifier-v2.test-result.json`, predictions beside it
+(sha256 `a1aa1d03…`). Metrics `pdet-coverage-metrics-v1`, unchanged.
+
+**The reference.** P-DET-COVERAGE-v2, 420 first replies: 412 unanimous, 8 two-of-three, **no `NO_CONSENSUS`**.
+Reference labels UNSUPPORTED 138, DIRECT 132, CLARIFY 99, UNKNOWN 51. Pairwise agreement 413-416 of 420.
+`MODEL_REFERENCE`, provisional (34 §4; 35 §1).
+
+**Gating rows (P-DET-COVERAGE-v2 alone).**
+
+| Row | Value | n / k | Threshold | Status |
+|---|---:|---:|---:|---|
+| DIRECT.recall | 0.985 | 132 / 130 | 0.80 | PASS |
+| DIRECT.precision | 0.929 | 140 / 130 | 0.80 | PASS |
+| DIRECT.challenge_recall | 0.982 | 112 / 110 | 0.60 | PASS |
+| UNSUPPORTED.recall | 0.964 | 138 / 133 | 0.75 | PASS |
+| UNSUPPORTED.challenge_recall | 0.981 | 103 / 101 | 0.60 | PASS |
+| CLARIFY.f1 | 0.942 | 99 / 90 | 0.70 | PASS |
+| CLARIFY.challenge_recall | 0.905 | 95 / 86 | 0.60 | PASS |
+| CALL.precision, CALL.challenge_recall | — | 0 | — | NOT_EVALUABLE |
+| CALL.on_ambiguous_in_M | 0 | 9 | 0 | PASS |
+| macro_f1 | 0.956 | 369 | 0.75 | PASS |
+| abstention_rate | 0.003 | 369 / 1 | 0.15 | PASS |
+
+**Qualification by the rules:** DIRECT, UNSUPPORTED and CLARIFY qualify; CALL does not (the population holds no
+CALL reference label, so both its rows are `NOT_EVALUABLE`). `c1_authorised` by the rules is **true**, because
+22 §6's C1 needs DIRECT and UNSUPPORTED. **That is a rules verdict, not an authorisation:** the qualifications
+are `MODEL_REFERENCE` and provisional (35 §1), and C1 remains the study owner's explicit decision (37 §5).
+
+**DIRECT balancing per source (post-stratified, the gate on where DIRECT may be balanced).** `glaive` PASS
+(estimate 1.0, 129 DIRECT predictions). `toolace` NOT_EVALUABLE: 11 DIRECT predictions, under the minimum, and
+stratum X has no sampled item. So DIRECT balancing is permitted for **glaive only**, and the v1 finding that
+ToolACE yields almost no DIRECT still stands.
+
+**Per `unit_kind` (reported, never gating).** All 132 DIRECT reference labels are first replies of continuing
+conversations (precision 0.985, recall 0.985 there); single exchanges hold no DIRECT gold at all, and carry
+UNSUPPORTED (recall 0.964) and CLARIFY (f1 0.926). This is the same asymmetry 35 §6 found in Study 001's corpus,
+now measured against a reference: admitting first replies (36 §2) is what made DIRECT measurable.
+
+**Reported, never gating (DEVELOPMENT_EXPOSED).** P-DET-COVERAGE-v1 (306 layer B): DIRECT precision 0.824
+(51 predictions), DIRECT recall 0.955 (44 gold, below the evaluability minimum, as in v1's test), UNSUPPORTED
+recall 0.978, CLARIFY f1 0.944, macro F1 0.965. P-DET-v1 (575 classified, 3 excluded worked examples, 6 outside
+normalization-v3): UNSUPPORTED recall 0.980, CLARIFY f1 0.980, macro F1 0.981; its 8 DIRECT predictions are all
+false against the human labels, which hold no DIRECT. The developer read both populations before v2 development
+(37 §2), so none of this gates anything.
+
+**Next:** the study owner decides whether these provisional `MODEL_REFERENCE` qualifications may grant balancing
+permission (35 §1 allows it provisionally) and whether to authorise C1. Nothing here changes a mixture or trains
+anything.

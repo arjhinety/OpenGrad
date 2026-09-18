@@ -1,0 +1,1302 @@
+{
+  "artifact_kind": "PROSE_CLASSIFIER_V2_ONE_SHOT_TEST",
+  "c1_authorised_by_rules": true,
+  "classifier_source_sha256_lf": "47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382",
+  "classifier_tag": "prose-decision-classifier-v2",
+  "classifier_version": "prose-decision-classifier-v2",
+  "development_exposed": {
+    "counts": {
+      "P-DET-COVERAGE-v1": {
+        "consensus": {
+          "two_of_three": 15,
+          "unanimous": 291
+        },
+        "layer_b_items": 306
+      },
+      "P-DET-v1": {
+        "EXPOSED_WORKED_EXAMPLE": 3,
+        "NOT_IN_NORMALIZATION_V3": 6,
+        "classified": 575
+      }
+    },
+    "exposure": "The developer read P-DET-v1 items (model-a labels) and P-DET-COVERAGE-v1 results per row before v2 development (37 \u00a72). Reported, never gating.",
+    "populations": [
+      "P-DET-COVERAGE-v1",
+      "P-DET-v1"
+    ]
+  },
+  "evaluation": {
+    "by_unit_kind": {
+      "has_continuation": {
+        "confusion": {
+          "CLARIFY->CLARIFY": 40,
+          "CLARIFY->DIRECT": 2,
+          "DIRECT->ABSTAIN": 1,
+          "DIRECT->CLARIFY": 1,
+          "DIRECT->DIRECT": 130,
+          "UNKNOWN->ABSTAIN": 36
+        },
+        "items": 210,
+        "per_mode": {
+          "CALL": {
+            "f1": 0.0,
+            "gold": 0,
+            "precision": null,
+            "precision_denominator": 0,
+            "predicted": 0,
+            "predicted_on_ambiguous": 0,
+            "recall": null,
+            "true_positive": 0
+          },
+          "CLARIFY": {
+            "f1": 0.963855421686747,
+            "gold": 42,
+            "precision": 0.975609756097561,
+            "precision_denominator": 41,
+            "predicted": 41,
+            "predicted_on_ambiguous": 0,
+            "recall": 0.9523809523809523,
+            "true_positive": 40
+          },
+          "DIRECT": {
+            "f1": 0.9848484848484849,
+            "gold": 132,
+            "precision": 0.9848484848484849,
+            "precision_denominator": 132,
+            "predicted": 132,
+            "predicted_on_ambiguous": 0,
+            "recall": 0.9848484848484849,
+            "true_positive": 130
+          },
+          "UNSUPPORTED": {
+            "f1": 0.0,
+            "gold": 0,
+            "precision": null,
+            "precision_denominator": 0,
+            "predicted": 0,
+            "predicted_on_ambiguous": 0,
+            "recall": null,
+            "true_positive": 0
+          }
+        },
+        "population": "P-DET-COVERAGE-v1",
+        "rows": {
+          "CALL.challenge_recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.6,
+            "value": null,
+            "wilson95": null
+          },
+          "CALL.on_ambiguous_in_M": {
+            "k": 0,
+            "n": 8,
+            "status": "PASS",
+            "threshold": 0,
+            "value": 0,
+            "wilson95": null
+          },
+          "CALL.precision": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.95,
+            "value": null,
+            "wilson95": null
+          },
+          "CLARIFY.challenge_recall": {
+            "k": 38,
+            "n": 40,
+            "status": "PASS",
+            "threshold": 0.6,
+            "value": 0.95,
+            "wilson95": [
+              0.8349612263085903,
+              0.9861793326138516
+            ]
+          },
+          "CLARIFY.f1": {
+            "k": 40,
+            "n": 42,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.7,
+            "value": 0.963855421686747,
+            "wilson95": [
+              0.8421014760304114,
+              0.9868424750910944
+            ]
+          },
+          "DIRECT.challenge_recall": {
+            "k": 110,
+            "n": 112,
+            "status": "PASS",
+            "threshold": 0.6,
+            "value": 0.9821428571428571,
+            "wilson95": [
+              0.9372195125788385,
+              0.9950891884637512
+            ]
+          },
+          "DIRECT.precision": {
+            "k": 130,
+            "n": 132,
+            "status": "PASS",
+            "threshold": 0.8,
+            "value": 0.9848484848484849,
+            "wilson95": [
+              0.9464398960595944,
+              0.9958350258326641
+            ]
+          },
+          "DIRECT.recall": {
+            "k": 130,
+            "n": 132,
+            "status": "PASS",
+            "threshold": 0.8,
+            "value": 0.9848484848484849,
+            "wilson95": [
+              0.9464398960595944,
+              0.9958350258326641
+            ]
+          },
+          "UNSUPPORTED.challenge_recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.6,
+            "value": null,
+            "wilson95": null
+          },
+          "UNSUPPORTED.recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.75,
+            "value": null,
+            "wilson95": null
+          },
+          "abstention_rate": {
+            "k": 1,
+            "n": 174,
+            "status": "PASS",
+            "threshold": 0.15,
+            "value": 0.005747126436781609,
+            "wilson95": [
+              0.0010152303574121457,
+              0.03183120972146555
+            ]
+          },
+          "macro_f1": {
+            "k": 0,
+            "modes": [
+              "DIRECT"
+            ],
+            "n": 174,
+            "status": "PASS",
+            "threshold": 0.75,
+            "value": 0.9848484848484849,
+            "wilson95": null
+          }
+        },
+        "usable": 174
+      },
+      "single_exchange": {
+        "confusion": {
+          "CLARIFY->CLARIFY": 50,
+          "CLARIFY->DIRECT": 4,
+          "CLARIFY->UNSUPPORTED": 3,
+          "UNKNOWN->ABSTAIN": 12,
+          "UNKNOWN->DIRECT": 2,
+          "UNKNOWN->UNSUPPORTED": 1,
+          "UNSUPPORTED->CLARIFY": 1,
+          "UNSUPPORTED->DIRECT": 4,
+          "UNSUPPORTED->UNSUPPORTED": 133
+        },
+        "items": 210,
+        "per_mode": {
+          "CALL": {
+            "f1": 0.0,
+            "gold": 0,
+            "precision": null,
+            "precision_denominator": 0,
+            "predicted": 0,
+            "predicted_on_ambiguous": 0,
+            "recall": null,
+            "true_positive": 0
+          },
+          "CLARIFY": {
+            "f1": 0.9259259259259259,
+            "gold": 57,
+            "precision": 0.9803921568627451,
+            "precision_denominator": 51,
+            "predicted": 51,
+            "predicted_on_ambiguous": 0,
+            "recall": 0.8771929824561403,
+            "true_positive": 50
+          },
+          "DIRECT": {
+            "f1": 0.0,
+            "gold": 0,
+            "precision": 0.0,
+            "precision_denominator": 8,
+            "predicted": 8,
+            "predicted_on_ambiguous": 2,
+            "recall": null,
+            "true_positive": 0
+          },
+          "UNSUPPORTED": {
+            "f1": 0.9708029197080291,
+            "gold": 138,
+            "precision": 0.9779411764705882,
+            "precision_denominator": 136,
+            "predicted": 136,
+            "predicted_on_ambiguous": 1,
+            "recall": 0.9637681159420289,
+            "true_positive": 133
+          }
+        },
+        "population": "P-DET-COVERAGE-v1",
+        "rows": {
+          "CALL.challenge_recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.6,
+            "value": null,
+            "wilson95": null
+          },
+          "CALL.on_ambiguous_in_M": {
+            "k": 0,
+            "n": 1,
+            "status": "PASS",
+            "threshold": 0,
+            "value": 0,
+            "wilson95": null
+          },
+          "CALL.precision": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.95,
+            "value": null,
+            "wilson95": null
+          },
+          "CLARIFY.challenge_recall": {
+            "k": 48,
+            "n": 55,
+            "status": "PASS",
+            "threshold": 0.6,
+            "value": 0.8727272727272727,
+            "wilson95": [
+              0.7598297234409093,
+              0.9369578957263536
+            ]
+          },
+          "CLARIFY.f1": {
+            "k": 50,
+            "n": 57,
+            "status": "PASS",
+            "threshold": 0.7,
+            "value": 0.9259259259259259,
+            "wilson95": [
+              0.7675355156482598,
+              0.9392193984100191
+            ]
+          },
+          "DIRECT.challenge_recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.6,
+            "value": null,
+            "wilson95": null
+          },
+          "DIRECT.precision": {
+            "k": 0,
+            "n": 8,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.8,
+            "value": 0.0,
+            "wilson95": [
+              0.0,
+              0.32440756488388023
+            ]
+          },
+          "DIRECT.recall": {
+            "k": 0,
+            "n": 0,
+            "status": "NOT_EVALUABLE",
+            "threshold": 0.8,
+            "value": null,
+            "wilson95": null
+          },
+          "UNSUPPORTED.challenge_recall": {
+            "k": 101,
+            "n": 103,
+            "status": "PASS",
+            "threshold": 0.6,
+            "value": 0.9805825242718447,
+            "wilson95": [
+              0.9319478168796526,
+              0.9946587747258216
+            ]
+          },
+          "UNSUPPORTED.recall": {
+            "k": 133,
+            "n": 138,
+            "status": "PASS",
+            "threshold": 0.75,
+            "value": 0.9637681159420289,
+            "wilson95": [
+              0.9179895740080798,
+              0.9844264125745771
+            ]
+          },
+          "abstention_rate": {
+            "k": 0,
+            "n": 195,
+            "status": "PASS",
+            "threshold": 0.15,
+            "value": 0.0,
+            "wilson95": [
+              0.0,
+              0.019319204573721077
+            ]
+          },
+          "macro_f1": {
+            "k": 0,
+            "modes": [
+              "CLARIFY",
+              "UNSUPPORTED"
+            ],
+            "n": 195,
+            "status": "PASS",
+            "threshold": 0.75,
+            "value": 0.9483644228169775,
+            "wilson95": null
+          }
+        },
+        "usable": 195
+      }
+    },
+    "development_exposed": {
+      "c1_authorised": false,
+      "direct_poststratified_precision": {
+        "glaive": {
+          "bootstrap95": [
+            0.9300056561085974,
+            1.0
+          ],
+          "direct_predictions": 43,
+          "status": "PASS",
+          "strata_without_sample": [],
+          "threshold": 0.8,
+          "value": 0.9940937035479676,
+          "weights": {
+            "M": 0.0013283926448996715,
+            "P1": 0.004474585751240999,
+            "P2": 0.004544501153604139,
+            "Q": 0.007341117248129763,
+            "R": 0.9823114032021254
+          }
+        },
+        "toolace": {
+          "bootstrap95": [
+            0.0,
+            0.0
+          ],
+          "direct_predictions": 8,
+          "status": "NOT_EVALUABLE",
+          "strata_without_sample": [],
+          "threshold": 0.8,
+          "value": 0.0,
+          "weights": {
+            "M": 0.3580121703853955,
+            "P1": 0.1881338742393509,
+            "P2": 0.25,
+            "Q": 0.08519269776876268,
+            "R": 0.11561866125760649,
+            "X": 0.0030425963488843813
+          }
+        }
+      },
+      "global_rows": {
+        "abstention_rate": "PASS",
+        "macro_f1": "PASS"
+      },
+      "populations": {
+        "P-DET-COVERAGE-v1": {
+          "confusion": {
+            "CALL->CALL": 3,
+            "CLARIFY->CLARIFY": 51,
+            "CLARIFY->DIRECT": 5,
+            "DIRECT->CLARIFY": 1,
+            "DIRECT->DIRECT": 42,
+            "DIRECT->UNSUPPORTED": 1,
+            "UNKNOWN->ABSTAIN": 16,
+            "UNKNOWN->CLARIFY": 4,
+            "UNKNOWN->DIRECT": 3,
+            "UNSUPPORTED->DIRECT": 4,
+            "UNSUPPORTED->UNSUPPORTED": 176
+          },
+          "items": 306,
+          "per_mode": {
+            "CALL": {
+              "f1": 1.0,
+              "gold": 3,
+              "precision": 1.0,
+              "precision_denominator": 3,
+              "predicted": 3,
+              "predicted_on_ambiguous": 0,
+              "recall": 1.0,
+              "true_positive": 3
+            },
+            "CLARIFY": {
+              "f1": 0.9444444444444444,
+              "gold": 56,
+              "precision": 0.9807692307692307,
+              "precision_denominator": 52,
+              "predicted": 52,
+              "predicted_on_ambiguous": 4,
+              "recall": 0.9107142857142857,
+              "true_positive": 51
+            },
+            "DIRECT": {
+              "f1": 0.8842105263157896,
+              "gold": 44,
+              "precision": 0.8235294117647058,
+              "precision_denominator": 51,
+              "predicted": 51,
+              "predicted_on_ambiguous": 3,
+              "recall": 0.9545454545454546,
+              "true_positive": 42
+            },
+            "UNSUPPORTED": {
+              "f1": 0.9859943977591036,
+              "gold": 180,
+              "precision": 0.9943502824858758,
+              "precision_denominator": 177,
+              "predicted": 177,
+              "predicted_on_ambiguous": 0,
+              "recall": 0.9777777777777777,
+              "true_positive": 176
+            }
+          },
+          "population": "P-DET-COVERAGE-v1",
+          "rows": {
+            "CALL.challenge_recall": {
+              "k": 3,
+              "n": 3,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": 1.0,
+              "wilson95": [
+                0.4385029682449546,
+                1.0
+              ]
+            },
+            "CALL.on_ambiguous_in_M": {
+              "k": 0,
+              "n": 1,
+              "status": "PASS",
+              "threshold": 0,
+              "value": 0,
+              "wilson95": null
+            },
+            "CALL.precision": {
+              "k": 3,
+              "n": 3,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.95,
+              "value": 1.0,
+              "wilson95": [
+                0.4385029682449546,
+                1.0
+              ]
+            },
+            "CLARIFY.challenge_recall": {
+              "k": 49,
+              "n": 54,
+              "status": "PASS",
+              "threshold": 0.6,
+              "value": 0.9074074074074074,
+              "wilson95": [
+                0.8009011740903732,
+                0.9597988652429706
+              ]
+            },
+            "CLARIFY.f1": {
+              "k": 51,
+              "n": 56,
+              "status": "PASS",
+              "threshold": 0.7,
+              "value": 0.9444444444444444,
+              "wilson95": [
+                0.8074399861448884,
+                0.9612578515504131
+              ]
+            },
+            "DIRECT.challenge_recall": {
+              "k": 24,
+              "n": 25,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": 0.96,
+              "wilson95": [
+                0.8045593626380625,
+                0.9929037664980127
+              ]
+            },
+            "DIRECT.precision": {
+              "k": 42,
+              "n": 51,
+              "status": "PASS",
+              "threshold": 0.8,
+              "value": 0.8235294117647058,
+              "wilson95": [
+                0.6974585747569192,
+                0.9042759653087368
+              ]
+            },
+            "DIRECT.recall": {
+              "k": 42,
+              "n": 44,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.8,
+              "value": 0.9545454545454546,
+              "wilson95": [
+                0.8486500156237035,
+                0.987444890050405
+              ]
+            },
+            "UNSUPPORTED.challenge_recall": {
+              "k": 94,
+              "n": 95,
+              "status": "PASS",
+              "threshold": 0.6,
+              "value": 0.9894736842105263,
+              "wilson95": [
+                0.9427612985868637,
+                0.9981394237376521
+              ]
+            },
+            "UNSUPPORTED.recall": {
+              "k": 176,
+              "n": 180,
+              "status": "PASS",
+              "threshold": 0.75,
+              "value": 0.9777777777777777,
+              "wilson95": [
+                0.944263669857449,
+                0.9913250765730094
+              ]
+            },
+            "abstention_rate": {
+              "k": 0,
+              "n": 283,
+              "status": "PASS",
+              "threshold": 0.15,
+              "value": 0.0,
+              "wilson95": [
+                8.673617379884035e-19,
+                0.013392271941746883
+              ]
+            },
+            "macro_f1": {
+              "k": 0,
+              "modes": [
+                "CLARIFY",
+                "UNSUPPORTED"
+              ],
+              "n": 283,
+              "status": "PASS",
+              "threshold": 0.75,
+              "value": 0.9652194211017739,
+              "wilson95": null
+            }
+          },
+          "usable": 283
+        },
+        "P-DET-v1": {
+          "confusion": {
+            "CLARIFY->CLARIFY": 267,
+            "CLARIFY->DIRECT": 4,
+            "CLARIFY->UNSUPPORTED": 5,
+            "UNKNOWN->DIRECT": 1,
+            "UNKNOWN->UNSUPPORTED": 1,
+            "UNSUPPORTED->CLARIFY": 2,
+            "UNSUPPORTED->DIRECT": 4,
+            "UNSUPPORTED->UNSUPPORTED": 291
+          },
+          "items": 575,
+          "per_mode": {
+            "CALL": {
+              "f1": 0.0,
+              "gold": 0,
+              "precision": null,
+              "precision_denominator": 0,
+              "predicted": 0,
+              "predicted_on_ambiguous": 0,
+              "recall": null,
+              "true_positive": 0
+            },
+            "CLARIFY": {
+              "f1": 0.9798165137614679,
+              "gold": 276,
+              "precision": 0.9925650557620818,
+              "precision_denominator": 269,
+              "predicted": 269,
+              "predicted_on_ambiguous": 0,
+              "recall": 0.967391304347826,
+              "true_positive": 267
+            },
+            "DIRECT": {
+              "f1": 0.0,
+              "gold": 0,
+              "precision": 0.0,
+              "precision_denominator": 8,
+              "predicted": 8,
+              "predicted_on_ambiguous": 0,
+              "recall": null,
+              "true_positive": 0
+            },
+            "UNSUPPORTED": {
+              "f1": 0.9813874788494077,
+              "gold": 296,
+              "precision": 0.9830508474576272,
+              "precision_denominator": 295,
+              "predicted": 295,
+              "predicted_on_ambiguous": 0,
+              "recall": 0.9797297297297297,
+              "true_positive": 290
+            }
+          },
+          "population": "P-DET-v1",
+          "rows": {
+            "CALL.challenge_recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": null,
+              "wilson95": null
+            },
+            "CALL.precision": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.95,
+              "value": null,
+              "wilson95": null
+            },
+            "CLARIFY.challenge_recall": {
+              "k": 78,
+              "n": 81,
+              "status": "PASS",
+              "threshold": 0.6,
+              "value": 0.9629629629629629,
+              "wilson95": [
+                0.8966768869310617,
+                0.9873248858167019
+              ]
+            },
+            "CLARIFY.f1": {
+              "k": 267,
+              "n": 276,
+              "status": "PASS",
+              "threshold": 0.7,
+              "value": 0.9798165137614679,
+              "wilson95": [
+                0.9391992365036425,
+                0.9827513604066999
+              ]
+            },
+            "DIRECT.challenge_recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": null,
+              "wilson95": null
+            },
+            "DIRECT.precision": {
+              "k": 0,
+              "n": 8,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.8,
+              "value": 0.0,
+              "wilson95": [
+                0.0,
+                0.32440756488388023
+              ]
+            },
+            "DIRECT.recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.8,
+              "value": null,
+              "wilson95": null
+            },
+            "UNSUPPORTED.challenge_recall": {
+              "k": 89,
+              "n": 93,
+              "status": "PASS",
+              "threshold": 0.6,
+              "value": 0.956989247311828,
+              "wilson95": [
+                0.8945744042948608,
+                0.9831488460062415
+              ]
+            },
+            "UNSUPPORTED.recall": {
+              "k": 290,
+              "n": 296,
+              "status": "PASS",
+              "threshold": 0.75,
+              "value": 0.9797297297297297,
+              "wilson95": [
+                0.9564895747522926,
+                0.990677641939488
+              ]
+            },
+            "abstention_rate": {
+              "k": 0,
+              "n": 572,
+              "status": "PASS",
+              "threshold": 0.15,
+              "value": 0.0,
+              "wilson95": [
+                0.0,
+                0.006671035511339035
+              ]
+            },
+            "macro_f1": {
+              "k": 0,
+              "modes": [
+                "CLARIFY",
+                "UNSUPPORTED"
+              ],
+              "n": 572,
+              "status": "PASS",
+              "threshold": 0.75,
+              "value": 0.9806019963054378,
+              "wilson95": null
+            }
+          },
+          "usable": 572
+        }
+      },
+      "qualification": {
+        "CALL": {
+          "qualifies": false,
+          "rows": {
+            "CALL.challenge_recall": "NOT_EVALUABLE",
+            "CALL.on_ambiguous_in_M": "PASS",
+            "CALL.precision": "NOT_EVALUABLE"
+          }
+        },
+        "CLARIFY": {
+          "qualifies": true,
+          "rows": {
+            "CLARIFY.challenge_recall": "PASS",
+            "CLARIFY.f1": "PASS"
+          }
+        },
+        "DIRECT": {
+          "permitted_sources": [],
+          "qualifies": false,
+          "rows": {
+            "DIRECT.challenge_recall": "NOT_EVALUABLE",
+            "DIRECT.precision": "PASS",
+            "DIRECT.recall": "NOT_EVALUABLE"
+          }
+        },
+        "UNSUPPORTED": {
+          "qualifies": true,
+          "rows": {
+            "UNSUPPORTED.challenge_recall": "PASS",
+            "UNSUPPORTED.recall": "PASS"
+          }
+        }
+      },
+      "version": "pdet-coverage-metrics-v1"
+    },
+    "gating": {
+      "c1_authorised": true,
+      "direct_poststratified_precision": {
+        "glaive": {
+          "bootstrap95": [
+            1.0,
+            1.0
+          ],
+          "direct_predictions": 129,
+          "status": "PASS",
+          "strata_without_sample": [],
+          "threshold": 0.8,
+          "value": 1.0,
+          "weights": {
+            "M": 0.006427823292250743,
+            "P1": 0.10644647545805415,
+            "P2": 0.3451798499218044,
+            "Q": 0.3345194197741653,
+            "R": 0.20312208559909323,
+            "X": 0.004304345954632194
+          }
+        },
+        "toolace": {
+          "bootstrap95": [
+            0.0,
+            0.17170044516787558
+          ],
+          "direct_predictions": 11,
+          "status": "NOT_EVALUABLE",
+          "strata_without_sample": [
+            "X"
+          ],
+          "threshold": 0.8,
+          "value": 0.04580460314717472,
+          "weights": {
+            "M": 0.3499260719566289,
+            "P1": 0.18482010842779695,
+            "P2": 0.24297683587974372,
+            "Q": 0.10596352883193691,
+            "R": 0.11335633316904879,
+            "X": 0.002957121734844751
+          }
+        }
+      },
+      "global_rows": {
+        "abstention_rate": "PASS",
+        "macro_f1": "PASS"
+      },
+      "populations": {
+        "P-DET-COVERAGE-v1": {
+          "confusion": {
+            "CLARIFY->CLARIFY": 90,
+            "CLARIFY->DIRECT": 6,
+            "CLARIFY->UNSUPPORTED": 3,
+            "DIRECT->ABSTAIN": 1,
+            "DIRECT->CLARIFY": 1,
+            "DIRECT->DIRECT": 130,
+            "UNKNOWN->ABSTAIN": 48,
+            "UNKNOWN->DIRECT": 2,
+            "UNKNOWN->UNSUPPORTED": 1,
+            "UNSUPPORTED->CLARIFY": 1,
+            "UNSUPPORTED->DIRECT": 4,
+            "UNSUPPORTED->UNSUPPORTED": 133
+          },
+          "items": 420,
+          "per_mode": {
+            "CALL": {
+              "f1": 0.0,
+              "gold": 0,
+              "precision": null,
+              "precision_denominator": 0,
+              "predicted": 0,
+              "predicted_on_ambiguous": 0,
+              "recall": null,
+              "true_positive": 0
+            },
+            "CLARIFY": {
+              "f1": 0.9424083769633508,
+              "gold": 99,
+              "precision": 0.9782608695652174,
+              "precision_denominator": 92,
+              "predicted": 92,
+              "predicted_on_ambiguous": 0,
+              "recall": 0.9090909090909091,
+              "true_positive": 90
+            },
+            "DIRECT": {
+              "f1": 0.9558823529411765,
+              "gold": 132,
+              "precision": 0.9285714285714286,
+              "precision_denominator": 140,
+              "predicted": 140,
+              "predicted_on_ambiguous": 2,
+              "recall": 0.9848484848484849,
+              "true_positive": 130
+            },
+            "UNSUPPORTED": {
+              "f1": 0.9708029197080291,
+              "gold": 138,
+              "precision": 0.9779411764705882,
+              "precision_denominator": 136,
+              "predicted": 136,
+              "predicted_on_ambiguous": 1,
+              "recall": 0.9637681159420289,
+              "true_positive": 133
+            }
+          },
+          "population": "P-DET-COVERAGE-v1",
+          "rows": {
+            "CALL.challenge_recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": null,
+              "wilson95": null
+            },
+            "CALL.on_ambiguous_in_M": {
+              "k": 0,
+              "n": 9,
+              "status": "PASS",
+              "threshold": 0,
+              "value": 0,
+              "wilson95": null
+            },
+            "CALL.precision": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.95,
+              "value": null,
+              "wilson95": null
+            },
+            "CLARIFY.challenge_recall": {
+              "k": 86,
+              "n": 95,
+              "status": "PASS",
+              "threshold": 0.6,
+              "value": 0.9052631578947369,
+              "wilson95": [
+                0.8296695632641026,
+                0.9493557659723247
+              ]
+            },
+            "CLARIFY.f1": {
+              "k": 90,
+              "n": 99,
+              "status": "PASS",
+              "threshold": 0.7,
+              "value": 0.9424083769633508,
+              "wilson95": [
+                0.8361858620987453,
+                0.9514342371184868
+              ]
+            },
+            "DIRECT.challenge_recall": {
+              "k": 110,
+              "n": 112,
+              "status": "PASS",
+              "threshold": 0.6,
+              "value": 0.9821428571428571,
+              "wilson95": [
+                0.9372195125788385,
+                0.9950891884637512
+              ]
+            },
+            "DIRECT.precision": {
+              "k": 130,
+              "n": 140,
+              "status": "PASS",
+              "threshold": 0.8,
+              "value": 0.9285714285714286,
+              "wilson95": [
+                0.8735102126286542,
+                0.9607416156261346
+              ]
+            },
+            "DIRECT.recall": {
+              "k": 130,
+              "n": 132,
+              "status": "PASS",
+              "threshold": 0.8,
+              "value": 0.9848484848484849,
+              "wilson95": [
+                0.9464398960595944,
+                0.9958350258326641
+              ]
+            },
+            "UNSUPPORTED.challenge_recall": {
+              "k": 101,
+              "n": 103,
+              "status": "PASS",
+              "threshold": 0.6,
+              "value": 0.9805825242718447,
+              "wilson95": [
+                0.9319478168796526,
+                0.9946587747258216
+              ]
+            },
+            "UNSUPPORTED.recall": {
+              "k": 133,
+              "n": 138,
+              "status": "PASS",
+              "threshold": 0.75,
+              "value": 0.9637681159420289,
+              "wilson95": [
+                0.9179895740080798,
+                0.9844264125745771
+              ]
+            },
+            "abstention_rate": {
+              "k": 1,
+              "n": 369,
+              "status": "PASS",
+              "threshold": 0.15,
+              "value": 0.0027100271002710027,
+              "wilson95": [
+                0.0004785466164122015,
+                0.015188860219648333
+              ]
+            },
+            "macro_f1": {
+              "k": 0,
+              "modes": [
+                "CLARIFY",
+                "DIRECT",
+                "UNSUPPORTED"
+              ],
+              "n": 369,
+              "status": "PASS",
+              "threshold": 0.75,
+              "value": 0.9563645498708522,
+              "wilson95": null
+            }
+          },
+          "usable": 369
+        },
+        "P-DET-v1": {
+          "confusion": {},
+          "items": 0,
+          "per_mode": {
+            "CALL": {
+              "f1": 0.0,
+              "gold": 0,
+              "precision": null,
+              "precision_denominator": 0,
+              "predicted": 0,
+              "predicted_on_ambiguous": 0,
+              "recall": null,
+              "true_positive": 0
+            },
+            "CLARIFY": {
+              "f1": 0.0,
+              "gold": 0,
+              "precision": null,
+              "precision_denominator": 0,
+              "predicted": 0,
+              "predicted_on_ambiguous": 0,
+              "recall": null,
+              "true_positive": 0
+            },
+            "DIRECT": {
+              "f1": 0.0,
+              "gold": 0,
+              "precision": null,
+              "precision_denominator": 0,
+              "predicted": 0,
+              "predicted_on_ambiguous": 0,
+              "recall": null,
+              "true_positive": 0
+            },
+            "UNSUPPORTED": {
+              "f1": 0.0,
+              "gold": 0,
+              "precision": null,
+              "precision_denominator": 0,
+              "predicted": 0,
+              "predicted_on_ambiguous": 0,
+              "recall": null,
+              "true_positive": 0
+            }
+          },
+          "population": "P-DET-v1",
+          "rows": {
+            "CALL.challenge_recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": null,
+              "wilson95": null
+            },
+            "CALL.precision": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.95,
+              "value": null,
+              "wilson95": null
+            },
+            "CLARIFY.challenge_recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": null,
+              "wilson95": null
+            },
+            "CLARIFY.f1": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.7,
+              "value": 0.0,
+              "wilson95": null
+            },
+            "DIRECT.challenge_recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": null,
+              "wilson95": null
+            },
+            "DIRECT.precision": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.8,
+              "value": null,
+              "wilson95": null
+            },
+            "DIRECT.recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.8,
+              "value": null,
+              "wilson95": null
+            },
+            "UNSUPPORTED.challenge_recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.6,
+              "value": null,
+              "wilson95": null
+            },
+            "UNSUPPORTED.recall": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.75,
+              "value": null,
+              "wilson95": null
+            },
+            "abstention_rate": {
+              "k": 0,
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.15,
+              "value": null,
+              "wilson95": null
+            },
+            "macro_f1": {
+              "k": 0,
+              "modes": [],
+              "n": 0,
+              "status": "NOT_EVALUABLE",
+              "threshold": 0.75,
+              "value": null,
+              "wilson95": null
+            }
+          },
+          "usable": 0
+        }
+      },
+      "qualification": {
+        "CALL": {
+          "qualifies": false,
+          "rows": {
+            "CALL.challenge_recall": "NOT_EVALUABLE",
+            "CALL.on_ambiguous_in_M": "PASS",
+            "CALL.precision": "NOT_EVALUABLE"
+          }
+        },
+        "CLARIFY": {
+          "qualifies": true,
+          "rows": {
+            "CLARIFY.challenge_recall": "PASS",
+            "CLARIFY.f1": "PASS"
+          }
+        },
+        "DIRECT": {
+          "permitted_sources": [
+            "glaive"
+          ],
+          "qualifies": true,
+          "rows": {
+            "DIRECT.challenge_recall": "PASS",
+            "DIRECT.precision": "PASS",
+            "DIRECT.recall": "PASS"
+          }
+        },
+        "UNSUPPORTED": {
+          "qualifies": true,
+          "rows": {
+            "UNSUPPORTED.challenge_recall": "PASS",
+            "UNSUPPORTED.recall": "PASS"
+          }
+        }
+      },
+      "version": "pdet-coverage-metrics-v1"
+    }
+  },
+  "gating": {
+    "metrics_slot": "scored alone in the P-DET-COVERAGE-v1 slot of pdet-coverage-metrics-v1, so its challenge rows use strata R, Q, M and X (37 \u00a75); the P-DET-v1 slot is empty in this evaluation",
+    "population": "P-DET-COVERAGE-v2",
+    "reference": {
+      "counts": {
+        "consensus": {
+          "two_of_three": 8,
+          "unanimous": 412
+        },
+        "items": 420,
+        "unit_kind": {
+          "has_continuation": 210,
+          "single_exchange": 210
+        }
+      },
+      "kind": "MODEL_REFERENCE (provisional)",
+      "reference_manifest_sha256": "f92f678266b3bf79f57d7519b707264b82edb4a5d7f23f98223cfbaf6e610741",
+      "what": "two-of-three consensus of Gemini 3.8 Flash (High), gpt-5.6-sol and deepseek-v4.1-flash (36 \u00a73.7)"
+    }
+  },
+  "input_contract": "prose-decision-input-v2",
+  "metrics_version": "pdet-coverage-metrics-v1",
+  "normalization_version": "normalization-v3",
+  "predictions_file": "prose-decision-classifier-v2.test-predictions.jsonl",
+  "predictions_sha256": "a1aa1d03eba312826c775694642e14d5482cac150b33140b646068208aedc82f",
+  "qualification": {
+    "CALL": {
+      "qualifies": false,
+      "rows": {
+        "CALL.challenge_recall": "NOT_EVALUABLE",
+        "CALL.on_ambiguous_in_M": "PASS",
+        "CALL.precision": "NOT_EVALUABLE"
+      }
+    },
+    "CLARIFY": {
+      "qualifies": true,
+      "rows": {
+        "CLARIFY.challenge_recall": "PASS",
+        "CLARIFY.f1": "PASS"
+      }
+    },
+    "DIRECT": {
+      "permitted_sources": [
+        "glaive"
+      ],
+      "qualifies": true,
+      "rows": {
+        "DIRECT.challenge_recall": "PASS",
+        "DIRECT.precision": "PASS",
+        "DIRECT.recall": "PASS"
+      }
+    },
+    "UNSUPPORTED": {
+      "qualifies": true,
+      "rows": {
+        "UNSUPPORTED.challenge_recall": "PASS",
+        "UNSUPPORTED.recall": "PASS"
+      }
+    }
+  },
+  "statement": "The single preregistered test of the frozen prose-decision-classifier-v2. Qualification comes from P-DET-COVERAGE-v2 alone, against a provisional model reference; per-unit_kind and development-exposed rows are reported and never gate. A qualification grants nothing by itself: a MODEL_REFERENCE qualification counts toward balancing permission only provisionally (35 \u00a71), and C1 needs the study owner's decision (37 \u00a75)."
+}
