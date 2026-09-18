@@ -15,6 +15,13 @@ from tests.data.test_classifier_input_v2 import CONTINUED_WITH_CALL
 ROOT = Path(__file__).resolve().parents[2]
 CLASSIFIER = {"version": "prose-decision-classifier-v2", "tag": "prose-decision-classifier-v2", "source_sha256_lf": "a" * 64}
 
+# The canonical-v3 artifacts are git-ignored local builds (.gitignore:69), so the two tests that read them
+# skip on a clean checkout instead of failing on a missing file -- the same rule the other artifact tests in
+# this suite follow. Build order: `python -m opengrad.data.behaviour_labels --build`, then `--build` for
+# opengrad.data.canonical_v3_balance and opengrad.data.canonical_v3.
+BALANCE_BUILT = (ROOT / corpus.balance.OUTPUT_DIR / "manifest.json").is_file()
+CORPUS_BUILT = (ROOT / corpus.OUTPUT_DIR / "manifest.json").is_file()
+
 
 def label_row(label: str, source: str = "glaive") -> dict:
     return {"id": "og_1", "source": source, "label": label, "step": "7_delivered", "unit_kind": "single_exchange"}
@@ -65,6 +72,7 @@ def test_a_semantically_broken_trajectory_is_rejected() -> None:
     assert reason is not None and reason.startswith("SEMANTIC")
 
 
+@pytest.mark.skipif(not BALANCE_BUILT, reason="canonical-v3 balance not built in this checkout")
 def test_a_written_artifact_is_never_overwritten(tmp_path: Path) -> None:
     out = tmp_path / corpus.OUTPUT_DIR
     out.mkdir(parents=True)
@@ -76,6 +84,7 @@ def test_a_written_artifact_is_never_overwritten(tmp_path: Path) -> None:
         corpus.build(tmp_path)
 
 
+@pytest.mark.skipif(not CORPUS_BUILT, reason="canonical-v3 artifact not built in this checkout")
 def test_the_real_artifact_matches_its_manifest_and_the_plan() -> None:
     """The built artifact verifies: hashes, counts, decisions and the plan it came from."""
     manifest = json.loads((ROOT / corpus.REPORT).read_text(encoding="utf-8"))

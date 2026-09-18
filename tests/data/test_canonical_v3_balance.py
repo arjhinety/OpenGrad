@@ -14,6 +14,12 @@ from opengrad.data.mixture import load_mixture, validate_mixture
 ROOT = Path(__file__).resolve().parents[2]
 SEED = "test-seed"
 
+# The balance artifact and the label pass it verifies are git-ignored local builds (.gitignore:69), so a
+# clean checkout skips the one test that reads them rather than failing on a missing file. Build with
+# `python -m opengrad.data.behaviour_labels --build`, then `--build` for opengrad.data.canonical_v3_balance.
+BALANCE_BUILT = (ROOT / balance.OUTPUT_DIR / "manifest.json").is_file()
+LABELS_BUILT = (ROOT / labels_pass.OUTPUT_DIR / "manifest.json").is_file()
+
 
 def row(index: int, label: str, source: str = "glaive", *, permitted: bool | None = None) -> dict:
     if permitted is None:
@@ -100,6 +106,10 @@ def test_composition_reports_sources_and_unit_kinds_without_constraining_them() 
     }
 
 
+@pytest.mark.skipif(
+    not (BALANCE_BUILT and LABELS_BUILT),
+    reason="canonical-v3 balance and its label pass are not built in this checkout",
+)
 def test_verify_catches_a_changed_config(tmp_path: Path) -> None:
     plan = json.loads((ROOT / balance.OUTPUT_DIR / "manifest.json").read_text(encoding="utf-8"))
     out = tmp_path / balance.OUTPUT_DIR

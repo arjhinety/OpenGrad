@@ -88,6 +88,12 @@ def test_the_written_check_set_shares_nothing_with_the_development_or_validation
         json.loads(line)
         for line in (ROOT / devcheck.OUTPUT_DIR / devcheck.POPULATION_NAME).read_text(encoding="utf-8").splitlines()
     ]
+    # The overlap checks read the pinned §9 exclusion inputs, which are git-ignored (33 §3), so a clean
+    # checkout reports the absence instead of failing on it: the BLOCKED_INPUT_MISSING rule verify_population
+    # applies, and the idiom test_pdet_coverage.py uses for the same predicate.
+    missing = coverage.derivation_inputs_missing(ROOT)
+    if missing:
+        pytest.skip(f"BLOCKED_INPUT_MISSING: {missing}")
     development = devcheck.load_devset_exclusion(ROOT)
     coverage_exclusion = devset.load_coverage_exclusion(ROOT)
     pdet = coverage.load_draw_exclusions(ROOT)
