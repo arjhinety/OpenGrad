@@ -1,0 +1,131 @@
+{
+  "artifact_kind": "CANONICAL_V3_DECISION_BALANCED",
+  "authorisation": "docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md",
+  "content_hash": "663c701e87d3dfc35334e6eefbf6a787b77f05bbcd11ca5dff228cb4523051c4",
+  "corpus_fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+  "corpus_version": "canonical-v3-decision-balance-v1",
+  "counts": {
+    "per_source": {
+      "ANSWER": {
+        "glaive-function-calling-v2": 22014
+      },
+      "CALL": {
+        "glaive-function-calling-v2": 6642,
+        "toolace": 2133,
+        "xlam-function-calling-60k": 13239
+      },
+      "CLARIFY": {
+        "glaive-function-calling-v2": 14128,
+        "toolace": 697,
+        "when2call": 7189
+      },
+      "UNSUPPORTED": {
+        "glaive-function-calling-v2": 13963,
+        "toolace": 849,
+        "when2call": 7202
+      }
+    },
+    "per_stratum": {
+      "ANSWER": 22014,
+      "CALL": 22014,
+      "CLARIFY": 22014,
+      "UNSUPPORTED": 22014
+    },
+    "planned_per_stratum": 22014,
+    "rejected_by_gate": {},
+    "shortfall_per_stratum": {},
+    "written": 88056
+  },
+  "gates": {
+    "contamination": "status in ['CLEAN', 'UNASSESSED'] or absent",
+    "membership": "every selected id found exactly once in normalization-v3",
+    "renderability": {
+      "checked": 88056,
+      "failures": {},
+      "identity": {
+        "enable_thinking": false,
+        "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+        "renderer": "qwen3_5_2b_v1",
+        "template_hash": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+        "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+      },
+      "rendered": 88056,
+      "scope": "all",
+      "seed": "opengrad-canonical-v3-render-check-v1"
+    },
+    "semantic": "validate_training_trajectory returns no issue",
+    "supervision": "metadata.supervision declares a kind (require=True)"
+  },
+  "labels": {
+    "classifier": {
+      "source_sha256_lf": "47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382",
+      "tag": "prose-decision-classifier-v2",
+      "version": "prose-decision-classifier-v2"
+    },
+    "input_contract": "prose-decision-input-v2",
+    "labels_version": "behaviour-labels-v1"
+  },
+  "selection_plan": {
+    "balance_version": "canonical-v3-decision-balance-v1",
+    "selected_ids_sha256": "f8e31f15a6003cf78328ddca1f2965cc1c82764e917d5491d1c9830f254892ca"
+  },
+  "shards": [
+    {
+      "file": "shard-000000.parquet",
+      "records": 10000,
+      "sha256": "46027a3b540fd1d5f808045bb9352fe759cdd723c75c051d52a4c1d87ca6bc61"
+    },
+    {
+      "file": "shard-000001.parquet",
+      "records": 10000,
+      "sha256": "49ee7eb1853c7576e4da02e2b3eb7075cde70dafc79d7d8903049f2b966bb2ec"
+    },
+    {
+      "file": "shard-000002.parquet",
+      "records": 10000,
+      "sha256": "4dab1ee6c9e431cc744acd7443f58e7aa38402c3bfd78514bf9de9ef2461b8c8"
+    },
+    {
+      "file": "shard-000003.parquet",
+      "records": 10000,
+      "sha256": "f809c298f878c9c5ecfcd0ef95a374140b3f3537ffa9422ab8701b81c33b64e5"
+    },
+    {
+      "file": "shard-000004.parquet",
+      "records": 10000,
+      "sha256": "5319b990389270c7e29e21fb716c0496c053ba50c0a167edc0caf32e4874a736"
+    },
+    {
+      "file": "shard-000005.parquet",
+      "records": 10000,
+      "sha256": "19aa4956893fcd7614077153bd22ff111acaf2b3239547dde8d180acdd44939b"
+    },
+    {
+      "file": "shard-000006.parquet",
+      "records": 10000,
+      "sha256": "3e48b7140c2030ca25071cdab5c9661f6004871342db5a3052f6a9ddb86e1a50"
+    },
+    {
+      "file": "shard-000007.parquet",
+      "records": 10000,
+      "sha256": "ca5473652bf546db1b3c19e8990299bccfdd1fd9aa5396631824050ff8497ee1"
+    },
+    {
+      "file": "shard-000008.parquet",
+      "records": 8056,
+      "sha256": "fd86cad4359e786209270fe3869ec1cb8da525168c24ae12c7f5d69cfce4f954"
+    }
+  ],
+  "specification": "docs/research/study-002/39-CANONICAL-V3-DECISION-BALANCE-SPEC.md",
+  "statement": "The decision-balanced canonical-v3 artifact: normalization-v3 records selected by the plan of 39 and carrying one behaviour block each. Behaviour comes from the frozen prose-decision-classifier-v2 for ANSWER/CLARIFY/UNSUPPORTED (confidence heuristic, provisional MODEL_REFERENCE footing) and from record structure for CALL (confidence known). No training text is rendered here, no arm uses this corpus, and no training is authorised (38 \u00a74).",
+  "versions": {
+    "adapter_version": "2.2.0",
+    "behavior_taxonomy_version": "tool-use-behavior-taxonomy-v1",
+    "canonical_schema_version": "tool_use_ir_v1",
+    "decision_classifier_version": "prose-decision-classifier-v1",
+    "normalization_version": "normalization-v3",
+    "provenance_invariant_version": "provenance-version-agreement-v1",
+    "schema_normalization_version": "source-schema-normalization-v1",
+    "supervision_contract_version": "supervision_contract_v1"
+  }
+}

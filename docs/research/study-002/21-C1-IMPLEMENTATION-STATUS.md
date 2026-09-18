@@ -8,8 +8,11 @@
 > not wired into `adapt_when2call`, which is unchanged. Phases 3–4 (the classifier and the mixture) are
 > still not started. So no canonical-v3 *training* artifact exists, and nothing below is otherwise revised.
 
-> **Status note, 2026-09-18 (later).** Phases 3 and 4 landed: every record carries a behaviour label, and a
-> decision-balanced selection plan exists (39). Phase 5 has not started; nothing is rendered and nothing trained.
+> **Status note, 2026-09-18 (later).** Phases 3, 4 and 5 landed: every normalization-v3 record carries a
+> behaviour label, a decision-balanced selection plan exists (39), and **canonical-v3 is built** -- 88,056
+> records, 22,014 per decision, every gate run and recorded (contamination, supervision, semantic trajectory,
+> and a renderability pass over all 88,056 under the pinned Qwen3.5-2B renderer, 0 failures). It is not any
+> arm's corpus (phase 8 is untouched) and **nothing is trained** (38 §4).
 >
 > **Status note, 2026-09-18.** The classifier gate is passed: `prose-decision-classifier-v2` is frozen and
 > tested once on P-DET-COVERAGE-v2 (37 §7-§8), and **C1 is authorised** to proceed to phases 3-5 under the
@@ -28,7 +31,7 @@ canonical-v2 code path is byte-identical to before and its outputs cannot drift.
 | 2 | Source-scoped schema normalization (shared validator untouched) | **DONE** |
 | 3 | Deterministic versioned behaviour classifier | **DONE** (frozen `prose-decision-classifier-v2`, applied to all 181,433 records by `behaviour_labels.py`) |
 | 4 | Wire decisions/capabilities into mixture machinery + materialized balance | **DONE for decisions** (`decision_balanced` mixture class + `canonical_v3_balance.py`, spec 39); capabilities remain unlabelled, so `balanced_policy_v1.yaml` stays HYPOTHESIS_ONLY |
-| 5 | New immutable canonical-v3 artifacts | **NOT STARTED** (unblocked by 3–4; needs contamination, renderability and supervision re-checks first, 39 §4) |
+| 5 | New immutable canonical-v3 artifacts | **DONE** (88,056 records, 9 shards, every gate run: 0 rejected, 88,056/88,056 rendered) |
 | 6 | Pre-GPU validation gates | **PARTIAL** (the two invariants from phases 1–2 only) |
 | 7 | Renderer unchanged, with equality proof | **NOT YET PROVEN** |
 | 8 | Study 002 preregistration update | **NOT STARTED** |
@@ -103,8 +106,15 @@ drops it, so the coercion is visible rather than silent. A parametrized test gua
 
 Nothing in this phase touches the renderer: `renderers.py` was not modified, and neither was any module on
 the render path. The proof the C1 specification requires — record `renderer_version` (`qwen3_5_2b_v1`) and
-`template_hash` (`273d8e0e683b885071fb17e08d5f2a5ddfb5309756181681de4f5a1822d80`) before and after, and
+`template_hash` (`273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80`) before and after, and
 require equality — has **not been executed**, so it is `PENDING`, not asserted.
+
+> **Correction, 2026-09-18.** This paragraph previously gave the template hash with three characters dropped
+> (`…fb17e08d5f2a5ddfb53…`, 61 hex digits instead of 64). The authoritative value in
+> `src/opengrad/evaluation/runner.py:33` was and is correct, and it is what the renderer produced while building
+> canonical-v3 (39 §3, gate 5), so only this document was wrong. Phase 7's before-and-after equality proof is
+> still `PENDING`: canonical-v3 records the renderer identity it observed, which is not the same as proving the
+> renderer unchanged across the intervention.
 
 ## UNKNOWN / BLOCKED register
 

@@ -95,7 +95,15 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
   `configs/data/tool_calling/decision_balance_v1.yaml` (`mixture_class: decision_balanced`, validated by
   `mixture.validate_mixture` against the decision vocabulary, not capability ids). It is a selection plan only:
   no shard, no arm, no training. `balanced_policy_v1.yaml` weights *capabilities*, which no labeller produces,
-  and stays HYPOTHESIS_ONLY. It never writes into normalization-v3, whose `verify`
+  and stays HYPOTHESIS_ONLY.
+- **canonical-v3** (`src/opengrad/data/canonical_v3.py`, `--build|--verify`, 21 phase 5) writes the balanced
+  artifact to `data/processed/canonical-v3/` (parquet shards + manifest; tracked copy in
+  `reports/canonical-v3/canonical-v3.manifest.json`). Each record gains `metadata.behavior` with the *mixture*
+  vocabulary: the classifier's DIRECT becomes `ANSWER`, `confidence` is `known` for structural CALL and
+  `heuristic` otherwise, `capabilities` is always empty. Five gates run before any shard is written
+  (membership, contamination, supervision kind, semantic trajectory, renderability); a rejected record is
+  counted with its reason, never silently dropped. The artifact is immutable: `--build` refuses to overwrite.
+  It is no arm's corpus and authorises no training. It never writes into normalization-v3, whose `verify`
   still refuses any behaviour label on a record. `weight_permitted` follows 38 §2: UNSUPPORTED and CLARIFY
   always, DIRECT on glaive only, never CALL/CALL_BY_STRUCTURE/ABSTAIN/UNLABELLED. Its single test is `python -m opengrad.verification.prose_classifier_v2_oneshot
   --preflight`, then `--run` once, after the P-DET-COVERAGE-v2 consensus reference exists: it gates on
