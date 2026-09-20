@@ -8,11 +8,11 @@ zero `ANSWER` row, and a missing sentinel.
 from __future__ import annotations
 
 from opengrad.verification.accounting import BLOCKED_INPUT_MISSING, FAIL, PASS
+from opengrad.verification.population_validators import CODE_UNRESOLVED_ROW
 from opengrad.verification.study_002_gate import (
     CODE_ACCOUNTING,
     CODE_NONVACUOUS,
     CODE_PROVENANCE_INCOMPLETE,
-    CODE_UNRESOLVED_ROW,
     CODE_VACUOUS_METRIC,
     STUDY_002_GATE_CONTRACT,
     healthy_bundle,
@@ -81,9 +81,9 @@ def test_a_census_that_does_not_add_up_fails() -> None:
     assert any(CODE_ACCOUNTING in error for error in _errors(report, "census"))
 
 
-def test_a_comparison_row_without_a_margin_fails() -> None:
+def test_a_comparison_row_without_an_n_fails() -> None:
     bundle = healthy_bundle()
-    bundle["comparisons"] = [{"id": "R1_vs_C0", "n": 1277, "delta": 0.12}]
+    bundle["comparisons"] = [{"id": "R1_vs_C0", "margin": 0.08, "delta": 0.12}]
     report = study_002_gate(bundle)
     assert _status(report, "comparison_margins") == FAIL
     assert any(CODE_UNRESOLVED_ROW in error for error in _errors(report, "comparison_margins"))

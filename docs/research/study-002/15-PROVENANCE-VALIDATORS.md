@@ -91,6 +91,13 @@ with no failing test is itself unverified.
 | `V11` | a table mixing a Study 001 frozen number with a Study 002 number | `FAIL_INCOMPARABLE` |
 | `V12` | a comparison row with no `n` or margin | `FAIL_UNRESOLVED_ROW` |
 
+> **Status, 2026-09-20.** `V1`, `V2` and `V12` exist as code:
+> `src/opengrad/verification/population_validators.py` (`v1_mode_coverage`, `v2_metric_denominator`,
+> `v12_resolvable_margin`), with the C2 arithmetic in `src/opengrad/verification/resolvability.py`.
+> `study_002_gate_v1` calls them rather than re-implementing them, so there is one definition of
+> "covered" and one of "resolvable". `V1`'s failing fixture is the frozen partition's empty `ANSWER`
+> class. `V3`–`V11` are not built.
+
 ## What the validators are for, in one sentence
 
 They exist so that the failure mode the audit found — a number that is *wrong because it is detached from

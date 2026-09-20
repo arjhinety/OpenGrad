@@ -144,7 +144,7 @@ finding (`#66`: a tokenizer gate hardcoded to pass; `#67`: a documented training
 | Corrected corpus builder | `NOT_IMPLEMENTED` | produces a new corpus version; Canonical-v2 stays published (`STUDIES.md:70-71`) |
 | `ANSWER`-mode evaluation population | `NOT_IMPLEMENTED` | the L1 fix; required for `study_002_gate_v1` to be able to fail |
 | Refusal-correctness metric | `NOT_IMPLEMENTED` | required by H6 |
-| Mode-coverage and non-vacuity validators | **PARTIAL** | `study_002_gate_v1` (`src/opengrad/verification/study_002_gate.py`) implements mode coverage (check 1), census (2) and vacuous-metric (3) checks plus the behavioural floors through `tool_use_promotion_v5`; the `V1`–`V12` validator set and `S-NV` are not built |
+| Mode-coverage and non-vacuity validators | **PARTIAL** | `study_002_gate_v1` (`src/opengrad/verification/study_002_gate.py`) and `V1`/`V2`/`V12` (`population_validators.py`, `resolvability.py`) implement mode coverage, census, vacuous-metric and resolvable-margin checks plus the behavioural floors through `tool_use_promotion_v5`; `V3`–`V11` and `S-NV` are not built |
 
 Five of the ten components do not exist, and one is partial. That is the honest state of the study, and it is why this
 design set is a pre-registration rather than a launch plan: every `NOT_IMPLEMENTED` row is a blocking

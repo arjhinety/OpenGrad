@@ -131,6 +131,13 @@ manifest, so a reader can verify that the partition can resolve what the study c
 existing three-mode rows already sit between 9.2pp and 10.2pp, **no claim in this study uses a margin
 below 10pp**, and the `ANSWER` strata set is sized to resolve 8pp or better.
 
+> **Status, 2026-09-20.** C1 and C2 are now machine-checkable: `V1 mode_coverage` and
+> `V12 resolvable_margin` (`src/opengrad/verification/population_validators.py`) enforce them, and the C2
+> arithmetic (`src/opengrad/verification/resolvability.py`) reproduces this section's worked figures. The
+> `ANSWER` strata set itself is **not built**: its source is the study owner's decision (open item 2 of
+> [20](20-CLOSURE-REPORT.md)), and it must satisfy both the `n ≥ 200` floor and the 8pp sizing above — the
+> one source this section cites carries 140 `ANSWER` items, below the hard floor.
+
 ## One-shot discipline on `P-CONF`
 
 `P-CONF` is scored **once per arm**, on a checkpoint chosen in advance, exactly as

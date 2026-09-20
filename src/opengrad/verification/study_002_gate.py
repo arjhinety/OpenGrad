@@ -48,13 +48,7 @@ import argparse
 import json
 from typing import Any
 
-from opengrad.promotion.tool_use_policy import (
-    CODE_NONVACUOUS,
-    MACRO_DIMENSIONS,
-    REQUIRED_MODES,
-    PromotionPolicyV5,
-    measurable_dimensions,
-)
+from opengrad.promotion.tool_use_policy import CODE_NONVACUOUS, PromotionPolicyV5
 from opengrad.registry.validate import result_from
 from opengrad.verification.accounting import (
     BLOCKED_INPUT_MISSING,
@@ -65,17 +59,21 @@ from opengrad.verification.accounting import (
     ValidationResult,
     VerificationReport,
 )
+from opengrad.verification.population_validators import (
+    CODE_VACUOUS_METRIC,
+    v1_mode_coverage,
+    v2_metric_denominator,
+    v12_resolvable_margin,
+)
 
 #: The gate's own contract. Bump when the check set, its discovery rules or its non-vacuity
 #: requirements change, so a PASS under one contract is never read as a PASS under another.
 STUDY_002_GATE_CONTRACT = 1
 GATE_VERSION = "study_002_gate_v1"
 
-CODE_VACUOUS_METRIC = "FAIL_VACUOUS_METRIC"
 CODE_ACCOUNTING = "FAIL_ACCOUNTING"
 CODE_PROVENANCE_INCOMPLETE = "PROVENANCE_INCOMPLETE"
 CODE_INVALID_COMPARISON = "INVALID_COMPARISON"
-CODE_UNRESOLVED_ROW = "FAIL_UNRESOLVED_ROW"
 
 #: The behavioural checks 4-10, and the v5 dimension each reads.
 BEHAVIOUR_CHECKS = (
@@ -129,15 +127,7 @@ class Study002Gate:
     # -- 1-3: the L1 family ---------------------------------------------------------------------
 
     def mode_coverage(self) -> ValidationResult:
-        modes = dict(self.bundle.get("modes") or {})
-        if not modes:
-            return self._blocked("mode_coverage", list(REQUIRED_MODES), "no gold-count table in the bundle")
-        errors = [
-            f"{mode}: {CODE_NONVACUOUS}: gold n={int(modes.get(mode, 0))}"
-            for mode in REQUIRED_MODES
-            if int(modes.get(mode, 0)) <= 0
-        ]
-        return result_from("mode_coverage", REQUIRED_NONEMPTY, list(REQUIRED_MODES), errors)
+        return v1_mode_coverage(dict(self.bundle.get("modes") or {}))
 
     def census(self) -> ValidationResult:
         census = self.bundle.get("census")
@@ -154,21 +144,7 @@ class Study002Gate:
         return result_from("census", REQUIRED_NONEMPTY, ["census"], errors)
 
     def metric_denominators(self) -> ValidationResult:
-        candidate = self.candidate
-        if not isinstance(candidate.get("confusion_matrix"), dict):
-            return self._blocked(
-                "metric_denominators", list(MACRO_DIMENSIONS), "no confusion matrix to read denominators from"
-            )
-        measurable, unmeasurable = measurable_dimensions(candidate)
-        errors = []
-        for name in sorted(unmeasurable):
-            # A metric computed over an empty class is an absence encoded numerically (the L1 root cause).
-            if float(candidate.get(name, 0.0)) == 0.0:
-                errors.append(
-                    f"{name}: {CODE_VACUOUS_METRIC}: reports 0.0 for a class with an empty denominator"
-                )
-        return result_from("metric_denominators", REQUIRED_NONEMPTY, list(MACRO_DIMENSIONS), errors,
-                           detail={"measurable": len(measurable), "unmeasurable": len(unmeasurable)})
+        return v2_metric_denominator(self.candidate)
 
     # -- 4-10: the behavioural family (from the v5 verdict) -------------------------------------
 
@@ -232,20 +208,7 @@ class Study002Gate:
         return result_from("provenance", REQUIRED_NONEMPTY, required, errors)
 
     def comparison_margins(self) -> ValidationResult:
-        rows = list(self.bundle.get("comparisons") or [])
-        if not rows:
-            return self._blocked("comparison_margins", ["comparisons"], "no comparison rows in the bundle")
-        ids, errors, within_noise = [], [], []
-        for row in rows:
-            row_id = str(row.get("id", "?"))
-            ids.append(row_id)
-            if row.get("n") is None or row.get("margin") is None:
-                errors.append(f"{row_id}: {CODE_UNRESOLVED_ROW}: row prints no n or no resolvable margin")
-            elif row.get("delta") is not None and abs(float(row["delta"])) <= float(row["margin"]):
-                within_noise.append(row_id)
-        return result_from(
-            "comparison_margins", REQUIRED_NONEMPTY, ids, errors, detail={"within_noise": len(within_noise)}
-        )
+        return v12_resolvable_margin(list(self.bundle.get("comparisons") or []))
 
     # -- assembly -------------------------------------------------------------------------------
 
