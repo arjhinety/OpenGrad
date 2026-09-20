@@ -1,6 +1,6 @@
 # 21 — C1 implementation status (provenance + schema normalization)
 
-**Status: `PARTIAL — 8 of 9 phases landed` (updated 2026-09-20). canonical-v3 exists: 88,056 records, decision-balanced, every gate recorded. The renderer is proven unchanged across the C1 intervention (phase 7), the pre-GPU provenance gate passes (phase 6), and the corpus is registered in the preregistration as built but not an arm (phase 8). It is no arm's corpus, and no training was run.**
+**Status: `COMPLETE — 9 of 9 phases landed` (updated 2026-09-20). C1 is built: canonical-v3 exists (88,056 records, decision-balanced, every gate recorded), the renderer is proven unchanged (phase 7), the pre-GPU provenance gate passes (phase 6), and the corpus is registered in the preregistration as built but not an arm (phase 8). It is no arm's corpus, and no training was run.**
 
 > **Status note, 2026-09-15.** Sources, adapters and the pre-classifier `normalization-v3` artifact now exist
 > ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)), as does the classifier input contract
@@ -57,10 +57,17 @@
 > partition or decision rule changed. Entering a study stays a separate owner decision (31 §9.6). Phase 9
 > (the audit package) is this document.
 
-This is a **new Study 002 intervention**, not a repair of Study 001. Nothing historical was touched: no v1/v2
-artifact, manifest, hash, report or commit was modified or rewritten, and no Study 001 conclusion was
-revised. Only three files were **added** in this phase; **zero existing files were changed**, so the
-canonical-v2 code path is byte-identical to before and its outputs cannot drift.
+> **Status note, 2026-09-20 (phase 9).** The audit package is complete: phases 3–5 and 8 are recorded, an
+> evidence index maps every C1 claim to its artifact, and the register below is resolved. C1's
+> implementation is complete. Training is still **not** authorised: [16](16-GPU-READINESS-GATE.md) has
+> produced no `READY` record, and the two remaining decisions are the study owner's (31 §9.6, [35](35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md)).
+
+This is a **new Study 002 intervention**, not a repair of Study 001. Nothing historical was touched: no
+Study 001 artifact, canonical-v1/v2 manifest or hash, P-DET-v1 population, or frozen report was modified or
+rewritten, and no Study 001 conclusion was revised. Phases 1–2 added three files and changed none, so the
+canonical-v2 code path is byte-identical; later phases added their own modules, and the only change to an
+existing module was the phase-6 `canonical_v3.py` fix, which moved one field of canonical-v3's own manifest
+and left every shard byte-identical.
 
 | Phase | Requirement | Status |
 |---|---|---|
@@ -72,7 +79,7 @@ canonical-v2 code path is byte-identical to before and its outputs cannot drift.
 | 6 | Pre-GPU validation gates | **DONE** — `src/opengrad/data/provenance_gate.py`, six checks on the accounting contract; committed-artifact verdict **PASS** after the classifier-version fix |
 | 7 | Renderer unchanged, with equality proof | **DONE** — equality required by `tests/data/test_canonical_v3.py::test_the_renderer_identity_is_unchanged_across_the_c1_intervention` |
 | 8 | Study 002 preregistration update | **DONE** — a registration, not an amendment: canonical-v3 recorded in [03](03-PREREGISTRATION.md) as built and not an arm's corpus; entering a study stays a separate owner decision |
-| 9 | Full audit package | **THIS DOCUMENT** (partial by construction) |
+| 9 | Full audit package | **DONE** — this document, completed 2026-09-20: phases 3–5 and 8 recorded, an evidence index added, the register resolved |
 
 ## Phase 1 — provenance repair (done)
 
@@ -138,6 +145,54 @@ type *list* (`["string","null"]`), and an unparseable type value. Measured cost 
 rows and 1 Glaive row. The contract is now explicit — **translation is never stricter than the canonical
 layer on a type annotation** — and a multi-type list is dropped *with a recorded note*, exactly as canonical
 drops it, so the coercion is visible rather than silent. A parametrized test guards all three shapes.
+
+## Phase 3 — the behaviour classifier applied (done 2026-09-18)
+
+`src/opengrad/data/behaviour_labels.py` (21 phase 3) runs the frozen `prose-decision-classifier-v2` over
+every normalization-v3 record's first assistant reply, through contract `prose-decision-input-v2`, and
+writes one label per record to `data/processed/behaviour-labels-v1/`, with counts in
+`reports/canonical-v3/behaviour-labels-v1.counts.json`.
+
+- **181,433 records labelled:** `CALL_BY_STRUCTURE` 92,851, `DIRECT` 34,190, `CLARIFY` 22,014,
+  `UNSUPPORTED` 22,419, `ABSTAIN` 7,791, `UNLABELLED` 2,156, `CALL` 12.
+- **`weight_permitted` follows 38 §2 exactly:** UNSUPPORTED and CLARIFY on both layer B sources, DIRECT on
+  **glaive only** (33,927 of 34,190), never `CALL`/`CALL_BY_STRUCTURE`/`ABSTAIN`/`UNLABELLED`.
+- The pass refuses to run unless the classifier source is byte-for-byte the frozen one (tag
+  `prose-decision-classifier-v2`, source sha256 LF `47436ca9…`); `tests/data/test_behaviour_labels.py`
+  asserts the pin equals the one-shot runner's constant.
+- It writes labels only: no mixture, no sampling weight, no training corpus.
+
+## Phase 4 — the decision balance (done 2026-09-18)
+
+`src/opengrad/data/canonical_v3_balance.py` (21 phase 4) implements the rule of
+[39](39-CANONICAL-V3-DECISION-BALANCE-SPEC.md), fixed **before** it was computed: equal shares over the four
+decisions, supply-limited, ranked deterministically by `sha256(seed | record id)` with seed
+`opengrad-canonical-v3-decision-balance-v1`. It is a **plan, not a corpus** — no shard, no arm, no training.
+
+- Supply: `CALL` 92,851 (structural), `ANSWER` 33,927 (glaive DIRECT), `CLARIFY` 22,014, `UNSUPPORTED` 22,419.
+- The binding stratum is `CLARIFY` at 22,014, so the plan selects **88,056** records and leaves **70,837**
+  structural-call records out. That loss is the price of a flat decision prior and is stated in 39 §2.
+- Recorded at `reports/canonical-v3/decision-balance-v1.json`; `--verify` recomputes it byte for byte.
+  `tests/data/test_canonical_v3_balance.py` covers it. Config
+  `configs/data/tool_calling/decision_balance_v1.yaml` (`mixture_class: decision_balanced`).
+- `balanced_policy_v1.yaml` (capabilities) stays `HYPOTHESIS_ONLY`: no capability labeller exists (39 §1).
+
+## Phase 5 — the canonical-v3 artifact (done 2026-09-18)
+
+`src/opengrad/data/canonical_v3.py` (21 phase 5) materialises the plan into an immutable artifact at
+`data/processed/canonical-v3/` (git-ignored), tracked by `reports/canonical-v3/canonical-v3.manifest.json`.
+Each record gains one `metadata.behavior` block in the *mixture* vocabulary — the classifier's `DIRECT`
+becomes `ANSWER`; `confidence` is `known` for structural `CALL` and `heuristic` otherwise; `capabilities` is
+always empty, because no capability labeller exists.
+
+- **88,056 records, 22,014 per decision, 9 shards;** `content_hash` `663c701e…`.
+- **Five gates run before any shard is written, each recorded with its counts:** membership, contamination,
+  supervision kind, semantic trajectory, renderability. **0 rejected**; 88,056/88,056 rendered under the
+  pinned Qwen3.5-2B renderer (identity `qwen3_5_2b_v1`, template `273d8e0e…`).
+- `--build` refuses to overwrite; `--verify` re-hashes every shard and re-checks the decisions. It never
+  writes into normalization-v3, whose `verify` still refuses a behaviour label on a record.
+- No arm uses it and no training is authorised (38 §4). Its `versions` block names the classifier that
+  labelled it — the phase-6 fix below.
 
 ## Phase 6 — pre-GPU provenance gate (done 2026-09-20)
 
@@ -207,6 +262,33 @@ rendering all 88,056 records (`reports/canonical-v3/canonical-v3.manifest.json`,
 > block names is what the test closes — it asserts the equality across the recorded before-and-after identity
 > rather than merely noting the value canonical-v3 observed.
 
+## Phase 8 — preregistration registration (done 2026-09-20)
+
+Recorded in [03](03-PREREGISTRATION.md) as a **registration, not an amendment**: canonical-v3 exists, the
+pre-GPU provenance gate passes, and **no arm of [04](04-ARM-MATRIX.md) moves to it**. No threshold, arm,
+seed, partition or decision rule changed, so nothing already scored is re-run. Entering a study stays a
+separate owner decision ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md) §9.6), and no training is
+authorised.
+
+## Phase 9 — the audit package (this document)
+
+This document is the C1 audit package. It records every phase, names the artifact behind every claim, and
+resolves the register below.
+
+| Claim | Artifact | Checked by |
+|---|---|---|
+| One authoritative version source; record and manifest versions agree | `src/opengrad/data/versions.py` | `tests/data/test_source_schema.py`; the gate's `record_version_agreement` |
+| Source-scoped schema translation is never stricter than the canonical layer | `src/opengrad/data/source_schema.py` | `tests/data/test_source_schema.py` (64 tests) |
+| 181,433 records labelled by the frozen classifier, with 38 §2 weights | `reports/canonical-v3/behaviour-labels-v1.counts.json` | `tests/data/test_behaviour_labels.py` |
+| The plan is 88,056 records, equal per decision, reproducible | `reports/canonical-v3/decision-balance-v1.json` | `python -m opengrad.data.canonical_v3_balance --verify`; `tests/data/test_canonical_v3_balance.py` |
+| canonical-v3 is 88,056 records, 0 gate rejections, all renderable | `reports/canonical-v3/canonical-v3.manifest.json` | `python -m opengrad.data.canonical_v3 --verify`; `tests/data/test_canonical_v3.py` |
+| The renderer is unchanged across the intervention | the manifest's `gates.renderability.identity`, against the frozen Study 001 contract | `tests/data/test_canonical_v3.py::test_the_renderer_identity_is_unchanged_across_the_c1_intervention` |
+| Provenance passes on the committed artifacts | `reports/canonical-v3/provenance-gate-v2.json` | `python -m opengrad.data.provenance_gate --verify`; `tests/data/test_provenance_gate.py` |
+| canonical-v3 is not an arm's corpus; no training is authorised | [03](03-PREREGISTRATION.md)'s registration; [16](16-GPU-READINESS-GATE.md) has no `READY` record | this document; [04](04-ARM-MATRIX.md) |
+
+Every number above is read from the named artifact, not retyped (G14). No frozen Study 001 artifact,
+canonical-v1/v2, P-DET-v1 or P-DET-COVERAGE population was modified by any phase.
+
 ## UNKNOWN / BLOCKED register
 
 1. **`UNKNOWN` — whether the When2Call `train_sft` population contains any `direct`-gold items.** The split
@@ -236,7 +318,7 @@ regression. Only a controlled ablation can establish that. GSM8K stays a capabil
 regression sentinel; Study 002 is not a math-answerability study, and at least one non-math direct-answer
 probe is required.
 
-## Files added in this phase
+## Files added in phases 1–2
 
 | File | Purpose |
 |---|---|
@@ -245,11 +327,11 @@ probe is required.
 | `tests/data/test_source_schema.py` | 64 tests: translation table, quarantine codes, idempotence, the never-stricter-than-canonical contract, tool-list shapes, both provenance invariants |
 | `docs/research/study-002/21-C1-IMPLEMENTATION-STATUS.md` | this record |
 
-No file was modified. Verified: `python -m pytest tests/data/test_source_schema.py` → 64 passed.
+No file was modified in phases 1–2. Verified: `python -m pytest tests/data/test_source_schema.py` → 64 passed.
 
 ## Next, in order
 
-Phases 1–8 have landed; phase 9 is this document. What remains is not engineering:
+Phases 1–9 have landed. What remains is not engineering:
 
 1. **The study owner's decisions**, which no phase above took:
    - whether canonical-v3 enters Study 002 or 003, and as which arm or factor ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md) §9.6,
