@@ -122,7 +122,7 @@
     "adapter_version": "2.2.0",
     "behavior_taxonomy_version": "tool-use-behavior-taxonomy-v1",
     "canonical_schema_version": "tool_use_ir_v1",
-    "decision_classifier_version": "prose-decision-classifier-v1",
+    "decision_classifier_version": "prose-decision-classifier-v2",
     "normalization_version": "normalization-v3",
     "provenance_invariant_version": "provenance-version-agreement-v1",
     "schema_normalization_version": "source-schema-normalization-v1",

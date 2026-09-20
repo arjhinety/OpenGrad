@@ -1,6 +1,6 @@
 # 21 — C1 implementation status (provenance + schema normalization)
 
-**Status: `PARTIAL — 7 of 9 phases landed` (updated 2026-09-20). canonical-v3 exists: 88,056 records, decision-balanced, every gate recorded. The renderer is proven unchanged across the C1 intervention (phase 7), and the pre-GPU provenance gate exists and runs (phase 6) — it currently returns `FAIL` on one finding, so training stays blocked. It is no arm's corpus, and no training was run.**
+**Status: `PARTIAL — 7 of 9 phases landed` (updated 2026-09-20). canonical-v3 exists: 88,056 records, decision-balanced, every gate recorded. The renderer is proven unchanged across the C1 intervention (phase 7), and the pre-GPU provenance gate passes on the committed artifacts (phase 6). It is no arm's corpus, and no training was run.**
 
 > **Status note, 2026-09-15.** Sources, adapters and the pre-classifier `normalization-v3` artifact now exist
 > ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)), as does the classifier input contract
@@ -41,6 +41,16 @@
 > canonical-v3's version block and rebuild it, a new immutable artifact) is a separate owner decision and is
 > **not** done here. Phases 8 and 9 remain open.
 
+> **Status note, 2026-09-20 (latest).** The phase-6 finding is fixed. `canonical_v3.py` now records the
+> classifier that actually labelled the records (`labels.classifier.version`) in the artifact's `versions`
+> block, and canonical-v3 was rebuilt from the same inputs: the shards are **byte-identical**, `content_hash`
+> is unchanged (`663c701e…`), and only `versions.decision_classifier_version` moved (`…-v1` → `…-v2`), so no
+> other copy needed re-anchoring (G15). The gate now returns **`PASS`**, recorded as
+> `reports/canonical-v3/provenance-gate-v2.json`; `…-v1.json` is kept as the finding's evidence, and a
+> recorded run is never edited. `versions.py` was deliberately not touched — it is in normalization-v3's
+> `CODE_MODULES`, so changing it would invalidate that frozen artifact — so the override lives in
+> `canonical_v3.py`. Phases 8 and 9 remain open, and training is still not authorised.
+
 This is a **new Study 002 intervention**, not a repair of Study 001. Nothing historical was touched: no v1/v2
 artifact, manifest, hash, report or commit was modified or rewritten, and no Study 001 conclusion was
 revised. Only three files were **added** in this phase; **zero existing files were changed**, so the
@@ -53,7 +63,7 @@ canonical-v2 code path is byte-identical to before and its outputs cannot drift.
 | 3 | Deterministic versioned behaviour classifier | **DONE** (frozen `prose-decision-classifier-v2`, applied to all 181,433 records by `behaviour_labels.py`) |
 | 4 | Wire decisions/capabilities into mixture machinery + materialized balance | **DONE for decisions** (`decision_balanced` mixture class + `canonical_v3_balance.py`, spec 39); capabilities remain unlabelled, so `balanced_policy_v1.yaml` stays HYPOTHESIS_ONLY |
 | 5 | New immutable canonical-v3 artifacts | **DONE** (88,056 records, 9 shards, every gate run: 0 rejected, 88,056/88,056 rendered) |
-| 6 | Pre-GPU validation gates | **DONE** — `src/opengrad/data/provenance_gate.py`, six checks on the accounting contract; committed-artifact verdict **FAIL** (one finding, `FAIL_CLASSIFIER_VERSION`), so training stays blocked (38 §3 condition 5) |
+| 6 | Pre-GPU validation gates | **DONE** — `src/opengrad/data/provenance_gate.py`, six checks on the accounting contract; committed-artifact verdict **PASS** after the classifier-version fix |
 | 7 | Renderer unchanged, with equality proof | **DONE** — equality required by `tests/data/test_canonical_v3.py::test_the_renderer_identity_is_unchanged_across_the_c1_intervention` |
 | 8 | Study 002 preregistration update | **NOT STARTED** |
 | 9 | Full audit package | **THIS DOCUMENT** (partial by construction) |
@@ -139,27 +149,31 @@ Six checks, each a `ValidationResult`; the verdict on the committed artifacts:
 | Check | Policy | Verdict |
 |---|---|---|
 | `versions_authoritative` — each C1 manifest's version block equals the authoritative constants | `REQUIRED_NONEMPTY` | `PASS` |
-| `classifier_identity` — the applied classifier is the frozen `prose-decision-classifier-v2`, through a known contract, and agrees with any declared version | `REQUIRED_NONEMPTY` | **`FAIL`** (`FAIL_CLASSIFIER_VERSION`) |
+| `classifier_identity` — the applied classifier is the frozen `prose-decision-classifier-v2`, through a known contract, and agrees with any declared version | `REQUIRED_NONEMPTY` | `PASS` |
 | `renderer_identity` — canonical-v3's recorded renderer equals the pinned Study 001 contract (phase 7) | `REQUIRED_NONEMPTY` | `PASS` |
 | `authorisation_recorded` — each artifact names the 38 authorisation | `REQUIRED_NONEMPTY` | `PASS` |
 | `record_version_agreement` — per record, metadata and manifest versions agree (the phase-1 invariant) | `CONDITIONALLY_REQUIRED` | `PASS` over 88,056 records; `BLOCKED_INPUT_MISSING` when the git-ignored shards are absent |
 | `selection_plan_agreement` — canonical-v3 selects exactly the balance plan's ids | `CONDITIONALLY_REQUIRED` | `PASS` |
 
-Recorded once, never edited:
-[`reports/canonical-v3/provenance-gate-v1.json`](../../../reports/canonical-v3/provenance-gate-v1.json). Overall
-**`FAIL`**, on one finding. Tests: `tests/data/test_provenance_gate.py` (every check has a fixture that makes
-it fail; the committed-artifact test records the finding and flips to `PASS` when it is remediated).
+Recorded, never edited: [`provenance-gate-v1.json`](../../../reports/canonical-v3/provenance-gate-v1.json) holds
+the original finding (overall **`FAIL`**); [`provenance-gate-v2.json`](../../../reports/canonical-v3/provenance-gate-v2.json)
+holds the resolved state (overall **`PASS`**). A correction is a new record, not an edit. Tests:
+`tests/data/test_provenance_gate.py` (every check has a fixture that makes it fail; the committed-artifact test
+asserts the resolved state and would still catch a regression).
 
-### The finding: `FAIL_CLASSIFIER_VERSION`
+### The finding: `FAIL_CLASSIFIER_VERSION` (found, then fixed)
 
-canonical-v3's manifest `versions.decision_classifier_version` is `prose-decision-classifier-v1` (from
-`versions.provenance_versions()` / `DECISION_CLASSIFIER_VERSION`), but the artifact's behaviour labels were
-produced by the frozen `prose-decision-classifier-v2`, as its own `labels.classifier` records. The version
-block was never checked before this gate. Per 38 §3 condition 5 a failing pre-GPU gate means **no training
-run**. Clearing it is a separate, owner-decided change: record the applied classifier in canonical-v3's
-`versions` block and rebuild the artifact (a new immutable artifact with a new fingerprint), rather than
-repointing the shared `DECISION_CLASSIFIER_VERSION`, which would mislabel the pre-classifier normalization-v3
-(`NOT_APPLIED`). The gate landing and the fix are deliberately separate changes.
+canonical-v3's manifest `versions.decision_classifier_version` **was** `prose-decision-classifier-v1` (from
+`versions.provenance_versions()` / `DECISION_CLASSIFIER_VERSION`) while the artifact's behaviour labels came
+from the frozen `prose-decision-classifier-v2`, as its own `labels.classifier` recorded. The version block had
+never been checked before this gate.
+
+**Fixed.** `canonical_v3.py` now records `labels.classifier.version` in the artifact's `versions` block, and
+canonical-v3 was rebuilt from the same inputs: the shards are byte-identical and only that one field moved, so
+`content_hash` (`663c701e…`) and every downstream reference are unchanged (no G15 re-anchoring was needed). The
+override lives in `canonical_v3.py` rather than `versions.py` because the latter is in normalization-v3's
+`CODE_MODULES`, where a byte change would invalidate that frozen artifact and force its own rebuild. No
+threshold, population, contract, metric or other artifact was touched.
 
 ## Phase 7 — renderer identity (proven 2026-09-20)
 

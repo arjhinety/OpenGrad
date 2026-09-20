@@ -224,6 +224,13 @@ def build(root: Path = ROOT, *, render_sample: int | None = RENDER_SAMPLE) -> di
     out.mkdir(parents=True, exist_ok=True)
     kept.sort(key=lambda row: row["id"])
     shards = _write_shards(out, kept)
+    # The version block must name the classifier that actually labelled these records. The frozen
+    # constant (`provenance_versions` default) is ``prose-decision-classifier-v1``; canonical-v3's
+    # behaviour labels come from the frozen ``prose-decision-classifier-v2``, recorded in the labels
+    # manifest. Naming the constant here is the mismatch the phase-6 gate caught as
+    # ``FAIL_CLASSIFIER_VERSION`` (21 phase 6).
+    versions_block = versions.provenance_versions()
+    versions_block["decision_classifier_version"] = classifier["version"]
     planned = plan["counts"]["per_stratum"]
     manifest = {
         "artifact_kind": ARTIFACT_KIND,
@@ -239,7 +246,7 @@ def build(root: Path = ROOT, *, render_sample: int | None = RENDER_SAMPLE) -> di
         "authorisation": "docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md",
         "selection_plan": {"balance_version": plan["balance_version"], "selected_ids_sha256": plan["selected_ids_sha256"]},
         "labels": {"labels_version": labels_manifest["labels_version"], "classifier": classifier, "input_contract": contract},
-        "versions": versions.provenance_versions(),
+        "versions": versions_block,
         "corpus_fingerprint": labels_manifest["corpus_fingerprint"],
         "counts": {
             "planned_per_stratum": planned,

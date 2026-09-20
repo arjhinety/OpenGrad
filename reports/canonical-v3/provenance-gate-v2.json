@@ -1,0 +1,112 @@
+{
+  "contract": 1,
+  "overall": "PASS",
+  "results": [
+    {
+      "counts": {
+        "blocked": 0,
+        "checked": 2,
+        "discovered": 2,
+        "failed": 0,
+        "passed": 2,
+        "skipped": 0
+      },
+      "detail": {
+        "canonical-v3": 5,
+        "source-manifest": 4
+      },
+      "errors": [],
+      "name": "versions_authoritative",
+      "policy": "REQUIRED_NONEMPTY",
+      "status": "PASS"
+    },
+    {
+      "counts": {
+        "blocked": 0,
+        "checked": 3,
+        "discovered": 3,
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0
+      },
+      "detail": {},
+      "errors": [],
+      "name": "classifier_identity",
+      "policy": "REQUIRED_NONEMPTY",
+      "status": "PASS"
+    },
+    {
+      "counts": {
+        "blocked": 0,
+        "checked": 3,
+        "discovered": 3,
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0
+      },
+      "detail": {},
+      "errors": [],
+      "name": "renderer_identity",
+      "policy": "REQUIRED_NONEMPTY",
+      "status": "PASS"
+    },
+    {
+      "counts": {
+        "blocked": 0,
+        "checked": 3,
+        "discovered": 3,
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0
+      },
+      "detail": {},
+      "errors": [],
+      "name": "authorisation_recorded",
+      "policy": "REQUIRED_NONEMPTY",
+      "status": "PASS"
+    },
+    {
+      "counts": {
+        "blocked": 0,
+        "checked": 9,
+        "discovered": 9,
+        "failed": 0,
+        "passed": 9,
+        "skipped": 0
+      },
+      "detail": {
+        "rows": 88056,
+        "shards": 9
+      },
+      "errors": [],
+      "name": "record_version_agreement",
+      "policy": "CONDITIONALLY_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "counts": {
+        "blocked": 0,
+        "checked": 1,
+        "discovered": 1,
+        "failed": 0,
+        "passed": 1,
+        "skipped": 0
+      },
+      "detail": {
+        "balance_verify": "PASS"
+      },
+      "errors": [],
+      "name": "selection_plan_agreement",
+      "policy": "CONDITIONALLY_REQUIRED",
+      "status": "PASS"
+    }
+  ],
+  "totals": {
+    "blocked": 0,
+    "checked": 21,
+    "discovered": 21,
+    "failed": 0,
+    "passed": 21,
+    "skipped": 0
+  }
+}

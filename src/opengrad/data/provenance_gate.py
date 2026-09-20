@@ -419,12 +419,18 @@ def main(argv: list[str] | None = None) -> int:
     group.add_argument("--verify", action="store_true")
     group.add_argument("--record", action="store_true")
     parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help=f"where --record writes, relative to --root (default: {RECORD})",
+    )
     args = parser.parse_args(argv)
 
     report = gate(args.root)
     document = report_document(report)
     if args.record:
-        destination = args.root / RECORD
+        destination = args.root / (args.output or RECORD)
         if destination.exists():
             raise ProvenanceGateError(
                 f"{destination} exists: a recorded run is evidence, never overwritten"

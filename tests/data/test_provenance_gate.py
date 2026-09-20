@@ -1,9 +1,9 @@
 """The C1 pre-GPU provenance gate (21 phase 6), on synthetic artifacts and the real ones.
 
 Every check gets a fixture that makes it fail, and the failure code is asserted -- a check with no
-failing test is itself unverified (docs/research/study-002/15-PROVENANCE-VALIDATORS.md:74-92). Two
-tests read the committed artifacts and record the current state, including the known classifier-version
-finding (21 phase 6).
+failing test is itself unverified (docs/research/study-002/15-PROVENANCE-VALIDATORS.md:74-92). The
+committed-artifact tests assert the resolved state: the gate passes (the phase-6
+``FAIL_CLASSIFIER_VERSION`` finding is fixed) and the counters stay consistent.
 """
 
 from __future__ import annotations
@@ -230,18 +230,28 @@ def test_every_result_keeps_its_counters_consistent(tmp_path: Path) -> None:
 # ── the committed artifacts ──────────────────────────────────────────────────────────────────────
 
 
-def test_the_gate_finds_the_known_classifier_version_mismatch_on_the_committed_artifact() -> None:
-    """The current finding (21 phase 6): canonical-v3's versions block names v1, its labels are v2.
+def test_the_committed_artifacts_pass_the_provenance_gate() -> None:
+    """The phase-6 finding is fixed: canonical-v3's version block names the classifier it used.
 
-    This asserts the evidence-derived state, so it must be updated to expect PASS when the artifact
-    is rebuilt with the applied classifier recorded.
+    The synthetic negative above proves the check still catches a v1-versus-v2 mismatch; here the
+    committed artifacts pass. record_version_agreement needs the git-ignored shards, so on a clean
+    checkout it blocks (never fails) and the overall is BLOCKED_INPUT_MISSING rather than PASS.
     """
     report = gate(ROOT)
-    assert report.overall == FAIL
-    assert _status(report, "classifier_identity") == FAIL
-    assert any("decision_classifier_version" in error for error in _errors(report, "classifier_identity"))
-    for name in ("versions_authoritative", "renderer_identity", "authorisation_recorded"):
+    assert report.overall != FAIL, [result.all_errors() for result in report.results]
+    for name in (
+        "versions_authoritative",
+        "classifier_identity",
+        "renderer_identity",
+        "authorisation_recorded",
+        "selection_plan_agreement",
+    ):
         assert _status(report, name) == PASS, _errors(report, name)
+    if _status(report, "record_version_agreement") == PASS:
+        assert report.overall == PASS
+    else:
+        assert _status(report, "record_version_agreement") == BLOCKED_INPUT_MISSING
+        assert report.overall == BLOCKED_INPUT_MISSING
 
 
 def test_the_committed_artifacts_keep_their_counters_consistent() -> None:

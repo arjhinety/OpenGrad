@@ -108,7 +108,9 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
   `src/opengrad/data/provenance_gate.py` (`python -m opengrad.data.provenance_gate --verify|--record`, 21
   phase 6): it checks authoritative versions, classifier identity, renderer identity, authorisation,
   per-record version agreement and selection-plan agreement, records
-  `reports/canonical-v3/provenance-gate-v1.json`, and currently returns `FAIL_CLASSIFIER_VERSION`.
+  `reports/canonical-v3/provenance-gate-v1.json` (the finding) and `…-v2.json` (the resolved state), and
+  passes on the committed artifacts. The artifact's `versions` block names the classifier that actually
+  labelled it (`labels.classifier.version`), set in `canonical_v3.py`.
   `weight_permitted` follows 38 §2: UNSUPPORTED and CLARIFY
   always, DIRECT on glaive only, never CALL/CALL_BY_STRUCTURE/ABSTAIN/UNLABELLED. Its single test is `python -m opengrad.verification.prose_classifier_v2_oneshot
   --preflight`, then `--run` once, after the P-DET-COVERAGE-v2 consensus reference exists: it gates on
