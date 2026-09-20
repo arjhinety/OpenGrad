@@ -226,6 +226,34 @@ seeing data is a new study, and it goes into the next study
   stays a separate decision (38 §4). No gold is frozen; P-DET-v1 remains unfrozen. The qualifications stay
   `MODEL_REFERENCE` and provisional, and 38 §5 names what withdraws them.
 
+## Registration of the C1 corpus (canonical-v3) — 2026-09-20
+
+This is a **registration, not an amendment**: no threshold, arm, seed count, partition or decision rule
+changes, so nothing already scored needs re-running and no amendment numbering applies. It records the
+artifact the C1 workstream ([21](21-C1-IMPLEMENTATION-STATUS.md)) produced and, more importantly, what it
+is not.
+
+- **The artifact exists.** canonical-v3: 88,056 records, 22,014 per decision across
+  `CALL`/`ANSWER`/`CLARIFY`/`UNSUPPORTED`, selected under the supply-limited equal-shares rule fixed in
+  [39](39-CANONICAL-V3-DECISION-BALANCE-SPEC.md) before it was computed, from normalization-v3 fingerprint
+  `60d3123e…`, with behaviour labels from the frozen `prose-decision-classifier-v2` (`labels.classifier`).
+  Its `versions` block names that classifier.
+- **Provenance is checked and passes.** The pre-GPU provenance gate
+  (`src/opengrad/data/provenance_gate.py`, 21 phase 6) returns `PASS` on the committed artifacts, recorded
+  as [`reports/canonical-v3/provenance-gate-v2.json`](../../../reports/canonical-v3/provenance-gate-v2.json);
+  [`…-v1.json`](../../../reports/canonical-v3/provenance-gate-v1.json) holds the classifier-version
+  finding it caught, since fixed (21 phase 6).
+- **It is not an arm's corpus.** No arm of [04](04-ARM-MATRIX.md) moves to canonical-v3; no arm's corpus,
+  supervised tokens or steps change. canonical-v3 is not an operative corpus of any arm
+  ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md) §9.6). The balanced corpus drops ≈70,800
+  structural-call records relative to its supply; any later arm that wants more call data must declare it as
+  its own factor (31 §9.6, [39](39-CANONICAL-V3-DECISION-BALANCE-SPEC.md) §2).
+- **Entering a study remains open, and remains the study owner's decision.** If canonical-v3 later enters
+  Study 002 or 003 it enters as its own numbered amendment and as its own measurable factor, never silently
+  inside another arm (31 §9.6, 39 §4). This registration does not decide it.
+- **No training is authorised.** [16](16-GPU-READINESS-GATE.md) has produced no `READY` record, and the arm
+  matrix's `NOT_IMPLEMENTED` components are unchanged.
+
 ## Why there is no "best arm" selection
 
 Study 002 does not select a best arm. It tests one mechanism and one correction: `C0` versus `R1` under

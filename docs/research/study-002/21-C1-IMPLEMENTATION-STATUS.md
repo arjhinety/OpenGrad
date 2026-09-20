@@ -1,6 +1,6 @@
 # 21 — C1 implementation status (provenance + schema normalization)
 
-**Status: `PARTIAL — 7 of 9 phases landed` (updated 2026-09-20). canonical-v3 exists: 88,056 records, decision-balanced, every gate recorded. The renderer is proven unchanged across the C1 intervention (phase 7), and the pre-GPU provenance gate passes on the committed artifacts (phase 6). It is no arm's corpus, and no training was run.**
+**Status: `PARTIAL — 8 of 9 phases landed` (updated 2026-09-20). canonical-v3 exists: 88,056 records, decision-balanced, every gate recorded. The renderer is proven unchanged across the C1 intervention (phase 7), the pre-GPU provenance gate passes (phase 6), and the corpus is registered in the preregistration as built but not an arm (phase 8). It is no arm's corpus, and no training was run.**
 
 > **Status note, 2026-09-15.** Sources, adapters and the pre-classifier `normalization-v3` artifact now exist
 > ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)), as does the classifier input contract
@@ -51,6 +51,12 @@
 > `CODE_MODULES`, so changing it would invalidate that frozen artifact — so the override lives in
 > `canonical_v3.py`. Phases 8 and 9 remain open, and training is still not authorised.
 
+> **Status note, 2026-09-20 (phase 8).** The preregistration records the C1 corpus.
+> [03](03-PREREGISTRATION.md) gains a **registration, not an amendment**: canonical-v3 exists, the
+> provenance gate passes, and **no arm of [04](04-ARM-MATRIX.md) moves to it**. No threshold, arm, seed,
+> partition or decision rule changed. Entering a study stays a separate owner decision (31 §9.6). Phase 9
+> (the audit package) is this document.
+
 This is a **new Study 002 intervention**, not a repair of Study 001. Nothing historical was touched: no v1/v2
 artifact, manifest, hash, report or commit was modified or rewritten, and no Study 001 conclusion was
 revised. Only three files were **added** in this phase; **zero existing files were changed**, so the
@@ -65,7 +71,7 @@ canonical-v2 code path is byte-identical to before and its outputs cannot drift.
 | 5 | New immutable canonical-v3 artifacts | **DONE** (88,056 records, 9 shards, every gate run: 0 rejected, 88,056/88,056 rendered) |
 | 6 | Pre-GPU validation gates | **DONE** — `src/opengrad/data/provenance_gate.py`, six checks on the accounting contract; committed-artifact verdict **PASS** after the classifier-version fix |
 | 7 | Renderer unchanged, with equality proof | **DONE** — equality required by `tests/data/test_canonical_v3.py::test_the_renderer_identity_is_unchanged_across_the_c1_intervention` |
-| 8 | Study 002 preregistration update | **NOT STARTED** |
+| 8 | Study 002 preregistration update | **DONE** — a registration, not an amendment: canonical-v3 recorded in [03](03-PREREGISTRATION.md) as built and not an arm's corpus; entering a study stays a separate owner decision |
 | 9 | Full audit package | **THIS DOCUMENT** (partial by construction) |
 
 ## Phase 1 — provenance repair (done)
@@ -216,6 +222,11 @@ rendering all 88,056 records (`reports/canonical-v3/canonical-v3.manifest.json`,
    `callable` / `set` (`:98-103`) at a cost of 2,028 xLAM rows. Changing it would alter another source's
    semantics, so it is not folded into C1.
 
+> **Update, 2026-09-20.** Items 2–4 are resolved by the phases above and are kept as written, dated: the
+> classifier exists and is frozen (`prose-decision-classifier-v2`) and validated on P-DET-COVERAGE-v2
+> (37 §8); P-DET-v1 exists (581 items, frozen population); canonical-v3 is built. Item 1 — whether the
+> When2Call `train_sft` split holds any `direct`-gold item — stays `UNKNOWN`. Item 5 is unchanged.
+
 ## Causation language (unchanged)
 
 The training-side label collapse is a **plausible causal mechanism**, and the missing direct-answer
@@ -238,13 +249,18 @@ No file was modified. Verified: `python -m pytest tests/data/test_source_schema.
 
 ## Next, in order
 
-1. `decision_classifier.py` — deterministic, versioned, emits the existing decisions/capabilities with
-   `confidence="heuristic"` and classifier provenance; `known` reserved for genuine upstream labels.
-2. `P-DET` sampling harness (deterministic, stratified, hashed) plus annotation protocol; validation stays
-   `BLOCKED` until human labels exist.
-3. Wire translation + classifier into `_base` / `adapt_when2call`, with every version derived from
-   `versions.py`; then `normalization-v3` and the canonical-v3 release with new fingerprints.
-4. Deterministic mixture materializer — none exists today (`mixture.py` only *validates* weights) — with
-   frozen weights, caps, dedup, replacement policy and seed; realized counts read from the artifact.
-5. Pre-GPU gate module covering every listed failure condition, the renderer equality proof, the
-   preregistration update, and only then any consideration of training.
+Phases 1–8 have landed; phase 9 is this document. What remains is not engineering:
+
+1. **The study owner's decisions**, which no phase above took:
+   - whether canonical-v3 enters Study 002 or 003, and as which arm or factor ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md) §9.6,
+     [03](03-PREREGISTRATION.md)'s registration);
+   - whether to re-read the 2 UNKNOWN P-DET-v1 items and freeze its gold ([35](35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md)).
+2. **[16](16-GPU-READINESS-GATE.md), the pre-training readiness gate** — the fourteen blocking checks
+   (`study_002_gate_v1`), most of which need artifacts that do not exist yet (P-CONF, sentinels, the
+   answerability partition). It has produced no `READY` record, so **no training run is authorised**.
+3. **Only then**, any consideration of training.
+
+The list this section carried earlier — the classifier, the P-DET harness, wiring the classifier into the
+artifacts, a deterministic mixture materializer, and a pre-GPU gate module — is complete:
+`decision_classifier_v2.py`, `canonical_v3_balance.py`, `canonical_v3.py` and `provenance_gate.py` exist, and
+the renderer proof and this preregistration update landed. The earlier text is in git history.

@@ -405,8 +405,8 @@ The raw subgroups of §9.2 are larger than these categories for two reasons, mea
 - **Study 002's arms.** This is case A: Study 002 is preregistered (`study_002_prereg_v1`–`v3`), and every
   arm in [04](04-ARM-MATRIX.md) is Canonical-v2-derived, with `C0` "exactly as published".
   - No arm is moved to canonical-v3, and no arm's corpus changes.
-  - canonical-v3 is not yet an operative corpus of any arm: 21 phase 8, the preregistration update, has not
-    started.
+  - canonical-v3 is not an operative corpus of any arm. 21 phase 8 (2026-09-20) registered it in
+    [03](03-PREREGISTRATION.md) as built but not an arm; entering a study remains a separate owner decision.
 - **P-DET-COVERAGE-v1 (a draft).** Its pins and counts-only dry run were re-recorded on the new artifact
   (30 §13).
   - Layer B is identical in every count.
