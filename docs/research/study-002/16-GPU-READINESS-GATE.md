@@ -31,6 +31,13 @@ afterwards; a correction is a new record that supersedes the old one by referenc
 Fourteen checks, every one blocking, every one with an artifact rather than a statement. A check that cannot
 be evaluated is `BLOCKED`, which is not a pass.
 
+> **Status, 2026-09-20.** Checks 2 and 13 now have code. `study_002_gate_v1` and
+> `tool_use_promotion_v5` are implemented (`src/opengrad/verification/study_002_gate.py`,
+> `src/opengrad/promotion/tool_use_policy.py`), and the gate's vacuity self-test runs
+> (`python -m opengrad.verification.study_002_gate --self-test`), failing on the three fixtures named
+> below. The gate reports `BLOCKED_INPUT_MISSING` until a four-mode evaluation bundle exists, so this is
+> not yet a `READY` record: checks 3–6 and 8–14 still have no artifact. No arm has launched.
+
 ## The self-test (check 13) is the most important one
 
 `study_002_gate_v1` must be shown to return **FAIL** on: a population with an empty required mode; a metrics

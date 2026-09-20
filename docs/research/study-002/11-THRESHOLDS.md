@@ -78,6 +78,15 @@ far `call_f1` rose.
 Checks 1–3 are the L1 family and are new. Checks 4–6 are the new behavioural family. Checks 7–14 are
 existing discipline made explicit.
 
+> **Status, 2026-09-20.** `tool_use_promotion_v5` and `study_002_gate_v1` now exist as code:
+> `PromotionPolicyV5` in `src/opengrad/promotion/tool_use_policy.py` (the new fields, `NOT_EVALUABLE`,
+> and `FAIL_NONVACUOUS` where a required dimension is unmeasurable), and the fourteen checks in
+> `src/opengrad/verification/study_002_gate.py`. The gate runs its vacuity self-test
+> (`python -m opengrad.verification.study_002_gate --self-test`) and is shown to **fail** on the three
+> fixtures of [16](16-GPU-READINESS-GATE.md) check 13: an empty required mode, a metric reporting `0.0`
+> beside a zero `ANSWER` row, and a missing sentinel. No arm has been scored on a four-mode population,
+> so on the real repository the gate reports `BLOCKED_INPUT_MISSING` — never `PASS`.
+
 ## Failing closed
 
 The v3/v4 code already fails closed in the right places and v5 keeps that behaviour deliberately:
