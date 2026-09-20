@@ -104,7 +104,12 @@ Follow the `glaive_v2` / `toolace_v2` / `toolace_v3` precedent in `src/opengrad/
   (membership, contamination, supervision kind, semantic trajectory, renderability); a rejected record is
   counted with its reason, never silently dropped. The artifact is immutable: `--build` refuses to overwrite.
   It is no arm's corpus and authorises no training. It never writes into normalization-v3, whose `verify`
-  still refuses any behaviour label on a record. `weight_permitted` follows 38 §2: UNSUPPORTED and CLARIFY
+  still refuses any behaviour label on a record. The pre-GPU provenance gate over these artifacts is
+  `src/opengrad/data/provenance_gate.py` (`python -m opengrad.data.provenance_gate --verify|--record`, 21
+  phase 6): it checks authoritative versions, classifier identity, renderer identity, authorisation,
+  per-record version agreement and selection-plan agreement, records
+  `reports/canonical-v3/provenance-gate-v1.json`, and currently returns `FAIL_CLASSIFIER_VERSION`.
+  `weight_permitted` follows 38 §2: UNSUPPORTED and CLARIFY
   always, DIRECT on glaive only, never CALL/CALL_BY_STRUCTURE/ABSTAIN/UNLABELLED. Its single test is `python -m opengrad.verification.prose_classifier_v2_oneshot
   --preflight`, then `--run` once, after the P-DET-COVERAGE-v2 consensus reference exists: it gates on
   P-DET-COVERAGE-v2 alone and reports per-`unit_kind` and DEVELOPMENT_EXPOSED (P-DET-v1, P-DET-COVERAGE-v1)

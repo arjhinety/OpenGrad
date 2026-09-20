@@ -1,6 +1,6 @@
 # 21 — C1 implementation status (provenance + schema normalization)
 
-**Status: `PARTIAL — 5 of 9 phases landed` (updated 2026-09-18). canonical-v3 exists: 88,056 records, decision-balanced, every gate recorded. It is no arm's corpus, and no training was run.**
+**Status: `PARTIAL — 7 of 9 phases landed` (updated 2026-09-20). canonical-v3 exists: 88,056 records, decision-balanced, every gate recorded. The renderer is proven unchanged across the C1 intervention (phase 7), and the pre-GPU provenance gate exists and runs (phase 6) — it currently returns `FAIL` on one finding, so training stays blocked. It is no arm's corpus, and no training was run.**
 
 > **Status note, 2026-09-15.** Sources, adapters and the pre-classifier `normalization-v3` artifact now exist
 > ([31](31-CANONICAL-V3-SOURCES-AND-NORMALIZATION-V3.md)), as does the classifier input contract
@@ -21,6 +21,26 @@
 > provisionally (DIRECT on glaive only, no CALL). At the time of this note phases 3-5 had not started; they
 > landed the same day, as the note above records. No training run is authorised.
 
+> **Status note, 2026-09-20.** Phase 7 is proven, and only phase 7 changed. The renderer is unchanged across
+> the C1 intervention: the identity canonical-v3 recorded while rendering all 88,056 records equals the pinned
+> Study 001 contract in `reports/evaluation/behavioral-heldout-v1.manifest.json`, the committed renderer
+> snapshot `tests/fixtures/rendered/qwen35_2b_metadata.json`, and the renderer class constant
+> (`Qwen35_2BRenderer.renderer_version`, `…model_revision`). The equality is required, not asserted, by
+> `tests/data/test_canonical_v3.py::test_the_renderer_identity_is_unchanged_across_the_c1_intervention`, which
+> reads only committed artifacts and so runs on a clean checkout. No artifact, hash, threshold, population,
+> contract or metric was touched; canonical-v3's fingerprint is unchanged. This supersedes the `PENDING` status
+> in the 2026-09-18 correction below, which is kept as written, dated. Phases 6, 8 and 9 remain open.
+
+> **Status note, 2026-09-20 (later).** Phase 6 also landed: `src/opengrad/data/provenance_gate.py`, the
+> pre-GPU provenance gate, six checks over the C1 artifacts on the shared accounting contract. It runs on a
+> clean checkout, and it **fails**: canonical-v3's `versions.decision_classifier_version` names
+> `prose-decision-classifier-v1` while its behaviour labels came from the frozen
+> `prose-decision-classifier-v2`, so the gate returns `FAIL_CLASSIFIER_VERSION`. Every other check passes. By
+> 38 §3 condition 5 a failing pre-GPU gate means **no training run**; the recorded run is
+> `reports/canonical-v3/provenance-gate-v1.json`. The remediating rebuild (record the applied classifier in
+> canonical-v3's version block and rebuild it, a new immutable artifact) is a separate owner decision and is
+> **not** done here. Phases 8 and 9 remain open.
+
 This is a **new Study 002 intervention**, not a repair of Study 001. Nothing historical was touched: no v1/v2
 artifact, manifest, hash, report or commit was modified or rewritten, and no Study 001 conclusion was
 revised. Only three files were **added** in this phase; **zero existing files were changed**, so the
@@ -33,8 +53,8 @@ canonical-v2 code path is byte-identical to before and its outputs cannot drift.
 | 3 | Deterministic versioned behaviour classifier | **DONE** (frozen `prose-decision-classifier-v2`, applied to all 181,433 records by `behaviour_labels.py`) |
 | 4 | Wire decisions/capabilities into mixture machinery + materialized balance | **DONE for decisions** (`decision_balanced` mixture class + `canonical_v3_balance.py`, spec 39); capabilities remain unlabelled, so `balanced_policy_v1.yaml` stays HYPOTHESIS_ONLY |
 | 5 | New immutable canonical-v3 artifacts | **DONE** (88,056 records, 9 shards, every gate run: 0 rejected, 88,056/88,056 rendered) |
-| 6 | Pre-GPU validation gates | **PARTIAL** (the two invariants from phases 1–2 only) |
-| 7 | Renderer unchanged, with equality proof | **NOT YET PROVEN** |
+| 6 | Pre-GPU validation gates | **DONE** — `src/opengrad/data/provenance_gate.py`, six checks on the accounting contract; committed-artifact verdict **FAIL** (one finding, `FAIL_CLASSIFIER_VERSION`), so training stays blocked (38 §3 condition 5) |
+| 7 | Renderer unchanged, with equality proof | **DONE** — equality required by `tests/data/test_canonical_v3.py::test_the_renderer_identity_is_unchanged_across_the_c1_intervention` |
 | 8 | Study 002 preregistration update | **NOT STARTED** |
 | 9 | Full audit package | **THIS DOCUMENT** (partial by construction) |
 
@@ -103,12 +123,57 @@ rows and 1 Glaive row. The contract is now explicit — **translation is never s
 layer on a type annotation** — and a multi-type list is dropped *with a recorded note*, exactly as canonical
 drops it, so the coercion is visible rather than silent. A parametrized test guards all three shapes.
 
-## Phase 7 — renderer identity (not yet proven)
+## Phase 6 — pre-GPU provenance gate (done 2026-09-20)
+
+`src/opengrad/data/provenance_gate.py` is the module [`versions.py`](../../../src/opengrad/data/versions.py)
+names as a consumer of its version fields but that never existed. It is the machine-checkable
+provenance/identity gate over the C1 artifacts, built on the shared accounting contract
+(`opengrad.verification.accounting`, doc [15](15-PROVENANCE-VALIDATORS.md)) and carrying its own
+`PROVENANCE_GATE_CONTRACT = 1` — it does not bump the shared `VERIFIER_CONTRACT`, which governs
+publication verification. It reads committed artifacts, so `python -m opengrad.data.provenance_gate
+--verify` runs on a clean checkout; a git-ignored local build is reported `BLOCKED_INPUT_MISSING`, never a
+pass, and a real disagreement is `FAIL`. It authorises no training.
+
+Six checks, each a `ValidationResult`; the verdict on the committed artifacts:
+
+| Check | Policy | Verdict |
+|---|---|---|
+| `versions_authoritative` — each C1 manifest's version block equals the authoritative constants | `REQUIRED_NONEMPTY` | `PASS` |
+| `classifier_identity` — the applied classifier is the frozen `prose-decision-classifier-v2`, through a known contract, and agrees with any declared version | `REQUIRED_NONEMPTY` | **`FAIL`** (`FAIL_CLASSIFIER_VERSION`) |
+| `renderer_identity` — canonical-v3's recorded renderer equals the pinned Study 001 contract (phase 7) | `REQUIRED_NONEMPTY` | `PASS` |
+| `authorisation_recorded` — each artifact names the 38 authorisation | `REQUIRED_NONEMPTY` | `PASS` |
+| `record_version_agreement` — per record, metadata and manifest versions agree (the phase-1 invariant) | `CONDITIONALLY_REQUIRED` | `PASS` over 88,056 records; `BLOCKED_INPUT_MISSING` when the git-ignored shards are absent |
+| `selection_plan_agreement` — canonical-v3 selects exactly the balance plan's ids | `CONDITIONALLY_REQUIRED` | `PASS` |
+
+Recorded once, never edited:
+[`reports/canonical-v3/provenance-gate-v1.json`](../../../reports/canonical-v3/provenance-gate-v1.json). Overall
+**`FAIL`**, on one finding. Tests: `tests/data/test_provenance_gate.py` (every check has a fixture that makes
+it fail; the committed-artifact test records the finding and flips to `PASS` when it is remediated).
+
+### The finding: `FAIL_CLASSIFIER_VERSION`
+
+canonical-v3's manifest `versions.decision_classifier_version` is `prose-decision-classifier-v1` (from
+`versions.provenance_versions()` / `DECISION_CLASSIFIER_VERSION`), but the artifact's behaviour labels were
+produced by the frozen `prose-decision-classifier-v2`, as its own `labels.classifier` records. The version
+block was never checked before this gate. Per 38 §3 condition 5 a failing pre-GPU gate means **no training
+run**. Clearing it is a separate, owner-decided change: record the applied classifier in canonical-v3's
+`versions` block and rebuild the artifact (a new immutable artifact with a new fingerprint), rather than
+repointing the shared `DECISION_CLASSIFIER_VERSION`, which would mislabel the pre-classifier normalization-v3
+(`NOT_APPLIED`). The gate landing and the fix are deliberately separate changes.
+
+## Phase 7 — renderer identity (proven 2026-09-20)
 
 Nothing in this phase touches the renderer: `renderers.py` was not modified, and neither was any module on
 the render path. The proof the C1 specification requires — record `renderer_version` (`qwen3_5_2b_v1`) and
 `template_hash` (`273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80`) before and after, and
-require equality — has **not been executed**, so it is `PENDING`, not asserted.
+require equality — is now **executed and enforced** by
+`tests/data/test_canonical_v3.py::test_the_renderer_identity_is_unchanged_across_the_c1_intervention`. It
+requires equality across three committed records: the frozen Study 001 contract
+(`reports/evaluation/behavioral-heldout-v1.manifest.json`, `model_renderer_contract`), the committed renderer
+snapshot (`tests/fixtures/rendered/qwen35_2b_metadata.json`), and the identity canonical-v3 recorded while
+rendering all 88,056 records (`reports/canonical-v3/canonical-v3.manifest.json`,
+`gates.renderability.identity`). All three records agree, and the renderer class constant
+(`Qwen35_2BRenderer`) is the fourth witness the test checks them against.
 
 > **Correction, 2026-09-18.** This paragraph previously gave the template hash with three characters dropped
 > (`…fb17e08d5f2a5ddfb53…`, 61 hex digits instead of 64). The authoritative value in
@@ -116,6 +181,11 @@ require equality — has **not been executed**, so it is `PENDING`, not asserted
 > canonical-v3 (39 §3, gate 5), so only this document was wrong. Phase 7's before-and-after equality proof is
 > still `PENDING`: canonical-v3 records the renderer identity it observed, which is not the same as proving the
 > renderer unchanged across the intervention.
+
+> **Resolved, 2026-09-20.** The `PENDING` sentence above is superseded: the equality proof now exists as the
+> test named in the paragraph before it, and the correction block is kept as written, dated. The limitation the
+> block names is what the test closes — it asserts the equality across the recorded before-and-after identity
+> rather than merely noting the value canonical-v3 observed.
 
 ## UNKNOWN / BLOCKED register
 

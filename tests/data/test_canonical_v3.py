@@ -9,10 +9,13 @@ import pytest
 
 from opengrad.data import canonical_v3 as corpus
 from opengrad.data.behavior import DECISIONS
+from opengrad.data.renderers import Qwen35_2BRenderer
 from tests.data.test_classifier_input import glaive_record
 from tests.data.test_classifier_input_v2 import CONTINUED_WITH_CALL
 
 ROOT = Path(__file__).resolve().parents[2]
+FROZEN_HELDOUT_V1 = "reports/evaluation/behavioral-heldout-v1.manifest.json"
+RENDERER_SNAPSHOT = "tests/fixtures/rendered/qwen35_2b_metadata.json"
 CLASSIFIER = {"version": "prose-decision-classifier-v2", "tag": "prose-decision-classifier-v2", "source_sha256_lf": "a" * 64}
 
 # The canonical-v3 artifacts are git-ignored local builds (.gitignore:69), so the two tests that read them
@@ -99,3 +102,20 @@ def test_the_real_artifact_matches_its_manifest_and_the_plan() -> None:
     assert result["status"] == "PASS", result["problems"]
     assert set(result["decisions"]) == DECISIONS
     assert len(set(result["decisions"].values())) == 1  # equal shares
+
+
+def test_the_renderer_identity_is_unchanged_across_the_c1_intervention() -> None:
+    """Phase 7 (21): the renderer is unchanged across C1 -- before and after, equality required.
+
+    Before the intervention the pinned Study 001 contract fixed the renderer identity in the frozen
+    held-out manifest and in the committed renderer snapshot; the code declares it on the renderer
+    class. After it, canonical-v3 records the identity it observed while rendering all 88,056 records.
+    The records are committed artifacts, so this proof runs on a clean checkout.
+    """
+    before = json.loads((ROOT / FROZEN_HELDOUT_V1).read_text(encoding="utf-8"))["model_renderer_contract"]
+    snapshot = json.loads((ROOT / RENDERER_SNAPSHOT).read_text(encoding="utf-8"))
+    after = json.loads((ROOT / corpus.REPORT).read_text(encoding="utf-8"))["gates"]["renderability"]["identity"]
+
+    assert before["renderer"] == snapshot["renderer"] == after["renderer"] == Qwen35_2BRenderer.renderer_version
+    assert before["model_revision"] == snapshot["model_revision"] == after["model_revision"]
+    assert before["template_hash"] == snapshot["chat_template_hash"] == after["template_hash"]
