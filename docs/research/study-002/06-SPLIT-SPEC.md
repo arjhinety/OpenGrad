@@ -137,6 +137,18 @@ below 10pp**, and the `ANSWER` strata set is sized to resolve 8pp or better.
 > `ANSWER` strata set itself is **not built**: its source is the study owner's decision (open item 2 of
 > [20](20-CLOSURE-REPORT.md)), and it must satisfy both the `n ≥ 200` floor and the 8pp sizing above — the
 > one source this section cites carries 140 `ANSWER` items, below the hard floor.
+>
+> A survey of the repository's labelled pools finds **no disjoint pool at or above the `n ≥ 200` floor**.
+> The frozen held-out (`frozen_behavioural_eval_v1.jsonl`, 3,650) and the frozen confirmatory prompts
+> (`frozen_prompts_confirmatory_v1.jsonl`, 1,277) carry **`ANSWER` 0**. The largest non-training
+> `ANSWER`-gold pools are the QAD recovery corpus (140) and its local calibration sibling (100), both
+> **training** artifacts drawn from the same four sources; P-DET-COVERAGE-v1 and -v2 hold 44 and 132
+> model-consensus `DIRECT` items, which are classifier-validation and provisional, not model gold. The
+> only large `DIRECT` pools — ≈37,000 first-exchange `DIRECT` prompts in canonical-v2-final — are the
+> **training corpora** themselves and are barred by the disjointness rule. Against C2 this section asks
+> for `n ≈ 601` to resolve 8pp (≈384 for the 10pp floor this study uses), so the `ANSWER` stratum needs a
+> **new held-out source**, or a documented decision to accept `UNDER_POWERED`; selection from what already
+> exists does not clear the floor.
 
 ## One-shot discipline on `P-CONF`
 
