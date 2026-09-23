@@ -106,7 +106,8 @@ which restored satisfiability but left the blind spot in place. Study 002 requir
 fixed **and** keeps the skip-path so that a future regression is visible rather than silent.
 
 **C2 — Resolvability.** Every reported row prints `n`, the 95% Wilson interval and the **resolvable
-margin** = 2 × Wilson half-width. The margin is quoted at the worst case `p = 0.5`, so it is a function
+margin** = 2 × the worst-case half-width (the normal-approximation half-width `z·sqrt(0.25/n)`, slightly
+larger than Wilson's and so conservative; corrected 2026-09-24, `reports/ERRATA.md` §19). The margin is quoted at the worst case `p = 0.5`, so it is a function
 of `n` alone and cannot be flattered by an observed rate near 0 or 1; the observed-rate margin is printed
 alongside as a second, non-binding figure. A comparison whose observed margin is smaller than its
 resolvable margin is reported `WITHIN_NOISE`, may not support a claim, and may not enter a gate decision.
@@ -139,14 +140,16 @@ below 10pp**, and the `ANSWER` strata set is sized to resolve 8pp or better.
 > one source this section cites carries 140 `ANSWER` items, below the hard floor.
 >
 > A survey of the repository's labelled pools finds **no disjoint pool at or above the `n ≥ 200` floor**.
-> The frozen held-out (`frozen_behavioural_eval_v1.jsonl`, 3,650) and the frozen confirmatory prompts
+> The frozen held-out (`results/quantization/frozen_behavioral_eval_v1.jsonl`, 3,650) and the frozen confirmatory prompts
 > (`frozen_prompts_confirmatory_v1.jsonl`, 1,277) carry **`ANSWER` 0**. The largest non-training
-> `ANSWER`-gold pools are the QAD recovery corpus (140) and its local calibration sibling (100), both
-> **training** artifacts drawn from the same four sources; P-DET-COVERAGE-v1 and -v2 hold 44 and 132
+> `ANSWER`-gold pools found are the QAD recovery corpus (140), its local calibration sibling (100) and
+> `m1_v2_imatrix_calibration_v2` (300), all **training-derived** and drawn from the same four sources, so no
+> non-training pool reaches the floor; P-DET-COVERAGE-v1 and -v2 hold 44 and 132
 > model-consensus `DIRECT` items, which are classifier-validation and provisional, not model gold. The
-> only large `DIRECT` pools — ≈37,000 first-exchange `DIRECT` prompts in canonical-v2-final — are the
+> only large `DIRECT` pools — about 43,300 first answers in canonical-v2-final that frozen classifier v1
+> *predicts* `DIRECT` (33,831 of 37,512 with no tools offered, 9,455 with tools; predictions, not gold) — are the
 > **training corpora** themselves and are barred by the disjointness rule. Against C2 this section asks
-> for `n ≈ 601` to resolve 8pp (≈384 for the 10pp floor this study uses), so the `ANSWER` stratum needs a
+> for `n ≈ 601` to resolve 8pp (385 for the 10pp floor this study uses), so the `ANSWER` stratum needs a
 > **new held-out source**, or a documented decision to accept `UNDER_POWERED`; selection from what already
 > exists does not clear the floor.
 

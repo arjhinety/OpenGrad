@@ -10,6 +10,8 @@ import pytest
 
 from opengrad.verification.resolvability import (
     MODE_FLOOR,
+    at_least,
+    at_most,
     mode_status,
     observed_half_width,
     resolvable_margin,
@@ -65,3 +67,12 @@ def test_a_row_records_within_noise_when_it_cannot_resolve_its_own_margin() -> N
     large = resolvable_row(1277, observed_margin=0.12)
     assert large["within_noise"] is False
     assert observed_half_width(90, 100) < 0.10
+
+
+def test_threshold_comparisons_are_decided_by_the_threshold_not_by_float_error() -> None:
+    assert 0.9 - 0.6 > 0.30  # the float defect the helpers exist for
+    assert at_most(0.9 - 0.6, 0.30)
+    assert at_least(0.63 / 0.7, 0.90)
+    assert at_least(0.72 / 0.8, 0.90)  # 0.8999999999999999
+    assert not at_least(0.8999, 0.90)
+    assert not at_most(0.3001, 0.30)

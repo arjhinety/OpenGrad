@@ -25,6 +25,8 @@ evidence before it can be.
 
 from __future__ import annotations
 
+import math
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -255,9 +257,11 @@ REQUIRED_MODES = ("CALL", "ANSWER", "CLARIFY", "UNSUPPORTED")
 
 @dataclass
 class PromotionPolicyV5(PromotionPolicyV2):
-    """v4 plus the ANSWER-mode floors and the refusal sentinel the L1 defect showed were missing.
+    """v3 plus the ANSWER-mode floors and the refusal sentinel the L1 defect showed were missing.
 
-    The v3/v4 field set is inherited unchanged, so a v4 verdict stays readable and comparable. Two
+    It subclasses the v3 class (``PromotionPolicyV2``), not v4 (``M1CalibrationPolicy``): the v4
+    parent-relative floors are not part of v5 (``reports/ERRATA.md`` §19). The v3 field set is
+    inherited unchanged, so a v4 verdict stays readable and comparable. Two
     behaviours change, and only two:
 
     * an unmeasurable required dimension **fails** (``FAIL_NONVACUOUS``) instead of being skipped.
@@ -383,4 +387,114 @@ class PromotionPolicyV5(PromotionPolicyV2):
             "failure_codes": codes,
             "checks": checks,
             "required_modes": list(REQUIRED_MODES),
+        }
+
+
+# â”€â”€ v6: v5 with its fail-open paths closed (draft; not wired to any gate) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+V6_POLICY_VERSION = "tool_use_promotion_v6"
+
+#: Every metric v5 reads from the candidate, and from the baseline. v5 fills an absent one with a
+#: default (and silently skips `refusal_correctness` and the answer-rate drop when absent); v6 does not.
+V6_CANDIDATE_METRICS = (
+    "call_f1",
+    "over_call_rate",
+    "clarification_accuracy",
+    "unsupported_accuracy",
+    "no_call_accuracy",
+    "must_call_accuracy",
+    "answer_rate",
+    "refusal_rate",
+    "refusal_correctness",
+    "parse_valid_rate",
+)
+V6_BASELINE_METRICS = ("call_f1", "answer_rate")
+
+#: Thresholds are compared at this many decimal places. A check's `observed` is already rounded to 6,
+#: and every threshold is a two-decimal literal, so 6 places cannot change a real decision: the
+#: smallest real difference on a population of a few thousand items is ~1e-4.
+V6_COMPARISON_PLACES = 6
+
+_REQUIREMENT = re.compile(r"^(>=|<=) (-?\d+(?:\.\d+)?)")
+
+
+def _finite(value: Any) -> bool:
+    return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(float(value))
+
+
+@dataclass
+class PromotionPolicyV6(PromotionPolicyV5):
+    """v5 with the three ways it could promote without measuring closed.
+
+    Found by the 2026-09-24 review (`reports/ERRATA.md` Â§19). v5 is not edited in place (a policy
+    version is immutable); these are v6:
+
+    * **no confusion matrix** -- v5 treats every dimension as measurable, so ``answer_mode_coverage``
+      passes on a population it never saw. v6 returns ``NOT_EVALUABLE``;
+    * **a missing or non-numeric metric** -- v5 fills a default (and crashes on ``None``), and skips the
+      ``refusal_correctness`` floor and the answer-rate drop outright when their inputs are absent.
+      v6 returns ``NOT_EVALUABLE`` naming each missing metric;
+    * **float error at a threshold** -- ``0.90 - 0.60`` is ``0.30000000000000004`` and failed v5's
+      ``<= 0.30`` bound. v6 compares at :data:`V6_COMPARISON_PLACES`.
+
+    Thresholds and the check set are v5's, unchanged. ``study_002_gate_v1`` still wraps v5: switching
+    it to v6 is part of the ``study_002_prereg_v8`` draft (`docs/research/study-002/40-PREREG-V8-DRAFT.md`)
+    and happens only if the owner adopts it.
+    """
+
+    version: str = V6_POLICY_VERSION
+
+    def evaluate(self, candidate: dict[str, Any], baseline: dict[str, Any]) -> dict[str, Any]:
+        missing = [f"candidate.{m}" for m in V6_CANDIDATE_METRICS if not _finite(candidate.get(m))]
+        missing += [f"baseline.{m}" for m in V6_BASELINE_METRICS if not _finite(baseline.get(m))]
+        if not isinstance(candidate.get("confusion_matrix"), dict):
+            missing.append("candidate.confusion_matrix")
+        if missing:
+            checks = [
+                {
+                    "dimension": f"input.{name}",
+                    "observed": None,
+                    "requirement": "present and a finite number",
+                    "passed": False,
+                    "detail": "v6 does not substitute a default for an input it did not receive",
+                    "code": CODE_NOT_EVALUABLE,
+                }
+                for name in missing
+            ]
+            return {
+                "policy_version": self.version,
+                "decision": NOT_EVALUABLE,
+                "failed_dimensions": [check["dimension"] for check in checks],
+                "failure_codes": [CODE_NOT_EVALUABLE] * len(checks),
+                "checks": checks,
+                "required_modes": list(REQUIRED_MODES),
+                "unmeasured_dimensions": list(UNMEASURED_DIMENSIONS),
+            }
+
+        verdict = super().evaluate(candidate, baseline)
+        checks = []
+        for check in verdict["checks"]:
+            check = dict(check)
+            match = _REQUIREMENT.match(str(check["requirement"]))
+            if match and _finite(check["observed"]):
+                observed = round(float(check["observed"]), V6_COMPARISON_PLACES)
+                threshold = round(float(match.group(2)), V6_COMPARISON_PLACES)
+                check["passed"] = observed >= threshold if match.group(1) == ">=" else observed <= threshold
+            checks.append(check)
+
+        failed = [check["dimension"] for check in checks if not check["passed"]]
+        codes = [check.get("code") or CODE_TOOL_POLICY_REGRESSION for check in checks if not check["passed"]]
+        if any(code in (CODE_NONVACUOUS, CODE_NOT_EVALUABLE) for code in codes):
+            decision = NOT_EVALUABLE
+        elif failed:
+            decision = REJECT
+        else:
+            decision = PROMOTE
+        return {
+            **verdict,
+            "policy_version": self.version,
+            "decision": decision,
+            "failed_dimensions": failed,
+            "failure_codes": codes,
+            "checks": checks,
         }

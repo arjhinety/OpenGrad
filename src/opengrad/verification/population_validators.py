@@ -20,6 +20,7 @@ failing test is itself unverified.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -35,11 +36,20 @@ from opengrad.verification.accounting import (
     REQUIRED_NONEMPTY,
     ValidationResult,
 )
-from opengrad.verification.resolvability import mode_status, resolvable_margin
+from opengrad.verification.resolvability import MODE_FLOOR, at_least, mode_status, resolvable_margin
 
 CODE_NONVACUOUS = "FAIL_NONVACUOUS"
 CODE_VACUOUS_METRIC = "FAIL_VACUOUS_METRIC"
 CODE_UNRESOLVED_ROW = "FAIL_UNRESOLVED_ROW"
+CODE_UNDER_POWERED = "UNDER_POWERED"
+
+
+def finite_number(value: Any) -> float | None:
+    """`value` as a float if it is a real, finite number; otherwise None (bool is not a number)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    return number if math.isfinite(number) else None
 
 
 def v1_mode_coverage(
@@ -47,12 +57,17 @@ def v1_mode_coverage(
     declared: Mapping[str, int] | None = None,
     *,
     name: str = "mode_coverage",
+    enforce_floor: bool = False,
 ) -> ValidationResult:
     """Every required mode must have `n > 0`.
 
     `declared` is the coverage a manifest claims; where it claims a mode the measured counts do not
     contain, the population's stated and measured coverage disagree, which is the defect
     `06-SPLIT-SPEC.md:73-77` names. The measured counts are what the check runs on.
+
+    With `enforce_floor`, a mode below the `n >= 200` floor also fails, with `UNDER_POWERED`: its
+    dimensions are `NOT_EVALUABLE` and the study claims nothing on it (06 §C2), so a gate that
+    decides on the population cannot pass. As a validator (V1, 15:36) the floor is only recorded.
     """
     if not measured:
         return result_from(
@@ -67,13 +82,23 @@ def v1_mode_coverage(
     errors = []
     under_powered = 0
     for mode in REQUIRED_MODES:
-        n = int(measured.get(mode, 0))
+        raw = measured.get(mode, 0)
+        count = finite_number(raw)
+        if count is None or count != int(count):
+            errors.append(f"{mode}: {CODE_NONVACUOUS}: gold n={raw!r} is not a count")
+            continue
+        n = int(count)
         if n <= 0:
             errors.append(
                 f"{mode}: {CODE_NONVACUOUS}: gold n={n}; a floor on an empty class is not a check"
             )
         elif mode_status(n) == "UNDER_POWERED":
             under_powered += 1
+            if enforce_floor:
+                errors.append(
+                    f"{mode}: {CODE_UNDER_POWERED}: gold n={n} is below the n >= {MODE_FLOOR} floor; "
+                    "its dimensions are NOT_EVALUABLE"
+                )
     if declared is not None:
         for mode in REQUIRED_MODES:
             if int(declared.get(mode, 0)) > 0 and int(measured.get(mode, 0)) <= 0:
@@ -84,11 +109,14 @@ def v1_mode_coverage(
         REQUIRED_NONEMPTY,
         list(REQUIRED_MODES),
         errors,
-        detail={mode: int(measured.get(mode, 0)) for mode in REQUIRED_MODES} | {"under_powered": under_powered},
+        detail={mode: int(finite_number(measured.get(mode, 0)) or 0) for mode in REQUIRED_MODES}
+        | {"under_powered": under_powered},
     )
 
 
-def v2_metric_denominator(candidate: Mapping[str, Any], *, name: str = "metric_denominators") -> ValidationResult:
+def v2_metric_denominator(
+    candidate: Mapping[str, Any], *, name: str = "metric_denominators"
+) -> ValidationResult:
     """No per-class metric may report `0.0` for a class the population does not contain."""
     matrix = candidate.get("confusion_matrix")
     if not isinstance(matrix, dict):
@@ -102,11 +130,23 @@ def v2_metric_denominator(candidate: Mapping[str, Any], *, name: str = "metric_d
             detail={"reason": "no confusion matrix to read denominators from"},
         )
     _, unmeasurable = measurable_dimensions(dict(candidate))
-    errors = [
-        f"{dimension}: {CODE_VACUOUS_METRIC}: reports 0.0 for a class with an empty denominator"
-        for dimension in sorted(unmeasurable)
-        if float(candidate.get(dimension, 0.0)) == 0.0
-    ]
+    errors: list[str] = []
+    for dimension in sorted(unmeasurable):
+        # 15:40: an unmeasured value is `null`, the one honest encoding, and is accepted. Any number
+        # (0.0 included, and a missing key, which the policies read as 0.0) is a value computed over
+        # an empty denominator, and a non-numeric value is malformed -- a finding, never a crash.
+        if dimension in candidate and candidate[dimension] is None:
+            continue
+        value = finite_number(candidate.get(dimension, 0.0))
+        if value is None:
+            errors.append(
+                f"{dimension}: {CODE_VACUOUS_METRIC}: {candidate.get(dimension)!r} is not a number"
+            )
+        else:
+            errors.append(
+                f"{dimension}: {CODE_VACUOUS_METRIC}: reports {value} for a class with an empty "
+                "denominator; unmeasured is null"
+            )
     return result_from(
         name,
         REQUIRED_NONEMPTY,
@@ -116,7 +156,9 @@ def v2_metric_denominator(candidate: Mapping[str, Any], *, name: str = "metric_d
     )
 
 
-def v12_resolvable_margin(rows: Sequence[Mapping[str, Any]], *, name: str = "comparison_margins") -> ValidationResult:
+def v12_resolvable_margin(
+    rows: Sequence[Mapping[str, Any]], *, name: str = "comparison_margins"
+) -> ValidationResult:
     """Every comparison must print an `n` that can resolve the claim, or be `WITHIN_NOISE`."""
     rows = list(rows)
     if not rows:
@@ -133,24 +175,39 @@ def v12_resolvable_margin(rows: Sequence[Mapping[str, Any]], *, name: str = "com
     errors: list[str] = []
     within_noise: list[str] = []
     under_powered = 0
-    for row in rows:
-        row_id = str(row.get("id", "?"))
+    supporting: list[str] = []
+    for index, row in enumerate(rows):
+        row_id = str(row.get("id") or f"row-{index}")
         ids.append(row_id)
-        n = row.get("n")
-        if n is None:
-            errors.append(f"{row_id}: {CODE_UNRESOLVED_ROW}: row prints no n")
+        count = finite_number(row.get("n"))
+        if count is None or count <= 0 or count != int(count):
+            errors.append(
+                f"{row_id}: {CODE_UNRESOLVED_ROW}: row prints no usable n ({row.get('n')!r})"
+            )
             continue
-        n = int(n)
+        observed = finite_number(row.get("margin"))
+        if observed is None:
+            # 15:92: a row with no `n` or no margin is unresolved.
+            errors.append(
+                f"{row_id}: {CODE_UNRESOLVED_ROW}: row prints no margin ({row.get('margin')!r})"
+            )
+            continue
+        n = int(count)
         if mode_status(n) == "UNDER_POWERED":
             under_powered += 1
             continue
-        observed = row.get("margin")
-        if observed is not None and float(observed) < resolvable_margin(n):
+        if not at_least(abs(observed), resolvable_margin(n)):
             within_noise.append(row_id)
+            continue
+        supporting.append(row_id)
     return result_from(
         name,
         REQUIRED_NONEMPTY,
         ids,
         errors,
-        detail={"within_noise": len(within_noise), "under_powered": under_powered},
+        detail={
+            "within_noise": len(within_noise),
+            "under_powered": under_powered,
+            "supporting": len(supporting),
+        },
     )

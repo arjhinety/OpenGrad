@@ -1,24 +1,42 @@
-"""Tests for `study_002_gate_v1` (`docs/research/study-002/11-THRESHOLDS.md`, 16 check 2/13).
+"""Tests for `study_002_gate_v1`, contract 2 (`docs/research/study-002/11-THRESHOLDS.md`, 16 check 2/13).
 
 Every check must be able to fail, and the gate must be shown failing on the three fixtures
-`16-GPU-READINESS-GATE.md:36-38` names: an empty required mode, a metric reporting `0.0` beside a
-zero `ANSWER` row, and a missing sentinel.
+`16-GPU-READINESS-GATE.md:43-44` names: an empty required mode, a metric reporting `0.0` beside a
+zero `ANSWER` row, and a missing sentinel. Contract 1 passed every bundle in the "contract 1 passed
+these" block below (`reports/ERRATA.md` §19); each is asserted here with its literal numbers.
 """
 
 from __future__ import annotations
 
+import copy
+
+import pytest
+
+from opengrad.promotion.tool_use_policy import PROMOTE, PromotionPolicyV5
 from opengrad.verification.accounting import BLOCKED_INPUT_MISSING, FAIL, PASS
-from opengrad.verification.population_validators import CODE_UNRESOLVED_ROW
+from opengrad.verification.population_validators import CODE_UNDER_POWERED, CODE_UNRESOLVED_ROW
 from opengrad.verification.study_002_gate import (
+    ADOPTED_PARAMETERS,
     CODE_ACCOUNTING,
+    CODE_INVALID_COMPARISON,
+    CODE_MISSING_METRIC,
     CODE_NONVACUOUS,
     CODE_PROVENANCE_INCOMPLETE,
     CODE_VACUOUS_METRIC,
+    CODE_WITHIN_NOISE,
+    DRAFT_V8_PARAMETERS,
+    REQUIRED_PROVENANCE,
     STUDY_002_GATE_CONTRACT,
     healthy_bundle,
     self_test,
+    self_test_passed,
     study_002_gate,
 )
+
+
+def _gate(bundle):
+    """The gate with the draft parameters, so a failure is the fixture's and not the undeclared values'."""
+    return study_002_gate(bundle, DRAFT_V8_PARAMETERS)
 
 
 def _status(report, name: str) -> str:
@@ -30,28 +48,58 @@ def _errors(report, name: str) -> list[str]:
 
 
 def test_the_gate_is_versioned() -> None:
-    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 1
+    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 2
 
 
-def test_a_healthy_bundle_passes_every_check() -> None:
-    report = study_002_gate(healthy_bundle())
+def test_a_healthy_bundle_passes_every_check_once_the_prereg_parameters_exist() -> None:
+    report = _gate(healthy_bundle())
     assert report.overall == PASS, [result.all_errors() for result in report.results]
-    assert len(report.results) == 14
+    assert len(report.results) == 17
 
 
-def test_the_self_test_shows_the_gate_failing_on_the_three_named_fixtures() -> None:
+def test_under_the_adopted_prereg_the_undeclared_parameters_block_rather_than_pass() -> None:
+    assert ADOPTED_PARAMETERS.truncation_max_ratio is None
+    assert ADOPTED_PARAMETERS.p_unans_min_n is None
+    report = study_002_gate(healthy_bundle())
+    assert report.overall == BLOCKED_INPUT_MISSING
+    assert _status(report, "safety_regression") == BLOCKED_INPUT_MISSING
+    assert _status(report, "truncation_balance") == BLOCKED_INPUT_MISSING
+    blocked = {result.name for result in report.results if result.status != PASS}
+    assert blocked == {"safety_regression", "truncation_balance"}
+
+
+def test_the_healthy_bundle_is_internally_consistent() -> None:
+    bundle = healthy_bundle()
+    modes = bundle["modes"]
+    matrix = bundle["candidate"]["confusion_matrix"]
+    assert sum(modes.values()) == bundle["census"]["discovered"] == 1677
+    for mode, n in modes.items():
+        assert sum(matrix[mode].values()) == n
+
+
+def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     cases = self_test()
-    assert cases["healthy"]["overall"] == PASS
-    assert cases["empty_required_mode"]["overall"] == FAIL
-    assert cases["vacuous_metric_beside_empty_answer_row"]["overall"] == FAIL
-    assert cases["missing_sentinel"]["overall"] == FAIL
+    assert self_test_passed(cases)
+    assert cases["healthy_with_draft_parameters"]["overall"] == PASS
+    assert cases["healthy_under_adopted_prereg"]["overall"] == BLOCKED_INPUT_MISSING
+    assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 10
+
+
+def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
+    cases = self_test()
+    cases["missing_sentinel"]["code_found"] = False
+    assert not self_test_passed(cases)
+
+
+# -- the three named fixtures -------------------------------------------------------------------
 
 
 def test_an_empty_required_mode_fails_with_the_nonvacuity_code() -> None:
     bundle = healthy_bundle()
     bundle["modes"]["ANSWER"] = 0
     bundle["candidate"]["confusion_matrix"]["ANSWER"] = {"ANSWER": 0}
-    report = study_002_gate(bundle)
+    report = _gate(bundle)
     assert _status(report, "mode_coverage") == FAIL
     assert any(CODE_NONVACUOUS in error for error in _errors(report, "mode_coverage"))
 
@@ -60,51 +108,288 @@ def test_a_vacuous_metric_beside_an_empty_answer_row_fails() -> None:
     bundle = healthy_bundle()
     bundle["candidate"]["confusion_matrix"]["ANSWER"] = {"ANSWER": 0}
     bundle["candidate"]["no_call_accuracy"] = 0.0
-    report = study_002_gate(bundle)
+    report = _gate(bundle)
     assert _status(report, "metric_denominators") == FAIL
     assert any(CODE_VACUOUS_METRIC in error for error in _errors(report, "metric_denominators"))
 
 
 def test_a_missing_sentinel_fails_with_provenance_incomplete() -> None:
     bundle = healthy_bundle()
-    bundle["sentinels_ran"] = ["S-REF"]
-    report = study_002_gate(bundle)
+    del bundle["sentinels_ran"]["S-REF"]
+    report = _gate(bundle)
     assert _status(report, "sentinels") == FAIL
     assert any(CODE_PROVENANCE_INCOMPLETE in error for error in _errors(report, "sentinels"))
 
 
-def test_a_census_that_does_not_add_up_fails() -> None:
+# -- contract 1 passed these ------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("clarification_accuracy", 0.10), ("unsupported_accuracy", 0.05)],
+)
+def test_a_floor_v5_rejects_on_fails_the_gate(field: str, value: float) -> None:
     bundle = healthy_bundle()
-    bundle["census"] = {"discovered": 1277, "checked": 100, "passed": 100, "failed": 0, "blocked": 0, "skipped": 0}
-    report = study_002_gate(bundle)
+    bundle["candidate"][field] = value
+    report = _gate(bundle)
+    assert report.overall == FAIL
+    assert _status(report, "policy_decision") == FAIL
+    assert any("REJECT" in error and field in error for error in _errors(report, "policy_decision"))
+
+
+def test_an_answer_rate_drop_beyond_the_bound_fails() -> None:
+    # 0.98 -> 0.60 is a 0.38 drop against the 0.30 bound; 0.60 itself clears the 0.60 floor.
+    bundle = healthy_bundle()
+    bundle["candidate"]["answer_rate"] = 0.60
+    report = _gate(bundle)
+    assert report.overall == FAIL
+    assert any("answer_rate_drop_vs_base" in error for error in _errors(report, "answer_mode"))
+
+
+def test_a_baseline_regression_fails() -> None:
+    bundle = healthy_bundle()
+    bundle["baseline"]["call_recall"] = 0.99
+    bundle["candidate"]["call_recall"] = 0.77
+    report = _gate(bundle)
+    assert report.overall == FAIL
+    assert any("regression.call_recall" in error for error in _errors(report, "policy_decision"))
+
+
+@pytest.mark.parametrize("answer_n", [5, 140, 199])
+def test_an_under_powered_mode_fails(answer_n: int) -> None:
+    bundle = healthy_bundle()
+    bundle["modes"]["ANSWER"] = answer_n
+    report = _gate(bundle)
+    assert _status(report, "mode_coverage") == FAIL
+    assert any(CODE_UNDER_POWERED in error for error in _errors(report, "mode_coverage"))
+
+
+def test_the_mode_floor_is_inclusive_at_200() -> None:
+    bundle = healthy_bundle()
+    bundle["modes"]["ANSWER"] = 200
+    assert _status(_gate(bundle), "mode_coverage") == PASS
+
+
+@pytest.mark.parametrize(
+    "census",
+    [
+        {"discovered": 0, "checked": 0, "passed": 0, "failed": 0, "blocked": 0, "skipped": 0},
+        {"discovered": 1677, "checked": 0, "passed": 0, "failed": 0, "blocked": 1677, "skipped": 0},
+        {"discovered": 1677, "checked": 0, "passed": 0, "failed": 0, "blocked": 0, "skipped": 1677},
+        {
+            "discovered": 1677,
+            "checked": 1677,
+            "passed": 1177,
+            "failed": 500,
+            "blocked": 0,
+            "skipped": 0,
+        },
+        {"discovered": 5, "checked": 5, "passed": 5, "failed": 0, "blocked": 0, "skipped": 0},
+        {
+            "discovered": 1277,
+            "checked": 100,
+            "passed": 100,
+            "failed": 0,
+            "blocked": 0,
+            "skipped": 0,
+        },
+        {
+            "discovered": None,
+            "checked": 1677,
+            "passed": 1677,
+            "failed": 0,
+            "blocked": 0,
+            "skipped": 0,
+        },
+    ],
+)
+def test_a_census_that_did_not_score_every_gold_item_fails(census: dict) -> None:
+    bundle = healthy_bundle()
+    bundle["census"] = census
+    report = _gate(bundle)
     assert _status(report, "census") == FAIL
     assert any(CODE_ACCOUNTING in error for error in _errors(report, "census"))
 
 
-def test_a_comparison_row_without_an_n_fails() -> None:
+def test_a_confusion_matrix_that_counts_different_items_fails_the_census() -> None:
     bundle = healthy_bundle()
-    bundle["comparisons"] = [{"id": "R1_vs_C0", "margin": 0.08, "delta": 0.12}]
-    report = study_002_gate(bundle)
-    assert _status(report, "comparison_margins") == FAIL
+    bundle["candidate"]["confusion_matrix"]["CALL"] = {
+        "CALL": 400,
+        "CLARIFY": 20,
+    }  # 420, modes say 453
+    report = _gate(bundle)
+    assert any("row CALL counts 420" in error for error in _errors(report, "census"))
+
+
+def test_the_bundle_cannot_declare_its_own_sentinel_list() -> None:
+    bundle = healthy_bundle()
+    bundle["required_sentinels"] = ["x"]  # contract 1 honoured this key
+    bundle["sentinels_ran"] = {"x": ["0-shot"]}
+    report = _gate(bundle)
+    assert _status(report, "sentinels") == FAIL
+
+
+def test_a_sentinel_that_ran_in_the_wrong_mode_fails() -> None:
+    bundle = healthy_bundle()
+    bundle["sentinels_ran"]["S-ANS-8"] = ["0-shot"]
+    report = _gate(bundle)
+    assert any("S-ANS-8" in error and "8-shot" in error for error in _errors(report, "sentinels"))
+
+
+def test_the_bundle_cannot_declare_its_own_provenance_requirement() -> None:
+    bundle = healthy_bundle()
+    bundle["provenance"] = {"required": ["a"], "present": ["a"]}
+    report = _gate(bundle)
+    assert _status(report, "provenance") == FAIL
+    assert len(_errors(report, "provenance")) == len(REQUIRED_PROVENANCE) == 11
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        {"id": "r", "n": 1277, "margin": None},
+        {"id": "r", "n": 1277, "margin": float("nan")},
+        {"id": "r", "n": 1277},
+        {"id": "r", "n": 0, "margin": 0.3},
+        {"id": "r", "n": -5, "margin": 0.3},
+        {"id": "r", "margin": 0.08},
+    ],
+)
+def test_an_unresolved_comparison_row_fails(row: dict) -> None:
+    bundle = healthy_bundle()
+    bundle["comparisons"] = [row]
+    report = _gate(bundle)
     assert any(CODE_UNRESOLVED_ROW in error for error in _errors(report, "comparison_margins"))
+
+
+@pytest.mark.parametrize(
+    "rows",
+    [
+        [{"id": "r", "n": 1277, "margin": 0.01}],  # 1pp against a 5.48pp resolvable margin
+        [{"id": "r", "n": 10, "margin": 0.5}],  # under-powered supports nothing
+    ],
+)
+def test_comparisons_that_resolve_nothing_fail_with_within_noise(rows: list) -> None:
+    bundle = healthy_bundle()
+    bundle["comparisons"] = rows
+    report = _gate(bundle)
+    assert any(CODE_WITHIN_NOISE in error for error in _errors(report, "comparison_margins"))
+
+
+def test_a_within_noise_row_beside_a_resolving_row_is_excluded_not_failed() -> None:
+    bundle = healthy_bundle()
+    bundle["comparisons"].append({"id": "noise", "n": 1277, "margin": 0.01})
+    assert _status(_gate(bundle), "comparison_margins") == PASS
+
+
+@pytest.mark.parametrize("value", [None, float("nan"), "0.99", True])
+def test_a_malformed_metric_fails_instead_of_crashing(value) -> None:
+    bundle = healthy_bundle()
+    bundle["candidate"]["parse_valid_rate"] = value
+    report = _gate(bundle)
+    assert report.overall == FAIL
+    assert any(CODE_MISSING_METRIC in error for error in _errors(report, "metric_values"))
+
+
+@pytest.mark.parametrize("metric", ["no_call_accuracy", "answer_rate", "refusal_correctness"])
+def test_a_missing_metric_fails_rather_than_taking_the_policy_default(metric: str) -> None:
+    bundle = healthy_bundle()
+    del bundle["candidate"][metric]
+    report = _gate(bundle)
+    assert report.overall == FAIL
+    assert any(metric in error for error in _errors(report, "metric_values"))
+
+
+def test_a_missing_baseline_answer_rate_fails() -> None:
+    bundle = healthy_bundle()
+    del bundle["baseline"]["answer_rate"]
+    assert _status(_gate(bundle), "metric_values") == FAIL
+
+
+def test_a_truncation_rate_outside_the_unit_interval_fails() -> None:
+    bundle = healthy_bundle()
+    bundle["truncation"]["0-shot"]["R1"] = None
+    report = _gate(bundle)
+    assert any(CODE_INVALID_COMPARISON in error for error in _errors(report, "truncation"))
+
+
+def test_a_truncation_imbalance_beyond_the_factor_fails() -> None:
+    # The MMLU-Pro precedent (08 rule 2): 21.8% against 6.3% at 2,048 tokens, a ~3.5x imbalance.
+    bundle = healthy_bundle()
+    bundle["truncation"]["5-shot"] = {"C0": 0.218, "R1": 0.063}
+    report = _gate(bundle)
+    assert _status(report, "truncation_balance") == FAIL
+    assert any(CODE_INVALID_COMPARISON in error for error in _errors(report, "truncation_balance"))
+
+
+def test_a_small_absolute_truncation_difference_is_not_an_imbalance() -> None:
+    # 0.0 against 0.01: infinite ratio, but within the 2pp absolute gap.
+    bundle = healthy_bundle()
+    bundle["truncation"]["elicit"] = {"C0": 0.0, "R1": 0.01}
+    assert _status(_gate(bundle), "truncation_balance") == PASS
+
+
+def test_a_p_unans_below_the_declared_size_fails() -> None:
+    bundle = healthy_bundle()
+    bundle["p_unans_n"] = 384
+    report = _gate(bundle)
+    assert any(CODE_UNDER_POWERED in error for error in _errors(report, "safety_regression"))
+
+
+def test_an_empty_bundle_is_never_a_pass() -> None:
+    for parameters in (ADOPTED_PARAMETERS, DRAFT_V8_PARAMETERS):
+        report = study_002_gate({}, parameters)
+        assert report.overall == FAIL
+        assert _status(report, "mode_coverage") == BLOCKED_INPUT_MISSING
+        assert _status(report, "census") == BLOCKED_INPUT_MISSING
 
 
 def test_a_missing_input_blocks_rather_than_passes() -> None:
     bundle = healthy_bundle()
     del bundle["modes"]
-    report = study_002_gate(bundle)
+    report = _gate(bundle)
     assert _status(report, "mode_coverage") == BLOCKED_INPUT_MISSING
-    assert report.overall == BLOCKED_INPUT_MISSING
+    assert report.overall != PASS
 
 
 def test_a_refusal_rate_above_the_floor_rejects_the_candidate() -> None:
     bundle = healthy_bundle()
     bundle["candidate"]["refusal_rate"] = 0.40
-    report = study_002_gate(bundle)
+    report = _gate(bundle)
     assert _status(report, "answer_mode") == FAIL
 
 
+# -- the property contract 1 lacked -----------------------------------------------------------
+
+MUTATIONS = [
+    ("candidate", "call_f1", 0.50),
+    ("candidate", "over_call_rate", 0.30),
+    ("candidate", "clarification_accuracy", 0.49),
+    ("candidate", "unsupported_accuracy", 0.29),
+    ("candidate", "no_call_accuracy", 0.39),
+    ("candidate", "parse_valid_rate", 0.98),
+    ("candidate", "answer_rate", 0.59),
+    ("candidate", "refusal_rate", 0.26),
+    ("candidate", "refusal_correctness", 0.69),
+    ("candidate", "answer_rate", 0.65),  # drop 0.33 from the 0.98 baseline
+    ("baseline", "call_recall", 0.99),  # candidate 0.77: a 0.22 regression against 0.10
+]
+
+
+@pytest.mark.parametrize(("side", "field", "value"), MUTATIONS)
+def test_whenever_v5_does_not_promote_the_gate_does_not_pass(
+    side: str, field: str, value: float
+) -> None:
+    bundle = copy.deepcopy(healthy_bundle())
+    bundle[side][field] = value
+    verdict = PromotionPolicyV5().evaluate(bundle["candidate"], bundle["baseline"])
+    report = _gate(bundle)
+    if verdict["decision"] != PROMOTE:
+        assert report.overall != PASS, (field, value, verdict["failed_dimensions"])
+    assert verdict["decision"] != PROMOTE, f"mutation {field}={value} was meant to fail v5"
+
+
 def test_every_result_keeps_its_counters_consistent() -> None:
-    report = study_002_gate(healthy_bundle())
-    for result in report.results:
-        assert result.accounting_errors() == [], result.render()
+    for bundle in (healthy_bundle(), {}):
+        for result in _gate(bundle).results:
+            assert result.accounting_errors() == [], result.render()

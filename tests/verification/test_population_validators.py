@@ -9,6 +9,7 @@ from __future__ import annotations
 from opengrad.verification.accounting import BLOCKED_INPUT_MISSING, FAIL, PASS
 from opengrad.verification.population_validators import (
     CODE_NONVACUOUS,
+    CODE_UNDER_POWERED,
     CODE_UNRESOLVED_ROW,
     CODE_VACUOUS_METRIC,
     v1_mode_coverage,
@@ -105,3 +106,49 @@ def test_every_validator_keeps_its_counters_consistent() -> None:
         v12_resolvable_margin([{"id": "R1_vs_C0", "n": 1277, "margin": 0.03}]),
     ):
         assert result.accounting_errors() == [], result.render()
+
+
+# -- contract-2 hardening (reports/ERRATA.md §19) ----------------------------------------------
+
+
+def test_v1_with_the_floor_enforced_fails_an_under_powered_mode() -> None:
+    result = v1_mode_coverage({**FOUR_MODE, "ANSWER": 140}, enforce_floor=True)
+    assert result.status == FAIL
+    assert any(CODE_UNDER_POWERED in error for error in result.all_errors())
+    assert v1_mode_coverage({**FOUR_MODE, "ANSWER": 200}, enforce_floor=True).status == PASS
+
+
+def test_v1_fails_a_count_that_is_not_a_count_instead_of_crashing() -> None:
+    for bad in (float("nan"), "400", None, 12.5):
+        assert v1_mode_coverage({**FOUR_MODE, "ANSWER": bad}).status == FAIL
+
+
+def test_v2_accepts_null_as_the_encoding_of_an_unmeasured_metric() -> None:
+    """15:40: unmeasured is `null`. Contract 1 raised TypeError on it."""
+    result = v2_metric_denominator({"no_call_accuracy": None, "confusion_matrix": THREE_MODE_MATRIX})
+    assert result.status == PASS
+
+
+def test_v2_fails_any_number_reported_for_an_empty_class() -> None:
+    result = v2_metric_denominator({"no_call_accuracy": 0.61, "confusion_matrix": THREE_MODE_MATRIX})
+    assert result.status == FAIL
+
+
+def test_v12_fails_a_row_with_no_margin_or_a_non_positive_n() -> None:
+    for row in (
+        {"id": "r", "n": 1277},
+        {"id": "r", "n": 1277, "margin": float("nan")},
+        {"id": "r", "n": 0, "margin": 0.3},
+        {"id": "r", "n": -5, "margin": 0.3},
+    ):
+        result = v12_resolvable_margin([row])
+        assert result.status == FAIL, row
+        assert any(CODE_UNRESOLVED_ROW in error for error in result.all_errors())
+
+
+def test_v12_counts_the_rows_that_support_a_claim() -> None:
+    # 8pp clears the 5.48pp resolvable margin at n=1277; 1pp does not.
+    result = v12_resolvable_margin(
+        [{"id": "a", "n": 1277, "margin": 0.08}, {"id": "b", "n": 1277, "margin": 0.01}]
+    )
+    assert (result.detail["supporting"], result.detail["within_noise"]) == (1, 1)

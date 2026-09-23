@@ -1,7 +1,7 @@
 """Tests for `tool_use_promotion_v5` (Study 002, `11-THRESHOLDS.md`).
 
-v5 = v4 plus the ANSWER-mode floors and the refusal sentinel the L1 defect showed were missing. Two
-behaviours change from v4: an unmeasurable required dimension fails (`FAIL_NONVACUOUS`) instead of
+v5 = v3 (the `PromotionPolicyV2` class, not v4) plus the ANSWER-mode floors and the refusal sentinel
+the L1 defect showed were missing (`reports/ERRATA.md` §19). Two behaviours change from v3/v4: an unmeasurable required dimension fails (`FAIL_NONVACUOUS`) instead of
 being skipped, and the verdict gains `NOT_EVALUABLE`.
 """
 

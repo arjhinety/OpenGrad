@@ -924,3 +924,112 @@ counted single exchanges only; 35 §6 corrects it.
 
 The full record is
 [`docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md`](../docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md).
+
+
+## 18. Amendment `study_002_prereg_v7` (recorded late)
+
+**Added 2026-09-24.** `study_002_prereg_v7` (2026-09-18) was recorded in
+`docs/research/study-002/03-PREREGISTRATION.md` but not here, although step 2 of the amendment procedure
+(03, "Amendments") requires both. It was also placed under "Registration of the unit of analysis" rather than
+under "Amendments"; 03 now points to it from there.
+
+**What changed under v7:** the two permissions 22 §6 and 35 §1 left to the study owner were taken under the
+owner's explicit delegation (38): balancing permission, provisionally, for UNSUPPORTED and CLARIFY on both
+layer B sources, DIRECT on glaive only, and not CALL; and C1 (the canonical-v3 build workstream) authorised
+past its classifier gate, under 38 §3's conditions.
+
+**What stays the same:** every threshold and minimum, the C1 rule, the arms, the seeds, the partition, both
+input contracts and every population. No training run is authorised; no gold is frozen.
+
+The full record is
+[`docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md`](../docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md).
+
+## 19. Study 002 gate contract 2, and corrections to Study 002 prose
+
+**Added 2026-09-24,** from an adversarial review of the repository. No arm has been scored, so no verdict
+changes.
+
+### `src/opengrad/verification/study_002_gate.py`
+
+- **As written (contract 1):** the fourteen checks of `11-THRESHOLDS.md`. **Correction:** contract 1 did not
+  implement them as written. Probed with one-field mutations of its own healthy fixture, it returned PASS for
+  candidates `tool_use_promotion_v5` returned REJECT on (clarification accuracy 0.10 against a 0.50 floor;
+  unsupported accuracy 0.05 against 0.30; answer rate 0.98 → 0.60, a 0.38 drop against 0.30; call recall
+  0.99 → 0.77 against a 0.10 regression bound), because it read seven v5 dimensions and never v5's
+  `decision`. It also passed an `ANSWER` mode of n = 5 (below the n ≥ 200 floor of 06 §C2), a census that
+  scored nothing or reported 500 failed items, a bundle that declared its own one-item sentinel and
+  provenance lists, a comparison row with no margin or n ≤ 0, and every comparison `WITHIN_NOISE`. On an
+  empty bundle it returned FAIL, not the `BLOCKED_INPUT_MISSING` that 11 and 16 stated. It never returned
+  PASS on an empty bundle.
+  **Contract 2** fails whenever v5 does not promote, enforces the floor, pins the sentinel list (08) and
+  provenance fields (15 V3, V9) in code, requires the census to score every gold item once, fails unresolved
+  rows and a comparison set that resolves nothing, and fails a missing or non-numeric metric instead of
+  crashing. Check 12's "declared factor" and the `P-UNANS` size behind check 4 are declared nowhere in the
+  preregistration, so the gate blocks on them; `docs/research/study-002/40-PREREG-V8-DRAFT.md` proposes values
+  (not adopted). **Source:** `tests/verification/test_study_002_gate.py`.
+- `src/opengrad/promotion/tool_use_policy.py`, `PromotionPolicyV5`. **As written:** "v4 plus". **Correction:**
+  it subclasses the v3 class (`PromotionPolicyV2`); v4's parent-relative floors are not part of it. v5's
+  behaviour is unchanged. Three ways v5 can promote without measuring (no confusion matrix; an absent
+  `refusal_correctness` or baseline `answer_rate`; float error at a threshold, where `0.90 − 0.60` fails
+  `≤ 0.30`) are closed in a new `tool_use_promotion_v6`, which no gate uses unless the owner adopts the v8
+  draft. **Source:** `tests/evaluation/test_tool_use_promotion_v6.py`.
+
+### `docs/research/study-002/11-THRESHOLDS.md`
+
+- §`tool_use_promotion_v5`. **As written:** "v5 is v4 **plus**", with a "v3/v4 value" column. **Correction:**
+  the column holds v3 values. v4 (`src/opengrad/promotion/m1_calibration.py`) sets `min_call_precision` 0.65,
+  `min_call_recall` 0.60, `min_macro_recall` 0.60, `min_clarification_accuracy` 0.60 and
+  `min_unsupported_accuracy` 0.40. v5's values, and the code, match the v5 column exactly.
+- Threshold register and the paragraph under it. **As written:** `max_over_call_rate` on 824 items has a
+  6.9pp resolvable margin, "below the 10pp floor", so small changes are "not adjudicable"; CLARIFY at 371
+  (10.2pp) is "adjudicable: yes". **Correction:** `resolvable_margin(824)` is **6.83pp** (6.8pp). The
+  direction is reversed: a smaller resolvable margin is finer resolution. Under the rule "no claim on a row
+  that cannot resolve 10pp", over-call on 824 items is adjudicable and CLARIFY at n = 371 (10.18pp) is not; it
+  needs n ≥ 385.
+
+### `docs/research/study-002/06-SPLIT-SPEC.md`
+
+- §C2. **As written:** the resolvable margin is "twice the Wilson half-width at p = 0.5". **Correction:** the
+  formula used, `z·sqrt(0.25/n)`, is the normal-approximation (Wald) half-width. Wilson's is slightly smaller
+  (13.73pp against 13.86pp at n = 200), so every margin stated is conservative, and no conclusion changes.
+- §C2 status note. **As written:** "≈384 for the 10pp floor". **Correction:** 385 (n = 384 gives 10.002pp).
+- Same note. **As written:** `frozen_behavioural_eval_v1.jsonl`. **Correction:** the file is
+  `results/quantization/frozen_behavioral_eval_v1.jsonl`.
+- Same note. **As written:** "≈37,000 first-exchange `DIRECT` prompts in canonical-v2-final".
+  **Correction:** 37,512 is the number of prose first answers with *no tools offered*, not of DIRECT items.
+  Frozen classifier v1 *predicts* DIRECT on 33,831 of them (33,756 distinct user messages), and on 9,455
+  first answers with tools offered: about 43,300 in total. These are classifier predictions, not gold. The
+  conclusion, that the only large DIRECT pools are the training corpora and the disjointness rule bars them,
+  is unchanged. **Source:** `docs/research/study-002/35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md` §6.
+- Same note. **As written:** the QAD corpus (140) and its calibration sibling (100) are "the largest
+  non-training `ANSWER`-gold pools" and, in the same sentence, "both training artifacts". **Correction:**
+  they are training-derived pools; the survey found no non-training pool at or above n = 200. The survey
+  also did not list `m1_v2_imatrix_calibration_v2` (ANSWER 300), which is training-derived and equally
+  barred.
+
+### `README.md`, `ROADMAP.md`
+
+- README "+0.0078 call_f1, 7 of 453 calls" (and ROADMAP step 10). **Correction:** the 7 of 453 is the
+  *recall* difference (0.0155 × 453 = 7.0 more gold calls recalled); +0.0078 is the `call_f1` difference.
+  Both are within noise, as stated.
+- ROADMAP step 16. **As written:** "A CPU audit of the supervision M0 trained on — the published
+  Canonical-v2 final corpus — finds 18,114 of 173,237 records". **Correction:** 173,237 is the released
+  corpus; M0 trained on 161,966 of them. The counts are exact for M0's training only for When2Call (4,038 of
+  6,505) and xLAM (0); Glaive's 14,066 and ToolACE's 10 are counted over the release, of which 97,112 and
+  2,259 records were trainable. **Source:** `m0_training_admission` in
+  `results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit_canonical_v2.json`.
+
+## 20. Study 001: an in-place edit after the freeze
+
+**Added 2026-09-24.** Study 001 was frozen on 2026-09-13 at tag `study-001`. Commit `c59bc16`
+(2026-09-18) edited `reports/FINAL_CAMPAIGN_AUDIT.md` §4 in place: the heading "Superseded results —
+preserved, with one gap" became "Superseded results — preserved", and M1-v1's MMLU-Pro @768 accuracy cell
+changed from "—" to **33.0%**, after the pass was recovered from the Modal volume (claim audit #41).
+`docs/research/STUDIES.md` says a number in a frozen study is corrected here, not in place. The file is not
+in `PRESERVED_STATE_v1.json`, and the commit message disclosed the edit and the recomputation, but no entry
+was made here.
+
+**The numbers, as recomputed by `scripts/score_mmlu_pro.py`:** accuracy 33.0%, answer rate 52.8%, accuracy
+given answer 62.5%, 5,978 of 12,032 truncated (49.7%) at `max_tokens` 768, matching the cost ledger's run
+seq 9. M1-v1's MMLU-Pro at the corrected 2,048 budget remains **UNMEASURED**. The tag `study-001` keeps the
+text as frozen. **Source:** the `superseded_mmlu_768/mmlu_pro_scores.json` that commit added.

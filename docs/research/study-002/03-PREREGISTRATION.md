@@ -1,5 +1,9 @@
 # 03 — Pre-registration
 
+> **Current version: `study_002_prereg_v7` (2026-09-18).** The text below is v1, the original contract;
+> amendments v2–v7 follow under "Amendments" (v7 is recorded after "Registration of the unit of analysis").
+> A proposed v8 ([40](40-PREREG-V8-DRAFT.md)) is a draft and is **not adopted**.
+
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
 committed **before the first Study 002 training run is launched and before any Study 002 evaluation
 result is read**. It exists because Study 001's central methodological error was a decision rule that
@@ -200,6 +204,11 @@ seeing data is a new study, and it goes into the next study
 - **Nature:** a defect repair (the validation unit excluded where DIRECT lives), made **after** v1's result was
   visible, which is disclosed. The new population is drawn after adoption and scored only for v2.
 - **Full record:** [36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md](36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md).
+
+### `study_002_prereg_v7` (recorded below)
+
+Recorded below, after "Registration of the unit of analysis", where it was first written; its ERRATA entry
+is `reports/ERRATA.md` §18 (added 2026-09-24).
 
 ## Registration of the unit of analysis
 

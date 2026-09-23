@@ -7,10 +7,12 @@ rejected at pre-GPU review ([16](16-GPU-READINESS-GATE.md)).
 
 ## `tool_use_promotion_v5`
 
-v5 is v4 **plus** the checks the L1 defect showed were missing. The v3/v4 field set is kept unchanged so a
-v4 verdict stays readable and comparable.
+v5 is v3 **plus** the checks the L1 defect showed were missing (corrected 2026-09-24: it subclasses the v3
+class, not v4, and the column below holds v3 values; v4's are in `m1_calibration.py`, `reports/ERRATA.md` §19).
+The v3 field set is kept unchanged so a
+v3 verdict stays readable and comparable.
 
-| Field | v3/v4 value | v5 | Basis |
+| Field | v3 value | v5 | Basis |
 |---|---|---|---|
 | `min_call_f1_retention` | 0.90 | 0.90 unchanged | `tool_use_policy.py:107`; a retention floor, not an absolute one |
 | `min_macro_recall` | 0.40 | 0.40 unchanged | `tool_use_policy.py:109`; guards a one-class policy |
@@ -86,6 +88,16 @@ existing discipline made explicit.
 > fixtures of [16](16-GPU-READINESS-GATE.md) check 13: an empty required mode, a metric reporting `0.0`
 > beside a zero `ANSWER` row, and a missing sentinel. No arm has been scored on a four-mode population,
 > so on the real repository the gate reports `BLOCKED_INPUT_MISSING` — never `PASS`.
+>
+> **Corrected 2026-09-24 (`reports/ERRATA.md` §19).** Contract 1 of the gate did not do all of the
+> above: it never read v5's decision (so checks v5 fails on — the clarification and unsupported floors,
+> `answer_rate_drop_vs_base`, `regression.*` — did not stop it), let a bundle declare its own sentinel and
+> provenance lists, accepted a census that scored nothing, passed an under-powered mode and a comparison
+> row with no margin, and implemented neither check 12's "declared factor" nor check 14's
+> `WITHIN_NOISE` exclusion. On an empty bundle it returned `FAIL`, not `BLOCKED_INPUT_MISSING`. Contract 2
+> implements the table as written. Check 12's factor and the `P-UNANS` size for check 4 are **not declared
+> anywhere in this preregistration**; the gate blocks on them until the owner adopts values
+> ([40](40-PREREG-V8-DRAFT.md) proposes them, not adopted).
 
 ## Failing closed
 
@@ -128,13 +140,18 @@ its `n` is a number without a denominator:
 | `min_no_call_accuracy` | 0.40 | `ANSWER` strata | as above | as above | yes |
 | `min_macro_recall` | 0.40 | all modes | 1,277 + strata | composite | reports per-mode components |
 | `call_f1_retention` | 0.90 | `CALL` | 453 | 9.2pp | yes |
-| `min_clarification_accuracy` | 0.50 | `CLARIFY` | 371 | 10.2pp | yes |
+| `min_clarification_accuracy` | 0.50 | `CLARIFY` | 371 | 10.2pp | **no at n = 371** (needs n ≥ 385; see below) |
 | `min_unsupported_accuracy` | 0.30 | `UNSUPPORTED` | 453 | 9.2pp | yes |
-| `max_over_call_rate` | 0.20 | non-`CALL` | 824 | 6.9pp | yes |
+| `max_over_call_rate` | 0.20 | non-`CALL` | 824 | 6.8pp | yes |
 | `min_parse_valid_rate` | 0.99 | all | 1,277+ | 5.5pp | yes |
 
 `max_over_call_rate`'s denominator is the 824 non-`CALL` gold items in the existing confirmatory partition
-(1,277 − 453), which gives a worst-case resolvable margin of 6.9pp — and that is **below** the 10pp floor
-[06](06-SPLIT-SPEC.md) sets for claims. The consequence is stated rather than hidden: an `over_call_rate`
-change smaller than 6.9pp on this population is not adjudicable, and that row is reported `WITHIN_NOISE`
-unless the partition is enlarged. This is the kind of arithmetic that Study 001's tables never showed.
+(1,277 − 453), which gives a worst-case resolvable margin of 6.8pp. An `over_call_rate` change smaller than
+6.8pp on this population is not adjudicable, and such a row is reported `WITHIN_NOISE`. This is the kind of
+arithmetic that Study 001's tables never showed.
+
+> **Corrected 2026-09-24 (`reports/ERRATA.md` §19).** This paragraph said 6.9pp, and called a margin
+> "below" the 10pp floor a deficiency. The direction is the other way: a smaller resolvable margin is finer
+> resolution, so over-call on 824 items can resolve the 10pp this study claims on. The row that cannot is
+> `CLARIFY` at n = 371 (10.2pp); it needs n ≥ 385 or its claims are `WITHIN_NOISE`
+> ([40](40-PREREG-V8-DRAFT.md) item D).
