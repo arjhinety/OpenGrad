@@ -1033,3 +1033,35 @@ was made here.
 given answer 62.5%, 5,978 of 12,032 truncated (49.7%) at `max_tokens` 768, matching the cost ledger's run
 seq 9. M1-v1's MMLU-Pro at the corrected 2,048 budget remains **UNMEASURED**. The tag `study-001` keeps the
 text as frozen. **Source:** the `superseded_mmlu_768/mmlu_pro_scores.json` that commit added.
+
+
+## 21. Preserved state: a successor manifest over committed blobs, and the confirmatory deltas
+
+**Added 2026-09-24.**
+
+### `results/benchmarks/h200/PRESERVED_STATE_v1.json`
+
+§6 recorded that v1 pinned the author's CRLF working tree and could not be verified from a clone, "until
+… a successor manifest pins committed blobs". Nothing ran `--verify` in CI, and since commit `d28beff`
+rewrote the Windows working copies of `*.jsonl` to their committed LF bytes, `--verify` failed on
+`results/quantization/findings.jsonl` on the author's machine too. No artifact changed: the committed
+blob of every file is the one v1 preserved.
+
+**The successor:** `results/benchmarks/h200/PRESERVED_STATE_v2.json` pins the committed blob of each
+tracked artifact and records, for each, which line-ending rendering reproduces its v1 digest: 14 CRLF and
+1 LF (`results/benchmarks/openweights_parity_cases_v1.json`), exactly as §6 counted. The two gitignored
+artifacts are recorded `in_clone: false`. `reports/H200_BENCHMARK_RUN.md` stays append-only: v1's
+`original_sha256` is the CRLF rendering of the first 8,909 LF bytes of the committed file, now pinned as
+that prefix. v1 is unchanged and remains the historical record.
+`python scripts/preserve_h200_state.py --verify` now checks v2 and runs in CI through
+`tests/results/test_preserved_state.py`, which also checks every tracked `.sha256` sidecar (43) against
+its committed file. `--verify-v1` keeps the old working-tree check.
+
+### `results/registry.jsonl`
+
+- **As written:** each confirmatory row's `deltas`. **Correction:** they are measured against the
+  **full-set** B0 `call_f1` 0.6191, not the confirmatory B0 0.6264, because they are copied from each run's
+  `baseline_comparison`. M1-v2's confirmatory `call_f1` delta is therefore recorded as +0.1357; against the
+  confirmatory B0 it is about +0.128. M0 final's is recorded as +0.1279 (about +0.121). The file is pinned by
+  `reports/data/m0-final-freeze.json` and is not edited. No prose quotes these deltas; the README and reports
+  quote the absolute confirmatory values, which are correct.

@@ -41,13 +41,19 @@ Related rules:
 - **Hash-pinned files** (manifests with `.sha256` sidecars, frozen reports) are corrected by a new artifact or an
   erratum, never edited in place.
 - **Line endings matter to hashes.** Hash LF-normalized text where the code says so (`lf_sha256`), and never
-  rewrite a pinned file's bytes.
+  rewrite a pinned file's bytes. A new pin hashes the **committed blob**
+  (`read_evidence_bytes` in `src/opengrad/registry/provenance.py`), never a Windows working tree.
+- **Pins are verified in CI, not asserted.** `tests/results/test_preserved_state.py` runs
+  `scripts/preserve_h200_state.py --verify` against `results/benchmarks/h200/PRESERVED_STATE_v2.json` and checks
+  every tracked `.sha256` sidecar against its committed file. A new pinned set gets the same kind of test in the
+  commit that pins it.
 
 ## Written records
 
 - **Generated views are regenerated, not edited:**
   - `docs/EXPERIMENT_STATUS.md` from `scripts/reporting/generate_experiment_status.py` (`--check` in tests);
-  - `results/registry.jsonl` from `opengrad results rebuild-registry`;
+  - `results/registry.jsonl` from `opengrad results rebuild-registry` — but the committed file is also pinned by
+    `reports/data/m0-final-freeze.json`, so a rebuild that changes its bytes needs an erratum (`reports/ERRATA.md` §21);
   - `results/final_campaign_verdict.json` from `scripts/build_final_verdict.py`.
 - **`src/opengrad/reporting/generate.py`** writes synthetic test reports only. Its output is labelled as not a
   research result, and must never be presented as one.
