@@ -1101,3 +1101,33 @@ the facts are recorded here.
   `scripts/archive_devset_model_labels.py` and `scripts/run_external_annotation.py`): repo-relative inside the
   repository, `<outside-repo>/<name>` outside it. The existing occurrences are allowlisted with exact counts,
   and the scan runs in CI.
+
+
+## 23. Licensing records: the registry, the model cards and the M1 preference pairs
+
+**Added 2026-09-24.** No released file changes; the corrections are to the registry and to the local copies of
+the model cards. The copies on Hugging Face still carry the old text until they are re-uploaded (G15), which is
+a separate, owner-approved step.
+
+- `registry/datasets.yaml`. **As written:** `redistribution: NOT_ASSESSED` for When2Call, ToolACE, BUTTON,
+  LoopTool-23k and Glaive. **Correction:** all five were assessed on 2026-09-04 in
+  `docs/publishing/source-redistribution-audit.md` as `REDISTRIBUTION_WITH_ATTRIBUTION`, and the published
+  `source-licenses.md` files say so. The registry, which is meant to be the source of truth, was never updated;
+  it now records the status and its basis. BUTTON and LoopTool were licence-checked at their pinned revisions on
+  2026-09-02; their upstreams later became unavailable (HTTP 401 / not located), which is why they are absent
+  from v2, not a change in their licences.
+- `release/huggingface/qwen35-2b-*/README.md` (five weight cards). **As written:** `license: other`,
+  `license_name: composite-per-source`, with no licence link and no statement of the base model's terms.
+  **Correction:** the weights derive from `Qwen/Qwen3.5-2B` (Apache-2.0), whose license and notices carry to a
+  derivative. Each card now links the licence at the pinned revision (`license_link`) and states the per-source
+  data terms. The GGUF card's generator (`scripts/build_gguf_card.py`) renders the same section.
+- `release/huggingface/qwen35-2b-m0-sft-corpusv1-evaluation/README.md`. **As written:** `license: apache-2.0`.
+  **Correction:** the record's predictions contain Canonical-v1 prompts, including CC-BY-4.0 sources, so the
+  card is `other` / `composite-per-source` with the per-source terms stated.
+- `data/processed/m1_calibration_preference_pairs_v1.jsonl`. **As written:** `redistribution:
+  INTERNAL_RESEARCH_ARTIFACT`, `downstream_access_requirement: private`. **Correction:** the file has been in the
+  public repository since `92ca2b9`, so it is public in fact. Its rows derive from When2Call (CC-BY-4.0) and from
+  prompts of the canonical sources, all redistributable with attribution, and 5 rows carrying credential-like
+  strings were excluded when it was built. The registry now says `PER_SOURCE` and `public_allowed`.
+- `hf/MODEL_CARD_TEMPLATE.md` gains two required fields: general-capability regressions against the base model,
+  and license and attribution. **Source:** `tests/publication/test_model_cards.py`.

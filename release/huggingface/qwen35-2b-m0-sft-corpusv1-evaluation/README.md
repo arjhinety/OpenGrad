@@ -2,7 +2,8 @@
 pretty_name: OpenGrad Qwen3.5-2B M0 SFT CorpusV1 — evaluation record
 language:
 - en
-license: apache-2.0
+license: other
+license_name: composite-per-source
 task_categories:
 - text-generation
 tags:
@@ -160,3 +161,10 @@ predictions are one model's outputs on it.
 Use it to check the claim that corpus v1 could not teach tool calling, or to compare against a
 reproduction. Do not use it to draw conclusions about `Qwen/Qwen3.5-2B` itself, and do not
 treat the five surviving checkpoints as representative of the sixth.
+
+## License and attribution
+
+The OpenGrad code that produced this record is Apache-2.0. The predictions contain prompts from the
+upstream datasets of OpenGrad ToolPolicy Canonical v1 (including CC-BY-4.0 sources such as When2Call,
+xLAM and BUTTON), which carry their own attribution terms, listed per source in that dataset card's
+`source-licenses.md`. `license: other` records that no single license covers every component.

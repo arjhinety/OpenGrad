@@ -4,6 +4,7 @@ base_model_relation: quantized
 library_name: gguf
 license: other
 license_name: composite-per-source
+license_link: https://huggingface.co/Qwen/Qwen3.5-2B/blob/15852e8c16360a2fea060d615a32b45270f8a8fc/LICENSE
 pipeline_tag: text-generation
 tags:
   - gguf
@@ -115,3 +116,15 @@ llama-cli --hf-repo arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2-GG
 - [Committed per-format results](https://github.com/arjhinety/OpenGrad/tree/study-001/results/quantization/gguf)
 - [Study 001, deployment section](https://opengrad.arjhinety.com/studies/001#quantization)
 - [Hardware benchmark page](https://experimentalmachines.org/gguf/) on Experimental Machines
+
+## License and attribution
+
+These weights are derived from [`Qwen/Qwen3.5-2B`](https://huggingface.co/Qwen/Qwen3.5-2B/tree/15852e8c16360a2fea060d615a32b45270f8a8fc)
+(revision `15852e8c`), released under the **Apache License 2.0** ([license text at that revision](https://huggingface.co/Qwen/Qwen3.5-2B/blob/15852e8c16360a2fea060d615a32b45270f8a8fc/LICENSE)).
+That license applies to this derivative: keep the license and its notices, and note that these weights
+are **modified** from the original by the post-training described above.
+
+The training data are modified derivatives of upstream datasets with their own terms (CC-BY-4.0 and
+Apache-2.0, attribution required), listed per source in the dataset card's `source-licenses.md`.
+`license: other` / `composite-per-source` records that no single license covers every component; it
+does not relicense any of them.

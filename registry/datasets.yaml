@@ -64,7 +64,8 @@ datasets:
     value: CC-BY-4.0
     verified: true
     source: https://huggingface.co/datasets/nvidia/When2Call
-  redistribution: NOT_ASSESSED
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: docs/publishing/source-redistribution-audit.md (decided 2026-09-04; registry updated 2026-09-24, reports/ERRATA.md §23)
   original_sample_count: null
   retained_sample_count: null
   preprocessing_version: null
@@ -120,7 +121,8 @@ datasets:
     value: Apache-2.0
     verified: true
     source: https://huggingface.co/datasets/Team-ACE/ToolACE
-  redistribution: NOT_ASSESSED
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: docs/publishing/source-redistribution-audit.md (decided 2026-09-04; registry updated 2026-09-24, reports/ERRATA.md §23)
   original_sample_count: null
   retained_sample_count: null
   preprocessing_version: null
@@ -164,7 +166,8 @@ datasets:
     value: CC-BY-4.0
     verified: true
     source: https://github.com/PKU-Baichuan-MLSystemLab/BUTTON
-  redistribution: NOT_ASSESSED
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: docs/publishing/source-redistribution-audit.md (decided 2026-09-04; registry updated 2026-09-24, reports/ERRATA.md §23)
   original_sample_count: 8000
   retained_sample_count: null
   preprocessing_version: null
@@ -210,7 +213,8 @@ datasets:
     value: Apache-2.0
     verified: true
     source: https://huggingface.co/datasets/zhangkangning/LoopTool-23k
-  redistribution: NOT_ASSESSED
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: docs/publishing/source-redistribution-audit.md (decided 2026-09-04; registry updated 2026-09-24, reports/ERRATA.md §23)
   original_sample_count: null
   retained_sample_count: null
   preprocessing_version: null
@@ -252,7 +256,8 @@ datasets:
     value: Apache-2.0
     verified: true
     source: https://huggingface.co/datasets/glaiveai/glaive-function-calling-v2
-  redistribution: NOT_ASSESSED
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: docs/publishing/source-redistribution-audit.md (decided 2026-09-04; registry updated 2026-09-24, reports/ERRATA.md §23)
   original_sample_count: null
   retained_sample_count: null
   preprocessing_version: null
@@ -674,9 +679,12 @@ datasets:
     verified: true
     source: reports/data/m1-calibration-preference-pairs-v1.json
     source_sha256: 228884aa7f600e0bc1b1eadb95edc83dc23afa62b1e362bc3ac2498fade1a0d2
-  redistribution: INTERNAL_RESEARCH_ARTIFACT
+  # Committed to the public repository since 92ca2b9, so it is public in fact. Its rows derive from
+  # When2Call (CC-BY-4.0) and from prompts of the canonical sources, each redistributable with
+  # attribution; 5 rows carrying credential-like strings were excluded at build (reports/ERRATA.md §23).
+  redistribution: PER_SOURCE
   upstream_access_mode: local_derived
-  downstream_access_requirement: private
+  downstream_access_requirement: public_allowed
   attribution_required: true
   citation_required: true
   citation_target: source

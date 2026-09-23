@@ -9,6 +9,11 @@
 - Hardware / software:
 - Benchmarks / versions / contamination procedure:
 - CALL/ANSWER/CLARIFY/UNSUPPORTED confusion matrix and directional routing metrics:
+- **General-capability regressions against the base model (required, even when none were found):**
+  benchmark, prompt mode, n, base and model scores, delta and interval; link the report and any
+  errata. Study 001's promoted card omitted its regression (docs/research/GUARDRAILS.md).
+- License and attribution: the base model's license at its pinned revision (`license_link`), and the
+  per-source data terms. `license: other` never implies relicensing a component.
 - Limitations / runtime / parser:
 - Intended and out-of-scope use:
 
