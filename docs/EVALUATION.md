@@ -114,3 +114,8 @@ Real scores require an accelerator and are recorded under `reports/baselines/` a
 
 The registry, tier list, counting convention, and harness status consulted when choosing a suite
 live in [benchmarks/README.md](benchmarks/README.md).
+
+Study 002 evaluates on four response modes with populations sized by their resolvable margin; its metric,
+sentinel and gate specifications are [`research/study-002/07-METRIC-SPEC.md`](research/study-002/07-METRIC-SPEC.md),
+[`08-SENTINEL-SPEC.md`](research/study-002/08-SENTINEL-SPEC.md) and
+[`11-THRESHOLDS.md`](research/study-002/11-THRESHOLDS.md). Terms: [glossary](GLOSSARY.md).

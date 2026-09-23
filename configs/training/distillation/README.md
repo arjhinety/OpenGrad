@@ -2,7 +2,7 @@
 
 **Deliberately not executed.** The trainer foundations exist (`src/opengrad/training/distillation.py`,
 with `TeacherProvider` and `RolloutProvider` seams), but no distillation run has been performed. It
-was not part of Study 001 and is in scope for [Study 002](../../../docs/research/STUDIES.md).
+was not part of Study 001 and is deferred to Study 003 ([studies](../../../docs/research/STUDIES.md)).
 
 Leaving it out of Study 001 was a decision, not an omission. The M0/M1 line ended at DPO because the diagnosis identified
 the corpus as the binding constraint, and distillation reweights or transfers behaviour a policy can

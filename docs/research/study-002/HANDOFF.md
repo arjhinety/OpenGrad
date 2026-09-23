@@ -1,5 +1,12 @@
 # Study 002 — handoff (2026-09-15)
 
+> **SUPERSEDED for current state (2026-09-24).** This brief describes the repository as of 2026-09-15 and
+> was committed on 2026-09-18; much of §2 and §20 is out of date (a classifier now exists and is frozen,
+> P-DET-COVERAGE-v1 and -v2 are drawn and labelled, canonical-v3 is built, the normalization-v3
+> fingerprint is `60d3123e…`). The current state, blockers and open decisions are in
+> [README.md — Current state](README.md#current-state). Keep this file for its history and its
+> working procedures, not for status.
+
 This file lets a new engineer or researcher continue Study 002 without the chat history that produced it.
 Every number below was checked against the repository or the local working state on 2026-09-15, and the
 file or command it comes from is named. Where the brief for this handoff and the repository disagreed, the

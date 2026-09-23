@@ -22,7 +22,7 @@ Arjhine Ty.
 [![CI](https://github.com/arjhinety/OpenGrad/actions/workflows/ci.yml/badge.svg)](https://github.com/arjhinety/OpenGrad/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-052B42?style=flat-square)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-052B42?style=flat-square)](LICENSE)
-[![Research status](https://img.shields.io/badge/research-Building%20in%20Public%20%7C%20M1--v2%20DPO%20promoted-052B42?style=flat-square)](reports/M1_DPO_EVALUATION.md)
+[![Research status](https://img.shields.io/badge/research-Study%20001%20frozen%20%7C%20Study%20002%20pre--registration-052B42?style=flat-square)](reports/M1_DPO_EVALUATION.md)
 [![Hugging Face models](https://img.shields.io/badge/Hugging%20Face-models-FFD21E?style=flat-square)](https://huggingface.co/collections/arjhinety/opengrad-models-6aa3c7ea9ae58be5adbb113e)
 [![Hugging Face datasets](https://img.shields.io/badge/Hugging%20Face-datasets-FFD21E?style=flat-square)](https://huggingface.co/collections/arjhinety/opengrad-datasets-and-evaluation-records-6aa3c7eb4514d9bc27e5d160)
 
@@ -36,7 +36,7 @@ Arjhine Ty.
 | Canonical dataset | **Canonical-v2 final** — 173,237 records, 161,966 trainable, 4 sources, fingerprint `8ced403b…` |
 | Latest completed stage | **General-capability diagnosis** across Base → M0 → M1-v2 on real IFEval, GSM8K and MMLU-Pro. It found a **general-capability regression associated with tool-policy post-training** that the tool-policy gate could not see. It appears after SFT (M0) and also after DPO applied directly to Base (M1-v1), so it is not specific to SFT |
 | Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30, promoted under the parent-relative `tool_use_promotion_v4` gate. **Improved on tool policy over Base; within noise of its M0 parent; materially worse than Base on general capability. Not an unqualified improvement** |
-| Studies | **Study 001 frozen 2026-09-13** at tag [`study-001`](https://github.com/arjhinety/OpenGrad/tree/study-001). **Study 002 in progress, no results yet:** refusal relabelling ([`ROADMAP.md`](ROADMAP.md) step 16, **BLOCKED_ON_PREFLIGHT**), M2 on-policy distillation (unexecuted scaffold) and speculative decoding. See [`docs/research/STUDIES.md`](docs/research/STUDIES.md) |
+| Studies | **Study 001 frozen 2026-09-13** at tag [`study-001`](https://github.com/arjhinety/OpenGrad/tree/study-001). **Study 002 in pre-registration, no model result yet:** it explains the refusal/direct-answer regression before trying to correct it. Blocked on an `ANSWER` held-out source and two undeclared preregistration values ([current state](docs/research/study-002/README.md#current-state)). On-policy distillation is deferred to Study 003, speculative decoding to Study 004. See [`docs/research/STUDIES.md`](docs/research/STUDIES.md) |
 | Behavioral held-out | When2Call — 3,650 examples. **Contains no ANSWER examples**, which is why the regression escaped promotion |
 | Largest current limitation | One 2B model, one lineage, no replicate. The promoted checkpoint refuses 100% of bare arithmetic questions |
 
@@ -56,6 +56,7 @@ Every experiment record, its validity, selected checkpoint, and published artifa
 | Understand the methodology | [Research program](docs/research/research-program.md) · [Methodology](docs/research/methodology.md) |
 | Add a benchmark or backend | [Adding a benchmark](docs/evaluation/ADDING_A_BENCHMARK.md) · [Adding a backend](docs/evaluation/ADDING_A_BACKEND.md) |
 | Plan or publish a Study 002 experiment | [Guardrails](docs/research/GUARDRAILS.md) — rules and checklists derived from the 100 claims Study 001 got wrong |
+| Look up a term (B0, M0, P-DET, C1, G1–G17, frozen, gold…) | [Glossary](docs/GLOSSARY.md) |
 | Challenge a result | [CONTRIBUTING.md](CONTRIBUTING.md) · [Negative-result guide](docs/contributing/negative-result.md) |
 
 **Contents:** [Current status](#current-research-status) · [Quick start](#quick-start) · [Latest results](#latest-results) · [How it works](#how-opengrad-works) · [Research program](#research-program) · [Datasets & evaluation](#datasets--evaluation) · [Limitations](#current-limitations) · [Reproducing](#reproducing-experiments) · [Repository structure](#repository-structure) · [Contributing](#contributing)
@@ -78,7 +79,7 @@ uv run opengrad-preflight    # capture the local environment and run fixture pre
 Useful inspection commands:
 
 ```bash
-uv run opengrad status                                  # authoritative repository + experiment state
+uv run opengrad status                                  # repository and run state as JSON (long; pipe to a file)
 uv run opengrad experiment list                         # experiment records and lifecycle states
 uv run opengrad results show                            # derived result index
 uv run opengrad results validate-registry               # index vs. authoritative-artifact drift
@@ -104,13 +105,13 @@ scores 0.6191 / 0.9722. The same results written as a narrative, with the charts
 | **B0** | Base `Qwen/Qwen3.5-2B` | 0.6264 / 0.9735 — from a degenerate policy that calls on 62% of no-call items | Baseline |
 | **M0** | Canonical-v2 SFT (checkpoint 1800) | 0.7470 / 0.7594 | Selected; **not promoted** under `tool_use_promotion_v3` (recall-regression check against B0) |
 | **M1** | M1-v2 DPO calibration (checkpoint 30) | **0.7548 / 0.7748** | **PROMOTED** under `tool_use_promotion_v4` (checks against the M0 parent) |
-| **M2** | On-policy distillation | — | **Not executed** in Study 001 (mock-only scaffold); in scope for Study 002 |
+| **M2** | On-policy distillation | — | **Not executed** in Study 001 (mock-only scaffold); deferred to Study 003 |
 
 **"Not promoted" → "PROMOTED" is a gate change, not a measured improvement.** M1-v2 is promoted
 under a parent-relative gate (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2
 fails the v3 gate that rejected M0 (all four DEV checkpoints `REJECT`; DEV recall 0.7257 against
 B0's 0.9715). The promotion reflects the gate change; the measured difference from M0 (+0.0078
-call_f1, 7 of 453 calls, single seed) is within noise.
+call_f1; 7 more of 453 gold calls recalled; single seed) is within noise.
 
 - Full intervention record, caveats, and published artifacts: [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md)
 - Promoted evaluation: [`reports/M1_DPO_EVALUATION.md`](reports/M1_DPO_EVALUATION.md)
@@ -236,7 +237,7 @@ Evaluation layers, and what has actually run in each:
 | Behavioral held-out | Tool-use policy (when to call, answer, clarify, refuse) | **Executed** — When2Call, 3,650 examples |
 | External capability | General regressions and transfer | **3 of 17 executed** — IFEval, GSM8K, MMLU-Pro (Tier B) on Base → M0 → M1-v2; the other 14 are frozen, not executed |
 | Agent / runtime | Realistic transfer in agent loops | Planned |
-| Systems | Latency, throughput, memory, spec decoding | Planned |
+| Systems | Latency, throughput, memory, spec decoding | **One run** — an H200 vLLM throughput and latency microsuite ([report](reports/H200_BENCHMARK_RUN.md)); memory, device and speculative decoding planned |
 
 The three executed external benchmarks ran in the H200 capability-diagnosis campaign with the
 upstream scorers (IFEval 541 prompts, GSM8K 1,319 questions in two arms, MMLU-Pro 12,032 items);

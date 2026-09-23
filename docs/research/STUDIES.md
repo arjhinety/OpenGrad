@@ -97,7 +97,7 @@ Cross-model replication (step 11) and joint capability-efficiency studies (step 
 roadmap and are not assigned to Study 002.
 ## Study 002 — what the design set contains
 
-**Design set:** [`docs/research/study-002/`](study-002/README.md) — twenty outputs, from the adversarial
+**Design set:** [`docs/research/study-002/`](study-002/README.md) — forty numbered outputs (listed in its README), from the adversarial
 audit of Study 001 to the closure report. The parts a reader is most likely to want:
 
 - **Why the regression happened and why nobody saw it.** Study 001's promotion gate asserted a floor on

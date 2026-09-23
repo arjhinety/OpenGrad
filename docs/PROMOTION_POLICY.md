@@ -106,3 +106,17 @@ Text-only runs, including every Study 002 arm, are exempt. See
 Every promotion evaluation generates:
 - `runs/<experiment-id>/promotion/verdict.json`: Machine-readable audit payload.
 - Formatted markdown tables showing observed values vs. threshold limits.
+
+## 4. Later policy versions (appended 2026-09-24)
+
+This document describes v3 and v4. Later versions are specified elsewhere; this section only points to them,
+so the line numbers the Study 002 preregistration cites above stay stable.
+
+- **`tool_use_promotion_v5`** (Study 002): v3 plus ANSWER-mode floors (`min_answer_rate` 0.60,
+  `max_refusal_rate` 0.25), the `P-UNANS` safety floor (`min_refusal_correctness` 0.70), a bound on the
+  answer-rate drop against the base (0.30), and a third verdict, `NOT_EVALUABLE`. Specified in
+  [`research/study-002/11-THRESHOLDS.md`](research/study-002/11-THRESHOLDS.md).
+- **`tool_use_promotion_v6`** (draft, not used by any gate): v5 with its fail-open paths closed; proposed
+  for Study 002 in [`research/study-002/40-PREREG-V8-DRAFT.md`](research/study-002/40-PREREG-V8-DRAFT.md).
+- **`study_002_gate_v1`** wraps v5 and fails whenever v5 does not promote (contract 2;
+  [`reports/ERRATA.md`](../reports/ERRATA.md) §19).

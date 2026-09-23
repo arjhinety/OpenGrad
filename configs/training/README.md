@@ -4,7 +4,7 @@
 |---|---|
 | [sft/](sft/) | **Implemented and executed** — the M0 runs. See [`docs/SFT_TRAINING.md`](../../docs/SFT_TRAINING.md) |
 | [preference/](preference/) | **Implemented and executed** — M1 DPO. Preference configs live in [`configs/experiments/`](../experiments/) |
-| [distillation/](distillation/) | Reserved. On-policy distillation was deliberately not attempted in Study 001, by decision rather than omission. It is in scope for [Study 002](../../docs/research/STUDIES.md) |
+| [distillation/](distillation/) | Reserved. On-policy distillation was deliberately not attempted in Study 001, by decision rather than omission. It is deferred to Study 003 ([studies](../../docs/research/STUDIES.md)) |
 | [rl/](rl/) | Reserved. A future extension boundary; nothing is implemented |
 
 **Model components.** From 2026-09-16 every trainer carries and trains all components the base checkpoint

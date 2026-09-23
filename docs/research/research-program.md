@@ -40,12 +40,12 @@ The study will cover, as the corresponding evaluations are implemented:
 The first baseline is [`Qwen/Qwen3.5-2B`](../../registry/models.yaml), recorded as `qwen3.5-2b` at an
 immutable revision in the [experiment definition](../../configs/experiments/tool_calling/qwen35_2b_baseline.yaml).
 
-## Study 002 — Relabelling, on-policy distillation and speculative decoding
+## Study 002 — The refusal/direct-answer mechanism
 
-In progress, no results yet. It takes up what Study 001 left open: refusal relabelling of the SFT
-corpus (and any other dataset correction it turns out to need), on-policy distillation (RQ4) and
-speculative decoding (RQ5), each pre-registered and reported against the frozen Study 001
-checkpoints. Scope and status: [studies](STUDIES.md).
+In pre-registration, no model result yet. It explains Study 001's refusal/direct-answer regression before
+it tries to correct it (refusal relabelling of the SFT corpus, and any other dataset correction it turns
+out to need), reported against the frozen Study 001 checkpoints. On-policy distillation (RQ4) is deferred
+to Study 003 and speculative decoding (RQ5) to Study 004. Scope and status: [studies](STUDIES.md).
 
 ## Experimental decision pipeline
 

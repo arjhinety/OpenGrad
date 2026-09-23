@@ -66,7 +66,7 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
      was promoted under `tool_use_promotion_v4`. M1-v2 is promoted under a parent-relative gate
      (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that
      rejected M0. The promotion reflects the gate change; the measured difference from M0 (+0.0078
-     call_f1, 7 of 453 calls, single seed) is within noise. The first M1 identity is preserved as
+     call_f1; 7 more of 453 gold calls recalled; single seed) is within noise. The first M1 identity is preserved as
      a 119/120-step failure. The existing M2 path is mock-only: it has no live teacher, student
      update, parent checkpoint loading, or valid prompt-state dataset. M1 already passes the
      intended measured calibration policy, so launching M2 would neither answer a distinct valid
@@ -102,12 +102,19 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 15. Joint capability-efficiency optimization — PLANNED
 
-16. Refusal-supervision ablation — **PLANNED / BLOCKED_ON_PREFLIGHT**. Design set committed as
+16. Refusal-supervision ablation — **STUDY 002: DESIGN AND PRE-REGISTRATION; no GPU time, no model result**. Design set committed as
     **Study 002** (pre-registration only; no GPU time spent, no results):
     [`docs/research/study-002/`](docs/research/study-002/README.md). The pre-flight gate below is
     restated there as a fourteen-check blocking gate, with the detector-precision floor, the
     answerability-triage agreement requirement and the non-vacuity self-test all made explicit
     ([`16-GPU-READINESS-GATE.md`](docs/research/study-002/16-GPU-READINESS-GATE.md)).
+
+    > **Status (2026-09-24).** The current state, what it is blocked on and the decisions it needs are
+    > kept in one place: [Study 002 — Current state](docs/research/study-002/README.md#current-state).
+    > In short: the refusal detector became a frozen, once-tested classifier (v2); canonical-v3 is built
+    > but is no arm's corpus; the gate is executable; and the study is blocked on an `ANSWER` held-out
+    > source and two undeclared preregistration values. The six-item pre-flight below is the plan as it
+    > stood on 2026-09-13, kept for the record.
 
     Diagnosis (executed, see [general-capability regression](reports/GENERAL_CAPABILITY_REGRESSION.md)):
     the post-SFT checkpoints refuse **100% of bare GSM8K questions** while solving 55.5% of the
@@ -117,10 +124,13 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
     associated with tool-policy post-training on When2Call-derived data; causation is not
     established (one lineage, one seed, no replicate).
 
-    A CPU audit of the supervision M0 trained on — the published Canonical-v2 final corpus — finds
+    A CPU audit of the published Canonical-v2 final corpus (173,237 records, of which M0 trained on
+    161,966) finds
     **18,114 of 173,237 records (10.5%) whose single-exchange supervised target is a refusal and
     whose decision label is `ANSWER`**: When2Call 4,038 of 6,505 (62.1%), Glaive 14,066 of 98,339
-    (14.3%), ToolACE 10, xLAM 0, and **zero** labelled `CANNOT_ANSWER`. Evidence:
+    (14.3%), ToolACE 10, xLAM 0, and **zero** labelled `CANNOT_ANSWER`. The counts are exact for M0's
+    training for When2Call and xLAM; Glaive's and ToolACE's are over the release
+    ([errata §19](reports/ERRATA.md)). Evidence:
     `results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit_canonical_v2.json`. The
     original audit
     `results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit.json` (21,749 of 217,903,
@@ -137,7 +147,7 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
     under consideration is *relabelling* refusal-targeted records away from `ANSWER`, not removing
     refusals from the corpus.
 
-    **Pre-flight gate — every item must pass before any GPU time is spent:**
+    **Pre-flight gate as planned on 2026-09-13 (superseded by Study 002's gate; kept for the record):**
 
     1. **Refusal-detector precision.** The 18,114 count comes from `HEURISTIC_REGEX_v1`. Hand-label
        a random sample (n >= 200) of flagged records and measure precision and recall. A detector
@@ -196,7 +206,9 @@ B0 baseline                                  -> EXECUTED (REAL_RESULT)
 > (`reports/OPENWEIGHTS_TRANSFER_EVALUATION.md`). The previous wording is in git history.
 
 > **Study boundary (2026-09-13).** Everything executed above is Study 001, frozen at tag
-> `study-001`. The refusal-supervision ablation (step 16), on-policy distillation (the unexecuted
-> branch of step 10) and speculative decoding (step 14) are Study 002, which has no results yet.
+> `study-001`. The refusal-supervision ablation (step 16) is Study 002, which has no model result
+> yet. On-policy distillation (the unexecuted branch of step 10) is deferred to Study 003 and
+> speculative decoding (step 14) to Study 004 (corrected 2026-09-24: this note said all three were
+> Study 002, contradicting steps 10 and 14).
 > Cross-model replication (step 11) and joint capability-efficiency optimization (step 15) are not
 > assigned to a study. See [`docs/research/STUDIES.md`](docs/research/STUDIES.md).
