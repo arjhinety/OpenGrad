@@ -26,7 +26,9 @@ number must trace to an artifact. Correctness here means *provenance and gates h
 
 ## Repository map
 
-`docs/architecture/repository.md` is the authoritative layout. In short:
+`docs/architecture/repository.md` is the authoritative layout, and
+`tests/results/test_generated_indexes.py` fails when a tracked top-level directory is missing from it. The generated indexes `reports/README.md`, `scripts/README.md` and `docs/README.md` come from
+`scripts/reporting/generate_indexes.py` (run it after adding a file; `--check` in tests). In short:
 - `src/opengrad/` holds all library code. `src/opengrad/cli.py` is `opengrad`, and `src/opengrad/agent_cli.py`
   holds the train/readiness boundary that integrations share.
 - `runs/` is authoritative experiment state (written only by `ExperimentStore`). `results/` is a derived index.

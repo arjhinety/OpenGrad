@@ -1,3 +1,6 @@
+# PLANNED before Study 001 and never run; kept as a record of the intended mixture ablation.
+# Here m0/m1/m2 name three data MIXTURES, not the training stages M0 (SFT), M1 (DPO) and M2
+# (distillation) used everywhere else (docs/GLOSSARY.md). No code reads this file.
 experiment_family: tool_use_policy_ablation_v1
 status: PLANNED
 research_question: Does behavioral and residual-driven dataset composition improve reliable tool-use policy over generic source mixing?

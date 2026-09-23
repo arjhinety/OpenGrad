@@ -68,6 +68,13 @@ same commit.
   positive one.
 - An operational mistake that changes what can be claimed gets an entry in `docs/INCIDENT_LOG.md`. Entries are
   never edited to look better; a later entry supersedes an earlier one.
+- **Amendments are recorded twice**, in `03-PREREGISTRATION.md` and in `reports/ERRATA.md`, in the same commit;
+  `study_002_prereg_v7` was recorded only once and needed a late entry (ERRATA §18). A draft amendment
+  (`40-PREREG-V8-DRAFT.md`) is recorded in neither until the owner adopts it.
+- **A frozen study's files are not edited in place, even to add a recovered number** (ERRATA §20); the number
+  goes into ERRATA.
+- **Where a new study's evidence goes:** a `reports/study-<number>/` directory, kebab-case names with the version last. Existing
+  Study 002 evidence stays where it is (its paths are pinned); the generated `reports/README.md` records its study.
 - Freezing a study requires the claim audit (`reports/audits/study-001-claim-audit/README.md` is the precedent)
   and matching git tags, as `docs/research/STUDIES.md` describes.
 

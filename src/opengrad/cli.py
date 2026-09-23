@@ -45,18 +45,29 @@ def preflight(root: Path) -> int:
     return 0 if all(ok for _, ok in checks) else 1
 
 
-def data_audit_cli() -> int:
-    parser = argparse.ArgumentParser(prog="opengrad-data-audit")
+def _data_audit_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--records", required=True, help="JSON array or JSONL canonical records")
     parser.add_argument("--config", help="mixture config retained for audit provenance")
     parser.add_argument("--json", action="store_true", help="also emit machine-readable JSON")
-    args = parser.parse_args()
+
+
+def _data_audit(args: argparse.Namespace) -> int:
+    """Shared by `opengrad data-audit` and the `opengrad-data-audit` alias."""
     report = coverage_report(load_records(Path(args.records)))
     print(render_human(report))
     if args.json:
         print("\nJSON_REPORT")
         print(json.dumps(report, indent=2, sort_keys=True))
     return 0
+
+
+def data_audit_cli() -> int:
+    """`opengrad-data-audit`: an alias of `opengrad data-audit`."""
+    parser = argparse.ArgumentParser(
+        prog="opengrad-data-audit", description="Alias of `opengrad data-audit`."
+    )
+    _data_audit_arguments(parser)
+    return _data_audit(parser.parse_args())
 
 
 def _evaluation_config_status(config_path: Path) -> str | None:
@@ -106,6 +117,8 @@ def main() -> int:
     pre_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
     sub.add_parser("benchmark", help="reproducible post-training benchmark system")
+    # Dispatched before argparse (above); registered here so it is listed in --help.
+    sub.add_parser("results", help="derived result index: show, validate-registry, rebuild-registry")
 
     # validate-data
     val_data = sub.add_parser(
@@ -265,12 +278,8 @@ def main() -> int:
     ro_stat.add_argument("--json", action="store_true", help="emit JSON output")
 
     # Legacy CLI tools
-    data_audit = sub.add_parser("data-audit")
-    data_audit.add_argument(
-        "--records", required=True, help="JSON array or JSONL canonical records"
-    )
-    data_audit.add_argument("--config", help="mixture config retained for audit provenance")
-    data_audit.add_argument("--json", action="store_true", help="also emit machine-readable JSON")
+    data_audit = sub.add_parser("data-audit", help="behaviour-coverage report over canonical records")
+    _data_audit_arguments(data_audit)
     corpus_audit = sub.add_parser(
         "audit-corpus", help="strict semantic audit of canonical training records"
     )
@@ -453,12 +462,7 @@ def main() -> int:
 
     # Legacy CLI dispatch
     if args.command == "data-audit":
-        report = coverage_report(load_records(Path(args.records)))
-        print(render_human(report))
-        if args.json:
-            print("\nJSON_REPORT")
-            print(json.dumps(report, indent=2, sort_keys=True))
-        return 0
+        return _data_audit(args)
 
     if args.command == "audit-corpus":
         records: list[ToolConversation] = []
@@ -580,4 +584,11 @@ def main() -> int:
 
 
 def preflight_cli() -> int:
+    """`opengrad-preflight`: the repository check. `opengrad preflight <config>` also checks a config."""
+    parser = argparse.ArgumentParser(
+        prog="opengrad-preflight",
+        description="Repository pre-experiment readiness check (registries, environment capture). "
+        "For a config-specific check use `opengrad preflight <config> [--json]`.",
+    )
+    parser.parse_args()
     return preflight(Path.cwd())

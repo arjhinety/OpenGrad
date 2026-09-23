@@ -122,20 +122,39 @@ and the artifacts rather than letting the two diverge silently. See
 
 ## Repository layout
 
+Every tracked top-level directory, with one role each. `tests/results/test_generated_indexes.py` fails when a
+tracked top-level directory is missing from this table, so the map cannot fall behind the tree.
+
 | Path | Role |
 |---|---|
-| `registry/` | Dataset, benchmark, model, runtime, hardware, provenance, and experiment contracts |
-| `src/opengrad/` | Canonical data, adapters and renderers, parsing, contamination tools, evaluation schemas, lineage, stage gates, reporting utilities |
-| `configs/` | Data, evaluation, model, training, inference, and planned experiment configurations |
-| `runs/` | Authoritative experiment state (`runs/<id>/experiment.json`, `eval/`, ledgers) |
-| `results/` | Derived, rebuildable result index (`results/registry.jsonl`) |
-| `reports/` | Written experiment analyses, baselines, releases, and incident records |
-| `experiments/` | Evidence namespace for experiment definitions and closures |
-| `docs/` | Methodology, architecture, data, benchmark, inference, reproducibility, contribution, and publication protocols |
-| `integrations/` | Harness-facing integrations over the `opengrad … --json` boundary (`opengrad-mcp/` stdio server) |
-| `release/`, `hf/` | Tracked Hugging Face release definitions and card/report templates |
-| `scripts/` | Execution, evaluation, freezing, and reporting tooling |
-| `tests/` | CPU-safe fixture and contract tests |
+| `src/` | The `opengrad` package: canonical data and adapters, rendering and parsing, training, evaluation, benchmarks, contamination, promotion gates, verification, registry and reporting. All library code lives here. |
+| `tests/` | CPU-safe tests; the tree mirrors `src/opengrad/`. |
+| `scripts/` | Campaign, audit, freeze and reporting tooling that is run by hand or by CI. Indexed in [`scripts/README.md`](../../scripts/README.md) (generated). Reusable logic belongs in `src/`. |
+| `configs/` | Versioned definitions: experiments, data, releases, evaluation, benchmarks, annotation tasks, training, inference. Directories holding only a README are reserved names, not implementations. |
+| `registry/` | Dataset, model, benchmark, runtime and hardware registries and their JSON schemas; validated by `opengrad-validate`. |
+| `runs/` | **Authoritative** experiment state (`runs/<id>/experiment.json`, `eval/`, ledgers), written only by `ExperimentStore`. |
+| `results/` | The derived experiment index (`results/registry.jsonl`) **plus** benchmark and quantization campaign results, which have no `runs/` identity. Under `results/benchmarks/` and `results/quantization/` the per-benchmark scores and ledgers are authoritative; see [`results/README.md`](../../results/README.md). |
+| `reports/` | Written analyses, audits and closures, and the evidence behind Study 002 (populations, annotations, audit trails, provenance). Indexed in [`reports/README.md`](../../reports/README.md) (generated), with a study column. `reports/ERRATA.md` corrects frozen files. |
+| `docs/` | Living specifications and methodology; the studies under `docs/research/`. Indexed in [`docs/README.md`](../README.md) (generated). Terms: [`docs/GLOSSARY.md`](../GLOSSARY.md). |
+| `manifests/` | Pinned input manifests for quantization (the PTQ closure and calibration sets). |
+| `data/` | Local data, git-ignored except two small preference-pair files under `data/processed/` that are tracked on purpose (`registry/datasets.yaml`). |
+| `release/` | Generated Hugging Face, GGUF and ExecuTorch release bundles and model cards, as published. |
+| `hf/` | Card and report templates for Hugging Face releases. |
+| `.release/` | Local release build output, git-ignored except one release manifest a freeze pins. |
+| `integrations/` | Harness-facing integrations over the `opengrad … --json` boundary: `opengrad-mcp/` (stdio MCP server), `annotate-ui/` (the annotation web UI), and ExecuTorch/Hugging Face/W&B/OpenPapers adapters. |
+| `plugins/` | The `opengrad` Claude Code plugin: the development skills, kept current by `tests/skills/`. |
+| `third_party/` | Vendored code, byte-exact and hash-pinned (the IFEval checkers). |
+| `experiments/` | A pointer only: experiment records live in `runs/` (see its README). |
+| `assets/` | Images for the README. |
+| `.github/` | CI workflow, issue and PR templates. |
+| `.claude/`, `.claude-plugin/` | Project settings that register the plugin marketplace, and the marketplace manifest. |
+
+**Where a study's material lives.** Study 001's written record is the flat `reports/*.md` files plus
+`docs/EXPERIMENT_RESULTS.md`, frozen at tag `study-001`. Study 002's text is `docs/research/study-002/`; its
+evidence is under `reports/pdet*/`, `reports/prose-classifier/`, `reports/normalization-v3/` and
+`reports/canonical-v3/`. Frozen evidence is not moved into per-study folders, because its paths are pinned;
+the generated `reports/README.md` records the study of every file instead. **New studies** write evidence to
+`reports/study-00N/` and name files in kebab-case with the version last (`population-v2.jsonl`).
 
 Training and inference have been executed on an A100. Large data and checkpoints remain outside Git
 and must be referenced by immutable revisions and hashes.

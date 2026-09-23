@@ -304,17 +304,21 @@ the [results namespace](results/README.md).
 ## Repository Structure
 
 ```text
-registry/       dataset, benchmark, model, runtime, and experiment contracts
-src/opengrad/   canonical data, adapters/renderers, evaluation, gates, reporting
-configs/        versioned experiment, data, evaluation, and inference definitions
+src/opengrad/   the package: data, training, evaluation, gates, verification, registry, reporting
+tests/          CPU-safe tests mirroring src/opengrad/
+scripts/        campaign, audit, freeze and reporting tooling (indexed: scripts/README.md)
+configs/        versioned experiment, data, release, evaluation and annotation definitions
+registry/       dataset, benchmark, model, runtime and hardware registries and schemas
 runs/           authoritative experiment state (experiment.json, eval/, ledgers)
-results/        derived, rebuildable result index
-reports/        experiment analyses, baselines, releases, incident records
-docs/           methodology and detailed technical documentation
-integrations/   harness-facing integration (opengrad-mcp stdio server)
+results/        derived experiment index, plus benchmark and quantization campaign results
+reports/        analyses and study evidence, with a study column (indexed: reports/README.md)
+docs/           specifications, methodology and the studies (indexed: docs/README.md)
+release/, hf/   published release bundles and cards; card templates
+integrations/   MCP server, annotation UI and other harness adapters
+plugins/        the opengrad Claude Code development skills
 ```
 
-Full layout and boundaries: [repository architecture](docs/architecture/repository.md).
+Every tracked top-level directory, with its role and boundaries: [repository layout](docs/architecture/repository.md#repository-layout).
 
 ## Contributing
 
