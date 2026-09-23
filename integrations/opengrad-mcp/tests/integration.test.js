@@ -1,4 +1,5 @@
 import test from "node:test";
+import path from "node:path";
 import assert from "node:assert/strict";
 import { OpenGradService, ensureInside, stableError, redactText } from "../src/core.js";
 import { classifyOpenGradOperation, evaluateHighImpactGate, evaluateStaticGuard, isProtectedEvaluationPath, MONOTONIC_INVARIANTS } from "../src/guardian.js";
@@ -11,7 +12,8 @@ const root = "/workspace/opengrad";
 const liveRoot = process.cwd();
 
 test("path arguments stay inside the OpenGrad root", () => {
-  assert.equal(ensureInside(root, "configs/a.yaml"), "/workspace/opengrad/configs/a.yaml");
+  // path.resolve keeps the expectation right on Windows, where the resolved root gains a drive letter.
+  assert.equal(ensureInside(root, "configs/a.yaml"), path.resolve(root, "configs/a.yaml"));
   assert.throws(() => ensureInside(root, "../secrets"), /inside the OpenGrad repository/);
   assert.throws(() => ensureInside(root, "/tmp/other"), /inside the OpenGrad repository/);
 });
@@ -21,7 +23,7 @@ test("command bridge uses an argv array and parses JSON", async () => {
   const observed = [];
   service.command = async (args) => { observed.push(args); return { ok: true, value: { status: "PASS" } }; };
   await service.readiness("configs/x.yaml");
-  assert.deepEqual(observed[0], ["readiness", `${liveRoot}/configs/x.yaml`, "--json"]);
+  assert.deepEqual(observed[0], ["readiness", path.resolve(liveRoot, "configs/x.yaml"), "--json"]);
 });
 
 test("command bridge preserves stable JSON errors and stderr", async () => {

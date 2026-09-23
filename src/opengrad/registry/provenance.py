@@ -233,6 +233,28 @@ def read_evidence_bytes(root: Path, relative: str) -> tuple[bytes | None, str | 
 # ── Claim checks ─────────────────────────────────────────────────────────────
 
 
+_ABSOLUTE_PATH_RE = re.compile(r"^(?:[A-Za-z]:[\\/]|[\\/])")
+
+
+def portable_path(value: str, root: Path) -> str:
+    """A path as it may be written into a committed record.
+
+    Committed audit trails once recorded the author's absolute home-directory paths (the Windows
+    user folder and the ``AppData`` tool paths under it), which publish a local account name and mean nothing on another
+    machine (`reports/ERRATA.md` §22). A path inside ``root`` becomes repo-relative POSIX; any
+    other absolute path keeps only its final component, as ``<outside-repo>/<name>``. A value that
+    is not an absolute path (a flag, a model id, a relative path) is returned unchanged.
+    """
+    text = str(value)
+    if not _ABSOLUTE_PATH_RE.match(text):
+        return text
+    posix = text.replace("\\", "/")
+    root_posix = root.resolve().as_posix().rstrip("/")
+    if posix.lower().startswith(root_posix.lower() + "/"):
+        return posix[len(root_posix) + 1 :]
+    return f"<outside-repo>/{posix.rstrip('/').rsplit('/', 1)[-1]}"
+
+
 def _check_local_anchor(
     record_id: str, claim: str, source: str, digest: Any, root: Path
 ) -> ClaimAudit:

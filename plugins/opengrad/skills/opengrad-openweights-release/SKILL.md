@@ -24,8 +24,12 @@ record is committed and the publication gate passes.
    - Exit 0 is PASS, 1 is FAIL (a provenance defect), and 2 is BLOCKED (a check could not run).
    - The census must show the required populations were examined. Implementation:
      `src/opengrad/publication/verify.py`.
-6. **Hygiene:** `python scripts/repo/check_publication_hygiene.py` scans tracked text for private paths and
-   assistant/prompt scaffolding language. Fix the findings; do not suppress them.
+6. **Hygiene:** `python scripts/repo/check_publication_hygiene.py` scans tracked text, data files (`.jsonl`)
+   and tarball members for credentials (`ghp_`, `hf_`, `AKIA`, private keys), home-directory paths and
+   assistant/prompt scaffolding language; CI runs it. Fix a finding. Only a finding that cannot be fixed
+   (it sits in hash-pinned evidence, or is upstream content) goes into
+   `scripts/repo/publication_hygiene_allowlist.yaml`, with an exact count, a reason and an ERRATA reference.
+   Records that name files use `portable_path` (`src/opengrad/registry/provenance.py`), never an absolute path.
 7. **Redistribution:** source terms are audited in `docs/publishing/source-redistribution-audit.md`. A source
    that may not be redistributed is not uploaded.
 8. **Frozen studies:** a study's Hugging Face repositories are tagged at freeze, and later work goes to *new*

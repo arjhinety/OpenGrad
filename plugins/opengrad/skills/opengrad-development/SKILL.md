@@ -32,6 +32,7 @@ number must trace to an artifact. Correctness here means *provenance and gates h
 - `runs/` is authoritative experiment state (written only by `ExperimentStore`). `results/` is a derived index.
 - `configs/`, `registry/`, `reports/`, `docs/`, `scripts/` (one-off and campaign tooling) and `tests/` (CPU-safe).
 - Large data, checkpoints and caches are git-ignored (`data/`, `.cache/`) and referenced by hash or revision.
+  Two small files under `data/processed/` are tracked on purpose (the M1 preference pairs, `registry/datasets.yaml`).
 
 ## Environment
 
@@ -54,13 +55,21 @@ number must trace to an artifact. Correctness here means *provenance and gates h
 
 ## Verify a change the way CI does
 
-CI (`.github/workflows/ci.yml`) runs three commands. Run all three before committing:
+CI (`.github/workflows/ci.yml`) has two jobs. The Python job runs these; run them all before committing:
 
 ```bash
+uv sync --locked --extra dev           # CI fails on a stale uv.lock
 .venv/Scripts/python.exe -m ruff check .
 .venv/Scripts/python.exe -m pytest -p no:cacheprovider -q
 .venv/Scripts/opengrad-validate.exe
+.venv/Scripts/python.exe scripts/preserve_h200_state.py --verify      # frozen H200 pins, on committed blobs
+.venv/Scripts/python.exe scripts/repo/check_publication_hygiene.py    # secrets and local paths
 ```
+
+The `mcp` job runs `npm run check` and `npm test` in `integrations/opengrad-mcp`. Actions are pinned to
+commit SHAs and the workflow has `contents: read` only; bump a pin by resolving the tag
+(`git ls-remote https://github.com/<owner>/<action> refs/tags/<tag>`), never by writing a tag name back.
+Python is 3.11 (`.python-version`); the pre-commit ruff `rev` equals ruff in `uv.lock`.
 
 - `pytest` deselects `network` tests by default (they reach external hosts). Run them explicitly with
   `pytest -m network` when a change touches publication resolution.
@@ -78,7 +87,6 @@ CI (`.github/workflows/ci.yml`) runs three commands. Run all three before commit
 - Commit only when the user asks, or when a task the user started naturally ends in a commit. Push only when
   asked.
 - Never commit:
-  - the Study 002 handoff file (docs/research/study-002/HANDOFF.md), which the user keeps untracked;
   - credentials;
   - transcripts containing personal e-mail;
   - bulk data or checkpoints.

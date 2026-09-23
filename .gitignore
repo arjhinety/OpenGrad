@@ -57,7 +57,9 @@ runs/**/predictions.jsonl
 runs/**/training_state.pt
 runs/**/model.safetensors
 runs/**/*.tmp
-artifacts/
+# Local bulk outputs: the top-level scratch dir and the ~1 GB render/audit index under reports/.
+/artifacts/
+reports/artifacts/
 # Assembled Hugging Face dataset releases. The parquet shards are hundreds of MB and are published
 # on the Hub, so they stay out of Git. A release manifest that a result freeze pins as evidence is
 # committed, byte-identical to the published copy, so the freeze verifies from a fresh clone.
@@ -81,18 +83,8 @@ android-studio/
 /.annotation/
 # Verbatim subagent transcripts of the P-DET model labels: they carry the session's injected context (an
 # e-mail address, local paths), so only their hashes are tracked (reports/pdet/provenance/model-a/).
-reports/pdet/provenance/*/local/
-reports/prose-classifier/dev/provenance/*/local/
-reports/prose-classifier/devcheck/provenance/*/local/
-reports/prose-classifier/devcheck-v2/provenance/*/local/
-reports/prose-classifier/dev-v2/provenance/*/local/
-reports/prose-classifier/v2-devcheck-1/provenance/*/local/
-reports/prose-classifier/v2-devcheck-2/provenance/*/local/
-reports/prose-classifier/v2-devcheck-3/provenance/*/local/
-reports/prose-classifier/v2-devcheck-4/provenance/*/local/
-reports/prose-classifier/v2-devcheck-5/provenance/*/local/
-reports/pdet-coverage/provenance/*/local/
-reports/pdet-coverage-v2/provenance/*/local/
+# One rule for every annotation set, present and future (was one line per set).
+reports/**/provenance/*/local/
 integrations/annotate-ui/.next/
 integrations/annotate-ui/out/
 integrations/annotate-ui/next-env.d.ts

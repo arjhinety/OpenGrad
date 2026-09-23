@@ -46,6 +46,8 @@ from archive_pdet_model_batches import (
     write_new,
 )
 
+from opengrad.registry.provenance import portable_path
+
 ROOT = Path(__file__).resolve().parents[1]
 SUBAGENTS = Path.home() / ".claude/projects/C--Users-arro-DOwnloads-OpenGrad/a4718da9-447f-4538-88d4-459232648e01/subagents"
 SCHEMA = "opengrad-model-label-audit-trail-v1"
@@ -274,7 +276,14 @@ def audit_part(
     match = BATCH_LINE.fullmatch(line.strip())
     models = sorted({e["message"]["model"] for e in events if e.get("type") == "assistant" and e["message"].get("model")})
     calls = [
-        {"name": block["name"], **{k: block["input"].get(k) for k in ("file_path", "offset", "limit")}}
+        {
+            "name": block["name"],
+            **{k: block["input"].get(k) for k in ("offset", "limit")},
+            # repo-relative, never the author's absolute path (reports/ERRATA.md §22)
+            "file_path": portable_path(str(block["input"].get("file_path")), ROOT)
+            if block["input"].get("file_path") is not None
+            else None,
+        }
         for e in events
         if e.get("type") == "assistant"
         for block in e["message"]["content"]

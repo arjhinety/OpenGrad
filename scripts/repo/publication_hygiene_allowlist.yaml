@@ -1,0 +1,102 @@
+# Findings of scripts/repo/check_publication_hygiene.py that a reviewer has accepted.
+#
+# Each entry names a path (fnmatch; a tarball member is "<archive>!<member>"), a category, the EXACT
+# number of findings it covers, and why. A different count fails, and so does an entry that matches
+# nothing: the allowlist cannot quietly grow to cover a new finding. Add an entry only with a reason a
+# reader can check, and a reports/ERRATA.md reference when the finding sits in pinned evidence.
+
+# -- a live-format credential that came with upstream data (reports/ERRATA.md §22) ------------------
+
+- path: reports/pdet/pdet-v1.population.jsonl
+  category: api_secret
+  count: 1
+  reason: >-
+    A GitHub token string in the upstream NVIDIA When2Call row at line 271 (tools[0] parameter default).
+    Not an OpenGrad credential; reported upstream. The population is frozen and hash-pinned in ~15
+    places, so its bytes are kept.
+  reference: reports/ERRATA.md §22
+- path: reports/pdet/provenance/model-a/pdet-v1.model-a.audit-trail.tar.gz!model-a/batch-06.*
+  category: api_secret
+  count: 2
+  reason: The same upstream row, as shown to the model annotator in batch 06 (.json and .md). Pinned tarball.
+  reference: reports/ERRATA.md §22
+
+# -- the author's local paths inside hash-pinned audit trails (reports/ERRATA.md §22) --------------
+
+- path: reports/prose-classifier/*/provenance/*/prose-classifier-*.audit-trail.manifest.json
+  category: private_path
+  count: 149
+  reason: >-
+    Nine pinned dev-set audit-trail manifests record the Read tool's absolute file_path. The writer
+    (scripts/archive_devset_model_labels.py) now records repo-relative paths; these are kept byte-exact.
+  reference: reports/ERRATA.md §22
+- path: reports/pdet*/provenance/*/*.audit-trail.tar.gz!*
+  category: private_path
+  count: 251
+  reason: >-
+    Pinned external-model audit trails record each CLI run's argv, whose executable and temp files sat
+    under the author's user folder. scripts/run_external_annotation.py now records portable paths.
+  reference: reports/ERRATA.md §22
+- path: reports/prose-classifier/v2-devcheck-1/provenance/*/*.audit-trail.tar.gz!*
+  category: private_path
+  count: 4
+  reason: The same argv recording, in the pinned v2-devcheck-1 tarball.
+  reference: reports/ERRATA.md §22
+
+# -- upstream dataset content: example paths inside tool-use prompts, not local paths -------------
+
+- path: reports/baselines/qwen35_2b_baseline/predictions.jsonl
+  category: private_path
+  count: 4
+  reason: Example Windows paths ("C:\Users\Name\Documents\...") in upstream prompts and model outputs.
+- path: reports/pdet-coverage-v2/pdet-coverage-v2.population.jsonl
+  category: private_path
+  count: 4
+  reason: Example macOS paths ("/Users/MyUser/Media/...") in an upstream prompt.
+- path: reports/pdet/pdet-v1.population.jsonl
+  category: private_path
+  count: 1
+  reason: An example home-directory path in an upstream prompt.
+- path: reports/prose-classifier/dev-v2/prose-classifier-v2-devcheck-1.population.jsonl
+  category: private_path
+  count: 2
+  reason: Example path "/home/user/documents" in an upstream prompt.
+- path: manifests/quantization/m1_v2_imatrix_calibration_v2.txt
+  category: placeholder
+  count: 20
+  reason: Upstream tool-use calibration text about lorem-ipsum generator APIs; content, not a placeholder.
+- path: registry/tool_behaviors.yaml
+  category: assistant_reference
+  count: 2
+  reason: '"conversation context" is the name of a tool behaviour being defined.'
+- path: scripts/score_ifeval.py
+  category: prompt_reference
+  count: 1
+  reason: '"original prompt" is the IFEval benchmark input some checkers need.'
+
+# -- code that legitimately names POSIX paths ---------------------------------------------------
+
+- path: integrations/opengrad-mcp/tests/integration.test.js
+  category: private_path
+  count: 2
+  reason: Synthetic roots ("/workspace/opengrad", "/tmp/other") that the path-confinement tests use.
+- path: tests/registry/test_provenance_portable_path.py
+  category: private_path
+  count: 2
+  reason: Made-up absolute paths ("someone") that portable_path is tested on.
+- path: tests/evaluation/test_subprocess_pipe_invariants.py
+  category: private_path
+  count: 1
+  reason: A test fixture writing to /tmp inside a subprocess.
+- path: scripts/modal/executorch_export.py
+  category: private_path
+  count: 1
+  reason: /tmp inside the Modal container, not a local path.
+- path: scripts/modal/gguf_study.py
+  category: private_path
+  count: 1
+  reason: /tmp inside the Modal container, not a local path.
+- path: scripts/modal/mediatek_sdk_probe.py
+  category: private_path
+  count: 2
+  reason: /tmp inside the Modal container, not a local path.

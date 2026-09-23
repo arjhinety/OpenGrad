@@ -1065,3 +1065,39 @@ its committed file. `--verify-v1` keeps the old working-tree check.
   confirmatory B0 it is about +0.128. M0 final's is recorded as +0.1279 (about +0.121). The file is pinned by
   `reports/data/m0-final-freeze.json` and is not edited. No prose quotes these deltas; the README and reports
   quote the absolute confirmatory values, which are correct.
+
+
+## 22. A credential string in upstream data, and local paths in pinned audit trails
+
+**Added 2026-09-24.** Neither changes a number. Both are in hash-pinned evidence, so the bytes are kept and
+the facts are recorded here.
+
+### `reports/pdet/pdet-v1.population.jsonl`, line 271
+
+- **What it is:** a string in GitHub personal-access-token format, the whole value of
+  `tools[0].parameters.properties.key.default` in a When2Call row (`pdet_id` `when2call-sft:736b54c6…`,
+  a tool described as reading a GitHub repository folder). It came with the upstream NVIDIA When2Call
+  training data. It is not an OpenGrad credential, and the prompt and response do not use it.
+- **Where else:** the same row, shown to the model annotator, is in two members of
+  `reports/pdet/provenance/model-a/pdet-v1.model-a.audit-trail.tar.gz` (`model-a/batch-06.json`, `.md`). It has
+  been in history since `308b4ca`. No other tracked file or revision carries a live-format credential.
+- **What was done:** the token was reported upstream on 2026-09-24 by the study owner. The population is
+  frozen P-DET evidence whose sha256 is pinned in about fifteen places (its manifest, the task config, three
+  code constants, tests and derived reports), and redaction would not remove it from history, so the owner
+  kept the bytes. `scripts/repo/check_publication_hygiene.py` now reads `.jsonl` files and tarball members and
+  recognises `ghp_`, `github_pat_`, `hf_`, `AKIA` and private-key patterns; these three occurrences are listed
+  in `scripts/repo/publication_hygiene_allowlist.yaml` with exact counts, so any new credential fails CI.
+
+### Local paths
+
+- **As written:** nine audit-trail manifests under `reports/prose-classifier/*/provenance/` record the Read
+  tool's absolute `file_path` (149 occurrences), and five audit-trail tarballs under `reports/pdet*/` and
+  `reports/prose-classifier/v2-devcheck-1/` record each external CLI run's `argv` (255), both under the
+  author's Windows user folder. `.gitignore` kept the raw transcripts out because they carry local paths; the
+  manifests and tarballs that are tracked carried them anyway. The hygiene scanner reported the manifests and
+  could not read the tarballs, and CI never ran it.
+- **What was done:** the files are pinned by `.sha256` sidecars and kept. The writers now record portable
+  paths (`portable_path` in `src/opengrad/registry/provenance.py`, used by
+  `scripts/archive_devset_model_labels.py` and `scripts/run_external_annotation.py`): repo-relative inside the
+  repository, `<outside-repo>/<name>` outside it. The existing occurrences are allowlisted with exact counts,
+  and the scan runs in CI.

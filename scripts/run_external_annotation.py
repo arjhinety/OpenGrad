@@ -45,6 +45,7 @@ from opengrad.annotation.model_batch import (
     write_batch,
 )
 from opengrad.annotation.service import Workspace
+from opengrad.registry.provenance import portable_path
 
 #: Handed to CLIs that take an instruction argument beside standard input.
 STDIN_POINTER = (
@@ -205,7 +206,9 @@ def run_once(
     if last_message:
         (directory / f"{stem}.last-message.txt").write_bytes(last_message)
     return {
-        "argv": [argv[0], *argv[1:]],
+        # Recorded without the author's absolute paths: the executable and the isolated temp files
+        # keep their names only (portable_path; reports/ERRATA.md §22).
+        "argv": [portable_path(arg, ROOT) for arg in argv],
         "exit_code": exit_code,
         "started_at": started,
         "seconds": round(ended - started, 1),
