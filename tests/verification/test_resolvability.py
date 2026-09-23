@@ -31,7 +31,9 @@ SPEC_TABLE = [
 
 
 def test_the_specs_worked_figures_reproduce() -> None:
-    for n, half_width_pp, margin_pp in SPEC_TABLE:
+    _items = list(SPEC_TABLE)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for n, half_width_pp, margin_pp in _items:
         assert round(worst_case_half_width(n) * 100, 2) == half_width_pp, n
         assert round(resolvable_margin(n) * 100, 1) == margin_pp, n
 

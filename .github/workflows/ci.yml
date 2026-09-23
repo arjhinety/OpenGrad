@@ -19,6 +19,7 @@ jobs:
       # --locked fails when uv.lock is stale instead of silently re-resolving it.
       - run: uv sync --locked --extra dev
       - run: uv run ruff check .
+      - run: uv run mypy src
       - run: uv run pytest
       - run: uv run opengrad-validate
       - run: uv run python scripts/preserve_h200_state.py --verify

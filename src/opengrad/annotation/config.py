@@ -475,7 +475,7 @@ def _read_mapping(path: Path) -> dict[str, Any]:
         data = json.loads(text)
     else:
         try:
-            import yaml  # type: ignore[import-untyped]
+            import yaml  # type: ignore[import-untyped,unused-ignore]
         except ImportError as exc:  # pragma: no cover - dependency guard
             raise TaskConfigError("PyYAML is required for YAML task configs (pip install pyyaml)") from exc
         data = yaml.safe_load(text)

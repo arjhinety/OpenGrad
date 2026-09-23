@@ -258,7 +258,9 @@ def test_inconsistent_counters_cannot_reach_a_pass_through_a_report():
 
 
 def test_every_real_gate_keeps_its_counters_consistent():
-    for name, result in audit(REPO_ROOT).items():
+    _items = list(audit(REPO_ROOT).items())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for name, result in _items:
         assert result.accounting_errors() == [], f"{name}: {result.render()}"
 
 

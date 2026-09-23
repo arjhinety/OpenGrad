@@ -473,7 +473,9 @@ def test_current_repository_registry_is_not_the_empty_bootstrap_placeholder() ->
 
 def test_unevaluated_runs_name_no_eval_location() -> None:
     """Failed, scaffold and mock runs produced no evaluation, so their rows must not point at one."""
-    for row in load_registry(Path.cwd()):
+    _items = list(load_registry(Path.cwd()))
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for row in _items:
         if not row["evaluated_checkpoints"]:
             assert not row["provenance"].get("eval", "").startswith("runs/"), row["experiment_id"]
 

@@ -350,7 +350,9 @@ def test_gsm8k_gold_answers_are_diverse_numbers():
 @pytest.mark.parametrize("name", sorted(BENCHMARKS))
 def test_requests_carry_no_chat_control_tokens(name):
     """Requests must be plain message content. Rendering is the runner's job, done once."""
-    for r in load_requests(name)[:500]:
+    _items = list(load_requests(name)[:500])
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for r in _items:
         for msg in r["messages"]:
             assert "<|im_start|>" not in msg["content"], f"{r['example_id']} pre-rendered"
             assert "<|im_end|>" not in msg["content"], f"{r['example_id']} pre-rendered"

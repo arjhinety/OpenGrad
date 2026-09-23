@@ -7,6 +7,7 @@ OpenGrad welcomes reproductions, alternative seeds, model-family adapters, sourc
 ```bash
 uv sync --locked --extra dev
 uv run ruff check .
+uv run mypy src                                        # strict
 uv run pytest                                          # network tests are deselected; run with -m network
 uv run opengrad-validate
 uv run python scripts/preserve_h200_state.py --verify  # frozen H200 pins, on committed blobs

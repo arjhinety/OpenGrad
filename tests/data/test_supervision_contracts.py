@@ -507,7 +507,9 @@ def test_17_legacy_orphan_still_fails_with_the_same_code() -> None:
 
 
 def test_every_declared_kind_has_a_contract() -> None:
-    for kind in SupervisionKind:
+    _items = list(SupervisionKind)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for kind in _items:
         assert kind in CONTRACTS, kind
         assert contract_for_kind(kind).validation_policy
 
@@ -751,7 +753,9 @@ def test_15_minus_xlam_configs_select_only_the_contract_present_after_filtering(
         root / "configs/experiments/m0_v2_final_minus_xlam_fixed_compute.yaml",
         root / "configs/experiments/m0_v2_final_minus_xlam_matched_exposure.yaml",
     ]
-    for path in paths:
+    _items = list(paths)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for path in _items:
         config = ExperimentConfig.from_file(path)
         assert config.datasets["exclude_sources"] == ["xlam-function-calling-60k"]
         assert config.supervision == {"include": ["COMPLETE_TRAJECTORY"]}
@@ -785,7 +789,9 @@ def test_16_supervision_composition_designs_are_separate_and_explicit() -> None:
         "m0_v2_final_supervision_call_prediction_only.yaml": "CALL_PREDICTION",
         "m0_v2_final_supervision_complete_trajectory_only.yaml": "COMPLETE_TRAJECTORY",
     }
-    for filename, kind in expected.items():
+    _items = list(expected.items())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for filename, kind in _items:
         config = ExperimentConfig.from_file(root / "configs/experiments" / filename)
         assert config.supervision == {"include": [kind]}
         assert config.datasets["exclude_sources"] == []

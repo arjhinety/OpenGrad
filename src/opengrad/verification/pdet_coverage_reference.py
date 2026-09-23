@@ -26,7 +26,7 @@ import hashlib
 import json
 import sys
 from collections import Counter
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from itertools import combinations
 from pathlib import Path
 from typing import Any
@@ -74,7 +74,7 @@ def consensus(votes: Mapping[str, str]) -> dict[str, Any]:
 
 
 def build_reference(
-    records: list[Mapping[str, Any]], item_ids: list[str], *, item_key: str = "pdetcov_id"
+    records: Sequence[Mapping[str, Any]], item_ids: list[str], *, item_key: str = "pdetcov_id"
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Per-item reference records and the summary, from exported session records of the three annotators.
 

@@ -39,6 +39,7 @@ so each gate declares what it is:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 PASS = "PASS"
 FAIL = "FAIL"
@@ -90,7 +91,7 @@ class ValidationResult:
     blocked_reasons: list[str] = field(default_factory=list)
     # Gate-specific breakdown that does not fit the census, e.g. reproduced /
     # corroborated / unresolved for the freeze gate.
-    detail: dict[str, int] = field(default_factory=dict)
+    detail: dict[str, Any] = field(default_factory=dict)
     # Set when the gate cannot run at all, e.g. an optional dependency is absent.
     blocked_status: str | None = None
     precondition: str | None = None

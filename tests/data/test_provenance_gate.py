@@ -223,7 +223,9 @@ def test_absent_local_shards_block_rather_than_pass(tmp_path: Path) -> None:
 
 def test_every_result_keeps_its_counters_consistent(tmp_path: Path) -> None:
     report = gate(_root(tmp_path))
-    for result in report.results:
+    _items = list(report.results)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for result in _items:
         assert result.accounting_errors() == [], result.render()
 
 
@@ -256,7 +258,9 @@ def test_the_committed_artifacts_pass_the_provenance_gate() -> None:
 
 def test_the_committed_artifacts_keep_their_counters_consistent() -> None:
     report = gate(ROOT)
-    for result in report.results:
+    _items = list(report.results)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for result in _items:
         assert result.accounting_errors() == [], result.render()
 
 

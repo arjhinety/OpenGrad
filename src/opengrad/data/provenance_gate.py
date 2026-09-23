@@ -162,14 +162,16 @@ def _result(
 
 
 def _json(root: Path, path: Path) -> dict[str, Any]:
-    return json.loads((root / path).read_text(encoding="utf-8"))
+    document: dict[str, Any] = json.loads((root / path).read_text(encoding="utf-8"))
+    return document
 
 
 def _document(root: Path, path: Path) -> dict[str, Any]:
     text = (root / path).read_text(encoding="utf-8")
-    if path.suffix in {".yaml", ".yml"}:
-        return yaml.safe_load(text)
-    return json.loads(text)
+    document: dict[str, Any] = (
+        yaml.safe_load(text) if path.suffix in {".yaml", ".yml"} else json.loads(text)
+    )
+    return document
 
 
 def _classifier_block(document: Mapping[str, Any]) -> tuple[dict[str, Any], Any]:

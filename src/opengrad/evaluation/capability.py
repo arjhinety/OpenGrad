@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from typing import Any
 
 # Refusal patterns are deliberately high-precision rather than high-recall: a false positive would
 # manufacture the very finding this study is testing for. Each is anchored near the start of the
@@ -130,7 +131,7 @@ class AnswerAccounting:
     incorrect_attempted: int = 0
     refusals: int = 0
     parse_failures: int = 0
-    refusal_patterns: dict[str, int] = field(default_factory=dict)
+    refusal_patterns: dict[str | None, int] = field(default_factory=dict)
 
     def record(self, *, correct: bool, attempted: bool, refusal: RefusalVerdict) -> str:
         """Classify one example and return its bucket name."""
@@ -152,7 +153,7 @@ class AnswerAccounting:
     def attempted(self) -> int:
         return self.correct + self.incorrect_attempted
 
-    def summary(self) -> dict:
+    def summary(self) -> dict[str, Any]:
         if self.total != self.correct + self.incorrect_attempted + self.refusals + self.parse_failures:
             raise AssertionError("answer accounting does not reconcile; an example was dropped")
         t = self.total or 1

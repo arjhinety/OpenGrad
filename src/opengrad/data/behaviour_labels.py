@@ -40,7 +40,7 @@ import hashlib
 import json
 import sys
 from collections import Counter
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -134,7 +134,7 @@ def label_source(root: Path, source: str, heldout: HeldoutIndex) -> Iterator[dic
         yield label_record(record, source, heldout)
 
 
-def summarise(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
+def summarise(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     labels: Counter[str] = Counter()
     weighted: Counter[str] = Counter()
     kinds: Counter[str] = Counter()
@@ -156,7 +156,7 @@ def summarise(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _rows_bytes(rows: list[Mapping[str, Any]]) -> bytes:
+def _rows_bytes(rows: Sequence[Mapping[str, Any]]) -> bytes:
     return b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8") for row in rows)
 
 

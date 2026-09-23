@@ -85,3 +85,21 @@ extend-exclude = ["third_party", "release"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
+
+# Untyped third-party packages. torch is absent from the dev environment (CPU-only tests skip it).
+[[tool.mypy.overrides]]
+module = ["yaml", "yaml.*", "torch", "torch.*"]
+ignore_missing_imports = true
+
+# Source files whose bytes are recorded by hash: the frozen decision classifiers (check_frozen), the
+# frozen P-DET builder, and modules whose sha256 is written into data manifests (code_sha256_lf).
+# A typing-only edit would still change the recorded hash, so these errors are silenced here instead.
+[[tool.mypy.overrides]]
+module = [
+    "opengrad.data.decision_classifier",
+    "opengrad.data.decision_classifier_v2",
+    "opengrad.data.source_schema",
+    "opengrad.verification.pdet",
+    "opengrad.verification.pdet_coverage",
+]
+disable_error_code = ["union-attr", "type-arg", "arg-type", "import-untyped"]

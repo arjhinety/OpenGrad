@@ -102,7 +102,9 @@ def test_mock_run_is_invalid_and_never_reads_as_trained() -> None:
 
 def test_no_mock_or_scaffold_record_carries_an_effective_claim() -> None:
     """Validity annotations gate every count, so an unannotated mock cannot slip through."""
-    for experiment_id, record in _records():
+    _items = list(_records())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for experiment_id, record in _items:
         validity = (record.get("metadata") or {}).get("validity")
         if validity == "MOCK_ONLY":
             assert record["status"] not in {"TRAINED", "PROMOTED", "EVALUATED"}, (
@@ -187,7 +189,9 @@ def test_promoted_dpo_is_published_and_quotes_the_confirmatory_score() -> None:
 def test_published_model_links_are_well_formed() -> None:
     """A published-artifact claim must name an owner/repository, not a free-text note."""
     pattern = re.compile(r"^[\w.-]+/[\w.-]+$")
-    for path in sorted((ROOT / "reports" / "releases").glob("*.json")):
+    _items = sorted((ROOT / "reports" / "releases").glob("*.json"))
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for path in _items:
         release = json.loads(path.read_text(encoding="utf-8"))
         candidates = [release.get("repository"), release.get("hub_repository")]
         candidates += [model.get("repository") for model in release.get("models") or []]

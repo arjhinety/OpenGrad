@@ -69,5 +69,7 @@ def test_a_stale_allowlist_entry_fails() -> None:
 
 def test_every_allowlist_entry_carries_a_reason() -> None:
     scanner = _scanner()
-    for entry in scanner.load_allowlist():
+    _items = list(scanner.load_allowlist())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for entry in _items:
         assert str(entry["reason"]).strip(), entry

@@ -62,6 +62,7 @@ CI (`.github/workflows/ci.yml`) has two jobs. The Python job runs these; run the
 ```bash
 uv sync --locked --extra dev           # CI fails on a stale uv.lock
 .venv/Scripts/python.exe -m ruff check .
+.venv/Scripts/python.exe -m mypy src                                    # strict; see [tool.mypy] overrides
 .venv/Scripts/python.exe -m pytest -p no:cacheprovider -q
 .venv/Scripts/opengrad-validate.exe
 .venv/Scripts/python.exe scripts/preserve_h200_state.py --verify      # frozen H200 pins, on committed blobs

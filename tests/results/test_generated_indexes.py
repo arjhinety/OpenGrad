@@ -34,7 +34,9 @@ def test_every_generated_index_is_current() -> None:
 
 def test_every_reports_directory_has_a_study() -> None:
     generator = _generator()
-    for study, _ in generator.REPORT_DIRECTORIES.values():
+    _items = list(generator.REPORT_DIRECTORIES.values())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for study, _ in _items:
         assert study in {"Study 001", "Study 002"}
 
 

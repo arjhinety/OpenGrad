@@ -12,6 +12,8 @@ def test_all_primary_harnesses_accept_mock_predictions(tmp_path: Path):
         "mcpmark-verified",
         "toolathlon",
     ]
-    for name in names:
+    _items = list(names)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for name in _items:
         result = run_smoke(name, tmp_path / (name + ".json"))
         assert result["run_id"].startswith("SMOKE_TEST_ONLY")

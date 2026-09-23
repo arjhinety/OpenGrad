@@ -247,7 +247,9 @@ def _backward_mtp_only(model, scope: str):
 
 def test_head_only_mtp_gradient_reaches_only_the_mtp_layer(base_dir):
     grads = _backward_mtp_only(_load(base_dir).model, "head_only")
-    for name, grad in grads.items():
+    _items = list(grads.items())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for name, grad in _items:
         if name.startswith(M.MTP_PREFIX):
             assert grad is not None and grad.abs().sum() > 0, name
         else:

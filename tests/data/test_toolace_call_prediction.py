@@ -257,13 +257,17 @@ FROZEN_RELEASES = {
 
 
 def test_the_older_toolace_adapters_are_byte_for_byte_unchanged() -> None:
-    for name, digest in FROZEN_SOURCES.items():
+    _items = list(FROZEN_SOURCES.items())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for name, digest in _items:
         source = inspect.getsource(getattr(adapters, name)).replace("\r\n", "\n")
         assert hashlib.sha256(source.encode("utf-8")).hexdigest() == digest, name
 
 
 def test_the_canonical_v2_release_definitions_are_unchanged() -> None:
-    for path, digest in FROZEN_RELEASES.items():
+    _items = list(FROZEN_RELEASES.items())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for path, digest in _items:
         data = (ROOT / path).read_bytes().replace(b"\r\n", b"\n")
         assert hashlib.sha256(data).hexdigest() == digest, path
         assert "toolace_v3" not in data.decode("utf-8")

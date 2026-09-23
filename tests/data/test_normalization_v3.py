@@ -163,7 +163,9 @@ def test_no_behaviour_label_and_every_version_is_authoritative() -> None:
         normalize_row(glaive_spec(), {"system": GLAIVE_SYSTEM, "chat": GLAIVE_PLAIN_CHAT}, 0),
         normalize_row(when2call_spec(), when2call_raw(), 0),
     ]
-    for item in rows:
+    _items = list(rows)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for item in _items:
         metadata = item["metadata"]
         assert "behavior" not in metadata
         assert metadata["adapter_version"] == versions.ADAPTER_VERSION

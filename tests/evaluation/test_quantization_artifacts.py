@@ -224,7 +224,9 @@ def test_every_ledger_row_carries_a_recognised_status():
     if not LEDGER.is_file():
         pytest.skip("no candidates recorded yet")
     rows = read_jsonl(LEDGER)
-    for row in rows:
+    _items = list(rows)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for row in _items:
         assert row["status"] in VALID_STATUSES, f"unknown status {row['status']!r}"
         assert row["branch"] and row["artifact"]
 
@@ -233,7 +235,9 @@ def test_no_scored_ledger_row_drops_examples():
     """A shrinking denominator is the failure mode the runtime accounting exists to prevent."""
     if not LEDGER.is_file():
         pytest.skip("no candidates recorded yet")
-    for row in read_jsonl(LEDGER):
+    _items = list(read_jsonl(LEDGER))
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for row in _items:
         if row.get("records") is None:
             continue
         assert row["records"] == row["submitted"], (

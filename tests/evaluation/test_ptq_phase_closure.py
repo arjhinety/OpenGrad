@@ -73,7 +73,9 @@ def test_accepted_roles_carry_their_bar_failures(closure):
 
 def test_roles_match_gate_outcomes(closure):
     """Nothing that failed the primary gate may hold a release role, and vice versa."""
-    for a in closure["artifacts"]:
+    _items = list(closure["artifacts"])
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for a in _items:
         passed = a["gate_decision"] in PASSING_GATE
         if a["role"] in ACCEPTED_ROLES:
             assert passed, f"{a['quantization']} has a release role but failed the primary gate"
@@ -110,7 +112,9 @@ def test_q4_k_m_beats_bf16_on_f1_while_failing_the_gate(closure):
 
 def test_ledger_agrees_with_closure_on_roles_and_hashes(closure, ledger):
     rows = {r["quantization"]: r for r in ledger if r.get("branch") == "gguf"}
-    for a in closure["artifacts"]:
+    _items = list(closure["artifacts"])
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for a in _items:
         row = rows.get(a["quantization"])
         assert row is not None, f"{a['quantization']} missing from the ledger"
         assert row.get("release_role") == a["role"], (

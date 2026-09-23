@@ -63,7 +63,9 @@ def test_exactly_three_examples_change_behaviour(payload):
 
 
 def test_prompt_text_matches_its_recorded_hash(payload):
-    for f in payload["fixtures"]:
+    _items = list(payload["fixtures"])
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for f in _items:
         digest = hashlib.sha256(f["prompt_text"].encode("utf-8")).hexdigest()
         assert digest == f["prompt_sha256"], f"{f['example_id']} prompt text drifted"
 
@@ -91,7 +93,9 @@ def test_llamacpp_side_is_shorter_on_every_fixture(payload):
     FEWER tokens on every affected prompt. A fixture where it emitted more would mean a different
     mechanism is at work and the recorded cause no longer explains it.
     """
-    for f in payload["fixtures"]:
+    _items = list(payload["fixtures"])
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for f in _items:
         assert f["divergence"]["token_count_delta"] < 0, f["example_id"]
         assert f["llamacpp"]["token_count"] < f["hf"]["token_count"]
         assert (
@@ -102,7 +106,9 @@ def test_llamacpp_side_is_shorter_on_every_fixture(payload):
 
 def test_no_special_token_is_inserted_dropped_or_reinterpreted(payload):
     """The earlier <|im_start|> BOS collision is why this is asserted rather than assumed."""
-    for f in payload["fixtures"]:
+    _items = list(payload["fixtures"])
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for f in _items:
         hf, lc = f["hf"]["special_census"], f["llamacpp"]["special_census"]
         assert hf["im_start"] == lc["im_start"], f["example_id"]
         assert hf["im_end"] == lc["im_end"], f["example_id"]
@@ -113,7 +119,9 @@ def test_no_special_token_is_inserted_dropped_or_reinterpreted(payload):
 
 def test_divergence_is_localized_and_reconverges(payload):
     """Both streams rejoin after the Thai span; an unbounded divergence would be a different bug."""
-    for f in payload["fixtures"]:
+    _items = list(payload["fixtures"])
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for f in _items:
         d = f["divergence"]
         assert d["reconverged_suffix_tokens"] > 0, f["example_id"]
         assert d["first_divergence_index"] is not None
@@ -134,7 +142,9 @@ def test_fixtures_do_not_assert_tokenizer_agreement(payload):
     If someone 'fixes' the divergence by making the fixtures agree, the recorded failure would
     silently disappear. Every fixture must still represent a real disagreement.
     """
-    for f in payload["fixtures"]:
+    _items = list(payload["fixtures"])
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for f in _items:
         assert f["hf"]["token_ids"] != f["llamacpp"]["token_ids"], (
             f"{f['example_id']} no longer diverges; the parity failure must not be erased by "
             "editing fixtures — re-characterise deliberately instead"

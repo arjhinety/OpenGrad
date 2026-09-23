@@ -18,7 +18,9 @@ def test_upstream_shaped_fixtures_are_source_aware():
         "looptool": "instruction",
         "glaive": "chat",
     }
-    for name, native_key in expected.items():
+    _items = list(expected.items())
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for name, native_key in _items:
         rows = list(iter_jsonl(ROOT / name / "row.jsonl"))
         row = next((item for item in rows if native_key in item), rows[0])
         assert native_key in row or (name == "button" and "messages" in row)

@@ -44,7 +44,7 @@ import hashlib
 import json
 import sys
 from collections import Counter, defaultdict
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -127,7 +127,7 @@ def gate_record(record: Mapping[str, Any]) -> str | None:
     return None
 
 
-def render_check(records: list[Mapping[str, Any]], sample: int | None, root: Path) -> dict[str, Any]:
+def render_check(records: Sequence[Mapping[str, Any]], sample: int | None, root: Path) -> dict[str, Any]:
     """Render a seeded sample (or all) under the pinned renderer, counting failures. Never writes text."""
     from opengrad.data.renderers import renderer_for
 

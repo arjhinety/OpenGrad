@@ -68,7 +68,9 @@ def test_released_sources_are_assessed_in_the_registry() -> None:
         "button",
         "looptool-23k",
     )
-    for source in released:
+    _items = list(released)
+    assert _items, "nothing to check: an empty collection would pass this test vacuously"
+    for source in _items:
         assert by_id[source]["redistribution"] in {
             "PERMITTED_WITH_ATTRIBUTION",
             "REDISTRIBUTION_WITH_ATTRIBUTION",

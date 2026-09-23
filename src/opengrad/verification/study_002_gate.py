@@ -298,7 +298,7 @@ class Study002Gate:
                         f"discovered {c['discovered']} != {total} gold items in the mode table"
                     )
         matrix = self.raw_candidate.get("confusion_matrix")
-        if _valid_matrix(matrix):
+        if isinstance(matrix, dict) and _valid_matrix(matrix):
             for mode, gold_n in self._modes().items():
                 row = matrix.get(mode) or {}
                 row_total = sum(int(v) for v in row.values())

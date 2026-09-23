@@ -732,7 +732,7 @@ def result_from(
     skipped: list[Skip] | None = None,
     blocked_ids: list[str] | None = None,
     blocked_status: str | None = None,
-    detail: dict[str, int] | None = None,
+    detail: dict[str, Any] | None = None,
     precondition: str | None = None,
 ) -> ValidationResult:
     """Build a census from a discovered population and a flat error list.

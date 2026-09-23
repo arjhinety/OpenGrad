@@ -115,7 +115,7 @@ class Qwen35MultiTokenPredictor(nn.Module):  # type: ignore[misc]
             attention_mask=mask,
             position_ids=position_ids,
         )
-        return self.norm(states)  # type: ignore[no-any-return]
+        return self.norm(states)  # type: ignore[no-any-return,unused-ignore]
 
 
 class FinalHiddenCapture:
