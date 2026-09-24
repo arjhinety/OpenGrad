@@ -17,6 +17,9 @@ datasets:
   papers:
   - apigen
   retrieval_date: '2026-09-02'
+  date_published:
+    value: '2024-06-13'
+    source: Hugging Face API createdAt of Salesforce/xlam-function-calling-60k, read 2026-09-24
   license:
     value: CC-BY-4.0
     verified: true
@@ -74,6 +77,9 @@ datasets:
   papers:
   - when2call
   retrieval_date: '2026-09-02'
+  date_published:
+    value: '2025-04-26'
+    source: Hugging Face API createdAt of nvidia/When2Call, read 2026-09-24
   license:
     value: CC-BY-4.0
     verified: true
@@ -160,6 +166,9 @@ datasets:
   papers:
   - toolace
   retrieval_date: '2026-09-02'
+  date_published:
+    value: '2024-08-21'
+    source: Hugging Face API createdAt of Team-ACE/ToolACE, read 2026-09-24
   license:
     value: Apache-2.0
     verified: true
@@ -216,6 +225,9 @@ datasets:
   papers:
   - button
   retrieval_date: '2026-09-02'
+  date_published:
+    value: '2024-10-16'
+    source: GitHub API created_at of PKU-Baichuan-MLSystemLab/BUTTON, read 2026-09-24
   license:
     value: CC-BY-4.0
     verified: true
@@ -274,6 +286,9 @@ datasets:
   papers:
   - looptool
   retrieval_date: '2026-09-02'
+  date_published:
+    value: '2025-12-10'
+    source: Hugging Face API createdAt of zhangkangning/LoopTool-23k, read 2026-09-24
   license:
     value: Apache-2.0
     verified: true
@@ -328,6 +343,9 @@ datasets:
   repository: null
   papers: []
   retrieval_date: '2026-09-02'
+  date_published:
+    value: '2023-08-15'
+    source: Hugging Face API createdAt of glaiveai/glaive-function-calling-v2, read 2026-09-24
   license:
     value: Apache-2.0
     verified: true
@@ -384,6 +402,9 @@ datasets:
   papers:
   - apigen
   retrieval_date: '2026-09-02'
+  date_published:
+    value: '2025-04-29'
+    source: Hugging Face API createdAt of Salesforce/APIGen-MT-5k, read 2026-09-24
   license:
     value: CC-BY-NC-4.0
     verified: true
@@ -448,6 +469,9 @@ datasets:
   - toolace
   - when2call
   retrieval_date: '2026-09-11'
+  date_published:
+    value: '2026-09-11'
+    source: Hugging Face API createdAt of arjhinety/OpenGrad-ToolPolicy-Canonical-v2, read 2026-09-24
   license:
     value: COMPOSITE_PER_SOURCE
     verified: true
@@ -553,6 +577,9 @@ datasets:
   - toolace
   - when2call
   retrieval_date: '2026-09-10'
+  date_published:
+    value: '2026-09-10'
+    source: Hugging Face API createdAt of arjhinety/OpenGrad-ToolPolicy-Canonical-v2-M0-snapshot, read 2026-09-24
   license:
     value: COMPOSITE_PER_SOURCE
     verified: true
@@ -676,6 +703,9 @@ datasets:
   - when2call
   - looptool
   retrieval_date: '2026-09-10'
+  date_published:
+    value: '2026-09-04'
+    source: Hugging Face API createdAt of arjhinety/OpenGrad-ToolPolicy-Canonical-v1, read 2026-09-24
   license:
     value: COMPOSITE_PER_SOURCE
     verified: true
@@ -782,6 +812,9 @@ datasets:
   repository: data/processed/m1_calibration_preference_pairs_v1.jsonl
   papers: []
   retrieval_date: '2026-09-11'
+  date_published:
+    value: '2026-09-11'
+    source: first committed to the public repository in 92ca2b91e7fb1a3b7bd13cc85aa01a596805f3fb
   license:
     value: DERIVED_FROM_COMPOSITE_TRAINING_SOURCES
     verified: true

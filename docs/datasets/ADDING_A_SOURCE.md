@@ -127,3 +127,22 @@ the sizing and overlap figures. A reader's sizing judgement is stored as its own
 
 A change to `intended_stages` or `allowed_splits` changes what may be trained on. The pinned allowlist in that
 test fails on purpose. Update it in the same commit, and say why in the commit message.
+
+## Step 7: Export as Croissant
+
+```bash
+.venv/Scripts/opengrad.exe croissant <id>                 # one record as Croissant 1.1 JSON-LD
+.venv/Scripts/opengrad.exe croissant --out DIR --strict   # every record; exit 1 if a required property is missing
+```
+
+- **Where the mapping comes from.** The export reads each field's Croissant or Croissant RAI counterpart from
+  the schema's `x-croissant` annotations. It uses the standard Croissant context.
+- **What it contains.** The export is metadata only: dataset-level fields, the pinned files as `cr:FileObject`s
+  with their sha256, lineage as `prov:wasDerivedFrom`, and `responsible_use` as `rai:*`. It has no `RecordSet`,
+  because the registry does not describe record fields.
+- **What it leaves out.** A required property the registry cannot supply is reported, never invented. Today
+  that is `distribution` for the derived corpora.
+- **Validator result.** Checked with MLCommons' validator (`mlcroissant` 1.1.0), the export has no errors.
+  - One warning is expected and kept: `version` holds the pinned commit, which is not a semantic version.
+    Inventing one would describe the data less exactly.
+  - The other is a missing `citeAs` where the source has no paper.

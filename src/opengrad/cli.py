@@ -297,6 +297,14 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     baseline.add_argument("--limit", type=int, help="evaluate only the first N held-out examples")
     baseline.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    croissant = sub.add_parser(
+        "croissant", help="export registry/datasets.yaml records as MLCommons Croissant 1.1 JSON-LD"
+    )
+    croissant.add_argument("dataset_id", nargs="?", help="one record id; omit to export every record")
+    croissant.add_argument("--out", type=Path, help="directory to write <id>.json files into")
+    croissant.add_argument(
+        "--strict", action="store_true", help="exit 1 if a required Croissant property is missing"
+    )
     return parser
 
 
@@ -604,6 +612,11 @@ def main() -> int:
 
     if args.command == "baseline":
         return _cmd_baseline(args, root)
+
+    if args.command == "croissant":
+        from opengrad.registry.croissant import run as export_croissant
+
+        return export_croissant(root, args.dataset_id, args.out, args.strict)
 
     parser.print_help()
     return 0

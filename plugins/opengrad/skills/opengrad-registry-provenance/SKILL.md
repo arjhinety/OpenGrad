@@ -48,6 +48,13 @@ description: How OpenGrad's registries, provenance claims and written records st
   checks `papers` ids, evidence paths and that every distribution URL carries the pinned revision.
 - **Croissant.** Each schema property names its Croissant 1.1 / Croissant RAI 1.0 counterpart in `x-croissant`;
   `responsible_use` holds the RAI fields and needs `evidence`.
+  - `opengrad croissant [<id>] [--out DIR] [--strict]` (`src/opengrad/registry/croissant.py`) exports records as
+    Croissant JSON-LD, reading that mapping from the schema. It uses the standard context and never invents a
+    required property: a missing one is reported, and `--strict` exits 1.
+  - `tests/registry/test_croissant.py` pins which records are incomplete: the derived corpora have no
+    `distribution`.
+  - mlcroissant 1.1.0 reports 0 errors on all records. Its only warnings are the commit SHA as `version` and a
+    missing `citeAs` where no paper exists.
 - **Screen before adopting.** Every candidate considered for a purpose, including the rejected ones, goes in
   `registry/source_screening.yaml` (`registry/source_screening.schema.json`). The `screening` gate of
   `opengrad-validate` checks it:
