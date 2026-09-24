@@ -1,0 +1,752 @@
+schema_version: 1
+# Every screening conforms to registry/source_screening.schema.json. A screening records the need, the
+# criteria, the search and every candidate considered -- including the rejected ones -- so that a
+# reader can see what was looked at and why each exclusion happened. Flow counts are derived from the
+# records by scripts/reporting/generate_source_views.py, never typed here. The training firewall does
+# not read this file; an adopted candidate moves to registry/datasets.yaml.
+# Procedure: docs/datasets/ADDING_A_SOURCE.md.
+record_schema: registry/source_screening.schema.json
+screenings:
+- id: study-002-answer-heldout
+  question: >-
+    Which public, licence-compatible datasets can supply Study 002's held-out ANSWER stratum: prompts
+    where a tool-calling model is offered tools, none is needed, and the right behaviour is a direct
+    prose answer from general knowledge?
+  purpose: EVALUATION_POPULATION
+  requirement_source: docs/research/study-002/06-SPLIT-SPEC.md
+  opened: '2026-09-24'
+  owner_decision:
+    status: PENDING
+  search:
+    date: '2026-09-24'
+    method: >-
+      Named candidates from the request plus web and literature search, including adversarial queries
+      on BFCL label quality and dataset derivation. Every candidate was read at its primary artifact
+      (dataset card, repository LICENSE, paper data-construction section). BFCL was additionally read
+      from its raw files at the pinned revision, sampled and probed against OpenGrad's corpora.
+    report: reports/source-screening/study-002-answer-heldout/REPORT.md
+    artifacts:
+    - reports/source-screening/study-002-answer-heldout/answer-sizing-readings.json
+    - reports/source-screening/study-002-answer-heldout/bfcl-answer-sizing.json
+    - reports/source-screening/study-002-answer-heldout/bfcl-training-overlap.json
+  criteria:
+  - id: C1
+    name: tools_offered
+    test: >-
+      Each item offers the model at least one tool schema. A QUESTION_SOURCE is NOT_APPLICABLE:
+      curation adds the schemas.
+  - id: C2
+    name: answerable_without_tools
+    test: >-
+      The source's labels, or a reading of its items, separate questions answerable from general
+      knowledge (ANSWER) from questions that need an absent tool (UNSUPPORTED) or clarification.
+  - id: C3
+    name: licence_permits_redistribution
+    test: The data licence, read at the source, permits redistributing items or items derived from them.
+  - id: C4
+    name: pinned_revision
+    test: An immutable revision of the data can be pinned.
+  - id: C5
+    name: disjoint_from_training
+    test: >-
+      No shared upstream or derivation with xLAM/APIGen-60k, Glaive v2, ToolACE, When2Call SFT,
+      BUTTON or LoopTool-23k, and text collisions with them or with the When2Call MCQ and LLM-judge
+      splits are few enough for fingerprint screening to remove.
+  - id: C6
+    name: released
+    test: The data is publicly downloadable now.
+  - id: C7
+    name: supply
+    test: >-
+      Contributes ANSWER items toward the n >= 200 floor (385 to resolve 10 points, about 601 for 8
+      points; 06-SPLIT-SPEC).
+  candidates:
+  - id: bfcl-irrelevance
+    display_name: BFCL irrelevance (non-live)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/ShishirPatil/gorilla/tree/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data
+      revision: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+      files:
+      - BFCL_v4_irrelevance.json
+    license:
+      value: Apache-2.0
+      source: https://github.com/ShishirPatil/gorilla/tree/main/berkeley-function-call-leaderboard
+    answer_items:
+      basis: DATA_SAMPLE
+      estimate_artifact: reports/source-screening/study-002-answer-heldout/bfcl-answer-sizing.json
+      note: 35 of 50 sampled items read ANSWER, 4 borderline, of 240.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PARTIAL, note: 'One no-call label covers ANSWER and UNSUPPORTED items; an audit found inverted labels. Needs relabelling.'}
+      C3: {result: PASS}
+      C4: {result: PASS, note: 'The revision registry/benchmarks.yaml already pins for bfcl-v4.'}
+      C5: {result: PARTIAL, note: '7 items collide with xLAM, Glaive or When2Call SFT (shared maths templates); screening removes them.'}
+      C6: {result: PASS}
+      C7: {result: PASS}
+    decision: SHORTLISTED
+    evidence:
+    - https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html
+    - https://epoch.ai/benchmarks/berkeley-function-calling-leaderboard/review
+    - https://github.com/ShishirPatil/gorilla/blob/main/berkeley-function-call-leaderboard/CHANGELOG.md
+    - reports/source-screening/study-002-answer-heldout/bfcl-training-overlap.json
+  - id: bfcl-live-irrelevance
+    display_name: BFCL live irrelevance
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/ShishirPatil/gorilla/tree/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data
+      revision: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+      files:
+      - BFCL_v4_live_irrelevance.json
+    license:
+      value: Apache-2.0
+      source: https://github.com/ShishirPatil/gorilla/tree/main/berkeley-function-call-leaderboard
+    answer_items:
+      basis: DATA_SAMPLE
+      estimate_artifact: reports/source-screening/study-002-answer-heldout/bfcl-answer-sizing.json
+      note: 15 of 60 sampled items read ANSWER, 4 borderline, of 884; the rest is UNSUPPORTED, CLARIFY or noise.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PARTIAL, note: 'Unmodified real user queries; most need an absent tool. Needs relabelling.'}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: PARTIAL, note: '55 items collide, mostly with the When2Call MCQ and LLM-judge splits, which were built from BFCL v2 Live.'}
+      C6: {result: PASS}
+      C7: {result: PASS}
+    decision: SHORTLISTED
+    evidence:
+    - https://gorilla.cs.berkeley.edu/blogs/12_bfcl_v2_live.html
+    - https://gorilla.cs.berkeley.edu/blogs/13_bfcl_v3_multi_turn.html
+    - reports/source-screening/study-002-answer-heldout/bfcl-training-overlap.json
+    notes: Multilingual (zh, ko, ru, pt, id); report English-only counts alongside the total.
+  - id: bfcl-chatting
+    display_name: BFCL V1 chatting capability
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/gorilla-llm/Berkeley-Function-Calling-Leaderboard
+      revision: 61fc0608cfd831fcfbbaa676ebdfef0ed963eeda
+    license:
+      value: Apache-2.0
+      source: https://huggingface.co/datasets/gorilla-llm/Berkeley-Function-Calling-Leaderboard/blob/main/README.md
+    answer_items:
+      basis: PAPER
+      count: 200
+      note: Direct-answer items, but with no tools offered.
+    verdicts:
+      C1: {result: FAIL, note: 'No tools offered; tests plain chat, not the decision to abstain.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1]
+    evidence:
+    - https://huggingface.co/datasets/gorilla-llm/Berkeley-Function-Calling-Leaderboard/blob/main/README.md
+  - id: when2call
+    display_name: When2Call (all splits)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/nvidia/When2Call
+      revision: 0582f7749df63a96fdc3070932e83e72396ace53
+    license:
+      value: CC-BY-4.0
+      source: https://huggingface.co/datasets/nvidia/When2Call/blob/main/README.md
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: 'The paper: the direct answer "is always a hallucination and, thus, always wrong".'
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Zero direct-answer gold items in every split.'}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: FAIL, note: 'Training data generated from xlam-function-calling-60k; test built from BFCL v2 Live; SFT split is a training source.'}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2, C5]
+    evidence:
+    - https://arxiv.org/html/2504.18851
+    - https://github.com/NVIDIA/When2Call
+  - id: xlam-irrelevance-7.5k
+    display_name: xLAM irrelevance 7.5k (Hammer)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/MadeAgents/xlam-irrelevance-7.5k
+      revision: 34323bf
+    license:
+      value: CC-BY-4.0
+      source: https://huggingface.co/datasets/MadeAgents/xlam-irrelevance-7.5k/blob/main/README.md
+    answer_items:
+      basis: NOT_ESTIMATED
+      note: Gold is an empty call list; ANSWER and UNSUPPORTED items are not distinguished.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Built by deleting the needed tool, so most items still need it.'}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: FAIL, note: '7,500 prompts sampled from xlam-function-calling-60k, an OpenGrad training source.'}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C5]
+    evidence:
+    - https://huggingface.co/datasets/MadeAgents/xlam-irrelevance-7.5k
+    - https://arxiv.org/html/2410.04587v1
+  - id: hammerbench-irrelevant
+    display_name: HammerBench function-irrelevant items
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/MadeAgents/HammerBench
+      revision: 18b4f4ea47e8b367006391951cf7e69cefa48c73
+    license:
+      value: Apache-2.0
+      source: https://github.com/MadeAgents/HammerBench
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: Expected output is a fixed refusal string.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Refusal (UNSUPPORTED), not a prose answer.'}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/abs/2412.16516
+  - id: acebench-special
+    display_name: ACEBench special (exceeding function ability)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/ACEBench/ACEBench
+      revision: null
+    license:
+      value: MIT
+      source: https://github.com/chenchen0103/ACEBench/blob/main/LICENSE.md
+      note: The LICENSE names Microsoft Corporation as copyright holder, apparently an uncustomised template.
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'No candidate function can resolve the request (UNSUPPORTED); knowledge-answerability is not required.'}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: PARTIAL, note: 'Shares a data-synthesis method and a co-author with ToolACE.'}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/html/2501.12851v1
+    - https://github.com/chenchen0103/ACEBench/blob/main/LICENSE.md
+    notes: registry/benchmarks.yaml records acebench as Apache-2.0 at a ServiceNow URL; this repository is MIT at another. To be reconciled separately.
+  - id: toolsandbox-insufficient-information
+    display_name: ToolSandbox insufficient-information scenarios
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/apple/ToolSandbox
+      revision: 165848b
+    license:
+      value: CUSTOM
+      source: https://github.com/apple/ToolSandbox/blob/main/LICENSE
+      note: Apple's own licence text; permits use and redistribution but is not an OSI or Creative Commons licence.
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'A needed tool or argument is withheld on purpose (UNSUPPORTED); multi-turn.'}
+      C3: {result: PARTIAL}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/html/2408.04682v1
+    - https://github.com/apple/ToolSandbox/blob/main/LICENSE
+  - id: toolbehonest-unsolvable
+    display_name: ToolBeHonest unsolvable tasks
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/ToolBeHonest/ToolBeHonest
+      revision: 22da253
+    license:
+      value: MIT
+      source: https://arxiv.org/pdf/2406.20015
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Every unsolvable item removes or constrains a genuinely needed tool.'}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/pdf/2406.20015
+    - https://github.com/ToolBeHonest/ToolBeHonest
+    notes: 350 unsolvable items; a candidate for the separate unanswerable population (P-UNANS), not for ANSWER.
+  - id: noisytoolbench
+    display_name: NoisyToolBench
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/Mysterchan/learning_to_ask
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/Mysterchan/learning_to_ask
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Gold is a clarifying question or a refusal (CLARIFY or UNSUPPORTED).'}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: PASS, note: 'Derived from ToolBench.'}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/html/2409.00557v4
+  - id: api-bank
+    display_name: API-Bank
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/api-bank
+      revision: null
+    license:
+      value: MIT
+      source: https://github.com/AlibabaResearch/DAMO-ConvAI/blob/main/LICENSE
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: Call, Retrieve+Call and Plan+Retrieve+Call partition the benchmark.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Every item requires a tool call.'}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://aclanthology.org/2023.emnlp-main.187.pdf
+  - id: toolbench
+    display_name: ToolBench
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/OpenBMB/ToolBench
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/OpenBMB/ToolBench
+      note: Data drawn from RapidAPI; its terms of service also apply.
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Pure CALL data.'}
+      C3: {result: PARTIAL}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://github.com/OpenBMB/ToolBench
+  - id: stabletoolbench
+    display_name: StableToolBench
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/THUNLP-MT/StableToolBench
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/THUNLP-MT/StableToolBench
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: Its solvability filter concerns whether a task can be completed, not whether a tool is needed.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL}
+      C3: {result: PARTIAL}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://github.com/THUNLP-MT/StableToolBench
+  - id: nestful
+    display_name: NESTFUL
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/ibm-research/nestful
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://huggingface.co/datasets/ibm-research/nestful
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: 1,861 executable nested call sequences.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: PARTIAL, note: 'The superseded data_v1 draws on Glaive; only v2 is independent.'}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/html/2409.03797v2
+    - https://github.com/IBM/NESTFUL
+  - id: tau-bench
+    display_name: tau-bench
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/sierra-research/tau-bench
+      revision: c3f7943fa1094056a0667e4125b2938cf78b024c
+    license:
+      value: MIT
+      source: https://github.com/sierra-research/tau-bench
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: 165 tasks graded on database-write calls.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL}
+      C3: {result: PASS}
+      C4: {result: PASS, note: 'The revision registry/benchmarks.yaml pins for tau3.'}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://github.com/sierra-research/tau-bench
+    - https://arxiv.org/abs/2406.12045
+  - id: mmau
+    display_name: MMAU
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/apple/axlearn/tree/main/docs/research/mmau
+      revision: 5478e44ac23b58bc4340b05ea927e694a8b44f46
+    license:
+      value: UNRESOLVED
+      source: https://github.com/apple/axlearn/tree/main/docs/research/mmau
+      note: The dataset card would not load; the licence was not read.
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: Tool-use items are RapidAPI calls; DAG-QA is multiple-choice plan selection.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL}
+      C3: {result: UNKNOWN}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/abs/2407.18961
+  - id: t-eval
+    display_name: T-Eval
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/open-compass/T-Eval
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/open-compass/T-Eval
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Every item exercises a tool sub-skill over ToolBench''s tools.'}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/abs/2312.14033
+  - id: seal-tools
+    display_name: Seal-Tools
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/fairyshine/seal-tools
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/fairyshine/seal-tools
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: 14,076 self-instruct instances, all calling tools.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: PASS}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/abs/2405.08355
+  - id: toolalpaca
+    display_name: ToolAlpaca
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/tangqiaoyu/ToolAlpaca
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/tangqiaoyu/ToolAlpaca
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Every instance contains an action step.'}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://github.com/tangqiaoyu/ToolAlpaca
+  - id: rotbench
+    display_name: RoTBench
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/Junjie-Ye/RoTBench
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/Junjie-Ye/RoTBench
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'Measures tool-use robustness to noise; every item needs a tool.'}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/abs/2401.08326
+  - id: toolhop
+    display_name: ToolHop
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/bytedance-research/ToolHop
+      revision: null
+    license:
+      value: CC-BY-4.0
+      source: https://huggingface.co/datasets/bytedance-research/ToolHop
+      note: Code is Apache-2.0; data is CC BY 4.0.
+    answer_items:
+      basis: NOT_ESTIMATED
+      note: Its direct condition is a prompting setup applied to every item, not a per-item label.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL, note: 'No per-item tool-necessity label; tools raise accuracy substantially.'}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: PASS, note: 'Built from MoreHopQA.'}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://arxiv.org/abs/2501.02506
+  - id: toolqa
+    display_name: ToolQA
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/night-chen/ToolQA
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/night-chen/ToolQA
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      count: 0
+      note: Questions are constructed to require tools.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: FAIL}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://github.com/night-chen/ToolQA
+  - id: when2tool
+    display_name: When2Tool (easy tier)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/cesun/When2Tool
+      revision: 1c9126e19f186b9a8ab8da70cfe9c201a7220a52
+    license:
+      value: NONE
+      source: https://github.com/Trustworthy-ML-Lab/when2tool
+      note: No licence on the dataset card or in the repository, so by default it may not be redistributed.
+    answer_items:
+      basis: DATA_COUNT
+      count: 750
+      note: Easy-tier test items (15 environments x 50) designed to be solvable without the offered tool; 300 more in train.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PARTIAL, note: 'Tool-necessity is computed per model at evaluation time, not shipped as a label; covers unnecessary, not irrelevant, tools.'}
+      C3: {result: FAIL}
+      C4: {result: PASS}
+      C5: {result: PASS, note: 'Generated offline by deterministic generators.'}
+      C6: {result: PASS}
+      C7: {result: PASS}
+    decision: WATCHLIST
+    revisit_when: The authors publish a licence that permits redistribution.
+    evidence:
+    - https://huggingface.co/datasets/cesun/When2Tool
+    - https://github.com/Trustworthy-ML-Lab/when2tool
+    - https://arxiv.org/html/2605.09252v2
+  - id: when-tools-get-in-the-way
+    display_name: When Tools Get in the Way (500 paired queries)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://arxiv.org/abs/2609.14157
+      revision: null
+    license:
+      value: UNRESOLVED
+      source: https://arxiv.org/html/2609.14157
+      note: The paper is CC BY 4.0; the data is unreleased and carries no licence yet.
+    answer_items:
+      basis: PAPER
+      count: 500
+      note: Closed-domain questions paired with a topically adjacent but unnecessary tool, with a matched no-tool control.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PASS}
+      C3: {result: UNKNOWN}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: FAIL, note: '"We will release the data and evaluation code on acceptance."'}
+      C7: {result: PASS}
+    decision: WATCHLIST
+    revisit_when: The data is released; then read its licence and run the fingerprint screen.
+    evidence:
+    - https://arxiv.org/html/2609.14157
+  - id: natural-questions-dev
+    display_name: Natural Questions dev (short-answer questions)
+    kind: QUESTION_SOURCE
+    locator:
+      url: https://aclanthology.org/Q19-1026.pdf
+      revision: null
+    license:
+      value: CC-BY-4.0
+      source: https://aclanthology.org/Q19-1026.pdf
+    answer_items:
+      basis: PAPER
+      note: 7,830 dev questions, about 36% with a short answer; a constructed set pairs them with out-of-domain tool schemas.
+    verdicts:
+      C1: {result: NOT_APPLICABLE}
+      C2: {result: PASS, note: 'Human-annotated short answers; a matched no-tool control confirms answerability per item.'}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN, note: 'Pin the release file by sha256 when drawing.'}
+      C5: {result: UNKNOWN, note: 'Must be fingerprint-screened against every training corpus.'}
+      C6: {result: PASS}
+      C7: {result: PASS}
+    decision: SHORTLISTED
+    evidence:
+    - https://aclanthology.org/Q19-1026.pdf
+    notes: Report the constructed stratum separately from the natural BFCL stratum; never offer a search or lookup tool, which would make CALL correct.
+  - id: simpleqa
+    display_name: SimpleQA
+    kind: QUESTION_SOURCE
+    locator:
+      url: https://github.com/openai/simple-evals
+      revision: 5e623c2
+    license:
+      value: MIT
+      source: https://github.com/openai/simple-evals
+    answer_items:
+      basis: PAPER
+      count: 4326
+    verdicts:
+      C1: {result: NOT_APPLICABLE}
+      C2: {result: FAIL, note: 'Adversarially selected so that strong models answer wrongly; not answerable from knowledge for a 2B model.'}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://openai.com/index/introducing-simpleqa/
+  - id: triviaqa
+    display_name: TriviaQA
+    kind: QUESTION_SOURCE
+    locator:
+      url: https://nlp.cs.washington.edu/triviaqa/
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/mandarjoshi90/triviaqa/blob/master/LICENSE
+      note: The maintainers state the university does not own the copyright of the questions, so the repository licence does not clearly cover them.
+    answer_items:
+      basis: PAPER
+      note: About 95K question-answer pairs.
+    verdicts:
+      C1: {result: NOT_APPLICABLE}
+      C2: {result: PASS}
+      C3: {result: FAIL}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C3]
+    evidence:
+    - https://nlp.cs.washington.edu/triviaqa/

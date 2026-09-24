@@ -1,0 +1,1079 @@
+{
+  "artifact": "answer-sizing-readings",
+  "status": "ONE_READER_SIZING_JUDGEMENT_NOT_GOLD",
+  "reader": "Claude (Opus), 2026-09-24, during the source screening",
+  "definition": {
+    "ANSWER": "answerable from general knowledge, and no offered tool fits the request",
+    "BORDERLINE": "plausibly ANSWER, but depends on reading (e.g. a current roster, a named-but-unspecified item)",
+    "NOT_ANSWER": "needs live, local or private data or an action (UNSUPPORTED), is ambiguous (CLARIFY), is noise, or an offered tool fits (label error)"
+  },
+  "use": "sizes the BFCL supply for registry/source_screening.yaml; it is not an annotation and must not be used as gold",
+  "readings": {
+    "irrelevance": [
+      {
+        "index": 0,
+        "id": "irrelevance_3",
+        "question": "What is the slope of the line which is perpendicular to the line with the equation y = 3x + 2?",
+        "tools": [
+          "find_critical_points"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 1,
+        "id": "irrelevance_209",
+        "question": "How to build a new PC?",
+        "tools": [
+          "fetch_recipe"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 2,
+        "id": "irrelevance_169",
+        "question": "Who is playing basketball game  at Madison Square Garden tonight?",
+        "tools": [
+          "concert_search.find_concerts"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 3,
+        "id": "irrelevance_233",
+        "question": "What is the equivalent of $20 in British Pounds?",
+        "tools": [
+          "weather_in_location"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 4,
+        "id": "irrelevance_139",
+        "question": "What is the largest planet in the universe?",
+        "tools": [
+          "space.star_info"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 5,
+        "id": "irrelevance_161",
+        "question": "What is the most visited market in New York?",
+        "tools": [
+          "museum_data.get_visit_stats"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 6,
+        "id": "irrelevance_179",
+        "question": "Who played for Clippers in NBA",
+        "tools": [
+          "get_game_results"
+        ],
+        "reading": "BORDERLINE"
+      },
+      {
+        "index": 7,
+        "id": "irrelevance_37",
+        "question": "Find a picnic spot in Miami.",
+        "tools": [
+          "local_fauna"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 8,
+        "id": "irrelevance_143",
+        "question": "What defines scientist",
+        "tools": [
+          "get_historical_figure_info"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 9,
+        "id": "irrelevance_145",
+        "question": "Who initiate Protestant Reformation?",
+        "tools": [
+          "religion_history.get_event_year"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 10,
+        "id": "irrelevance_201",
+        "question": "Find me an ice cream store",
+        "tools": [
+          "game_guide"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 11,
+        "id": "irrelevance_186",
+        "question": "What is the ranking of a football team?",
+        "tools": [
+          "sports_ranking.get_MVP"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 12,
+        "id": "irrelevance_208",
+        "question": "Find the shortest path in a game from 'Point A' to 'Point B'",
+        "tools": [
+          "calculate_taxi_fare"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 13,
+        "id": "irrelevance_14",
+        "question": "What is the acceleration a ball will reach if it's thrown straight upwards with a velocity of 5 m/s?",
+        "tools": [
+          "calculate_maximum_height"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 14,
+        "id": "irrelevance_216",
+        "question": "Where is the closest Italian restaurant?",
+        "tools": [
+          "convert_currency"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 15,
+        "id": "irrelevance_109",
+        "question": "Calculate how much nurtient a cactus in Arizona needs weekly in the summer.",
+        "tools": [
+          "calculate_water_needs"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 16,
+        "id": "irrelevance_71",
+        "question": "Calculate the profit margin of a company with revenue of $200,000 and expenses of $150,000.",
+        "tools": [
+          "calculate_ROI"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 17,
+        "id": "irrelevance_94",
+        "question": "What were the most impactful cases handled by law firm ABC in the year 2020?",
+        "tools": [
+          "case_info.get"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 18,
+        "id": "irrelevance_195",
+        "question": "Who won the chess tournament in 2015?",
+        "tools": [
+          "game.board_analyser"
+        ],
+        "reading": "BORDERLINE"
+      },
+      {
+        "index": 19,
+        "id": "irrelevance_166",
+        "question": "What are some tips to maintain a piano?",
+        "tools": [
+          "instrument_rental_prices"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 20,
+        "id": "irrelevance_113",
+        "question": "Find me restaurants in London",
+        "tools": [
+          "find_pois"
+        ],
+        "reading": "BORDERLINE"
+      },
+      {
+        "index": 21,
+        "id": "irrelevance_192",
+        "question": "What is the roster of Manchester United?",
+        "tools": [
+          "sports_team.get_top_scorer"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 22,
+        "id": "irrelevance_137",
+        "question": "Who signed the declaration of independence?",
+        "tools": [
+          "historical_event.get_date"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 23,
+        "id": "irrelevance_85",
+        "question": "Who won the presidential election in 2020?",
+        "tools": [
+          "criminal_case_details.get"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 24,
+        "id": "irrelevance_88",
+        "question": "What are the best Crime-Thriller movies of 2020?",
+        "tools": [
+          "detect_forgery"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 25,
+        "id": "irrelevance_219",
+        "question": "What's the recipe for lasagna?",
+        "tools": [
+          "get_calories_in_recipe"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 26,
+        "id": "irrelevance_138",
+        "question": "When was the Declaration of Independence signed?",
+        "tools": [
+          "calculate_age"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 27,
+        "id": "irrelevance_62",
+        "question": "How to build a frontend interface for my e-commerce website?",
+        "tools": [
+          "create_Recommender_Model"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 28,
+        "id": "irrelevance_184",
+        "question": "Who won the NBA Most Valuable Player in 2020?",
+        "tools": [
+          "sports_stats.get_player_stats"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 29,
+        "id": "irrelevance_226",
+        "question": "What's timezone is it in London?",
+        "tools": [
+          "get_local_time"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 30,
+        "id": "irrelevance_67",
+        "question": "What is the mean of an experiment with 50 successful outcomes out of 500 trials, under the null hypothesis that the probability of success is 0.1?",
+        "tools": [
+          "hypothesis_testing.get_p_value"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 31,
+        "id": "irrelevance_52",
+        "question": "Convert the sentence 'Hello, how are you?' from English to French.",
+        "tools": [
+          "compress_file"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 32,
+        "id": "irrelevance_68",
+        "question": "Calculate the standard deviation of the null hypothesis test with a sample mean of 98.2, standard deviation of 1.4, and sample size of 40 for a population mean of 98.6.",
+        "tools": [
+          "statistics.calculate_p_value"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 33,
+        "id": "irrelevance_9",
+        "question": "Find the definite integral of f(x)=x^2 from x=1 to x=3.",
+        "tools": [
+          "CalculateTax"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 34,
+        "id": "irrelevance_22",
+        "question": "What is the magnetic field at a point located at distance 'r' from a wire carrying current 'I'?",
+        "tools": [
+          "magnetic_field_intensity"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 35,
+        "id": "irrelevance_151",
+        "question": "Find the year of a Picasso's painting.",
+        "tools": [
+          "sculpture.get_dimensions"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 36,
+        "id": "irrelevance_222",
+        "question": "How many calories are in a tomato?",
+        "tools": [
+          "grocery_store.item_details"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 37,
+        "id": "irrelevance_200",
+        "question": "What is the rule for 'Ace' in Blackjack?",
+        "tools": [
+          "get_highest_card_holder"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 38,
+        "id": "irrelevance_120",
+        "question": "What's the neurological impact of sports on human brain?",
+        "tools": [
+          "caffeine_effect"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 39,
+        "id": "irrelevance_193",
+        "question": "Who is the top scorer for Los Angeles Lakers?",
+        "tools": [
+          "get_sport_team_details"
+        ],
+        "reading": "BORDERLINE"
+      },
+      {
+        "index": 40,
+        "id": "irrelevance_83",
+        "question": "What's the current interest rate",
+        "tools": [
+          "calculate_mortgage_payment"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 41,
+        "id": "irrelevance_19",
+        "question": "Find the volume of a cone with base radius 3 cm and height 5 cm.",
+        "tools": [
+          "investment_calculator.calculate_return"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 42,
+        "id": "irrelevance_65",
+        "question": "How many red marbles are there in a bag of 20, given the probability of drawing a red marble is 0.3?",
+        "tools": [
+          "probability.determine_population"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 43,
+        "id": "irrelevance_118",
+        "question": "Who won the 1996 NBA championships?",
+        "tools": [
+          "playoff.brackets"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 44,
+        "id": "irrelevance_56",
+        "question": "What is the current bitcoin price?",
+        "tools": [
+          "database_connect.select"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 45,
+        "id": "irrelevance_128",
+        "question": "How many servings of vegetables should I consume in a day?",
+        "tools": [
+          "personality_assessment.calculate_score"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 46,
+        "id": "irrelevance_153",
+        "question": "Which sculture is the most famous in 19th century?",
+        "tools": [
+          "material_tool_lookup.lookup"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 47,
+        "id": "irrelevance_126",
+        "question": "What is the effect of economic status on happiness levels?",
+        "tools": [
+          "get_happiness_index"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 48,
+        "id": "irrelevance_117",
+        "question": "Tell me some of the major airports in the United States.",
+        "tools": [
+          "distance.calculate"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 49,
+        "id": "irrelevance_115",
+        "question": "How long would it take to travel from Boston to New York by car?",
+        "tools": [
+          "calculate_distance"
+        ],
+        "reading": "ANSWER"
+      }
+    ],
+    "live_irrelevance": [
+      {
+        "index": 0,
+        "id": "live_irrelevance_443-113-1",
+        "question": "what's the color of the sea?",
+        "tools": [
+          "weather_forecast.get_prediction"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 1,
+        "id": "live_irrelevance_456-123-0",
+        "question": " import re\n\ntext = \"Hello, world. This, is a test.\"\nresult = re.split(r'(\\s)', text)\n\nprint(result)",
+        "tools": [
+          "audio_mixer.combine_tracks"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 2,
+        "id": "live_irrelevance_283-65-0",
+        "question": "购买衣服",
+        "tools": [
+          "get_current_weather",
+          "get_current_news",
+          "get_shopping"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 3,
+        "id": "live_irrelevance_39-2-27",
+        "question": "Show me the object descriptors of URLs associated with the domain 'linked.net'. Please use the API key 'linker_api'.",
+        "tools": [
+          "get_current_weather"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 4,
+        "id": "live_irrelevance_836-327-0",
+        "question": "uma foto do mesmo.",
+        "tools": [
+          "search_on_google"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 5,
+        "id": "live_irrelevance_869-354-1",
+        "question": "What can you do?",
+        "tools": [
+          "set_ac_state",
+          "get_ac_state"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 6,
+        "id": "live_irrelevance_571-179-0",
+        "question": "Schedule my next gym session",
+        "tools": [
+          "EventQuery",
+          "reschedule_event"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 7,
+        "id": "live_irrelevance_170-24-0",
+        "question": "Hi, I am a Machine Learning Engineer | Kaggle Master. Connect with me on 🐦 TWITTER:   / rohanpaul_ai   - for daily in-depth coverage of Machine Learning / LLM / OpenAI / LangChain / Python Intricacies",
+        "tools": [
+          "todo"
+        ],
+        "reading": "BORDERLINE"
+      },
+      {
+        "index": 8,
+        "id": "live_irrelevance_562-172-3",
+        "question": "what is the date",
+        "tools": [
+          "cmd_controller.execute"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 9,
+        "id": "live_irrelevance_401-83-1",
+        "question": "sum ",
+        "tools": [
+          "calculate_sum"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 10,
+        "id": "live_irrelevance_671-214-0",
+        "question": "I'm due for a haircut and need help finding a unisex salon.",
+        "tools": [
+          "Services_1_BookAppointment",
+          "Services_1_FindProvider",
+          "Weather_1_GetWeather"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 11,
+        "id": "live_irrelevance_746-257-0",
+        "question": "See promotions",
+        "tools": [
+          "get_service_providers",
+          "view_service_provider_profile"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 12,
+        "id": "live_irrelevance_618-195-6",
+        "question": "I want to take a sightseeing trip along the countryside, and a nice train ride would be ideal. Would you be my travel agent and help me get 1 ticket, going to Chi-town, please?",
+        "tools": [
+          "Events_3_FindEvents",
+          "Events_3_BuyEventTickets",
+          "Messaging_1_ShareLocation",
+          "Trains_1_GetTrainTickets",
+          "Trains_1_FindTrains"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 13,
+        "id": "live_irrelevance_422-100-0",
+        "question": "\nRecord where the following query classified:  \n\"what is the weather like\"",
+        "tools": [
+          "record"
+        ],
+        "reading": "BORDERLINE"
+      },
+      {
+        "index": 14,
+        "id": "live_irrelevance_120-9-0",
+        "question": "Could you tell me the current weather in Boston, MA and also in San Francisco? Please provide the temperatures in Fahrenheit.",
+        "tools": [],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 15,
+        "id": "live_irrelevance_515-154-0",
+        "question": "I need details for interface with fabric Network4, node 5",
+        "tools": [
+          "requests.get"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 16,
+        "id": "live_irrelevance_280-62-0",
+        "question": "What is the price of the water?",
+        "tools": [
+          "weather.get",
+          "stock_price.get"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 17,
+        "id": "live_irrelevance_176-28-0",
+        "question": "whats currently going on?",
+        "tools": [
+          "get_movies",
+          "get_show_times"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 18,
+        "id": "live_irrelevance_466-129-1",
+        "question": "I want to build a visual question answering bot to answer a question from a text file named 'questiondetails.txt' about an image named 'cat.jpeg'. Could you initialize a pipeline on my GPU at index 0 ",
+        "tools": [
+          "load_model",
+          "process_data"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 19,
+        "id": "live_irrelevance_825-318-0",
+        "question": "what's the weather in london",
+        "tools": [
+          "user_authentication.login"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 20,
+        "id": "live_irrelevance_528-162-3",
+        "question": "do you know Daniel? ",
+        "tools": [
+          "introduction.greet"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 21,
+        "id": "live_irrelevance_589-184-0",
+        "question": "I want to go out to eat at an average priced place in Oakland.",
+        "tools": [
+          "Restaurants_2_ReserveRestaurant",
+          "Restaurants_2_FindRestaurants",
+          "RideSharing_2_GetRide"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 22,
+        "id": "live_irrelevance_430-105-0",
+        "question": "Can you fetch the server's response if I send a GET request to 'https://api.intent.com/query' with the following queries to recognize their corresponding intents: [hello, I want to transfer funds, sho",
+        "tools": [
+          "get_response"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 23,
+        "id": "live_irrelevance_519-157-0",
+        "question": "I need to change the date of my dentist appointment. Could you please check when it's currently scheduled and move it to November 1, 2024 at 4:00 PM in the America/New_York timezone?",
+        "tools": [
+          "reschedule",
+          "list_events"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 24,
+        "id": "live_irrelevance_245-48-0",
+        "question": "hi!",
+        "tools": [
+          "render_ui_single_select_widget",
+          "render_ui_multi_select_widget",
+          "render_ui_date_picker_widget",
+          "render_ui_finish"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 25,
+        "id": "live_irrelevance_865-351-1",
+        "question": "I'm planning a series of long weekend getaways for the upcoming year and I need to know when they'll occur in my country. Could you fetch me the list of long weekends for Canada in the year 2023? I'd ",
+        "tools": [
+          "SimpleQuestion.ask"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 26,
+        "id": "live_irrelevance_752-263-0",
+        "question": "Get the event shoes!",
+        "tools": [
+          "EventSettingsApi.get_custom_event_specifications",
+          "EventSettingsApi.get_event_specification_infos",
+          "EventSettingsApi.get_event_specification_infos_by_ids"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 27,
+        "id": "live_irrelevance_23-2-11",
+        "question": "On VirusTotal, could you show me the subdomains of domain paypal.com? Set the limit to 25 and use the continuation cursor 'pp_next'. My API key is pp_key123.",
+        "tools": [
+          "get_current_weather"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 28,
+        "id": "live_irrelevance_499-145-0",
+        "question": "Can you send to Mom an Email saying we should go out and play if Friday is okay.",
+        "tools": [
+          "python_send_mail",
+          "get_current_weather"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 29,
+        "id": "live_irrelevance_228-35-3",
+        "question": "I see that size M is still in stock, I want to exchange for a size M, I will bear the cost and packing. Please, I really want these pants for a long time, thank you in advance.",
+        "tools": [
+          "check_order_status"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 30,
+        "id": "live_irrelevance_804-305-8",
+        "question": "{\"data\":{\"eman\":{\"branches\":[\"eman2020.03\",\"emanTD\",\"eman2023.03\",\"eman2022.06\",\"eman2021.09\",\"eman2020.12\"]},\"spyglass\":{\"branches\":[\"TD\",\"VERDI2021.09\",\"VCS2023.12\",\"VCS2023.03\",\"VCS2022.06\",\"VCS202",
+        "tools": [
+          "product_list.retrieve",
+          "get_business_unit_mapping",
+          "product_selector.get_products",
+          "sce_api.get_products",
+          "product_volume.get_active_branches",
+          "sce_api.get_product_information"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 31,
+        "id": "live_irrelevance_605-193-7",
+        "question": "Hi, could you get me a regular Imaginative fiction movie please?",
+        "tools": [
+          "Movies_1_BuyMovieTickets",
+          "Movies_1_FindMovies",
+          "Movies_1_GetTimesForMovie"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 32,
+        "id": "live_irrelevance_298-73-5",
+        "question": "ed || ed || menggokil",
+        "tools": [
+          "get_detail_adriel_project",
+          "get_adriel_detail_experience_and_education",
+          "get_adriel_list_projects",
+          "get_adriel_experiences_and_education",
+          "get_adriel_profile",
+          "get_adriel_tech_stack"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 33,
+        "id": "live_irrelevance_424-101-1",
+        "question": "I want to ensure that I'm providing accurate information to my users depending on what they're looking for. If someone asks to 'show me my balance', which intent should I classify this query as from t",
+        "tools": [
+          "get_response"
+        ],
+        "reading": "BORDERLINE"
+      },
+      {
+        "index": 34,
+        "id": "live_irrelevance_108-5-2",
+        "question": "dont give me anything",
+        "tools": [
+          "ChaFod",
+          "ChaDri.change_drink"
+        ],
+        "reading": "BORDERLINE"
+      },
+      {
+        "index": 35,
+        "id": "live_irrelevance_130-11-5",
+        "question": "如何安装mbox?",
+        "tools": [
+          "get_current_weather",
+          "start_oncall",
+          "create_workspace",
+          "generate_password"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 36,
+        "id": "live_irrelevance_453-121-0",
+        "question": "The user did not provide a query",
+        "tools": [
+          "requests.get"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 37,
+        "id": "live_irrelevance_141-13-7",
+        "question": "공기청정기 켜",
+        "tools": [
+          "OpenWeatherMap.get_current_weather",
+          "HNA_WQA.search",
+          "HNA_NEWS.search",
+          "cookbook.search_recipe"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 38,
+        "id": "live_irrelevance_24-2-12",
+        "question": "I'm looking for SSL certificates associated with the IP 56.78.90.1 on VirusTotal. My API key for this task is 'sec_key4'.",
+        "tools": [
+          "get_current_weather"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 39,
+        "id": "live_irrelevance_13-2-1",
+        "question": "What is diffrence between cpu and gpu?",
+        "tools": [
+          "get_current_weather"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 40,
+        "id": "live_irrelevance_317-76-15",
+        "question": "Whst is the temperature in Antwerpen ",
+        "tools": [
+          "requests.get"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 41,
+        "id": "live_irrelevance_417-96-0",
+        "question": "Submit the assignment with ID: 1333 for the course with ID: 1444",
+        "tools": [
+          "order_processing.handle_order",
+          "process_transaction",
+          "user_authentication.login",
+          "api_name.get_weather_forecast",
+          "user_authentication",
+          "generate_report",
+          "archive_documents",
+          "user_authentication.validate",
+          "user_registration.create_account",
+          "user_authenticate"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 42,
+        "id": "live_irrelevance_194-32-7",
+        "question": "Hallo, ukuran XS tidak ada ya?",
+        "tools": [
+          "user_authentication.login"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 43,
+        "id": "live_irrelevance_386-81-47",
+        "question": "На полке нет товара \"Кефира 2.5% Молочный Знак, 900 мл\".\n\nВот несколько альтернативных товаров, которые я нашел на сайте магазина Перекресток:\n4261311 Кефир 1% Молочный Знак, 900мл, 0 шт.\n4198906 Кефи",
+        "tools": [
+          "requests.get"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 44,
+        "id": "live_irrelevance_568-176-0",
+        "question": "Help find a housekeeper who provides ironing services in Chiang Mai.",
+        "tools": [
+          "get_service_id",
+          "get_province_id"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 45,
+        "id": "live_irrelevance_647-205-1",
+        "question": "Search for something under the Play genre near Seattle.",
+        "tools": [
+          "Buses_3_FindBus",
+          "Buses_3_BuyBusTicket",
+          "Events_3_FindEvents",
+          "Events_3_BuyEventTickets",
+          "Hotels_2_BookHouse",
+          "Hotels_2_SearchHouse"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 46,
+        "id": "live_irrelevance_626-198-0",
+        "question": "I want to find a train.",
+        "tools": [
+          "Events_3_FindEvents",
+          "Events_3_BuyEventTickets",
+          "Hotels_2_BookHouse",
+          "Hotels_2_SearchHouse",
+          "Trains_1_GetTrainTickets",
+          "Trains_1_FindTrains",
+          "Travel_1_FindAttractions"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 47,
+        "id": "live_irrelevance_358-81-19",
+        "question": "Can you give me an API call?",
+        "tools": [
+          "requests.get"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 48,
+        "id": "live_irrelevance_591-186-0",
+        "question": "I would like to rent a house.",
+        "tools": [
+          "Hotels_2_BookHouse",
+          "Hotels_2_SearchHouse"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 49,
+        "id": "live_irrelevance_496-142-7",
+        "question": "dope",
+        "tools": [
+          "detail_project",
+          "detail_experience_and_education",
+          "list_projects",
+          "experiences_and_education",
+          "contact",
+          "get_tech_stack",
+          "help.display"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 50,
+        "id": "live_irrelevance_223-34-12",
+        "question": "Delete clothing items that are in stock and fall within the $50-$100 price range?",
+        "tools": [
+          "ProductSearch.execute"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 51,
+        "id": "live_irrelevance_850-340-0",
+        "question": "'Message' object is not subscriptable\n",
+        "tools": [
+          "chat_completions",
+          "generate_image",
+          "generate_completion",
+          "generation_claude"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 52,
+        "id": "live_irrelevance_502-147-0",
+        "question": "get list of nodes for fabric fab-ed.",
+        "tools": [
+          "requests.get"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 53,
+        "id": "live_irrelevance_823-316-0",
+        "question": "hi",
+        "tools": [
+          "open_asset"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 54,
+        "id": "live_irrelevance_224-34-13",
+        "question": "When will size 40 be available?",
+        "tools": [
+          "ProductSearch.execute"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 55,
+        "id": "live_irrelevance_382-81-43",
+        "question": "Tell me a joke",
+        "tools": [
+          "requests.get"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 56,
+        "id": "live_irrelevance_61-2-49",
+        "question": "where is the capital of china",
+        "tools": [
+          "get_current_weather"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 57,
+        "id": "live_irrelevance_658-209-1",
+        "question": "I would lake to make a transaction with Diego.",
+        "tools": [
+          "Payment_1_RequestPayment",
+          "Payment_1_MakePayment"
+        ],
+        "reading": "NOT_ANSWER"
+      },
+      {
+        "index": 58,
+        "id": "live_irrelevance_767-276-0",
+        "question": "i love bike",
+        "tools": [
+          "get_current_weather"
+        ],
+        "reading": "ANSWER"
+      },
+      {
+        "index": 59,
+        "id": "live_irrelevance_543-168-6",
+        "question": "who is the president of usa",
+        "tools": [
+          "cmd_controller.execute"
+        ],
+        "reading": "ANSWER"
+      }
+    ]
+  }
+}

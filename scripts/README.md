@@ -14,6 +14,7 @@ the script's own first docstring line.
 | [`archive_external_model_labels.py`](archive_external_model_labels.py) | Archive the audit trail of the three external model annotators of P-DET-COVERAGE-v1 (34 §3). |
 | [`archive_pdet_model_batches.py`](archive_pdet_model_batches.py) | Archive the P-DET `model-a` audit trail out of the git-ignored working directory. |
 | [`assemble_m1_preference_dataset.py`](assemble_m1_preference_dataset.py) | Assemble the frozen M1 calibration preference dataset. |
+| [`audit_bfcl_answer_supply.py`](audit_bfcl_answer_supply.py) | Size and screen BFCL's no-call items as a source for Study 002's held-out ANSWER stratum. |
 | [`audit_campaign_final.py`](audit_campaign_final.py) | Adversarial re-derivation of every campaign headline number. CPU only, no GPU calls. |
 | [`audit_canonical_v2_final_direct.py`](audit_canonical_v2_final_direct.py) | DIRECT in Study 001's training corpus, canonical-v2-final. Counts only (35 §5, owner decision 2026-09-17). |
 | [`audit_corpus_direct_prevalence.py`](audit_corpus_direct_prevalence.py) | How rare is DIRECT across the whole normalization-v3 corpus? Counts only (35 §4, owner decision 2026-09-17). |
@@ -108,5 +109,6 @@ the script's own first docstring line.
 |---|---|
 | [`reporting/generate_experiment_status.py`](reporting/generate_experiment_status.py) | Generate the machine-checkable experiment status view at ``docs/EXPERIMENT_STATUS.md``. |
 | [`reporting/generate_indexes.py`](reporting/generate_indexes.py) | Generate the directory indexes ``reports/README.md``, ``scripts/README.md`` and ``docs/README.md``. |
+| [`reporting/generate_source_views.py`](reporting/generate_source_views.py) | Generate the data-source views: ``docs/datasets/SOURCE_REGISTRY.md`` and ``SOURCE_SCREENING.md``. |
 
-83 scripts.
+85 scripts.

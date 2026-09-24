@@ -25,6 +25,39 @@ A source enters `datasets.yaml` only after it is adopted. The firewall
 and `allowed_splits` in that file. Keeping candidates out of it means a candidate can never become trainable
 by accident.
 
+## Step 0: Screen before you adopt
+
+Candidates for a purpose (a training source, an evaluation population, a benchmark) are screened in
+`registry/source_screening.yaml` before any is adopted. A screening records:
+- **the need,** and the document that sizes it (`requirement_source`);
+- **the criteria,** each a test a candidate passes or fails;
+- **the search,** its date and method, the written report, and the artifacts behind its numbers;
+- **every candidate considered,** with the fields below.
+
+Each candidate carries:
+- one verdict per criterion: PASS, PARTIAL, FAIL, UNKNOWN or NOT_APPLICABLE;
+- a count of the items that fit the purpose, and the basis for that count;
+- evidence, as https URLs or repository paths;
+- a decision:
+  - **SHORTLISTED**, which fails no criterion;
+  - **EXCLUDED**, which names the failing criteria that decide it;
+  - **WATCHLIST**, which names what would change the verdict.
+
+The rejected candidates stay in the log. That is the point of it: a reader can see what was looked at and why
+each exclusion happened, as in a PRISMA flow. The flow counts are generated, never typed:
+
+```bash
+.venv/Scripts/python.exe scripts/reporting/generate_source_views.py   # docs/datasets/SOURCE_SCREENING.md, SOURCE_REGISTRY.md
+```
+
+Adopting a candidate is the study owner's decision. Record it in the screening's `owner_decision`, then add the
+source to `registry/datasets.yaml` with the steps below. The validator requires an adopted candidate to be both
+shortlisted and registered.
+
+A number in the screening report comes from a committed artifact, as in
+`reports/source-screening/study-002-answer-heldout/`, where `scripts/audit_bfcl_answer_supply.py` regenerates
+the sizing and overlap figures. A reader's sizing judgement is stored as its own file, labelled as not gold.
+
 ## Step 1: Pin the bytes
 
 1. **Pin an immutable revision.** Use the Hub commit, or the git commit for GitHub-hosted data. Never pin a

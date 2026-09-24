@@ -1,0 +1,48 @@
+{
+  "artifact": "bfcl-answer-sizing",
+  "method": "ANSWER share of a seeded sample scaled to the file; 95% Wilson interval, low end from ANSWER readings, high end from ANSWER + BORDERLINE",
+  "per_file": {
+    "irrelevance": {
+      "answer_95_high": 209,
+      "answer_95_low": 135,
+      "answer_point_estimate": 168,
+      "file": "BFCL_v4_irrelevance.json",
+      "population": 240,
+      "readings": {
+        "ANSWER": 35,
+        "BORDERLINE": 4,
+        "NOT_ANSWER": 11
+      },
+      "sampled": 50
+    },
+    "live_irrelevance": {
+      "answer_95_high": 391,
+      "answer_95_low": 139,
+      "answer_point_estimate": 221,
+      "file": "BFCL_v4_live_irrelevance.json",
+      "population": 884,
+      "readings": {
+        "ANSWER": 15,
+        "BORDERLINE": 4,
+        "NOT_ANSWER": 41
+      },
+      "sampled": 60
+    }
+  },
+  "readings_file": "reports/source-screening/study-002-answer-heldout/answer-sizing-readings.json",
+  "seed": 20260924,
+  "source": {
+    "repository": "ShishirPatil/gorilla",
+    "revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+    "sha256": {
+      "BFCL_v4_irrelevance.json": "2b6ed4c2e992cdcf5f1678a701851f944bef7550ee026ed1ddb89efed5be01a6",
+      "BFCL_v4_live_irrelevance.json": "6559fda2beaceb609a2cd2e504c65b4a56cb448e1ef88fddfd199e163d163349"
+    }
+  },
+  "status": "SIZING_ESTIMATE_NOT_GOLD",
+  "total": {
+    "high": 600,
+    "low": 274,
+    "point": 389
+  }
+}

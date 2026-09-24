@@ -49,6 +49,7 @@ REPORT_DIRECTORIES: dict[str, tuple[str, str]] = {
     "pdet-coverage-v2": ("Study 002", "P-DET-COVERAGE-v2: population, three-model labels, reference, audit trails"),
     "prose-classifier": ("Study 002", "Decision-classifier development sets, check rounds and one-shot tests; see its README"),
     "releases": ("Study 001", "Hugging Face publication records"),
+    "source-screening": ("Study 002", "Data-source screenings: the written report and the artifacts behind its numbers"),
     "training": ("Study 001", "Pre-training component-gate evidence"),
     "visual": ("Study 001", "Figures"),
 }

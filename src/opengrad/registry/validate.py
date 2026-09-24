@@ -13,6 +13,7 @@ from opengrad.registry.validators import (
     validate_reconstructed_events,
     validate_references,
     validate_semantic_consistency,
+    validate_source_screening,
     validate_structure,
 )
 from opengrad.verification import (
@@ -29,12 +30,14 @@ __all__ = [
     "_load_datasets",
     "audit",
     "check_freeze",
+    "check_source_screening",
     "result_from",
     "validate",
     "validate_freeze",
     "validate_publication_records",
     "validate_reconstructed_events",
     "validate_references",
+    "validate_source_screening",
     "validate_structure",
 ]
 
@@ -168,6 +171,7 @@ def validate(root: Path) -> list[str]:
         "provenance",
         "freeze",
         "semantic",
+        "screening",
     ):
         errors.extend(report[gate].all_errors())
     return errors
@@ -294,6 +298,17 @@ def check_references(root: Path) -> ValidationResult:
     ids = _candidate_ids(records)
     errors = [load_error] if load_error else validate_references(root)
     return result_from("registry references", REQUIRED_NONEMPTY, ids, errors)
+
+
+def check_source_screening(root: Path) -> ValidationResult:
+    """Every screened candidate is a census member.
+
+    A repository without a screening log has nothing to screen (OPTIONAL); one with a log must
+    discover candidates in it, so a log that parses to nothing cannot pass.
+    """
+    ids, errors = validate_source_screening(root)
+    present = (root / "registry/source_screening.yaml").is_file()
+    return result_from("source screening", REQUIRED_NONEMPTY if present else OPTIONAL, ids, errors)
 
 
 def check_publication_records(root: Path) -> ValidationResult:
@@ -491,6 +506,7 @@ def audit(root: Path) -> dict[str, ValidationResult]:
         "provenance": check_verified_claims(root),
         "freeze": check_freeze(root),
         "semantic": check_semantic_consistency(root),
+        "screening": check_source_screening(root),
     }
 
 

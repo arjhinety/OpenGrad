@@ -147,7 +147,102 @@ def _record_schema_errors(
         record_id = str(record.get("id", "<missing id>")) if isinstance(record, dict) else "?"
         for error in sorted(validator.iter_errors(record), key=lambda e: list(e.absolute_path)):
             where = ".".join(str(part) for part in error.absolute_path) or "(record)"
-            errors.append(f"{name}: {record_id}: {where}: {error.message}")
+            errors.append(f"{record_id}: {where}: {error.message} ({name} record schema)")
+    return errors
+
+
+SOURCE_SCREENING = "registry/source_screening.yaml"
+SOURCE_SCREENING_SCHEMA = "registry/source_screening.schema.json"
+
+
+def validate_source_screening(root: Path) -> tuple[list[str], list[str]]:
+    """Check the screening log; return (candidate ids as `<screening>/<candidate>`, errors).
+
+    Beyond the schema, the decisions must follow from the verdicts: every candidate is judged on
+    every criterion, an exclusion names criteria that actually failed, a shortlisted candidate fails
+    none, and an adopted candidate is registered in datasets.yaml.
+    """
+    path = root / SOURCE_SCREENING
+    if not path.is_file():
+        return [], []
+    try:
+        registry = load_yaml(path)
+    except (ImportError, OSError, TypeError, ValueError) as exc:
+        return [], [f"source_screening.yaml: {exc}"]
+    if not isinstance(registry, dict):
+        return [], ["source_screening.yaml: not a mapping"]
+    ids: list[str] = []
+    errors = _record_schema_errors(
+        root, registry, "source_screening.yaml", "screenings", expected=SOURCE_SCREENING_SCHEMA
+    )
+    try:
+        datasets = load_yaml(root / "registry/datasets.yaml") or {}
+    except (ImportError, OSError, TypeError, ValueError):
+        datasets = {}
+    registered = {str(r.get("id")) for r in datasets.get("datasets", []) if isinstance(r, dict)}
+    for screening in registry.get("screenings") or []:
+        if not isinstance(screening, dict):
+            continue
+        sid = str(screening.get("id"))
+        criteria = [
+            str(c.get("id")) for c in screening.get("criteria") or [] if isinstance(c, dict)
+        ]
+        search = screening.get("search") or {}
+        local = [
+            screening.get("requirement_source"),
+            search.get("report"),
+            *(search.get("artifacts") or []),
+        ]
+        for reference in local:
+            if isinstance(reference, str) and not (root / reference).exists():
+                errors.append(f"{sid}: path does not exist: {reference}")
+        candidates = [c for c in screening.get("candidates") or [] if isinstance(c, dict)]
+        seen: set[str] = set()
+        for candidate in candidates:
+            cid = f"{sid}/{candidate.get('id')}"
+            ids.append(cid)
+            if cid in seen:
+                errors.append(f"{cid}: duplicate candidate id")
+            seen.add(cid)
+            errors += _candidate_errors(root, cid, candidate, criteria)
+        decision = screening.get("owner_decision") or {}
+        shortlisted = {str(c.get("id")) for c in candidates if c.get("decision") == "SHORTLISTED"}
+        for adopted in decision.get("adopted") or []:
+            if adopted not in shortlisted:
+                errors.append(f"{sid}: adopted candidate '{adopted}' is not SHORTLISTED")
+            if adopted not in registered:
+                errors.append(
+                    f"{sid}: adopted candidate '{adopted}' is not in registry/datasets.yaml"
+                )
+    return ids, errors
+
+
+def _candidate_errors(
+    root: Path, cid: str, candidate: dict[str, Any], criteria: list[str]
+) -> list[str]:
+    errors = []
+    verdicts = candidate.get("verdicts") or {}
+    if sorted(verdicts) != sorted(criteria):
+        errors.append(
+            f"{cid}: verdicts {sorted(verdicts)} do not match the criteria {sorted(criteria)}"
+        )
+    failing = {key for key, value in verdicts.items() if (value or {}).get("result") == "FAIL"}
+    decision = candidate.get("decision")
+    if decision == "SHORTLISTED" and failing:
+        errors.append(f"{cid}: SHORTLISTED but fails {sorted(failing)}")
+    for criterion in candidate.get("decisive_criteria") or []:
+        if criterion not in failing:
+            errors.append(f"{cid}: decisive criterion {criterion} is not a FAIL verdict")
+    references = list(candidate.get("evidence") or [])
+    artifact = (candidate.get("answer_items") or {}).get("estimate_artifact")
+    if artifact:
+        references.append(artifact)
+    for reference in references:
+        text = str(reference)
+        if text.startswith("https://"):
+            continue
+        if text.startswith("http://") or not (root / text).exists():
+            errors.append(f"{cid}: evidence is neither an https URL nor an existing path: {text}")
     return errors
 
 

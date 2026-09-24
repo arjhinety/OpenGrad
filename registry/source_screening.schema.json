@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/arrogance231/OpenGrad/registry/source_screening.schema.json",
+  "title": "OpenGrad source screening (registry/source_screening.yaml, schema_version 1)",
+  "description": "One screening per purpose: the need, the criteria every candidate is judged against, the search, and every candidate considered, with a verdict per criterion and a decision, including the ones rejected. It follows the reporting logic of a PRISMA flow: a reader can see what was looked at and why each exclusion happened. The flow counts are derived from the records (docs/datasets/SOURCE_SCREENING.md), never typed. The training firewall never reads this file; an adopted candidate is copied into registry/datasets.yaml under registry/dataset_record.schema.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "question", "purpose", "requirement_source", "opened", "owner_decision", "search", "criteria", "candidates"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "question": {"type": "string", "minLength": 1},
+    "purpose": {
+      "description": "What an adopted candidate would become.",
+      "enum": ["TRAINING_SOURCE", "EVALUATION_POPULATION", "BENCHMARK"]
+    },
+    "requirement_source": {
+      "description": "Repository path of the document that states the need and its sizing.",
+      "type": "string",
+      "minLength": 1
+    },
+    "opened": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "owner_decision": {
+      "description": "PENDING until the study owner decides; then the ids adopted, or DECLINED.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["PENDING", "ADOPTED", "DECLINED"]},
+        "adopted": {"type": "array", "items": {"type": "string"}},
+        "recorded_in": {"type": "string"},
+        "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"}
+      }
+    },
+    "search": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "method", "report"],
+      "properties": {
+        "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+        "method": {"type": "string", "minLength": 1},
+        "report": {"description": "Repository path of the written screening report.", "type": "string"},
+        "artifacts": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "test"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^C[0-9]+$"},
+          "name": {"type": "string", "pattern": "^[a-z_]+$"},
+          "test": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "candidates": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/candidate"}}
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "display_name", "kind", "locator", "license", "answer_items", "verdicts", "decision", "evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*$"},
+        "display_name": {"type": "string", "minLength": 1},
+        "kind": {
+          "description": "ITEM_SOURCE supplies finished items. QUESTION_SOURCE supplies questions that curation pairs with tools.",
+          "enum": ["ITEM_SOURCE", "QUESTION_SOURCE"]
+        },
+        "locator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url", "revision"],
+          "properties": {
+            "url": {"type": "string", "pattern": "^https://"},
+            "revision": {"description": "Immutable revision read, or null when none was pinned.", "type": ["string", "null"]},
+            "files": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "license": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "source"],
+          "properties": {
+            "value": {"description": "SPDX identifier, NONE (no licence found), UNRESOLVED or CUSTOM.", "type": "string", "minLength": 1},
+            "source": {"type": "string", "minLength": 1},
+            "note": {"type": "string"}
+          }
+        },
+        "answer_items": {
+          "description": "How many items fit the purpose, and on what basis.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["basis"],
+          "properties": {
+            "basis": {"enum": ["DATA_SAMPLE", "DATA_COUNT", "PAPER", "BY_DESIGN_ZERO", "NOT_ESTIMATED"]},
+            "count": {"type": ["integer", "null"], "minimum": 0},
+            "estimate_artifact": {"type": "string"},
+            "note": {"type": "string"}
+          }
+        },
+        "verdicts": {
+          "description": "One verdict per criterion id.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["result"],
+            "properties": {
+              "result": {"enum": ["PASS", "PARTIAL", "FAIL", "UNKNOWN", "NOT_APPLICABLE"]},
+              "note": {"type": "string"}
+            }
+          }
+        },
+        "decision": {
+          "description": "SHORTLISTED: no criterion fails. EXCLUDED: names the failing criteria that decide it. WATCHLIST: blocked by something that can change, named in revisit_when.",
+          "enum": ["SHORTLISTED", "EXCLUDED", "WATCHLIST"]
+        },
+        "decisive_criteria": {"type": "array", "items": {"type": "string", "pattern": "^C[0-9]+$"}, "minItems": 1},
+        "revisit_when": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "notes": {"type": "string"}
+      },
+      "allOf": [
+        {"if": {"properties": {"decision": {"const": "EXCLUDED"}}}, "then": {"required": ["decisive_criteria"]}},
+        {"if": {"properties": {"decision": {"const": "WATCHLIST"}}}, "then": {"required": ["revisit_when"]}}
+      ]
+    }
+  }
+}

@@ -48,6 +48,21 @@ description: How OpenGrad's registries, provenance claims and written records st
   checks `papers` ids, evidence paths and that every distribution URL carries the pinned revision.
 - **Croissant.** Each schema property names its Croissant 1.1 / Croissant RAI 1.0 counterpart in `x-croissant`;
   `responsible_use` holds the RAI fields and needs `evidence`.
+- **Screen before adopting.** Every candidate considered for a purpose, including the rejected ones, goes in
+  `registry/source_screening.yaml` (`registry/source_screening.schema.json`). The `screening` gate of
+  `opengrad-validate` checks it:
+  - every candidate has a verdict per criterion;
+  - an EXCLUDED candidate names FAIL criteria;
+  - a SHORTLISTED candidate fails none;
+  - evidence resolves;
+  - an adopted candidate is also registered in `datasets.yaml`.
+
+  `owner_decision` stays PENDING until the study owner decides; `tests/registry/test_source_screening.py` pins
+  it.
+- **Views are generated.** `scripts/reporting/generate_source_views.py` writes `docs/datasets/SOURCE_REGISTRY.md`
+  and `docs/datasets/SOURCE_SCREENING.md`, including the screening flow counts; the test requires them current.
+  Numbers in a screening report come from its artifacts. The BFCL figures come from
+  `scripts/audit_bfcl_answer_supply.py`, and the same test checks the report against them.
 
 ## Provenance: every verified claim needs an immutable anchor
 

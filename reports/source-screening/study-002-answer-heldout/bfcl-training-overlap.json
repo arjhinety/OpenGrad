@@ -1,0 +1,474 @@
+{
+  "artifact": "bfcl-training-overlap",
+  "corpora_root": "data/processed/normalization-v1",
+  "corpus_user_turns": {
+    "button.jsonl": 7941,
+    "glaive": 242502,
+    "looptool": 85691,
+    "toolace": 23186,
+    "when2call-llm-judge": 299,
+    "when2call-mcq": 3648,
+    "when2call-preference": 9000,
+    "when2call-sft": 14829,
+    "xlam": 59370
+  },
+  "exact_matches": 40,
+  "flagged": 62,
+  "flagged_by_file": {
+    "irrelevance": 7,
+    "live_irrelevance": 55
+  },
+  "half_contained": 49,
+  "items": {
+    "irrelevance_1": {
+      "contained": [
+        "xlam"
+      ],
+      "exact": []
+    },
+    "irrelevance_103": {
+      "contained": [
+        "glaive",
+        "xlam"
+      ],
+      "exact": []
+    },
+    "irrelevance_228": {
+      "contained": [
+        "xlam"
+      ],
+      "exact": []
+    },
+    "irrelevance_52": {
+      "contained": [
+        "button.jsonl",
+        "glaive"
+      ],
+      "exact": []
+    },
+    "irrelevance_7": {
+      "contained": [
+        "when2call-preference",
+        "when2call-sft",
+        "xlam"
+      ],
+      "exact": []
+    },
+    "irrelevance_70": {
+      "contained": [
+        "glaive"
+      ],
+      "exact": []
+    },
+    "irrelevance_9": {
+      "contained": [
+        "when2call-preference",
+        "when2call-sft",
+        "xlam"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_10-1-0": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_11-1-1": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_118-7-8": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_119-8-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_120-9-0": {
+      "contained": [
+        "looptool",
+        "when2call-mcq"
+      ],
+      "exact": [
+        "looptool"
+      ]
+    },
+    "live_irrelevance_121-9-1": {
+      "contained": [
+        "looptool"
+      ],
+      "exact": [
+        "looptool"
+      ]
+    },
+    "live_irrelevance_122-9-2": {
+      "contained": [
+        "looptool"
+      ],
+      "exact": [
+        "looptool"
+      ]
+    },
+    "live_irrelevance_123-9-3": {
+      "contained": [
+        "looptool"
+      ],
+      "exact": [
+        "looptool"
+      ]
+    },
+    "live_irrelevance_124-10-0": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_136-13-2": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_155-17-2": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_164-21-0": {
+      "contained": [
+        "glaive",
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_173-27-0": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_184-31-3": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_198-32-11": {
+      "contained": [
+        "toolace"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_293-73-0": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_305-76-3": {
+      "contained": [
+        "glaive"
+      ],
+      "exact": [
+        "glaive"
+      ]
+    },
+    "live_irrelevance_309-76-7": {
+      "contained": [
+        "glaive"
+      ],
+      "exact": [
+        "glaive"
+      ]
+    },
+    "live_irrelevance_329-76-27": {
+      "contained": [
+        "looptool"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_342-81-3": {
+      "contained": [
+        "glaive"
+      ],
+      "exact": [
+        "glaive"
+      ]
+    },
+    "live_irrelevance_352-81-13": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_380-81-41": {
+      "contained": [],
+      "exact": [
+        "glaive"
+      ]
+    },
+    "live_irrelevance_398-81-59": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_44-2-32": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_502-147-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_507-149-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_559-172-0": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_560-172-1": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_562-172-3": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_565-173-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_567-175-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_568-176-0": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_569-177-0": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_576-179-5": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_584-182-4": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_587-183-0": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_589-184-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_593-188-0": {
+      "contained": [
+        "glaive"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_698-227-1": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_708-232-0": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_739-253-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_745-256-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": []
+    },
+    "live_irrelevance_751-262-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_77-2-65": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_783-292-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_785-294-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_786-295-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_791-300-0": {
+      "contained": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_808-307-0": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_809-308-0": {
+      "contained": [],
+      "exact": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_810-309-0": {
+      "contained": [],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_811-309-1": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_812-310-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_813-311-0": {
+      "contained": [],
+      "exact": [
+        "when2call-llm-judge",
+        "when2call-mcq"
+      ]
+    },
+    "live_irrelevance_815-313-0": {
+      "contained": [
+        "when2call-mcq"
+      ],
+      "exact": [
+        "when2call-mcq"
+      ]
+    }
+  },
+  "method": "normalised exact match of each BFCL question against every corpus user turn, plus 8-gram containment >= 0.5 in one corpus",
+  "questions": 1124,
+  "status": "MEASURED"
+}
