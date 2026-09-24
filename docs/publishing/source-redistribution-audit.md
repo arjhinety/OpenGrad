@@ -34,3 +34,17 @@ The Apache-2.0 license in the OpenGrad repository applies to OpenGrad source cod
 ## Recheck requirement
 
 Upstream cards, repository terms, gated conditions, and redistribution status must be rechecked immediately before any future update. The v1.0.0 release includes xLAM under the documented CC BY 4.0 attribution and modification terms; its upstream access gate is not reproduced downstream.
+
+## Later changes (appended 2026-09-24)
+
+The table above is the dated record of the 2026-09-04 decision and is not rewritten.
+`registry/datasets.yaml` moved to schema version 2 on 2026-09-24
+(`registry/dataset_record.schema.json`), with these effects on this audit:
+- **One spelling per outcome.** xLAM's `PERMITTED_WITH_ATTRIBUTION` is now spelled
+  `REDISTRIBUTION_WITH_ATTRIBUTION`, the same outcome the other sources have. The upstream gate the distinction
+  recorded is `upstream_access_mode: gated`.
+- **Each record names this audit** as its `redistribution_basis`.
+- **Current per-source view.** The generated [`docs/datasets/SOURCE_REGISTRY.md`](../datasets/SOURCE_REGISTRY.md)
+  shows the current per-source status.
+- **Drift test.** `tests/registry/test_source_docs_agree.py` fails if this table's revisions stop matching the
+  registry.

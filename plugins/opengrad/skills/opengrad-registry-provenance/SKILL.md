@@ -68,6 +68,9 @@ description: How OpenGrad's registries, provenance claims and written records st
   it.
 - **Views are generated.** `scripts/reporting/generate_source_views.py` writes `docs/datasets/SOURCE_REGISTRY.md`
   and `docs/datasets/SOURCE_SCREENING.md`, including the screening flow counts; the test requires them current.
+  Two hand-written documents still carry revision tables: the dated redistribution audit and
+  `docs/data/normalization-sources.md`. `tests/registry/test_source_docs_agree.py` fails when either disagrees
+  with the registry.
   Numbers in a screening report come from its artifacts. The BFCL figures come from
   `scripts/audit_bfcl_answer_supply.py`, and the same test checks the report against them.
 
