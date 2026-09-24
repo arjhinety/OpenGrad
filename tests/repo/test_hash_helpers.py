@@ -31,6 +31,8 @@ ALLOWED = {
     "scripts/modal/gguf_study.py::_sha256": _MODAL,
     "src/opengrad/data/classifier_input.py::_sha256_bytes": _RECORDED,
     "src/opengrad/data/normalization_v3.py::file_sha256": _RECORDED,
+    # ANSWER-STRATA-v1's manifest records this module's code_sha256_lf (study_002_prereg_v9).
+    "src/opengrad/verification/answer_strata.py::_sha256": _RECORDED,
     "src/opengrad/verification/classifier_devcheck.py::_sha256": _RECORDED,
     "src/opengrad/verification/classifier_devset.py::_sha256": _RECORDED,
     "src/opengrad/verification/classifier_devset_v2.py::_sha256": _RECORDED,

@@ -48,7 +48,15 @@ TASK_SPECS: dict[str, tuple[str, str, Path]] = {
         "docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md",
         Path("reports/pdet-coverage-v2/reference"),
     ),
+    # The ANSWER strata candidates (41 §9) use the same three annotators and the same consensus rule.
+    "answer-strata-v1": (
+        "study_002_prereg_v9",
+        "docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md",
+        Path("reports/study-002/answer-strata-v1/reference"),
+    ),
 }
+#: The reference's artifact kind, by task; P-DET-COVERAGE tasks keep the kind their references were built with.
+ARTIFACT_KINDS = {"answer-strata-v1": "ANSWER_STRATA_MODEL_CONSENSUS_REFERENCE"}
 TASKS = tuple(TASK_SPECS)
 UNANIMOUS = "unanimous"
 MAJORITY = "two_of_three"
@@ -185,8 +193,10 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
     from opengrad.annotation.config import load_task_config
 
     manifest, records, item_ids = load_package(task, package, root)
-    references, summary = build_reference(records, item_ids)
     config = load_task_config(root / "configs" / "annotation" / f"{task}.yaml", root=root)
+    references, summary = build_reference(
+        records, item_ids, item_key=config.source.id_field or "pdetcov_id"
+    )
     declared = {item.annotator_id: item for item in config.model_annotators}
     payload = b"".join(
         (json.dumps(ref, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
@@ -198,7 +208,7 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
     reference_path = out / f"{task}.reference.jsonl"
     manifest_path = out / f"{task}.reference.manifest.json"
     reference_manifest = {
-        "artifact_kind": "PDET_COVERAGE_MODEL_CONSENSUS_REFERENCE",
+        "artifact_kind": ARTIFACT_KINDS.get(task, "PDET_COVERAGE_MODEL_CONSENSUS_REFERENCE"),
         "status": "MODEL_REFERENCE_PROVISIONAL",
         "statement": (
             "Reference labels from a two-of-three consensus of three non-Claude models, each labelling blind. "
