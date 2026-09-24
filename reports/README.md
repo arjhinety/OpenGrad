@@ -65,8 +65,8 @@ Terms: [glossary](../docs/GLOSSARY.md).
 | [`pdet-coverage/`](pdet-coverage/) | 34 | Study 002 | P-DET-COVERAGE-v1 (and its routing task): population, three-model labels, reference, audit trails |
 | [`pdet-coverage-v2/`](pdet-coverage-v2/) | 22 | Study 002 | P-DET-COVERAGE-v2: population, three-model labels, reference, audit trails |
 | [`prose-classifier/`](prose-classifier/) | 139 | Study 002 | Decision-classifier development sets, check rounds and one-shot tests; see its README |
-| [`releases/`](releases/) | 9 | Study 001 | Hugging Face publication records |
+| [`releases/`](releases/) | 10 | Study 001 | Hugging Face publication records |
 | [`training/`](training/) | 1 | Study 001 | Pre-training component-gate evidence |
 | [`visual/`](visual/) | 12 | Study 001 | Figures |
 
-326 tracked files in total.
+327 tracked files in total.
