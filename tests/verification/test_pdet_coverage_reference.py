@@ -11,8 +11,10 @@ from opengrad.verification.pdet_coverage_reference import (
     ANNOTATORS,
     MAJORITY,
     NO_CONSENSUS,
+    TASK_ANNOTATORS,
     UNANIMOUS,
     ReferenceError,
+    annotators_for,
     build_reference,
     consensus,
     load_package,
@@ -129,3 +131,35 @@ def test_other_sessions_are_ignored_and_foreign_items_refused() -> None:
     assert refs[0]["reference_label"] == "DIRECT"
     with pytest.raises(ReferenceError, match="not an item"):
         build_reference(records({"zz": ("DIRECT", "DIRECT", "DIRECT")}), ["i1"])
+
+
+# study_002_prereg_v10 (42): answer-strata-v1 has two annotators, and both must give the label.
+PAIR = (GEMINI, DEEPSEEK)
+
+
+def test_answer_strata_has_the_two_annotators_of_42_and_other_tasks_keep_three() -> None:
+    assert annotators_for("answer-strata-v1") == PAIR == TASK_ANNOTATORS["answer-strata-v1"]
+    assert annotators_for("pdet-coverage-v2") == ANNOTATORS
+
+
+def test_two_annotators_must_agree_and_a_disagreement_is_no_consensus() -> None:
+    agree = consensus({GEMINI: "ANSWER", DEEPSEEK: "ANSWER"}, PAIR)
+    assert agree == {"reference_label": "ANSWER", "consensus": UNANIMOUS, "dissenting_annotator": None}
+    split = consensus({GEMINI: "ANSWER", DEEPSEEK: "UNSUPPORTED"}, PAIR)
+    assert split == {"reference_label": None, "consensus": NO_CONSENSUS, "dissenting_annotator": None}
+    with pytest.raises(ReferenceError):
+        consensus({GEMINI: "ANSWER", GPT: "ANSWER"}, PAIR)
+
+
+def test_a_two_annotator_reference_ignores_a_third_session_and_counts_one_pair() -> None:
+    rows = [
+        {"answer_id": item, "annotator_id": annotator, "status": "labeled", "gold_policy_label": label,
+         "ambiguity_status": "NONE"}
+        for item, labels in {"a1": ("ANSWER", "ANSWER"), "a2": ("ANSWER", "CALL")}.items()
+        for annotator, label in zip(PAIR, labels)
+    ] + [{"answer_id": "a2", "annotator_id": GPT, "status": "labeled", "gold_policy_label": "ANSWER"}]
+    refs, summary = build_reference(rows, ["a1", "a2"], item_key="answer_id", annotators=PAIR)
+    assert [ref["reference_label"] for ref in refs] == ["ANSWER", None]
+    assert refs[0]["reference_ambiguity_status"] == "NONE"
+    assert summary["consensus"] == {UNANIMOUS: 1, NO_CONSENSUS: 1}
+    assert summary["pairwise_agreement"] == {f"{GEMINI}|{DEEPSEEK}": 1}

@@ -1212,3 +1212,19 @@ artifact, so it is corrected in place and the correction recorded here (G15).
     the constructed items are distributed under CC-BY-SA-3.0.
   - **Lesson:** the rule the screening states was not followed for this one candidate. A licence is read from
     the dataset's own card or LICENSE file, never from the paper about it.
+
+## 27. `study_002_prereg_v10`: the `ANSWER` strata reference uses two models, not three
+
+**Added 2026-09-24.**
+
+- **What failed.** 41 declared three annotators for the `ANSWER` strata candidates. One of them,
+  gpt-5.6-sol, is refused by Codex for this account, so it could not label any item.
+- **The decision.** The study owner chose to proceed with the two remaining models, and to require that both
+  give the same label. [42](../docs/research/study-002/42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md) records it as
+  `study_002_prereg_v10`, in [03](../docs/research/study-002/03-PREREGISTRATION.md), in the same commit.
+- **When it was written.** At that point 160 of 1,767 items carried one model's label, and only the
+  completion counts had been read.
+- **Consequences, stated before the results:**
+  - the strata can only hold items both models agree on;
+  - no third model breaks a tie;
+  - this reference is not comparable as an instrument to P-DET-COVERAGE's two-of-three consensus.

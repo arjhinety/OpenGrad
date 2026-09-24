@@ -4,9 +4,10 @@
 # Amendment: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md §7-§9 (adopted).
 # - What is labelled: the response the assistant *should* give. No assistant response is shown.
 # - Items: both pools (natural and constructed), mixed and blinded.
-# - Reference: a three-model consensus (41 §9, as in 34), declared below.
+# - Reference: the agreement of the two models declared below; both must give the label (41 §9 as amended by
+#   42, study_002_prereg_v10).
 #
-#   python scripts/run_external_annotation.py answer-strata-v1 --annotator model.gpt-5.6-sol --size 20
+#   python scripts/run_external_annotation.py answer-strata-v1 --annotator model.deepseek-v4.1-flash --size 20
 
 task_id: answer-strata-v1
 version: "1"
@@ -130,7 +131,7 @@ protected_paths:
 
 state_db: .annotation/answer-strata-v1.sqlite3
 
-# The three-model consensus reference is computed separately (41 §9), never frozen as human gold.
+# The two-model reference is computed separately (41 §9, 42), never frozen as human gold.
 freeze:
   allowed_designs: [two_pass, single_annotator]
   require_adjudication: true
@@ -140,15 +141,11 @@ freeze:
     field_not_in:
       boundary_rule_cited: ["none"]
 
-# 41 §7: the three non-Claude annotators of 34. Their labels are model judgments (annotator_kind: model).
+# 41 §7 as amended by 42: two non-Claude annotators. gpt-5.6-sol, the third of 41, was removed before it
+# labelled any item: Codex refuses that model for this account (42 §1). Labels are model judgments.
 model_annotators:
   - annotator_id: model.gemini-3.8-flash-high
     model: Gemini 3.8 Flash (High)
-    procedure: configs/annotation/answer-strata-v1.model-procedure.md
-    procedure_sha256: 5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb
-    authorization: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md
-  - annotator_id: model.gpt-5.6-sol
-    model: gpt-5.6-sol
     procedure: configs/annotation/answer-strata-v1.model-procedure.md
     procedure_sha256: 5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb
     authorization: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md

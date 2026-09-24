@@ -10,6 +10,8 @@
 > - **What this document does:** it fixes every parameter of that recommendation before any item is drawn or
 >   labelled.
 > - **Where it is recorded:** in [03](03-PREREGISTRATION.md) and `reports/ERRATA.md` §26, in the same commit.
+> - **Amended:** §7 and §9 by [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md) (`study_002_prereg_v10`,
+>   2026-09-24). The reference is now two models that must both agree; the text below is kept as adopted.
 
 ## 1. Why
 

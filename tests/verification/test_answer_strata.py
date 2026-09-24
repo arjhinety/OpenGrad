@@ -63,7 +63,11 @@ def test_the_annotation_task_is_blind_to_pool_source_and_reference_answers() -> 
     procedure = ROOT / "configs/annotation/answer-strata-v1.model-procedure.md"
     digest = strata._sha256(procedure.read_bytes())
     annotators = config["model_annotators"]
-    assert len(annotators) == 3 and not any("claude" in a["annotator_id"] for a in annotators)
+    # 42 (study_002_prereg_v10): two annotators; gpt-5.6-sol was removed before labelling anything.
+    assert [a["annotator_id"] for a in annotators] == [
+        "model.gemini-3.8-flash-high",
+        "model.deepseek-v4.1-flash",
+    ]
     assert {a["procedure_sha256"] for a in annotators} == {digest}
 
 

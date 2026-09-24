@@ -937,8 +937,9 @@ datasets:
   - reports/source-screening/study-002-answer-heldout/bfcl-training-overlap.json
   - reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
   planned_initial_mixture_percent: null
-  notes: Pool N of the ANSWER strata candidate population (41 §4). Relabelled into the four modes by three
-    non-Claude models (41 §7-§9); its no-call labels are not used. Evaluation only, never trained on.
+  notes: Pool N of the ANSWER strata candidate population (41 §4). Relabelled into the four modes by two
+    non-Claude models that must agree (41 §7-§9 as amended by 42); its no-call labels are not used. Evaluation
+    only, never trained on.
 - id: bfcl-live-irrelevance
   display_name: BFCL live irrelevance
   organization: Gorilla (UC Berkeley)
@@ -1004,7 +1005,7 @@ datasets:
   planned_initial_mixture_percent: null
   notes: Pool N of the ANSWER strata candidate population (41 §4). Unmodified user traffic in several languages;
     When2Call's test set was built from an earlier release of it, so the §6 screen removed the shared items.
-    Relabelled by three non-Claude models; evaluation only, never trained on.
+    Relabelled by two non-Claude models that must agree (42); evaluation only, never trained on.
 - id: natural-questions-dev
   display_name: Natural Questions dev, open-domain short-answer questions (nq_open validation)
   organization: Google Research

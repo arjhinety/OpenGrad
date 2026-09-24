@@ -1,8 +1,9 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v9` (2026-09-24).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8 and v9 at
-> the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md)). Entries are
+> **Current version: `study_002_prereg_v10` (2026-09-24).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v10 at
+> the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
+> [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md)). Entries are
 > appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
@@ -341,3 +342,25 @@ Appended here rather than under "Amendments" so that line numbers other document
 - **Arms launched under an earlier version:** none. Nothing has been trained, and no `P-CONF` score exists.
 - **Full record:** [41-ANSWER-STRATA-AMENDMENT.md](41-ANSWER-STRATA-AMENDMENT.md); the ERRATA entry is
   `reports/ERRATA.md` §26.
+
+### `study_002_prereg_v10` — 2026-09-24
+
+- **Items changed:** [41](41-ANSWER-STRATA-AMENDMENT.md) §7 and §9.
+  - The `ANSWER` strata set is labelled by two non-Claude models: Gemini 3.8 Flash (High) and
+    deepseek-v4.1-flash.
+  - Its reference label is the label both give. A disagreement is `NO_CONSENSUS` and is excluded.
+- **Reason:** 41's third annotator cannot run. Codex refuses gpt-5.6-sol for this account ("not supported
+  when using Codex with a ChatGPT account"), including for a test prompt with no item in it.
+- **Owner decision:** 2026-09-24, *"Two-model rule (v10)"*, chosen over restoring access and over
+  substituting another model.
+- **Not changed:**
+  - the population (sha256 `25ef4c25…`), the screen, the rubric and the procedure file;
+  - 41 §10–§13;
+  - P-DET-COVERAGE and 34's three-model rule.
+- **Candidates already scored:** none.
+- **Labels already recorded:** deepseek-v4.1-flash had labelled 160 of 1,767 items; the other two models
+  none. Only completion counts were read, never a label.
+- **Stated consequence:** both models must agree, so the strata are smaller than a two-of-three rule would
+  give. Each is judged on that n (41 §10).
+- **Full record:** [42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md); the
+  ERRATA entry is `reports/ERRATA.md` §27.

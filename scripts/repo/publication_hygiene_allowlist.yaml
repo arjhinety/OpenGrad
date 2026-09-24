@@ -65,6 +65,14 @@
   category: placeholder
   count: 20
   reason: Upstream tool-use calibration text about lorem-ipsum generator APIs; content, not a placeholder.
+- path: docs/research/study-002/03-PREREGISTRATION.md
+  category: assistant_reference
+  count: 1
+  reason: The v10 entry quotes the provider's verbatim refusal ("... with a ChatGPT account"), the evidence for the amendment.
+- path: docs/research/study-002/42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md
+  category: assistant_reference
+  count: 1
+  reason: 42 §1 quotes the provider's verbatim refusal ("... with a ChatGPT account"), the evidence for the amendment.
 - path: registry/tool_behaviors.yaml
   category: assistant_reference
   count: 2

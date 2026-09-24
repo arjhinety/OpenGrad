@@ -48,15 +48,20 @@ TASK_SPECS: dict[str, tuple[str, str, Path]] = {
         "docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md",
         Path("reports/pdet-coverage-v2/reference"),
     ),
-    # The ANSWER strata candidates (41 §9) use the same three annotators and the same consensus rule.
+    # The ANSWER strata candidates (41 §9); their annotators and rule were amended by 42 (TASK_ANNOTATORS).
     "answer-strata-v1": (
-        "study_002_prereg_v9",
-        "docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md",
+        "study_002_prereg_v10",
+        "docs/research/study-002/42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md",
         Path("reports/study-002/answer-strata-v1/reference"),
     ),
 }
 #: The reference's artifact kind, by task; P-DET-COVERAGE tasks keep the kind their references were built with.
 ARTIFACT_KINDS = {"answer-strata-v1": "ANSWER_STRATA_MODEL_CONSENSUS_REFERENCE"}
+#: The declared annotators, by task, where they are not the three of 34. study_002_prereg_v10 (42) left
+#: answer-strata-v1 with two, whose labels must agree.
+TASK_ANNOTATORS: dict[str, tuple[str, ...]] = {
+    "answer-strata-v1": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
+}
 TASKS = tuple(TASK_SPECS)
 UNANIMOUS = "unanimous"
 MAJORITY = "two_of_three"
@@ -64,28 +69,43 @@ NO_CONSENSUS = "NO_CONSENSUS"
 LABEL_KEY = "gold_policy_label"
 
 
+RULES = {
+    3: "a two-of-three consensus of three non-Claude models",
+    2: "the agreement of two non-Claude models, both of which must give the label",
+}
+
+
+def annotators_for(task: str) -> tuple[str, ...]:
+    return TASK_ANNOTATORS.get(task, ANNOTATORS)
+
+
 class ReferenceError(ValueError):
     """The package cannot yield a reference: unverified, incomplete, or not these three annotators."""
 
 
-def consensus(votes: Mapping[str, str]) -> dict[str, Any]:
-    """The reference for one item from exactly the three declared annotators' labels."""
-    if set(votes) != set(ANNOTATORS):
-        raise ReferenceError(f"expected labels from {list(ANNOTATORS)}, got {sorted(votes)}")
+def consensus(votes: Mapping[str, str], annotators: Sequence[str] = ANNOTATORS) -> dict[str, Any]:
+    """The reference for one item from exactly the declared annotators' labels: two of three (34), or
+    both of two (42)."""
+    if set(votes) != set(annotators):
+        raise ReferenceError(f"expected labels from {list(annotators)}, got {sorted(votes)}")
     counts = Counter(votes.values())
     label, top = counts.most_common(1)[0]
-    if top == 3:
+    if top == len(annotators):
         return {"reference_label": label, "consensus": UNANIMOUS, "dissenting_annotator": None}
-    if top == 2:
+    if top == 2 and len(annotators) == 3:
         dissent = next(annotator for annotator, vote in votes.items() if vote != label)
         return {"reference_label": label, "consensus": MAJORITY, "dissenting_annotator": dissent}
     return {"reference_label": None, "consensus": NO_CONSENSUS, "dissenting_annotator": None}
 
 
 def build_reference(
-    records: Sequence[Mapping[str, Any]], item_ids: list[str], *, item_key: str = "pdetcov_id"
+    records: Sequence[Mapping[str, Any]],
+    item_ids: list[str],
+    *,
+    item_key: str = "pdetcov_id",
+    annotators: Sequence[str] = ANNOTATORS,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Per-item reference records and the summary, from exported session records of the three annotators.
+    """Per-item reference records and the summary, from exported session records of the declared annotators.
 
     Refuses unless each declared annotator labelled every item exactly once.
     """
@@ -93,7 +113,7 @@ def build_reference(
     ambiguity: dict[str, dict[str, Any]] = {item_id: {} for item_id in item_ids}
     for record in records:
         annotator = str(record.get("annotator_id"))
-        if annotator not in ANNOTATORS:
+        if annotator not in annotators:
             continue
         item_id = str(record.get(item_key))
         if item_id not in votes:
@@ -108,16 +128,16 @@ def build_reference(
         ambiguity[item_id][annotator] = record.get("ambiguity_status")
     missing = {
         annotator: sum(1 for item_id in item_ids if annotator not in votes[item_id])
-        for annotator in ANNOTATORS
+        for annotator in annotators
     }
     if any(missing.values()):
         raise ReferenceError(f"incomplete: items without a label, per annotator: {missing}")
 
     references = []
     for item_id in item_ids:
-        result = consensus(votes[item_id])
+        result = consensus(votes[item_id], annotators)
         label = result["reference_label"]
-        agreeing = [a for a in ANNOTATORS if label is not None and votes[item_id][a] == label]
+        agreeing = [a for a in annotators if label is not None and votes[item_id][a] == label]
         statuses = Counter(ambiguity[item_id][a] for a in agreeing)
         references.append(
             {
@@ -128,7 +148,7 @@ def build_reference(
                     if statuses and statuses.most_common(1)[0][1] >= 2
                     else None
                 ),
-                "votes": {annotator: votes[item_id][annotator] for annotator in ANNOTATORS},
+                "votes": {annotator: votes[item_id][annotator] for annotator in annotators},
                 "metric_eligible": label is not None,
             }
         )
@@ -140,11 +160,11 @@ def build_reference(
         ),
         "pairwise_agreement": {
             f"{a}|{b}": sum(1 for item_id in item_ids if votes[item_id][a] == votes[item_id][b])
-            for a, b in combinations(ANNOTATORS, 2)
+            for a, b in combinations(annotators, 2)
         },
         "annotator_label_counts": {
             annotator: dict(sorted(Counter(votes[i][annotator] for i in item_ids).items()))
-            for annotator in ANNOTATORS
+            for annotator in annotators
         },
         "dissent_by_annotator": dict(
             Counter(
@@ -158,7 +178,7 @@ def build_reference(
 def load_package(
     task: str, package: Path, root: Path = ROOT
 ) -> tuple[dict[str, Any], list[dict[str, Any]], list[str]]:
-    """A verified export package of ``task``: its manifest, the three annotators' records and the item ids."""
+    """A verified export package of ``task``: its manifest, the declared annotators' records and the item ids."""
     from opengrad.annotation.config import load_task_config
     from opengrad.annotation.export import verify_package
     from opengrad.annotation.items import load_source
@@ -177,7 +197,7 @@ def load_package(
     _digest, items = load_source(config)
     records: list[dict[str, Any]] = []
     sessions = {s["annotator_id"]: s for s in manifest.get("sessions") or []}
-    for annotator in ANNOTATORS:
+    for annotator in annotators_for(task):
         if annotator not in sessions:
             raise ReferenceError(f"the package has no session of {annotator}")
         path = package.parent / sessions[annotator]["file"]
@@ -194,8 +214,9 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
 
     manifest, records, item_ids = load_package(task, package, root)
     config = load_task_config(root / "configs" / "annotation" / f"{task}.yaml", root=root)
+    annotators = annotators_for(task)
     references, summary = build_reference(
-        records, item_ids, item_key=config.source.id_field or "pdetcov_id"
+        records, item_ids, item_key=config.source.id_field or "pdetcov_id", annotators=annotators
     )
     declared = {item.annotator_id: item for item in config.model_annotators}
     payload = b"".join(
@@ -211,7 +232,7 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
         "artifact_kind": ARTIFACT_KINDS.get(task, "PDET_COVERAGE_MODEL_CONSENSUS_REFERENCE"),
         "status": "MODEL_REFERENCE_PROVISIONAL",
         "statement": (
-            "Reference labels from a two-of-three consensus of three non-Claude models, each labelling blind. "
+            f"Reference labels from {RULES[len(annotators)]}, each labelling blind. "
             "Model judgments, not human gold; qualifications against it are MODEL_REFERENCE and provisional; "
             "agreement below is model-model agreement."
         ),
@@ -225,7 +246,7 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
                 "procedure": declared[annotator].procedure,
                 "procedure_sha256": declared[annotator].procedure_sha256,
             }
-            for annotator in ANNOTATORS
+            for annotator in annotators
         ],
         "population_sha256": manifest.get("source", {}).get("sha256")
         or manifest.get("source_sha256"),

@@ -61,7 +61,8 @@ FILE_POINTER = (
 )
 
 #: The declared annotators of amendment study_002_prereg_v5 and how each one is run. ``{last}`` is replaced
-#: by a path for the CLI's final message, where the CLI can write one.
+#: by a path for the CLI's final message, where the CLI can write one, and ``{workdir}`` by the isolated
+#: directory.
 ANNOTATORS: dict[str, dict[str, Any]] = {
     "model.gemini-3.8-flash-high": {
         "session": "model-gemini",
@@ -70,6 +71,10 @@ ANNOTATORS: dict[str, dict[str, Any]] = {
             "--model",
             "Gemini 3.8 Flash (High)",
             "--sandbox",
+            # agy 1.2.10 no longer takes its starting directory as the workspace: without this it looks for
+            # the input file in the user's home directory and finds nothing (measured 2026-09-24).
+            "--add-dir",
+            "{workdir}",
             "--print-timeout",
             "45m",
             "-p",
@@ -183,7 +188,13 @@ def run_once(
     """One isolated CLI run. Outputs are saved under ``directory``; nothing is printed."""
     workdir = Path(tempfile.mkdtemp(prefix="og-annotate-"))
     last = workdir.parent / f"{workdir.name}.last-message.txt"
-    argv = [executable, *(arg.replace("{last}", str(last)) for arg in spec["argv"])]
+    argv = [
+        executable,
+        *(
+            arg.replace("{last}", str(last)).replace("{workdir}", str(workdir))
+            for arg in spec["argv"]
+        ),
+    ]
     by_file = spec["input"] == "file"
     if by_file:
         (workdir / INPUT_FILE).write_bytes(prompt)
@@ -201,6 +212,9 @@ def run_once(
         exit_code, stdout, stderr = done.returncode, done.stdout, done.stderr
     except subprocess.TimeoutExpired as exc:
         exit_code, stdout, stderr = "timeout", exc.stdout or b"", exc.stderr or b""
+    except FileNotFoundError:
+        # npm-installed CLIs update themselves and briefly remove their launcher; the attempt is retried.
+        exit_code, stdout, stderr = "executable_missing", b"", b""
     ended = time.time()
     created = sorted(
         path.name for path in workdir.iterdir() if not (by_file and path.name == INPUT_FILE)
@@ -267,7 +281,6 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit(f"{spec['executable']} is not on PATH")
     config = load_task_config(ROOT / "configs" / "annotation" / f"{args.task}.yaml", root=ROOT)
     procedure = procedure_text(config, args.annotator)
-    version = cli_version(executable, spec["version_argv"])
     state_db = config.resolve(config.state_db)
     batch_dir = state_db.parent / f"{config.task_id}.model-batches" / spec["session"]
     batch_dir.mkdir(parents=True, exist_ok=True)
@@ -308,7 +321,7 @@ def main(argv: list[str] | None = None) -> int:
                 "task_id": config.task_id,
                 "session_id": spec["session"],
                 "annotator_id": args.annotator,
-                "cli_version": version,
+                "cli_version": cli_version(executable, spec["version_argv"]),
                 "batch_id": batch["batch_id"],
                 "batch_content_sha256": batch["content_sha256"],
                 "procedure_sha256": batch["procedure_sha256"],

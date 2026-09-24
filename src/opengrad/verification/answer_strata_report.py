@@ -1,4 +1,4 @@
-"""The ANSWER strata of ANSWER-STRATA-v1, from its three-model consensus reference (41 §9-§11).
+"""The ANSWER strata of ANSWER-STRATA-v1, from its two-model reference (41 §9-§11, amended by 42).
 
 Reads the committed candidate population (hash-checked against its manifest) and the consensus reference that
 ``python -m opengrad.verification.pdet_coverage_reference --task answer-strata-v1`` wrote, and reports:
@@ -166,12 +166,13 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         "artifact_kind": "ANSWER_STRATA_REPORT",
         "status": "MODEL_REFERENCE_PROVISIONAL",
         "statement": (
-            "The ANSWER strata of ANSWER-STRATA-v1: the items a two-of-three consensus of three non-Claude "
-            "models labels ANSWER, per pool. Model judgments, not human gold. Each stratum is judged on its own "
+            "The ANSWER strata of ANSWER-STRATA-v1: the items two non-Claude models both label ANSWER (41 §9 "
+            "as amended by 42), per pool. Model judgments, not human gold. Each stratum is judged on its own "
             "n (41 §10); no pool is redrawn."
         ),
         "amendment": strata.ADOPTION_AMENDMENT,
         "amendment_document": strata.PREREGISTRATION.as_posix(),
+        "reference_amendment": reference_manifest.get("amendment"),
         "population_sha256": reference_manifest["population_sha256"],
         "reference_manifest": (REFERENCE_DIR / REFERENCE_MANIFEST_NAME).as_posix(),
         "reference_sha256": reference_manifest["reference_sha256"],

@@ -93,8 +93,11 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   `.cache/answer-strata/`, and the screen needs `data/processed/normalization-v1`. Without them, `--verify` reports
   `BLOCKED_INPUT_MISSING` rather than re-deriving. Task `answer-strata-v1`
   (`configs/annotation/answer-strata-v1.yaml`, procedure `answer-strata-v1.model-procedure.md`) serves only 41 §8
-  and blinds pool, source and reference answers. It is labelled by the same three external annotators, with the
-  same finish-up steps. The strata are the two-of-three `ANSWER` items per pool, reported separately (41 §9).
+  and blinds pool, source and reference answers. Since `study_002_prereg_v10` (42) it is labelled by two external
+  annotators, Gemini and DeepSeek, because Codex refuses gpt-5.6-sol for this account. Export with
+  `--sessions model-gemini model-deepseek`. The strata are the items both label `ANSWER`, per pool, reported
+  separately (41 §9, 42). `pdet_coverage_reference.TASK_ANNOTATORS` holds that per-task annotator set; the
+  P-DET-COVERAGE tasks keep three.
   - **After the reference:** `pdet_coverage_reference --task answer-strata-v1` writes a `reference/`
     directory beside the population. Then `python -m opengrad.verification.answer_strata_report`
     (`src/opengrad/verification/answer_strata_report.py`) writes the per-stratum n, the §10 sizing status and the
