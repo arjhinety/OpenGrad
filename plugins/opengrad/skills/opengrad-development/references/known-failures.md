@@ -10,6 +10,7 @@ Failures present on `master` that no current change introduced. Confirm each by 
 | Was failing | Cause | Fix |
 |---|---|---|
 | GitHub CI stopped at `ruff check` (`EXE001`) before pytest ever ran | `scripts/verify_publication.py` had a shebang but git mode `100644` (only fails on Linux) | `git update-index --chmod=+x`; every shebang script must be `100755` |
+| GitHub CI stopped at `ruff check` (`EXE001`) again, 2026-09-24 | `scripts/reporting/generate_indexes.py` (and six other shebang files) committed as `100644`; ruff cannot see the bit on Windows | `tests/repo/test_executable_bits.py` reads modes from the git index, so it fails on every platform |
 | `tests/evaluation/test_baseline_runner.py` (2 tests) | `str(path.relative_to(root))` gives `\` on Windows, compared with `/` canonical paths | compare `relative_to(root).as_posix()` |
 | `tests/optimization/test_protocol.py` (3), `test_optional_import.py` (1) | artifact directory named from a checkpoint id containing `::`, illegal in Windows filenames | `artifact_directory_name` in `src/opengrad/optimization/protocol.py` maps unportable characters to `_` |
 | `test_vendored_ifeval_checkers_are_unmodified` | `core.autocrlf=true` checked the SHA-pinned vendored files out as CRLF | `.gitattributes`: `third_party/** -text` |
