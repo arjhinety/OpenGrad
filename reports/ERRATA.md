@@ -1154,3 +1154,26 @@ a separate, owner-approved step.
   string is NVIDIA's, it is public in their When2Call data, and it has been reported to them; a rewrite would
   not remove it from existing clones. The publication hygiene scan (`scripts/repo/check_publication_hygiene.py`)
   fails on any new occurrence.
+
+## 25. `bfcl-v4` recorded as contamination-`CLEAN` from a scan of placeholders
+
+**Added 2026-09-24.** `reports/data/benchmark_contamination_registry.json` is a living registry, not a pinned
+artifact, so it is corrected in place and the correction recorded here (G15).
+
+- **As written** (since 2026-09-10): `bfcl-v4` had `scan_status: CLEAN`, every level including level 5
+  `COMPLETED`, and `training_corpus_fingerprint: "sample-or-materialized-fingerprint"`.
+- **What that scan was.** `opengrad-benchmark contamination-scan` loaded ten tasks from the BFCL adapter, which
+  synthesizes placeholder tasks (`docs/evaluation/BENCHMARK_STRATEGY.md` section 6 already says no real BFCL data
+  has been scored). Given no `--training-data`, it compared them with two built-in fixture prompts. The scanner
+  then set level 5, the human audit, to `COMPLETED` itself, and called an empty queue `CLEAN`. No real benchmark
+  was compared with any real training corpus.
+- **A second defect in the same scanner.** Its level 1 ("exact") normalised whitespace and case before hashing,
+  so it was not the level 1 of the policy or of the held-out screen, which hashes the raw text.
+- **Correction.** `bfcl-v4` is `UNSCANNED`, and every entry carries the same five level names, all `NOT_RUN`.
+  The benchmark scan is now a layer over the held-out screen's engine (`src/opengrad/contamination/levels.py`);
+  it reads real benchmark and training files and records their sha256. The registry refuses an entry with a
+  non-sha256 fingerprint, with level 5 anything but `NOT_RUN`, or with a status of `CLEAN`.
+  **Source:** `tests/benchmarks/test_contamination_scanner.py`.
+- **What does not change.** No claim in a report rested on this entry: Study 001's contamination evidence is the
+  behavioural held-out screen and its human audit (`reports/data/behavioral-heldout-v2-contamination*.json`),
+  whose report the refactor leaves byte-identical (`tests/contamination/test_levels.py`).

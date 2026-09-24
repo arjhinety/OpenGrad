@@ -5,11 +5,10 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any
 
 from opengrad.benchmarks.config import BenchmarkConfig, BenchmarkSuiteConfig
 from opengrad.benchmarks.contamination.registry import ContaminationRegistry
-from opengrad.benchmarks.contamination.scanner import MultiLevelContaminationScanner
+from opengrad.benchmarks.contamination.scanner import load_samples, scan_benchmark
 from opengrad.benchmarks.registry import BenchmarkRegistry
 from opengrad.benchmarks.reporting.comparator import (
     compare_runs,
@@ -61,12 +60,25 @@ def benchmark_cli(args: list[str] | None = None) -> int:
 
     # contamination-scan
     cont_p = sub.add_parser(
-        "contamination-scan", help="Run multi-level benchmark contamination scan"
+        "contamination-scan",
+        help="Run contamination levels 1-4 of benchmark prompts against training prompts",
     )
-    cont_p.add_argument("--benchmark", default="bfcl-v4", help="Benchmark ID to check")
-    cont_p.add_argument("--training-data", help="Optional path to training JSON/JSONL records")
+    cont_p.add_argument("--benchmark", required=True, help="Benchmark ID to check")
     cont_p.add_argument(
-        "--max-level", type=int, default=5, help="Maximum contamination level (1-5)"
+        "--benchmark-data",
+        required=True,
+        help="JSONL of the benchmark's real prompts ({id, prompt}); the adapters' placeholder "
+        "tasks are not scanned",
+    )
+    cont_p.add_argument(
+        "--training-data",
+        required=True,
+        help="JSONL of training records ({id, prompt} or canonical rows with messages)",
+    )
+    cont_p.add_argument(
+        "--record",
+        action="store_true",
+        help="Write the scan into reports/data/benchmark_contamination_registry.json",
     )
 
     parsed = parser.parse_args(args)
@@ -188,62 +200,22 @@ def benchmark_cli(args: list[str] | None = None) -> int:
         return 0
 
     if parsed.benchmark_command == "contamination-scan":
-        scanner = MultiLevelContaminationScanner()
-        b_reg = BenchmarkRegistry(root)
-        c_reg = ContaminationRegistry(root)
         try:
-            bm_meta = b_reg.get(parsed.benchmark)
-        except KeyError as exc:
+            bm_meta = BenchmarkRegistry(root).get(parsed.benchmark)
+            benchmark_samples, benchmark_sha = load_samples(Path(parsed.benchmark_data))
+            training_samples, training_sha = load_samples(Path(parsed.training_data))
+            report = scan_benchmark(
+                bm_meta.id,
+                benchmark_samples,
+                training_samples,
+                benchmark_data_sha256=benchmark_sha,
+                training_corpus_sha256=training_sha,
+            )
+        except (KeyError, OSError, TypeError, ValueError) as exc:
             print(f"Error: {exc}")
             return 1
-
-        # Prepare dummy/sample training records if no path provided
-        training_samples: list[dict[str, Any]] = []
-        if parsed.training_data:
-            tr_path = Path(parsed.training_data)
-            if tr_path.exists():
-                with tr_path.open(encoding="utf-8") as handle:
-                    for idx, line in enumerate(handle):
-                        line_str = line.strip()
-                        if line_str:
-                            training_samples.append({"id": f"train_{idx}", "prompt": line_str})
-        if not training_samples:
-            # Seed with representative fixture prompts to exercise full pipeline
-            training_samples = [
-                {
-                    "id": "fixture_train_01",
-                    "prompt": "What is the weather today?",
-                    "canonical": "weather",
-                },
-                {
-                    "id": "fixture_train_02",
-                    "prompt": "Write a python script to sort numbers.",
-                    "canonical": "sort",
-                },
-            ]
-
-        adapter = __import__("opengrad.benchmarks.adapters", fromlist=["get_adapter"]).get_adapter(
-            bm_meta.id, root=root
-        )
-        tasks = adapter.load_tasks(limit=10)
-        bm_samples = [{"id": t.task_id, "prompt": t.prompt, "canonical": t.prompt} for t in tasks]
-
-        report = scanner.scan(
-            benchmark_id=bm_meta.id,
-            benchmark_samples=bm_samples,
-            training_samples=training_samples,
-            corpus_fingerprint="sample-or-materialized-fingerprint",
-            max_level=parsed.max_level,
-        )
-
-        c_reg.update_scan(
-            benchmark_id=bm_meta.id,
-            corpus_fingerprint=report.corpus_fingerprint,
-            scan_status=report.verdict,
-            levels_completed=report.level_status,
-            audit_queue=[m.to_dict() for m in report.audit_queue],
-        )
-
+        if parsed.record:
+            ContaminationRegistry(root).record_scan(report)
         print(report.render_markdown())
         return 0
 

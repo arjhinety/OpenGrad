@@ -13,15 +13,17 @@ Level 3 is an exact 5-gram Jaccard/containment screen using an inverted index bu
 the held-out shingle universe. Shingles that appear in more than ``max_df`` training
 records are non-discriminative boilerplate; they are pruned and the pruned count is
 reported rather than hidden.
+
+The level primitives live in :mod:`opengrad.contamination.levels`, shared with the benchmark scan;
+this module loads the held-out and training records, attaches reviewer evidence and writes the report.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-from collections import Counter, defaultdict
-from collections.abc import Iterable, Iterator
-from dataclasses import dataclass, field
+from collections import Counter
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -33,14 +35,26 @@ from opengrad.contamination.audit import (
     quarantine_path_for,
     training_corpus_fingerprint,
 )
-from opengrad.contamination.scanner import edit_similarity, ngrams, normalize
+from opengrad.contamination.levels import (
+    LEVEL_1,
+    LEVEL_2,
+    LEVEL_3,
+    LEVEL_4,
+    LEVEL_5,
+    STATUS_MEASURED,
+    STATUS_REVIEW_REQUIRED,
+    Record,
+    Thresholds,
+    build_queue,
+    level_status,
+    match_levels,
+    thresholds_record,
+)
+from opengrad.contamination.scanner import ngrams
+
+__all__ = ["LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "LEVEL_5", "Record"]
 
 MANIFEST_ID = "behavioral-heldout-v2"
-LEVEL_1 = "1_exact_canonical_conversation_hash"
-LEVEL_2 = "2_normalized_prompt_hash"
-LEVEL_3 = "3_near_duplicate_ngram_minhash"
-LEVEL_4 = "4_semantic_similarity"
-LEVEL_5 = "5_manual_audit"
 
 TRAINING_SOURCE_IDS = {
     "xlam-function-calling-60k",
@@ -66,32 +80,12 @@ def output_path_for(root: Path, release_dir: Path | str | None = None) -> Path:
     return root / scoped_artifact_path(OUTPUT, corpus_slug(release_dir))
 
 
-@dataclass(frozen=True)
-class Record:
-    record_id: str
-    source: str
-    text: str
-    shingles: frozenset[str] = field(default_factory=frozenset)
-    #: Held-out only: expected decision and candidate answers, for the reviewer's context.
-    detail: dict[str, Any] = field(default_factory=dict)
-    #: Training only: the matched prompt, assistant behaviour, and tool calls.
-    evidence: dict[str, Any] = field(default_factory=dict)
-
-
-def _exact_hash(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
 def _sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def _canonical(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-
-
-def _stable_hash(text: str) -> str:
-    return hashlib.sha256(normalize(text).encode("utf-8")).hexdigest()
 
 
 def _user_prompt(messages: Any) -> str:
@@ -241,14 +235,6 @@ def iter_training(
                 )
 
 
-def _hash_index(records: Iterable[Record], normalised: bool) -> dict[str, list[str]]:
-    index: dict[str, list[str]] = defaultdict(list)
-    for record in records:
-        digest = _stable_hash(record.text) if normalised else _exact_hash(record.text)
-        index[digest].append(record.record_id)
-    return index
-
-
 def screen(
     root: Path,
     *,
@@ -288,134 +274,19 @@ def screen(
             )
         return iter_training(root, release_dir, with_evidence=with_evidence, needed=needed)
 
-    # Level 1/2 need full hash indexes; level 3 needs the held-out shingle universe.
-    heldout_universe: dict[str, list[int]] = defaultdict(list)
-    for position, record in enumerate(heldout):
-        for shingle in record.shingles:
-            heldout_universe[shingle].append(position)
-
-    train_exact = _hash_index(train_source(), normalised=False)
-    train_normalised = _hash_index(train_source(), normalised=True)
-
-    # Heterogeneous value types on purpose: `heldout` is a record id and `training` is every
-    # training record id sharing that hash. Without the explicit annotation mypy joins `str` and
-    # `list[str]` at `Sequence[str]`, which then mis-types every `item["heldout"]` downstream.
-    level1: list[dict[str, Any]] = [
-        {"heldout": r.record_id, "training": train_exact[_exact_hash(r.text)]}
-        for r in heldout
-        if train_exact.get(_exact_hash(r.text))
-    ]
-    level2: list[dict[str, Any]] = [
-        {"heldout": r.record_id, "training": train_normalised[_stable_hash(r.text)]}
-        for r in heldout
-        if train_normalised.get(_stable_hash(r.text))
-    ]
-
-    # Pass 1: document frequency of held-out-universe shingles across training.
-    df: Counter[str] = Counter()
-    train_shingle_count: dict[str, int] = {}
-    sources_seen: set[str] = set()
-    for record in train_source():
-        sources_seen.add(record.source)
-        shingles = ngrams(record.text)
-        train_shingle_count[record.record_id] = len(shingles)
-        for shingle in shingles:
-            if shingle in heldout_universe:
-                df[shingle] += 1
-
-    pruned = {shingle for shingle, count in df.items() if count > max_df}
-    postings: dict[str, list[str]] = defaultdict(list)
-    for record in train_source():
-        for shingle in ngrams(record.text):
-            if shingle in df and shingle not in pruned:
-                postings[shingle].append(record.record_id)
-
-    # Pass 2: accumulate overlaps and score.
-    overlaps: dict[str, Counter[str]] = defaultdict(Counter)
-    for position, record in enumerate(heldout):
-        for shingle in record.shingles:
-            for training_id in postings.get(shingle, ()):
-                overlaps[str(position)][training_id] += 1
-
-    findings: list[dict[str, Any]] = []
-    level4_candidates: list[tuple[int, str, float]] = []
-    for position, record in enumerate(heldout):
-        size = len(record.shingles)
-        if not size:
-            continue
-        # Containment is undefined-ish for very short prompts: a 3-shingle prompt
-        # ("ok thanks") is trivially contained in almost anything. Require enough
-        # signal before containment can flag a candidate.
-        short = size < min_shingles
-        best = []
-        for training_id, shared in overlaps.get(str(position), {}).items():
-            if shared > size:
-                # A training record cannot share more shingles than the held-out
-                # record contains. Guard instead of emitting an impossible Jaccard.
-                raise AssertionError(
-                    f"overlap {shared} exceeds held-out shingle count {size} for {training_id}"
-                )
-            union = size + train_shingle_count.get(training_id, 0) - shared
-            jaccard = shared / union if union > 0 else 0.0
-            containment = shared / size
-            if jaccard >= jaccard_threshold or (not short and containment >= containment_threshold):
-                best.append((shared, training_id, jaccard, containment))
-        best.sort(reverse=True)
-        for shared, training_id, jaccard, containment in best[:top_k]:
-            findings.append(
-                {
-                    "heldout": record.record_id,
-                    "training": training_id,
-                    "shared_5grams": shared,
-                    "jaccard": round(jaccard, 6),
-                    "containment": round(containment, 6),
-                }
-            )
-        for _shared, training_id, jaccard, _containment in best:
-            if jaccard >= level4_jaccard_floor:
-                level4_candidates.append((position, training_id, jaccard))
-
-    # Level 4: order-sensitive semantic similarity over the level-3 candidates.
-    train_text = {r.record_id: r.text for r in train_source()}
-    level4: list[dict[str, Any]] = []
-    seen_pairs: set[tuple[str, str]] = set()
-    for position, training_id, jaccard in level4_candidates:
-        key = (heldout[position].record_id, training_id)
-        if key in seen_pairs:
-            continue
-        seen_pairs.add(key)
-        ratio = edit_similarity(heldout[position].text, train_text.get(training_id, ""))
-        if ratio >= edit_threshold:
-            level4.append(
-                {
-                    "heldout": key[0],
-                    "training": training_id,
-                    "sequence_matcher_ratio": round(ratio, 6),
-                    "jaccard": round(jaccard, 6),
-                }
-            )
-
-    blocked = bool(level1 or level2 or findings or level4)
-    present = set(sources_seen) & TRAINING_SOURCE_IDS
-
-    # One queue entry per distinct held-out record, so a human reviewer sees each
-    # question once with all of its evidence instead of per-level duplicates.
-    queue: dict[str, dict[str, Any]] = {}
-
-    def enqueue(heldout_id: str, level: str, match: dict[str, Any]) -> None:
-        entry = queue.setdefault(heldout_id, {"heldout": heldout_id, "levels": [], "matches": []})
-        if level not in entry["levels"]:
-            entry["levels"].append(level)
-        entry["matches"].append({"level": level, **match})
-
-    for item in level1:
-        enqueue(item["heldout"], LEVEL_1, {"training": item["training"]})
-    for item in level2:
-        enqueue(item["heldout"], LEVEL_2, {"training": item["training"]})
-    for item in findings:
-        enqueue(item["heldout"], LEVEL_3, item)
-    for item in level4:
-        enqueue(item["heldout"], LEVEL_4, item)
+    thresholds = Thresholds(
+        max_df=max_df,
+        min_shingles=min_shingles,
+        jaccard_threshold=jaccard_threshold,
+        containment_threshold=containment_threshold,
+        level4_jaccard_floor=level4_jaccard_floor,
+        edit_threshold=edit_threshold,
+        top_k=top_k,
+    )
+    matches = match_levels(heldout, train_source, thresholds)
+    blocked = matches.any_match
+    present = set(matches.sources_seen) & TRAINING_SOURCE_IDS
+    queue = build_queue(matches)
 
     # Attach reviewer context and matched-training behaviour. Only the referenced
     # records are read back, so the corpus is never held in memory in full.
@@ -468,21 +339,13 @@ def screen(
     return {
         "schema_version": 1,
         "manifest_id": MANIFEST_ID,
-        "status": "REVIEW_REQUIRED_LEVEL_5_PENDING"
-        if blocked
-        else "LEVELS_1_4_MEASURED_LEVEL_5_PENDING",
+        "status": STATUS_REVIEW_REQUIRED if blocked else STATUS_MEASURED,
         "scan_fingerprint": scan_fingerprint,
         "benchmark_fingerprint": benchmark_fingerprint(root),
         "training_corpus_fingerprint": training_corpus_fingerprint(root, release_dir),
         "quarantined_record_ids": sorted(excluded),
         "training_sources_checked": sorted(present),
-        "levels": {
-            LEVEL_1: "MEASURED",
-            LEVEL_2: "MEASURED",
-            LEVEL_3: "MEASURED",
-            LEVEL_4: "MEASURED",
-            LEVEL_5: "NOT_RUN",
-        },
+        "levels": level_status(),
         "methodology": {
             "levels_1_2_scope": (
                 "user-visible prompt text; held-out evaluation examples and training "
@@ -501,27 +364,21 @@ def screen(
                 "similarity was computed"
             ),
             "level_5": "human audit of the emitted queue; not performed by this tool",
-            "thresholds": {
-                "max_df": max_df,
-                "min_shingles": min_shingles,
-                "jaccard": jaccard_threshold,
-                "containment": containment_threshold,
-                "edit_similarity": edit_threshold,
-            },
+            "thresholds": thresholds_record(thresholds),
         },
         "counts": {
             "heldout_records": len(heldout),
-            "training_records": len(train_shingle_count),
-            "heldout_universe_shingles": len(heldout_universe),
-            "pruned_shingles": len(pruned),
-            "scored_pairs": sum(len(c) for c in overlaps.values()),
+            "training_records": matches.training_records,
+            "heldout_universe_shingles": matches.heldout_universe_shingles,
+            "pruned_shingles": matches.pruned_shingles,
+            "scored_pairs": matches.scored_pairs,
         },
-        "training_source_labels_seen": sorted(sources_seen),
+        "training_source_labels_seen": sorted(matches.sources_seen),
         "findings": {
-            "level_1_exact_prompt_matches": level1,
-            "level_2_normalized_prompt_matches": level2,
-            "level_3_near_duplicates": findings,
-            "level_4_semantic_matches": level4,
+            "level_1_exact_prompt_matches": matches.level1,
+            "level_2_normalized_prompt_matches": matches.level2,
+            "level_3_near_duplicates": matches.level3,
+            "level_4_semantic_matches": matches.level4,
         },
         "audit_queue": audit_queue,
         "audit_queue_size": len(queue),

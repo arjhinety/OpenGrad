@@ -1,19 +1,19 @@
-"""Benchmark contamination detection and registry package."""
+"""Benchmark contamination: the benchmark layer over `opengrad.contamination.levels`."""
 
 from opengrad.benchmarks.contamination.registry import (
     ContaminationEntry,
     ContaminationRegistry,
 )
 from opengrad.benchmarks.contamination.scanner import (
-    ContaminationMatch,
-    ContaminationScanReport,
-    MultiLevelContaminationScanner,
+    BenchmarkScanReport,
+    load_samples,
+    scan_benchmark,
 )
 
 __all__ = [
+    "BenchmarkScanReport",
     "ContaminationEntry",
-    "ContaminationMatch",
     "ContaminationRegistry",
-    "ContaminationScanReport",
-    "MultiLevelContaminationScanner",
+    "load_samples",
+    "scan_benchmark",
 ]

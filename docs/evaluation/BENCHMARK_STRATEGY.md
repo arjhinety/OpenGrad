@@ -77,6 +77,13 @@ Before freezing any training corpus or claiming generalization, OpenGrad require
 
 > **Rule:** OpenGrad never silently deletes benchmark examples. Matches are queued for human audit and recorded in `reports/data/benchmark_contamination_registry.json`.
 
+One engine measures levels 1–4 for every scan: `src/opengrad/contamination/levels.py`. Level 1 is
+byte-identical prompt text; level 2 is identical after whitespace and case normalisation. The
+behavioural held-out screen and the benchmark scan (`opengrad-benchmark contamination-scan`) are two
+layers over it, so a level means the same thing in both. A machine scan reports level 5 `NOT_RUN` and
+makes no clean claim; the registry refuses an entry that says otherwise, or one without the sha256 of
+the benchmark data and the training corpus it compared (`reports/ERRATA.md` §25).
+
 Levels 1–4 are machine-measured for the behavioral held-out namespace by
 `opengrad-contamination heldout-screen`. Level 5 is a durable human adjudication stored separately
 from the generated report, and any `CONTAMINATED` verdict must be quarantined from evaluation before

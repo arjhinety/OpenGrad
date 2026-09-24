@@ -1,0 +1,319 @@
+{
+  "audit_artifact": "reports\\data\\behavioral-heldout-v2-contamination-audit.json",
+  "audit_queue": [
+    {
+      "candidates": {},
+      "expected_decision": null,
+      "finding_fingerprint": "8fb08f2d383ade6f39f7fbef4abdb16230addcdbd2f2aa3b331e972a9bb87dc8",
+      "heldout": "when2call-llm-judge:h3",
+      "levels": [
+        "3_near_duplicate_ngram_minhash",
+        "4_semantic_similarity"
+      ],
+      "matches": [
+        {
+          "containment": 0.951389,
+          "heldout": "when2call-llm-judge:h3",
+          "jaccard": 0.907285,
+          "level": "3_near_duplicate_ngram_minhash",
+          "shared_5grams": 137,
+          "training": "looptool-23k:t4"
+        },
+        {
+          "heldout": "when2call-llm-judge:h3",
+          "jaccard": 0.907285,
+          "level": "4_semantic_similarity",
+          "sequence_matcher_ratio": 0.986755,
+          "training": "looptool-23k:t4"
+        }
+      ],
+      "split": "",
+      "text": "Summarise the quarterly revenue figures for the northern region and flag any month where the growth rate fell below two percent compared with last year",
+      "tools": [],
+      "training_evidence": [
+        {
+          "prompt": "Summarise the quarterly revenue figures for the southern region and flag any month where the growth rate fell below two percent compared with last year",
+          "record_id": "looptool-23k:t4"
+        }
+      ]
+    },
+    {
+      "candidates": {},
+      "expected_decision": null,
+      "finding_fingerprint": "5a9cf329d288f393e73b53cc80def827a5c6d8dd489fe4329ef5cac8072bd3e6",
+      "heldout": "when2call-mcq:h1",
+      "levels": [
+        "1_exact_canonical_conversation_hash",
+        "2_normalized_prompt_hash",
+        "3_near_duplicate_ngram_minhash",
+        "4_semantic_similarity"
+      ],
+      "matches": [
+        {
+          "level": "1_exact_canonical_conversation_hash",
+          "training": [
+            "glaive-function-calling-v2:t1",
+            "when2call-sft:t6"
+          ]
+        },
+        {
+          "level": "2_normalized_prompt_hash",
+          "training": [
+            "glaive-function-calling-v2:t1",
+            "when2call-sft:t6"
+          ]
+        },
+        {
+          "containment": 1.0,
+          "heldout": "when2call-mcq:h1",
+          "jaccard": 1.0,
+          "level": "3_near_duplicate_ngram_minhash",
+          "shared_5grams": 21,
+          "training": "when2call-sft:t6"
+        },
+        {
+          "containment": 1.0,
+          "heldout": "when2call-mcq:h1",
+          "jaccard": 1.0,
+          "level": "3_near_duplicate_ngram_minhash",
+          "shared_5grams": 21,
+          "training": "glaive-function-calling-v2:t1"
+        },
+        {
+          "heldout": "when2call-mcq:h1",
+          "jaccard": 1.0,
+          "level": "4_semantic_similarity",
+          "sequence_matcher_ratio": 1.0,
+          "training": "when2call-sft:t6"
+        },
+        {
+          "heldout": "when2call-mcq:h1",
+          "jaccard": 1.0,
+          "level": "4_semantic_similarity",
+          "sequence_matcher_ratio": 1.0,
+          "training": "glaive-function-calling-v2:t1"
+        }
+      ],
+      "split": "",
+      "text": "What is the current time?",
+      "tools": [],
+      "training_evidence": [
+        {
+          "prompt": "What is the current time?",
+          "record_id": "glaive-function-calling-v2:t1"
+        },
+        {
+          "prompt": "What is the current time?",
+          "record_id": "when2call-sft:t6"
+        }
+      ]
+    },
+    {
+      "candidates": {},
+      "expected_decision": null,
+      "finding_fingerprint": "3a2c519969e5725217ffa749de410287eb9a4819fd1ba6e83378920648ca3cd7",
+      "heldout": "when2call-mcq:h2",
+      "levels": [
+        "2_normalized_prompt_hash",
+        "3_near_duplicate_ngram_minhash",
+        "4_semantic_similarity"
+      ],
+      "matches": [
+        {
+          "level": "2_normalized_prompt_hash",
+          "training": [
+            "toolace:t2"
+          ]
+        },
+        {
+          "containment": 1.0,
+          "heldout": "when2call-mcq:h2",
+          "jaccard": 0.80663,
+          "level": "3_near_duplicate_ngram_minhash",
+          "shared_5grams": 146,
+          "training": "toolace:t3"
+        },
+        {
+          "containment": 1.0,
+          "heldout": "when2call-mcq:h2",
+          "jaccard": 1.0,
+          "level": "3_near_duplicate_ngram_minhash",
+          "shared_5grams": 146,
+          "training": "toolace:t2"
+        },
+        {
+          "heldout": "when2call-mcq:h2",
+          "jaccard": 0.80663,
+          "level": "4_semantic_similarity",
+          "sequence_matcher_ratio": 0.892128,
+          "training": "toolace:t3"
+        },
+        {
+          "heldout": "when2call-mcq:h2",
+          "jaccard": 1.0,
+          "level": "4_semantic_similarity",
+          "sequence_matcher_ratio": 1.0,
+          "training": "toolace:t2"
+        }
+      ],
+      "split": "",
+      "text": "Please schedule a follow up appointment with the cardiology department for patient record number four two seven one on the next available weekday morning",
+      "tools": [],
+      "training_evidence": [
+        {
+          "prompt": "   PLEASE SCHEDULE A FOLLOW UP APPOINTMENT WITH THE CARDIOLOGY DEPARTMENT FOR PATIENT RECORD NUMBER FOUR TWO SEVEN ONE ON THE NEXT AVAILABLE WEEKDAY MORNING   ",
+          "record_id": "toolace:t2"
+        },
+        {
+          "prompt": "Please schedule a follow up appointment with the cardiology department for patient record number four two seven one on the next available weekday morning and confirm the parking arrangements",
+          "record_id": "toolace:t3"
+        }
+      ]
+    }
+  ],
+  "audit_queue_size": 3,
+  "benchmark_fingerprint": null,
+  "counts": {
+    "heldout_records": 4,
+    "heldout_universe_shingles": 322,
+    "pruned_shingles": 0,
+    "scored_pairs": 24,
+    "training_records": 6
+  },
+  "findings": {
+    "level_1_exact_prompt_matches": [
+      {
+        "heldout": "when2call-mcq:h1",
+        "training": [
+          "glaive-function-calling-v2:t1",
+          "when2call-sft:t6"
+        ]
+      }
+    ],
+    "level_2_normalized_prompt_matches": [
+      {
+        "heldout": "when2call-mcq:h1",
+        "training": [
+          "glaive-function-calling-v2:t1",
+          "when2call-sft:t6"
+        ]
+      },
+      {
+        "heldout": "when2call-mcq:h2",
+        "training": [
+          "toolace:t2"
+        ]
+      }
+    ],
+    "level_3_near_duplicates": [
+      {
+        "containment": 1.0,
+        "heldout": "when2call-mcq:h1",
+        "jaccard": 1.0,
+        "shared_5grams": 21,
+        "training": "when2call-sft:t6"
+      },
+      {
+        "containment": 1.0,
+        "heldout": "when2call-mcq:h1",
+        "jaccard": 1.0,
+        "shared_5grams": 21,
+        "training": "glaive-function-calling-v2:t1"
+      },
+      {
+        "containment": 1.0,
+        "heldout": "when2call-mcq:h2",
+        "jaccard": 0.80663,
+        "shared_5grams": 146,
+        "training": "toolace:t3"
+      },
+      {
+        "containment": 1.0,
+        "heldout": "when2call-mcq:h2",
+        "jaccard": 1.0,
+        "shared_5grams": 146,
+        "training": "toolace:t2"
+      },
+      {
+        "containment": 0.951389,
+        "heldout": "when2call-llm-judge:h3",
+        "jaccard": 0.907285,
+        "shared_5grams": 137,
+        "training": "looptool-23k:t4"
+      }
+    ],
+    "level_4_semantic_matches": [
+      {
+        "heldout": "when2call-mcq:h1",
+        "jaccard": 1.0,
+        "sequence_matcher_ratio": 1.0,
+        "training": "when2call-sft:t6"
+      },
+      {
+        "heldout": "when2call-mcq:h1",
+        "jaccard": 1.0,
+        "sequence_matcher_ratio": 1.0,
+        "training": "glaive-function-calling-v2:t1"
+      },
+      {
+        "heldout": "when2call-mcq:h2",
+        "jaccard": 0.80663,
+        "sequence_matcher_ratio": 0.892128,
+        "training": "toolace:t3"
+      },
+      {
+        "heldout": "when2call-mcq:h2",
+        "jaccard": 1.0,
+        "sequence_matcher_ratio": 1.0,
+        "training": "toolace:t2"
+      },
+      {
+        "heldout": "when2call-llm-judge:h3",
+        "jaccard": 0.907285,
+        "sequence_matcher_ratio": 0.986755,
+        "training": "looptool-23k:t4"
+      }
+    ]
+  },
+  "interpretation": "Levels 1-4 are machine-measured. Level 5 is a human adjudication of audit_queue recorded in the separate audit artifact; this generated report is an input to that review and must never be hand-edited. No clean or generalization claim is made until Level 5 completes.",
+  "levels": {
+    "1_exact_canonical_conversation_hash": "MEASURED",
+    "2_normalized_prompt_hash": "MEASURED",
+    "3_near_duplicate_ngram_minhash": "MEASURED",
+    "4_semantic_similarity": "MEASURED",
+    "5_manual_audit": "NOT_RUN"
+  },
+  "manifest_id": "behavioral-heldout-v2",
+  "methodology": {
+    "level_3": "exact 5-gram Jaccard/containment over an inverted index of the held-out shingle universe; shingles with training document frequency > 1000 are pruned as non-discriminative, and containment cannot flag a held-out prompt shorter than 25 shingles",
+    "level_4": "SequenceMatcher (difflib) over level-3 candidates; candidate generation is prefiltered, so this is not an exhaustive semantic search and no embedding similarity was computed",
+    "level_5": "human audit of the emitted queue; not performed by this tool",
+    "levels_1_2_scope": "user-visible prompt text; held-out evaluation examples and training trajectories do not share a conversation schema, so no whole-conversation hash equality is claimed",
+    "thresholds": {
+      "containment": 0.6,
+      "edit_similarity": 0.8,
+      "jaccard": 0.5,
+      "max_df": 1000,
+      "min_shingles": 25
+    }
+  },
+  "quarantined_record_ids": [],
+  "scan_fingerprint": "5fe315a38a7074e89f16e541d66b91336665d14167a4871f674014d64920367d",
+  "schema_version": 1,
+  "status": "REVIEW_REQUIRED_LEVEL_5_PENDING",
+  "training_corpus_fingerprint": null,
+  "training_source_labels_seen": [
+    "button",
+    "glaive-function-calling-v2",
+    "looptool-23k",
+    "toolace",
+    "when2call-sft"
+  ],
+  "training_sources_checked": [
+    "button",
+    "glaive-function-calling-v2",
+    "looptool-23k",
+    "toolace",
+    "when2call-sft"
+  ]
+}

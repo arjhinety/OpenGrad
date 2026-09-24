@@ -72,7 +72,11 @@ opengrad-contamination quarantine        # derive the quarantine list from CONTA
 
 The machine report and the human audit are separate files with separate owners
 (`docs/evaluation/CONTAMINATION_ADJUDICATION.md`). Benchmark-level scans run through
-`opengrad-benchmark contamination-scan`. The scanner and audit code live in `src/opengrad/contamination/`.
+`opengrad-benchmark contamination-scan --benchmark <id> --benchmark-data <jsonl> --training-data <jsonl>`
+(`--record` writes the registry). Both scans use one engine, `src/opengrad/contamination/levels.py`; never
+give a scan its own level logic. A scan never reports level 5 run and never reports a benchmark clean: the
+benchmark adapters synthesize placeholder tasks, so a scan reads real data files and records their sha256
+(`reports/ERRATA.md` §25).
 
 ## Failures and comparisons
 
