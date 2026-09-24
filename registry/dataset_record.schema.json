@@ -1,0 +1,384 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/arrogance231/OpenGrad/registry/dataset_record.schema.json",
+  "title": "OpenGrad dataset record (registry/datasets.yaml, schema_version 2)",
+  "description": "One adopted data source or one corpus OpenGrad derived from adopted sources. Candidate sources that were screened but not adopted are recorded in registry/source_screening.yaml, never here: the training firewall (opengrad.data.materialize._training_split_allowlist) reads this file. Every property names its MLCommons Croissant 1.1 or Croissant RAI 1.0 counterpart in `x-croissant` (null when Croissant has none); `opengrad croissant` reads that mapping from this file. docs/datasets/ADDING_A_SOURCE.md is the procedure.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "display_name",
+    "organization",
+    "role",
+    "lifecycle",
+    "category",
+    "papers",
+    "retrieval_date",
+    "hf_id",
+    "repository",
+    "source_repository",
+    "source_revision",
+    "license",
+    "redistribution",
+    "redistribution_basis",
+    "upstream_access_mode",
+    "downstream_access_requirement",
+    "attribution_required",
+    "citation_required",
+    "citation_target",
+    "modifications_disclosed",
+    "sample_count",
+    "retained_after_filtering",
+    "processed_dataset_hash",
+    "intended_stages",
+    "allowed_splits",
+    "forbidden_splits",
+    "contamination_status",
+    "benchmark_overlap_risk",
+    "known_source_overlap",
+    "planned_initial_mixture_percent",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "description": "Stable identifier; other records cite it in derived_from, configs cite it as a dataset id.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "x-croissant": "sc:identifier"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "x-croissant": "sc:name"
+    },
+    "organization": {
+      "description": "Who published the data upstream (OpenGrad for derived corpora).",
+      "type": "string",
+      "minLength": 1,
+      "x-croissant": "sc:creator"
+    },
+    "role": {
+      "description": "UPSTREAM_SOURCE: data OpenGrad did not create. DERIVED_CORPUS: an artifact OpenGrad built from upstream sources; it must name them in derived_from.",
+      "enum": ["UPSTREAM_SOURCE", "DERIVED_CORPUS"],
+      "x-croissant": null
+    },
+    "lifecycle": {
+      "description": "ACTIVE: in current use or eligible for it. HISTORICAL: superseded; kept because published results cite it. EXCLUDED: recorded so the exclusion is explicit; never trained on by default.",
+      "enum": ["ACTIVE", "HISTORICAL", "EXCLUDED"],
+      "x-croissant": null
+    },
+    "category": {
+      "enum": ["tool_use", "preference"],
+      "x-croissant": "sc:keywords"
+    },
+    "papers": {
+      "description": "Ids in docs/references/papers.yaml.",
+      "type": "array",
+      "items": {"type": "string"},
+      "x-croissant": "cr:citeAs"
+    },
+    "retrieval_date": {
+      "description": "When the upstream metadata in this record was last read.",
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "x-croissant": "sc:dateModified"
+    },
+    "date_published": {
+      "description": "Upstream publication date, when the upstream states one. Croissant requires it; leave it absent rather than guess.",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "x-croissant": "sc:datePublished"
+    },
+    "hf_id": {
+      "type": ["string", "null"],
+      "x-croissant": null
+    },
+    "repository": {
+      "description": "Code repository or OpenGrad release config that produced or hosts the data.",
+      "type": ["string", "null"],
+      "x-croissant": null
+    },
+    "source_repository": {
+      "description": "The canonical location of the data: a URL, or a repository path for a derived artifact.",
+      "type": "string",
+      "minLength": 1,
+      "x-croissant": "sc:url"
+    },
+    "distribution": {
+      "description": "The upstream files at source_revision, each with its sha256. `verified_from` names where the digest was read: the Hub's LFS record for that revision, or a local hash of bytes shown identical to the pinned file.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "content_url", "sha256", "size_bytes", "encoding_format", "verified_from"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "content_url": {"type": "string", "pattern": "^https://"},
+          "sha256": {"$ref": "#/$defs/sha256"},
+          "size_bytes": {"type": "integer", "minimum": 0},
+          "encoding_format": {"enum": ["application/json", "application/jsonlines", "application/x-parquet", "text/csv"]},
+          "verified_from": {"type": "string", "minLength": 1}
+        }
+      },
+      "x-croissant": "sc:distribution"
+    },
+    "source_revision": {
+      "description": "The immutable revision this record describes: a Hub commit or git commit upstream, the OpenGrad commit that built a derived corpus.",
+      "$ref": "#/$defs/verified_claim",
+      "x-croissant": "sc:version"
+    },
+    "license": {
+      "description": "The licence as the upstream states it at source_revision. `value` is an SPDX identifier, or COMPOSITE_PER_SOURCE / DERIVED_FROM_COMPOSITE_TRAINING_SOURCES for a corpus whose parts keep their own licences. A local `source` needs source_sha256 (docs/PROVENANCE.md).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "verified", "source"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "pattern": "^([A-Za-z0-9.+-]+|COMPOSITE_PER_SOURCE|DERIVED_FROM_COMPOSITE_TRAINING_SOURCES)$"
+        },
+        "verified": {"type": "boolean"},
+        "source": {"type": "string", "minLength": 1},
+        "source_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "x-croissant": "sc:license"
+    },
+    "redistribution": {
+      "description": "Whether OpenGrad may redistribute the data or data derived from it. PER_SOURCE: each upstream part keeps its own status.",
+      "enum": ["REDISTRIBUTION_WITH_ATTRIBUTION", "PER_SOURCE", "NOT_ASSESSED", "NOT_PERMITTED"],
+      "x-croissant": null
+    },
+    "redistribution_basis": {
+      "description": "Where the redistribution decision is recorded. Required (non-null) unless redistribution is NOT_ASSESSED.",
+      "type": ["string", "null"],
+      "x-croissant": null
+    },
+    "upstream_access_mode": {
+      "enum": ["public", "gated", "mixed", "local_derived"],
+      "x-croissant": null
+    },
+    "downstream_access_requirement": {
+      "enum": ["public_allowed", "restricted", "not_redistributed"],
+      "x-croissant": null
+    },
+    "attribution_required": {"type": "boolean", "x-croissant": null},
+    "citation_required": {"type": "boolean", "x-croissant": null},
+    "citation_target": {
+      "description": "The work to cite (a papers.yaml id or title), or `source` for the per-source citations of a derived corpus.",
+      "type": ["string", "null"],
+      "x-croissant": "cr:citeAs"
+    },
+    "modifications_disclosed": {"type": "boolean", "x-croissant": null},
+    "sample_count": {
+      "description": "The upstream's own published count and where it was checked.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["published", "verified_from"],
+      "properties": {
+        "published": {"type": ["integer", "null"], "minimum": 0},
+        "verified_from": {"type": ["string", "null"]}
+      },
+      "x-croissant": null
+    },
+    "published_split_sizes": {
+      "description": "Per-split counts as published upstream.",
+      "type": "object",
+      "properties": {"status": {"type": "string"}},
+      "additionalProperties": {"type": ["integer", "string"]},
+      "x-croissant": null
+    },
+    "retained_after_filtering": {
+      "description": "Records OpenGrad kept after normalization and validation.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "status"],
+      "properties": {
+        "value": {"type": ["integer", "null"], "minimum": 0},
+        "status": {"$ref": "#/$defs/materialization_status"}
+      },
+      "x-croissant": null
+    },
+    "processed_dataset_hash": {
+      "description": "The sha256 identity of OpenGrad's processed artifact. `value` is a digest or null; a null value names the local build manifest in `manifest` instead. A derived corpus must carry a digest.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "status"],
+      "properties": {
+        "value": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "status": {"$ref": "#/$defs/materialization_status"},
+        "manifest": {
+          "description": "Repository-relative path of the local (git-ignored) build manifest.",
+          "type": "string"
+        },
+        "remote_identity": {"type": "object"},
+        "identity_artifact_unavailable": {"type": "object"}
+      },
+      "x-croissant": "cr:FileObject.sha256"
+    },
+    "preprocessing_version": {
+      "description": "The normalization or build version that produced a derived corpus.",
+      "type": "string",
+      "minLength": 1,
+      "x-croissant": "rai:dataPreprocessingProtocol"
+    },
+    "intended_stages": {
+      "description": "The training or evaluation stages the data serves. A `future_` prefix marks a stage planned but not yet executed; the firewall treats `future_sft` as `sft`.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(future_)?(sft|dpo|preference|evaluation|contaminated_experiment_only)$"
+      },
+      "x-croissant": "rai:dataUseCases"
+    },
+    "allowed_splits": {
+      "description": "The only splits that may enter training. Empty means the source has one training stream.",
+      "type": "array",
+      "items": {"type": "string"},
+      "x-croissant": null
+    },
+    "forbidden_splits": {
+      "description": "Splits that must never enter training (held-out, preference, evaluation).",
+      "type": "array",
+      "items": {"type": "string"},
+      "x-croissant": null
+    },
+    "contamination_status": {
+      "description": "Outcome of the contamination screen (docs/evaluation/CONTAMINATION_ADJUDICATION.md).",
+      "enum": [
+        "UNASSESSED",
+        "SEMANTIC_REVIEW_COMPLETE",
+        "NOT_REVIEWED_FOR_V2",
+        "EXCLUDED_FROM_CLEAN_DEFAULT",
+        "TRAINING_SOURCE_ONLY"
+      ],
+      "x-croissant": null
+    },
+    "benchmark_overlap_risk": {
+      "enum": [
+        "UNKNOWN_PENDING_AUDIT",
+        "HIGH_IF_TEST_LEAKS",
+        "HIGH_IF_BENCHMARK_LIKE",
+        "HIGH_KNOWN_BENCHMARK_OVERLAP",
+        "LOW_TRAINING_ONLY"
+      ],
+      "x-croissant": "rai:dataLimitations"
+    },
+    "overlap_benchmarks": {
+      "description": "Benchmark ids (registry/benchmarks.yaml or named upstream) the data is known to overlap; required with HIGH_KNOWN_BENCHMARK_OVERLAP.",
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "x-croissant": "rai:dataLimitations"
+    },
+    "known_source_overlap": {
+      "description": "Overlap with other sources. AUDITED and INHERITED_FROM_SOURCES name their evidence in overlap_evidence.",
+      "enum": [
+        "UNKNOWN_PENDING_AUDIT",
+        "POSSIBLE_DERIVATION_OVERLAP",
+        "POSSIBLE_BENCHMARK_OVERLAP",
+        "AUDITED",
+        "INHERITED_FROM_SOURCES",
+        "FROZEN_EVALUATION_IDS_EXCLUDED"
+      ],
+      "x-croissant": null
+    },
+    "overlap_evidence": {
+      "description": "Repository-relative paths of the artifacts that record the overlap audit.",
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "x-croissant": null
+    },
+    "planned_initial_mixture_percent": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "x-croissant": null
+    },
+    "derived_from": {
+      "description": "The exact upstream records and revisions a derived corpus was built from.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "source_revision", "upstream_license"],
+        "properties": {
+          "id": {"type": "string"},
+          "source_revision": {"type": "string", "minLength": 1},
+          "upstream_license": {"type": "string", "minLength": 1},
+          "split_used": {"type": "string"}
+        }
+      },
+      "x-croissant": "prov:wasDerivedFrom"
+    },
+    "supervision": {"type": "object", "x-croissant": null},
+    "findings": {"type": "object", "x-croissant": null},
+    "responsible_use": {
+      "description": "Croissant RAI 1.0 documentation. Each field is prose or a list of prose; record only what a cited source states.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "data_collection": {"type": "string", "x-croissant": "rai:dataCollection"},
+        "data_collection_type": {"type": "string", "x-croissant": "rai:dataCollectionType"},
+        "data_use_cases": {"type": "array", "items": {"type": "string"}, "x-croissant": "rai:dataUseCases"},
+        "data_limitations": {"type": "array", "items": {"type": "string"}, "x-croissant": "rai:dataLimitations"},
+        "data_biases": {"type": "array", "items": {"type": "string"}, "x-croissant": "rai:dataBiases"},
+        "personal_sensitive_information": {"type": "array", "items": {"type": "string"}, "x-croissant": "rai:personalSensitiveInformation"},
+        "data_preprocessing_protocol": {"type": "array", "items": {"type": "string"}, "x-croissant": "rai:dataPreprocessingProtocol"},
+        "data_annotation_protocol": {"type": "array", "items": {"type": "string"}, "x-croissant": "rai:dataAnnotationProtocol"},
+        "evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1, "x-croissant": null}
+      },
+      "required": ["evidence"],
+      "x-croissant": "rai:*"
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1,
+      "x-croissant": "sc:description"
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"role": {"const": "DERIVED_CORPUS"}}},
+      "then": {
+        "required": ["derived_from", "preprocessing_version"],
+        "properties": {"processed_dataset_hash": {"properties": {"value": {"$ref": "#/$defs/sha256"}}}}
+      }
+    },
+    {
+      "if": {"properties": {"redistribution": {"not": {"const": "NOT_ASSESSED"}}}},
+      "then": {"properties": {"redistribution_basis": {"type": "string", "minLength": 1}}}
+    },
+    {
+      "if": {"properties": {"benchmark_overlap_risk": {"const": "HIGH_KNOWN_BENCHMARK_OVERLAP"}}},
+      "then": {"required": ["overlap_benchmarks"]}
+    },
+    {
+      "if": {"properties": {"known_source_overlap": {"enum": ["AUDITED", "INHERITED_FROM_SOURCES"]}}},
+      "then": {"required": ["overlap_evidence"]}
+    },
+    {
+      "if": {"properties": {"lifecycle": {"const": "EXCLUDED"}}},
+      "then": {"properties": {"intended_stages": {"not": {"contains": {"pattern": "^(future_)?sft$"}}}}}
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "verified_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "verified", "source"],
+      "properties": {
+        "value": {"type": "string", "minLength": 1},
+        "verified": {"type": "boolean"},
+        "source": {"type": "string", "minLength": 1}
+      }
+    },
+    "materialization_status": {
+      "enum": ["FULL_DATA_VALIDATED", "not_yet_processed", "pending_dataset_preparation"]
+    }
+  }
+}

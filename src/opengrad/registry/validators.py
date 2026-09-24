@@ -107,6 +107,47 @@ def validate_structure(root: Path) -> list[str]:
     for record_id, count in seen.items():
         if count > 1:
             errors.append(f"datasets.yaml: duplicate dataset id '{record_id}' ({count} entries)")
+    if isinstance(registry, dict) and _schema_version(registry) >= 2:
+        errors += _record_schema_errors(root, registry, "datasets.yaml", "datasets")
+    return errors
+
+
+DATASET_RECORD_SCHEMA = "registry/dataset_record.schema.json"
+
+
+def _schema_version(registry: dict[str, Any]) -> int:
+    value = registry.get("schema_version")
+    return value if isinstance(value, int) else 0
+
+
+def _record_schema_errors(
+    root: Path, registry: dict[str, Any], name: str, key: str, expected: str = DATASET_RECORD_SCHEMA
+) -> list[str]:
+    """Validate every record against the JSON Schema the file declares.
+
+    From schema_version 2 a registry names its record schema, and the schema -- not a list of
+    field names in this module -- is the definition of a valid record. A file that stops naming
+    it, or names another schema, is an error rather than a way to skip the check.
+    """
+    declared = registry.get("record_schema")
+    if declared != expected:
+        return [f"{name}: schema_version 2 requires record_schema: {expected} (found {declared!r})"]
+    try:
+        import jsonschema
+    except ImportError:
+        return [f"{name}: install the dev extra (jsonschema) to validate records"]
+    try:
+        schema = json.loads((root / expected).read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator.check_schema(schema)
+    except (OSError, ValueError, jsonschema.SchemaError) as exc:
+        return [f"{expected}: {exc}"]
+    validator = jsonschema.Draft202012Validator(schema)
+    errors = []
+    for record in registry.get(key) or []:
+        record_id = str(record.get("id", "<missing id>")) if isinstance(record, dict) else "?"
+        for error in sorted(validator.iter_errors(record), key=lambda e: list(e.absolute_path)):
+            where = ".".join(str(part) for part in error.absolute_path) or "(record)"
+            errors.append(f"{name}: {record_id}: {where}: {error.message}")
     return errors
 
 
@@ -142,6 +183,7 @@ def validate_references(root: Path) -> list[str]:
         return [f"datasets.yaml: {exc}"]
     records = registry.get("datasets", []) if isinstance(registry, dict) else []
     by_id = {str(r.get("id")): r for r in records if isinstance(r, dict)}
+    paper_ids = _paper_ids(root)
 
     for record in records:
         if not isinstance(record, dict):
@@ -171,7 +213,7 @@ def validate_references(root: Path) -> list[str]:
         # that does not resolve -- or that resolves only on the machine which
         # built the release, because it lives under .gitignore -- is not an
         # anchor anyone else can use.
-        for key in ("sample_count", "retained_after_filtering", "original_sample_count"):
+        for key in ("sample_count", "retained_after_filtering"):
             block = record.get(key)
             if not isinstance(block, dict):
                 continue
@@ -217,6 +259,54 @@ def validate_references(root: Path) -> list[str]:
                     f"matches neither its recorded revision nor its derived digest nor any "
                     f"release config"
                 )
+        errors += _evidence_reference_errors(root, record_id, record, paper_ids)
+    return errors
+
+
+def _paper_ids(root: Path) -> set[str] | None:
+    """Ids in docs/references/papers.yaml, or None when the repository has no papers file."""
+    path = root / "docs/references/papers.yaml"
+    if not path.is_file():
+        return None
+    value = load_yaml(path)
+    papers = value.get("papers", value) if isinstance(value, dict) else value
+    return {str(p["id"]) for p in papers or [] if isinstance(p, dict) and "id" in p}
+
+
+def _leading_path(value: str) -> str:
+    """The repository path a prose reference starts with (`reports/ERRATA.md §23 (…)`)."""
+    return value.split(" ", 1)[0]
+
+
+def _evidence_reference_errors(
+    root: Path, record_id: str, record: dict[str, Any], paper_ids: set[str] | None
+) -> list[str]:
+    """Schema-version-2 references: papers, overlap evidence, redistribution basis, RAI evidence."""
+    errors = []
+    if paper_ids is not None:
+        for paper in record.get("papers") or []:
+            if str(paper) not in paper_ids:
+                errors.append(f"{record_id}: papers cites unknown id '{paper}'")
+    local = list(record.get("overlap_evidence") or [])
+    basis = record.get("redistribution_basis")
+    if isinstance(basis, str) and basis:
+        local.append(_leading_path(basis))
+    responsible = record.get("responsible_use")
+    if isinstance(responsible, dict):
+        local += [e for e in responsible.get("evidence") or [] if not str(e).startswith("http")]
+    for reference in local:
+        if not (root / str(reference)).exists():
+            errors.append(f"{record_id}: evidence path does not exist: {reference}")
+    # A file digest describes one snapshot. A distribution URL that does not carry the record's
+    # pinned revision could describe a different one, so the digest would pin nothing.
+    revision = record.get("source_revision")
+    pinned = str(revision.get("value", "")) if isinstance(revision, dict) else ""
+    for item in record.get("distribution") or []:
+        url = str(item.get("content_url", "")) if isinstance(item, dict) else ""
+        if not pinned or pinned not in url:
+            errors.append(
+                f"{record_id}: distribution '{url}' does not name the pinned revision {pinned!r}"
+            )
     return errors
 
 

@@ -146,7 +146,6 @@ def test_canonical_entry_hash_matches_the_release_manifest():
     registry = yaml.safe_load((ROOT / "registry/datasets.yaml").read_text())
     entry = next(item for item in registry["datasets"] if item["id"] == "canonical_v1")
     digest = hashlib.sha256(manifest.read_bytes()).hexdigest()
-    assert entry["checksum"] == digest
     assert entry["processed_dataset_hash"]["value"] == digest
     assert (
         entry["source_revision"]["value"] == json.loads(manifest.read_text())["opengrad_git_commit"]

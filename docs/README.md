@@ -75,6 +75,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 
 | Document | Title |
 |---|---|
+| [`datasets/ADDING_A_SOURCE.md`](datasets/ADDING_A_SOURCE.md) | Adding a data source to OpenGrad |
 | [`datasets/README.md`](datasets/README.md) | Dataset preparation |
 
 ## evaluation
@@ -217,4 +218,4 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 |---|---|
 | [`training/reference-recipes.md`](training/reference-recipes.md) | External training reference recipes |
 
-121 documents.
+122 documents.

@@ -71,7 +71,6 @@ def test_released_sources_are_assessed_in_the_registry() -> None:
     _items = list(released)
     assert _items, "nothing to check: an empty collection would pass this test vacuously"
     for source in _items:
-        assert by_id[source]["redistribution"] in {
-            "PERMITTED_WITH_ATTRIBUTION",
-            "REDISTRIBUTION_WITH_ATTRIBUTION",
-        }, source
+        # Schema version 2 spells this outcome one way (registry/dataset_record.schema.json).
+        assert by_id[source]["redistribution"] == "REDISTRIBUTION_WITH_ATTRIBUTION", source
+        assert by_id[source]["redistribution_basis"], source

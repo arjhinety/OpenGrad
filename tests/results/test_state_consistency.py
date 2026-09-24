@@ -210,8 +210,8 @@ def test_canonical_v2_dataset_figures_match_the_registry() -> None:
         )["datasets"]
     }
     final = datasets["canonical_v2_final"]
-    assert final["retained_sample_count"] == 173_237
-    assert final["checksum"].startswith("8ced403b")
+    assert final["retained_after_filtering"]["value"] == 173_237
+    assert final["processed_dataset_hash"]["value"].startswith("8ced403b")
     assert len(final["derived_from"]) == 4
     trainable = sum(
         kind["trainable_records"] for kind in final["supervision"]["by_kind"].values()
@@ -219,7 +219,7 @@ def test_canonical_v2_dataset_figures_match_the_registry() -> None:
     assert trainable == 161_966
 
     # The 103,036 snapshot is historical evidence, not the current corpus.
-    assert datasets["canonical_v2"]["retained_sample_count"] == 103_036
+    assert datasets["canonical_v2"]["retained_after_filtering"]["value"] == 103_036
 
     manifest = json.loads(
         (ROOT / "reports" / "evaluation" / "behavioral-heldout-v2.manifest.json").read_text(

@@ -102,6 +102,8 @@ module = [
     "huggingface_hub.*",
     "numpy",
     "numpy.*",
+    "jsonschema",
+    "jsonschema.*",
 ]
 ignore_missing_imports = true
 

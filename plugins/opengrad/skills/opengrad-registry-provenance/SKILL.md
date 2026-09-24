@@ -28,6 +28,27 @@ description: How OpenGrad's registries, provenance claims and written records st
 - `opengrad-preflight` (`src/opengrad/registry/preflight.py` via `opengrad.cli:preflight_cli`) is a repository-level
   check: git, registries, required layout.
 
+## Dataset records (`registry/datasets.yaml`, schema version 2)
+
+- **The schema is the definition.** Every record conforms to `registry/dataset_record.schema.json`
+  (JSON Schema 2020-12). `validate_structure` enforces it for any file declaring `schema_version: 2`, and a
+  version-2 file that drops `record_schema` is an error, not a skip. `tests/registry/test_dataset_record_schema.py`
+  pins the committed file at version 2 and proves each rule rejects a record that breaks it.
+- **The procedure is `docs/datasets/ADDING_A_SOURCE.md`.** Only *adopted* sources and OpenGrad's derived corpora
+  belong in this file: the training firewall (`materialize._training_split_allowlist`, also called by the frozen
+  `normalization_v3` builder) reads `id`, `intended_stages` and `allowed_splits` from it. Keep those three names;
+  the same test pins the allowlist literal.
+- **One field per fact.** Upstream revision is `source_revision`; OpenGrad's processed identity is
+  `processed_dataset_hash.value` (a digest, or null with the git-ignored `manifest` path); upstream file digests are
+  `distribution[].sha256`, read from the Hub's LFS record at the pinned revision or hashed from bytes proven
+  identical to it. `checksum`, `exact_revision`, `original_sample_count` and `retained_sample_count` were retired
+  on 2026-09-24 and are rejected.
+- **Enums are closed.** Redistribution, overlap and contamination fields take only the schema's values; an overlap
+  audit is named by its artifact in `overlap_evidence`, never by a sentence in the enum. `validate_references`
+  checks `papers` ids, evidence paths and that every distribution URL carries the pinned revision.
+- **Croissant.** Each schema property names its Croissant 1.1 / Croissant RAI 1.0 counterpart in `x-croissant`;
+  `responsible_use` holds the RAI fields and needs `evidence`.
+
 ## Provenance: every verified claim needs an immutable anchor
 
 From `docs/PROVENANCE.md`, implemented in `src/opengrad/registry/provenance.py`:
