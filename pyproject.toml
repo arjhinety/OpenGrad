@@ -86,9 +86,21 @@ extend-exclude = ["third_party", "release"]
 python_version = "3.11"
 strict = true
 
-# Untyped third-party packages. torch is absent from the dev environment (CPU-only tests skip it).
+# Untyped third-party packages, and optional ones the dev extra does not install (CI has no torch,
+# transformers, safetensors or huggingface_hub; the code imports them lazily).
 [[tool.mypy.overrides]]
-module = ["yaml", "yaml.*", "torch", "torch.*"]
+module = [
+    "yaml",
+    "yaml.*",
+    "torch",
+    "torch.*",
+    "transformers",
+    "transformers.*",
+    "safetensors",
+    "safetensors.*",
+    "huggingface_hub",
+    "huggingface_hub.*",
+]
 ignore_missing_imports = true
 
 # Source files whose bytes are recorded by hash: the frozen decision classifiers (check_frozen), the
