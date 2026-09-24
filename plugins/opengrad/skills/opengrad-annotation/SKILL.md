@@ -95,8 +95,8 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   (`configs/annotation/answer-strata-v1.yaml`, procedure `answer-strata-v1.model-procedure.md`) serves only 41 §8
   and blinds pool, source and reference answers. It is labelled by the same three external annotators, with the
   same finish-up steps. The strata are the two-of-three `ANSWER` items per pool, reported separately (41 §9).
-  - **After the reference:** `pdet_coverage_reference --task answer-strata-v1` writes
-    `reports/study-002/answer-strata-v1/reference/`. Then `python -m opengrad.verification.answer_strata_report`
+  - **After the reference:** `pdet_coverage_reference --task answer-strata-v1` writes a `reference/`
+    directory beside the population. Then `python -m opengrad.verification.answer_strata_report`
     (`src/opengrad/verification/answer_strata_report.py`) writes the per-stratum n, the §10 sizing status and the
     §11 balance, plus a membership file of ids and strata. The comparison with the other modes stays
     `BLOCKED_PCONF_NOT_BUILT` until P-CONF exists.
