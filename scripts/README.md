@@ -64,6 +64,7 @@ the script's own first docstring line.
 | [`prepare_imatrix_calibration.py`](prepare_imatrix_calibration.py) | Freeze the training-side calibration corpus used to build the GGUF importance matrix. |
 | [`prepare_quantization_inputs.py`](prepare_quantization_inputs.py) | Freeze compact study inputs and the prospective quantization gate. |
 | [`preserve_h200_state.py`](preserve_h200_state.py) | Snapshot and verify the completed H200 run before the capability continuation writes anything. |
+| [`publish_card_corrections.py`](publish_card_corrections.py) | Re-publish corrected cards to Hugging Face, and record what was published. |
 | [`publish_executorch_artifact.py`](publish_executorch_artifact.py) | Publish one exported ExecuTorch artifact and add it to the QwenGrad-Executorch collection. |
 | [`rebuild_eval_splits.py`](rebuild_eval_splits.py) | Rebuild the frozen held-out evaluation splits and re-freeze their content hashes. |
 | [`render_frozen_prompts.py`](render_frozen_prompts.py) | Pre-render the frozen evaluation prompts once, so every runtime scores identical bytes. |
@@ -108,4 +109,4 @@ the script's own first docstring line.
 | [`reporting/generate_experiment_status.py`](reporting/generate_experiment_status.py) | Generate the machine-checkable experiment status view at ``docs/EXPERIMENT_STATUS.md``. |
 | [`reporting/generate_indexes.py`](reporting/generate_indexes.py) | Generate the directory indexes ``reports/README.md``, ``scripts/README.md`` and ``docs/README.md``. |
 
-82 scripts.
+83 scripts.

@@ -34,6 +34,11 @@ record is committed and the publication gate passes.
    that may not be redistributed is not uploaded.
 8. **Frozen studies:** a study's Hugging Face repositories are tagged at freeze, and later work goes to *new*
    repositories (`docs/research/STUDIES.md`).
+9. **Card-only corrections** go through `scripts/publish_card_corrections.py`: a dry run by default (diffs
+   against the live card, lists Hub commits no record names), `--upload` only on the user's instruction. It
+   uploads the **committed** bytes, names the live head as the parent commit, re-fetches and compares, and writes
+   the record, reconstructing unrecorded commits retroactively. Its first dry run (2026-09-24) found seven
+   unrecorded card commits and a GGUF card uploaded with CRLF line endings from a Windows working tree.
 
 Never commit or print tokens. If push protection flags a secret, verify it and let the user decide.
 
