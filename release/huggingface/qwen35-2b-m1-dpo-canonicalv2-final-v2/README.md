@@ -50,10 +50,10 @@ in the repository.
 
 ## Results (pre-registered internal confirmatory partition, 1,277 examples)
 
-![QwenGrad-DPO confirmatory metrics: M0-final-v2 @1800 versus M1-v2 @30](qwengrad-dpo-results.png)
-
-The chart reports the exact values for `call_f1`, precision, recall, `over_call`, clarification,
-and unsupported. Higher is better for every metric except `over_call`.
+| run | `call_f1` | precision | recall | over_call | clarification | unsupported |
+|---|---:|---:|---:|---:|---:|---:|
+| M0-final-v2 @1800 | 0.7470 | 0.7350 | 0.7594 | 0.1505 | 0.7682 | 0.5430 |
+| **M1-v2 @30** | **0.7548** | 0.7358 | **0.7748** | 0.1529 | 0.7655 | 0.5386 |
 
 On tool routing, M1 stays at M0's operating point. The `call_f1` difference is +0.0078: 351
 against 344 correct of the 453 CALL examples (+7), single seed, no interval, which is within
