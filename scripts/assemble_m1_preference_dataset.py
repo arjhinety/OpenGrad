@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from opengrad.formatting.parser import parse_qwen_native_output
+from opengrad.hashing import sha256_file as sha256
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL = ROOT / "data/processed/m1_local_calibration_pairs_v1.jsonl"
@@ -29,14 +30,6 @@ OUTPUT = ROOT / "data/processed/m1_calibration_preference_pairs_v1.jsonl"
 REPORT = ROOT / "reports/data/m1-calibration-preference-pairs-v1.json"
 CURATED_TARGETS = {"CLARIFY": 100, "UNSUPPORTED": 100, "ANSWER": 40}
 SENSITIVE_LITERAL = re.compile(r"(?:ghp_|github_pat_|sk-[A-Za-z0-9])")
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def rows(path: Path) -> list[dict[str, Any]]:

@@ -13,7 +13,6 @@ can be traced to the exact input and instructions it was given under.
 
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -23,6 +22,7 @@ from opengrad.annotation.items import canonical_json, display_value
 from opengrad.annotation.service import Workspace, WorkspaceError, load_instructions
 from opengrad.annotation.store import utc_now
 from opengrad.annotation.values import AnnotationValueError, normalize_value
+from opengrad.hashing import sha256_text
 
 BATCH_FORMAT = 1
 
@@ -32,7 +32,7 @@ class BatchError(WorkspaceError):
 
 
 def _digest(payload: Any) -> str:
-    return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
+    return sha256_text(canonical_json(payload))
 
 
 def _fence(text: str) -> str:
@@ -62,7 +62,12 @@ def render_markdown(config: TaskConfig, batch: dict[str, Any]) -> str:
         "",
     ]
     for document in batch["instructions"]:
-        lines += [f"<!-- rubric document: {document['title']} -->", "", document["content"].strip(), ""]
+        lines += [
+            f"<!-- rubric document: {document['title']} -->",
+            "",
+            document["content"].strip(),
+            "",
+        ]
     lines += ["# Part 2 -- Items", ""]
     for item in batch["items"]:
         view = item["view"]
@@ -102,7 +107,9 @@ def prepare_batch(
     session has labeled -- rendered for the model and hashed, so ingestion can prove it matches."""
     config = workspace.config
     if not annotator_id.startswith(MODEL_PREFIX):
-        raise BatchError(f"model batches are for model annotators ({MODEL_PREFIX!r} ids), not {annotator_id!r}")
+        raise BatchError(
+            f"model batches are for model annotators ({MODEL_PREFIX!r} ids), not {annotator_id!r}"
+        )
     if size < 1:
         raise BatchError("batch size must be at least 1")
     session = workspace.open_session(session_id, annotator_id)  # refuses undeclared models
@@ -126,7 +133,9 @@ def prepare_batch(
         }
         for item_id in chosen
     ]
-    instructions = [{"title": doc["title"], "content": doc["content"]} for doc in load_instructions(config)]
+    instructions = [
+        {"title": doc["title"], "content": doc["content"]} for doc in load_instructions(config)
+    ]
     content = {"items": items, "instructions": instructions}
     return {
         "batch_format": BATCH_FORMAT,
@@ -162,7 +171,7 @@ def parse_answers(text: str) -> list[dict[str, Any]]:
     if isinstance(data, dict):
         data = data.get("labels")
     if not isinstance(data, list) or not all(isinstance(entry, dict) for entry in data):
-        raise BatchError("answers must be a JSON array of objects (or {\"labels\": [...]})")
+        raise BatchError('answers must be a JSON array of objects (or {"labels": [...]})')
     return data
 
 
@@ -173,14 +182,23 @@ def ingest_batch(
     config = workspace.config
     if batch.get("batch_format") != BATCH_FORMAT or batch.get("task_id") != workspace.task_id:
         raise BatchError("the batch was not prepared for this task")
-    if _digest({"items": batch["items"], "instructions": batch["instructions"]}) != batch["content_sha256"]:
-        raise BatchError("the batch content does not match its content_sha256; it was changed after preparing")
+    if (
+        _digest({"items": batch["items"], "instructions": batch["instructions"]})
+        != batch["content_sha256"]
+    ):
+        raise BatchError(
+            "the batch content does not match its content_sha256; it was changed after preparing"
+        )
     declared = config.model_annotator(str(batch["annotator_id"]))
     if declared is None or declared.procedure_sha256 != batch["procedure_sha256"]:
-        raise BatchError("the batch's model annotator or procedure no longer matches the task's declaration")
+        raise BatchError(
+            "the batch's model annotator or procedure no longer matches the task's declaration"
+        )
     session = workspace.require_session(str(batch["session_id"]))
     if session["annotator_id"] != batch["annotator_id"]:
-        raise BatchError(f"session {session['session_id']!r} belongs to {session['annotator_id']!r}")
+        raise BatchError(
+            f"session {session['session_id']!r} belongs to {session['annotator_id']!r}"
+        )
 
     expected = list(batch["item_ids"])
     keys = {config.primary_key, *(field.key for field in config.extra_fields)}
@@ -208,17 +226,26 @@ def ingest_batch(
             problems.append(f"{item_id}: flag must be true or false")
             continue
         by_item[item_id] = entry
-    missing = [item_id for item_id in expected if item_id not in by_item and not any(item_id in p for p in problems)]
+    missing = [
+        item_id
+        for item_id in expected
+        if item_id not in by_item and not any(item_id in p for p in problems)
+    ]
     problems += [f"{item_id}: no answer" for item_id in missing]
     already = [
         item_id
         for item_id in expected
-        if (row := workspace.store.annotation(workspace.task_id, session["session_id"], item_id)) is not None
+        if (row := workspace.store.annotation(workspace.task_id, session["session_id"], item_id))
+        is not None
         and row["status"] == "labeled"
     ]
-    problems += [f"{item_id}: already labeled in session {session['session_id']!r}" for item_id in already]
+    problems += [
+        f"{item_id}: already labeled in session {session['session_id']!r}" for item_id in already
+    ]
     if problems:
-        raise BatchError(f"{len(problems)} problems; nothing was recorded:\n  - " + "\n  - ".join(problems))
+        raise BatchError(
+            f"{len(problems)} problems; nothing was recorded:\n  - " + "\n  - ".join(problems)
+        )
 
     reason = (
         f"model batch {batch['batch_id']}; batch content sha256 {batch['content_sha256']}; "

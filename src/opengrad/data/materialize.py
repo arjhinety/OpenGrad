@@ -16,6 +16,7 @@ from opengrad.data.adapters import (
     adapt_when2call_preference,
 )
 from opengrad.data.canonical import canonical_dict, stable_json
+from opengrad.hashing import sha256_file as _source_digest
 
 _VALID_MODES = {"sft", "preference", "evaluation"}
 _DATASET_ALIASES = {
@@ -29,14 +30,6 @@ _DATASET_ALIASES = {
     "glaive": "glaive-function-calling-v2",
     "glaive-function-calling-v2": "glaive-function-calling-v2",
 }
-
-
-def _source_digest(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _jsonable(value: Any) -> dict[str, Any]:

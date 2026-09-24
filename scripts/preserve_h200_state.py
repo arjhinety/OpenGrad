@@ -28,10 +28,12 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from pathlib import Path
+
+from opengrad.hashing import sha256_bytes as sha256
+from opengrad.hashing import sha256_file as digest
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "results/benchmarks/h200/PRESERVED_STATE_v1.json"
@@ -61,18 +63,6 @@ PROTECTED = [
 ]
 
 APPEND_ONLY = "report_h200"
-
-
-def digest(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
-def sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
 
 
 def committed(relative: str) -> tuple[bytes | None, str | None]:

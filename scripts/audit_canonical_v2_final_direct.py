@@ -35,7 +35,6 @@ Nothing prints or writes item text, ids, tools or rationales.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from collections import Counter, defaultdict
@@ -47,6 +46,7 @@ import audit_pdet_coverage_v2_supply as supply_audit
 
 from opengrad.data.classifier_input import ClassifierFeatures, normalize_prompt
 from opengrad.data.decision_classifier import CLASSIFIER_VERSION, LABELS, classify
+from opengrad.hashing import sha256_bytes as _sha256
 from opengrad.verification import pdet_coverage as coverage
 from opengrad.verification import prose_classifier_oneshot as oneshot
 
@@ -66,20 +66,26 @@ KINDS = ("call", "after_tool_result", "first_exchange", "later_turn")
 TOOLS = ("tools_offered", "no_tools")
 
 
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
 def load_release(root: Path) -> tuple[Path, dict[str, Any]]:
     from huggingface_hub import snapshot_download
 
     manifest_bytes = (root / RELEASE_MANIFEST).read_bytes()
     manifest = json.loads(manifest_bytes)
-    pinned = json.loads((root / DATASET_MANIFEST).read_text(encoding="utf-8"))["corpus"]["manifest_sha256"]
+    pinned = json.loads((root / DATASET_MANIFEST).read_text(encoding="utf-8"))["corpus"][
+        "manifest_sha256"
+    ]
     if _sha256(manifest_bytes) != pinned:
-        raise SystemExit("the repository's release manifest is not the one M0's dataset manifest pins")
+        raise SystemExit(
+            "the repository's release manifest is not the one M0's dataset manifest pins"
+        )
     path = Path(
-        snapshot_download(REPOSITORY, repo_type="dataset", revision=REVISION, allow_patterns=["*.parquet"], local_files_only=True)
+        snapshot_download(
+            REPOSITORY,
+            repo_type="dataset",
+            revision=REVISION,
+            allow_patterns=["*.parquet"],
+            local_files_only=True,
+        )
     )
     for shard in manifest["output_shards"]:
         data = (path / shard["file"]).read_bytes()
@@ -113,13 +119,17 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
     prediction_prompts: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
     unreadable: Counter[str] = Counter()
     for shard in manifest["output_shards"]:
-        for row in pq.read_table(path / shard["file"], columns=["source_dataset", "tools", "messages"]).to_pylist():
+        for row in pq.read_table(
+            path / shard["file"], columns=["source_dataset", "tools", "messages"]
+        ).to_pylist():
             source = SOURCE_NAMES[row["source_dataset"]]
             tools = json.loads(row["tools"]) or []
             offered = TOOLS[0] if tools else TOOLS[1]
             records[(source, offered)] += 1
             body = [m for m in json.loads(row["messages"]) if m.get("role") != "system"]
-            first_assistant = next((i for i, m in enumerate(body) if m.get("role") == "assistant"), None)
+            first_assistant = next(
+                (i for i, m in enumerate(body) if m.get("role") == "assistant"), None
+            )
             last_user: str | None = None
             for index, message in enumerate(body):
                 role = message.get("role")
@@ -148,7 +158,10 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
                     first_prompts[(source, offered)].add(normalize_prompt(last_user))
                 label = classify(
                     ClassifierFeatures(
-                        user_message=last_user, assistant_response=response, tools=tuple(tools), structured_call_present=False
+                        user_message=last_user,
+                        assistant_response=response,
+                        tools=tuple(tools),
+                        structured_call_present=False,
                     )
                 ).label
                 predictions[(source, offered, kind, label)] += 1
@@ -168,34 +181,52 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
                 if not cell or not cell["items"]:
                     totals[f"first_exchanges_without_yield_{offered}"] += count
                     continue
-                totals[f"expected_direct_first_exchanges_{offered}"] += count * cell["DIRECT"] / cell["items"]
+                totals[f"expected_direct_first_exchanges_{offered}"] += (
+                    count * cell["DIRECT"] / cell["items"]
+                )
             per_source[source] = {key: round(value, 1) for key, value in sorted(totals.items())}
         projection[basis] = per_source
 
-    trainable = json.loads((root / DATASET_MANIFEST).read_text(encoding="utf-8"))["source_trainable"]
+    trainable = json.loads((root / DATASET_MANIFEST).read_text(encoding="utf-8"))[
+        "source_trainable"
+    ]
     return {
         "artifact_kind": "CANONICAL_V2_FINAL_DIRECT_PREVALENCE_AUDIT",
         "authorization": "docs/research/study-002/35-OWNER-DECISIONS-AFTER-CLASSIFIER-V1-TEST.md §5 (owner decision 2026-09-17)",
         "status": "COUNTS ONLY. Descriptive estimates from model labels and a frozen classifier; not gold.",
         "corpus": release,
-        "m0_trainable_records_by_source": {SOURCE_NAMES[name]: count for name, count in sorted(trainable.items())},
+        "m0_trainable_records_by_source": {
+            SOURCE_NAMES[name]: count for name, count in sorted(trainable.items())
+        },
         "records_by_source_and_tools": {s: {t: records[(s, t)] for t in TOOLS} for s in sources},
         "assistant_turns_by_source_tools_and_kind": {
             s: {t: {k: turns[(s, t, k)] for k in KINDS} for t in TOOLS} for s in sources
         },
         "prose_turns_without_text": dict(sorted(unreadable.items())),
         "first_exchange_strata": {
-            s: {t: {name: first_strata[(s, t, name)] for name in coverage.STRATA if first_strata[(s, t, name)]} for t in TOOLS}
+            s: {
+                t: {
+                    name: first_strata[(s, t, name)]
+                    for name in coverage.STRATA
+                    if first_strata[(s, t, name)]
+                }
+                for t in TOOLS
+            }
             for s in sources
         },
-        "first_exchange_distinct_prompts": {s: {t: len(first_prompts[(s, t)]) for t in TOOLS} for s in sources},
+        "first_exchange_distinct_prompts": {
+            s: {t: len(first_prompts[(s, t)]) for t in TOOLS} for s in sources
+        },
         "label_yield_projection_first_exchanges": projection,
         "frozen_classifier": {
             "version": CLASSIFIER_VERSION,
             "source_sha256_lf": oneshot.FROZEN_SOURCE_SHA256_LF,
             "predictions_by_source_tools_and_kind": {
                 s: {
-                    t: {k: {label: predictions[(s, t, k, label)] for label in LABELS} for k in ("first_exchange", "later_turn")}
+                    t: {
+                        k: {label: predictions[(s, t, k, label)] for label in LABELS}
+                        for k in ("first_exchange", "later_turn")
+                    }
                     for t in TOOLS
                 }
                 for s in sources
@@ -215,7 +246,9 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--root", type=Path, default=ROOT)
     args = parser.parse_args(argv)

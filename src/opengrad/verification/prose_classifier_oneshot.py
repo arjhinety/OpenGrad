@@ -30,7 +30,6 @@ permission is the study owner's separate decision (34 §4), and C1 needs the own
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from collections import Counter
@@ -41,6 +40,7 @@ from typing import Any
 from opengrad.data import versions
 from opengrad.data.canonical import stable_json
 from opengrad.data.classifier_input import CONTRACT_VERSION, ClassifierFeatures
+from opengrad.hashing import sha256_bytes as _sha256
 from opengrad.verification import pdet_coverage_metrics as metrics
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -52,7 +52,9 @@ COVERAGE_POPULATION = Path("reports/pdet-coverage/pdet-coverage-v1.population.js
 COVERAGE_POPULATION_SHA256 = "755bc16e79ceb1cb9e461c0fe8b9125628c16f263ed24f9e008f55b613a7158c"
 COVERAGE_MANIFEST = Path("reports/pdet-coverage/pdet-coverage-v1.manifest.json")
 COVERAGE_REFERENCE = Path("reports/pdet-coverage/reference/pdet-coverage-v1.reference.jsonl")
-COVERAGE_REFERENCE_MANIFEST = Path("reports/pdet-coverage/reference/pdet-coverage-v1.reference.manifest.json")
+COVERAGE_REFERENCE_MANIFEST = Path(
+    "reports/pdet-coverage/reference/pdet-coverage-v1.reference.manifest.json"
+)
 
 PDET_POPULATION = Path("reports/pdet/pdet-v1.population.jsonl")
 PDET_POPULATION_SHA256 = "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b"
@@ -71,22 +73,22 @@ class TestRunError(RuntimeError):
     """The one-shot test cannot run: an input is not the pinned one, or a result already exists."""
 
 
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
 def _lf_sha256(path: Path) -> str:
     return _sha256(path.read_bytes().replace(b"\r\n", b"\n"))
 
 
 def _jsonl(path: Path) -> list[dict[str, Any]]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
 
 
 def check_frozen(root: Path) -> None:
     observed = _lf_sha256(root / CLASSIFIER_MODULE)
     if observed != FROZEN_SOURCE_SHA256_LF:
-        raise TestRunError(f"{CLASSIFIER_MODULE.as_posix()} is not the frozen {FROZEN_TAG} (sha256 LF {observed})")
+        raise TestRunError(
+            f"{CLASSIFIER_MODULE.as_posix()} is not the frozen {FROZEN_TAG} (sha256 LF {observed})"
+        )
 
 
 def features_sha256(features: ClassifierFeatures) -> str:
@@ -159,8 +161,14 @@ def coverage_items(
             }
         )
     if feature_mismatch:
-        raise TestRunError(f"{feature_mismatch} coverage items do not reproduce their recorded features hash")
-    return items, predictions, {"layer_b_items": len(items), "consensus": dict(sorted(consensus.items()))}
+        raise TestRunError(
+            f"{feature_mismatch} coverage items do not reproduce their recorded features hash"
+        )
+    return (
+        items,
+        predictions,
+        {"layer_b_items": len(items), "consensus": dict(sorted(consensus.items()))},
+    )
 
 
 def pdet_items(
@@ -217,7 +225,9 @@ def load_inputs(root: Path) -> dict[str, Any]:
     coverage_bytes = (root / COVERAGE_POPULATION).read_bytes()
     if _sha256(coverage_bytes) != COVERAGE_POPULATION_SHA256:
         raise TestRunError("P-DET-COVERAGE-v1 population is not the drawn one")
-    reference_manifest = json.loads((root / COVERAGE_REFERENCE_MANIFEST).read_text(encoding="utf-8"))
+    reference_manifest = json.loads(
+        (root / COVERAGE_REFERENCE_MANIFEST).read_text(encoding="utf-8")
+    )
     reference_bytes = (root / COVERAGE_REFERENCE).read_bytes()
     if reference_manifest.get("status") != "MODEL_REFERENCE_PROVISIONAL":
         raise TestRunError("the coverage reference is not the provisional three-model consensus")
@@ -242,22 +252,34 @@ def load_inputs(root: Path) -> dict[str, Any]:
     if audit.get("pdet_v1_population_sha256") != PDET_POPULATION_SHA256:
         raise TestRunError("the representation audit is for another P-DET-v1 population")
     return {
-        "coverage_population": [json.loads(line) for line in coverage_bytes.decode("utf-8").splitlines() if line],
-        "coverage_references": {row["pdetcov_id"]: row for row in _jsonl(root / COVERAGE_REFERENCE)},
-        "coverage_pool_strata": json.loads((root / COVERAGE_MANIFEST).read_text(encoding="utf-8"))["counts"]["pool_strata"],
+        "coverage_population": [
+            json.loads(line) for line in coverage_bytes.decode("utf-8").splitlines() if line
+        ],
+        "coverage_references": {
+            row["pdetcov_id"]: row for row in _jsonl(root / COVERAGE_REFERENCE)
+        },
+        "coverage_pool_strata": json.loads((root / COVERAGE_MANIFEST).read_text(encoding="utf-8"))[
+            "counts"
+        ]["pool_strata"],
         "reference_manifest": reference_manifest,
         "reference_manifest_sha256": _sha256((root / COVERAGE_REFERENCE_MANIFEST).read_bytes()),
-        "pdet_population": [json.loads(line) for line in pdet_bytes.decode("utf-8").splitlines() if line],
+        "pdet_population": [
+            json.loads(line) for line in pdet_bytes.decode("utf-8").splitlines() if line
+        ],
         "pdet_labels": {row["pdet_id"]: row for row in human},
         "pdet_package_manifest_sha256": _sha256((root / PDET_PACKAGE).read_bytes()),
-        "pdet_not_in_input": frozenset(row["pdet_id"] for row in audit["not_structurally_equivalent"]),
+        "pdet_not_in_input": frozenset(
+            row["pdet_id"] for row in audit["not_structurally_equivalent"]
+        ),
     }
 
 
 def run(root: Path = ROOT) -> dict[str, Any]:
     out = root / OUTPUT_DIR
     if (out / RESULT_NAME).exists() or (out / PREDICTIONS_NAME).exists():
-        raise TestRunError(f"{out / RESULT_NAME} exists: the test runs once and is never overwritten")
+        raise TestRunError(
+            f"{out / RESULT_NAME} exists: the test runs once and is never overwritten"
+        )
     check_frozen(root)
     from opengrad.data.decision_classifier import CLASSIFIER_VERSION, classify
 
@@ -271,7 +293,8 @@ def run(root: Path = ROOT) -> dict[str, Any]:
     evaluation = metrics.evaluate(cov_items + pdet_items_, inputs["coverage_pool_strata"])
     predictions = cov_predictions + pdet_predictions
     predictions_bytes = b"".join(
-        (json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8") for row in predictions
+        (json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
+        for row in predictions
     )
     result = {
         "artifact_kind": "PROSE_CLASSIFIER_ONE_SHOT_TEST",
@@ -312,7 +335,9 @@ def run(root: Path = ROOT) -> dict[str, Any]:
     }
     out.mkdir(parents=True, exist_ok=True)
     (out / PREDICTIONS_NAME).write_bytes(predictions_bytes)
-    (out / RESULT_NAME).write_bytes((json.dumps(result, indent=2, sort_keys=True) + "\n").encode("utf-8"))
+    (out / RESULT_NAME).write_bytes(
+        (json.dumps(result, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    )
     return result
 
 
@@ -333,31 +358,49 @@ def summary(result: Mapping[str, Any]) -> dict[str, Any]:
             for population, data in evaluation["populations"].items()
         },
         "direct_poststratified_precision": {
-            source: {k: value.get(k) for k in ("status", "value", "direct_predictions", "strata_without_sample")}
+            source: {
+                k: value.get(k)
+                for k in ("status", "value", "direct_predictions", "strata_without_sample")
+            }
             for source, value in evaluation["direct_poststratified_precision"].items()
         },
     }
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--run", action="store_true", help="run the one-shot test (refuses if a result exists)")
-    group.add_argument("--preflight", action="store_true", help="check the freeze and every input; classify nothing")
+    group.add_argument(
+        "--run", action="store_true", help="run the one-shot test (refuses if a result exists)"
+    )
+    group.add_argument(
+        "--preflight",
+        action="store_true",
+        help="check the freeze and every input; classify nothing",
+    )
     parser.add_argument("--root", type=Path, default=ROOT)
     args = parser.parse_args(argv)
     if args.preflight:
         check_frozen(args.root)
         inputs = load_inputs(args.root)
-        print(json.dumps({
-            "frozen_classifier": "matches",
-            "coverage_layer_b": sum(1 for r in inputs["coverage_population"] if r["layer"] == "B"),
-            "coverage_references": len(inputs["coverage_references"]),
-            "pdet_v1_items": len(inputs["pdet_population"]),
-            "pdet_v1_human_labels": len(inputs["pdet_labels"]),
-            "pdet_v1_not_in_input": len(inputs["pdet_not_in_input"]),
-            "result_exists": (args.root / OUTPUT_DIR / RESULT_NAME).exists(),
-        }, indent=2))
+        print(
+            json.dumps(
+                {
+                    "frozen_classifier": "matches",
+                    "coverage_layer_b": sum(
+                        1 for r in inputs["coverage_population"] if r["layer"] == "B"
+                    ),
+                    "coverage_references": len(inputs["coverage_references"]),
+                    "pdet_v1_items": len(inputs["pdet_population"]),
+                    "pdet_v1_human_labels": len(inputs["pdet_labels"]),
+                    "pdet_v1_not_in_input": len(inputs["pdet_not_in_input"]),
+                    "result_exists": (args.root / OUTPUT_DIR / RESULT_NAME).exists(),
+                },
+                indent=2,
+            )
+        )
         return 0
     print(json.dumps(summary(run(args.root)), indent=2, default=str))
     return 0

@@ -19,6 +19,7 @@ from pathlib import Path
 
 from opengrad.data.classifier_input import CONTRACT_VERSION, ClassifierFeatures
 from opengrad.data.decision_classifier import ABSTAIN, CLASSIFIER_VERSION, LABELS, classify
+from opengrad.hashing import sha256_file as sha256
 
 ROOT = Path(__file__).resolve().parents[1]
 DEV_DIR = Path("reports/prose-classifier/dev")
@@ -27,7 +28,8 @@ DEV_DIR = Path("reports/prose-classifier/dev")
 SETS = {
     "dev": (
         DEV_DIR / "prose-classifier-dev-v1.population.jsonl",
-        DEV_DIR / "annotation/wip/prose-classifier-dev-v1.annotations.model.claude-opus-5.model-dev.jsonl",
+        DEV_DIR
+        / "annotation/wip/prose-classifier-dev-v1.annotations.model.claude-opus-5.model-dev.jsonl",
         DEV_DIR / f"{CLASSIFIER_VERSION}.dev-agreement.json",
     ),
     "devcheck": (
@@ -51,16 +53,16 @@ UNKNOWN = "UNKNOWN"
 MODES = ("CALL", "DIRECT", "CLARIFY", "UNSUPPORTED")
 
 
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def rows(root: Path, population: Path = POPULATION, labels_file: Path = LABELS_FILE) -> list[dict]:
     items = {
         item["dev_id"]: item
         for item in map(json.loads, (root / population).read_text(encoding="utf-8").splitlines())
     }
-    labels = [json.loads(line) for line in (root / labels_file).read_text(encoding="utf-8").splitlines() if line]
+    labels = [
+        json.loads(line)
+        for line in (root / labels_file).read_text(encoding="utf-8").splitlines()
+        if line
+    ]
     out = []
     for record in labels:
         item = items[record["dev_id"]]
@@ -100,7 +102,9 @@ def summarise(results: list[dict]) -> dict:
             "agree": hits,
             "share_of_model_labels_agreed": round(hits / len(labelled), 4) if labelled else None,
             "share_of_predictions_agreed": (
-                round(sum(1 for row in predicted if row["model_label"] == mode) / len(predicted), 4) if predicted else None
+                round(sum(1 for row in predicted if row["model_label"] == mode) / len(predicted), 4)
+                if predicted
+                else None
             ),
         }
     return {
@@ -111,10 +115,18 @@ def summarise(results: list[dict]) -> dict:
         "abstentions_on_mode_labels": sum(1 for row in usable if row["prediction"] == ABSTAIN),
         "per_mode": per_mode,
         "predictions_on_unknown_labels": dict(
-            sorted(Counter(row["prediction"] for row in results if row["model_label"] == UNKNOWN).items())
+            sorted(
+                Counter(
+                    row["prediction"] for row in results if row["model_label"] == UNKNOWN
+                ).items()
+            )
         ),
         "confusion_model_label_by_prediction": {
-            label: {prediction: confusion[(label, prediction)] for prediction in LABELS if confusion[(label, prediction)]}
+            label: {
+                prediction: confusion[(label, prediction)]
+                for prediction in LABELS
+                if confusion[(label, prediction)]
+            }
             for label in (*MODES, UNKNOWN)
         },
         "decisions_by_step": dict(sorted(Counter(row["step"] for row in results).items())),
@@ -122,16 +134,28 @@ def summarise(results: list[dict]) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--set", choices=sorted(SETS), default="dev")
-    parser.add_argument("--show", type=int, default=0, help="print up to N disagreements (development items only)")
+    parser.add_argument(
+        "--show", type=int, default=0, help="print up to N disagreements (development items only)"
+    )
     parser.add_argument("--write", action="store_true", help="write the agreement report")
-    parser.add_argument("--round", type=int, help="development round; names the report ...round<N>.<set>-agreement.json")
+    parser.add_argument(
+        "--round",
+        type=int,
+        help="development round; names the report ...round<N>.<set>-agreement.json",
+    )
     args = parser.parse_args(argv)
     population, labels_file, report_path = SETS[args.set]
     if args.round is not None:
-        report_path = report_path.with_name(report_path.name.replace(f"{CLASSIFIER_VERSION}.", f"{CLASSIFIER_VERSION}.round{args.round}."))
+        report_path = report_path.with_name(
+            report_path.name.replace(
+                f"{CLASSIFIER_VERSION}.", f"{CLASSIFIER_VERSION}.round{args.round}."
+            )
+        )
     if args.set in UNEXPOSED and args.show:
         parser.error("items of an unexposed check set are never printed (33 §5a)")
 
@@ -142,13 +166,17 @@ def main(argv: list[str] | None = None) -> int:
     for row in results:
         if shown >= args.show:
             break
-        if row["prediction"] == row["model_label"] or (row["model_label"] == UNKNOWN and row["prediction"] == ABSTAIN):
+        if row["prediction"] == row["model_label"] or (
+            row["model_label"] == UNKNOWN and row["prediction"] == ABSTAIN
+        ):
             continue
         shown += 1
         item = row["item"]
         names = [tool.get("name") for tool in item["tools"]]
-        print(f"\n#{row['dev_index'] + 1} model={row['model_label']}/{row['ambiguity_status']} "
-              f"pred={row['prediction']} step={row['step']} evidence={list(row['evidence'])} tools={names}")
+        print(
+            f"\n#{row['dev_index'] + 1} model={row['model_label']}/{row['ambiguity_status']} "
+            f"pred={row['prediction']} step={row['step']} evidence={list(row['evidence'])} tools={names}"
+        )
         print("  A:", " ".join(item["assistant_response"].split())[:600])
 
     if args.write:
@@ -177,7 +205,9 @@ def main(argv: list[str] | None = None) -> int:
             "labels": {"path": labels_file.as_posix(), "sha256": sha256(args.root / labels_file)},
             "summary": summary,
         }
-        (args.root / report_path).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        (args.root / report_path).write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         print(f"\nwrote {report_path}")
     return 0
 

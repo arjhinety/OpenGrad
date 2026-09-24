@@ -21,13 +21,14 @@ Design rules:
 from __future__ import annotations
 
 import getpass
-import hashlib
 import json
 import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+from opengrad.hashing import sha256_text as _sha256_text
 
 MANIFEST_ID = "behavioral-heldout-v2"
 
@@ -81,10 +82,6 @@ BENCHMARK_MANIFEST = Path("reports/evaluation/behavioral-heldout-v2.manifest.jso
 
 def _now() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
-
-
-def _sha256_text(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def _canonical(value: Any) -> str:

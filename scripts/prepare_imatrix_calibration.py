@@ -42,7 +42,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import statistics
 import sys
@@ -64,6 +63,7 @@ from opengrad.evaluation.runner import (
     _qwen_tool,
 )
 from opengrad.formatting.parser import parse_qwen_native_output
+from opengrad.hashing import sha256_file, sha256_text
 
 CORPUS_ID = "m1_v2_imatrix_calibration_v2"
 SUPERSEDES = "m1_v2_imatrix_calibration_v1"
@@ -85,21 +85,9 @@ BEHAVIORS = ("ANSWER", "CALL", "CLARIFY", "UNSUPPORTED")
 RECORD_SEPARATOR = "\n\n"
 
 
-def sha256_text(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def order_key(identity: str) -> str:
     """Stable shuffle that does not depend on an RNG seed, filesystem, or insertion order."""
-    return hashlib.sha256(identity.encode()).hexdigest()
+    return sha256_text(identity)
 
 
 def held_out_ids() -> tuple[set[str], dict[str, Any]]:
@@ -367,7 +355,11 @@ def main() -> int:
             "text_sha256": sha256_file(text_path),
             "text_bytes": text_path.stat().st_size,
         },
-        "contamination": {**exclusion, "excluded_ids_considered": len(excluded), "overlap_count": 0},
+        "contamination": {
+            **exclusion,
+            "excluded_ids_considered": len(excluded),
+            "overlap_count": 0,
+        },
         "render_contract": {
             "renderer": "qwen3_5_2b_v1",
             "tokenizer_revision": PINNED_MODEL_REVISION,

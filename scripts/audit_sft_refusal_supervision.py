@@ -49,6 +49,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from opengrad.evaluation.capability import detect_refusal
+from opengrad.hashing import sha256_file
 
 NORM = ROOT / "data/processed/normalization-v1"
 OUT = ROOT / "results/benchmarks/h200/capability_v1/sft_refusal_supervision_audit.json"
@@ -60,8 +61,16 @@ M0_RENDERING = ROOT / "runs/m0_sft_canonical_v2_final/rendering_report.json"
 
 # normalization-v1 source directories. A superset of the canonical-v2 SFT corpus: it also holds
 # evaluation rows (when2call-mcq, when2call-llm-judge) and BUTTON / LoopTool.
-SOURCES = ["when2call-sft", "when2call-mcq", "when2call-llm-judge",
-           "glaive", "toolace", "xlam", "button", "looptool"]
+SOURCES = [
+    "when2call-sft",
+    "when2call-mcq",
+    "when2call-llm-judge",
+    "glaive",
+    "toolace",
+    "xlam",
+    "button",
+    "looptool",
+]
 
 SHARD_NAME = re.compile(r"^(?P<source>.+)-(?P<index>\d{6})\.parquet$")
 
@@ -87,14 +96,6 @@ def iter_records(source: str):
     yield from iter_parquet(sorted((NORM / source).glob("*.parquet")))
 
 
-def sha256_file(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
 def load_release(manifest_path: Path, shard_dir: Path) -> tuple[dict, str, dict[str, list[Path]]]:
     """Verify every manifest shard in `shard_dir` and group the shards by release source.
 
@@ -114,7 +115,9 @@ def load_release(manifest_path: Path, shard_dir: Path) -> tuple[dict, str, dict[
             problems.append(f"missing shard {entry['file']}")
             continue
         if path.stat().st_size != entry["bytes"]:
-            problems.append(f"size mismatch {entry['file']}: {path.stat().st_size} != {entry['bytes']}")
+            problems.append(
+                f"size mismatch {entry['file']}: {path.stat().st_size} != {entry['bytes']}"
+            )
             continue
         digest = sha256_file(path)
         if digest != entry["sha256"]:
@@ -164,8 +167,16 @@ def audit(groups):
         for rec in records:
             total += 1
             try:
-                messages = json.loads(rec["messages"]) if isinstance(rec["messages"], str) else rec["messages"]
-                meta = json.loads(rec["metadata"]) if isinstance(rec["metadata"], str) else rec["metadata"]
+                messages = (
+                    json.loads(rec["messages"])
+                    if isinstance(rec["messages"], str)
+                    else rec["messages"]
+                )
+                meta = (
+                    json.loads(rec["metadata"])
+                    if isinstance(rec["metadata"], str)
+                    else rec["metadata"]
+                )
                 tools = json.loads(rec["tools"]) if isinstance(rec["tools"], str) else rec["tools"]
             except Exception:  # noqa: BLE001, S112 - an unparseable record is excluded from the audit
                 continue
@@ -173,8 +184,9 @@ def audit(groups):
             decision = ((meta or {}).get("behavior") or {}).get("decision")
             by_decision[decision] += 1
 
-            assistant_turns = [m for m in (messages or [])
-                               if m.get("role") == "assistant" and m.get("content")]
+            assistant_turns = [
+                m for m in (messages or []) if m.get("role") == "assistant" and m.get("content")
+            ]
             if not assistant_turns:
                 continue
             target = assistant_turns[-1].get("content")
@@ -211,14 +223,16 @@ def audit(groups):
             # The records that matter: single-exchange, refusal target, NON-refusal label.
             if decision in ("ANSWER", "CALL") and len(mislabelled_examples) < 25:
                 user = next((m.get("content") for m in messages if m.get("role") == "user"), "")
-                mislabelled_examples.append({
-                    "source": source,
-                    "id": rec["id"] if "id" in rec else rec.get("opengrad_id"),
-                    "decision_label": decision,
-                    "had_tools": bool(tools),
-                    "user": (user or "")[:200],
-                    "assistant_target": target[:260],
-                })
+                mislabelled_examples.append(
+                    {
+                        "source": source,
+                        "id": rec["id"] if "id" in rec else rec.get("opengrad_id"),
+                        "decision_label": decision,
+                        "had_tools": bool(tools),
+                        "user": (user or "")[:200],
+                        "assistant_target": target[:260],
+                    }
+                )
 
         per_source[source] = {
             "status": "AUDITED",
@@ -231,9 +245,12 @@ def audit(groups):
             "refusals_with_no_tools_offered": no_tools_refusals,
             "scope": "single-exchange records only (1 user turn, 1 assistant turn)",
         }
-        print(f"  {source:<26} {refusal_targets:>6}/{total:<7} refusal targets "
-              f"({refusal_targets/total*100 if total else 0:.1f}%)  "
-              f"labels={dict(refusal_by_decision)}", flush=True)
+        print(
+            f"  {source:<26} {refusal_targets:>6}/{total:<7} refusal targets "
+            f"({refusal_targets / total * 100 if total else 0:.1f}%)  "
+            f"labels={dict(refusal_by_decision)}",
+            flush=True,
+        )
 
     return {
         "per_source": per_source,
@@ -250,10 +267,14 @@ def overlap_with_model(all_templates: collections.Counter) -> dict:
     if OBSERVED.exists():
         obs = json.loads(OBSERVED.read_text(encoding="utf-8"))
         cur = obs["stages"].get("M1_DPO_CURRENT", {}).get("refusal_surface_forms", {})
-        obs_templates = {normalise_template(t["example"]): t["count"]
-                         for t in cur.get("top_templates", [])}
-        shared = {k: {"corpus_count": all_templates.get(k, 0), "model_count": v}
-                  for k, v in obs_templates.items() if k in all_templates}
+        obs_templates = {
+            normalise_template(t["example"]): t["count"] for t in cur.get("top_templates", [])
+        }
+        shared = {
+            k: {"corpus_count": all_templates.get(k, 0), "model_count": v}
+            for k, v in obs_templates.items()
+            if k in all_templates
+        }
         obs_total = cur.get("total_refusals") or 0
         covered = sum(v["model_count"] for v in shared.values())
         overlap = {
@@ -262,9 +283,11 @@ def overlap_with_model(all_templates: collections.Counter) -> dict:
             "model_refusals_covered_by_shared_templates": covered,
             "share_of_model_refusals": (covered / obs_total) if obs_total else None,
             "shared_templates": shared,
-            "note": ("Template match is on a normalised 12-token opening. Overlap shows the model "
-                     "reproduces supervision surface forms; it does not by itself establish that "
-                     "these records caused the behaviour."),
+            "note": (
+                "Template match is on a normalised 12-token opening. Overlap shows the model "
+                "reproduces supervision surface forms; it does not by itself establish that "
+                "these records caused the behaviour."
+            ),
         }
     return overlap
 
@@ -280,10 +303,10 @@ def build_payload(result: dict, corpus: str, extra: dict | None = None) -> dict:
     payload = {
         "schema_version": 1,
         "purpose": "Test whether refusal text appears in the SFT supervision, and under which "
-                   "decision labels.",
+        "decision labels.",
         "corpus": corpus,
         "refusal_detector": "HEURISTIC_REGEX_v1 -- the SAME detector used to score inference, so "
-                            "corpus and model refusals are counted by one definition",
+        "corpus and model refusals are counted by one definition",
         "totals": {
             "records_audited": total_records,
             "refusal_targets": total_refusals,
@@ -294,8 +317,8 @@ def build_payload(result: dict, corpus: str, extra: dict | None = None) -> dict:
             "Refusal text is taught under NON-refusal decision labels. Records labelled ANSWER "
             "whose supervised target is a refusal teach the model that answering looks like "
             "declining."
-            if label_breakdown.get("ANSWER") else
-            "No refusal targets were found under an ANSWER label."
+            if label_breakdown.get("ANSWER")
+            else "No refusal targets were found under an ANSWER label."
         ),
         "multi_turn_records_excluded": {
             "counts_by_first_exchange_label": dict(result["multi_turn_refusals"]),
@@ -371,10 +394,14 @@ def display(path: Path) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    ap.add_argument("--release-manifest", type=Path,
-                    help="audit a published release: its release-manifest.json")
-    ap.add_argument("--shard-dir", type=Path,
-                    help="directory holding the release's parquet shards (verified against the manifest)")
+    ap.add_argument(
+        "--release-manifest", type=Path, help="audit a published release: its release-manifest.json"
+    )
+    ap.add_argument(
+        "--shard-dir",
+        type=Path,
+        help="directory holding the release's parquet shards (verified against the manifest)",
+    )
     ap.add_argument("--out", type=Path, help="output path (default depends on the corpus audited)")
     args = ap.parse_args(argv)
     if (args.release_manifest is None) != (args.shard_dir is None):
@@ -398,12 +425,17 @@ def main(argv: list[str] | None = None) -> int:
         out = args.out or OUT_RELEASE
         manifest, manifest_sha256, by_source = load_release(args.release_manifest, args.shard_dir)
         n_shards = sum(len(p) for p in by_source.values())
-        print(f"verified {n_shards}/{len(manifest['output_shards'])} shards against "
-              f"{display(args.release_manifest)} (sha256 {manifest_sha256[:12]})", flush=True)
+        print(
+            f"verified {n_shards}/{len(manifest['output_shards'])} shards against "
+            f"{display(args.release_manifest)} (sha256 {manifest_sha256[:12]})",
+            flush=True,
+        )
         result = audit([(s, iter_release_source(s, p)) for s, p in by_source.items()])
         audited = sum(v.get("records", 0) for v in result["per_source"].values())
         if audited != manifest["record_count"]:
-            raise SystemExit(f"audited {audited} records, manifest declares {manifest['record_count']}")
+            raise SystemExit(
+                f"audited {audited} records, manifest declares {manifest['record_count']}"
+            )
         payload = build_payload(
             result,
             f"{manifest['release_name']} {manifest['release_version']} -- the published "
@@ -445,13 +477,17 @@ def main(argv: list[str] | None = None) -> int:
     overlap = payload["overlap_with_model_output"]
     total_records, total_refusals = totals["records_audited"], totals["refusal_targets"]
     print(f"\nwrote {display(out)}")
-    print(f"\n{total_refusals} refusal targets in {total_records} audited records "
-          f"({total_refusals/total_records*100 if total_records else 0:.2f}%)")
+    print(
+        f"\n{total_refusals} refusal targets in {total_records} audited records "
+        f"({total_refusals / total_records * 100 if total_records else 0:.2f}%)"
+    )
     print(f"by decision label: {totals['refusal_targets_by_decision_label']}")
     if overlap.get("share_of_model_refusals") is not None:
-        print(f"\ncorpus templates matching model output: "
-              f"{overlap['also_present_verbatim_in_corpus']}/{overlap['model_top_templates']} "
-              f"covering {overlap['share_of_model_refusals']*100:.1f}% of the model's refusals")
+        print(
+            f"\ncorpus templates matching model output: "
+            f"{overlap['also_present_verbatim_in_corpus']}/{overlap['model_top_templates']} "
+            f"covering {overlap['share_of_model_refusals'] * 100:.1f}% of the model's refusals"
+        )
     if result["mislabelled_examples"]:
         print("\nrefusal text taught under a NON-refusal label (sample):")
         for e in result["mislabelled_examples"][:6]:

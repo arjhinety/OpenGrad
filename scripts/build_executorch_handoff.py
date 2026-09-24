@@ -26,7 +26,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import shutil
 import sys
@@ -42,6 +41,7 @@ from opengrad.evaluation.runner import (
     PINNED_MODEL_REVISION,
     PINNED_TEMPLATE_HASH,
 )
+from opengrad.hashing import sha256_bytes
 
 PROMPTS = ROOT / "results/quantization/frozen_prompts_v1.jsonl"
 REFERENCE = ROOT / "results/quantization/m1_v2_reference.json"
@@ -257,10 +257,6 @@ def routing_metrics(actual: Iterable[str], predicted: Iterable[str]) -> dict[str
         else 0.0,
     }
 '''
-
-
-def sha256_bytes(payload: bytes) -> str:
-    return hashlib.sha256(payload).hexdigest()
 
 
 def sha256_file(path: Path) -> str:

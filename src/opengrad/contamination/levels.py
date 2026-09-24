@@ -21,13 +21,13 @@ byte-for-byte by `tests/contamination/test_levels.py`.
 
 from __future__ import annotations
 
-import hashlib
 from collections import Counter, defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
 from opengrad.contamination.scanner import edit_similarity, ngrams, normalize
+from opengrad.hashing import sha256_text
 
 LEVEL_1 = "1_exact_canonical_conversation_hash"
 LEVEL_2 = "2_normalized_prompt_hash"
@@ -90,12 +90,12 @@ class LevelMatches:
 
 def exact_hash(text: str) -> str:
     """Level 1: sha256 of the raw prompt text, no normalisation."""
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return sha256_text(text)
 
 
 def normalized_hash(text: str) -> str:
     """Level 2: sha256 of the whitespace-collapsed, casefolded prompt text."""
-    return hashlib.sha256(normalize(text).encode("utf-8")).hexdigest()
+    return sha256_text(normalize(text))
 
 
 def hash_index(records: Iterable[Record], normalised: bool) -> dict[str, list[str]]:

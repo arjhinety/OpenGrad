@@ -23,7 +23,6 @@ supervision contracts.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from collections import Counter, defaultdict
@@ -33,6 +32,7 @@ from typing import Any
 
 from opengrad.data import behaviour_labels as labels_pass
 from opengrad.data.mixture import load_mixture
+from opengrad.hashing import sha256_bytes as _sha256
 
 ROOT = Path(__file__).resolve().parents[3]
 BALANCE_VERSION = "canonical-v3-decision-balance-v1"
@@ -56,10 +56,6 @@ class BalanceError(RuntimeError):
     """The balance cannot be computed, or the written plan does not match its inputs."""
 
 
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
 def stratum_of(row: Mapping[str, Any]) -> str | None:
     """The decision stratum a labelled record belongs to, or None when it carries no weight (39 §1)."""
     for stratum, label in STRATUM_LABEL.items():
@@ -75,7 +71,9 @@ def rank_key(seed: str, record_id: str) -> str:
     return _sha256(f"{seed}|{record_id}".encode())
 
 
-def select(rows: list[Mapping[str, Any]], seed: str) -> tuple[dict[str, list[Mapping[str, Any]]], dict[str, Any]]:
+def select(
+    rows: list[Mapping[str, Any]], seed: str
+) -> tuple[dict[str, list[Mapping[str, Any]]], dict[str, Any]]:
     """Equal shares, supply-limited: every stratum contributes ``min(supply)`` records, deterministically."""
     strata: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for row in rows:
@@ -84,7 +82,9 @@ def select(rows: list[Mapping[str, Any]], seed: str) -> tuple[dict[str, list[Map
             strata[stratum].append(row)
     if set(strata) != set(STRATUM_LABEL):
         missing = sorted(set(STRATUM_LABEL) - set(strata))
-        raise BalanceError(f"no record supplies the strata {missing}; a balanced set cannot be built")
+        raise BalanceError(
+            f"no record supplies the strata {missing}; a balanced set cannot be built"
+        )
     supply = {stratum: len(items) for stratum, items in sorted(strata.items())}
     per_stratum = min(supply.values())
     chosen = {
@@ -108,15 +108,21 @@ def composition(chosen: Mapping[str, list[Mapping[str, Any]]]) -> dict[str, Any]
             by_source[stratum][row["source"]] += 1
             by_kind[stratum][row["unit_kind"] or "not_applicable"] += 1
     return {
-        "per_source": {stratum: dict(sorted(counter.items())) for stratum, counter in sorted(by_source.items())},
-        "per_unit_kind": {stratum: dict(sorted(counter.items())) for stratum, counter in sorted(by_kind.items())},
+        "per_source": {
+            stratum: dict(sorted(counter.items())) for stratum, counter in sorted(by_source.items())
+        },
+        "per_unit_kind": {
+            stratum: dict(sorted(counter.items())) for stratum, counter in sorted(by_kind.items())
+        },
     }
 
 
 def load_labels(root: Path) -> tuple[list[Mapping[str, Any]], dict[str, Any]]:
     manifest_path = root / labels_pass.OUTPUT_DIR / "manifest.json"
     if not manifest_path.exists():
-        raise BalanceError("behaviour labels do not exist yet: run opengrad.data.behaviour_labels --build")
+        raise BalanceError(
+            "behaviour labels do not exist yet: run opengrad.data.behaviour_labels --build"
+        )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     rows: list[Mapping[str, Any]] = []
     for source, entry in sorted(manifest["sources"].items()):
@@ -134,7 +140,9 @@ def build(root: Path = ROOT) -> dict[str, Any]:
     rows, labels_manifest = load_labels(root)
     seed = config["selection"]["seed"]
     chosen, counts = select(rows, seed)
-    selected_ids = {stratum: [row["id"] for row in items] for stratum, items in sorted(chosen.items())}
+    selected_ids = {
+        stratum: [row["id"] for row in items] for stratum, items in sorted(chosen.items())
+    }
     payload = (json.dumps(selected_ids, indent=2, sort_keys=True) + "\n").encode("utf-8")
     out = root / OUTPUT_DIR
     out.mkdir(parents=True, exist_ok=True)
@@ -150,7 +158,10 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         ),
         "specification": SPEC,
         "authorisation": "docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md",
-        "config": {"path": CONFIG.as_posix(), "sha256": _sha256((root / CONFIG).read_bytes().replace(b"\r\n", b"\n"))},
+        "config": {
+            "path": CONFIG.as_posix(),
+            "sha256": _sha256((root / CONFIG).read_bytes().replace(b"\r\n", b"\n")),
+        },
         "labels": {
             "labels_version": labels_manifest["labels_version"],
             "classifier": labels_manifest["classifier"],
@@ -189,19 +200,30 @@ def verify(root: Path = ROOT) -> dict[str, Any]:
     if config_hash != plan["config"]["sha256"]:
         problems.append("the mixture config changed since the plan was written")
     chosen, counts = select(rows, plan["seed"])
-    selected_ids = {stratum: [row["id"] for row in items] for stratum, items in sorted(chosen.items())}
+    selected_ids = {
+        stratum: [row["id"] for row in items] for stratum, items in sorted(chosen.items())
+    }
     payload = (json.dumps(selected_ids, indent=2, sort_keys=True) + "\n").encode("utf-8")
     if _sha256(payload) != plan["selected_ids_sha256"]:
         problems.append("the selection does not reproduce")
-    if _sha256((root / OUTPUT_DIR / plan["selected_ids_file"]).read_bytes()) != plan["selected_ids_sha256"]:
+    if (
+        _sha256((root / OUTPUT_DIR / plan["selected_ids_file"]).read_bytes())
+        != plan["selected_ids_sha256"]
+    ):
         problems.append("the written selection does not match its hash")
     if counts != plan["counts"]:
         problems.append("the counts do not reproduce")
-    return {"status": "PASS" if not problems else "FAIL", "problems": problems, "counts": plan["counts"]}
+    return {
+        "status": "PASS" if not problems else "FAIL",
+        "problems": problems,
+        "counts": plan["counts"],
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--build", action="store_true")
     group.add_argument("--verify", action="store_true")

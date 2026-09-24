@@ -47,6 +47,11 @@ Related rules:
   `scripts/preserve_h200_state.py --verify` against `results/benchmarks/h200/PRESERVED_STATE_v2.json` and checks
   every tracked `.sha256` sidecar against its committed file. A new pinned set gets the same kind of test in the
   commit that pins it.
+- **One sha256 helper.** Plain hashing (raw bytes, UTF-8 text, a file's exact bytes) uses `sha256_bytes`,
+  `sha256_text` or `sha256_file` from `src/opengrad/hashing.py`; `tests/repo/test_hash_helpers.py` fails on a new
+  local wrapper. The wrappers it allows are standalone and Modal scripts, and files whose own source hash a frozen
+  artifact records (editing those changes the recorded hash). A hash of something computed (canonical JSON,
+  normalised text, a seeded key) keeps its own named function, built on `sha256_text`.
 
 ## Written records
 

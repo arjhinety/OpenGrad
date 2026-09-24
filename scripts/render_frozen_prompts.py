@@ -19,7 +19,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import statistics
 import sys
@@ -36,6 +35,7 @@ from opengrad.evaluation.runner import (
     PINNED_MODEL_REVISION,
     PINNED_TEMPLATE_HASH,
 )
+from opengrad.hashing import sha256_file, sha256_text
 
 SOURCE = Path("results/quantization/frozen_behavioral_eval_v1.jsonl")
 OUT_JSONL = Path("results/quantization/frozen_prompts_v1.jsonl")
@@ -58,18 +58,6 @@ CONFIRMATORY_BASE = 1275
 CONFIRMATORY_OVERFLOW = 2
 
 
-def sha256_text(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def token_stats(values: list[int]) -> dict[str, Any]:
     return {
         "min": min(values),
@@ -88,9 +76,7 @@ def main() -> int:
 
     source_path = ROOT / SOURCE
     if not source_path.is_file():
-        raise SystemExit(
-            f"missing {SOURCE}; run scripts/prepare_quantization_inputs.py first"
-        )
+        raise SystemExit(f"missing {SOURCE}; run scripts/prepare_quantization_inputs.py first")
 
     renderer = Qwen35_2BRenderer(revision=PINNED_MODEL_REVISION, enable_thinking=False)
     rows: list[dict[str, Any]] = []

@@ -23,10 +23,11 @@ from opengrad.annotation.export import (
     freeze_gold,
     verify_package,
 )
-from opengrad.annotation.items import SourceIntegrityError, canonical_json, row_hash, sha256_file
+from opengrad.annotation.items import SourceIntegrityError, canonical_json, row_hash
 from opengrad.annotation.server import Api, ServerContext
 from opengrad.annotation.service import TaskDriftError, Workspace, WorkspaceError
 from opengrad.annotation.values import AnnotationValueError
+from opengrad.hashing import sha256_file
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs" / "annotation" / "pdet-v1.yaml"
@@ -34,22 +35,38 @@ PDET = ROOT / "reports" / "pdet"
 POPULATION = PDET / "pdet-v1.population.jsonl"
 FROZEN_SHA = "6ab920877ce8004056a747f36d0a9c9ae6bd8befeb249007d70a79a6ce9e781b"
 FAMILIES = (
-    "question_mark", "question_without_mark", "refusal_with_question", "refusal_plain",
-    "tool_mentioned_no_payload", "caveat_then_content", "multi_clause_question", "no_tools_offered",
-    "short_plain", "serialized_call_shape", "advice_external_service", "polite_followup",
+    "question_mark",
+    "question_without_mark",
+    "refusal_with_question",
+    "refusal_plain",
+    "tool_mentioned_no_payload",
+    "caveat_then_content",
+    "multi_clause_question",
+    "no_tools_offered",
+    "short_plain",
+    "serialized_call_shape",
+    "advice_external_service",
+    "polite_followup",
 )
 DOCS = (
-    "22-PDET-PROTOCOL.md", "23-PDET-ANNOTATION-INSTRUMENT.md", "26-PDET-ANNOTATOR-CHECKLIST.md",
-    "27-PDET-EXPOSED-WORKED-EXAMPLES.md", "29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md",
+    "22-PDET-PROTOCOL.md",
+    "23-PDET-ANNOTATION-INSTRUMENT.md",
+    "26-PDET-ANNOTATOR-CHECKLIST.md",
+    "27-PDET-EXPOSED-WORKED-EXAMPLES.md",
+    "29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md",
 )
 INSTRUMENT = ROOT / "docs" / "research" / "study-002" / "23-PDET-ANNOTATION-INSTRUMENT.md"
 REAL_STATE = ROOT / ".annotation"
 EXPOSED = "EXPOSED_WORKED_EXAMPLE"
 
-pytestmark = pytest.mark.skipif(not POPULATION.is_file(), reason="frozen P-DET population not present")
+pytestmark = pytest.mark.skipif(
+    not POPULATION.is_file(), reason="frozen P-DET population not present"
+)
 
 
-def ok(label: str, ambiguity: str = "NONE", why: str = "synthetic test rationale") -> dict[str, str]:
+def ok(
+    label: str, ambiguity: str = "NONE", why: str = "synthetic test rationale"
+) -> dict[str, str]:
     return {"label": label, "ambiguity_status": ambiguity, "annotator_rationale": why}
 
 
@@ -71,12 +88,21 @@ def real_store_fingerprint() -> list[tuple] | None:
     if not path.exists():
         return None
     with sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True) as conn:
-        tables = [row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")]
+        tables = [
+            row[0]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name"
+            )
+        ]
         found: list[tuple] = [("tables", *tables)]
         for table in tables:
             found.append((table, *conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()))
         found.extend(conn.execute("SELECT * FROM tasks ORDER BY task_id").fetchall())
-        found.extend(conn.execute("SELECT session_id, MAX(id) FROM history GROUP BY session_id ORDER BY 1").fetchall())
+        found.extend(
+            conn.execute(
+                "SELECT session_id, MAX(id) FROM history GROUP BY session_id ORDER BY 1"
+            ).fetchall()
+        )
         return found
 
 
@@ -94,7 +120,9 @@ def frozen_untouched():
 
 
 def frozen_rows() -> list[dict]:
-    return [json.loads(line) for line in POPULATION.read_text(encoding="utf-8").splitlines() if line]
+    return [
+        json.loads(line) for line in POPULATION.read_text(encoding="utf-8").splitlines() if line
+    ]
 
 
 # ── the population ──────────────────────────────────────────────────────────────────────────────
@@ -104,7 +132,9 @@ def test_population_hash_count_and_pin(config: TaskConfig) -> None:
     manifest = json.loads((PDET / "pdet-v1.manifest.json").read_text(encoding="utf-8"))
     assert sha256_file(POPULATION) == FROZEN_SHA == manifest["population_sha256"]
     assert config.source.expected_sha256 == FROZEN_SHA
-    assert config.source.expected_items == 581 == manifest["population_records"] == len(frozen_rows())
+    assert (
+        config.source.expected_items == 581 == manifest["population_records"] == len(frozen_rows())
+    )
     assert config.resolve(config.source.path).resolve() == POPULATION.resolve()
 
 
@@ -146,19 +176,36 @@ def test_annotation_view_hides_families_labels_and_classifier_fields(ws: Workspa
     for hidden in ws.config.blind_fields:
         assert f'"{hidden}"' not in items, hidden
     # Nowhere on the screen: no family identifier, no classifier field or status.
-    screen = "\n".join([items, json.dumps(api.state()), json.dumps(api.get("/api/items", {"status": "all"}))])
-    for hidden in (*FAMILIES, "challenge_families", "classifier_version_at_selection", "NOT_IMPLEMENTED"):
+    screen = "\n".join(
+        [items, json.dumps(api.state()), json.dumps(api.get("/api/items", {"status": "all"}))]
+    )
+    for hidden in (
+        *FAMILIES,
+        "challenge_families",
+        "classifier_version_at_selection",
+        "NOT_IMPLEMENTED",
+    ):
         assert hidden not in screen, hidden
     assert "classifier" not in json.dumps(api.state()).casefold()
 
 
 def test_rubric_panel_is_read_only_excerpts_without_sampling_cues(ws: Workspace) -> None:
-    documents = Api(ServerContext(ws, "annotate", session_id="none")).get("/api/instructions", {})["documents"]
+    documents = Api(ServerContext(ws, "annotate", session_id="none")).get("/api/instructions", {})[
+        "documents"
+    ]
     assert [doc["path"].split("/")[-1] for doc in documents] == [
-        "26-PDET-ANNOTATOR-CHECKLIST.md", "22-PDET-PROTOCOL.md", "23-PDET-ANNOTATION-INSTRUMENT.md"
+        "26-PDET-ANNOTATOR-CHECKLIST.md",
+        "22-PDET-PROTOCOL.md",
+        "23-PDET-ANNOTATION-INSTRUMENT.md",
     ]
     protocol, instrument = documents[1]["content"], documents[2]["content"]
-    for heading in ("### 1.1 `CALL`", "### 1.2 `DIRECT`", "### 1.3 `CLARIFY`", "### 1.4 `UNSUPPORTED`", "### 1.5 `UNKNOWN` / `AMBIGUOUS`"):
+    for heading in (
+        "### 1.1 `CALL`",
+        "### 1.2 `DIRECT`",
+        "### 1.3 `CLARIFY`",
+        "### 1.4 `UNSUPPORTED`",
+        "### 1.5 `UNKNOWN` / `AMBIGUOUS`",
+    ):
         assert heading in protocol
     for kept in ("## 2. The eight boundary discriminations", "## 3. Annotation decision tree"):
         assert kept in protocol
@@ -190,7 +237,9 @@ def test_only_the_five_pdet_outcomes_are_accepted(ws: Workspace) -> None:
         ws.annotate("pass-a", ws.item_ids[10], ok("DIRECT", "NON_SUBSTANTIVE"))
 
 
-def test_the_priority_review_queue_is_pinned_and_its_reasons_never_reach_the_screen(ws: Workspace) -> None:
+def test_the_priority_review_queue_is_pinned_and_its_reasons_never_reach_the_screen(
+    ws: Workspace,
+) -> None:
     (queue,) = ws.config.review_queues
     assert queue.name == "priority-review"
     body = json.loads((ROOT / queue.file).read_bytes())
@@ -198,7 +247,10 @@ def test_the_priority_review_queue_is_pinned_and_its_reasons_never_reach_the_scr
     assert (ROOT / (queue.file + ".sha256")).read_text(encoding="utf-8").split()[0] == queue.sha256
     assert body["source_population_sha256"] == FROZEN_SHA and body["task_id"] == "pdet-v1"
     order = ws.queue_order("priority-review")
-    assert order == [entry["item_id"] for entry in body["items"]] and len(order) == body["counts"]["items"]
+    assert (
+        order == [entry["item_id"] for entry in body["items"]]
+        and len(order) == body["counts"]["items"]
+    )
     assert set(order) <= set(ws.item_ids) and len(set(order)) == len(order)
     ws.open_session("pass-a", "test-a")
     api = Api(ServerContext(ws, "annotate", session_id="pass-a"))
@@ -210,17 +262,23 @@ def test_the_priority_review_queue_is_pinned_and_its_reasons_never_reach_the_scr
             api.get(f"/api/items/{order[0]}", {}),
         ]
     )
-    assert api.state()["queues"] == [{"name": "priority-review", "total": len(order), "completed": 0, "remaining": len(order)}]
+    assert api.state()["queues"] == [
+        {"name": "priority-review", "total": len(order), "completed": 0, "remaining": len(order)}
+    ]
     for hidden in ("reasons", "criterion", body["seed"], "model.claude-opus-5", "annotator_kind"):
         assert hidden not in screen, hidden
 
 
-def test_rationale_and_note_are_optional_but_unknown_needs_an_ambiguity_reason(ws: Workspace) -> None:
+def test_rationale_and_note_are_optional_but_unknown_needs_an_ambiguity_reason(
+    ws: Workspace,
+) -> None:
     """Amendment 29 (study_002_prereg_v3): the rationale is optional; the UNKNOWN rule is unchanged."""
     ws.open_session("pass-a", "test-a")
     ids = iter(ws.item_ids)
     for label in ("CALL", "DIRECT", "CLARIFY", "UNSUPPORTED"):
-        saved = ws.annotate("pass-a", next(ids), {"label": label, "ambiguity_status": "NONE"})["annotation"]
+        saved = ws.annotate("pass-a", next(ids), {"label": label, "ambiguity_status": "NONE"})[
+            "annotation"
+        ]
         assert saved["note"] is None and saved["value"]["boundary_rule_cited"] == "none"
         assert not saved["value"].get("annotator_rationale")
     blank = ws.annotate("pass-a", next(ids), ok("DIRECT", why="   "))["annotation"]
@@ -232,14 +290,20 @@ def test_rationale_and_note_are_optional_but_unknown_needs_an_ambiguity_reason(w
     ws.annotate("pass-a", item, {"label": "UNKNOWN", "ambiguity_status": "MISSING_CONTEXT"})
     kept = ws.annotate("pass-a", next(ids), ok("CLARIFY", why="needs the account id"))["annotation"]
     assert kept["value"]["annotator_rationale"] == "needs the account id"
-    noted = ws.annotate("pass-a", next(ids), {"label": "CALL", "ambiguity_status": "NONE"}, note="payload present")
+    noted = ws.annotate(
+        "pass-a", next(ids), {"label": "CALL", "ambiguity_status": "NONE"}, note="payload present"
+    )
     assert noted["annotation"]["note"] == "payload present"
 
 
-def test_the_rationale_amendment_is_declared_from_the_definition_the_labels_were_made_under() -> None:
+def test_the_rationale_amendment_is_declared_from_the_definition_the_labels_were_made_under() -> (
+    None
+):
     config = load_task_config(CONFIG)
     (amendment,) = config.definition_amendments
-    assert amendment.from_sha256 == "0f060bb395bfb0bc24cea8091fb9916fe62a717d5a0bc09b61e8004536a4e640"
+    assert (
+        amendment.from_sha256 == "0f060bb395bfb0bc24cea8091fb9916fe62a717d5a0bc09b61e8004536a4e640"
+    )
     assert amendment.to_sha256 == config.definition_sha256()
     assert amendment.document == "docs/research/study-002/29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md"
     rationale = next(field for field in config.extra_fields if field.key == "annotator_rationale")
@@ -250,7 +314,9 @@ def test_the_rationale_amendment_is_declared_from_the_definition_the_labels_were
     strict = dataclasses.replace(
         config,
         extra_fields=tuple(
-            dataclasses.replace(field, required=True) if field.key == "annotator_rationale" else field
+            dataclasses.replace(field, required=True)
+            if field.key == "annotator_rationale"
+            else field
             for field in config.extra_fields
         ),
         definition_amendments=(),
@@ -261,15 +327,20 @@ def test_the_rationale_amendment_is_declared_from_the_definition_the_labels_were
 # ── where labels go, and who sees them ──────────────────────────────────────────────────────────
 
 
-def test_annotations_are_saved_separately_and_every_submission_is_durable(ws: Workspace, tmp_path: Path) -> None:
+def test_annotations_are_saved_separately_and_every_submission_is_durable(
+    ws: Workspace, tmp_path: Path
+) -> None:
     ws.open_session("pass-a", "test-a")
     item = ws.item_ids[0]
     ws.annotate("pass-a", item, ok("CLARIFY"))
     assert ws.store.path == tmp_path / "state.sqlite3"
     # Another connection sees the label at once: it was committed when submitted, not on exit.
-    with sqlite3.connect(f"file:{(tmp_path / 'state.sqlite3').as_posix()}?mode=ro", uri=True) as reader:
+    with sqlite3.connect(
+        f"file:{(tmp_path / 'state.sqlite3').as_posix()}?mode=ro", uri=True
+    ) as reader:
         stored = reader.execute(
-            "SELECT value_json FROM annotations WHERE session_id = 'pass-a' AND item_id = ?", (item,)
+            "SELECT value_json FROM annotations WHERE session_id = 'pass-a' AND item_id = ?",
+            (item,),
         ).fetchone()
     assert json.loads(stored[0])["label"] == "CLARIFY"
     assert sha256_file(POPULATION) == FROZEN_SHA
@@ -293,12 +364,16 @@ def test_close_and_reopen_resumes_the_session(config: TaskConfig, tmp_path: Path
         second.close()
 
 
-def test_passes_are_isolated_and_a_second_session_cannot_overwrite_the_first(ws: Workspace, tmp_path: Path) -> None:
+def test_passes_are_isolated_and_a_second_session_cannot_overwrite_the_first(
+    ws: Workspace, tmp_path: Path
+) -> None:
     ws.open_session("pass-a", "alice")
     ws.open_session("pass-b", "bob")
     item = ws.item_ids[5]
     ws.annotate("pass-a", item, ok("CLARIFY", why="pass a decided"))
-    view_b = json.dumps(Api(ServerContext(ws, "annotate", session_id="pass-b")).get(f"/api/items/{item}", {}))
+    view_b = json.dumps(
+        Api(ServerContext(ws, "annotate", session_id="pass-b")).get(f"/api/items/{item}", {})
+    )
     assert "CLARIFY" not in view_b and "pass a decided" not in view_b
     with pytest.raises(WorkspaceError, match="belongs to annotator 'alice'"):
         ws.open_session("pass-a", "bob")
@@ -327,7 +402,13 @@ def test_previous_next_flag_skip_and_undo(ws: Workspace) -> None:
     ws.undo("pass-a")  # undoes the relabel
     assert ws.item_view("pass-a", ids[0])["annotation"]["value"]["label"] == "DIRECT"
     assert ws.store.annotation(ws.task_id, "pass-a", ids[1]) is None
-    assert [c["action"] for c in ws.item_history("pass-a", ids[0])] == ["label", "relabel", "flag", "undo", "undo"]
+    assert [c["action"] for c in ws.item_history("pass-a", ids[0])] == [
+        "label",
+        "relabel",
+        "flag",
+        "undo",
+        "undo",
+    ]
     assert ws.audit() == []
 
 
@@ -341,7 +422,10 @@ def test_incomplete_and_unadjudicated_work_never_freezes(ws: Workspace, tmp_path
     with pytest.raises(IncompleteGoldError, match="580 of 581 items not labeled"):
         freeze_gold(ws, ["pass-a", "pass-b"], tmp_path / "gold")
     snapshot = export_snapshot(ws, ["pass-a", "pass-b"], tmp_path / "wip")
-    assert snapshot["artifact_kind"] == "ANNOTATION_SNAPSHOT" and snapshot["completion_state"] == "INCOMPLETE"
+    assert (
+        snapshot["artifact_kind"] == "ANNOTATION_SNAPSHOT"
+        and snapshot["completion_state"] == "INCOMPLETE"
+    )
     assert snapshot["gold"] is None and not list((tmp_path / "wip").rglob("*gold*"))
     for index, item in enumerate(ws.item_ids):
         if index:
@@ -362,7 +446,10 @@ def _copied_task(tmp_path: Path, mutate) -> TaskConfig:
     (tmp_path / "reports" / "pdet").mkdir(parents=True)
     (tmp_path / "docs" / "research" / "study-002").mkdir(parents=True)
     for name in DOCS:
-        shutil.copy(ROOT / "docs" / "research" / "study-002" / name, tmp_path / "docs" / "research" / "study-002" / name)
+        shutil.copy(
+            ROOT / "docs" / "research" / "study-002" / name,
+            tmp_path / "docs" / "research" / "study-002" / name,
+        )
     for queue in load_task_config(CONFIG).review_queues:
         (tmp_path / queue.file).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(ROOT / queue.file, tmp_path / queue.file)
@@ -376,7 +463,12 @@ def _copied_task(tmp_path: Path, mutate) -> TaskConfig:
     [
         ("one byte", lambda data: data.replace(b"Locate hospitals", b"Locate Hospitals", 1)),
         ("one item dropped", lambda data: b"\n".join(data.split(b"\n")[1:])),
-        ("reordered", lambda data: b"\n".join([*data.split(b"\n")[1:2], *data.split(b"\n")[:1], *data.split(b"\n")[2:]])),
+        (
+            "reordered",
+            lambda data: b"\n".join(
+                [*data.split(b"\n")[1:2], *data.split(b"\n")[:1], *data.split(b"\n")[2:]]
+            ),
+        ),
     ],
 )
 def test_source_mismatch_is_a_hard_failure(tmp_path: Path, name: str, mutate) -> None:
@@ -389,7 +481,9 @@ def test_source_mismatch_is_a_hard_failure(tmp_path: Path, name: str, mutate) ->
 
 def test_population_changed_after_import_refuses_to_reopen(tmp_path: Path) -> None:
     config = _copied_task(tmp_path, lambda data: data)
-    unpinned = dataclasses.replace(config, source=dataclasses.replace(config.source, expected_sha256=None, expected_items=None))
+    unpinned = dataclasses.replace(
+        config, source=dataclasses.replace(config.source, expected_sha256=None, expected_items=None)
+    )
     Workspace.open(unpinned, state_db=tmp_path / "state.sqlite3").close()
     target = tmp_path / "reports" / "pdet" / "pdet-v1.population.jsonl"
     target.write_bytes(target.read_bytes().replace(b"Locate hospitals", b"Locate Hospitals", 1))
@@ -411,19 +505,37 @@ def test_check_command_is_read_only(tmp_path: Path, capsys: pytest.CaptureFixtur
         return
     # `status` opens the store (and would record a pending definition amendment), so it reads a copy.
     copy = tmp_path / "copy.sqlite3"
-    with sqlite3.connect(f"file:{real.as_posix()}?mode=ro", uri=True) as source, sqlite3.connect(copy) as target:
+    with (
+        sqlite3.connect(f"file:{real.as_posix()}?mode=ro", uri=True) as source,
+        sqlite3.connect(copy) as target,
+    ):
         source.backup(target)
     assert main(["status", "pdet-v1", "--state-db", str(copy)]) == 0
     assert "session pass-a" in capsys.readouterr().out
 
 
-def test_pass_a_start_dry_run_checks_everything_and_creates_nothing(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_pass_a_start_dry_run_checks_everything_and_creates_nothing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     ui = tmp_path / "ui"
     ui.mkdir()
     (ui / "index.html").write_text("<!doctype html>", encoding="utf-8")
     state = tmp_path / "state.sqlite3"
-    command = ["start", "pdet-v1", "--annotator", "test-a", "--session", "pass-a", "--dry-run",
-               "--state-db", str(state), "--port", "0", "--ui-dir", str(ui)]
+    command = [
+        "start",
+        "pdet-v1",
+        "--annotator",
+        "test-a",
+        "--session",
+        "pass-a",
+        "--dry-run",
+        "--state-db",
+        str(state),
+        "--port",
+        "0",
+        "--ui-dir",
+        str(ui),
+    ]
     assert main(command) == 0
     out = capsys.readouterr().out
     assert f"581 items, source sha256 {FROZEN_SHA}, pinned" in out
@@ -442,10 +554,17 @@ def squash(text: object) -> str:
 
 def worked_example_ids() -> list[str]:
     """Re-derive, from the instrument text and the population alone, the items 23 §4 quotes."""
-    section = INSTRUMENT.read_text(encoding="utf-8").split("## 4. Worked examples", 1)[1].split("\n## 5.", 1)[0]
+    section = (
+        INSTRUMENT.read_text(encoding="utf-8")
+        .split("## 4. Worked examples", 1)[1]
+        .split("\n## 5.", 1)[0]
+    )
 
     def quoted(kind: str) -> list[str]:
-        return [squash(text) for text in re.findall(rf'^- {kind}: \*"(.*?)"\*', section, re.DOTALL | re.MULTILINE)]
+        return [
+            squash(text)
+            for text in re.findall(rf'^- {kind}: \*"(.*?)"\*', section, re.DOTALL | re.MULTILINE)
+        ]
 
     prompts, responses = quoted("prompt"), quoted("response")
     assert len(prompts) == len(responses) == 3
@@ -454,21 +573,26 @@ def worked_example_ids() -> list[str]:
         hits = [
             row["pdet_id"]
             for row in frozen_rows()
-            if squash(row["prompt"]).startswith(prompt.rstrip("…").rstrip()) and squash(row["response"]) == response
+            if squash(row["prompt"]).startswith(prompt.rstrip("…").rstrip())
+            and squash(row["response"]) == response
         ]
         assert len(hits) == 1, prompt
         ids.extend(hits)
     return ids
 
 
-def test_exposed_worked_examples_are_derived_recorded_and_counted(config: TaskConfig, capsys: pytest.CaptureFixture[str]) -> None:
+def test_exposed_worked_examples_are_derived_recorded_and_counted(
+    config: TaskConfig, capsys: pytest.CaptureFixture[str]
+) -> None:
     derived = worked_example_ids()
     rows = {row["pdet_id"]: row for row in frozen_rows()}
     (group,) = config.metric_exclusions
     assert group.status == EXPOSED
     assert sorted(group.item_ids) == sorted(derived)
     assert set(group.excluded_from) == {
-        "classifier_validation_metrics", "annotator_agreement_statistics", "untouched_human_gold_claims"
+        "classifier_validation_metrics",
+        "annotator_agreement_statistics",
+        "untouched_human_gold_claims",
     }
     assert group.document is not None
     addendum = config.resolve(group.document).read_text(encoding="utf-8")
@@ -497,7 +621,14 @@ def test_exposure_is_never_shown_to_the_annotator(ws: Workspace) -> None:
             *(json.dumps(api.get(f"/api/items/{item_id}", {})) for item_id in worked_example_ids()),
         ]
     ).casefold()
-    for hidden in (EXPOSED, "metric_exclusion", "metric-eligible", "excluded_from", "27-PDET", "worked example"):
+    for hidden in (
+        EXPOSED,
+        "metric_exclusion",
+        "metric-eligible",
+        "excluded_from",
+        "27-PDET",
+        "worked example",
+    ):
         assert hidden.casefold() not in screen, hidden
 
 
@@ -510,18 +641,34 @@ def test_exposure_is_carried_into_snapshots_and_gold(ws: Workspace, tmp_path: Pa
         ws.annotate("pass-b", item, ok("UNSUPPORTED" if item in exposed else "DIRECT"))
     snapshot = export_snapshot(ws, ["pass-a", "pass-b"], tmp_path / "wip")
     section = snapshot["metric_exclusions"]
-    assert (section["population_items"], section["excluded_items"], section["metric_eligible_items"]) == (581, 3, 578)
+    assert (
+        section["population_items"],
+        section["excluded_items"],
+        section["metric_eligible_items"],
+    ) == (581, 3, 578)
     assert section["groups"][0]["item_ids"] == sorted(exposed)
-    assert (snapshot["disagreements"]["count"], snapshot["disagreements"]["metric_eligible"]) == (3, 0)
+    assert (snapshot["disagreements"]["count"], snapshot["disagreements"]["metric_eligible"]) == (
+        3,
+        0,
+    )
     assert [s["labeled_metric_eligible"] for s in snapshot["sessions"]] == [578, 578]
     for item in sorted(exposed):
         decision = {"label": "DIRECT", "ambiguity_status": "NONE", "decision_tree_step": "3"}
-        ws.adjudicate(["pass-a", "pass-b"], item, decision, rationale="synthetic test adjudication", adjudicator_id="test-c")
+        ws.adjudicate(
+            ["pass-a", "pass-b"],
+            item,
+            decision,
+            rationale="synthetic test adjudication",
+            adjudicator_id="test-c",
+        )
     manifest = freeze_gold(ws, ["pass-a", "pass-b"], tmp_path / "gold")
     gold = manifest["gold"]
     assert (gold["items"], gold["metric_eligible_items"]) == (581, 578)
     assert sum(gold["metric_eligible_label_counts"].values()) == 578
-    rows = [json.loads(line) for line in (tmp_path / "gold" / gold["file"]).read_text(encoding="utf-8").splitlines()]
+    rows = [
+        json.loads(line)
+        for line in (tmp_path / "gold" / gold["file"]).read_text(encoding="utf-8").splitlines()
+    ]
     assert {row["pdet_id"] for row in rows if row["metric_exclusions"] == [EXPOSED]} == exposed
     assert all(row["metric_exclusions"] == [] for row in rows if row["pdet_id"] not in exposed)
     _, summary = verify_package(Path(manifest["manifest_path"]), ROOT, require_source=True)

@@ -11,7 +11,7 @@ import pytest
 
 from opengrad.annotation.config import TaskConfig
 from opengrad.annotation.export import export_snapshot, freeze_gold
-from opengrad.annotation.items import SourceIntegrityError, sha256_file
+from opengrad.annotation.items import SourceIntegrityError
 from opengrad.annotation.service import (
     ConflictError,
     NotFoundError,
@@ -20,6 +20,7 @@ from opengrad.annotation.service import (
     WorkspaceError,
 )
 from opengrad.annotation.values import AnnotationValueError, normalize_value
+from opengrad.hashing import sha256_file
 from tests.annotation.helpers import BASE_CONFIG, adjudicated, label_all, rows, value, write_source
 
 
@@ -42,7 +43,12 @@ def test_annotation_is_persisted_immediately_and_survives_reopen(
     assert view["annotation"]["value"]["label"] == "DIRECT"
     assert view["annotation"]["note"] == "clear answer"
     progress = second.progress("pass-a")
-    assert (progress["completed"], progress["skipped"], progress["flagged"], progress["unknown"]) == (2, 1, 1, 1)
+    assert (
+        progress["completed"],
+        progress["skipped"],
+        progress["flagged"],
+        progress["unknown"],
+    ) == (2, 1, 1, 1)
     # Resume: the next item is the first never-labeled one, skipped items come after it.
     assert second.next_unlabeled("pass-a") == ids[3]
     second.annotate("pass-a", ids[3], value("CALL"))
@@ -53,8 +59,19 @@ def test_annotation_is_persisted_immediately_and_survives_reopen(
 def test_progress_counts_are_exact(workspace: Workspace) -> None:
     label_all(workspace, "pass-a", {0: "CALL", 1: "CLARIFY", 4: "UNKNOWN"})
     progress = workspace.progress("pass-a")
-    assert progress["label_counts"] == {"CALL": 1, "DIRECT": 2, "CLARIFY": 1, "UNSUPPORTED": 0, "UNKNOWN": 1}
-    assert (progress["completed"], progress["remaining"], progress["percent"], progress["unknown"]) == (5, 0, 100.0, 1)
+    assert progress["label_counts"] == {
+        "CALL": 1,
+        "DIRECT": 2,
+        "CLARIFY": 1,
+        "UNSUPPORTED": 0,
+        "UNKNOWN": 1,
+    }
+    assert (
+        progress["completed"],
+        progress["remaining"],
+        progress["percent"],
+        progress["unknown"],
+    ) == (5, 0, 100.0, 1)
 
 
 @pytest.mark.parametrize(
@@ -63,13 +80,29 @@ def test_progress_counts_are_exact(workspace: Workspace) -> None:
         ({"label": "MAYBE", "ambiguity_status": "NONE", "rationale_text": "x"}, "invalid label"),
         ({"label": "DIRECT", "ambiguity_status": "NONE"}, "required"),
         ({"label": "DIRECT", "ambiguity_status": "SORT_OF", "rationale_text": "x"}, "not one of"),
-        ({"label": "UNKNOWN", "ambiguity_status": "NONE", "rationale_text": "x"}, "ambiguity reason"),
-        ({"label": "DIRECT", "ambiguity_status": "NON_SUBSTANTIVE", "rationale_text": "x"}, "needs NONE"),
-        ({"label": "DIRECT", "ambiguity_status": "NONE", "rationale_text": "x", "classifier": "CALL"}, "unexpected"),
+        (
+            {"label": "UNKNOWN", "ambiguity_status": "NONE", "rationale_text": "x"},
+            "ambiguity reason",
+        ),
+        (
+            {"label": "DIRECT", "ambiguity_status": "NON_SUBSTANTIVE", "rationale_text": "x"},
+            "needs NONE",
+        ),
+        (
+            {
+                "label": "DIRECT",
+                "ambiguity_status": "NONE",
+                "rationale_text": "x",
+                "classifier": "CALL",
+            },
+            "unexpected",
+        ),
         ("DIRECT", "must be an object"),
     ],
 )
-def test_invalid_values_are_rejected_and_nothing_is_written(workspace: Workspace, candidate, message: str) -> None:
+def test_invalid_values_are_rejected_and_nothing_is_written(
+    workspace: Workspace, candidate, message: str
+) -> None:
     item = workspace.item_ids[0]
     with pytest.raises(AnnotationValueError, match=message):
         workspace.annotate("pass-a", item, candidate)
@@ -132,7 +165,13 @@ def test_adjudication_is_closed_until_both_passes_finish(workspace: Workspace) -
     with pytest.raises(WorkspaceError, match="pass-b: 4 unlabeled"):
         workspace.adjudication_queue(["pass-a", "pass-b"])
     with pytest.raises(WorkspaceError):
-        workspace.adjudicate(["pass-a", "pass-b"], workspace.item_ids[0], adjudicated("CLARIFY"), rationale="r", adjudicator_id="carol")
+        workspace.adjudicate(
+            ["pass-a", "pass-b"],
+            workspace.item_ids[0],
+            adjudicated("CLARIFY"),
+            rationale="r",
+            adjudicator_id="carol",
+        )
 
 
 def test_navigation_filters(workspace: Workspace) -> None:
@@ -141,19 +180,26 @@ def test_navigation_filters(workspace: Workspace) -> None:
     workspace.annotate("pass-a", ids[1], value("DIRECT"))
     workspace.set_flag("pass-a", ids[2], True)
     workspace.skip("pass-a", ids[3])
-    ids_of = lambda status, **filters: [row["item_id"] for row in workspace.list_items("pass-a", status, filters)]
+    ids_of = lambda status, **filters: [
+        row["item_id"] for row in workspace.list_items("pass-a", status, filters)
+    ]
     assert ids_of("completed") == ids[:2]
     assert ids_of("unlabeled") == ids[2:]
     assert ids_of("flagged") == [ids[2]]
     assert ids_of("skipped") == [ids[3]]
     assert ids_of("unknown") == [ids[0]]
     assert ids_of("all", component="challenge") == [ids[1], ids[3]]
-    assert workspace.filter_options() == {"component": ["challenge", "prevalence"], "source": ["synthetic"]}
+    assert workspace.filter_options() == {
+        "component": ["challenge", "prevalence"],
+        "source": ["synthetic"],
+    }
     with pytest.raises(WorkspaceError):
         workspace.list_items("pass-a", "all", {"not_a_filter": "x"})
 
 
-def test_source_is_never_written(tmp_path: Path, make_config: Callable[..., TaskConfig], open_workspace: Callable[..., Workspace]) -> None:
+def test_source_is_never_written(
+    tmp_path: Path, make_config: Callable[..., TaskConfig], open_workspace: Callable[..., Workspace]
+) -> None:
     config = make_config()
     source = tmp_path / "data/source.jsonl"
     before, stat = sha256_file(source), source.stat().st_mtime_ns
@@ -162,14 +208,22 @@ def test_source_is_never_written(tmp_path: Path, make_config: Callable[..., Task
     ws.open_session("pass-b", "bob")
     label_all(ws, "pass-a")
     label_all(ws, "pass-b", {2: "CALL"})
-    ws.adjudicate(["pass-a", "pass-b"], ws.item_ids[2], adjudicated("CALL"), rationale="payload", adjudicator_id="carol")
+    ws.adjudicate(
+        ["pass-a", "pass-b"],
+        ws.item_ids[2],
+        adjudicated("CALL"),
+        rationale="payload",
+        adjudicator_id="carol",
+    )
     export_snapshot(ws, ["pass-a", "pass-b"])
     freeze_gold(ws, ["pass-a", "pass-b"])
     assert sha256_file(source) == before
     assert source.stat().st_mtime_ns == stat
 
 
-def test_changed_source_refuses_to_reopen(tmp_path: Path, make_config: Callable[..., TaskConfig], open_workspace: Callable[..., Workspace]) -> None:
+def test_changed_source_refuses_to_reopen(
+    tmp_path: Path, make_config: Callable[..., TaskConfig], open_workspace: Callable[..., Workspace]
+) -> None:
     config = make_config()
     ws = open_workspace(config)
     ws.close()
@@ -180,7 +234,9 @@ def test_changed_source_refuses_to_reopen(tmp_path: Path, make_config: Callable[
         Workspace.open(config, state_db=tmp_path / "state/annotation.sqlite3")
 
 
-def test_pinned_hash_is_checked_before_opening(make_config: Callable[..., TaskConfig], tmp_path: Path) -> None:
+def test_pinned_hash_is_checked_before_opening(
+    make_config: Callable[..., TaskConfig], tmp_path: Path
+) -> None:
     data = copy.deepcopy(BASE_CONFIG)
     data["source"]["expected_sha256"] = "f" * 64
     with pytest.raises(SourceIntegrityError):
@@ -212,20 +268,30 @@ def _typed(make_config: Callable[..., TaskConfig], **changes) -> TaskConfig:
     data["extra_fields"], data["adjudication_fields"] = [], []
     data["unknown_labels"], data["freeze"] = [], {}
     data.update(changes)
-    data["disagreement_keys"] = [{"multi_label": "labels", "rating": "score", "free_text": "text", "ranking": "ranking"}.get(data["task_type"], "label")]
+    data["disagreement_keys"] = [
+        {"multi_label": "labels", "rating": "score", "free_text": "text", "ranking": "ranking"}.get(
+            data["task_type"], "label"
+        )
+    ]
     return make_config(data)
 
 
 def test_multi_label_values_are_canonicalised(make_config: Callable[..., TaskConfig]) -> None:
-    config = _typed(make_config, task_type="multi_label", labels=["HALLUCINATION", "WRONG_TOOL", "FORMAT"])
-    assert normalize_value(config, {"labels": ["FORMAT", "HALLUCINATION"]}) == {"labels": ["HALLUCINATION", "FORMAT"]}
+    config = _typed(
+        make_config, task_type="multi_label", labels=["HALLUCINATION", "WRONG_TOOL", "FORMAT"]
+    )
+    assert normalize_value(config, {"labels": ["FORMAT", "HALLUCINATION"]}) == {
+        "labels": ["HALLUCINATION", "FORMAT"]
+    }
     assert normalize_value(config, {"labels": []}) == {"labels": []}
     with pytest.raises(AnnotationValueError):
         normalize_value(config, {"labels": ["FORMAT", "FORMAT"]})
 
 
 def test_rating_values_respect_the_scale(make_config: Callable[..., TaskConfig]) -> None:
-    config = _typed(make_config, task_type="rating", labels=None, scale={"min": 1, "max": 5, "step": 0.5})
+    config = _typed(
+        make_config, task_type="rating", labels=None, scale={"min": 1, "max": 5, "step": 0.5}
+    )
     assert normalize_value(config, {"score": 4.5}) == {"score": 4.5}
     assert normalize_value(config, {"score": 3.0}) == {"score": 3}
     for bad in (6, 4.25, True, "4"):
@@ -238,10 +304,22 @@ def test_free_text_pairwise_and_ranking(make_config: Callable[..., TaskConfig]) 
     assert normalize_value(text, {"text": "  a note  "}) == {"text": "a note"}
     with pytest.raises(AnnotationValueError):
         normalize_value(text, {"text": "   "})
-    pair = _typed(make_config, task_type="pairwise", labels=None, fields={"a": "prompt", "b": "response"}, candidates=["a", "b"])
+    pair = _typed(
+        make_config,
+        task_type="pairwise",
+        labels=None,
+        fields={"a": "prompt", "b": "response"},
+        candidates=["a", "b"],
+    )
     assert pair.labels == ("A", "B", "TIE")
     assert normalize_value(pair, {"label": "TIE"}) == {"label": "TIE"}
-    ranked = _typed(make_config, task_type="ranking", labels=None, fields={"a": "prompt", "b": "response", "c": "tools"}, candidates=["a", "b", "c"])
+    ranked = _typed(
+        make_config,
+        task_type="ranking",
+        labels=None,
+        fields={"a": "prompt", "b": "response", "c": "tools"},
+        candidates=["a", "b", "c"],
+    )
     assert normalize_value(ranked, {"ranking": ["c", "a", "b"]}) == {"ranking": ["c", "a", "b"]}
     with pytest.raises(AnnotationValueError):
         normalize_value(ranked, {"ranking": ["a", "a", "b"]})

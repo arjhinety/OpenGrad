@@ -27,7 +27,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import shutil
 import sys
@@ -45,6 +44,7 @@ from opengrad.evaluation.runner import (
     PINNED_MODEL_REVISION,
     PINNED_TEMPLATE_HASH,
 )
+from opengrad.hashing import sha256_file
 
 PROMPTS = ROOT / "results/quantization/frozen_prompts_v1.jsonl"
 REFERENCE = ROOT / "results/quantization/m1_v2_reference.json"
@@ -314,10 +314,6 @@ def main():
 if __name__ == "__main__":
     raise SystemExit(main())
 '''
-
-
-def sha256_file(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def parity_notes(examples: int) -> str:

@@ -8,14 +8,13 @@ could change between hashing and parsing.
 from __future__ import annotations
 
 import csv
-import hashlib
 import io
 import json
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 from opengrad.annotation.config import DisplayField, TaskConfig
+from opengrad.hashing import sha256_bytes
 
 
 class SourceError(ValueError):
@@ -32,18 +31,6 @@ class Item:
     order_index: int
     row_hash: str
     row: dict[str, Any]
-
-
-def sha256_bytes(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def canonical_json(value: Any) -> str:

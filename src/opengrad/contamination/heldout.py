@@ -20,7 +20,6 @@ this module loads the held-out and training records, attaches reviewer evidence 
 
 from __future__ import annotations
 
-import hashlib
 import json
 from collections import Counter
 from collections.abc import Iterator
@@ -51,6 +50,7 @@ from opengrad.contamination.levels import (
     thresholds_record,
 )
 from opengrad.contamination.scanner import ngrams
+from opengrad.hashing import sha256_text as _sha256_text
 
 __all__ = ["LEVEL_1", "LEVEL_2", "LEVEL_3", "LEVEL_4", "LEVEL_5", "Record"]
 
@@ -78,10 +78,6 @@ def output_path_for(root: Path, release_dir: Path | str | None = None) -> Path:
     from opengrad.contamination.audit import corpus_slug, scoped_artifact_path
 
     return root / scoped_artifact_path(OUTPUT, corpus_slug(release_dir))
-
-
-def _sha256_text(value: str) -> str:
-    return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def _canonical(value: Any) -> str:

@@ -18,8 +18,8 @@ from opengrad.annotation.items import (
     get_path,
     load_source,
     project,
-    sha256_file,
 )
+from opengrad.hashing import sha256_file
 from tests.annotation.helpers import BASE_CONFIG, rows, write_source
 
 

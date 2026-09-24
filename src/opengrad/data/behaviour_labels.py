@@ -36,7 +36,6 @@ Safeguards:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from collections import Counter
@@ -53,6 +52,7 @@ from opengrad.data.classifier_input import (
 )
 from opengrad.data.decision_classifier_v2 import CLASSIFIER_VERSION, classify
 from opengrad.data.normalization_v3 import iter_rows
+from opengrad.hashing import sha256_bytes as _sha256
 
 ROOT = Path(__file__).resolve().parents[3]
 LABELS_VERSION = "behaviour-labels-v1"
@@ -77,14 +77,12 @@ class BehaviourLabelError(RuntimeError):
     """The labelling pass cannot run, or its output does not match its inputs."""
 
 
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
 def check_frozen(root: Path) -> None:
     observed = _sha256((root / CLASSIFIER_MODULE).read_bytes().replace(b"\r\n", b"\n"))
     if observed != FROZEN_SOURCE_SHA256_LF:
-        raise BehaviourLabelError(f"{CLASSIFIER_MODULE.as_posix()} is not the frozen {FROZEN_TAG} (sha256 LF {observed})")
+        raise BehaviourLabelError(
+            f"{CLASSIFIER_MODULE.as_posix()} is not the frozen {FROZEN_TAG} (sha256 LF {observed})"
+        )
 
 
 def weight_permitted(label: str, source: str) -> bool:
@@ -157,7 +155,9 @@ def summarise(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
 
 
 def _rows_bytes(rows: Sequence[Mapping[str, Any]]) -> bytes:
-    return b"".join((json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8") for row in rows)
+    return b"".join(
+        (json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8") for row in rows
+    )
 
 
 def build(root: Path = ROOT) -> dict[str, Any]:
@@ -176,7 +176,9 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         payload = _rows_bytes(rows)
         path = out / f"{source}.labels.jsonl"
         if path.exists() and path.read_bytes() != payload:
-            raise BehaviourLabelError(f"{path} exists with different labels; a labelling pass is deterministic")
+            raise BehaviourLabelError(
+                f"{path} exists with different labels; a labelling pass is deterministic"
+            )
         path.write_bytes(payload)
         per_source[source] = {"file": path.name, "sha256": _sha256(payload), **summarise(rows)}
         totals.extend(rows)
@@ -230,15 +232,26 @@ def verify(root: Path = ROOT) -> dict[str, Any]:
             problems.append(f"{source}: label file does not match its manifest hash")
             continue
         rows = [json.loads(line) for line in payload.decode("utf-8").splitlines() if line]
-        if summarise(rows) != {k: entry[k] for k in ("records", "labels", "weight_permitted", "unit_kind", "unlabelled_reasons")}:
+        if summarise(rows) != {
+            k: entry[k]
+            for k in ("records", "labels", "weight_permitted", "unit_kind", "unlabelled_reasons")
+        }:
             problems.append(f"{source}: counts do not match the labels")
-        if any(row["weight_permitted"] != weight_permitted(row["label"], row["source"]) for row in rows):
+        if any(
+            row["weight_permitted"] != weight_permitted(row["label"], row["source"]) for row in rows
+        ):
             problems.append(f"{source}: a weight permission does not follow 38 §2")
-    return {"status": "PASS" if not problems else "FAIL", "problems": problems, "totals": manifest["totals"]}
+    return {
+        "status": "PASS" if not problems else "FAIL",
+        "problems": problems,
+        "totals": manifest["totals"],
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--build", action="store_true")
     group.add_argument("--verify", action="store_true")
@@ -246,7 +259,15 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.build:
         manifest = build(args.root)
-        print(json.dumps({"totals": manifest["totals"], "sources": {s: v["labels"] for s, v in manifest["sources"].items()}}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "totals": manifest["totals"],
+                    "sources": {s: v["labels"] for s, v in manifest["sources"].items()},
+                },
+                indent=2,
+            )
+        )
         return 0
     print(json.dumps(verify(args.root), indent=2))
     return 0

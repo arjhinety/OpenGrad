@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import subprocess
@@ -9,6 +8,7 @@ from typing import Any
 
 from opengrad.data.materialize import iter_materialized_rows
 from opengrad.data.real_analysis import _restore_row
+from opengrad.hashing import sha256_file as _sha256
 
 _SOURCE_REPOS = {
     "xlam-function-calling-60k": "https://huggingface.co/datasets/Salesforce/xlam-function-calling-60k",
@@ -22,14 +22,6 @@ _SOURCE_REPOS = {
 # The card a release is published under follows its config. v1 is the default so
 # that releases which predate this field keep building byte-identically.
 _DEFAULT_CARD_DIRECTORY = "release/huggingface/toolpolicy-canonical-v1"
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _json(value: Any) -> str:

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from opengrad.evaluation.runner import load_evaluation_examples
+from opengrad.hashing import sha256_file as sha256
 from opengrad.promotion.quantization import compute_preservation_thresholds
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,14 +28,6 @@ REFERENCE_METRICS = Path(
 )
 M1_PROMOTION = Path("reports/data/m1-dpo-canonical-v2-final-v2-promotion.json")
 PREFERENCE = Path("data/processed/m1_calibration_preference_pairs_v1.jsonl")
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def version(name: str) -> str | None:
@@ -66,7 +59,9 @@ def main() -> None:
         default=Path(".workspace/quantization/source/m1-v2/dpo-checkpoint-30"),
     )
     args = parser.parse_args()
-    model_dir = (ROOT / args.model_dir).resolve() if not args.model_dir.is_absolute() else args.model_dir
+    model_dir = (
+        (ROOT / args.model_dir).resolve() if not args.model_dir.is_absolute() else args.model_dir
+    )
 
     partition = json.loads((ROOT / PARTITION).read_text(encoding="utf-8"))
     examples = load_evaluation_examples(ROOT, ROOT / EVAL_MANIFEST)
@@ -164,7 +159,9 @@ def main() -> None:
             "model_id": MODEL_ID,
             "model_revision": MODEL_REVISION,
             "selected_checkpoint": CHECKPOINT,
-            "source_model_path": str(model_dir.relative_to(ROOT)) if model_dir.is_relative_to(ROOT) else str(model_dir),
+            "source_model_path": str(model_dir.relative_to(ROOT))
+            if model_dir.is_relative_to(ROOT)
+            else str(model_dir),
             "tokenizer_revision": TOKENIZER_REVISION,
             "parent_experiment_id": "m0_sft_canonical_v2_final",
             "parent_checkpoint": "m0_sft_canonical_v2_final::checkpoint-1800",
@@ -244,9 +241,17 @@ def main() -> None:
             },
         },
     )
-    print(json.dumps({"eval_records": len(compact), "recovery_records": len(recovery_rows), "reference": reference}, indent=2))
+    print(
+        json.dumps(
+            {
+                "eval_records": len(compact),
+                "recovery_records": len(recovery_rows),
+                "reference": reference,
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":
     main()
-

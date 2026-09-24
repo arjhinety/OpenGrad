@@ -37,17 +37,10 @@ from opengrad.data.xlam_types import (
     XlamAnnotationError,
     is_canonical_object_schema,
 )
+from opengrad.hashing import sha256_file as _sha256
 
 RELEASE_DIR = ROOT / ".release" / "hf" / "toolpolicy-canonical-v1"
 MAX_SEQ_LENGTH = 2048
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _source_record(row: dict) -> dict:

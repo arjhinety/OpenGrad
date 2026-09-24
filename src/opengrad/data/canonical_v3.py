@@ -40,7 +40,6 @@ back-filled from another stratum.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from collections import Counter, defaultdict
@@ -55,6 +54,7 @@ from opengrad.data.canonical import ToolConversation
 from opengrad.data.normalization_v3 import iter_rows, storage_row
 from opengrad.data.semantic import validate_training_trajectory
 from opengrad.data.supervision import validate_supervision_block
+from opengrad.hashing import sha256_bytes as _sha256
 
 ROOT = Path(__file__).resolve().parents[3]
 ARTIFACT_KIND = "CANONICAL_V3_DECISION_BALANCED"
@@ -68,7 +68,12 @@ RENDER_SAMPLE = 500
 RENDER_SEED = "opengrad-canonical-v3-render-check-v1"
 
 #: classifier label -> mixture decision. The classifier says DIRECT; the mixture vocabulary says ANSWER.
-DECISION_OF_STRATUM = {"CALL": "CALL", "ANSWER": "ANSWER", "CLARIFY": "CLARIFY", "UNSUPPORTED": "UNSUPPORTED"}
+DECISION_OF_STRATUM = {
+    "CALL": "CALL",
+    "ANSWER": "ANSWER",
+    "CLARIFY": "CLARIFY",
+    "UNSUPPORTED": "UNSUPPORTED",
+}
 CLEAN_CONTAMINATION = frozenset({"CLEAN", "UNASSESSED"})
 
 
@@ -76,11 +81,9 @@ class CanonicalV3Error(RuntimeError):
     """The artifact cannot be built, or what was written does not match its inputs."""
 
 
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
-def behaviour_block(stratum: str, label_row: Mapping[str, Any], classifier: Mapping[str, Any], contract: str) -> dict[str, Any]:
+def behaviour_block(
+    stratum: str, label_row: Mapping[str, Any], classifier: Mapping[str, Any], contract: str
+) -> dict[str, Any]:
     """One record's behaviour block. ``CALL`` is structural and therefore ``known``; the rest are heuristic."""
     decision = DECISION_OF_STRATUM[stratum]
     confidence = "known" if stratum in balance.STRUCTURAL_STRATA else "heuristic"
@@ -103,7 +106,12 @@ def behaviour_block(stratum: str, label_row: Mapping[str, Any], classifier: Mapp
             step=label_row["step"],
             unit_kind=label_row["unit_kind"],
         )
-    return {"decision": decision, "capabilities": [], "confidence": confidence, "provenance": provenance}
+    return {
+        "decision": decision,
+        "capabilities": [],
+        "confidence": confidence,
+        "provenance": provenance,
+    }
 
 
 def gate_record(record: Mapping[str, Any]) -> str | None:
@@ -118,7 +126,13 @@ def gate_record(record: Mapping[str, Any]) -> str | None:
         return f"SUPERVISION:{type(error).__name__}"
     try:
         issues = validate_training_trajectory(
-            ToolConversation(record["id"], record["source"], list(record["tools"]), list(record["messages"]), metadata)
+            ToolConversation(
+                record["id"],
+                record["source"],
+                list(record["tools"]),
+                list(record["messages"]),
+                metadata,
+            )
         )
     except Exception as error:  # noqa: BLE001
         return f"SEMANTIC_ERROR:{type(error).__name__}"
@@ -127,7 +141,9 @@ def gate_record(record: Mapping[str, Any]) -> str | None:
     return None
 
 
-def render_check(records: Sequence[Mapping[str, Any]], sample: int | None, root: Path) -> dict[str, Any]:
+def render_check(
+    records: Sequence[Mapping[str, Any]], sample: int | None, root: Path
+) -> dict[str, Any]:
     """Render a seeded sample (or all) under the pinned renderer, counting failures. Never writes text."""
     from opengrad.data.renderers import renderer_for
 
@@ -138,7 +154,13 @@ def render_check(records: Sequence[Mapping[str, Any]], sample: int | None, root:
     rendered = 0
     identity: dict[str, Any] = {}
     for row in chosen:
-        example = ToolConversation(row["id"], row["source"], list(row["tools"]), list(row["messages"]), dict(row["metadata"]))
+        example = ToolConversation(
+            row["id"],
+            row["source"],
+            list(row["tools"]),
+            list(row["messages"]),
+            dict(row["metadata"]),
+        )
         try:
             result = renderer.render_sft(example)
         except Exception as error:  # noqa: BLE001
@@ -170,14 +192,18 @@ def _write_shards(out: Path, rows: list[dict[str, Any]]) -> list[dict[str, Any]]
         chunk = [storage_row(row) for row in rows[start : start + SHARD_SIZE]]
         name = f"shard-{len(shards):06d}.parquet"
         _write_parquet(chunk, out / name)
-        shards.append({"file": name, "records": len(chunk), "sha256": _sha256((out / name).read_bytes())})
+        shards.append(
+            {"file": name, "records": len(chunk), "sha256": _sha256((out / name).read_bytes())}
+        )
     return shards
 
 
 def build(root: Path = ROOT, *, render_sample: int | None = RENDER_SAMPLE) -> dict[str, Any]:
     out = root / OUTPUT_DIR
     if (out / "manifest.json").exists():
-        raise CanonicalV3Error(f"{out / 'manifest.json'} exists: canonical-v3 is immutable, never overwritten")
+        raise CanonicalV3Error(
+            f"{out / 'manifest.json'} exists: canonical-v3 is immutable, never overwritten"
+        )
     plan_path = root / balance.OUTPUT_DIR / "manifest.json"
     if not plan_path.exists():
         raise CanonicalV3Error("no selection plan: run opengrad.data.canonical_v3_balance --build")
@@ -185,7 +211,9 @@ def build(root: Path = ROOT, *, render_sample: int | None = RENDER_SAMPLE) -> di
     verification = balance.verify(root)
     if verification["status"] != "PASS":
         raise CanonicalV3Error(f"the selection plan does not verify: {verification['problems']}")
-    selected = json.loads((root / balance.OUTPUT_DIR / plan["selected_ids_file"]).read_text(encoding="utf-8"))
+    selected = json.loads(
+        (root / balance.OUTPUT_DIR / plan["selected_ids_file"]).read_text(encoding="utf-8")
+    )
     stratum_of_id = {record_id: stratum for stratum, ids in selected.items() for record_id in ids}
     label_rows, labels_manifest = balance.load_labels(root)
     labels_by_id = {row["id"]: row for row in label_rows}
@@ -211,7 +239,9 @@ def build(root: Path = ROOT, *, render_sample: int | None = RENDER_SAMPLE) -> di
                 continue
             row = dict(record)
             metadata = dict(row["metadata"])
-            metadata["behavior"] = behaviour_block(stratum, labels_by_id[record["id"]], classifier, contract)
+            metadata["behavior"] = behaviour_block(
+                stratum, labels_by_id[record["id"]], classifier, contract
+            )
             row["metadata"] = metadata
             kept.append(row)
             per_stratum[stratum] += 1
@@ -244,15 +274,24 @@ def build(root: Path = ROOT, *, render_sample: int | None = RENDER_SAMPLE) -> di
         ),
         "specification": balance.SPEC,
         "authorisation": "docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md",
-        "selection_plan": {"balance_version": plan["balance_version"], "selected_ids_sha256": plan["selected_ids_sha256"]},
-        "labels": {"labels_version": labels_manifest["labels_version"], "classifier": classifier, "input_contract": contract},
+        "selection_plan": {
+            "balance_version": plan["balance_version"],
+            "selected_ids_sha256": plan["selected_ids_sha256"],
+        },
+        "labels": {
+            "labels_version": labels_manifest["labels_version"],
+            "classifier": classifier,
+            "input_contract": contract,
+        },
         "versions": versions_block,
         "corpus_fingerprint": labels_manifest["corpus_fingerprint"],
         "counts": {
             "planned_per_stratum": planned,
             "written": len(kept),
             "per_stratum": dict(sorted(per_stratum.items())),
-            "shortfall_per_stratum": {s: planned - per_stratum[s] for s in sorted(per_stratum) if per_stratum[s] < planned},
+            "shortfall_per_stratum": {
+                s: planned - per_stratum[s] for s in sorted(per_stratum) if per_stratum[s] < planned
+            },
             "per_source": {s: dict(sorted(c.items())) for s, c in sorted(per_source.items())},
             "rejected_by_gate": dict(sorted(rejected.items())),
         },
@@ -282,7 +321,10 @@ def verify(root: Path = ROOT) -> dict[str, Any]:
         observed = _sha256((root / OUTPUT_DIR / shard["file"]).read_bytes())
         if observed != shard["sha256"]:
             problems.append(f"{shard['file']}: bytes do not match the manifest")
-    if _sha256(b"".join(bytes.fromhex(s["sha256"]) for s in manifest["shards"])) != manifest["content_hash"]:
+    if (
+        _sha256(b"".join(bytes.fromhex(s["sha256"]) for s in manifest["shards"]))
+        != manifest["content_hash"]
+    ):
         problems.append("content hash does not match the shard hashes")
     written = sum(shard["records"] for shard in manifest["shards"])
     if written != manifest["counts"]["written"]:
@@ -311,23 +353,38 @@ def verify(root: Path = ROOT) -> dict[str, Any]:
                     behaviours_ok = False
     if not behaviours_ok:
         problems.append("a record carries a missing or invalid behaviour block")
-    if dict(decisions) != {DECISION_OF_STRATUM[s]: n for s, n in manifest["counts"]["per_stratum"].items()}:
+    if dict(decisions) != {
+        DECISION_OF_STRATUM[s]: n for s, n in manifest["counts"]["per_stratum"].items()
+    }:
         problems.append("the written decisions do not match the manifest counts")
-    return {"status": "PASS" if not problems else "FAIL", "problems": problems, "decisions": dict(sorted(decisions.items()))}
+    return {
+        "status": "PASS" if not problems else "FAIL",
+        "problems": problems,
+        "decisions": dict(sorted(decisions.items())),
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--build", action="store_true")
     group.add_argument("--verify", action="store_true")
-    parser.add_argument("--render-all", action="store_true", help="render every record, not a seeded sample")
+    parser.add_argument(
+        "--render-all", action="store_true", help="render every record, not a seeded sample"
+    )
     parser.add_argument("--render-sample", type=int, default=RENDER_SAMPLE)
     parser.add_argument("--root", type=Path, default=ROOT)
     args = parser.parse_args(argv)
     if args.build:
         manifest = build(args.root, render_sample=None if args.render_all else args.render_sample)
-        print(json.dumps({"counts": manifest["counts"], "renderability": manifest["gates"]["renderability"]}, indent=2))
+        print(
+            json.dumps(
+                {"counts": manifest["counts"], "renderability": manifest["gates"]["renderability"]},
+                indent=2,
+            )
+        )
         return 0
     print(json.dumps(verify(args.root), indent=2))
     return 0

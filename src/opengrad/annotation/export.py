@@ -24,7 +24,6 @@ change-log chains and their agreement with the final labels -- from the files al
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 from collections import Counter
@@ -32,7 +31,6 @@ from pathlib import Path
 from typing import Any
 
 from opengrad.annotation.config import APP_VERSION, PRIMARY_KEY, TaskConfig, find_repo_root
-from opengrad.annotation.items import sha256_file
 from opengrad.annotation.provenance import (
     ADJUDICATION_ENTRY_FIELDS,
     ANNOTATION_ENTRY_FIELDS,
@@ -47,6 +45,8 @@ from opengrad.annotation.service import (
 )
 from opengrad.annotation.store import utc_now
 from opengrad.annotation.values import disagreement_signature, is_unknown
+from opengrad.hashing import sha256_bytes as _sha256
+from opengrad.hashing import sha256_file
 from opengrad.verification.accounting import FAIL, PASS, REQUIRED_NONEMPTY, ValidationResult
 
 MANIFEST_VERSION = 1
@@ -100,11 +100,9 @@ def jsonl_bytes(records: list[dict[str, Any]]) -> bytes:
 
 
 def manifest_bytes(manifest: dict[str, Any]) -> bytes:
-    return (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
-
-
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
+    return (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode(
+        "utf-8"
+    )
 
 
 def _write_atomic(path: Path, data: bytes) -> None:
@@ -135,7 +133,9 @@ def _loads(text: str | None) -> dict[str, Any] | None:
     return json.loads(text) if text else None
 
 
-def _history_records(entries: list[dict[str, Any]], fields: tuple[str, ...]) -> list[dict[str, Any]]:
+def _history_records(
+    entries: list[dict[str, Any]], fields: tuple[str, ...]
+) -> list[dict[str, Any]]:
     """Chain entries exactly as hashed, plus their images, in log order. ``seq`` replaces the row id."""
     return [
         {
@@ -152,7 +152,9 @@ def _history_records(entries: list[dict[str, Any]], fields: tuple[str, ...]) -> 
 class _Package:
     """Everything one export reads from the workspace, computed once."""
 
-    def __init__(self, workspace: Workspace, sessions: list[str], *, composite: bool = False) -> None:
+    def __init__(
+        self, workspace: Workspace, sessions: list[str], *, composite: bool = False
+    ) -> None:
         #: A composite takes each item's label from the first listed session that labeled it, so the
         #: order of ``sessions`` is its priority order.
         self.composite = composite
@@ -310,7 +312,9 @@ class _Package:
             # A model pass is never an independent annotator, whatever it is compared with.
             return "human_and_model" if "human" in kinds else "model_passes"
         annotators = {session["annotator_id"] for session in self.sessions}
-        return "two_pass" if len(annotators) == len(self.sessions) else "repeated_pass_same_annotator"
+        return (
+            "two_pass" if len(annotators) == len(self.sessions) else "repeated_pass_same_annotator"
+        )
 
     def source_of(self, item_id: str) -> tuple[dict[str, Any], dict[str, Any]] | None:
         """Composite: the first session, in priority order, holding a label for the item."""
@@ -324,7 +328,9 @@ class _Package:
         if len(self.session_ids) != 1:
             return []
         rows = self.annotations[self.session_ids[0]]
-        return [item_id for item_id in sorted(self.items) if self.ws.review_reasons(rows.get(item_id))]
+        return [
+            item_id for item_id in sorted(self.items) if self.ws.review_reasons(rows.get(item_id))
+        ]
 
     def incomplete_reasons(self) -> list[str]:
         if self.composite:
@@ -345,17 +351,25 @@ class _Package:
             return reasons
         design = self.design()
         allowed = self.config.freeze.allowed_designs
-        family = "single_annotator" if design in ("single_annotator", "single_model") else "two_pass"
+        family = (
+            "single_annotator" if design in ("single_annotator", "single_model") else "two_pass"
+        )
         if family not in allowed:
-            reasons.append(f"design {design!r} is not allowed by this task (allowed: {list(allowed)})")
+            reasons.append(
+                f"design {design!r} is not allowed by this task (allowed: {list(allowed)})"
+            )
         if len(self.sessions) == 2 and self.config.freeze.require_adjudication:
-            unresolved = [item_id for item_id in self.disagreements() if item_id not in self.adjudications]
+            unresolved = [
+                item_id for item_id in self.disagreements() if item_id not in self.adjudications
+            ]
             if unresolved:
                 reasons.append(
                     f"{len(unresolved)} disagreements not adjudicated (first: {unresolved[0]})"
                 )
         if len(self.sessions) == 1:
-            unreviewed = [item_id for item_id in self.review_queue() if item_id not in self.adjudications]
+            unreviewed = [
+                item_id for item_id in self.review_queue() if item_id not in self.adjudications
+            ]
             if unreviewed:
                 reasons.append(
                     f"{len(unreviewed)} items in the single-annotator re-read queue not reviewed "
@@ -373,7 +387,9 @@ class _Package:
         reasons: list[str] = []
         allowed = self.config.freeze.allowed_designs
         if COMPOSITE not in allowed:
-            reasons.append(f"design 'composite' is not allowed by this task (allowed: {list(allowed)})")
+            reasons.append(
+                f"design 'composite' is not allowed by this task (allowed: {list(allowed)})"
+            )
         uncovered = [item_id for item_id in sorted(self.items) if self.source_of(item_id) is None]
         if uncovered:
             reasons.append(
@@ -519,7 +535,9 @@ def _count_labels(config: TaskConfig, values: list[dict[str, Any] | None]) -> di
     return dict(sorted(counts.items()))
 
 
-def _session_summary(package: _Package, session: dict[str, Any], files: dict[str, str]) -> dict[str, Any]:
+def _session_summary(
+    package: _Package, session: dict[str, Any], files: dict[str, str]
+) -> dict[str, Any]:
     rows = package.annotations[session["session_id"]]
     labeled = [item_id for item_id, row in rows.items() if row["status"] == "labeled"]
     values = [_loads(rows[item_id]["value_json"]) for item_id in labeled]
@@ -590,7 +608,9 @@ def _write_package(
 
     def add(name: str, records: list[dict[str, Any]]) -> None:
         if name in outputs:
-            raise ExportError(f"two outputs resolve to the same file {name!r}; fix output templates")
+            raise ExportError(
+                f"two outputs resolve to the same file {name!r}; fix output templates"
+            )
         outputs[name] = jsonl_bytes(records)
         records_per_file[name] = len(records)
 
@@ -617,11 +637,15 @@ def _write_package(
         )
     disagreements_file: str | None = None
     if len(sessions) == 2:
-        disagreements_file = _file_name(config.output_files["disagreements_file"], task_id=config.task_id)
+        disagreements_file = _file_name(
+            config.output_files["disagreements_file"], task_id=config.task_id
+        )
         add(disagreements_file, package.disagreement_records())
     adjudication_summary: dict[str, Any] | None = None
     if package.adjudication_history:
-        adjudication_file = _file_name(config.output_files["adjudication_file"], task_id=config.task_id)
+        adjudication_file = _file_name(
+            config.output_files["adjudication_file"], task_id=config.task_id
+        )
         adjudication_history_file = _file_name(
             config.output_files["adjudication_history_file"], task_id=config.task_id
         )
@@ -725,7 +749,9 @@ def _write_package(
             for session in package.sessions
         ],
         "annotator_ids": sorted({session["annotator_id"] for session in package.sessions}),
-        "adjudicator_ids": sorted({row["adjudicator_id"] for row in package.adjudications.values()}),
+        "adjudicator_ids": sorted(
+            {row["adjudicator_id"] for row in package.adjudications.values()}
+        ),
         "adjudication": adjudication_summary,
         "disagreements": {
             "file": disagreements_file,
@@ -772,7 +798,8 @@ def _write_package(
             _write_atomic(out_dir / name, data)
         _write_atomic(manifest_path, stamped)
         _write_atomic(
-            manifest_path.with_name(manifest_path.name + ".sha256"), (_sha256(stamped) + "\n").encode()
+            manifest_path.with_name(manifest_path.name + ".sha256"),
+            (_sha256(stamped) + "\n").encode(),
         )
     except BaseException:
         if gold:
@@ -868,7 +895,9 @@ def freeze_gold(
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
 
 
 def _primary_of(manifest: dict[str, Any]) -> str:
@@ -891,12 +920,16 @@ def _recount(records: list[dict[str, Any]], label_key: str, task_type: Any) -> d
 
 def _renamer(renames: dict[str, str]) -> Any:
     def rename(value: dict[str, Any] | None) -> dict[str, Any] | None:
-        return None if value is None else {renames.get(key, key): item for key, item in value.items()}
+        return (
+            None if value is None else {renames.get(key, key): item for key, item in value.items()}
+        )
 
     return rename
 
 
-def _annotation_matches(record: dict[str, Any], image: dict[str, Any], renames: dict[str, str]) -> bool:
+def _annotation_matches(
+    record: dict[str, Any], image: dict[str, Any], renames: dict[str, str]
+) -> bool:
     """Does an exported pass record say exactly what the chain's final state says?"""
     if (
         record.get("status") != image.get("status")
@@ -911,7 +944,9 @@ def _annotation_matches(record: dict[str, Any], image: dict[str, Any], renames: 
     return all(record.get(key) == item for key, item in value.items())
 
 
-def _adjudication_matches(record: dict[str, Any], image: dict[str, Any], renames: dict[str, str]) -> bool:
+def _adjudication_matches(
+    record: dict[str, Any], image: dict[str, Any], renames: dict[str, str]
+) -> bool:
     rename = _renamer(renames)
     return (
         record.get("adjudicated") == rename(_loads(image.get("adjudicated_value_json")))
@@ -939,7 +974,11 @@ def _check_history(
     last: dict[str, dict[str, Any]] = {}
     for entry in history:
         last[str(entry["item_id"])] = entry
-    expected = {item: entry["after_sha256"] for item, entry in last.items() if entry.get("after") is not None}
+    expected = {
+        item: entry["after_sha256"]
+        for item, entry in last.items()
+        if entry.get("after") is not None
+    }
     actual = {str(record.get(id_key)): record.get("state_sha256") for record in records}
     if expected != actual:
         unmatched = sorted(set(expected) ^ set(actual))
@@ -971,28 +1010,38 @@ def _check_gold(
     renames: dict[str, str],
 ) -> list[str]:
     """Every gold label must follow from the pass and adjudication records it cites."""
-    keys = [renames.get(str(key), str(key)) for key in (manifest.get("disagreements") or {}).get("keys", [])]
+    keys = [
+        renames.get(str(key), str(key))
+        for key in (manifest.get("disagreements") or {}).get("keys", [])
+    ]
     sessions = {
         str(s.get("session_id")): {str(r.get(id_key)): r for r in parsed.get(s.get("file"), [])}
         for s in manifest.get("sessions") or []
     }
     adjudication = manifest.get("adjudication") or {}
     decisions = {str(r.get(id_key)): r for r in parsed.get(str(adjudication.get("file")), [])}
-    kinds = {str(s.get("session_id")): s.get("annotator_kind", "human") for s in manifest.get("sessions") or []}
+    kinds = {
+        str(s.get("session_id")): s.get("annotator_kind", "human")
+        for s in manifest.get("sessions") or []
+    }
     priority = [str(s) for s in (manifest.get("composite") or {}).get("priority") or []]
     wrong: list[str] = []
     for row in rows:
         item = str(row.get(id_key))
         top = {key: row.get(key) for key in keys}
         passes = row.get("passes") or []
-        pass_records = [sessions.get(str(entry.get("session_id")), {}).get(item) for entry in passes]
+        pass_records = [
+            sessions.get(str(entry.get("session_id")), {}).get(item) for entry in passes
+        ]
         if any(
             # A pass that never touched the item has no record; the gold row must then cite nothing.
             (entry.get("value") is not None or entry.get("state_sha256") is not None)
             if record is None
             else (
                 entry.get("state_sha256") != record.get("state_sha256")
-                or any(record.get(key) != value for key, value in (entry.get("value") or {}).items())
+                or any(
+                    record.get(key) != value for key, value in (entry.get("value") or {}).items()
+                )
             )
             for entry, record in zip(passes, pass_records)
         ):
@@ -1027,7 +1076,11 @@ def _check_gold(
         elif source == "single_annotator":
             ok = len(subsets) == 1 and subsets[0] == top
         elif source == UNRESOLVED:
-            ok = len(subsets) == 2 and subsets[0] != subsets[1] and all(v is None for v in top.values())
+            ok = (
+                len(subsets) == 2
+                and subsets[0] != subsets[1]
+                and all(v is None for v in top.values())
+            )
         else:
             ok = False
         if not ok:
@@ -1055,7 +1108,9 @@ def _check_exclusions(
     for group in section.get("groups") or []:
         ids = [str(item) for item in group.get("item_ids") or []]
         if len(set(ids)) != len(ids) or len(ids) != group.get("items"):
-            errors.append(f"FAIL_EXCLUSION: group {group.get('status')} item count differs from its ids")
+            errors.append(
+                f"FAIL_EXCLUSION: group {group.get('status')} item count differs from its ids"
+            )
         for item_id in ids:
             expected.setdefault(item_id, []).append(str(group.get("status")))
     expected = {item_id: sorted(statuses) for item_id, statuses in expected.items()}
@@ -1065,7 +1120,9 @@ def _check_exclusions(
         or section.get("excluded_items") != len(expected)
         or section.get("metric_eligible_items") != (population or 0) - len(expected)
     ):
-        errors.append("FAIL_EXCLUSION: excluded and metric-eligible counts do not add up to the population")
+        errors.append(
+            "FAIL_EXCLUSION: excluded and metric-eligible counts do not add up to the population"
+        )
 
     def carried(name: str | None, *, required: bool) -> list[dict[str, Any]]:
         records = parsed.get(str(name), [])
@@ -1084,22 +1141,34 @@ def _check_exclusions(
 
     for summary in manifest.get("sessions") or []:
         records = carried(summary.get("file"), required=True)
-        eligible = sum(1 for r in records if r.get("status") == "labeled" and str(r.get(id_key)) not in expected)
+        eligible = sum(
+            1
+            for r in records
+            if r.get("status") == "labeled" and str(r.get(id_key)) not in expected
+        )
         if "labeled_metric_eligible" in summary and eligible != summary["labeled_metric_eligible"]:
-            errors.append(f"FAIL_COUNT: session {summary.get('session_id')} metric-eligible count differs")
+            errors.append(
+                f"FAIL_COUNT: session {summary.get('session_id')} metric-eligible count differs"
+            )
     disagreements = manifest.get("disagreements") or {}
     if disagreements.get("file"):
         records = carried(disagreements["file"], required=True)
         eligible = sum(1 for r in records if str(r.get(id_key)) not in expected)
-        if len(records) != disagreements.get("count") or eligible != disagreements.get("metric_eligible"):
-            errors.append("FAIL_COUNT: disagreement counts recomputed from the file differ from the manifest")
+        if len(records) != disagreements.get("count") or eligible != disagreements.get(
+            "metric_eligible"
+        ):
+            errors.append(
+                "FAIL_COUNT: disagreement counts recomputed from the file differ from the manifest"
+            )
     carried((manifest.get("adjudication") or {}).get("file"), required=False)
     gold = manifest.get("gold") or {}
     if gold.get("file") in parsed:
         rows = carried(gold["file"], required=True)
         missing = sorted(set(expected) - {str(r.get(id_key)) for r in rows})
         if missing:
-            errors.append(f"FAIL_EXCLUSION: excluded items missing from the gold file (first: {missing[0]})")
+            errors.append(
+                f"FAIL_EXCLUSION: excluded items missing from the gold file (first: {missing[0]})"
+            )
         eligible_rows = [r for r in rows if str(r.get(id_key)) not in expected]
         recounted = _recount(eligible_rows, label_key, manifest.get("task_type"))
         if len(eligible_rows) != gold.get("metric_eligible_items") or recounted != gold.get(
@@ -1115,7 +1184,7 @@ def _package_root(package_dir: Path, manifest: dict[str, Any]) -> Path:
     if isinstance(relative, str) and relative and not Path(relative).is_absolute():
         parts = Path(relative).parts
         here = package_dir.parts
-        if len(here) > len(parts) and [os.path.normcase(p) for p in here[-len(parts):]] == [
+        if len(here) > len(parts) and [os.path.normcase(p) for p in here[-len(parts) :]] == [
             os.path.normcase(p) for p in parts
         ]:
             return Path(*here[: -len(parts)])
@@ -1203,10 +1272,14 @@ def verify_package(
         if "annotator_kind" in summary and summary["annotator_kind"] != annotator_kind(
             str(summary.get("annotator_id"))
         ):
-            errors.append(f"FAIL_PROVENANCE: session {summary.get('session_id')} misstates its annotator kind")
+            errors.append(
+                f"FAIL_PROVENANCE: session {summary.get('session_id')} misstates its annotator kind"
+            )
         name, history_name = summary.get("file"), summary.get("history_file")
         if name not in parsed or history_name not in parsed:
-            errors.append(f"FAIL_MISSING: session {summary.get('session_id')} files are not listed outputs")
+            errors.append(
+                f"FAIL_MISSING: session {summary.get('session_id')} files are not listed outputs"
+            )
             continue
         history = parsed[history_name]
         errors.extend(
@@ -1221,8 +1294,12 @@ def verify_package(
             )
         )
         head = history[-1].get("entry_sha256") if history else None
-        if head != summary.get("history_head_sha256") or len(history) != summary.get("history_entries"):
-            errors.append(f"FAIL_CHAIN: session {summary['session_id']}: chain head differs from the manifest")
+        if head != summary.get("history_head_sha256") or len(history) != summary.get(
+            "history_entries"
+        ):
+            errors.append(
+                f"FAIL_CHAIN: session {summary['session_id']}: chain head differs from the manifest"
+            )
         labeled = [r for r in parsed[name] if r.get("status") == "labeled"]
         counts = _recount(labeled, label_key, manifest.get("task_type"))
         if counts != summary.get("label_counts") or len(labeled) != summary.get("labeled"):
@@ -1247,7 +1324,9 @@ def verify_package(
                     renames,
                 )
             )
-            if history and history[-1].get("entry_sha256") != adjudication.get("history_head_sha256"):
+            if history and history[-1].get("entry_sha256") != adjudication.get(
+                "history_head_sha256"
+            ):
                 errors.append("FAIL_CHAIN: adjudication chain head differs from the manifest")
         else:
             errors.append("FAIL_MISSING: adjudication files are not listed outputs")
@@ -1269,19 +1348,31 @@ def verify_package(
                 errors.append("FAIL_GOLD: a gold record has no label")
             if _recount(rows, label_key, manifest.get("task_type")) != gold.get("label_counts"):
                 errors.append("FAIL_COUNT: gold label counts recomputed from the file differ")
-            sources = dict(sorted(Counter(r.get("label_source_kind", "passes") for r in rows).items()))
+            sources = dict(
+                sorted(Counter(r.get("label_source_kind", "passes") for r in rows).items())
+            )
             if "label_sources" in gold and sources != gold["label_sources"]:
-                errors.append("FAIL_COUNT: gold label sources (human/model) recomputed from the file differ")
-            if any(r.get("label_source_kind") == "model" for r in rows) and not manifest.get("model_annotation"):
-                errors.append("FAIL_PROVENANCE: model-sourced gold labels in a package that declares none")
+                errors.append(
+                    "FAIL_COUNT: gold label sources (human/model) recomputed from the file differ"
+                )
+            if any(r.get("label_source_kind") == "model" for r in rows) and not manifest.get(
+                "model_annotation"
+            ):
+                errors.append(
+                    "FAIL_PROVENANCE: model-sourced gold labels in a package that declares none"
+                )
             errors.extend(_check_gold(rows, manifest, parsed, id_key, renames))
         if manifest.get("completion_state") != "COMPLETE":
             errors.append("FAIL_GOLD: a gold freeze must be COMPLETE")
     errors.extend(_check_exclusions(manifest, parsed, id_key, label_key))
     definition_history = manifest.get("definition_history") or []
     errors.extend(verify_definition_chain(definition_history, "manifest definition history"))
-    if definition_history and definition_history[-1].get("new_sha256") != manifest.get("task_definition_sha256"):
-        errors.append("FAIL_PROVENANCE: the definition history does not end at the manifest's task definition")
+    if definition_history and definition_history[-1].get("new_sha256") != manifest.get(
+        "task_definition_sha256"
+    ):
+        errors.append(
+            "FAIL_PROVENANCE: the definition history does not end at the manifest's task definition"
+        )
 
     source = manifest.get("source") or {}
     base = root or _package_root(package_dir, manifest)

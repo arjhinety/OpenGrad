@@ -23,6 +23,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
+from opengrad.hashing import sha256_file as sha256
+
 ROOT = Path(__file__).resolve().parents[1]
 BASE_MODEL = "Qwen/Qwen3.5-2B"
 BASE_REVISION = "15852e8c16360a2fea060d615a32b45270f8a8fc"
@@ -36,14 +38,6 @@ TARGETS = {"CALL": 300, "CLARIFY": 200, "UNSUPPORTED": 200, "ANSWER": 100}
 MAX_CANDIDATES_PER_CLASS = 1600
 MAX_NEW_TOKENS = 128
 BATCH_SIZE = 32
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def parse_json(value: Any) -> Any:

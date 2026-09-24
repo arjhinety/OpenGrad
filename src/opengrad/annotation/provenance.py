@@ -19,6 +19,8 @@ import hashlib
 import json
 from typing import Any
 
+from opengrad.hashing import sha256_text
+
 #: Fields covered by an annotation-log entry hash.
 ANNOTATION_ENTRY_FIELDS = (
     "task_id",
@@ -68,19 +70,23 @@ def canonical(value: Any) -> str:
 def state_sha256(image: dict[str, Any] | None) -> str | None:
     if image is None:
         return None
-    return hashlib.sha256(canonical(image).encode("utf-8")).hexdigest()
+    return sha256_text(canonical(image))
 
 
 def entry_sha256(entry: dict[str, Any], fields: tuple[str, ...]) -> str:
-    return hashlib.sha256(canonical({key: entry.get(key) for key in fields}).encode("utf-8")).hexdigest()
+    return sha256_text(canonical({key: entry.get(key) for key in fields}))
 
 
 def definition_sha(definition: Any) -> str:
     """Same digest as :meth:`TaskConfig.definition_sha256`, from a parsed definition."""
-    return hashlib.sha256(json.dumps(definition, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return hashlib.sha256(
+        json.dumps(definition, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
 
 
-def verify_definition_chain(entries: list[dict[str, Any]], label: str = "definition history") -> list[str]:
+def verify_definition_chain(
+    entries: list[dict[str, Any]], label: str = "definition history"
+) -> list[str]:
     """Each entry must hash to itself, link to the one before, start where the previous one ended, and
     carry definitions whose hashes are the ones it names."""
     errors: list[str] = []
@@ -91,20 +97,24 @@ def verify_definition_chain(entries: list[dict[str, Any]], label: str = "definit
         if entry_sha256(entry, DEFINITION_ENTRY_FIELDS) != entry.get("entry_sha256"):
             errors.append(f"FAIL_CHAIN: {where}: entry_sha256 does not match its contents")
         if entry.get("prev_entry_sha256") != previous_entry:
-            errors.append(f"FAIL_CHAIN: {where}: prev_entry_sha256 does not link to the previous entry")
+            errors.append(
+                f"FAIL_CHAIN: {where}: prev_entry_sha256 does not link to the previous entry"
+            )
         if previous_definition is not None and entry.get("previous_sha256") != previous_definition:
-            errors.append(f"FAIL_CHAIN: {where}: starts from a definition the previous entry did not end at")
+            errors.append(
+                f"FAIL_CHAIN: {where}: starts from a definition the previous entry did not end at"
+            )
         for side in ("previous", "new"):
             if definition_sha(entry.get(f"{side}_definition")) != entry.get(f"{side}_sha256"):
-                errors.append(f"FAIL_CHAIN: {where}: the {side} definition does not hash to {side}_sha256")
+                errors.append(
+                    f"FAIL_CHAIN: {where}: the {side} definition does not hash to {side}_sha256"
+                )
         previous_entry = entry.get("entry_sha256")
         previous_definition = entry.get("new_sha256")
     return errors
 
 
-def verify_chain(
-    entries: list[dict[str, Any]], fields: tuple[str, ...], label: str
-) -> list[str]:
+def verify_chain(entries: list[dict[str, Any]], fields: tuple[str, ...], label: str) -> list[str]:
     """Re-derive every state hash, entry hash and link. ``entries`` must be in log order.
 
     Each entry needs ``before``/``after`` as parsed images (or None) alongside the hashed fields.
@@ -119,7 +129,9 @@ def verify_chain(
         if state_sha256(entry.get("after")) != entry.get("after_sha256"):
             errors.append(f"FAIL_CHAIN: {where}: after-state does not match after_sha256")
         if entry.get("prev_entry_sha256") != previous:
-            errors.append(f"FAIL_CHAIN: {where}: prev_entry_sha256 does not link to the previous entry")
+            errors.append(
+                f"FAIL_CHAIN: {where}: prev_entry_sha256 does not link to the previous entry"
+            )
         if entry_sha256(entry, fields) != entry.get("entry_sha256"):
             errors.append(f"FAIL_CHAIN: {where}: entry_sha256 does not match its contents")
         reverts = entry.get("reverts_entry_sha256")

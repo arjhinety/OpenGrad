@@ -22,7 +22,6 @@ labels or rationales**: Claude, who runs this, builds the classifier these label
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import shutil
@@ -45,6 +44,7 @@ from opengrad.annotation.model_batch import (
     write_batch,
 )
 from opengrad.annotation.service import Workspace
+from opengrad.hashing import sha256_bytes
 from opengrad.registry.provenance import portable_path
 
 #: Handed to CLIs that take an instruction argument beside standard input.
@@ -100,16 +100,19 @@ ANNOTATORS: dict[str, dict[str, Any]] = {
         "executable": "cline",
         # --json: the text output interleaves terminal colour codes with the answer; the final
         # ``run_result`` event carries the plain final text and the model that ran.
-        "argv": ["-m", "cline-pass/deepseek-v4.1-flash", "--auto-approve", "false", "--json", STDIN_POINTER],
+        "argv": [
+            "-m",
+            "cline-pass/deepseek-v4.1-flash",
+            "--auto-approve",
+            "false",
+            "--json",
+            STDIN_POINTER,
+        ],
         "input": "stdin",
         "output": "cline_json",
         "version_argv": ["--version"],
     },
 }
-
-
-def sha256_bytes(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
 
 
 def extract_answers(text: str, item_ids: list[str]) -> list[dict[str, Any]] | None:
@@ -131,7 +134,9 @@ def extract_answers(text: str, item_ids: list[str]) -> list[dict[str, Any]] | No
         if (
             isinstance(value, list)
             and value
-            and all(isinstance(entry, dict) and str(entry.get("item_id")) in wanted for entry in value)
+            and all(
+                isinstance(entry, dict) and str(entry.get("item_id")) in wanted for entry in value
+            )
         ):
             best = value
             index = text.find("[", end)
@@ -197,7 +202,9 @@ def run_once(
     except subprocess.TimeoutExpired as exc:
         exit_code, stdout, stderr = "timeout", exc.stdout or b"", exc.stderr or b""
     ended = time.time()
-    created = sorted(path.name for path in workdir.iterdir() if not (by_file and path.name == INPUT_FILE))
+    created = sorted(
+        path.name for path in workdir.iterdir() if not (by_file and path.name == INPUT_FILE)
+    )
     last_message = last.read_bytes() if last.is_file() else b""
     shutil.rmtree(workdir, ignore_errors=True)
     last.unlink(missing_ok=True)
@@ -235,15 +242,22 @@ def final_text(spec: dict[str, Any], stdout: bytes, last_message: bytes) -> dict
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("task", help="task id, e.g. pdet-coverage-v1")
     parser.add_argument("--annotator", required=True, choices=sorted(ANNOTATORS))
     parser.add_argument("--size", type=int, default=20)
-    parser.add_argument("--max-batches", type=int, default=0, help="0 = until every item is labelled")
+    parser.add_argument(
+        "--max-batches", type=int, default=0, help="0 = until every item is labelled"
+    )
     parser.add_argument("--attempts", type=int, default=3)
     parser.add_argument("--timeout", type=int, default=3600, help="seconds per CLI run")
     parser.add_argument(
-        "--retry-wait", type=int, default=90, help="seconds to wait before retrying (network drops are common)"
+        "--retry-wait",
+        type=int,
+        default=90,
+        help="seconds to wait before retrying (network drops are common)",
     )
     args = parser.parse_args(argv)
 
@@ -262,7 +276,9 @@ def main(argv: list[str] | None = None) -> int:
     while not args.max_batches or done_batches < args.max_batches:
         workspace = Workspace.open(config, state_db=state_db)
         try:
-            prepared = [p for p in batch_dir.glob("batch-*.json") if p.stem[len("batch-") :].isdigit()]
+            prepared = [
+                p for p in batch_dir.glob("batch-*.json") if p.stem[len("batch-") :].isdigit()
+            ]
             batch = prepare_batch(
                 workspace,
                 spec["session"],
@@ -273,7 +289,9 @@ def main(argv: list[str] | None = None) -> int:
             )
             if not batch["item_ids"]:
                 progress = workspace.progress(spec["session"])
-                print(f"done      every item is labelled in {spec['session']} ({progress['completed']}/{progress['total']})")
+                print(
+                    f"done      every item is labelled in {spec['session']} ({progress['completed']}/{progress['total']})"
+                )
                 return 0
             _json_path, md_path = write_batch(batch, config, batch_dir)
         finally:
@@ -328,7 +346,9 @@ def main(argv: list[str] | None = None) -> int:
             if attempt < args.attempts:
                 time.sleep(args.retry_wait)
         if not recorded:
-            print(f"stopped   batch {batch['batch_id']} was not recorded after {args.attempts} attempts")
+            print(
+                f"stopped   batch {batch['batch_id']} was not recorded after {args.attempts} attempts"
+            )
             return 1
         done_batches += 1
     return 0

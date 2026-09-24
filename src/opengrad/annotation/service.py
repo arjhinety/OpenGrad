@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any
 
 from opengrad.annotation.config import APP_VERSION, MODEL_PREFIX, TaskConfig, relaxation_problems
-from opengrad.annotation.items import canonical_json, get_path, load_source, project, sha256_file
+from opengrad.annotation.items import canonical_json, get_path, load_source, project
 from opengrad.annotation.provenance import (
     ADJUDICATION_ENTRY_FIELDS,
     ANNOTATION_ENTRY_FIELDS,
@@ -47,6 +47,7 @@ from opengrad.annotation.values import (
     is_unknown,
     normalize_value,
 )
+from opengrad.hashing import sha256_file
 
 IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 STATUS_FILTERS = ("all", "unlabeled", "completed", "skipped", "flagged", "unknown")
@@ -154,7 +155,9 @@ def metric_exclusion_problems(config: TaskConfig, item_ids: set[str]) -> list[st
     for group in config.metric_exclusions:
         unknown = [item_id for item_id in group.item_ids if item_id not in item_ids]
         if unknown:
-            problems.append(f"metric exclusion {group.status}: {len(unknown)} ids are not source items ({unknown[0]})")
+            problems.append(
+                f"metric exclusion {group.status}: {len(unknown)} ids are not source items ({unknown[0]})"
+            )
         if group.document is None:
             continue
         path = config.resolve(group.document)
@@ -194,7 +197,9 @@ def annotator_kind(annotator_id: str) -> str:
     return "model" if annotator_id.startswith(MODEL_PREFIX) else "human"
 
 
-def load_review_queues(config: TaskConfig, item_ids: set[str], source_sha256: str) -> dict[str, list[str]]:
+def load_review_queues(
+    config: TaskConfig, item_ids: set[str], source_sha256: str
+) -> dict[str, list[str]]:
     """name -> item ids in presentation order, for every queue the task pins.
 
     Only the ids are kept: a queue file's reasons name reference labels and must never reach a pass.
@@ -301,7 +306,9 @@ class Workspace:
         except BaseException:
             store.close()
             raise
-        workspace = cls(config=config, store=store, source_sha256=digest, _instructions=instructions)
+        workspace = cls(
+            config=config, store=store, source_sha256=digest, _instructions=instructions
+        )
         workspace._load_index()
         try:
             workspace._queues = load_review_queues(config, set(workspace._order), digest)
@@ -323,7 +330,9 @@ class Workspace:
         if existing["definition_sha256"] == config.definition_sha256():
             return
         stored = json.loads(existing["definition_json"])
-        changed = sorted(key for key, value in config.definition().items() if stored.get(key) != value)
+        changed = sorted(
+            key for key, value in config.definition().items() if stored.get(key) != value
+        )
         in_use = store.query(
             "SELECT (SELECT COUNT(*) FROM annotations WHERE task_id = ?) + "
             "(SELECT COUNT(*) FROM adjudications WHERE task_id = ?)",
@@ -505,7 +514,9 @@ class Workspace:
                 row = current.get(item_id)
                 actual = state_sha256(annotation_image(row))
                 if row is not None and row["state_sha256"] != actual:
-                    errors.append(f"FAIL_STATE: {session_id}/{item_id}: record does not hash to state_sha256")
+                    errors.append(
+                        f"FAIL_STATE: {session_id}/{item_id}: record does not hash to state_sha256"
+                    )
                 if expected.get(item_id) != actual:
                     errors.append(
                         f"FAIL_STATE: {session_id}/{item_id}: current record is not the last state "
@@ -533,7 +544,9 @@ class Workspace:
         errors.extend(verify_definition_chain(history))
         task = self.store.task(self.task_id)
         if history and task is not None and history[-1]["new_sha256"] != task["definition_sha256"]:
-            errors.append("FAIL_CHAIN: the task definition is not the one its definition history ends at")
+            errors.append(
+                "FAIL_CHAIN: the task definition is not the one its definition history ends at"
+            )
         return errors
 
     def item_view(self, session_id: str, item_id: str) -> dict[str, Any]:
@@ -664,7 +677,12 @@ class Workspace:
                 if item_id in annotations and annotations[item_id]["status"] == "labeled"
             )
             progress.append(
-                {"name": name, "total": len(order), "completed": done, "remaining": len(order) - done}
+                {
+                    "name": name,
+                    "total": len(order),
+                    "completed": done,
+                    "remaining": len(order) - done,
+                }
             )
         return progress
 
@@ -1047,7 +1065,10 @@ class Workspace:
                 for record in self.sessions()
             ],
             "freezes": [
-                {key: freeze[key] for key in ("sessions", "frozen_at", "manifest_path", "manifest_sha256")}
+                {
+                    key: freeze[key]
+                    for key in ("sessions", "frozen_at", "manifest_path", "manifest_sha256")
+                }
                 for freeze in self.store.freezes(self.task_id)
             ],
         }

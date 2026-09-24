@@ -22,7 +22,6 @@ to hashed files. Nothing here is human gold: the manifest says ``MODEL_REFERENCE
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from collections import Counter
@@ -30,6 +29,8 @@ from collections.abc import Mapping, Sequence
 from itertools import combinations
 from pathlib import Path
 from typing import Any
+
+from opengrad.hashing import sha256_bytes as _sha256
 
 ROOT = Path(__file__).resolve().parents[3]
 AMENDMENT = "study_002_prereg_v5"
@@ -88,7 +89,9 @@ def build_reference(
             continue
         item_id = str(record.get(item_key))
         if item_id not in votes:
-            raise ReferenceError(f"{annotator} labelled {item_id!r}, which is not an item of this task")
+            raise ReferenceError(
+                f"{annotator} labelled {item_id!r}, which is not an item of this task"
+            )
         if record.get("status") != "labeled" or record.get(LABEL_KEY) is None:
             continue
         if annotator in votes[item_id]:
@@ -136,17 +139,17 @@ def build_reference(
             for annotator in ANNOTATORS
         },
         "dissent_by_annotator": dict(
-            Counter(ref["dissenting_annotator"] for ref in references if ref["dissenting_annotator"])
+            Counter(
+                ref["dissenting_annotator"] for ref in references if ref["dissenting_annotator"]
+            )
         ),
     }
     return references, summary
 
 
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
-def load_package(task: str, package: Path, root: Path = ROOT) -> tuple[dict[str, Any], list[dict[str, Any]], list[str]]:
+def load_package(
+    task: str, package: Path, root: Path = ROOT
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[str]]:
     """A verified export package of ``task``: its manifest, the three annotators' records and the item ids."""
     from opengrad.annotation.config import load_task_config
     from opengrad.annotation.export import verify_package
@@ -156,7 +159,9 @@ def load_package(task: str, package: Path, root: Path = ROOT) -> tuple[dict[str,
     result, verification = verify_package(package, root, require_source=True)
     errors = result.all_errors()
     if errors or verification.get("status") != "PASS":
-        raise ReferenceError("the package failed verification:\n  - " + "\n  - ".join(map(str, errors[:20])))
+        raise ReferenceError(
+            "the package failed verification:\n  - " + "\n  - ".join(map(str, errors[:20]))
+        )
     manifest = json.loads(package.read_text(encoding="utf-8"))
     if manifest.get("task_id") != task:
         raise ReferenceError(f"the package is for {manifest.get('task_id')!r}, not {task!r}")
@@ -168,7 +173,9 @@ def load_package(task: str, package: Path, root: Path = ROOT) -> tuple[dict[str,
         if annotator not in sessions:
             raise ReferenceError(f"the package has no session of {annotator}")
         path = package.parent / sessions[annotator]["file"]
-        records.extend(json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line)
+        records.extend(
+            json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line
+        )
     return manifest, records, [item.item_id for item in items]
 
 
@@ -182,7 +189,8 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
     config = load_task_config(root / "configs" / "annotation" / f"{task}.yaml", root=root)
     declared = {item.annotator_id: item for item in config.model_annotators}
     payload = b"".join(
-        (json.dumps(ref, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8") for ref in references
+        (json.dumps(ref, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
+        for ref in references
     )
     amendment, amendment_document, output_dir = TASK_SPECS[task]
     out = root / output_dir
@@ -209,30 +217,44 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
             }
             for annotator in ANNOTATORS
         ],
-        "population_sha256": manifest.get("source", {}).get("sha256") or manifest.get("source_sha256"),
+        "population_sha256": manifest.get("source", {}).get("sha256")
+        or manifest.get("source_sha256"),
         "package_manifest": package.resolve().relative_to(root.resolve()).as_posix(),
         "package_manifest_sha256": _sha256(package.read_bytes()),
         "reference_file": reference_path.name,
         "reference_sha256": _sha256(payload),
         "summary": summary,
     }
-    manifest_bytes = (json.dumps(reference_manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    manifest_bytes = (json.dumps(reference_manifest, indent=2, sort_keys=True) + "\n").encode(
+        "utf-8"
+    )
     for path, data in ((reference_path, payload), (manifest_path, manifest_bytes)):
         if path.exists() and path.read_bytes() != data:
-            raise ReferenceError(f"{path} exists with different content; a reference is never overwritten")
+            raise ReferenceError(
+                f"{path} exists with different content; a reference is never overwritten"
+            )
         path.write_bytes(data)
     return reference_manifest
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--task", required=True, choices=TASKS)
-    parser.add_argument("--package", required=True, type=Path, help="a verified annotation package manifest")
+    parser.add_argument(
+        "--package", required=True, type=Path, help="a verified annotation package manifest"
+    )
     parser.add_argument("--root", type=Path, default=ROOT)
     args = parser.parse_args(argv)
     built = build(args.task, args.package, args.root)
     # Counts only: no item id, label per item or item text is printed.
-    print(json.dumps({"task_id": built["task_id"], "status": built["status"], "summary": built["summary"]}, indent=2))
+    print(
+        json.dumps(
+            {"task_id": built["task_id"], "status": built["status"], "summary": built["summary"]},
+            indent=2,
+        )
+    )
     return 0
 
 

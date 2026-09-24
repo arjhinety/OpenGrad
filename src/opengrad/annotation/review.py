@@ -24,12 +24,9 @@ from opengrad.annotation.service import (
     WorkspaceError,
     annotator_kind,
 )
+from opengrad.hashing import sha256_text as _digest
 
 COMPOSITE_RULE = "each item takes its label from the first session, in this order, that labeled it"
-
-
-def _digest(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _labeled(workspace: Workspace, sessions: list[str]) -> dict[str, dict[str, dict[str, Any]]]:
@@ -150,7 +147,11 @@ def build_review_queue(
 
     def add(item_id: str, reason: dict[str, Any]) -> None:
         reasons.setdefault(item_id, []).append(
-            {**reason, "session_id": sources[item_id]["session_id"], "annotator_kind": sources[item_id]["kind"]}
+            {
+                **reason,
+                "session_id": sources[item_id]["session_id"],
+                "annotator_kind": sources[item_id]["kind"],
+            }
         )
 
     for item_id in workspace.item_ids:
@@ -198,7 +199,9 @@ def build_review_queue(
                     "session_id": record["session_id"],
                     "annotator_id": record["annotator_id"],
                     "annotator_kind": annotator_kind(record["annotator_id"]),
-                    "labeled_items": sum(1 for s in sources.values() if s["session_id"] == record["session_id"]),
+                    "labeled_items": sum(
+                        1 for s in sources.values() if s["session_id"] == record["session_id"]
+                    ),
                     "history_head_sha256": _history_head(workspace, record["session_id"]),
                 }
                 for record in records
@@ -208,11 +211,19 @@ def build_review_queue(
         "task_definition_sha256": config.definition_sha256(),
         "criteria": [
             *(
-                [{"criterion": "flagged", "rule": "the record the composite label comes from is flagged uncertain"}]
+                [
+                    {
+                        "criterion": "flagged",
+                        "rule": "the record the composite label comes from is flagged uncertain",
+                    }
+                ]
                 if flagged
                 else []
             ),
-            *({"criterion": "label", "label": label, "rule": "the composite label is this label"} for label in labels),
+            *(
+                {"criterion": "label", "label": label, "rule": "the composite label is this label"}
+                for label in labels
+            ),
             *(
                 {
                     "criterion": "sample",
@@ -249,7 +260,9 @@ def write_review_queue(queue: dict[str, Any], path: Path) -> str:
     if path.exists():
         if path.read_bytes() == data:
             return digest
-        raise WorkspaceError(f"{path} exists with different contents; a queue file is never overwritten")
+        raise WorkspaceError(
+            f"{path} exists with different contents; a queue file is never overwritten"
+        )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
     path.with_name(path.name + ".sha256").write_bytes(f"{digest}  {path.name}\n".encode())
