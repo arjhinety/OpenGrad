@@ -60,12 +60,13 @@ def test_provenance_fails_closed_outside_a_repository(tmp_path: Path):
 
 
 def _contract_with_registry(monkeypatch, entry: dict) -> tuple[bool, str]:
-    from opengrad import readiness as readiness_module
+    # Patched where `_training_data_contract` looks it up (split out of readiness.py, 2026-09-24).
+    from opengrad import readiness_contracts
 
     monkeypatch.setattr(
-        readiness_module, "_read_dataset_registry", lambda root: {"canonical_v1": entry}
+        readiness_contracts, "_read_dataset_registry", lambda root: {"canonical_v1": entry}
     )
-    return readiness_module._training_data_contract(
+    return readiness_contracts._training_data_contract(
         ROOT,
         {"datasets": {"manifest_ids": ["canonical_v1"], "hashes": {"canonical_v1": "b" * 64}}},
     )

@@ -29,7 +29,7 @@ Every gate is written so each of those is impossible.
    assertions executed (`src/opengrad/verification/accounting.py`). Report an execution census. BLOCKED
    (could not check) is never success.
 5. **Evidence, not intent.** A gate reading a status file accepts `PASS` only with an evidence path that exists
-   and the current policy version. `model_components_validation` in `src/opengrad/readiness.py` is the pattern.
+   and the current policy version. `model_components_validation` (`src/opengrad/readiness_states.py`) is the pattern.
 6. **A wrapping gate reads the wrapped decision.** `study_002_gate_v1` contract 1 read seven of v5's dimensions
    and never its `decision`, so it passed candidates v5 rejected (`reports/ERRATA.md` §19). A gate built on a
    policy fails whenever that policy does not promote, and a test asserts it over mutated inputs.
@@ -53,7 +53,7 @@ Every gate is written so each of those is impossible.
 | Quantization preservation | `src/opengrad/promotion/quantization.py` (`quantization_preservation_v1`) | `release/gguf/quantization_preservation_v1.json` |
 | Promotion artifacts | `src/opengrad/promotion/artifacts.py` | `runs/<id>/promotion/` |
 | Readiness (baseline, SFT, DPO) | `src/opengrad/readiness.py` | `opengrad readiness <config> --json` |
-| Pre-training component gate | `_model_components_state` in `src/opengrad/readiness.py` | `reports/training/model-components-validation.json` |
+| Pre-training component gate | `_model_components_state` in `src/opengrad/readiness_states.py` | `reports/training/model-components-validation.json` |
 | Stage authorization | `src/opengrad/experiments/gates.py` | — |
 
 ## Promote and reject

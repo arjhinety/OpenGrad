@@ -37,6 +37,7 @@ from typing import Any
 
 from opengrad.training.determinism import apply_determinism, seed_everything
 from opengrad.training.dpo_runner import (
+    DPOSettings,
     PreferenceDataError,
     dpo_loss,
     encode_pair,
@@ -155,36 +156,10 @@ def _checkpoint_identity(path: Path) -> dict[str, Any]:
     return {"path": str(path), "model_sha256": digest.hexdigest(), "bytes": weights.stat().st_size}
 
 
-def run_real_dpo(
-    *,
-    experiment_id: str,
-    experiment: dict[str, Any],
-    trainer_config: dict[str, Any],
-    output_dir: Path,
-    root: Path,
-) -> TrainingRunResult:
-    """The real GPU preference-optimization loop."""
-    import importlib
-
-    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
-    try:
-        torch = importlib.import_module("torch")
-        transformers = importlib.import_module("transformers")
-    except ImportError as exc:
-        raise TrainingConfigError(
-            "real DPO requires the training extra (torch, transformers)"
-        ) from exc
-
-    from opengrad.env_capture import tracked_tree_provenance
-    from opengrad.hardware.probe import probe_hardware
-
-    settings = resolve_dpo_settings(experiment, trainer_config)
-    model_spec = experiment.get("model") or {}
-    model_id = model_spec.get("model_id")
-    model_revision = model_spec.get("model_revision")
-    if not model_id or not model_revision:
-        raise TrainingConfigError("experiment.model must pin model_id and model_revision")
-
+def _dpo_resolve_checkpoints(
+    *, root: Path, settings: DPOSettings, trainer_config: dict[str, Any]
+) -> tuple[Any, Any, Any, Any, Any]:
+    """The initial and reference checkpoints, each checked against its pinned identity."""
     initial_checkpoint = _project_path(
         root, trainer_config.get("initial_checkpoint"), "trainer.initial_checkpoint"
     )
@@ -212,42 +187,27 @@ def run_real_dpo(
         raise TrainingConfigError(
             "reference checkpoint must match the initial M1 policy checkpoint for this calibration run"
         )
-
-    preference_path = preference_path_for(experiment, root)
-    raw_pairs = load_preference_pairs(preference_path, min_records=8)
-    identity = preference_dataset_identity(preference_path)
-
-    hardware = probe_hardware()
-    if not hardware.gpu_available:
-        raise TrainingConfigError("real DPO requires an accelerator; none detected")
-
-    provenance = tracked_tree_provenance(root)
-    events_path = output_dir / "events.jsonl"
-    if events_path.exists():
-        events_path.unlink()
-
-    def emit(event: str, **payload: Any) -> None:
-        write_events(
-            events_path, {"event": event, "timestamp": time.time(), "algorithm": "dpo", **payload}
-        )
-
-    emit(
-        "run_start",
-        experiment_id=experiment_id,
-        model_id=model_id,
-        model_revision=model_revision,
-        git_commit=provenance["sha"],
-        git_dirty=provenance["dirty"],
-        settings=settings.to_dict(),
-        preference_dataset=identity,
-        parent_checkpoint_id=parent_checkpoint_id,
-        initial_checkpoint=initial_identity,
-        reference_checkpoint=reference_identity,
-    )
-    (output_dir / "preference_dataset.json").write_text(
-        json.dumps(identity, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    return (
+        initial_checkpoint,
+        initial_identity,
+        parent_checkpoint_id,
+        reference_checkpoint,
+        reference_identity,
     )
 
+
+def _dpo_build_models(
+    *,
+    emit: Any,
+    initial_checkpoint: Any,
+    model_id: Any,
+    model_revision: Any,
+    reference_checkpoint: Any,
+    settings: DPOSettings,
+    torch: Any,
+    transformers: Any,
+) -> tuple[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]:
+    """Determinism, tokenizer, the policy with its components, the frozen reference, optimizer and scheduler."""
     # Before the model exists: cuBLAS reads its workspace setting when its first handle is made.
     determinism_record = apply_determinism(settings.determinism, torch)
     determinism_record["seeded"] = seed_everything(settings.seed, settings.determinism, torch)
@@ -263,12 +223,9 @@ def run_real_dpo(
     if pad_token_id is None:
         raise TrainingConfigError("tokenizer exposes neither pad_token_id nor eos_token_id")
 
-    from opengrad.training.model_components import component_lineage
     from opengrad.training.mtp import (
-        IGNORE_INDEX,
         FinalHiddenCapture,
         load_training_model,
-        mtp_loss,
     )
 
     components = settings.model_components
@@ -317,7 +274,25 @@ def run_real_dpo(
             f"trainer.scheduler must be one of cosine, constant; got {settings.scheduler!r}"
         )
     device = next(model.parameters()).device
+    return (
+        capture,
+        components,
+        device,
+        loaded,
+        model,
+        mtp_layer,
+        optimizer,
+        pad_token_id,
+        reference,
+        scheduler,
+        tokenizer,
+    )
 
+
+def _dpo_encode_pairs(
+    *, emit: Any, experiment: dict[str, Any], raw_pairs: Any, settings: DPOSettings, tokenizer: Any
+) -> tuple[Any, Any]:
+    """Tokenize the preference pairs under the resolved prompt format; too few usable pairs refuse to train."""
     prompt_format = resolve_prompt_format(experiment)
     emit("prompt_format", prompt_format=prompt_format)
 
@@ -344,6 +319,163 @@ def run_real_dpo(
             "refusing to train a preference objective on a handful of examples"
         )
     emit("pairs_ready", usable_pairs=len(encoded), skipped_pairs=rejected_pairs)
+    return encoded, rejected_pairs
+
+
+def _dpo_finish(
+    *,
+    capture: Any,
+    components_record: Any,
+    created: list[str],
+    emit: Any,
+    experiment: dict[str, Any],
+    history: list[dict[str, Any]],
+    identity: Any,
+    model: Any,
+    optimizer: Any,
+    output_dir: Path,
+    parent_checkpoint_id: Any,
+    provenance: Any,
+    scheduler: Any,
+    settings: DPOSettings,
+    started: Any,
+    tokenizer: Any,
+    world: dict[str, Any],
+) -> tuple[Any, Any]:
+    """Final checkpoint, the DPO log, the capture hook removed, and run_end."""
+    final = _save_dpo_checkpoint(
+        model,
+        tokenizer,
+        output_dir,
+        world,
+        settings,
+        experiment,
+        identity,
+        provenance["sha"],
+        optimizer=optimizer,
+        scheduler=scheduler,
+        parent_checkpoint_id=parent_checkpoint_id,
+        model_components=components_record(),
+    )
+    if not created or created[-1] != str(final):
+        created.append(str(final))
+
+    elapsed = time.monotonic() - started
+    (output_dir / "metrics" / "dpo_log.jsonl").parent.mkdir(parents=True, exist_ok=True)
+    (output_dir / "metrics" / "dpo_log.jsonl").write_text(
+        "".join(json.dumps(entry, sort_keys=True) + "\n" for entry in history), encoding="utf-8"
+    )
+    if capture is not None:
+        capture.remove()
+    emit("run_end", optimizer_step=world["optimizer_step"], final_checkpoint=str(final))
+    return elapsed, final
+
+
+def run_real_dpo(
+    *,
+    experiment_id: str,
+    experiment: dict[str, Any],
+    trainer_config: dict[str, Any],
+    output_dir: Path,
+    root: Path,
+) -> TrainingRunResult:
+    """The real GPU preference-optimization loop."""
+    import importlib
+
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+    try:
+        torch = importlib.import_module("torch")
+        transformers = importlib.import_module("transformers")
+    except ImportError as exc:
+        raise TrainingConfigError(
+            "real DPO requires the training extra (torch, transformers)"
+        ) from exc
+
+    from opengrad.env_capture import tracked_tree_provenance
+    from opengrad.hardware.probe import probe_hardware
+
+    settings = resolve_dpo_settings(experiment, trainer_config)
+    model_spec = experiment.get("model") or {}
+    model_id = model_spec.get("model_id")
+    model_revision = model_spec.get("model_revision")
+    if not model_id or not model_revision:
+        raise TrainingConfigError("experiment.model must pin model_id and model_revision")
+
+    (
+        initial_checkpoint,
+        initial_identity,
+        parent_checkpoint_id,
+        reference_checkpoint,
+        reference_identity,
+    ) = _dpo_resolve_checkpoints(root=root, settings=settings, trainer_config=trainer_config)
+
+    preference_path = preference_path_for(experiment, root)
+    raw_pairs = load_preference_pairs(preference_path, min_records=8)
+    identity = preference_dataset_identity(preference_path)
+
+    hardware = probe_hardware()
+    if not hardware.gpu_available:
+        raise TrainingConfigError("real DPO requires an accelerator; none detected")
+
+    provenance = tracked_tree_provenance(root)
+    events_path = output_dir / "events.jsonl"
+    if events_path.exists():
+        events_path.unlink()
+
+    def emit(event: str, **payload: Any) -> None:
+        write_events(
+            events_path, {"event": event, "timestamp": time.time(), "algorithm": "dpo", **payload}
+        )
+
+    emit(
+        "run_start",
+        experiment_id=experiment_id,
+        model_id=model_id,
+        model_revision=model_revision,
+        git_commit=provenance["sha"],
+        git_dirty=provenance["dirty"],
+        settings=settings.to_dict(),
+        preference_dataset=identity,
+        parent_checkpoint_id=parent_checkpoint_id,
+        initial_checkpoint=initial_identity,
+        reference_checkpoint=reference_identity,
+    )
+    (output_dir / "preference_dataset.json").write_text(
+        json.dumps(identity, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    (
+        capture,
+        components,
+        device,
+        loaded,
+        model,
+        mtp_layer,
+        optimizer,
+        pad_token_id,
+        reference,
+        scheduler,
+        tokenizer,
+    ) = _dpo_build_models(
+        emit=emit,
+        initial_checkpoint=initial_checkpoint,
+        model_id=model_id,
+        model_revision=model_revision,
+        reference_checkpoint=reference_checkpoint,
+        settings=settings,
+        torch=torch,
+        transformers=transformers,
+    )
+    from opengrad.training.model_components import component_lineage
+    from opengrad.training.mtp import IGNORE_INDEX, mtp_loss
+
+    encoded, rejected_pairs = _dpo_encode_pairs(
+        emit=emit,
+        experiment=experiment,
+        raw_pairs=raw_pairs,
+        settings=settings,
+        tokenizer=tokenizer,
+    )
 
     world: dict[str, Any] = {
         "optimizer_step": 0,
@@ -491,31 +623,25 @@ def run_real_dpo(
                 created.append(str(path))
                 prune_checkpoints(output_dir / "checkpoints", settings.max_checkpoints)
 
-    final = _save_dpo_checkpoint(
-        model,
-        tokenizer,
-        output_dir,
-        world,
-        settings,
-        experiment,
-        identity,
-        provenance["sha"],
+    elapsed, final = _dpo_finish(
+        capture=capture,
+        components_record=components_record,
+        created=created,
+        emit=emit,
+        experiment=experiment,
+        history=history,
+        identity=identity,
+        model=model,
         optimizer=optimizer,
-        scheduler=scheduler,
+        output_dir=output_dir,
         parent_checkpoint_id=parent_checkpoint_id,
-        model_components=components_record(),
+        provenance=provenance,
+        scheduler=scheduler,
+        settings=settings,
+        started=started,
+        tokenizer=tokenizer,
+        world=world,
     )
-    if not created or created[-1] != str(final):
-        created.append(str(final))
-
-    elapsed = time.monotonic() - started
-    (output_dir / "metrics" / "dpo_log.jsonl").parent.mkdir(parents=True, exist_ok=True)
-    (output_dir / "metrics" / "dpo_log.jsonl").write_text(
-        "".join(json.dumps(entry, sort_keys=True) + "\n" for entry in history), encoding="utf-8"
-    )
-    if capture is not None:
-        capture.remove()
-    emit("run_end", optimizer_step=world["optimizer_step"], final_checkpoint=str(final))
 
     return TrainingRunResult(
         experiment_id=experiment_id,

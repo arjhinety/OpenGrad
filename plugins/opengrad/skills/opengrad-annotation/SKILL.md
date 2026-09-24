@@ -7,7 +7,8 @@ description: How to run and change OpenGrad's annotation system safely — the o
 
 The full guide is `docs/ANNOTATION_TOOL.md`. The P-DET task is `configs/annotation/pdet-v1.yaml`, with the model
 procedure in `configs/annotation/pdet-v1.model-procedure.md`. The Python side is `src/opengrad/annotation/`
-(stdlib server, SQLite store, export). The UI is `integrations/annotate-ui/` (Next.js static export that only
+(stdlib server, SQLite store, export; `config.py`/`config_types.py`, `service.py`/`service_support.py` and
+`export.py`/`export_common.py`/`export_verify.py` are split pairs, the first of each re-exporting the rest). The UI is `integrations/annotate-ui/` (Next.js static export that only
 renders).
 
 ## Hard rules

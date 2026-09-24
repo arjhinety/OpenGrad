@@ -166,3 +166,9 @@ check in [16](16-GPU-READINESS-GATE.md), not a nice-to-have.
 - **A safety-tuning or preference-optimization arm.** Anything that changes the harmlessness target
   rather than fixing a mislabelled contract is out of scope for a mechanism study and would make the
   intervention's target undefined.
+
+## Note on code citations (appended 2026-09-24)
+
+The `readiness.py` line ranges in the table above predate later edits and the 2026-09-24 split of that
+module. The model-revision, tokenizer and chat-template checks are `_model_identity_gates` in
+`src/opengrad/readiness.py`.

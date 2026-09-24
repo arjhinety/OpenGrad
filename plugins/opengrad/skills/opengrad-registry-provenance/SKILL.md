@@ -17,7 +17,8 @@ description: How OpenGrad's registries, provenance claims and written records st
 .venv/Scripts/opengrad-validate.exe      # same checks as `opengrad validate --json`; CI runs it
 ```
 
-- **Validation** lives in `src/opengrad/registry/validate.py`. That covers schema validity, revision pins,
+- **Validation** lives in `src/opengrad/registry/validate.py` (entry point, checks, `result_from`), with the
+  `validate_*` validators in `validators.py`. That covers schema validity, revision pins,
   `derived_from` citations and the publication revision chain (exactly one current Hub revision per
   repository).
 - **The validator must prove it ran.** It once exited 0 having checked nothing. A new check registers itself in

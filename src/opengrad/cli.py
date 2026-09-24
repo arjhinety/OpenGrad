@@ -83,15 +83,8 @@ def _evaluation_config_status(config_path: Path) -> str | None:
     return None
 
 
-def main() -> int:
-    if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
-        return benchmark_cli(sys.argv[2:])
-
-    if len(sys.argv) > 1 and sys.argv[1] == "results":
-        from opengrad.results.cli import results_cli
-
-        return results_cli(sys.argv[2:])
-
+def _build_parser() -> argparse.ArgumentParser:
+    """Every `opengrad` subcommand. `tests/skills` reads the `sub.add_parser(...)` calls here."""
     parser = argparse.ArgumentParser(prog="opengrad", description="OpenGrad Research Platform")
     sub = parser.add_subparsers(dest="command")
 
@@ -118,7 +111,9 @@ def main() -> int:
 
     sub.add_parser("benchmark", help="reproducible post-training benchmark system")
     # Dispatched before argparse (above); registered here so it is listed in --help.
-    sub.add_parser("results", help="derived result index: show, validate-registry, rebuild-registry")
+    sub.add_parser(
+        "results", help="derived result index: show, validate-registry, rebuild-registry"
+    )
 
     # validate-data
     val_data = sub.add_parser(
@@ -278,7 +273,9 @@ def main() -> int:
     ro_stat.add_argument("--json", action="store_true", help="emit JSON output")
 
     # Legacy CLI tools
-    data_audit = sub.add_parser("data-audit", help="behaviour-coverage report over canonical records")
+    data_audit = sub.add_parser(
+        "data-audit", help="behaviour-coverage report over canonical records"
+    )
     _data_audit_arguments(data_audit)
     corpus_audit = sub.add_parser(
         "audit-corpus", help="strict semantic audit of canonical training records"
@@ -300,6 +297,202 @@ def main() -> int:
     )
     baseline.add_argument("--limit", type=int, help="evaluate only the first N held-out examples")
     baseline.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    return parser
+
+
+def _cmd_evaluate(args: argparse.Namespace, root: Path) -> int:
+    """Run a benchmark suite by name."""
+    runner = BenchmarkRunner(root)
+    allowed_suites = {
+        "smoke",
+        "tool_use_core",
+        "regression_core",
+        "agent_transfer",
+        "full_post_training",
+        "speculative_decoding",
+    }
+    if args.suite not in allowed_suites:
+        err = {
+            "code": "SUITE_NOT_FOUND",
+            "message": f"Suite must be one of: {', '.join(sorted(allowed_suites))}",
+        }
+        print(json.dumps(err) if args.json else f"Error: {err['message']}")
+        return 1
+    suite_path = root / "configs" / "benchmark_suites" / f"{args.suite}.yaml"
+    if not suite_path.is_file():
+        err = {"code": "SUITE_NOT_FOUND", "message": f"Suite not found: {args.suite}"}
+        print(json.dumps(err) if args.json else f"Error: {err['message']}")
+        return 1
+    res_suite = runner.run_suite(suite_path, dry_run=args.dry_run, limit=args.limit)
+    if args.json:
+        print(json.dumps(res_suite, indent=2))
+    else:
+        print(f"Evaluated suite '{args.suite}' across {res_suite['benchmarks_run']} benchmarks:")
+        for b_id, b_res in res_suite["results"].items():
+            acc = b_res.get("result", {}).get("overall_accuracy", 0.0)
+            print(f"  - {b_id:<24} {acc:.1f}%")
+    return 0
+
+
+def _cmd_failures(args: argparse.Namespace) -> int:
+    """Cluster a run's recorded failures into the taxonomy."""
+    r_dir = Path(args.run_dir)
+    fail_file = r_dir / "failures.json"
+    if not fail_file.exists():
+        err = {"code": "FAILURES_NOT_FOUND", "message": f"File not found: {fail_file}"}
+        print(json.dumps(err) if args.json else f"Error: {err['message']}")
+        return 1
+    fail_data = json.loads(fail_file.read_text(encoding="utf-8"))
+    raw_items = fail_data.get("failures", [])
+    analyzer = FailureAnalyzer()
+    clusters = analyzer.cluster(
+        [
+            FailureItem(
+                benchmark=f.get("benchmark", r_dir.name),
+                sample_id=str(f.get("task_id", f.get("sample_id", f"s_{i}"))),
+                prompt=str(f.get("input", f.get("prompt", ""))),
+                expected=f.get("expected"),
+                actual=f.get("parsed_output", f.get("actual")),
+                score=float(f.get("score", 0.0)),
+                failure_category=str(f.get("failure_category", "unknown")),
+                checkpoint_id="unknown",
+                experiment_id="unknown",
+            )
+            for i, f in enumerate(raw_items)
+        ]
+    )
+    if args.json:
+        print(
+            json.dumps(
+                {"total_clusters": len(clusters), "clusters": [c.to_dict() for c in clusters]},
+                indent=2,
+            )
+        )
+    else:
+        print(f"Failure Analysis: {len(raw_items)} failures in {len(clusters)} clusters\n")
+        for c in clusters:
+            print(f"- {c.category:<24} {c.count} failures ({c.percentage:.1f}%)")
+    return 0
+
+
+def _cmd_audit_corpus(args: argparse.Namespace) -> int:
+    """Validate canonical training records and summarise every failure reason."""
+    records: list[ToolConversation] = []
+    failures: list[dict[str, object]] = []
+    source_rows = 0
+    reason_counts: dict[str, int] = {}
+    with Path(args.records).open(encoding="utf-8") as handle:
+        for line_number, line in enumerate(handle, 1):
+            if not line.strip():
+                continue
+            source_rows += 1
+            try:
+                row = json.loads(line)
+                if not isinstance(row, dict):
+                    raise TypeError("record must be a JSON object")
+            except (json.JSONDecodeError, TypeError) as exc:
+                code = (
+                    "INVALID_JSON"
+                    if isinstance(exc, json.JSONDecodeError)
+                    else "INVALID_RECORD_TYPE"
+                )
+                reason_counts[code] = reason_counts.get(code, 0) + 1
+                failures.append({"line": line_number, "reasons": [code], "details": [str(exc)]})
+                continue
+            try:
+                example = ToolConversation(
+                    row["id"], row["source"], row["tools"], row["messages"], row["metadata"]
+                )
+                example.validate()
+                records.append(example)
+                issues = validate_training_trajectory(example)
+                if issues:
+                    codes = [issue.code for issue in issues]
+                    for code in codes:
+                        reason_counts[code] = reason_counts.get(code, 0) + 1
+                    failures.append(
+                        {
+                            "line": line_number,
+                            "id": example.id,
+                            "reasons": codes,
+                            "details": [issue.message for issue in issues],
+                        }
+                    )
+            except (KeyError, TypeError, ValueError) as exc:
+                code = "INVALID_CANONICAL_RECORD"
+                reason_counts[code] = reason_counts.get(code, 0) + 1
+                failures.append({"line": line_number, "reasons": [code], "details": [str(exc)]})
+    summary = audit_records(records)
+    summary["records"] = source_rows
+    summary["valid"] = source_rows - len(failures)
+    summary["invalid"] = len(failures)
+    merged_reasons: dict[str, int] = {}
+    for code, count in summary["reason_counts"].items():
+        merged_reasons[code] = merged_reasons.get(code, 0) + count
+    for code, count in reason_counts.items():
+        merged_reasons[code] = merged_reasons.get(code, 0) + count
+    summary["reason_counts"] = dict(sorted(merged_reasons.items()))
+    summary["failures"] = failures
+    print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
+    return int(bool(failures))
+
+
+def _cmd_baseline(args: argparse.Namespace, root: Path) -> int:
+    """Evaluate the frozen baseline, or a candidate, on the held-out set."""
+    config_path = root / args.config
+    if not args.dry_run:
+        gate = readiness(root, config_path)
+        smoke_gate: dict[str, Any] = next(
+            (item for item in gate.get("gates", []) if item.get("name") == "gpu_boundary"), {}
+        )
+        if gate.get("ready_for_baseline") is not True or smoke_gate.get("status") != "PASS":
+            error = {
+                "ok": False,
+                "code": "BASELINE_NOT_READY",
+                "message": "real baseline is blocked by OpenGrad readiness gates",
+                "blocking": True,
+                "readiness": gate,
+            }
+            print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
+            return 1
+    # A candidate evaluation reuses this command rather than introducing a parallel one,
+    # because it is the same measurement against the same frozen held-out set. The config's
+    # status field decides which path runs; run_baseline keeps refusing anything that is not
+    # the pinned canonical model, so B0 stays immutable.
+    candidate_status = _evaluation_config_status(config_path)
+    try:
+        if candidate_status == CANDIDATE_STATUS:
+            result = run_candidate_evaluation(
+                config_path, root=root, limit=args.limit, dry_run=args.dry_run
+            )
+        else:
+            result = run_baseline(config_path, root=root, limit=args.limit, dry_run=args.dry_run)
+    except (OSError, KeyError, TypeError, ValueError, RuntimeError) as exc:
+        error = {
+            "ok": False,
+            "code": getattr(exc, "code", "BASELINE_FAILED"),
+            "message": str(exc),
+            "blocking": True,
+        }
+        print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
+        return 1
+    print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+    # A completed dry run is a successful command: the status field carries
+    # DRY_RUN vs EXECUTED. Exiting non-zero here made agent bridges report a
+    # successful plumbing run as COMMAND_FAILED.
+    return 0 if result.get("status") in {"EXECUTED", "DRY_RUN"} else 1
+
+
+def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "benchmark":
+        return benchmark_cli(sys.argv[2:])
+
+    if len(sys.argv) > 1 and sys.argv[1] == "results":
+        from opengrad.results.cli import results_cli
+
+        return results_cli(sys.argv[2:])
+
+    parser = _build_parser()
 
     args = parser.parse_args()
     root = Path.cwd()
@@ -359,38 +552,7 @@ def main() -> int:
         return handle_train(args, root)
 
     if args.command == "evaluate":
-        runner = BenchmarkRunner(root)
-        allowed_suites = {
-            "smoke",
-            "tool_use_core",
-            "regression_core",
-            "agent_transfer",
-            "full_post_training",
-            "speculative_decoding",
-        }
-        if args.suite not in allowed_suites:
-            err = {
-                "code": "SUITE_NOT_FOUND",
-                "message": f"Suite must be one of: {', '.join(sorted(allowed_suites))}",
-            }
-            print(json.dumps(err) if args.json else f"Error: {err['message']}")
-            return 1
-        suite_path = root / "configs" / "benchmark_suites" / f"{args.suite}.yaml"
-        if not suite_path.is_file():
-            err = {"code": "SUITE_NOT_FOUND", "message": f"Suite not found: {args.suite}"}
-            print(json.dumps(err) if args.json else f"Error: {err['message']}")
-            return 1
-        res_suite = runner.run_suite(suite_path, dry_run=args.dry_run, limit=args.limit)
-        if args.json:
-            print(json.dumps(res_suite, indent=2))
-        else:
-            print(
-                f"Evaluated suite '{args.suite}' across {res_suite['benchmarks_run']} benchmarks:"
-            )
-            for b_id, b_res in res_suite["results"].items():
-                acc = b_res.get("result", {}).get("overall_accuracy", 0.0)
-                print(f"  - {b_id:<24} {acc:.1f}%")
-        return 0
+        return _cmd_evaluate(args, root)
 
     if args.command == "compare":
         comp = compare_runs(Path(args.baseline), Path(args.candidate))
@@ -401,43 +563,7 @@ def main() -> int:
         return 0
 
     if args.command == "failures":
-        r_dir = Path(args.run_dir)
-        fail_file = r_dir / "failures.json"
-        if not fail_file.exists():
-            err = {"code": "FAILURES_NOT_FOUND", "message": f"File not found: {fail_file}"}
-            print(json.dumps(err) if args.json else f"Error: {err['message']}")
-            return 1
-        fail_data = json.loads(fail_file.read_text(encoding="utf-8"))
-        raw_items = fail_data.get("failures", [])
-        analyzer = FailureAnalyzer()
-        clusters = analyzer.cluster(
-            [
-                FailureItem(
-                    benchmark=f.get("benchmark", r_dir.name),
-                    sample_id=str(f.get("task_id", f.get("sample_id", f"s_{i}"))),
-                    prompt=str(f.get("input", f.get("prompt", ""))),
-                    expected=f.get("expected"),
-                    actual=f.get("parsed_output", f.get("actual")),
-                    score=float(f.get("score", 0.0)),
-                    failure_category=str(f.get("failure_category", "unknown")),
-                    checkpoint_id="unknown",
-                    experiment_id="unknown",
-                )
-                for i, f in enumerate(raw_items)
-            ]
-        )
-        if args.json:
-            print(
-                json.dumps(
-                    {"total_clusters": len(clusters), "clusters": [c.to_dict() for c in clusters]},
-                    indent=2,
-                )
-            )
-        else:
-            print(f"Failure Analysis: {len(raw_items)} failures in {len(clusters)} clusters\n")
-            for c in clusters:
-                print(f"- {c.category:<24} {c.count} failures ({c.percentage:.1f}%)")
-        return 0
+        return _cmd_failures(args)
 
     if args.command == "checkpoint":
         return handle_checkpoint_cli(args, root)
@@ -465,64 +591,7 @@ def main() -> int:
         return _data_audit(args)
 
     if args.command == "audit-corpus":
-        records: list[ToolConversation] = []
-        failures: list[dict[str, object]] = []
-        source_rows = 0
-        reason_counts: dict[str, int] = {}
-        with Path(args.records).open(encoding="utf-8") as handle:
-            for line_number, line in enumerate(handle, 1):
-                if not line.strip():
-                    continue
-                source_rows += 1
-                try:
-                    row = json.loads(line)
-                    if not isinstance(row, dict):
-                        raise TypeError("record must be a JSON object")
-                except (json.JSONDecodeError, TypeError) as exc:
-                    code = (
-                        "INVALID_JSON"
-                        if isinstance(exc, json.JSONDecodeError)
-                        else "INVALID_RECORD_TYPE"
-                    )
-                    reason_counts[code] = reason_counts.get(code, 0) + 1
-                    failures.append({"line": line_number, "reasons": [code], "details": [str(exc)]})
-                    continue
-                try:
-                    example = ToolConversation(
-                        row["id"], row["source"], row["tools"], row["messages"], row["metadata"]
-                    )
-                    example.validate()
-                    records.append(example)
-                    issues = validate_training_trajectory(example)
-                    if issues:
-                        codes = [issue.code for issue in issues]
-                        for code in codes:
-                            reason_counts[code] = reason_counts.get(code, 0) + 1
-                        failures.append(
-                            {
-                                "line": line_number,
-                                "id": example.id,
-                                "reasons": codes,
-                                "details": [issue.message for issue in issues],
-                            }
-                        )
-                except (KeyError, TypeError, ValueError) as exc:
-                    code = "INVALID_CANONICAL_RECORD"
-                    reason_counts[code] = reason_counts.get(code, 0) + 1
-                    failures.append({"line": line_number, "reasons": [code], "details": [str(exc)]})
-        summary = audit_records(records)
-        summary["records"] = source_rows
-        summary["valid"] = source_rows - len(failures)
-        summary["invalid"] = len(failures)
-        merged_reasons: dict[str, int] = {}
-        for code, count in summary["reason_counts"].items():
-            merged_reasons[code] = merged_reasons.get(code, 0) + count
-        for code, count in reason_counts.items():
-            merged_reasons[code] = merged_reasons.get(code, 0) + count
-        summary["reason_counts"] = dict(sorted(merged_reasons.items()))
-        summary["failures"] = failures
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
-        return int(bool(failures))
+        return _cmd_audit_corpus(args)
 
     if args.command == "env" and args.env_command == "capture":
         value = capture(root)
@@ -534,50 +603,7 @@ def main() -> int:
         return 0
 
     if args.command == "baseline":
-        config_path = root / args.config
-        if not args.dry_run:
-            gate = readiness(root, config_path)
-            smoke_gate: dict[str, Any] = next(
-                (item for item in gate.get("gates", []) if item.get("name") == "gpu_boundary"), {}
-            )
-            if gate.get("ready_for_baseline") is not True or smoke_gate.get("status") != "PASS":
-                error = {
-                    "ok": False,
-                    "code": "BASELINE_NOT_READY",
-                    "message": "real baseline is blocked by OpenGrad readiness gates",
-                    "blocking": True,
-                    "readiness": gate,
-                }
-                print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
-                return 1
-        # A candidate evaluation reuses this command rather than introducing a parallel one,
-        # because it is the same measurement against the same frozen held-out set. The config's
-        # status field decides which path runs; run_baseline keeps refusing anything that is not
-        # the pinned canonical model, so B0 stays immutable.
-        candidate_status = _evaluation_config_status(config_path)
-        try:
-            if candidate_status == CANDIDATE_STATUS:
-                result = run_candidate_evaluation(
-                    config_path, root=root, limit=args.limit, dry_run=args.dry_run
-                )
-            else:
-                result = run_baseline(
-                    config_path, root=root, limit=args.limit, dry_run=args.dry_run
-                )
-        except (OSError, KeyError, TypeError, ValueError, RuntimeError) as exc:
-            error = {
-                "ok": False,
-                "code": getattr(exc, "code", "BASELINE_FAILED"),
-                "message": str(exc),
-                "blocking": True,
-            }
-            print(json.dumps(error, ensure_ascii=False, indent=2, sort_keys=True))
-            return 1
-        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
-        # A completed dry run is a successful command: the status field carries
-        # DRY_RUN vs EXECUTED. Exiting non-zero here made agent bridges report a
-        # successful plumbing run as COMMAND_FAILED.
-        return 0 if result.get("status") in {"EXECUTED", "DRY_RUN"} else 1
+        return _cmd_baseline(args, root)
 
     parser.print_help()
     return 0

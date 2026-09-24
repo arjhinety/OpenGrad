@@ -39,7 +39,7 @@ properly, and when a path is renamed or removed, CI fails until the skill that c
 | Studies, preregistration, frozen artifacts, claims | `opengrad-research-guardrails` |
 | `data/`, `formatting/`, releases, normalization | `opengrad-data-pipeline` |
 | `annotation/`, `verification/` P-DET check | `opengrad-annotation` |
-| `experiments/`, `readiness.py`, `hardware/`, `config/`, `results/`, `agent_cli.py` | `opengrad-experiments-readiness` |
+| `experiments/`, `readiness*.py`, `hardware/`, `config/`, `results/`, `agent_cli.py` | `opengrad-experiments-readiness` |
 | `training/`, `preferences/`, `distillation/`, `checkpoints/` | `opengrad-training` |
 | `evaluation/`, `benchmarks/`, `contamination/`, `failures/` | `opengrad-evaluation` |
 | `promotion/`, gate design and testing | `opengrad-promotion-gates` |

@@ -7,7 +7,9 @@ description: How to change or run OpenGrad training correctly — the real SFT a
 
 ## Contracts the trainers enforce (fail closed, never infer)
 
-- **SFT** (`src/opengrad/training/sft.py`, loop helpers in `sft_runner.py`):
+- **SFT** (`src/opengrad/training/sft.py`, loop helpers in `sft_runner.py`, checkpoints in `sft_checkpoint.py`).
+  `run_real_sft` calls named phases (`_sft_prepare_corpus`, `_sft_build_model`, `_sft_finish`) around a loop kept
+  whole on purpose; DPO is laid out the same way. No test runs either loop: a GPU smoke is the check.
   - `trainer.tuning_method` must be `full` or `lora`, and `trainer.micro_batch_tokens` must be set (batches are
     bounded by tokens, not sequences).
   - Model, tokenizer and dataset hashes are pinned. A corpus hash mismatch refuses to train.

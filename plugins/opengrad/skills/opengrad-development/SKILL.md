@@ -53,6 +53,10 @@ number must trace to an artifact. Correctness here means *provenance and gates h
   - never build a filename from an id containing `:` or other Windows-forbidden characters;
   - give every script with a shebang git mode `100755` (`git update-index --chmod=+x`), or ruff `EXE001`
     fails CI; `tests/repo/test_executable_bits.py` catches it on Windows too.
+- **Size ratchet.** No `src/` module over 1,000 lines and no function over 250, except the entries listed with
+  their reason in `tests/repo/test_module_size.py`. Split a growing module into a sibling that the original
+  re-exports through `__all__` (the `readiness` / `readiness_states` pattern); patch a moved function where it
+  now lives.
   - GitHub Actions results: `gh run list` and `gh run view <id> --log-failed`.
 
 ## Verify a change the way CI does

@@ -59,9 +59,11 @@ A gate that blocks a correct run is a finding about the gate. Record it; never r
 
 ## Adding a readiness gate
 
-1. Write `_<name>_state(root, raw) -> tuple[bool, str, str | None]` in `src/opengrad/readiness.py`. It returns
+1. Write `_<name>_state(root, raw) -> tuple[bool, str, str | None]` in `src/opengrad/readiness_states.py`
+   (constants and file/config helpers are in `readiness_contracts.py`; `readiness.py` re-exports both). It returns
    ok, a human detail and an error code, and is pure given the root, so tests use `tmp_path`.
-2. Call `add(name, "PASS"|"FAIL", detail, code)` inside `readiness()`. For configs the gate does not apply to,
+2. Call `add(name, "PASS"|"FAIL", detail, code)` in the phase function of `readiness()` it belongs to
+   (`_training_gates` for SFT/DPO gates; the phases run in gate order, which the JSON output preserves). For configs the gate does not apply to,
    add a PASS that says so (the gate list stays stable).
 3. Add the name to every `ready_for_*` set it must block.
 4. Decide dormancy explicitly. A gate may be dormant until a config declares its input

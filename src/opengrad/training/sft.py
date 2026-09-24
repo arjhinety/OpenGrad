@@ -33,10 +33,11 @@ from opengrad.training.protocol import (
     TrainingMetadata,
     TrainingRunResult,
 )
+from opengrad.training.sft_checkpoint import _find_resume_checkpoint, _save_checkpoint
 from opengrad.training.sft_runner import (
+    ResolvedSettings,
     TrainingConfigError,
     build_batch,
-    checkpoint_lineage,
     deterministic_batches,
     install_interrupt_handler,
     learning_rate_at,
@@ -47,6 +48,10 @@ from opengrad.training.sft_runner import (
     summarise_history,
     write_events,
 )
+
+# The names other modules and the tests import from here, including those now defined in
+# opengrad.training.sft_checkpoint.
+__all__ = ["SFTTrainerBackend", "_save_checkpoint"]
 
 
 class SFTTrainerBackend:
@@ -188,68 +193,24 @@ def _dry_run(
     )
 
 
-def run_real_sft(
+def _sft_prepare_corpus(
     *,
-    experiment_id: str,
+    dataset_hashes: dict[Any, Any],
+    dataset_ids: list[Any],
     experiment: dict[str, Any],
-    trainer_config: dict[str, Any],
+    model_id: Any,
+    model_revision: Any,
     output_dir: Path,
     root: Path,
-) -> TrainingRunResult:
-    """The real GPU fine-tuning loop."""
-    import importlib
-
-    # Variable-length batches into a caching allocator fragment badly: the allocator holds
-    # blocks sized for the longest sequence seen and cannot reuse them for a shorter one. This
-    # must be set before the first CUDA allocation, so it is done before torch is imported.
-    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
-    try:
-        torch = importlib.import_module("torch")
-        transformers = importlib.import_module("transformers")
-    except ImportError as exc:
-        raise TrainingConfigError(
-            "real SFT requires the training extra (torch, transformers)"
-        ) from exc
-
-    from opengrad.env_capture import tracked_tree_provenance
-    from opengrad.hardware.probe import probe_hardware
+    settings: ResolvedSettings,
+    tokenizer_revision: Any,
+) -> tuple[Any, Any]:
+    """Render (or reuse) the sample cache, check the corpus hash, and write the dataset records."""
     from opengrad.training.preprocess import (
         default_cache_dir,
         load_cached_samples,
         preprocess_corpus,
         write_overflow_report,
-    )
-
-    settings = resolve_settings(experiment, trainer_config)
-    model_spec = experiment.get("model") or {}
-    model_id = model_spec.get("model_id")
-    model_revision = model_spec.get("model_revision")
-    tokenizer_revision = model_spec.get("tokenizer_revision", model_revision)
-    if not model_id or not model_revision:
-        raise TrainingConfigError("experiment.model must pin model_id and model_revision")
-
-    dataset_ids = list((experiment.get("datasets") or {}).get("manifest_ids") or [])
-    dataset_hashes = dict((experiment.get("datasets") or {}).get("hashes") or {})
-    if not dataset_ids or not dataset_hashes:
-        raise TrainingConfigError("experiment.datasets must pin manifest_ids and hashes")
-
-    provenance = tracked_tree_provenance(root)
-    events_path = output_dir / "events.jsonl"
-    if events_path.exists():
-        events_path.unlink()
-
-    def emit(event: str, **payload: Any) -> None:
-        write_events(events_path, {"event": event, "timestamp": time.time(), **payload})
-
-    emit(
-        "run_start",
-        experiment_id=experiment_id,
-        tuning_method=settings.tuning_method,
-        model_id=model_id,
-        model_revision=model_revision,
-        git_commit=provenance["sha"],
-        git_dirty=provenance["dirty"],
-        settings=settings.to_dict(),
     )
 
     # ------------------------------------------------------------------ corpus
@@ -331,7 +292,23 @@ def run_real_sft(
         (output_dir / name).write_text(
             json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
+    return rendering_report, rows
 
+
+def _sft_write_resolved_config(
+    *,
+    dataset_hashes: dict[Any, Any],
+    dataset_ids: list[Any],
+    emit: Any,
+    experiment_id: str,
+    model_spec: Any,
+    output_dir: Path,
+    provenance: Any,
+    rendering_report: Any,
+    rows: Any,
+    settings: ResolvedSettings,
+) -> None:
+    """Record the contract the run actually used, defaults included."""
     # Resolved configuration: the contract actually used, including defaults.
     import yaml
 
@@ -361,6 +338,23 @@ def run_real_sft(
         supervised_tokens=rendering_report.get("supervised_tokens"),
     )
 
+
+def _sft_build_model(
+    *,
+    emit: Any,
+    model_id: Any,
+    model_revision: Any,
+    output_dir: Path,
+    settings: ResolvedSettings,
+    tokenizer_revision: Any,
+    torch: Any,
+    transformers: Any,
+) -> tuple[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]:
+    """Hardware check, resume point, determinism, tokenizer, model with its components, LoRA and optimizer."""
+    import importlib
+
+    from opengrad.hardware.probe import probe_hardware
+
     # ------------------------------------------------------------------ model
     hardware = probe_hardware()
     if not hardware.gpu_available:
@@ -389,10 +383,9 @@ def run_real_sft(
         raise TrainingConfigError("tokenizer exposes neither pad_token_id nor eos_token_id")
 
     from opengrad.training.model_components import (
-        component_lineage,
         component_parameter_report,
     )
-    from opengrad.training.mtp import FinalHiddenCapture, load_training_model, mtp_loss
+    from opengrad.training.mtp import FinalHiddenCapture, load_training_model
 
     # Every component the base declares and the configuration does not exclude. A resume
     # checkpoint from before the policy has the missing components grafted from the base revision.
@@ -453,6 +446,215 @@ def run_real_sft(
     if not trainable:
         raise TrainingConfigError("no trainable parameters; the tuning configuration is empty")
     optimizer = torch.optim.AdamW(trainable, lr=settings.learning_rate)
+    return (
+        capture,
+        component_parameters,
+        components,
+        loaded,
+        model,
+        mtp_layer,
+        optimizer,
+        pad_token_id,
+        parameters,
+        resume_from,
+        tokenizer,
+        trainable,
+    )
+
+
+def _sft_finish(
+    *,
+    component_parameters: Any,
+    components_record: Any,
+    created_checkpoints: list[str],
+    dataset_hashes: dict[Any, Any],
+    dataset_ids: list[Any],
+    emit: Any,
+    experiment: dict[str, Any],
+    history: list[dict[str, Any]],
+    last_saved_step: Any,
+    model: Any,
+    optimizer: Any,
+    output_dir: Path,
+    parameters: Any,
+    provenance: Any,
+    resume_from: Any,
+    settings: ResolvedSettings,
+    started: Any,
+    stop_reason: Any,
+    tokenizer: Any,
+    torch: Any,
+    world: dict[str, Any],
+) -> tuple[Any, Any, Any]:
+    """Final checkpoint, run_end, the train log and the diagnostics the result carries."""
+    elapsed = time.monotonic() - started
+    if world["interrupted"]:
+        stop_reason = "interrupted"
+
+    # A periodic save that already landed on the final step produced this checkpoint, so
+    # rewriting it would register the same path twice and write identical weights again.
+    if not world["interrupted"] and last_saved_step == world["optimizer_step"]:
+        final_path = output_dir / "checkpoints" / f"checkpoint-{world['optimizer_step']}"
+    else:
+        final_path = _save_checkpoint(
+            model,
+            optimizer,
+            tokenizer,
+            output_dir,
+            world,
+            settings,
+            experiment,
+            dataset_ids,
+            dataset_hashes,
+            provenance["sha"],
+            suffix="" if not world["interrupted"] else "interrupted",
+            lineage_parent=str(resume_from) if resume_from is not None else None,
+            model_components=components_record(),
+        )
+        created_checkpoints.append(str(final_path))
+    emit(
+        "run_end",
+        stop_reason=stop_reason,
+        optimizer_step=world["optimizer_step"],
+        supervised_tokens_seen=world["supervised_tokens_seen"],
+        final_checkpoint=str(final_path),
+    )
+    (output_dir / "metrics" / "train_log.jsonl").write_text(
+        "".join(json.dumps(entry, sort_keys=True) + "\n" for entry in history),
+        encoding="utf-8",
+    )
+
+    diagnostics = {
+        "tuning_method": settings.tuning_method,
+        "evidence": True,
+        "stop_reason": stop_reason,
+        "optimizer_steps": world["optimizer_step"],
+        "examples_seen": world["examples_seen"],
+        "supervised_tokens_seen": world["supervised_tokens_seen"],
+        "epochs_completed": world["epoch"],
+        "effective_global_batch": settings.effective_global_batch_size,
+        "max_seq_length": settings.max_seq_length,
+        "gradient_clipping": settings.gradient_clipping,
+        "gradient_checkpointing": settings.gradient_checkpointing,
+        "scheduler": settings.scheduler,
+        "optimizer": settings.optimizer,
+        "optimizer_state": settings.optimizer_state,
+        "peak_gpu_gib": round(torch.cuda.max_memory_allocated() / 2**30, 4),
+        "summary": summarise_history(history),
+        "model_components": components_record(),
+        "component_parameters": component_parameters,
+        **parameters,
+    }
+    return diagnostics, elapsed, final_path
+
+
+def run_real_sft(
+    *,
+    experiment_id: str,
+    experiment: dict[str, Any],
+    trainer_config: dict[str, Any],
+    output_dir: Path,
+    root: Path,
+) -> TrainingRunResult:
+    """The real GPU fine-tuning loop."""
+    import importlib
+
+    # Variable-length batches into a caching allocator fragment badly: the allocator holds
+    # blocks sized for the longest sequence seen and cannot reuse them for a shorter one. This
+    # must be set before the first CUDA allocation, so it is done before torch is imported.
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+    try:
+        torch = importlib.import_module("torch")
+        transformers = importlib.import_module("transformers")
+    except ImportError as exc:
+        raise TrainingConfigError(
+            "real SFT requires the training extra (torch, transformers)"
+        ) from exc
+
+    from opengrad.env_capture import tracked_tree_provenance
+
+    settings = resolve_settings(experiment, trainer_config)
+    model_spec = experiment.get("model") or {}
+    model_id = model_spec.get("model_id")
+    model_revision = model_spec.get("model_revision")
+    tokenizer_revision = model_spec.get("tokenizer_revision", model_revision)
+    if not model_id or not model_revision:
+        raise TrainingConfigError("experiment.model must pin model_id and model_revision")
+
+    dataset_ids = list((experiment.get("datasets") or {}).get("manifest_ids") or [])
+    dataset_hashes = dict((experiment.get("datasets") or {}).get("hashes") or {})
+    if not dataset_ids or not dataset_hashes:
+        raise TrainingConfigError("experiment.datasets must pin manifest_ids and hashes")
+
+    provenance = tracked_tree_provenance(root)
+    events_path = output_dir / "events.jsonl"
+    if events_path.exists():
+        events_path.unlink()
+
+    def emit(event: str, **payload: Any) -> None:
+        write_events(events_path, {"event": event, "timestamp": time.time(), **payload})
+
+    emit(
+        "run_start",
+        experiment_id=experiment_id,
+        tuning_method=settings.tuning_method,
+        model_id=model_id,
+        model_revision=model_revision,
+        git_commit=provenance["sha"],
+        git_dirty=provenance["dirty"],
+        settings=settings.to_dict(),
+    )
+
+    rendering_report, rows = _sft_prepare_corpus(
+        dataset_hashes=dataset_hashes,
+        dataset_ids=dataset_ids,
+        experiment=experiment,
+        model_id=model_id,
+        model_revision=model_revision,
+        output_dir=output_dir,
+        root=root,
+        settings=settings,
+        tokenizer_revision=tokenizer_revision,
+    )
+
+    _sft_write_resolved_config(
+        dataset_hashes=dataset_hashes,
+        dataset_ids=dataset_ids,
+        emit=emit,
+        experiment_id=experiment_id,
+        model_spec=model_spec,
+        output_dir=output_dir,
+        provenance=provenance,
+        rendering_report=rendering_report,
+        rows=rows,
+        settings=settings,
+    )
+
+    (
+        capture,
+        component_parameters,
+        components,
+        loaded,
+        model,
+        mtp_layer,
+        optimizer,
+        pad_token_id,
+        parameters,
+        resume_from,
+        tokenizer,
+        trainable,
+    ) = _sft_build_model(
+        emit=emit,
+        model_id=model_id,
+        model_revision=model_revision,
+        output_dir=output_dir,
+        settings=settings,
+        tokenizer_revision=tokenizer_revision,
+        torch=torch,
+        transformers=transformers,
+    )
+    from opengrad.training.model_components import component_lineage
+    from opengrad.training.mtp import mtp_loss
 
     # Mixed value types, so annotate as Any rather than letting mypy narrow the dict to
     # `int | bool | None` and then reject arithmetic on the counters.
@@ -692,64 +894,29 @@ def run_real_sft(
         if capture is not None:
             capture.remove()
 
-    elapsed = time.monotonic() - started
-    if world["interrupted"]:
-        stop_reason = "interrupted"
-
-    # A periodic save that already landed on the final step produced this checkpoint, so
-    # rewriting it would register the same path twice and write identical weights again.
-    if not world["interrupted"] and last_saved_step == world["optimizer_step"]:
-        final_path = output_dir / "checkpoints" / f"checkpoint-{world['optimizer_step']}"
-    else:
-        final_path = _save_checkpoint(
-            model,
-            optimizer,
-            tokenizer,
-            output_dir,
-            world,
-            settings,
-            experiment,
-            dataset_ids,
-            dataset_hashes,
-            provenance["sha"],
-            suffix="" if not world["interrupted"] else "interrupted",
-            lineage_parent=str(resume_from) if resume_from is not None else None,
-            model_components=components_record(),
-        )
-        created_checkpoints.append(str(final_path))
-    emit(
-        "run_end",
+    diagnostics, elapsed, final_path = _sft_finish(
+        component_parameters=component_parameters,
+        components_record=components_record,
+        created_checkpoints=created_checkpoints,
+        dataset_hashes=dataset_hashes,
+        dataset_ids=dataset_ids,
+        emit=emit,
+        experiment=experiment,
+        history=history,
+        last_saved_step=last_saved_step,
+        model=model,
+        optimizer=optimizer,
+        output_dir=output_dir,
+        parameters=parameters,
+        provenance=provenance,
+        resume_from=resume_from,
+        settings=settings,
+        started=started,
         stop_reason=stop_reason,
-        optimizer_step=world["optimizer_step"],
-        supervised_tokens_seen=world["supervised_tokens_seen"],
-        final_checkpoint=str(final_path),
+        tokenizer=tokenizer,
+        torch=torch,
+        world=world,
     )
-    (output_dir / "metrics" / "train_log.jsonl").write_text(
-        "".join(json.dumps(entry, sort_keys=True) + "\n" for entry in history),
-        encoding="utf-8",
-    )
-
-    diagnostics = {
-        "tuning_method": settings.tuning_method,
-        "evidence": True,
-        "stop_reason": stop_reason,
-        "optimizer_steps": world["optimizer_step"],
-        "examples_seen": world["examples_seen"],
-        "supervised_tokens_seen": world["supervised_tokens_seen"],
-        "epochs_completed": world["epoch"],
-        "effective_global_batch": settings.effective_global_batch_size,
-        "max_seq_length": settings.max_seq_length,
-        "gradient_clipping": settings.gradient_clipping,
-        "gradient_checkpointing": settings.gradient_checkpointing,
-        "scheduler": settings.scheduler,
-        "optimizer": settings.optimizer,
-        "optimizer_state": settings.optimizer_state,
-        "peak_gpu_gib": round(torch.cuda.max_memory_allocated() / 2**30, 4),
-        "summary": summarise_history(history),
-        "model_components": components_record(),
-        "component_parameters": component_parameters,
-        **parameters,
-    }
     return TrainingRunResult(
         experiment_id=experiment_id,
         algorithm="sft",
@@ -762,87 +929,3 @@ def run_real_sft(
         metrics_history=history,
         algorithm_diagnostics=diagnostics,
     )
-
-
-def _find_resume_checkpoint(ckpt_dir: Path) -> Path | None:
-    """Newest checkpoint carrying optimizer state, or None when there is nothing to resume."""
-    candidates = sorted(
-        (path for path in ckpt_dir.glob("checkpoint-*") if (path / "training_state.pt").is_file()),
-        key=lambda path: int(path.name.split("-")[-1]) if path.name.split("-")[-1].isdigit() else 0,
-    )
-    return candidates[-1] if candidates else None
-
-
-def _save_checkpoint(
-    model: Any,
-    optimizer: Any,
-    tokenizer: Any,
-    output_dir: Path,
-    world: dict[str, Any],
-    settings: Any,
-    experiment: dict[str, Any],
-    dataset_ids: list[str],
-    dataset_hashes: dict[str, str],
-    git_commit: str,
-    *,
-    suffix: str = "",
-    lineage_parent: str | None = None,
-    model_components: dict[str, Any] | None = None,
-) -> Path:
-    """Persist a resumable checkpoint with the lineage the registry requires.
-
-    ``save_pretrained`` writes every carried component, including the attached ``mtp.*`` layer,
-    under the base checkpoint's tensor names.
-    """
-    import torch
-
-    step = world["optimizer_step"]
-    name = f"checkpoint-{step}" + (f"-{suffix}" if suffix else "")
-    path = output_dir / "checkpoints" / name
-    path.mkdir(parents=True, exist_ok=True)
-
-    model.save_pretrained(path)
-    tokenizer.save_pretrained(path)
-    torch.save(
-        {
-            "optimizer": optimizer.state_dict(),
-            "optimizer_step": step,
-            "examples_seen": world["examples_seen"],
-            "supervised_tokens_seen": world["supervised_tokens_seen"],
-            "epoch": world["epoch"],
-            "image_batches_seen": world.get("image_batches_seen", 0),
-            "mtp_loss_steps": world.get("mtp_loss_steps", 0),
-            "torch_rng": torch.get_rng_state(),
-            "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
-            "python_rng": __import__("random").getstate(),
-        },
-        path / "training_state.pt",
-    )
-    (path / "checkpoint_metadata.json").write_text(
-        json.dumps(
-            checkpoint_lineage(
-                experiment,
-                settings,
-                step=step,
-                tokens_seen=world["supervised_tokens_seen"],
-                examples_seen=world["examples_seen"],
-                git_commit=git_commit,
-                dataset_manifest_ids=dataset_ids,
-                dataset_hashes=dataset_hashes,
-                parent_checkpoint=lineage_parent,
-                model_components=model_components,
-            ),
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    # Optimizer state is roughly twice the size of the weights, and only the newest checkpoint
-    # can be resumed from, so older copies are pure storage cost. Measured on this model: a
-    # checkpoint is ~11 GiB with state and ~3.8 GiB without, which is the difference between
-    # being able to keep a usable evaluation curve and filling the disk after three saves.
-    for stale in (output_dir / "checkpoints").glob("checkpoint-*/training_state.pt"):
-        if stale.parent != path:
-            stale.unlink(missing_ok=True)
-    return path

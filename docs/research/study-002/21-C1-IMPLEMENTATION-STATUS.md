@@ -252,7 +252,7 @@ rendering all 88,056 records (`reports/canonical-v3/canonical-v3.manifest.json`,
 
 > **Correction, 2026-09-18.** This paragraph previously gave the template hash with three characters dropped
 > (`…fb17e08d5f2a5ddfb53…`, 61 hex digits instead of 64). The authoritative value in
-> `src/opengrad/evaluation/runner.py:33` was and is correct, and it is what the renderer produced while building
+> `PINNED_TEMPLATE_HASH` (`runner.py:33` then, `evaluation/backends.py` from 2026-09-24) was and is correct, and it is what the renderer produced while building
 > canonical-v3 (39 §3, gate 5), so only this document was wrong. Phase 7's before-and-after equality proof is
 > still `PENDING`: canonical-v3 records the renderer identity it observed, which is not the same as proving the
 > renderer unchanged across the intervention.

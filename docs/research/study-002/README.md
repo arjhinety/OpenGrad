@@ -166,7 +166,7 @@ Every extension point below is a verified path in this repository.
 | Hardware-agnostic GPU preflight record | `registry/gpu_preflight.schema.json` | already `provider: [nvidia, amd, cpu, unknown]` with `cuda_version`/`rocm_version` both optional — the basis of the hardware-agnostic contract (13) |
 | Provenance record | `registry/provenance.schema.json` | `run_id`, `status`, `compute_provider`, `hardware` — extended for device class and driver stack (13, 15) |
 | Gate execution accounting | `src/opengrad/verification/accounting.py` | `NONVACUOUS_PREFIX`, `ACCOUNTING_PREFIX`, `REQUIRED_NONEMPTY` — every new gate declares a population policy (15, 16) |
-| Repository readiness gates | `src/opengrad/readiness.py:1185-1610` | gate names and `PASS/WARN/FAIL` + `error_code` convention extended (16) |
+| Repository readiness gates | `readiness()` in `src/opengrad/readiness.py`, states in `readiness_states.py` | gate names and `PASS/WARN/FAIL` + `error_code` convention extended (16) |
 | Experiment preflight | `src/opengrad/experiments/preflight.py:55-202` | new checks as `PreflightCheckItem`s (15) |
 | Promotion policy versioning | `src/opengrad/promotion/tool_use_policy.py` | `tool_use_promotion_v5` adds a refusal sentinel and an ANSWER-mode floor (07, 11) |
 | Regression sentinels | `scripts/score_{gsm8k,ifeval,mmlu_pro,sentinel}.py` | reused unchanged; only the schedule and the statistics change (08, 09) |
