@@ -352,7 +352,13 @@ def write_record(entries: list[dict[str, Any]], root: Path = ROOT) -> Path:
             ),
         ],
     }
-    path = root / "reports" / "releases" / f"hf-publication-{today}-card-license-correction.json"
+    # Records are append-only: a second correction on the same day gets its own file.
+    stem = root / "reports" / "releases" / f"hf-publication-{today}-card-license-correction"
+    path = stem.with_suffix(".json")
+    number = 2
+    while path.exists():
+        path = stem.parent / f"{stem.name}-{number}.json"
+        number += 1
     path.write_text(
         json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
     )

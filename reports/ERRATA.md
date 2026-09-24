@@ -1132,6 +1132,20 @@ a separate, owner-approved step.
 - `hf/MODEL_CARD_TEMPLATE.md` gains two required fields: general-capability regressions against the base model,
   and license and attribution. **Source:** `tests/publication/test_model_cards.py`.
 
+- **Re-published 2026-09-24** (the step this entry said was pending). All six cards were uploaded from their
+  committed bytes with `scripts/publish_card_corrections.py`, fetched back and matched byte for byte, and recorded
+  in `reports/releases/hf-publication-2026-09-24-card-license-correction.json`. Two things the upload's dry run found
+  are corrected by the same record:
+  - **Seven card commits had no publication record:** the claim-audit card corrections of 2026-09-13 on five
+    repositories, `acffaf6` on the M0 card (2026-09-11) and `34ebbf1` on the M1-v2 card (2026-09-12). Every recorded
+    revision of those repositories was stale. They are recorded retroactively from the Hub's commit history, as the
+    2026-09-14 record did for the dataset card.
+  - **The GGUF card on the Hub had CRLF line endings**, so it was uploaded from a Windows working tree rather than
+    the committed file; it now carries the committed LF bytes.
+  - The committed M1-v2 card had replaced its results table with a chart image that was never uploaded; the table
+    (the same 12 numbers) is restored in the committed card, so the upload lost nothing and references no missing
+    file.
+
 ## 24. `study_002_prereg_v8` adopted, and git history kept as it is
 
 **Added 2026-09-24.** Two owner decisions, recorded together because both change what the record may be read as.

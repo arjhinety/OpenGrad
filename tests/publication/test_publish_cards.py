@@ -175,3 +175,11 @@ def test_unrecorded_hub_commits_are_recorded_retroactively_and_the_chain_validat
     pcc.write_record(entries, root)
     assert validate_publication_records(root) == []
     assert pcc.current_revisions(root)[entries[0]["repository"]] == entries[0]["hub_revision"]
+
+
+def test_a_second_record_on_the_same_day_does_not_overwrite_the_first(tmp_path: Path) -> None:
+    (tmp_path / "reports/releases").mkdir(parents=True)
+    first = pcc.write_record([], tmp_path)
+    second = pcc.write_record([], tmp_path)
+    assert first != second and first.exists() and second.exists()
+    assert second.name.endswith("-card-license-correction-2.json")

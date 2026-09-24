@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "HF_PUBLICATION_RECORD",
+  "published": "2026-09-24",
+  "correction": "Card-only. Each model card gains a license_link to Qwen/Qwen3.5-2B's Apache-2.0 license at the pinned revision and a License and attribution section, and the corpus-v1 evaluation card's license becomes other / composite-per-source (reports/ERRATA.md §23). No weight or other file was written.",
+  "cards": [
+    {
+      "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final",
+      "repo_type": "model",
+      "revision_chain_since_previous_record": [
+        {
+          "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final",
+          "repo_type": "model",
+          "hub_revision": "acffaf6eb068e556f9a127f36c9478201afb49fa",
+          "superseded_hub_revision": "2a3fb105b2300c26f66f2537aab3d57ea0b81960",
+          "event_occurred_at": "2026-09-11",
+          "entry_recorded_at": "2026-09-24",
+          "recorded_retroactively": true,
+          "what": "Findings page: link the model and the corpus it was trained on",
+          "reconstruction_evidence": {
+            "kind": "HUB_COMMIT_HISTORY",
+            "observed_from": "huggingface_hub list_repo_commits('arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final', repo_type='model')",
+            "immutable_identifier": "acffaf6eb068e556f9a127f36c9478201afb49fa",
+            "transcribed_not_rederived": true,
+            "contemporaneous_record_exists": false
+          }
+        },
+        {
+          "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final",
+          "repo_type": "model",
+          "hub_revision": "17bf7de24ea79d12d85113fae22d9de44ef251e0",
+          "superseded_hub_revision": "acffaf6eb068e556f9a127f36c9478201afb49fa",
+          "event_occurred_at": "2026-09-13",
+          "entry_recorded_at": "2026-09-24",
+          "recorded_retroactively": true,
+          "what": "Correct card against committed artifacts (OpenGrad claim audit, 2026-09-13)",
+          "reconstruction_evidence": {
+            "kind": "HUB_COMMIT_HISTORY",
+            "observed_from": "huggingface_hub list_repo_commits('arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final', repo_type='model')",
+            "immutable_identifier": "17bf7de24ea79d12d85113fae22d9de44ef251e0",
+            "transcribed_not_rederived": true,
+            "contemporaneous_record_exists": false
+          }
+        }
+      ],
+      "hub_revision": "484fdc505945df49920fb3b165762f1aeef404f4",
+      "superseded_hub_revision": "17bf7de24ea79d12d85113fae22d9de44ef251e0",
+      "event_occurred_at": "2026-09-24",
+      "entry_recorded_at": "2026-09-24",
+      "recorded_retroactively": false,
+      "files_replaced": [
+        "README.md"
+      ],
+      "card_source": "release/huggingface/qwen35-2b-m0-sft-canonicalv2-final/README.md",
+      "card_sha256": "73eff86351e06e69d585ef79ca51a31f89e4eee62a5dbf4ca11a8acf29a7804f",
+      "github_commit": "ea1dcc0747f7353774874799e9e1747afd45fecd",
+      "refetched_and_matched": true
+    },
+    {
+      "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation",
+      "repo_type": "dataset",
+      "revision_chain_since_previous_record": [
+        {
+          "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation",
+          "repo_type": "dataset",
+          "hub_revision": "1d8a67493cae0addf7fc73f85b0cd433d21b67b8",
+          "superseded_hub_revision": "5dec885bb40af2b7368a5fefb88c0438e86b4b71",
+          "event_occurred_at": "2026-09-13",
+          "entry_recorded_at": "2026-09-24",
+          "recorded_retroactively": true,
+          "what": "Correct card against committed artifacts (OpenGrad claim audit, 2026-09-13)",
+          "reconstruction_evidence": {
+            "kind": "HUB_COMMIT_HISTORY",
+            "observed_from": "huggingface_hub list_repo_commits('arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV1-evaluation', repo_type='dataset')",
+            "immutable_identifier": "1d8a67493cae0addf7fc73f85b0cd433d21b67b8",
+            "transcribed_not_rederived": true,
+            "contemporaneous_record_exists": false
+          }
+        }
+      ],
+      "hub_revision": "9483324752cf6229c356e18852a6f0b81b0f5bbb",
+      "superseded_hub_revision": "1d8a67493cae0addf7fc73f85b0cd433d21b67b8",
+      "event_occurred_at": "2026-09-24",
+      "entry_recorded_at": "2026-09-24",
+      "recorded_retroactively": false,
+      "files_replaced": [
+        "README.md"
+      ],
+      "card_source": "release/huggingface/qwen35-2b-m0-sft-corpusv1-evaluation/README.md",
+      "card_sha256": "f159c147e79545e2d30446bd804d7fbe836f901ee942d0ebcd2672bf57528f32",
+      "github_commit": "ea1dcc0747f7353774874799e9e1747afd45fecd",
+      "refetched_and_matched": true
+    },
+    {
+      "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2",
+      "repo_type": "model",
+      "revision_chain_since_previous_record": [
+        {
+          "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2",
+          "repo_type": "model",
+          "hub_revision": "34ebbf13603b79bf955c66bf9a75950fb59a670b",
+          "superseded_hub_revision": "f33d20308982f37deb459076f489e794d5521ee3",
+          "event_occurred_at": "2026-09-12",
+          "entry_recorded_at": "2026-09-24",
+          "recorded_retroactively": true,
+          "what": "docs: correct datasets provenance to the Canonical-v2 prompt source",
+          "reconstruction_evidence": {
+            "kind": "HUB_COMMIT_HISTORY",
+            "observed_from": "huggingface_hub list_repo_commits('arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2', repo_type='model')",
+            "immutable_identifier": "34ebbf13603b79bf955c66bf9a75950fb59a670b",
+            "transcribed_not_rederived": true,
+            "contemporaneous_record_exists": false
+          }
+        },
+        {
+          "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2",
+          "repo_type": "model",
+          "hub_revision": "5db725b71f9a7137fca368c84a62e74a76a7d42d",
+          "superseded_hub_revision": "34ebbf13603b79bf955c66bf9a75950fb59a670b",
+          "event_occurred_at": "2026-09-13",
+          "entry_recorded_at": "2026-09-24",
+          "recorded_retroactively": true,
+          "what": "Correct card against committed artifacts (OpenGrad claim audit, 2026-09-13)",
+          "reconstruction_evidence": {
+            "kind": "HUB_COMMIT_HISTORY",
+            "observed_from": "huggingface_hub list_repo_commits('arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2', repo_type='model')",
+            "immutable_identifier": "5db725b71f9a7137fca368c84a62e74a76a7d42d",
+            "transcribed_not_rederived": true,
+            "contemporaneous_record_exists": false
+          }
+        }
+      ],
+      "hub_revision": "a77d6a8328d3edd8ef3788135b6ecea0ad74ea77",
+      "superseded_hub_revision": "5db725b71f9a7137fca368c84a62e74a76a7d42d",
+      "event_occurred_at": "2026-09-24",
+      "entry_recorded_at": "2026-09-24",
+      "recorded_retroactively": false,
+      "files_replaced": [
+        "README.md"
+      ],
+      "card_source": "release/huggingface/qwen35-2b-m1-dpo-canonicalv2-final-v2/README.md",
+      "card_sha256": "e260d1f6f579253fd8c4e3debc060847dfbabb4f2ab1c20fb9e317fd3e90c7fc",
+      "github_commit": "ea1dcc0747f7353774874799e9e1747afd45fecd",
+      "refetched_and_matched": true
+    },
+    {
+      "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2-GGUF",
+      "repo_type": "model",
+      "revision_chain_since_previous_record": [],
+      "hub_revision": "bac260e925fbaf1b933f70b33542b2c55b647cf3",
+      "superseded_hub_revision": "962702444d417eefd4e12d51cf5e4d7583165f16",
+      "event_occurred_at": "2026-09-24",
+      "entry_recorded_at": "2026-09-24",
+      "recorded_retroactively": false,
+      "files_replaced": [
+        "README.md"
+      ],
+      "card_source": "release/huggingface/qwen35-2b-m1-dpo-canonicalv2-final-v2-gguf/README.md",
+      "card_sha256": "ee9a3c6011cbd4af67fb559231d5d125dfc27c446c98d7705a6b668cbf74b8fa",
+      "github_commit": "ea1dcc0747f7353774874799e9e1747afd45fecd",
+      "refetched_and_matched": true
+    },
+    {
+      "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute",
+      "repo_type": "model",
+      "revision_chain_since_previous_record": [
+        {
+          "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute",
+          "repo_type": "model",
+          "hub_revision": "9df7bb424eb38b52ad510a513ba2259511f1ffde",
+          "superseded_hub_revision": "b07aeca26061a8188f33b6240d8be0ad5b21a827",
+          "event_occurred_at": "2026-09-13",
+          "entry_recorded_at": "2026-09-24",
+          "recorded_retroactively": true,
+          "what": "Correct card against committed artifacts (OpenGrad claim audit, 2026-09-13)",
+          "reconstruction_evidence": {
+            "kind": "HUB_COMMIT_HISTORY",
+            "observed_from": "huggingface_hub list_repo_commits('arjhinety/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute', repo_type='model')",
+            "immutable_identifier": "9df7bb424eb38b52ad510a513ba2259511f1ffde",
+            "transcribed_not_rederived": true,
+            "contemporaneous_record_exists": false
+          }
+        }
+      ],
+      "hub_revision": "3425016b06d9d656013249fd436c9dbddd5457dc",
+      "superseded_hub_revision": "9df7bb424eb38b52ad510a513ba2259511f1ffde",
+      "event_occurred_at": "2026-09-24",
+      "entry_recorded_at": "2026-09-24",
+      "recorded_retroactively": false,
+      "files_replaced": [
+        "README.md"
+      ],
+      "card_source": "release/huggingface/qwen35-2b-m0-abl-minus-xlam-fixed-compute/README.md",
+      "card_sha256": "4d1d56d7c46c61d6466d0f9afb080eba7d6de96313ae7f0416362c2a239577ec",
+      "github_commit": "ea1dcc0747f7353774874799e9e1747afd45fecd",
+      "refetched_and_matched": true
+    },
+    {
+      "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure",
+      "repo_type": "model",
+      "revision_chain_since_previous_record": [
+        {
+          "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure",
+          "repo_type": "model",
+          "hub_revision": "d862894559ba8bef4ab50829ccd0369e2fd599c1",
+          "superseded_hub_revision": "69fd6a98e056fdfb108f01e87bc4f776565b4b7b",
+          "event_occurred_at": "2026-09-13",
+          "entry_recorded_at": "2026-09-24",
+          "recorded_retroactively": true,
+          "what": "Correct card against committed artifacts (OpenGrad claim audit, 2026-09-13)",
+          "reconstruction_evidence": {
+            "kind": "HUB_COMMIT_HISTORY",
+            "observed_from": "huggingface_hub list_repo_commits('arjhinety/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure', repo_type='model')",
+            "immutable_identifier": "d862894559ba8bef4ab50829ccd0369e2fd599c1",
+            "transcribed_not_rederived": true,
+            "contemporaneous_record_exists": false
+          }
+        }
+      ],
+      "hub_revision": "37c4477a1248f93bccb4701e59e1a84c0ad25e16",
+      "superseded_hub_revision": "d862894559ba8bef4ab50829ccd0369e2fd599c1",
+      "event_occurred_at": "2026-09-24",
+      "entry_recorded_at": "2026-09-24",
+      "recorded_retroactively": false,
+      "files_replaced": [
+        "README.md"
+      ],
+      "card_source": "release/huggingface/qwen35-2b-m0-abl-minus-xlam-matched-exposure/README.md",
+      "card_sha256": "5832b01cbb7ef66bdbf6d59111625fe22f9cf71d339edf814b206be3918f472d",
+      "github_commit": "ea1dcc0747f7353774874799e9e1747afd45fecd",
+      "refetched_and_matched": true
+    }
+  ],
+  "why_this_record_exists": "The weights are immutable; their cards are not. The card corrections of 2026-09-13 were published without a record, which left every recorded revision of these repositories stale; they are recorded retroactively in each revision chain.",
+  "notes": [
+    "Each upload named the live head as its parent commit, so it could not overwrite a change made after the dry run.",
+    "Each card was downloaded again at its new revision and compared byte for byte with the committed file (card_sha256) before this record was written.",
+    "A provenance correction is not a new version of a model: the hub_tag study-001 and every weight revision cited elsewhere still name the same weights."
+  ]
+}
