@@ -1,6 +1,8 @@
 *.yaml text eol=lf
 *.json text eol=lf
 *.md text eol=lf
+# Shell scripts run under bash, which rejects CRLF; keep them LF in a Windows checkout too.
+*.sh text eol=lf
 # JSONL records are hashed byte for byte (P-DET-v1's population_sha256, annotation packages, run ledgers),
 # so git must never convert their line endings: stored and checked out exactly as written.
 *.jsonl -text

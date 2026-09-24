@@ -3,7 +3,7 @@
 Failures present on `master` that no current change introduced. Confirm each by running the same test on a clean
 `HEAD` worktree before listing it. Remove an entry in the commit that fixes it.
 
-**None known.** As of 2026-09-16 the full suite passes locally on Windows; see the GitHub Actions run for Linux.
+**None known.** CI runs the full suite on Linux and on Windows (`test-windows`, from 2026-09-24).
 
 ## Resolved (keep the cause; the same class of bug recurs)
 

@@ -48,27 +48,33 @@ number must trace to an artifact. Correctness here means *provenance and gates h
   once invalidated a built artifact.
 - Treat frozen artifacts as byte-exact. Never "normalize" line endings of tracked data files. A hash-pinned file
   type needs a `.gitattributes` rule (`-text`) so every platform checks it out byte for byte.
-- **CI runs on Linux; development happens on Windows.** Code must be portable in both directions:
+- **CI runs on Linux and Windows; development happens on Windows.** Code must be portable in both directions:
   - compare repository paths as `relative_to(root).as_posix()`, never `str(path)`;
   - never build a filename from an id containing `:` or other Windows-forbidden characters;
   - give every script with a shebang git mode `100755` (`git update-index --chmod=+x`), or ruff `EXE001`
-    fails CI.
+    fails CI; `tests/repo/test_executable_bits.py` catches it on Windows too.
   - GitHub Actions results: `gh run list` and `gh run view <id> --log-failed`.
 
 ## Verify a change the way CI does
 
-CI (`.github/workflows/ci.yml`) has two jobs. The Python job runs these; run them all before committing:
+CI (`.github/workflows/ci.yml`) has three jobs. `test` (Linux) runs these. Locally, run the lint, types and
+checks, but run only the tests that cover the files you changed (their own test files, tests that import the
+changed modules, and `tests/skills` when a skill changed); CI runs the whole suite:
 
 ```bash
 uv sync --locked --extra dev           # CI fails on a stale uv.lock
 .venv/Scripts/python.exe -m ruff check .
 .venv/Scripts/python.exe -m mypy src                                    # strict; see [tool.mypy] overrides
-.venv/Scripts/python.exe -m pytest -p no:cacheprovider -q
+.venv/Scripts/python.exe -m pytest -p no:cacheprovider -q <the tests covering your change>
 .venv/Scripts/opengrad-validate.exe
 .venv/Scripts/python.exe scripts/preserve_h200_state.py --verify      # frozen H200 pins, on committed blobs
 .venv/Scripts/python.exe scripts/repo/check_publication_hygiene.py    # secrets and local paths
 ```
 
+`test-windows` runs pytest, `opengrad-validate`, the preserved-state verify and the hygiene scan on
+`windows-latest` with `core.autocrlf=true`, where line endings make the byte-pinned checks differ from Linux.
+Strict mypy needs a venv without the ML extras to match CI; `transformers`, `safetensors`, `huggingface_hub` and
+`torch` are `ignore_missing_imports` in `pyproject.toml` because CI does not install them.
 The `mcp` job runs `npm run check` and `npm test` in `integrations/opengrad-mcp`. Actions are pinned to
 commit SHAs and the workflow has `contents: read` only; bump a pin by resolving the tag
 (`git ls-remote https://github.com/<owner>/<action> refs/tags/<tag>`), never by writing a tag name back.

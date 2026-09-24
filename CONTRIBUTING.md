@@ -16,7 +16,7 @@ uv run python scripts/repo/check_publication_hygiene.py
 ```
 
 Optional: `uv run pre-commit install` runs ruff on each commit (its version matches `uv.lock`).
-Python is 3.11 (`.python-version`). CI runs on Linux; see
+Python is 3.11 (`.python-version`). CI runs on Linux and Windows; see
 [`plugins/opengrad/skills/opengrad-development/SKILL.md`](plugins/opengrad/skills/opengrad-development/SKILL.md)
 for the Windows notes (line endings change hashes).
 
