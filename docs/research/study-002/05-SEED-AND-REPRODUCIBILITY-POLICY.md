@@ -108,3 +108,11 @@ The same three seed values are used on every provider (`nvidia`, `amd`, `cpu`). 
 across providers is **not** claimed and is not required for this study's claims, which are about
 corpus-level mechanism. Where a claim would depend on cross-provider identity, it is out of scope and
 says so ([13](13-HARDWARE-AGNOSTIC-EXECUTION.md), [14](14-HETEROGENEITY-POLICY.md)).
+
+## Implementation note (appended 2026-09-24)
+
+The two modes of [14](14-HETEROGENEITY-POLICY.md) are a config field, `reproducibility.determinism`, applied by
+`src/opengrad/training/determinism.py` before the model loads. A declared mode seeds Python's `random`, numpy,
+torch and CUDA and records which; `DECLARED_DETERMINISTIC` also sets torch's deterministic algorithms, cuDNN
+determinism and `CUBLAS_WORKSPACE_CONFIG`. A training config that declares neither fails the readiness gate
+`determinism_declared`, except the frozen Study 001 configs, which are recorded `UNDECLARED`.

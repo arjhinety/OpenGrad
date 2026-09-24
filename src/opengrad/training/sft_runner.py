@@ -26,6 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from opengrad.training.determinism import resolve_determinism
 from opengrad.training.model_components import (
     ComponentSettings,
     ModelComponentError,
@@ -68,6 +69,8 @@ class ResolvedSettings:
     save_steps: int
     max_checkpoints: int
     shuffle_seed_offset: int
+    #: `reproducibility.determinism` (`opengrad.training.determinism`); UNDECLARED when absent.
+    determinism: str
     lora: dict[str, Any] | None
     model_components: ComponentSettings
 
@@ -91,6 +94,7 @@ class ResolvedSettings:
             "gradient_checkpointing": self.gradient_checkpointing,
             "activation_checkpointing": self.activation_checkpointing,
             "seed": self.seed,
+            "determinism": self.determinism,
             "save_steps": self.save_steps,
             "max_checkpoints": self.max_checkpoints,
             "lora": self.lora,
@@ -154,6 +158,11 @@ def resolve_settings(experiment: dict[str, Any], trainer: dict[str, Any]) -> Res
 
     gradient_checkpointing = bool(trainer.get("gradient_checkpointing", False))
 
+    try:
+        determinism = resolve_determinism(experiment)
+    except ValueError as exc:
+        raise TrainingConfigError(str(exc)) from exc
+
     # Which checkpoint components the run carries and how MTP trains (full-model-components-v1).
     try:
         model_components = resolve_component_settings(trainer, algorithm="sft")
@@ -182,6 +191,7 @@ def resolve_settings(experiment: dict[str, Any], trainer: dict[str, Any]) -> Res
         save_steps=int((experiment.get("checkpointing") or {}).get("save_steps", 0) or 0),
         max_checkpoints=int((experiment.get("checkpointing") or {}).get("max_checkpoints", 3) or 0),
         shuffle_seed_offset=int(trainer.get("shuffle_seed_offset", 0)),
+        determinism=determinism,
         lora=lora,
         model_components=model_components,
     )

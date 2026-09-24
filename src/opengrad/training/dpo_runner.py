@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from opengrad.training.determinism import resolve_determinism
 from opengrad.training.model_components import (
     ComponentSettings,
     ModelComponentError,
@@ -217,6 +218,8 @@ class DPOSettings:
     reference: str
     scheduler: str
     model_components: ComponentSettings
+    #: `reproducibility.determinism` (`opengrad.training.determinism`); UNDECLARED when absent.
+    determinism: str
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -229,6 +232,7 @@ class DPOSettings:
             "max_seq_length": self.max_seq_length,
             "precision": self.precision,
             "seed": self.seed,
+            "determinism": self.determinism,
             "save_steps": self.save_steps,
             "max_checkpoints": self.max_checkpoints,
             "reference": self.reference,
@@ -270,6 +274,10 @@ def resolve_dpo_settings(experiment: dict[str, Any], trainer: dict[str, Any]) ->
         model_components = resolve_component_settings(trainer, algorithm="dpo")
     except ModelComponentError as exc:
         raise PreferenceDataError(str(exc)) from exc
+    try:
+        determinism = resolve_determinism(experiment)
+    except ValueError as exc:
+        raise PreferenceDataError(str(exc)) from exc
     return DPOSettings(
         beta=beta,
         learning_rate=float(trainer.get("learning_rate", 5e-6)),
@@ -285,4 +293,5 @@ def resolve_dpo_settings(experiment: dict[str, Any], trainer: dict[str, Any]) ->
         reference=str(reference),
         scheduler=str(trainer.get("scheduler", "constant")),
         model_components=model_components,
+        determinism=determinism,
     )

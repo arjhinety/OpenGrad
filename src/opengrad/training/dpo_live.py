@@ -35,6 +35,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from opengrad.training.determinism import apply_determinism, seed_everything
 from opengrad.training.dpo_runner import (
     PreferenceDataError,
     dpo_loss,
@@ -247,8 +248,10 @@ def run_real_dpo(
         json.dumps(identity, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
-    torch.manual_seed(settings.seed)
-    torch.cuda.manual_seed_all(settings.seed)
+    # Before the model exists: cuBLAS reads its workspace setting when its first handle is made.
+    determinism_record = apply_determinism(settings.determinism, torch)
+    determinism_record["seeded"] = seed_everything(settings.seed, settings.determinism, torch)
+    emit("determinism", **determinism_record)
     dtype = torch.bfloat16 if settings.precision == "bfloat16" else torch.float32
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(

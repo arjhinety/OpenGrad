@@ -423,3 +423,51 @@ def test_an_invalid_component_configuration_fails_the_gate(tmp_path):
     raw = {"trainer": {"type": "sft", "model_components": {"audio": "include"}}}
     ok, _detail, code = _model_components_state(tmp_path, raw)
     assert (ok, code) == (False, "CONFIG_INVALID")
+
+
+# -- determinism_declared (Study 002 docs 05 and 14) -------------------------------------------
+
+
+def _training_configs() -> set[str]:
+    import yaml
+
+    found = set()
+    for path in sorted((ROOT / "configs/experiments").glob("*.yaml")):
+        raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if str((raw.get("trainer") or {}).get("type", "")).lower() in {"sft", "dpo"}:
+            found.add(path.relative_to(ROOT).as_posix())
+    return found
+
+
+def test_the_study_001_exemption_list_is_exactly_the_existing_training_configs():
+    from opengrad.readiness import STUDY_001_TRAINING_CONFIGS
+
+    configs = _training_configs()
+    assert len(configs) == 14
+    assert configs == STUDY_001_TRAINING_CONFIGS
+
+
+@pytest.mark.parametrize(
+    ("determinism", "ok", "code"),
+    [
+        (None, False, "DETERMINISM_UNDECLARED"),
+        ("DECLARED_DETERMINISTIC", True, None),
+        ("NON_DETERMINISTIC_KERNEL", True, None),
+        ("sometimes", False, "DETERMINISM_INVALID"),
+    ],
+)
+def test_a_new_training_config_must_declare_its_determinism(tmp_path, determinism, ok, code):
+    from opengrad.readiness import _determinism_state
+
+    block = {"seed": 0} if determinism is None else {"seed": 0, "determinism": determinism}
+    state = _determinism_state(ROOT, tmp_path / "study002_arm.yaml", {"reproducibility": block})
+    assert (state[0], state[2]) == (ok, code)
+
+
+def test_a_study_001_config_records_undeclared_without_blocking():
+    from opengrad.readiness import _determinism_state
+
+    config = ROOT / "configs/experiments/m0_sft_canonical_v2_final.yaml"
+    ok, detail, code = _determinism_state(ROOT, config, {"reproducibility": {"seed": 42}})
+    assert (ok, code) == (True, None)
+    assert "UNDECLARED" in detail

@@ -36,10 +36,10 @@ mock: never evidence, never an experiment record.
 - `ready_for_baseline`: repository, config, revisions, template, evaluation manifest and materialization,
   contamination, leakage, disk, storage, parser, GPU probe;
 - `ready_for_sft` adds: GPU boundary, real B0, baseline artifacts, training-data policy, dataset revision and
-  snapshot, experiment preflight, renderability yield, supervision composition, and
-  `model_components_validation`;
-- `ready_for_dpo` adds: GPU boundary, real B0, baseline artifacts, experiment preflight, the DPO contract, and
-  `model_components_validation`.
+  snapshot, experiment preflight, renderability yield, supervision composition,
+  `model_components_validation` and `determinism_declared`;
+- `ready_for_dpo` adds: GPU boundary, real B0, baseline artifacts, experiment preflight, the DPO contract,
+  `model_components_validation` and `determinism_declared`.
 
 A gate that blocks a correct run is a finding about the gate. Record it; never relax the gate to pass.
 

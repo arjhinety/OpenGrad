@@ -36,6 +36,7 @@ from opengrad.experiments.schema import ExperimentConfig
 from opengrad.experiments.store import ExperimentStore
 from opengrad.hardware.probe import probe_hardware
 from opengrad.registry.validate import validate as validate_registry
+from opengrad.training.determinism import UNDECLARED, resolve_determinism
 from opengrad.training.model_components import (
     MODEL_COMPONENT_POLICY_VERSION,
     ModelComponentError,
@@ -456,9 +457,7 @@ def _training_data_contract(root: Path, raw: dict[str, Any]) -> tuple[bool, str]
     ):
         return False, "SFT dataset manifest IDs are missing or invalid"
     extra_hash_aliases = (
-        {"preference"}
-        if str(raw.get("trainer", {}).get("type", "")).lower() == "dpo"
-        else set()
+        {"preference"} if str(raw.get("trainer", {}).get("type", "")).lower() == "dpo" else set()
     )
     if (
         not isinstance(hashes, dict)
@@ -995,6 +994,52 @@ def _renderability_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, st
 #: The pre-training gate of `full-model-components-v1` (docs/MODEL_COMPONENT_POLICY.md §10).
 MODEL_COMPONENTS_VALIDATION = Path("reports/training/model-components-validation.json")
 REQUIRED_MODEL_COMPONENT_CHECKS = ("gpu_smoke_test", "gguf_export")
+
+#: Study 001's training configs. They predate the determinism declaration Study 002 requires
+#: (`14-HETEROGENEITY-POLICY.md`), are frozen and are not run again, so an undeclared mode is
+#: recorded for them rather than blocking. Every other training config must declare one.
+STUDY_001_TRAINING_CONFIGS = frozenset(
+    f"configs/experiments/{name}.yaml"
+    for name in (
+        "m0_sft",
+        "m0_sft_canonical_v2_final",
+        "m0_v2_final_minus_xlam_fixed_compute",
+        "m0_v2_final_minus_xlam_matched_exposure",
+        "m0_v2_final_supervision_call_prediction_only",
+        "m0_v2_final_supervision_complete_trajectory_only",
+        "m1_dpo",
+        "m1_dpo_canonical_v2_final",
+        "m1_dpo_canonical_v2_final_v2",
+        "qwen35_2b_m0_sft_full_v3",
+        "qwen35_2b_m0_sft_micro",
+        "qwen35_2b_m0_sft_v2corpus",
+        "qwen35_2b_m1_dpo_v1",
+        "qwen35_2b_m1_dpo_v1_restore",
+    )
+)
+
+
+def _determinism_state(
+    root: Path, config_path: Path, raw: dict[str, Any]
+) -> tuple[bool, str, str | None]:
+    """Whether the config declares its kernel-determinism mode (docs 05 and 14)."""
+    try:
+        mode = resolve_determinism(raw)
+    except ValueError as exc:
+        return False, str(exc), "DETERMINISM_INVALID"
+    if mode != UNDECLARED:
+        return True, f"reproducibility.determinism: {mode}", None
+    try:
+        relative = config_path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        relative = config_path.as_posix()
+    if relative in STUDY_001_TRAINING_CONFIGS:
+        return True, "Study 001 config, frozen: determinism recorded as UNDECLARED", None
+    detail = (
+        "reproducibility.determinism is not declared; set DECLARED_DETERMINISTIC or "
+        "NON_DETERMINISTIC_KERNEL (14-HETEROGENEITY-POLICY.md)"
+    )
+    return False, detail, "DETERMINISM_UNDECLARED"
 
 
 def _model_components_state(root: Path, raw: dict[str, Any]) -> tuple[bool, str, str | None]:
@@ -1624,6 +1669,22 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
             "PASS",
             "Not a training configuration; component validation deferred",
         )
+    if is_sft_config or is_dpo_config:
+        determinism_ok, determinism_detail, determinism_code = _determinism_state(
+            root, config_path, raw
+        )
+        add(
+            "determinism_declared",
+            "PASS" if determinism_ok else "FAIL",
+            determinism_detail,
+            determinism_code,
+        )
+    else:
+        add(
+            "determinism_declared",
+            "PASS",
+            "Not a training configuration; determinism declaration deferred",
+        )
 
     # Baseline execution is the operation that establishes real_b0. It may
     # require the hardware probe and repository/data contracts, but must not
@@ -1656,6 +1717,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "renderability_yield",
         "supervision_composition",
         "model_components_validation",
+        "determinism_declared",
     }
     ready_for_sft = all(gate_map[name]["status"] == "PASS" for name in sft_names)
     dpo_names = baseline_prerequisites | {
@@ -1665,6 +1727,7 @@ def readiness(root: Path, config_path: Path | None = None) -> dict[str, Any]:
         "experiment_preflight",
         "dpo_contract",
         "model_components_validation",
+        "determinism_declared",
     }
     ready_for_dpo = is_dpo_config and all(gate_map[name]["status"] == "PASS" for name in dpo_names)
     blocking = [gate["name"] for gate in gates if gate["status"] == "FAIL"]

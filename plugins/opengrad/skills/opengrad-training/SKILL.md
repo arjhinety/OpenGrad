@@ -17,6 +17,13 @@ description: How to change or run OpenGrad training correctly — the real SFT a
   - `trainer.initial_checkpoint` plus `initial_checkpoint_sha256`, and `parent_checkpoint_id`.
 
   The reference model is frozen, and only completion tokens are scored.
+- **Determinism** (`src/opengrad/training/determinism.py`): `reproducibility.determinism` is
+  `DECLARED_DETERMINISTIC` (torch deterministic algorithms, cuDNN deterministic, `CUBLAS_WORKSPACE_CONFIG`) or
+  `NON_DETERMINISTIC_KERNEL` (flags untouched; REP-A measures the noise floor), per Study 002 doc 14. Absent means
+  `UNDECLARED`, which keeps Study 001's behaviour (torch and CUDA seeded only) and blocks readiness for any config
+  outside `STUDY_001_TRAINING_CONFIGS`. Both trainers apply it before loading the model and log a `determinism`
+  event. Deterministic mode raises at an op with no deterministic kernel; that is the signal to declare
+  `NON_DETERMINISTIC_KERNEL`, never to set `warn_only`.
 - **Resume.** A run directory holding a checkpoint with `training_state.pt` resumes: weights, optimizer,
   counters and all RNG streams come back. Raising `max_steps` continues a run, and resuming at or past
   `max_steps` is refused.

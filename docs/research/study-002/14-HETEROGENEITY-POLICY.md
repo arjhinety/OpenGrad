@@ -78,3 +78,11 @@ Every table states the device class of each row, or states that all rows share o
 prints the `HOMOGENEOUS`/`HETEROGENEOUS` verdict above it. Where the verdict is `NOT_RUN`, the table says so
 in the table, because a reader who has to reach the limitations section to discover that two rows came from
 two different providers has effectively been misled.
+
+## Implementation note (appended 2026-09-24)
+
+`DECLARED_DETERMINISTIC` and `NON_DETERMINISTIC_KERNEL` are the values of `reproducibility.determinism`
+(`src/opengrad/training/determinism.py`); readiness blocks a Study 002 training config that declares neither
+([05](05-SEED-AND-REPRODUCIBILITY-POLICY.md), implementation note). Whether Qwen3.5's kernels admit
+`DECLARED_DETERMINISTIC` is unknown until a GPU smoke run: torch raises at the first operation without a
+deterministic implementation.
