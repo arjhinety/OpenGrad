@@ -87,7 +87,7 @@ python_version = "3.11"
 strict = true
 
 # Untyped third-party packages, and optional ones the dev extra does not install (CI has no torch,
-# transformers, safetensors or huggingface_hub; the code imports them lazily).
+# transformers, safetensors, huggingface_hub or numpy; the code imports them lazily).
 [[tool.mypy.overrides]]
 module = [
     "yaml",
@@ -100,6 +100,8 @@ module = [
     "safetensors.*",
     "huggingface_hub",
     "huggingface_hub.*",
+    "numpy",
+    "numpy.*",
 ]
 ignore_missing_imports = true
 
