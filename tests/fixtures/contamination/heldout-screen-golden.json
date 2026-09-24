@@ -1,5 +1,5 @@
 {
-  "audit_artifact": "reports\\data\\behavioral-heldout-v2-contamination-audit.json",
+  "audit_artifact": "reports/data/behavioral-heldout-v2-contamination-audit.json",
   "audit_queue": [
     {
       "candidates": {},

@@ -378,7 +378,8 @@ def screen(
         },
         "audit_queue": audit_queue,
         "audit_queue_size": len(queue),
-        "audit_artifact": str(AUDIT_PATH),
+        # POSIX form on every platform: the committed reports were written that way.
+        "audit_artifact": AUDIT_PATH.as_posix(),
         "interpretation": (
             "Levels 1-4 are machine-measured. Level 5 is a human adjudication of audit_queue "
             "recorded in the separate audit artifact; this generated report is an input to "

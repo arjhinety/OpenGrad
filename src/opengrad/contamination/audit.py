@@ -332,7 +332,8 @@ def save_audit(path: Path, artifact: AuditArtifact) -> Path:
 class Quarantine:
     schema_version: int = 1
     manifest_id: str = MANIFEST_ID
-    generated_from_audit: str = str(AUDIT_PATH)
+    # POSIX form on every platform, as the committed quarantine records it.
+    generated_from_audit: str = AUDIT_PATH.as_posix()
     updated_at: str = ""
     excluded: list[dict[str, Any]] = field(default_factory=list)
 
