@@ -64,8 +64,10 @@ description: How OpenGrad's registries, provenance claims and written records st
   - evidence resolves;
   - an adopted candidate is also registered in `datasets.yaml`.
 
-  `owner_decision` stays PENDING until the study owner decides; `tests/registry/test_source_screening.py` pins
-  it.
+  `owner_decision` stays PENDING until the study owner decides. Adoption names the registered records and the
+  amendment that records it (`study-002-answer-heldout` → 41, `study_002_prereg_v9`), and
+  `tests/registry/test_source_screening.py` pins it. An evaluation-only record has `intended_stages: [evaluation]`
+  and `allowed_splits: []`, so the training firewall never admits it.
 - **Views are generated.** `scripts/reporting/generate_source_views.py` writes `docs/datasets/SOURCE_REGISTRY.md`
   and `docs/datasets/SOURCE_SCREENING.md`, including the screening flow counts; the test requires them current.
   Two hand-written documents still carry revision tables: the dated redistribution audit and

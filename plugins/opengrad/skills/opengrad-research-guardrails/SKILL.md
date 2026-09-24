@@ -20,8 +20,9 @@ follows is the operational core.
   version (the precedents are `28-PDET-MODEL-LABEL-AMENDMENT.md` → `study_002_prereg_v2`, and
   `29-PDET-RATIONALE-OPTIONAL-AMENDMENT.md` → `study_002_prereg_v3`, and
   `30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md` → `study_002_prereg_v4`, adopted in place with its status line
-  changed, and `34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md` → `study_002_prereg_v5`), written *before* results it could
-  influence (G1).
+  changed, and `34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md` → `study_002_prereg_v5`, and
+  `41-ANSWER-STRATA-AMENDMENT.md` → `study_002_prereg_v9`, which names a data source and was committed with its
+  drawn population before any label existed), written *before* results it could influence (G1).
 - **A gate or threshold, to make a run pass.** A threshold that blocks a correct result is a finding about the
   threshold and is recorded, not edited around (`docs/contributing/README.md`).
 

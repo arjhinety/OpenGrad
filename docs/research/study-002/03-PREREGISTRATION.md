@@ -1,8 +1,9 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v8` (2026-09-24).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8 at the
-> end of this document ([40](40-PREREG-V8-DRAFT.md)). Entries are appended so cited line numbers hold.
+> **Current version: `study_002_prereg_v9` (2026-09-24).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8 and v9 at
+> the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md)). Entries are
+> appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
 committed **before the first Study 002 training run is launched and before any Study 002 evaluation
@@ -306,3 +307,37 @@ Appended here rather than under "Amendments" so that line numbers other document
   govern has been seen.
 - **Code:** `ADOPTED_PARAMETERS` and `STUDY_002_GATE_CONTRACT = 3` in
   `src/opengrad/verification/study_002_gate.py`; the ERRATA entry is `reports/ERRATA.md` §24.
+
+### `study_002_prereg_v9` — 2026-09-24
+
+- **Item changed:** [06](06-SPLIT-SPEC.md) "Building `P-CONF` for four modes", item 2.
+  - **The `ANSWER` strata set's source is named.** It has two pools:
+    - pool N, BFCL's two no-call files at the gorilla revision the benchmark registry pins, relabelled;
+    - pool K, 850 Natural Questions questions (`nq_open` validation) paired with BFCL tool schemas that cannot
+      serve them.
+  - **How the pools are screened and labelled.** Both pools are screened against every training corpus and the
+    When2Call evaluation splits, and labelled blind by the three non-Claude annotators of 34, with a
+    two-of-three reference.
+  - **Two strata, reported separately:** `ANSWER-natural` and `ANSWER-constructed`, each judged against 06 on
+    its own n.
+  - **Balance is measured, not enforced.** 06's balance requirement is replaced by a measured report of length
+    and tool count: source balance is impossible, and length balance by subsampling would cut the strata below
+    their sizing.
+- **Reason:** the gap 06 §C2 records. No repository pool reaches the `n ≥ 200` floor. The screening of 27
+  public candidates found one usable natural source, estimated at about 389 `ANSWER` items: enough for the
+  floor, not for 8 points (`registry/source_screening.yaml`, `study-002-answer-heldout`).
+- **Owner decision:** 2026-09-24, *"Proceed with your recommendation on the ANSWER source."*
+- **Not changed:**
+  - every threshold and the `n ≥ 200` floor;
+  - C1, C2, the one-shot discipline and the confirmatory partition;
+  - `P-DEV`, `P-UNANS` and `P-SEALED`;
+  - every classifier, P-DET and C1 decision of v2–v8.
+- **Candidates already scored:** none. The candidate population was drawn by
+  `src/opengrad/verification/answer_strata.py`:
+  - 1,767 items (917 in pool N, 850 in pool K);
+  - sha256 `25ef4c2579affb3591aa542f3513eff6af82b4e5bebdd819457e7ae0b52bbfa8`.
+
+  It was committed with this entry, before any label existed.
+- **Arms launched under an earlier version:** none. Nothing has been trained, and no `P-CONF` score exists.
+- **Full record:** [41-ANSWER-STRATA-AMENDMENT.md](41-ANSWER-STRATA-AMENDMENT.md); the ERRATA entry is
+  `reports/ERRATA.md` §26.

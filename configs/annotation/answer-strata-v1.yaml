@@ -1,0 +1,159 @@
+# Annotation of ANSWER-STRATA-v1: the right response mode for a prompt with the tools offered (Study 002,
+# study_002_prereg_v9).
+#
+# Amendment: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md §7-§9 (adopted).
+# - What is labelled: the response the assistant *should* give. No assistant response is shown.
+# - Items: both pools (natural and constructed), mixed and blinded.
+# - Reference: a three-model consensus (41 §9, as in 34), declared below.
+#
+#   python scripts/run_external_annotation.py answer-strata-v1 --annotator model.gpt-5.6-sol --size 20
+
+task_id: answer-strata-v1
+version: "1"
+title: ANSWER-STRATA-v1 response-mode annotation
+task_type: single_label
+annotation_schema_version: answer-strata-annotation-v1
+
+labels: [CALL, ANSWER, CLARIFY, UNSUPPORTED, UNKNOWN]
+shortcuts: {"1": CALL, "2": ANSWER, "3": CLARIFY, "4": UNSUPPORTED, "5": UNKNOWN}
+unknown_labels: [UNKNOWN]
+
+source:
+  path: reports/study-002/answer-strata-v1/answer-strata-v1.population.jsonl
+  format: jsonl
+  id_field: answer_id
+  expected_sha256: 25ef4c2579affb3591aa542f3513eff6af82b4e5bebdd819457e7ae0b52bbfa8
+  expected_items: 1767
+
+# 41 §7: the user message and the offered tools, nothing else.
+fields:
+  user:
+    label: User message
+    path: user_message
+  tools:
+    label: Available tools
+    path: tools
+
+# 41 §7: blind to the pool, the source dataset, the upstream id and the reference answers. Never displayed,
+# filtered on or sent to the browser. No metadata chips and no filters are declared, for the same reason.
+blind_fields:
+  - gold_policy_label
+  - ambiguity_status
+  - annotator_id
+  - annotator_rationale
+  - boundary_rule_cited
+  - annotation_version
+  - pool
+  - source_dataset
+  - source_id
+  - reference_answers
+
+extra_fields:
+  - key: ambiguity_status
+    label: Ambiguity status
+    type: select
+    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT]
+    default: NONE
+    required: true
+  - key: annotator_rationale
+    label: Rationale
+    type: text
+    required: false
+    adjudication: false
+    help: Optional. A short note on why, or on what was hard, if you want one.
+  - key: boundary_rule_cited
+    label: Boundary rule (41 §8)
+    type: select
+    options: ["1", "2", "3", "4", "5", "6", "none"]
+    default: "none"
+    required: false
+    help: Cite 1-6 when a boundary rule decided the label.
+
+constraints:
+  - when_label_in: [UNKNOWN]
+    field: ambiguity_status
+    forbidden: [NONE]
+    message: UNKNOWN needs an ambiguity reason (set ambiguity_status).
+  - when_label_not_in: [UNKNOWN]
+    field: ambiguity_status
+    allowed: [NONE]
+    message: An ambiguous item is labeled UNKNOWN; a mode label needs ambiguity_status NONE.
+
+disagreement_keys: [label, ambiguity_status]
+
+adjudication_fields:
+  - key: decision_rule
+    label: Deciding boundary rule (41 §8)
+    type: select
+    options: ["1", "2", "3", "4", "5", "6", "none"]
+    required: true
+
+# 41 §8 only. Never 41 §1-§7 or §9-§13: they name the sources, the pools and the construction.
+instructions:
+  - title: Rubric - response modes and boundary rules (41 §8)
+    file: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md
+    include_sections: ["8."]
+
+# The server refuses to start if the served rubric text contains one of these.
+instruction_forbidden_terms:
+  - BFCL
+  - Berkeley
+  - gorilla
+  - nq_open
+  - Natural Questions
+  - pool
+  - constructed
+  - natural
+  - irrelevance
+  - reference_answers
+  - source_dataset
+
+record_keys:
+  item_id: answer_id
+  label: gold_policy_label
+  annotation_schema_version: annotation_version
+
+output:
+  dir: reports/study-002/answer-strata-v1/annotation
+  session_file: "answer-strata-v1.annotations.{annotator_id}.{session_id}.jsonl"
+  history_file: "audit/answer-strata-v1.history.{annotator_id}.{session_id}.jsonl"
+  adjudication_history_file: audit/answer-strata-v1.adjudication-history.jsonl
+  disagreements_file: answer-strata-v1.disagreements.jsonl
+  adjudication_file: answer-strata-v1.adjudicated.jsonl
+  gold_file: answer-strata-v1.gold.jsonl
+  manifest_file: answer-strata-v1.annotation-manifest.json
+
+protected_paths:
+  - reports/study-002/answer-strata-v1/answer-strata-v1.population.jsonl
+  - reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
+  - reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json.sha256
+
+state_db: .annotation/answer-strata-v1.sqlite3
+
+# The three-model consensus reference is computed separately (41 §9), never frozen as human gold.
+freeze:
+  allowed_designs: [two_pass, single_annotator]
+  require_adjudication: true
+  single_annotator_review:
+    flagged: true
+    labels: [UNKNOWN]
+    field_not_in:
+      boundary_rule_cited: ["none"]
+
+# 41 §7: the three non-Claude annotators of 34. Their labels are model judgments (annotator_kind: model).
+model_annotators:
+  - annotator_id: model.gemini-3.8-flash-high
+    model: Gemini 3.8 Flash (High)
+    procedure: configs/annotation/answer-strata-v1.model-procedure.md
+    procedure_sha256: 5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb
+    authorization: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md
+  - annotator_id: model.gpt-5.6-sol
+    model: gpt-5.6-sol
+    procedure: configs/annotation/answer-strata-v1.model-procedure.md
+    procedure_sha256: 5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb
+    authorization: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md
+  - annotator_id: model.deepseek-v4.1-flash
+    model: deepseek-v4.1-flash
+    procedure: configs/annotation/answer-strata-v1.model-procedure.md
+    procedure_sha256: 5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb
+    authorization: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md

@@ -1,0 +1,138 @@
+{
+  "artifact_kind": "ANSWER_STRATA_POPULATION",
+  "blinded_fields": [
+    "pool",
+    "source_dataset",
+    "source_id",
+    "reference_answers"
+  ],
+  "code_sha256_lf": {
+    "src/opengrad/contamination/levels.py": "36f25de8d849277d2852b3f9d15824a2b032c4fb4637116ad6e3c35665240371",
+    "src/opengrad/verification/answer_strata.py": "5bd4d65ff05e19204d32bdaaaff19263a8053defdf1c3b6849c2c3f53e57bc83"
+  },
+  "counts": {
+    "duplicates_removed": {
+      "K": 0,
+      "N": 105
+    },
+    "pool_k_available_after_screen": 3439,
+    "pool_k_skipped_before_screen": {
+      "time_cue": 169
+    },
+    "pool_n": {
+      "eligible": 1070,
+      "ineligible": {
+        "no_tool": 4,
+        "not_one_user_turn": 8,
+        "system_message": 42
+      }
+    },
+    "realized": {
+      "K": 850,
+      "N": 917,
+      "total": 1767
+    },
+    "realized_by_source": {
+      "bfcl_v4_irrelevance": 226,
+      "bfcl_v4_live_irrelevance": 691,
+      "nq_open_validation": 850
+    },
+    "screen": {
+      "engine_level_counts": {
+        "level_1": 23,
+        "level_2": 24,
+        "level_3": 11,
+        "level_4": 10
+      },
+      "engine_thresholds": {
+        "containment": 0.6,
+        "edit_similarity": 0.8,
+        "jaccard": 0.5,
+        "max_df": 1000,
+        "min_shingles": 25
+      },
+      "flagged": 50,
+      "flagged_by_pool": {
+        "K": 2,
+        "N": 48
+      },
+      "probe_exact": 27,
+      "probe_half_contained": 37,
+      "training_user_turns": 446466
+    },
+    "tool_pool": {
+      "functions": 370
+    },
+    "tools_per_item": {
+      "K": {
+        "1": 282,
+        "2": 303,
+        "3": 265
+      },
+      "N": {
+        "1": 630,
+        "2": 68,
+        "3": 49,
+        "4": 53,
+        "5": 53,
+        "6": 34,
+        "7": 16,
+        "8": 6,
+        "9": 1,
+        "10": 5,
+        "12": 1,
+        "37": 1
+      }
+    }
+  },
+  "gold_labels_present": false,
+  "id_rule": "ans1: + sha256(pool : source_dataset : source_id)",
+  "inputs": {
+    "bfcl_irrelevance": {
+      "sha256": "2b6ed4c2e992cdcf5f1678a701851f944bef7550ee026ed1ddb89efed5be01a6",
+      "url": "https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_irrelevance.json"
+    },
+    "bfcl_live_irrelevance": {
+      "sha256": "6559fda2beaceb609a2cd2e504c65b4a56cb448e1ef88fddfd199e163d163349",
+      "url": "https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_live_irrelevance.json"
+    },
+    "bfcl_simple_python": {
+      "sha256": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991",
+      "url": "https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_simple_python.json"
+    },
+    "nq_open_validation": {
+      "sha256": "b074bed0bccb56fa1551a8ac1c9c51ce89bc11c7fbb6a9c713b2c33a98531e12",
+      "url": "https://huggingface.co/datasets/google-research-datasets/nq_open/resolve/5dd9790a83002ad084ddeb7c420dc716852c6f28/nq_open/validation-00000-of-00001.parquet"
+    }
+  },
+  "licences": {
+    "pool_K": "CC-BY-SA-3.0 (Natural Questions via nq_open) with Apache-2.0 tool schemas (BFCL)",
+    "pool_N": "Apache-2.0 (BFCL)"
+  },
+  "pool_k_size": 850,
+  "population_file": "answer-strata-v1.population.jsonl",
+  "population_id": "ANSWER-STRATA-v1",
+  "population_records": 1767,
+  "population_sha256": "25ef4c2579affb3591aa542f3513eff6af82b4e5bebdd819457e7ae0b52bbfa8",
+  "preregistration": {
+    "adoption_amendment": "study_002_prereg_v9",
+    "document": "docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md",
+    "status_at_build": "ADOPTED"
+  },
+  "presentation_order": "sha256(seed | order | answer_id) ascending",
+  "protocol_version": "answer-strata-001-v1",
+  "schema_version": 1,
+  "screen_corpora_manifest_sha256": {
+    "button.jsonl": "2692b5cc42ff64f4f0ba94e83e4488bda9556f8c15e8d8acb114eab4335a3746",
+    "glaive": "b80d0868eba3ff457d5e5b7e52395badc8ec6cd6426006ebc32173f9586aa642",
+    "looptool": "2d2749f767a18547fd1a771666b62284efa2d8453ab4a5f2d0dc71709b2d30c5",
+    "toolace": "a16e9a37a0780b6ff4b42e77bfca7869dad329dc25531e2b6719bc2e84617400",
+    "when2call-llm-judge": "a59beaf7811186c21c2fa5eefdd23657c4295233972458f6eaece48ee0316d18",
+    "when2call-mcq": "ff957a8686e5a04748dd3109ebfd70b3f49afa6d0d7bb680591be56870f7789f",
+    "when2call-preference": "9e6b5bc1f1d4450f787c8d98a38e8b4fcdca7021687c6066ea46bdb85f9a1904",
+    "when2call-sft": "0056c2d8134ab69d855800f754e294a9f8530d5997a84abdf9b043e885a2816c",
+    "xlam": "ea15b7e9d3f28d35870e3337a8d1ed9cbc12693afe55122377c1a47b711173d3"
+  },
+  "seed": "opengrad-answer-strata-001-v1",
+  "statement": "Candidate items for Study 002's ANSWER strata set, before labelling. Pool N is natural (BFCL no-call items); pool K is constructed (Natural Questions questions with tools that cannot serve them). The strata are the items the three-model consensus labels ANSWER (41 §9)."
+}

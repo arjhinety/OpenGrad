@@ -243,3 +243,12 @@ ToolHop has CC BY 4.0 data and Apache-2.0 code, with 995 multi-hop queries built
 53. <https://github.com/openai/simple-evals>
 54. <https://nlp.cs.washington.edu/triviaqa/>
 55. <https://github.com/mandarjoshi90/triviaqa/blob/master/LICENSE>
+
+## Correction (2026-09-24)
+
+- **Natural Questions' data licence is CC-BY-SA-3.0, not CC-BY-4.0** as §17 and the comparison table say. The
+  CC-BY-4.0 figure is the licence of the paper, not of the data.
+- **The verdict stands**, because share-alike still permits redistribution. The constructed items are
+  distributed under CC-BY-SA-3.0.
+- **Where it is recorded:** the screening log carries the corrected licence, and `reports/ERRATA.md` §26
+  records the correction.

@@ -11,7 +11,7 @@ Verdicts: PASS, PARTIAL, FAIL, UNKNOWN, n/a.
 Which public, licence-compatible datasets can supply Study 002's held-out ANSWER stratum: prompts where a tool-calling model is offered tools, none is needed, and the right behaviour is a direct prose answer from general knowledge?
 
 - Purpose: EVALUATION_POPULATION; requirement: `docs/research/study-002/06-SPLIT-SPEC.md`
-- Owner decision: **PENDING**
+- Owner decision: **ADOPTED** — adopted bfcl-irrelevance, bfcl-live-irrelevance, natural-questions-dev
 - Report: `reports/source-screening/study-002-answer-heldout/REPORT.md`
 
 ### Criteria
@@ -45,7 +45,7 @@ Which public, licence-compatible datasets can supply Study 002's held-out ANSWER
 |---|---|---|---|---|---|---|---|---|---|---|
 | `bfcl-irrelevance` | item | Apache-2.0 | PASS | PARTIAL | PASS | PASS | PARTIAL | PASS | PASS | SHORTLISTED |
 | `bfcl-live-irrelevance` | item | Apache-2.0 | PASS | PARTIAL | PASS | PASS | PARTIAL | PASS | PASS | SHORTLISTED |
-| `natural-questions-dev` | question | CC-BY-4.0 | n/a | PASS | PASS | ? | ? | PASS | PASS | SHORTLISTED |
+| `natural-questions-dev` | question | CC-BY-SA-3.0 | n/a | PASS | PASS | PASS | ? | PASS | PASS | SHORTLISTED |
 | `when-tools-get-in-the-way` | item | UNRESOLVED | PASS | PASS | ? | ? | ? | **FAIL** | PASS | WATCHLIST |
 | `when2tool` | item | NONE | PASS | PARTIAL | **FAIL** | PASS | PASS | PASS | PASS | WATCHLIST |
 | `acebench-special` | item | MIT | PASS | **FAIL** | PASS | ? | PARTIAL | PASS | **FAIL** | EXCLUDED |

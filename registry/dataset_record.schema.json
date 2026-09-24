@@ -68,7 +68,7 @@
       "x-croissant": null
     },
     "category": {
-      "enum": ["tool_use", "preference"],
+      "enum": ["tool_use", "preference", "question_answering"],
       "x-croissant": "sc:keywords"
     },
     "papers": {
@@ -250,13 +250,14 @@
       "x-croissant": null
     },
     "contamination_status": {
-      "description": "Outcome of the contamination screen (docs/evaluation/CONTAMINATION_ADJUDICATION.md).",
+      "description": "Outcome of the contamination screen (docs/evaluation/CONTAMINATION_ADJUDICATION.md). SCREENED_LEVELS_1_4: an evaluation source whose items were screened at levels 1-4 against the training corpora and every flagged item removed; level 5 is not claimed.",
       "enum": [
         "UNASSESSED",
         "SEMANTIC_REVIEW_COMPLETE",
         "NOT_REVIEWED_FOR_V2",
         "EXCLUDED_FROM_CLEAN_DEFAULT",
-        "TRAINING_SOURCE_ONLY"
+        "TRAINING_SOURCE_ONLY",
+        "SCREENED_LEVELS_1_4"
       ],
       "x-croissant": null
     },

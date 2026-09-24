@@ -871,3 +871,198 @@ datasets:
     source_revision: 0582f7749df63a96fdc3070932e83e72396ace53
     upstream_license: CC-BY-4.0
     split_used: train_preference
+
+# Evaluation-only sources adopted for Study 002's ANSWER strata set (study_002_prereg_v9,
+# docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md). None names an sft stage or an allowed split, so the
+# training firewall never admits them.
+- id: bfcl-irrelevance
+  display_name: BFCL irrelevance (non-live)
+  organization: Gorilla (UC Berkeley)
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: tool_use
+  papers:
+  - bfcl
+  retrieval_date: '2026-09-24'
+  date_published:
+    value: '2024-02-27'
+    source: Hugging Face API createdAt of gorilla-llm/Berkeley-Function-Calling-Leaderboard, read 2026-09-24
+  hf_id: null
+  repository: https://github.com/ShishirPatil/gorilla
+  source_repository: https://github.com/ShishirPatil/gorilla/tree/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data
+  distribution:
+  - name: BFCL_v4_irrelevance.json
+    content_url: https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_irrelevance.json
+    sha256: 2b6ed4c2e992cdcf5f1678a701851f944bef7550ee026ed1ddb89efed5be01a6
+    size_bytes: 159940
+    encoding_format: application/jsonlines
+    verified_from: sha256 of the file downloaded from content_url on 2026-09-24; size equals the pinned tree's
+  source_revision:
+    value: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+    verified: true
+    source: the gorilla revision registry/benchmarks.yaml pins for bfcl-v4
+  license:
+    value: Apache-2.0
+    verified: true
+    source: https://github.com/ShishirPatil/gorilla/blob/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/LICENSE
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: registry/source_screening.yaml (study-002-answer-heldout, adopted 2026-09-24)
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: bfcl
+  modifications_disclosed: true
+  sample_count:
+    published: 240
+    verified_from: https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_irrelevance.json
+  retained_after_filtering:
+    value: 226
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - irrelevance
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: HIGH_KNOWN_BENCHMARK_OVERLAP
+  overlap_benchmarks:
+  - bfcl-v4
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/source-screening/study-002-answer-heldout/bfcl-training-overlap.json
+  - reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
+  planned_initial_mixture_percent: null
+  notes: Pool N of the ANSWER strata candidate population (41 §4). Relabelled into the four modes by three
+    non-Claude models (41 §7-§9); its no-call labels are not used. Evaluation only, never trained on.
+- id: bfcl-live-irrelevance
+  display_name: BFCL live irrelevance
+  organization: Gorilla (UC Berkeley)
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: tool_use
+  papers:
+  - bfcl
+  retrieval_date: '2026-09-24'
+  date_published:
+    value: '2024-02-27'
+    source: Hugging Face API createdAt of gorilla-llm/Berkeley-Function-Calling-Leaderboard, read 2026-09-24
+  hf_id: null
+  repository: https://github.com/ShishirPatil/gorilla
+  source_repository: https://github.com/ShishirPatil/gorilla/tree/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data
+  distribution:
+  - name: BFCL_v4_live_irrelevance.json
+    content_url: https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_live_irrelevance.json
+    sha256: 6559fda2beaceb609a2cd2e504c65b4a56cb448e1ef88fddfd199e163d163349
+    size_bytes: 2209534
+    encoding_format: application/jsonlines
+    verified_from: sha256 of the file downloaded from content_url on 2026-09-24; size equals the pinned tree's
+  source_revision:
+    value: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+    verified: true
+    source: the gorilla revision registry/benchmarks.yaml pins for bfcl-v4
+  license:
+    value: Apache-2.0
+    verified: true
+    source: https://github.com/ShishirPatil/gorilla/blob/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/LICENSE
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: registry/source_screening.yaml (study-002-answer-heldout, adopted 2026-09-24)
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: bfcl
+  modifications_disclosed: true
+  sample_count:
+    published: 884
+    verified_from: https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_live_irrelevance.json
+  retained_after_filtering:
+    value: 691
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - live_irrelevance
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: HIGH_KNOWN_BENCHMARK_OVERLAP
+  overlap_benchmarks:
+  - bfcl-v4
+  - when2call
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/source-screening/study-002-answer-heldout/bfcl-training-overlap.json
+  - reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
+  planned_initial_mixture_percent: null
+  notes: Pool N of the ANSWER strata candidate population (41 §4). Unmodified user traffic in several languages;
+    When2Call's test set was built from an earlier release of it, so the §6 screen removed the shared items.
+    Relabelled by three non-Claude models; evaluation only, never trained on.
+- id: natural-questions-dev
+  display_name: Natural Questions dev, open-domain short-answer questions (nq_open validation)
+  organization: Google Research
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: question_answering
+  papers: []
+  retrieval_date: '2026-09-24'
+  date_published:
+    value: '2022-03-02'
+    source: Hugging Face API createdAt of google-research-datasets/nq_open, read 2026-09-24
+  hf_id: google-research-datasets/nq_open
+  repository: https://github.com/google-research-datasets/natural-questions
+  source_repository: https://huggingface.co/datasets/google-research-datasets/nq_open
+  distribution:
+  - name: nq_open/validation-00000-of-00001.parquet
+    content_url: https://huggingface.co/datasets/google-research-datasets/nq_open/resolve/5dd9790a83002ad084ddeb7c420dc716852c6f28/nq_open/validation-00000-of-00001.parquet
+    sha256: b074bed0bccb56fa1551a8ac1c9c51ce89bc11c7fbb6a9c713b2c33a98531e12
+    size_bytes: 213603
+    encoding_format: application/x-parquet
+    verified_from: Hugging Face LFS sha256 at the pinned revision (api/datasets/<repo>/revision/<rev>?blobs=true, read 2026-09-24)
+  source_revision:
+    value: 5dd9790a83002ad084ddeb7c420dc716852c6f28
+    verified: true
+    source: Hugging Face dataset snapshot API
+  license:
+    value: CC-BY-SA-3.0
+    verified: true
+    source: https://huggingface.co/datasets/google-research-datasets/nq_open
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: registry/source_screening.yaml (study-002-answer-heldout, adopted 2026-09-24; share-alike)
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: Kwiatkowski et al. 2019, Natural Questions (TACL); Lee et al. 2019 (the open-domain split)
+  modifications_disclosed: true
+  sample_count:
+    published: 3610
+    verified_from: https://huggingface.co/datasets/google-research-datasets/nq_open
+  retained_after_filtering:
+    value: 850
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - validation
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: LOW_TRAINING_ONLY
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
+  planned_initial_mixture_percent: null
+  notes: Pool K of the ANSWER strata candidate population (41 §5). Its questions are paired with BFCL tool schemas
+    that cannot serve them; the constructed items are distributed under CC-BY-SA-3.0 (share-alike). The data
+    licence is CC-BY-SA-3.0, not the CC-BY-4.0 of the paper, which the screening first recorded.

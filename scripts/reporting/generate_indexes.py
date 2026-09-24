@@ -50,6 +50,7 @@ REPORT_DIRECTORIES: dict[str, tuple[str, str]] = {
     "prose-classifier": ("Study 002", "Decision-classifier development sets, check rounds and one-shot tests; see its README"),
     "releases": ("Study 001", "Hugging Face publication records"),
     "source-screening": ("Study 002", "Data-source screenings: the written report and the artifacts behind its numbers"),
+    "study-002": ("Study 002", "New Study 002 evidence: the ANSWER strata candidate population and its three-model labels"),
     "training": ("Study 001", "Pre-training component-gate evidence"),
     "visual": ("Study 001", "Figures"),
 }

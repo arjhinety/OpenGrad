@@ -20,11 +20,14 @@ REVISION = re.compile(r"`([0-9a-f]{40})`")
 
 
 def _upstream_revisions() -> set[str]:
+    # Both documents cover the training sources; evaluation-only sources are not theirs.
     registry = yaml.safe_load((ROOT / "registry/datasets.yaml").read_text(encoding="utf-8"))
     return {
         record["source_revision"]["value"]
         for record in registry["datasets"]
-        if record["role"] == "UPSTREAM_SOURCE" and record["lifecycle"] == "ACTIVE"
+        if record["role"] == "UPSTREAM_SOURCE"
+        and record["lifecycle"] == "ACTIVE"
+        and record["intended_stages"] != ["evaluation"]
     }
 
 

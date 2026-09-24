@@ -45,10 +45,19 @@ def test_committed_log_validates_and_every_candidate_is_counted() -> None:
     assert (census.discovered, census.checked, census.failed) == (27, 27, 0)
 
 
-def test_the_owner_decision_is_still_pending() -> None:
-    # Adopting a source is the study owner's decision (06-SPLIT-SPEC, open item 2 of 20). Changing
-    # this status is a research-phase decision and must come with the owner's recorded choice.
-    assert _log()["screenings"][0]["owner_decision"] == {"status": "PENDING"}
+def test_the_owner_decision_is_recorded_with_its_amendment() -> None:
+    # Adopting a source is the study owner's decision (06-SPLIT-SPEC, open item 2 of 20). The owner
+    # adopted the recommendation on 2026-09-24 as study_002_prereg_v9 (41), recorded in 03 and ERRATA.
+    decision = _log()["screenings"][0]["owner_decision"]
+    assert decision["status"] == "ADOPTED"
+    assert decision["adopted"] == [
+        "bfcl-irrelevance",
+        "bfcl-live-irrelevance",
+        "natural-questions-dev",
+    ]
+    assert decision["recorded_in"] == "docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md"
+    for record in ("docs/research/study-002/03-PREREGISTRATION.md", "reports/ERRATA.md"):
+        assert "study_002_prereg_v9" in (ROOT / record).read_text(encoding="utf-8"), record
 
 
 @pytest.fixture
@@ -98,10 +107,8 @@ def _errors_after(root: Path, change) -> list[str]:
             "toolqa: evidence is neither an https URL nor an existing path",
         ),
         (
-            lambda s, c: s.update(
-                owner_decision={"status": "ADOPTED", "adopted": ["bfcl-irrelevance"]}
-            ),
-            "adopted candidate 'bfcl-irrelevance' is not in registry/datasets.yaml",
+            lambda s, c: s.update(owner_decision={"status": "ADOPTED", "adopted": ["toolqa"]}),
+            "adopted candidate 'toolqa' is not in registry/datasets.yaml",
         ),
         (
             lambda s, c: s.update(owner_decision={"status": "ADOPTED", "adopted": ["when2call"]}),

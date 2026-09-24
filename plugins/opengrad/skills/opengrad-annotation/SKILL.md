@@ -86,6 +86,15 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   it excludes. Task `prose-classifier-dev-v2` (`configs/annotation/prose-classifier-dev-v2.yaml`) is labelled by
   Claude subagents under `prose-classifier-dev-v2.model-procedure.md` (v1's plus the first-reply instruction),
   session `model-dev-v2`. Development labels only, never gold.
+- **ANSWER strata candidates** (41, `study_002_prereg_v9`) come from `src/opengrad/verification/answer_strata.py`:
+  1,767 items, pool N (BFCL no-call items) plus pool K (Natural Questions questions with tools that cannot serve them),
+  written to `reports/study-002/answer-strata-v1/`. The same counts-only rules apply.
+  `python -m opengrad.verification.answer_strata --dry-run | --build | --verify`: the inputs are cached in
+  `.cache/answer-strata/`, and the screen needs `data/processed/normalization-v1`. Without them, `--verify` reports
+  `BLOCKED_INPUT_MISSING` rather than re-deriving. Task `answer-strata-v1`
+  (`configs/annotation/answer-strata-v1.yaml`, procedure `answer-strata-v1.model-procedure.md`) serves only 41 §8
+  and blinds pool, source and reference answers. It is labelled by the same three external annotators, with the
+  same finish-up steps. The strata are the two-of-three `ANSWER` items per pool, reported separately (41 §9).
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters

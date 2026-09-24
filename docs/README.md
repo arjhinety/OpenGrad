@@ -211,6 +211,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md`](research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md) | 38 — Balancing permission and C1 authorisation |
 | [`research/study-002/39-CANONICAL-V3-DECISION-BALANCE-SPEC.md`](research/study-002/39-CANONICAL-V3-DECISION-BALANCE-SPEC.md) | 39 — canonical-v3 decision balance (specification) |
 | [`research/study-002/40-PREREG-V8-DRAFT.md`](research/study-002/40-PREREG-V8-DRAFT.md) | 40 — `study_002_prereg_v8` (ADOPTED 2026-09-24) |
+| [`research/study-002/41-ANSWER-STRATA-AMENDMENT.md`](research/study-002/41-ANSWER-STRATA-AMENDMENT.md) | 41 — The `ANSWER` strata set: sources, construction and labelling (`study_002_prereg_v9`) |
 | [`research/study-002/HANDOFF.md`](research/study-002/HANDOFF.md) | Study 002 — handoff (2026-09-15) |
 | [`research/study-002/README.md`](research/study-002/README.md) | Study 002 — design set |
 
@@ -220,4 +221,4 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 |---|---|
 | [`training/reference-recipes.md`](training/reference-recipes.md) | External training reference recipes |
 
-124 documents.
+125 documents.

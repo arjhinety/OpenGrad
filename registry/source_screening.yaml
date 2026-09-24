@@ -16,7 +16,13 @@ screenings:
   requirement_source: docs/research/study-002/06-SPLIT-SPEC.md
   opened: '2026-09-24'
   owner_decision:
-    status: PENDING
+    status: ADOPTED
+    adopted:
+    - bfcl-irrelevance
+    - bfcl-live-irrelevance
+    - natural-questions-dev
+    recorded_in: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md
+    date: '2026-09-24'
   search:
     date: '2026-09-24'
     method: >-
@@ -681,11 +687,14 @@ screenings:
     display_name: Natural Questions dev (short-answer questions)
     kind: QUESTION_SOURCE
     locator:
-      url: https://aclanthology.org/Q19-1026.pdf
-      revision: null
+      url: https://huggingface.co/datasets/google-research-datasets/nq_open
+      revision: 5dd9790a83002ad084ddeb7c420dc716852c6f28
+      files:
+      - nq_open/validation-00000-of-00001.parquet
     license:
-      value: CC-BY-4.0
-      source: https://aclanthology.org/Q19-1026.pdf
+      value: CC-BY-SA-3.0
+      source: https://huggingface.co/datasets/google-research-datasets/nq_open
+      note: 'Corrected 2026-09-24: first recorded as CC-BY-4.0, which is the licence of the paper (Q19-1026), not of the data. Share-alike applies to derived items.'
     answer_items:
       basis: PAPER
       note: 7,830 dev questions, about 36% with a short answer; a constructed set pairs them with out-of-domain tool schemas.
@@ -693,7 +702,7 @@ screenings:
       C1: {result: NOT_APPLICABLE}
       C2: {result: PASS, note: 'Human-annotated short answers; a matched no-tool control confirms answerability per item.'}
       C3: {result: PASS}
-      C4: {result: UNKNOWN, note: 'Pin the release file by sha256 when drawing.'}
+      C4: {result: PASS, note: 'nq_open validation (the dev questions with short answers) pinned at a Hub revision.'}
       C5: {result: UNKNOWN, note: 'Must be fingerprint-screened against every training corpus.'}
       C6: {result: PASS}
       C7: {result: PASS}

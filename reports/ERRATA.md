@@ -1191,3 +1191,24 @@ artifact, so it is corrected in place and the correction recorded here (G15).
 - **What does not change.** No claim in a report rested on this entry: Study 001's contamination evidence is the
   behavioural held-out screen and its human audit (`reports/data/behavioral-heldout-v2-contamination*.json`),
   whose report the refactor leaves byte-identical (`tests/contamination/test_levels.py`).
+
+## 26. `study_002_prereg_v9` adopted: the `ANSWER` strata source, and one screening correction
+
+**Added 2026-09-24.**
+
+- **The amendment.** The study owner chose the recommended `ANSWER` source, and
+  [41](../docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md) fixes it as `study_002_prereg_v9`:
+  - BFCL's no-call items, relabelled;
+  - Natural Questions questions paired with tools that cannot serve them, reported as a separate stratum.
+
+  It is recorded in [03](../docs/research/study-002/03-PREREGISTRATION.md) in the same commit. The candidate
+  population was drawn and committed before any label existed: 1,767 items, sha256 `25ef4c25…`.
+- **A correction to the screening of the same day.** `registry/source_screening.yaml` and
+  `reports/source-screening/study-002-answer-heldout/REPORT.md` recorded Natural Questions as CC-BY-4.0.
+  - **Why it was wrong:** that is the licence of the paper (TACL, Q19-1026). The data cards
+    (`google-research-datasets/natural_questions`, `nq_open`) state CC-BY-SA-3.0.
+  - **What changes:** the candidate's verdict on licence stands, because share-alike still permits
+    redistribution. Its recorded licence and note are corrected, the report carries an appended correction, and
+    the constructed items are distributed under CC-BY-SA-3.0.
+  - **Lesson:** the rule the screening states was not followed for this one candidate. A licence is read from
+    the dataset's own card or LICENSE file, never from the paper about it.
