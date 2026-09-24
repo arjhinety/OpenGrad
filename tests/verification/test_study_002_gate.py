@@ -1,9 +1,11 @@
-"""Tests for `study_002_gate_v1`, contract 2 (`docs/research/study-002/11-THRESHOLDS.md`, 16 check 2/13).
+"""Tests for `study_002_gate_v1`, contract 3 (`docs/research/study-002/11-THRESHOLDS.md`, 16 check 2/13).
 
 Every check must be able to fail, and the gate must be shown failing on the three fixtures
 `16-GPU-READINESS-GATE.md:43-44` names: an empty required mode, a metric reporting `0.0` beside a
 zero `ANSWER` row, and a missing sentinel. Contract 1 passed every bundle in the "contract 1 passed
 these" block below (`reports/ERRATA.md` §19); each is asserted here with its literal numbers.
+Contract 3 wraps `tool_use_promotion_v6` and runs with the values `study_002_prereg_v8` adopted
+(`40-PREREG-V8-DRAFT.md`); the boundary tests at the end pin those values exactly.
 """
 
 from __future__ import annotations
@@ -12,7 +14,7 @@ import copy
 
 import pytest
 
-from opengrad.promotion.tool_use_policy import PROMOTE, PromotionPolicyV5
+from opengrad.promotion.tool_use_policy import NOT_EVALUABLE, PROMOTE, PromotionPolicyV6
 from opengrad.verification.accounting import BLOCKED_INPUT_MISSING, FAIL, PASS
 from opengrad.verification.population_validators import CODE_UNDER_POWERED, CODE_UNRESOLVED_ROW
 from opengrad.verification.study_002_gate import (
@@ -24,9 +26,9 @@ from opengrad.verification.study_002_gate import (
     CODE_PROVENANCE_INCOMPLETE,
     CODE_VACUOUS_METRIC,
     CODE_WITHIN_NOISE,
-    DRAFT_V8_PARAMETERS,
     REQUIRED_PROVENANCE,
     STUDY_002_GATE_CONTRACT,
+    UNDECLARED_PARAMETERS,
     healthy_bundle,
     self_test,
     self_test_passed,
@@ -35,8 +37,8 @@ from opengrad.verification.study_002_gate import (
 
 
 def _gate(bundle):
-    """The gate with the draft parameters, so a failure is the fixture's and not the undeclared values'."""
-    return study_002_gate(bundle, DRAFT_V8_PARAMETERS)
+    """The gate as a real verdict runs it: the adopted `study_002_prereg_v8` parameters."""
+    return study_002_gate(bundle, ADOPTED_PARAMETERS)
 
 
 def _status(report, name: str) -> str:
@@ -48,19 +50,25 @@ def _errors(report, name: str) -> list[str]:
 
 
 def test_the_gate_is_versioned() -> None:
-    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 2
+    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 3
 
 
-def test_a_healthy_bundle_passes_every_check_once_the_prereg_parameters_exist() -> None:
-    report = _gate(healthy_bundle())
+def test_a_healthy_bundle_passes_every_check_under_the_adopted_prereg() -> None:
+    report = study_002_gate(healthy_bundle())
     assert report.overall == PASS, [result.all_errors() for result in report.results]
     assert len(report.results) == 17
 
 
-def test_under_the_adopted_prereg_the_undeclared_parameters_block_rather_than_pass() -> None:
-    assert ADOPTED_PARAMETERS.truncation_max_ratio is None
-    assert ADOPTED_PARAMETERS.p_unans_min_n is None
-    report = study_002_gate(healthy_bundle())
+def test_the_adopted_parameters_are_prereg_v8_items_a_and_b() -> None:
+    assert ADOPTED_PARAMETERS.truncation_max_ratio == 2.0
+    assert ADOPTED_PARAMETERS.truncation_min_gap == 0.02
+    assert ADOPTED_PARAMETERS.p_unans_min_n == 385
+
+
+def test_undeclared_parameters_block_rather_than_pass() -> None:
+    assert UNDECLARED_PARAMETERS.truncation_max_ratio is None
+    assert UNDECLARED_PARAMETERS.p_unans_min_n is None
+    report = study_002_gate(healthy_bundle(), UNDECLARED_PARAMETERS)
     assert report.overall == BLOCKED_INPUT_MISSING
     assert _status(report, "safety_regression") == BLOCKED_INPUT_MISSING
     assert _status(report, "truncation_balance") == BLOCKED_INPUT_MISSING
@@ -80,8 +88,8 @@ def test_the_healthy_bundle_is_internally_consistent() -> None:
 def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     cases = self_test()
     assert self_test_passed(cases)
-    assert cases["healthy_with_draft_parameters"]["overall"] == PASS
-    assert cases["healthy_under_adopted_prereg"]["overall"] == BLOCKED_INPUT_MISSING
+    assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
+    assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
     assert len([case for case in cases.values() if case["expected"] == FAIL]) == 10
 
@@ -298,6 +306,11 @@ def test_a_missing_metric_fails_rather_than_taking_the_policy_default(metric: st
     report = _gate(bundle)
     assert report.overall == FAIL
     assert any(metric in error for error in _errors(report, "metric_values"))
+    # v6 refuses to evaluate an incomplete input: the decision is NOT_EVALUABLE and the behavioural
+    # checks it would have fed are BLOCKED, never PASS.
+    assert any(NOT_EVALUABLE in error for error in _errors(report, "policy_decision"))
+    for name in ("answer_mode", "no_call_accuracy", "call_f1_retention", "macro_recall"):
+        assert _status(report, name) == BLOCKED_INPUT_MISSING
 
 
 def test_a_missing_baseline_answer_rate_fails() -> None:
@@ -337,7 +350,7 @@ def test_a_p_unans_below_the_declared_size_fails() -> None:
 
 
 def test_an_empty_bundle_is_never_a_pass() -> None:
-    for parameters in (ADOPTED_PARAMETERS, DRAFT_V8_PARAMETERS):
+    for parameters in (ADOPTED_PARAMETERS, UNDECLARED_PARAMETERS):
         report = study_002_gate({}, parameters)
         assert report.overall == FAIL
         assert _status(report, "mode_coverage") == BLOCKED_INPUT_MISSING
@@ -377,19 +390,54 @@ MUTATIONS = [
 
 
 @pytest.mark.parametrize(("side", "field", "value"), MUTATIONS)
-def test_whenever_v5_does_not_promote_the_gate_does_not_pass(
+def test_whenever_the_policy_does_not_promote_the_gate_does_not_pass(
     side: str, field: str, value: float
 ) -> None:
     bundle = copy.deepcopy(healthy_bundle())
     bundle[side][field] = value
-    verdict = PromotionPolicyV5().evaluate(bundle["candidate"], bundle["baseline"])
+    verdict = PromotionPolicyV6().evaluate(bundle["candidate"], bundle["baseline"])
     report = _gate(bundle)
     if verdict["decision"] != PROMOTE:
         assert report.overall != PASS, (field, value, verdict["failed_dimensions"])
-    assert verdict["decision"] != PROMOTE, f"mutation {field}={value} was meant to fail v5"
+    assert verdict["decision"] != PROMOTE, f"mutation {field}={value} was meant to fail v6"
 
 
 def test_every_result_keeps_its_counters_consistent() -> None:
     for bundle in (healthy_bundle(), {}):
         for result in _gate(bundle).results:
             assert result.accounting_errors() == [], result.render()
+
+
+# -- the adopted prereg_v8 values, at their exact boundaries --------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("rates", "imbalanced"),
+    [
+        ({"C0": 0.05, "R1": 0.10}, False),  # 5pp gap, ratio exactly 2.0: within the factor
+        ({"C0": 0.05, "R1": 0.100000005}, True),  # ratio 2.0000001: beyond it
+        ({"C0": 0.0, "R1": 0.02}, False),  # infinite ratio, gap exactly 2pp: within the gap
+        ({"C0": 0.0, "R1": 0.0200001}, True),  # infinite ratio, gap just over 2pp
+        ({"C0": 0.01, "R1": 0.025}, False),  # ratio 2.5 but only 1.5pp apart
+    ],
+)
+def test_the_truncation_factor_boundary(rates: dict, imbalanced: bool) -> None:
+    bundle = healthy_bundle()
+    bundle["truncation"]["5-shot"] = rates
+    assert _status(_gate(bundle), "truncation_balance") == (FAIL if imbalanced else PASS)
+
+
+@pytest.mark.parametrize(("n", "passes"), [(384, False), (385, True)])
+def test_the_p_unans_size_boundary(n: int, passes: bool) -> None:
+    bundle = healthy_bundle()
+    bundle["p_unans_n"] = n
+    assert _status(_gate(bundle), "safety_regression") == (PASS if passes else FAIL)
+
+
+def test_an_answer_rate_drop_exactly_at_the_bound_passes_under_v6() -> None:
+    # 0.98 - 0.68 is 0.30000000000000004 in binary floating point; v5 rejected it against <= 0.30.
+    bundle = healthy_bundle()
+    bundle["candidate"]["answer_rate"] = 0.68
+    report = _gate(bundle)
+    assert _status(report, "answer_mode") == PASS
+    assert report.overall == PASS, [result.all_errors() for result in report.results]

@@ -1,10 +1,10 @@
-# 40 — `study_002_prereg_v8` (DRAFT — NOT ADOPTED)
+# 40 — `study_002_prereg_v8` (ADOPTED 2026-09-24)
 
-> **Status: DRAFT, 2026-09-24. Nothing here is in force.** It was written at the study owner's request after
-> the 2026-09-24 repository review found two rules the preregistration requires but never quantifies. It is
-> recorded in [03](03-PREREGISTRATION.md) and `reports/ERRATA.md` only if the owner adopts it. Until then
-> `ADOPTED_PARAMETERS` in `src/opengrad/verification/study_002_gate.py` leaves both values `None`, and the
-> gate reports `BLOCKED_INPUT_MISSING` on the checks that need them — never `PASS`.
+> **Status: ADOPTED 2026-09-24, items A–D as drafted.** It was written at the study owner's request after
+> the 2026-09-24 repository review found two rules the preregistration requires but never quantifies, and
+> the owner adopted it the same day. It is recorded in [03](03-PREREGISTRATION.md) (at the end) and
+> `reports/ERRATA.md` §24. `ADOPTED_PARAMETERS` in `src/opengrad/verification/study_002_gate.py` carries
+> A and B, and the gate wraps `tool_use_promotion_v6` at contract 3. The text below is kept as drafted.
 
 ## Why an amendment, and why now
 

@@ -1131,3 +1131,26 @@ a separate, owner-approved step.
   strings were excluded when it was built. The registry now says `PER_SOURCE` and `public_allowed`.
 - `hf/MODEL_CARD_TEMPLATE.md` gains two required fields: general-capability regressions against the base model,
   and license and attribution. **Source:** `tests/publication/test_model_cards.py`.
+
+## 24. `study_002_prereg_v8` adopted, and git history kept as it is
+
+**Added 2026-09-24.** Two owner decisions, recorded together because both change what the record may be read as.
+
+- **`study_002_prereg_v8` adopted, items A–D as drafted** (`docs/research/study-002/40-PREREG-V8-DRAFT.md`). It
+  declares the two values the preregistration required but never quantified: check 12's truncation factor
+  (imbalanced when two arms differ by more than 2pp **and** by more than 2.0×) and `P-UNANS` n ≥ 385. It switches
+  `study_002_gate_v1` from `tool_use_promotion_v5` to v6 at gate contract 3. Recorded in
+  `docs/research/study-002/03-PREREGISTRATION.md` at the end of the file (so cited line numbers hold) and here, in the
+  same commit (G15). No candidate was scored and no arm launched under v7's gate, so nothing is re-run. **Code:**
+  `ADOPTED_PARAMETERS` and `STUDY_002_GATE_CONTRACT = 3` in `src/opengrad/verification/study_002_gate.py`.
+  - **As written** in §19 and 11/16: "the gate blocks on them until the owner adopts values" and "wraps v5". Both
+    were true until this entry.
+- **Git history is not rewritten** to remove the upstream credential string of §22 or the local paths. Rewriting
+  would have to change the bytes of `reports/pdet/pdet-v1.population.jsonl`, whose sha256 (`6ab92087…`) 24 tracked
+  files pin, so P-DET-v1 would stop being the population they describe. It would also give every commit from
+  `308b4ca` onward a new id. That moves the pushed tag `prose-decision-classifier-v1`, and breaks 16 short commit
+  ids cited in study-002 documents 33, 37 and 38, in this file and in a test. Several of those ids are the evidence that a
+  rule was committed before the check set it governs was drawn: commit order is the preregistration's proof. The
+  string is NVIDIA's, it is public in their When2Call data, and it has been reported to them; a rewrite would
+  not remove it from existing clones. The publication hygiene scan (`scripts/repo/check_publication_hygiene.py`)
+  fails on any new occurrence.

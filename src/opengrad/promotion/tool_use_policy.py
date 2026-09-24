@@ -297,7 +297,9 @@ class PromotionPolicyV5(PromotionPolicyV2):
                 check["code"] = CODE_NOT_EVALUABLE
             checks.append(check)
 
-        def add(name: str, observed: float, requirement: str, passed: bool, detail: str, code: str) -> None:
+        def add(
+            name: str, observed: float, requirement: str, passed: bool, detail: str, code: str
+        ) -> None:
             checks.append(
                 {
                     "dimension": name,
@@ -419,7 +421,11 @@ _REQUIREMENT = re.compile(r"^(>=|<=) (-?\d+(?:\.\d+)?)")
 
 
 def _finite(value: Any) -> bool:
-    return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(float(value))
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (int, float))
+        and math.isfinite(float(value))
+    )
 
 
 @dataclass
@@ -437,9 +443,9 @@ class PromotionPolicyV6(PromotionPolicyV5):
     * **float error at a threshold** -- ``0.90 - 0.60`` is ``0.30000000000000004`` and failed v5's
       ``<= 0.30`` bound. v6 compares at :data:`V6_COMPARISON_PLACES`.
 
-    Thresholds and the check set are v5's, unchanged. ``study_002_gate_v1`` still wraps v5: switching
-    it to v6 is part of the ``study_002_prereg_v8`` draft (`docs/research/study-002/40-PREREG-V8-DRAFT.md`)
-    and happens only if the owner adopts it.
+    Thresholds and the check set are v5's, unchanged. ``study_002_gate_v1`` wraps v6 from its contract 3,
+    under ``study_002_prereg_v8`` item C (`docs/research/study-002/40-PREREG-V8-DRAFT.md`, adopted
+    2026-09-24).
     """
 
     version: str = V6_POLICY_VERSION
@@ -479,11 +485,17 @@ class PromotionPolicyV6(PromotionPolicyV5):
             if match and _finite(check["observed"]):
                 observed = round(float(check["observed"]), V6_COMPARISON_PLACES)
                 threshold = round(float(match.group(2)), V6_COMPARISON_PLACES)
-                check["passed"] = observed >= threshold if match.group(1) == ">=" else observed <= threshold
+                check["passed"] = (
+                    observed >= threshold if match.group(1) == ">=" else observed <= threshold
+                )
             checks.append(check)
 
         failed = [check["dimension"] for check in checks if not check["passed"]]
-        codes = [check.get("code") or CODE_TOOL_POLICY_REGRESSION for check in checks if not check["passed"]]
+        codes = [
+            check.get("code") or CODE_TOOL_POLICY_REGRESSION
+            for check in checks
+            if not check["passed"]
+        ]
         if any(code in (CODE_NONVACUOUS, CODE_NOT_EVALUABLE) for code in codes):
             decision = NOT_EVALUABLE
         elif failed:

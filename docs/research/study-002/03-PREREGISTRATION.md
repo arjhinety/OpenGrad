@@ -1,8 +1,8 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v7` (2026-09-18).** The text below is v1, the original contract;
-> amendments v2–v7 follow under "Amendments" (v7 is recorded after "Registration of the unit of analysis").
-> A proposed v8 ([40](40-PREREG-V8-DRAFT.md)) is a draft and is **not adopted**.
+> **Current version: `study_002_prereg_v8` (2026-09-24).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8 at the
+> end of this document ([40](40-PREREG-V8-DRAFT.md)). Entries are appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
 committed **before the first Study 002 training run is launched and before any Study 002 evaluation
@@ -282,3 +282,27 @@ Stated explicitly, as a tripwire:
    version and partition on both (G9).
 5. Publishing a claim about ability, decision or format that the metric in [07](07-METRIC-SPEC.md)
    cannot support.
+
+### `study_002_prereg_v8` — 2026-09-24
+
+Appended here rather than under "Amendments" so that line numbers other documents cite do not move.
+
+- **Items changed** (all four items of [40](40-PREREG-V8-DRAFT.md), adopted as drafted by the study owner):
+  - **A.** Check 12's truncation "declared factor": within a stage, two arms are imbalanced when their
+    truncation rates differ by more than 2 percentage points **and** the larger is more than 2.0× the smaller.
+  - **B.** `P-UNANS` has n ≥ 385, the smallest n whose worst-case resolvable margin is at most 10pp. Below it,
+    `refusal_correctness` is `UNDER_POWERED` and check 4 fails.
+  - **C.** `study_002_gate_v1` wraps `tool_use_promotion_v6` instead of v5, at gate contract 3. v6 changes no
+    threshold; it stops v5 promoting without measuring.
+  - **D.** Wording corrections to [11](11-THRESHOLDS.md): v5 is v3 plus, not v4 plus, and the 10pp
+    resolvability rule stated once, under which `CLARIFY` at n = 371 is not adjudicable.
+- **Reason:** a defect. The preregistration required both A and B and quantified neither, so the gate could
+  only block on them; v5 could promote on a bundle it never measured (`reports/ERRATA.md` §19).
+- **Not changed:** every threshold value in [11](11-THRESHOLDS.md), the arms, the seeds, the partition, the
+  `n ≥ 200` mode floor, the `ANSWER` strata sizing, every classifier and P-DET decision of v2–v7, and every
+  population.
+- **Candidates already scored:** none under this gate, so there is nothing to re-run.
+- **Arms launched under an earlier version:** none. No evaluation bundle exists, and no number these rules
+  govern has been seen.
+- **Code:** `ADOPTED_PARAMETERS` and `STUDY_002_GATE_CONTRACT = 3` in
+  `src/opengrad/verification/study_002_gate.py`; the ERRATA entry is `reports/ERRATA.md` §24.

@@ -40,11 +40,11 @@ be evaluated is `BLOCKED`, which is not a pass.
 >
 > **Corrected 2026-09-24 (`reports/ERRATA.md` §19).** On an *empty* bundle the contract-1 gate returned
 > `FAIL`, not `BLOCKED_INPUT_MISSING` (the policy's missing metrics fail closed); it was never `PASS`. The
-> gate is now at contract 2: it fails whenever `tool_use_promotion_v5` does not promote, enforces the
+> gate is now at contract 3: it fails whenever `tool_use_promotion_v6` does not promote, enforces the
 > `n >= 200` mode floor, pins the sentinel and provenance lists, and requires the census to score every
-> gold item. Two values the preregistration never quantified — the truncation imbalance factor and the
-> `P-UNANS` size — block the gate until the owner adopts them ([40](40-PREREG-V8-DRAFT.md), a draft). The
-> self-test now runs twelve cases and checks each expected failure code.
+> gold item. The two values the preregistration never quantified — the truncation imbalance factor and the
+> `P-UNANS` size — are declared by `study_002_prereg_v8` ([40](40-PREREG-V8-DRAFT.md), adopted 2026-09-24).
+> The self-test runs twelve cases and checks each expected failure code.
 
 ## The self-test (check 13) is the most important one
 

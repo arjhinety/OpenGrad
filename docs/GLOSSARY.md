@@ -39,8 +39,8 @@ Study 001's held-out set had no ANSWER items, which is why its regression went u
 | **P-DET, P-DET-COVERAGE** | Labelled samples for validating the refusal/decision classifier. P-DET-v1 is frozen (581 items); P-DET-COVERAGE-v1/v2 add DIRECT and CALL coverage. | [22-PDET-PROTOCOL](research/study-002/22-PDET-PROTOCOL.md), [30](research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md), [36](research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md) |
 | **REP-A** | A re-run of arm C0 at a fixed seed: the nondeterminism floor every threshold margin is compared with. | [05-SEED-AND-REPRODUCIBILITY-POLICY](research/study-002/05-SEED-AND-REPRODUCIBILITY-POLICY.md) |
 | **V1 … V12** | The provenance validators (mode coverage, metric denominators, …, resolvable margin). | [15-PROVENANCE-VALIDATORS](research/study-002/15-PROVENANCE-VALIDATORS.md) |
-| **`study_002_prereg_vN`** | A preregistration version; v1 is the original contract, v2–v7 are amendments. v8 is a draft. | [03-PREREGISTRATION](research/study-002/03-PREREGISTRATION.md) |
-| **`study_002_gate_v1`** | The Study 002 evaluation gate (17 checks at contract 2). | [11-THRESHOLDS](research/study-002/11-THRESHOLDS.md) |
+| **`study_002_prereg_vN`** | A preregistration version; v1 is the original contract, v2–v8 are amendments (v8 adopted 2026-09-24). | [03-PREREGISTRATION](research/study-002/03-PREREGISTRATION.md) |
+| **`study_002_gate_v1`** | The Study 002 evaluation gate (17 checks at contract 3, over `tool_use_promotion_v6`). | [11-THRESHOLDS](research/study-002/11-THRESHOLDS.md) |
 | **G1 … G17** | Guardrails derived from the claims Study 001 got wrong. | [GUARDRAILS](research/GUARDRAILS.md) |
 
 ## Status words

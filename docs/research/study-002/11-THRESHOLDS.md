@@ -96,8 +96,8 @@ existing discipline made explicit.
 > row with no margin, and implemented neither check 12's "declared factor" nor check 14's
 > `WITHIN_NOISE` exclusion. On an empty bundle it returned `FAIL`, not `BLOCKED_INPUT_MISSING`. Contract 2
 > implements the table as written. Check 12's factor and the `P-UNANS` size for check 4 are **not declared
-> anywhere in this preregistration**; the gate blocks on them until the owner adopts values
-> ([40](40-PREREG-V8-DRAFT.md) proposes them, not adopted).
+> anywhere in this preregistration** before `study_002_prereg_v8` ([40](40-PREREG-V8-DRAFT.md), adopted
+> 2026-09-24: 2.0× and 2pp, n ≥ 385); the gate is now contract 3 over `tool_use_promotion_v6`.
 
 ## Failing closed
 
@@ -154,4 +154,4 @@ arithmetic that Study 001's tables never showed.
 > "below" the 10pp floor a deficiency. The direction is the other way: a smaller resolvable margin is finer
 > resolution, so over-call on 824 items can resolve the 10pp this study claims on. The row that cannot is
 > `CLARIFY` at n = 371 (10.2pp); it needs n ≥ 385 or its claims are `WITHIN_NOISE`
-> ([40](40-PREREG-V8-DRAFT.md) item D).
+> ([40](40-PREREG-V8-DRAFT.md) item D, adopted 2026-09-24).

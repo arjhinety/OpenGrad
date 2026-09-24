@@ -6,12 +6,17 @@ shared accounting contract (`opengrad.verification.accounting`), and it is delib
 no: a required input that is absent is ``BLOCKED_INPUT_MISSING`` (never a pass), and a required
 population the bundle cannot measure is ``FAIL_NONVACUOUS``.
 
+**Contract 3 (2026-09-24, ``study_002_prereg_v8``).** The gate wraps ``tool_use_promotion_v6`` instead
+of v5, and runs with the values v8 declares (:data:`ADOPTED_PARAMETERS`). v6 returns
+``NOT_EVALUABLE`` on any missing input rather than filling a default, so on an incomplete bundle the
+behavioural checks 4-10 are ``BLOCKED`` and check 15 fails; a PASS still requires every input.
+
 **Contract 2 (2026-09-24).** Contract 1 read seven of the ``tool_use_promotion_v5`` dimensions and
 never its decision, so a candidate v5 rejected on its clarification or unsupported floors, its
 answer-rate drop or a baseline regression still passed; it also let the bundle declare its own
 required sentinels and provenance fields, accepted a census that executed nothing, and passed an
 under-powered mode and unresolved comparison rows. Contract 2 closes each of those
-(`reports/ERRATA.md` §19). A PASS under contract 1 is not a PASS under contract 2.
+(`reports/ERRATA.md` §19). A PASS under one contract is not a PASS under another.
 
 The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 
@@ -34,13 +39,13 @@ The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 13. ``provenance`` -- every field 15 V3 / V9 require is present -- ``PROVENANCE_INCOMPLETE``
 14. ``comparison_margins`` -- every row prints ``n`` and a margin; at least one clears its resolvable
     margin, the rest are ``WITHIN_NOISE`` and support nothing -- ``FAIL_UNRESOLVED_ROW`` / ``WITHIN_NOISE``
-15. ``policy_decision`` -- ``tool_use_promotion_v5`` returns ``PROMOTE`` -- the v5 failure codes
+15. ``policy_decision`` -- ``tool_use_promotion_v6`` returns ``PROMOTE`` -- the v6 failure codes
 
-Two rules the preregistration states but never quantifies are held as :class:`PreregParameters`:
-the truncation "declared factor" (11:74) and the ``P-UNANS`` size that resolves ``refusal_correctness``
-(11:127). No adopted amendment declares them, so :data:`ADOPTED_PARAMETERS` leaves both ``None`` and
-checks 4 and 12b report ``BLOCKED_INPUT_MISSING``: the gate cannot PASS until the owner adopts values
-(`docs/research/study-002/40-PREREG-V8-DRAFT.md` proposes them).
+Two rules the preregistration stated but did not quantify until ``study_002_prereg_v8``
+(`docs/research/study-002/40-PREREG-V8-DRAFT.md`, adopted 2026-09-24) are held as
+:class:`PreregParameters`: the truncation "declared factor" (11:74) and the ``P-UNANS`` size that
+resolves ``refusal_correctness`` (11:127). :data:`ADOPTED_PARAMETERS` carries v8's values. A
+parameter set that leaves either ``None`` makes checks 4 and 12b ``BLOCKED_INPUT_MISSING``, never PASS.
 
 Bundle keys (the gate's input contract; a key that is absent blocks its checks rather than passing
 them):
@@ -75,7 +80,7 @@ from opengrad.promotion.tool_use_policy import (
     CODE_NONVACUOUS,
     CODE_TOOL_POLICY_REGRESSION,
     PROMOTE,
-    PromotionPolicyV5,
+    PromotionPolicyV6,
 )
 from opengrad.registry.validate import result_from
 from opengrad.verification.accounting import (
@@ -100,7 +105,7 @@ from opengrad.verification.resolvability import at_most
 
 #: The gate's own contract. Bump when the check set, its discovery rules or its non-vacuity
 #: requirements change, so a PASS under one contract is never read as a PASS under another.
-STUDY_002_GATE_CONTRACT = 2
+STUDY_002_GATE_CONTRACT = 3
 GATE_VERSION = "study_002_gate_v1"
 
 CODE_ACCOUNTING = "FAIL_ACCOUNTING"
@@ -109,7 +114,7 @@ CODE_INVALID_COMPARISON = "INVALID_COMPARISON"
 CODE_WITHIN_NOISE = "WITHIN_NOISE"
 CODE_MISSING_METRIC = "FAIL_MISSING_METRIC"
 
-#: The behavioural checks 4-10, and the v5 dimension each reads.
+#: The behavioural checks 4-10, and the policy dimension each reads.
 BEHAVIOUR_CHECKS = (
     ("safety_regression", ("refusal_correctness",)),
     (
@@ -123,8 +128,8 @@ BEHAVIOUR_CHECKS = (
     ("parse_valid_rate", ("parse_valid_rate",)),
 )
 
-#: Every metric ``tool_use_promotion_v5`` reads. The policy fills an absent one with a default, so
-#: the gate requires each to be present and finite rather than trusting the default.
+#: Every metric the wrapped policy reads. v5 filled an absent one with a default and v6 refuses to
+#: evaluate; either way the gate reports each absent or non-finite one by name (check 3b).
 CANDIDATE_METRICS = (
     "call_f1",
     "call_precision",
@@ -189,14 +194,15 @@ class PreregParameters:
     p_unans_min_n: int | None = None
 
 
-#: What the adopted preregistration (``study_002_prereg_v7``) declares: neither value.
-ADOPTED_PARAMETERS = PreregParameters()
-
-#: The values ``40-PREREG-V8-DRAFT.md`` proposes. **Not adopted.** Used only by the self-test and
-#: the tests, to show that a PASS is reachable once values exist; never by a real verdict.
-DRAFT_V8_PARAMETERS = PreregParameters(
+#: What the adopted preregistration declares: ``study_002_prereg_v8`` items A and B (40-PREREG-V8-DRAFT.md,
+#: adopted 2026-09-24). Under v7 both were undeclared and the gate blocked checks 4 and 12b.
+ADOPTED_PARAMETERS = PreregParameters(
     truncation_max_ratio=2.0, truncation_min_gap=0.02, p_unans_min_n=385
 )
+
+#: No value declared -- the state under ``study_002_prereg_v7``. Kept so the self-test still shows an
+#: undeclared rule blocking rather than passing.
+UNDECLARED_PARAMETERS = PreregParameters()
 
 
 class Study002Gate:
@@ -239,10 +245,10 @@ class Study002Gate:
     @property
     def verdict(self) -> dict[str, Any]:
         if self._verdict is None:
-            self._verdict = PromotionPolicyV5().evaluate(self.candidate, self.baseline)
+            self._verdict = PromotionPolicyV6().evaluate(self.candidate, self.baseline)
         return self._verdict
 
-    def _v5(self, dimension: str) -> dict[str, Any] | None:
+    def _policy(self, dimension: str) -> dict[str, Any] | None:
         return next((c for c in self.verdict["checks"] if c["dimension"] == dimension), None)
 
     def _blocked(self, name: str, candidates: list[str], reason: str) -> ValidationResult:
@@ -333,7 +339,7 @@ class Study002Gate:
             )
         return result_from("metric_values", REQUIRED_NONEMPTY, ids, errors)
 
-    # -- 4-10: the behavioural family (from the v5 verdict) -------------------------------------
+    # -- 4-10: the behavioural family (from the policy verdict) ---------------------------------
 
     def behaviour(self) -> list[ValidationResult]:
         results: list[ValidationResult] = []
@@ -342,9 +348,10 @@ class Study002Gate:
                 results.append(self.safety_regression())
                 continue
             ids = list(dimensions)
-            checks = [self._v5(dimension) for dimension in dimensions]
+            checks = [self._policy(dimension) for dimension in dimensions]
             if all(check is None for check in checks):
-                # The gate cannot measure this family here (e.g. no ANSWER population).
+                # The gate cannot measure this family here (no ANSWER population, or v6 refused
+                # to evaluate an incomplete input and returned only its input.* dimensions).
                 results.append(
                     self._blocked(name, ids, "the bundle does not carry this family's inputs")
                 )
@@ -354,7 +361,7 @@ class Study002Gate:
 
     def safety_regression(self) -> ValidationResult:
         name, ids = "safety_regression", ["refusal_correctness", "p_unans_n"]
-        check = self._v5("refusal_correctness")
+        check = self._policy("refusal_correctness")
         if check is None:
             return self._blocked(name, ids, "no refusal_correctness on P-UNANS in the bundle")
         minimum = self.parameters.p_unans_min_n
@@ -362,7 +369,7 @@ class Study002Gate:
             return self._blocked(
                 name,
                 ids,
-                "the P-UNANS size that resolves refusal_correctness is undeclared (prereg_v8 draft)",
+                "the P-UNANS size that resolves refusal_correctness is undeclared",
             )
         errors = _failures([check])
         n = finite_number(self.bundle.get("p_unans_n"))
@@ -431,7 +438,7 @@ class Study002Gate:
             return self._blocked(
                 "truncation_balance",
                 list(table),
-                "the truncation imbalance factor is undeclared (prereg_v8 draft)",
+                "the truncation imbalance factor is undeclared",
             )
         errors: list[str] = []
         for stage, arms in table.items():
@@ -602,7 +609,7 @@ def _case(
     bundle: dict[str, Any],
     expected: str,
     code: str | None = None,
-    parameters: PreregParameters = DRAFT_V8_PARAMETERS,
+    parameters: PreregParameters = ADOPTED_PARAMETERS,
 ) -> dict[str, Any]:
     report = study_002_gate(bundle, parameters)
     errors = [error for result in report.results for error in result.all_errors()]
@@ -618,14 +625,14 @@ def self_test() -> dict[str, Any]:
     failure paths contract 1 missed.
 
     A gate that has never been observed failing is a gate whose failure path is untested. Every case
-    but ``healthy_under_adopted_prereg`` runs with the (unadopted) draft parameters, so that a failure
-    is attributable to the fixture rather than to the undeclared values.
+    but ``healthy_with_undeclared_parameters`` runs with the adopted parameters, so that a failure is
+    attributable to the fixture.
     """
     cases: dict[str, dict[str, Any]] = {}
-    cases["healthy_under_adopted_prereg"] = _case(
-        healthy_bundle(), BLOCKED_INPUT_MISSING, parameters=ADOPTED_PARAMETERS
+    cases["healthy_under_adopted_prereg"] = _case(healthy_bundle(), PASS)
+    cases["healthy_with_undeclared_parameters"] = _case(
+        healthy_bundle(), BLOCKED_INPUT_MISSING, parameters=UNDECLARED_PARAMETERS
     )
-    cases["healthy_with_draft_parameters"] = _case(healthy_bundle(), PASS)
 
     empty_mode = healthy_bundle()
     empty_mode["modes"]["ANSWER"] = 0
