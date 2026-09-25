@@ -129,3 +129,38 @@ def test_the_committed_report_records_the_stop_and_the_readme_quotes_it() -> Non
         counts = by_source[key]
         agreed = sum(n for k, n in counts.items() if k != "NO_CONSENSUS")
         assert f"{label} {agreed} of {sum(counts.values())}" in row, key
+
+
+def test_the_negative_result_quotes_the_report_and_every_status_surface_says_stopped() -> None:
+    # G14 for the write-up, and G16: the status word changes on every surface in the same commit.
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).parents[2]
+    document = json.loads(
+        (root / "reports/study-002/punans-v1/punans-v1.strata.json").read_text(encoding="utf-8")
+    )
+    note = (root / "reports/study-002/punans-v1/NEGATIVE-RESULT.md").read_text(encoding="utf-8")
+    floor = document["agreement"]
+    assert (
+        f"| Items on which both models gave the same label | {floor['same_label']} of {floor['items']:,} |"
+        in note
+    )
+    assert f"**{floor['raw_agreement']:.3f}**" in note and f"| {floor['cohen_kappa']:.3f} |" in note
+    selfaware = document["reference_labels_by_source"]["U:selfaware"]
+    assert (
+        f"jointly labelled {selfaware['UNKNOWABLE']} unknowable, {selfaware['SUBJECTIVE']} subjective, "
+        f"{selfaware['ANSWERABLE']} answerable, {selfaware['UNDERSPECIFIED']} underspecified and "
+        f"{selfaware['FALSE_PREMISE']} false"
+    ) in note
+    assert f"disagreed on {selfaware['NO_CONSENSUS']}" in note
+    strata = document["strata"]
+    assert f"would have held {strata['P-UNANS-unknowable']['n']}" in note
+    assert f"stratum would have held {strata['P-UNANS-false-premise']['n']}" in note
+    for surface in ("README.md", "docs/research/STUDIES.md", "docs/research/study-002/README.md"):
+        text = (root / surface).read_text(encoding="utf-8")
+        assert "DESIGN / PRE-REGISTRATION" not in text and "in pre-registration" not in text, (
+            surface
+        )
+        assert "stopped before training" in text.lower(), surface
+        assert f"{floor['raw_agreement']:.3f}" in text, surface
