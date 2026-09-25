@@ -1,0 +1,168 @@
+{
+  "adjudication": null,
+  "adjudication_flags": {},
+  "adjudicator_ids": [],
+  "annotation_schema_version": "answer-strata-annotation-v1",
+  "annotator_ids": [
+    "model.deepseek-v4.1-flash",
+    "model.gemini-3.8-flash-high"
+  ],
+  "app_version": "opengrad-annotate-1.0.0",
+  "artifact_kind": "ANNOTATION_SNAPSHOT",
+  "completion_state": "INCOMPLETE",
+  "composite": null,
+  "config_path": "configs/annotation/answer-strata-v1.yaml",
+  "definition_history": [],
+  "design": "model_passes",
+  "disagreements": {
+    "adjudicated": 0,
+    "count": 222,
+    "file": "answer-strata-v1.disagreements.jsonl",
+    "keys": [
+      "label",
+      "ambiguity_status"
+    ],
+    "metric_eligible": 222,
+    "unresolved": 222
+  },
+  "exported_at": "2026-09-25T07:06:26.126Z",
+  "frozen": false,
+  "gold": null,
+  "incomplete_reasons": [
+    "222 disagreements not adjudicated (first: ans1:0007f814aaad5d269c362a2bccf1c301ce1a46814bbb34780d87c5cdc080ca18)"
+  ],
+  "independent_annotators": false,
+  "inter_annotator_agreement_claimable": false,
+  "limitations": [
+    "Model annotation: at least one session was labeled by a language model. A model pass is not an independent human annotator; no inter-annotator agreement may be claimed."
+  ],
+  "manifest_version": 1,
+  "metric_exclusions": {
+    "excluded_items": 0,
+    "groups": [],
+    "metric_eligible_items": 1767,
+    "population_items": 1767
+  },
+  "model_annotation": true,
+  "model_annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "authorization": "docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/answer-strata-v1.model-procedure.md",
+      "procedure_sha256": "5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "authorization": "docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/answer-strata-v1.model-procedure.md",
+      "procedure_sha256": "5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb"
+    }
+  ],
+  "model_assistance": false,
+  "outputs": {
+    "answer-strata-v1.annotations.model.deepseek-v4.1-flash.model-deepseek.jsonl": {
+      "bytes": 1736489,
+      "records": 1767,
+      "sha256": "6af9d86160b94f62ac209371d0ae16a8820a67b071e87e3dfb8f76215dc2b8e5"
+    },
+    "answer-strata-v1.annotations.model.gemini-3.8-flash-high.model-gemini.jsonl": {
+      "bytes": 1701680,
+      "records": 1767,
+      "sha256": "e263c266b1ed0c57160bde75ef4a3add5b49040369e902512765fe49645d182f"
+    },
+    "answer-strata-v1.disagreements.jsonl": {
+      "bytes": 182182,
+      "records": 222,
+      "sha256": "2265082da8961b65697765c4cbc231d8fd88cde6317e67c9cf01370a50e49a7b"
+    },
+    "audit/answer-strata-v1.history.model.deepseek-v4.1-flash.model-deepseek.jsonl": {
+      "bytes": 2513169,
+      "records": 1767,
+      "sha256": "cc9222a5f0204e13e8a4f652b7c996b0e59de6f3afb669452d0e320911d91b80"
+    },
+    "audit/answer-strata-v1.history.model.gemini-3.8-flash-high.model-gemini.jsonl": {
+      "bytes": 2478036,
+      "records": 1767,
+      "sha256": "747ba160c785cc68f9caca96d8c5fe867780637137104a5282a59d32be5cdaca"
+    }
+  },
+  "package_dir": "reports/study-002/answer-strata-v1/annotation/wip",
+  "record_key_map": {
+    "annotation_schema_version": "annotation_version",
+    "item_id": "answer_id",
+    "label": "gold_policy_label"
+  },
+  "record_keys": {
+    "annotator_id": "annotator_id",
+    "item_id": "answer_id",
+    "label": "gold_policy_label"
+  },
+  "review_queue": null,
+  "sessions": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "annotator_kind": "model",
+      "created_at": "2026-09-24T07:48:47.823Z",
+      "file": "answer-strata-v1.annotations.model.gemini-3.8-flash-high.model-gemini.jsonl",
+      "flagged": 48,
+      "history_entries": 1767,
+      "history_file": "audit/answer-strata-v1.history.model.gemini-3.8-flash-high.model-gemini.jsonl",
+      "history_head_sha256": "54a3f47ebc12064b9bb9c301b5af091aa2a91439f8891874558236391804010d",
+      "label_counts": {
+        "ANSWER": 1187,
+        "CALL": 88,
+        "CLARIFY": 161,
+        "UNKNOWN": 99,
+        "UNSUPPORTED": 232
+      },
+      "labeled": 1767,
+      "labeled_metric_eligible": 1767,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-gemini",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 99,
+      "unlabeled": 0
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "annotator_kind": "model",
+      "created_at": "2026-09-24T07:48:54.389Z",
+      "file": "answer-strata-v1.annotations.model.deepseek-v4.1-flash.model-deepseek.jsonl",
+      "flagged": 288,
+      "history_entries": 1767,
+      "history_file": "audit/answer-strata-v1.history.model.deepseek-v4.1-flash.model-deepseek.jsonl",
+      "history_head_sha256": "0ef40ca08bee62d18fc92a1e2be6825dbd96abff08a8de09dbffe3cd13a99263",
+      "label_counts": {
+        "ANSWER": 1059,
+        "CALL": 111,
+        "CLARIFY": 206,
+        "UNKNOWN": 127,
+        "UNSUPPORTED": 264
+      },
+      "labeled": 1767,
+      "labeled_metric_eligible": 1767,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-deepseek",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 127,
+      "unlabeled": 0
+    }
+  ],
+  "source": {
+    "format": "jsonl",
+    "items": 1767,
+    "path": "reports/study-002/answer-strata-v1/answer-strata-v1.population.jsonl",
+    "sha256": "25ef4c2579affb3591aa542f3513eff6af82b4e5bebdd819457e7ae0b52bbfa8"
+  },
+  "statement": "Labels in sessions whose annotator_kind is 'model' were produced by the language model named under model_annotators, following the pinned procedure recorded there; they are model judgments, not human annotations. Labels in human sessions were entered through the annotation interface under the annotator and adjudicator identifiers recorded in this package; those identifiers are declared, not authenticated. The interface displays no classifier prediction, model suggestion or pre-filled label to human annotators, and the source population was read but never written. Every change is in the hash-chained change logs listed under outputs. Hashes detect changes to the package; they are not signatures.",
+  "task_definition_sha256": "36db6347084e76ebc55a9b34dd21d97b38590fd6dc72b80333c7fabd2cd2ea9c",
+  "task_id": "answer-strata-v1",
+  "task_type": "single_label",
+  "task_version": "1"
+}

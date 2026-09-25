@@ -32,7 +32,9 @@ import argparse
 import json
 import re
 import sqlite3
+import subprocess
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -57,7 +59,24 @@ TASK_SPECS = {
         "configs/annotation/pdet-coverage-v2.model-procedure.md",
         "docs/research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md",
     ),
+    # 41 as amended by 42 (study_002_prereg_v10): two annotators. gpt-5.6-sol's session is archived too: its one
+    # prepared batch and three refused attempts are the evidence for 42 section 1.
+    "answer-strata-v1": (
+        ROOT / "reports" / "study-002" / "answer-strata-v1" / "provenance" / "external-models",
+        "configs/annotation/answer-strata-v1.model-procedure.md",
+        "docs/research/study-002/42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md",
+    ),
 }
+#: The status sentence of the archive, where it is not the three-model one of 34.
+STATUS = {
+    "answer-strata-v1": (
+        "Model judgments by two declared non-Claude annotators, each blind and independent; an item's reference "
+        "label is the label both give ({authorization}). gpt-5.6-sol, declared by 41, labelled nothing: Codex "
+        "refused the model for this account. Not human labels and not human gold."
+    ),
+}
+#: Credential shapes that must never reach an archive (tracked or not).
+CREDENTIALS = re.compile(rb"sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AIza[0-9A-Za-z_-]{30,}")
 TASKS = tuple(TASK_SPECS)
 SESSIONS = {
     "model-gemini": "model.gemini-3.8-flash-high",
@@ -176,6 +195,20 @@ def audit_session(task: str, session: str, members: dict[str, bytes], streams: d
     }
 
 
+def scan(*groups: dict[str, bytes]) -> str:
+    """Refuse to archive a file holding the operator's git e-mail or a credential shape; return the scan date.
+
+    The P-DET-COVERAGE archives recorded a scan of 2026-09-17 made by hand; this makes it part of the build."""
+    email = subprocess.run(
+        ["git", "config", "user.email"], cwd=ROOT, capture_output=True, check=False
+    ).stdout.strip()
+    for group in groups:
+        for name, data in group.items():
+            if (email and email in data) or CREDENTIALS.search(data):
+                raise SystemExit(f"{name}: holds the operator's e-mail address or a credential; not archived")
+    return datetime.now(tz=UTC).date().isoformat()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--task", choices=TASKS, required=True)
@@ -186,7 +219,12 @@ def main(argv: list[str] | None = None) -> int:
         f"runner/{Path(RUNNER).name}": (ROOT / RUNNER).read_bytes(),
     }
     streams: dict[str, bytes] = {}
-    sessions = [audit_session(task, session, members, streams) for session in SESSIONS]
+    sessions = [
+        audit_session(task, session, members, streams)
+        for session in SESSIONS
+        if (ROOT / ".annotation" / f"{task}.model-batches" / session).is_dir()
+    ]
+    scanned = scan(members, streams)
     stem = f"{task}.external-models.audit-trail"
     local_name = f"{task}.external-models.cli-streams.tar.gz"
     archive = tar_gz(members)
@@ -195,10 +233,11 @@ def main(argv: list[str] | None = None) -> int:
         "schema": SCHEMA,
         "task_id": task,
         "authorization": authorization,
-        "status": (
+        "status": STATUS.get(
+            task,
             "Model judgments by three declared non-Claude annotators, each blind and independent. They form the "
-            f"provisional MODEL_REFERENCE of the three-model consensus ({authorization}); not human labels and not human gold."
-        ),
+            "provisional MODEL_REFERENCE of the three-model consensus ({authorization}); not human labels and not human gold.",
+        ).format(authorization=authorization),
         "procedure": {"path": procedure, "sha256": sha256(members[f"procedure/{Path(procedure).name}"])},
         "runner": {"path": RUNNER, "sha256": sha256(members[f"runner/{Path(RUNNER).name}"])},
         "sessions": sessions,
@@ -210,7 +249,7 @@ def main(argv: list[str] | None = None) -> int:
                 "Raw CLI stdout and stderr are unfiltered tool logs that may carry account or session details, and "
                 "they are large. They are kept verbatim, out of version control; their hashes are recorded here and "
                 "in each run record. A scan for the operator's e-mail address and common credential patterns found "
-                "none (2026-09-17)."
+                f"none ({scanned})."
             ),
             "sha256": sha256(local),
             "bytes": len(local),

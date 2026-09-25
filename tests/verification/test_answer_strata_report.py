@@ -87,3 +87,40 @@ def test_strata_are_separate_and_other_labels_are_counted_not_admitted() -> None
 def test_a_reference_that_misses_an_item_is_refused() -> None:
     with pytest.raises(report.StrataReportError):
         report.build_report([_item("n1", "N", "a", 1)], [])
+
+
+def test_the_status_row_quotes_the_committed_strata() -> None:
+    # G14: the numbers in the study-002 README row are the ones the strata artifact records.
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).parents[2]
+    strata = json.loads(
+        (root / "reports/study-002/answer-strata-v1/answer-strata-v1.strata.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    natural, constructed = (
+        strata["strata"]["ANSWER-natural"],
+        strata["strata"]["ANSWER-constructed"],
+    )
+    assert (natural["n"], natural["sizing_status"]) == (284, "MEETS_FLOOR_ONLY")
+    assert (constructed["n"], constructed["sizing_status"]) == (771, "RESOLVES_8_POINTS")
+    assert constructed["construction_failures"] == 21
+    assert strata["pooled_beside_strata"]["n"] == 1055
+    row = next(
+        line
+        for line in (root / "docs/research/study-002/README.md")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.startswith("| `ANSWER` strata set |")
+    )
+    for quoted in ("n = 284", "n = 771", "21 constructed", "1,055", "1,565 of 1,767"):
+        assert quoted in row, quoted
+    reference = json.loads(
+        (
+            root
+            / "reports/study-002/answer-strata-v1/reference/answer-strata-v1.reference.manifest.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert reference["summary"]["consensus"]["unanimous"] == 1565

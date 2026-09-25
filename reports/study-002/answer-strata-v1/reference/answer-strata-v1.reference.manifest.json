@@ -1,0 +1,62 @@
+{
+  "amendment": "study_002_prereg_v10",
+  "amendment_document": "docs/research/study-002/42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md",
+  "annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/answer-strata-v1.model-procedure.md",
+      "procedure_sha256": "5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/answer-strata-v1.model-procedure.md",
+      "procedure_sha256": "5031c1ab8029432e4c2a06837be8220137def17bc639fedd4c5f8901b74f3abb"
+    }
+  ],
+  "artifact_kind": "ANSWER_STRATA_MODEL_CONSENSUS_REFERENCE",
+  "package_manifest": "reports/study-002/answer-strata-v1/annotation/wip/answer-strata-v1.annotation-manifest.json",
+  "package_manifest_sha256": "8bbfff0d397c51044468c290ea79c7d8342218efd4bccee7e9106f96287058f2",
+  "population_sha256": "25ef4c2579affb3591aa542f3513eff6af82b4e5bebdd819457e7ae0b52bbfa8",
+  "reference_file": "answer-strata-v1.reference.jsonl",
+  "reference_sha256": "0e04f6e5767ff2dea0b4c4d9e6149c8928ee7c36442b6dbf0a065a208881bbf8",
+  "statement": "Reference labels from the agreement of two non-Claude models, both of which must give the label, each labelling blind. Model judgments, not human gold; qualifications against it are MODEL_REFERENCE and provisional; agreement below is model-model agreement.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "summary": {
+    "annotator_label_counts": {
+      "model.deepseek-v4.1-flash": {
+        "ANSWER": 1059,
+        "CALL": 111,
+        "CLARIFY": 206,
+        "UNKNOWN": 127,
+        "UNSUPPORTED": 264
+      },
+      "model.gemini-3.8-flash-high": {
+        "ANSWER": 1187,
+        "CALL": 88,
+        "CLARIFY": 161,
+        "UNKNOWN": 99,
+        "UNSUPPORTED": 232
+      }
+    },
+    "consensus": {
+      "NO_CONSENSUS": 202,
+      "unanimous": 1565
+    },
+    "dissent_by_annotator": {},
+    "items": 1767,
+    "pairwise_agreement": {
+      "model.gemini-3.8-flash-high|model.deepseek-v4.1-flash": 1565
+    },
+    "reference_labels": {
+      "ANSWER": 1055,
+      "CALL": 80,
+      "CLARIFY": 148,
+      "NO_CONSENSUS": 202,
+      "UNKNOWN": 85,
+      "UNSUPPORTED": 197
+    }
+  },
+  "task_id": "answer-strata-v1"
+}

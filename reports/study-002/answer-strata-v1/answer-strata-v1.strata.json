@@ -1,0 +1,98 @@
+{
+  "amendment": "study_002_prereg_v9",
+  "amendment_document": "docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md",
+  "artifact_kind": "ANSWER_STRATA_REPORT",
+  "balance_against_other_modes": {
+    "note": "41 §11 compares each stratum with the other three modes of the confirmatory partition; that partition is built after these strata, so the comparison is made at the P-CONF build.",
+    "status": "BLOCKED_PCONF_NOT_BUILT"
+  },
+  "members_file": "answer-strata-v1.strata-members.jsonl",
+  "members_sha256": "118e3aac647cf1e27c2965a3109eeca49fd67aea862f671aff559a93451eef41",
+  "pooled_beside_strata": {
+    "n": 1055,
+    "sizing_status": "RESOLVES_8_POINTS"
+  },
+  "population_sha256": "25ef4c2579affb3591aa542f3513eff6af82b4e5bebdd819457e7ae0b52bbfa8",
+  "quartile_method": "statistics.quantiles(n=4, method='inclusive') over prompt characters",
+  "reference_amendment": "study_002_prereg_v10",
+  "reference_manifest": "reports/study-002/answer-strata-v1/reference/answer-strata-v1.reference.manifest.json",
+  "reference_sha256": "0e04f6e5767ff2dea0b4c4d9e6149c8928ee7c36442b6dbf0a065a208881bbf8",
+  "statement": "The ANSWER strata of ANSWER-STRATA-v1: the items two non-Claude models both label ANSWER (41 §9 as amended by 42), per pool. Model judgments, not human gold. Each stratum is judged on its own n (41 §10); no pool is redrawn.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "strata": {
+    "ANSWER-constructed": {
+      "balance": {
+        "n": 771,
+        "offered_tools": {
+          "1": 259,
+          "2": 274,
+          "3": 238
+        },
+        "prompt_chars": {
+          "max": 97,
+          "median": 45.0,
+          "min": 29,
+          "q1": 40.5,
+          "q3": 52.0
+        }
+      },
+      "candidates": 850,
+      "consensus": {
+        "NO_CONSENSUS": 58,
+        "unanimous": 792
+      },
+      "construction_failures": 21,
+      "n": 771,
+      "pool": "K",
+      "reference_labels": {
+        "ANSWER": 771,
+        "NO_CONSENSUS": 58,
+        "UNKNOWN": 2,
+        "UNSUPPORTED": 19
+      },
+      "sizing_status": "RESOLVES_8_POINTS"
+    },
+    "ANSWER-natural": {
+      "balance": {
+        "n": 284,
+        "offered_tools": {
+          "1": 258,
+          "2": 4,
+          "3": 9,
+          "4": 7,
+          "5": 1,
+          "6": 2,
+          "7": 3
+        },
+        "prompt_chars": {
+          "max": 10743,
+          "median": 43.0,
+          "min": 2,
+          "q1": 29.0,
+          "q3": 60.0
+        }
+      },
+      "by_product_labels": {
+        "CALL": 80,
+        "CLARIFY": 148,
+        "UNSUPPORTED": 178
+      },
+      "candidates": 917,
+      "consensus": {
+        "NO_CONSENSUS": 144,
+        "unanimous": 773
+      },
+      "n": 284,
+      "pool": "N",
+      "reference_labels": {
+        "ANSWER": 284,
+        "CALL": 80,
+        "CLARIFY": 148,
+        "NO_CONSENSUS": 144,
+        "UNKNOWN": 83,
+        "UNSUPPORTED": 178
+      },
+      "sizing_status": "MEETS_FLOOR_ONLY"
+    }
+  }
+}
