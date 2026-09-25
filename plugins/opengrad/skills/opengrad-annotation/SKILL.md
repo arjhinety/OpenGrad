@@ -115,6 +115,16 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     agreement and κ), builds both strata and reports check 4's size. Below the floor it records
     `STOPPED_AGREEMENT_FLOOR` and writes no membership. That happened on 2026-09-25 (0.770): P-UNANS-v1 is not
     built, and stop rule 2 blocks training. The floor is never moved after a result.
+- **P-UNANS-v2, the second attempt** (44, `study_002_prereg_v12`), comes from
+  `src/opengrad/verification/punans_v2.py`: a 100-item trial set and an 800-item main set in
+  `reports/study-002/punans-v2/`, drawn together before any label from fresh KUQ, KUQP and BIG-bench questions
+  (every P-UNANS-v1 question excluded). Inputs are cached in `.cache/punans-v2/`. Tasks `punans-v2-trial` and
+  `punans-v2` share `punans-v2.model-procedure.md` and serve only 44 §4, with the labels UNKNOWABLE,
+  NOT_UNKNOWABLE and UNKNOWN. The trial is labelled first and never enters P-UNANS. The procedure may be revised
+  once after it, never the floor.
+  - **After labelling:** `pdet_coverage_reference --task punans-v2-trial` (or `punans-v2`), then `python -m
+    opengrad.verification.punans_v2_report --set trial | main`. The main set's floor is raw ≥ 0.80 over three
+    labels, with the caveat of 44 §10 carried in the report.
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters

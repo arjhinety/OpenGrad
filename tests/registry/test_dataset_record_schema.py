@@ -36,7 +36,7 @@ def test_committed_registry_is_version_2_and_conforms() -> None:
     assert registry["record_schema"] == "registry/dataset_record.schema.json"
     # 11 at the v2 migration; +3 evaluation-only sources for the ANSWER strata (study_002_prereg_v9);
     # +3 for P-UNANS, including the BFCL tool file both populations use (study_002_prereg_v11).
-    assert len(registry["datasets"]) == 17
+    assert len(registry["datasets"]) == 19
     assert validate_structure(ROOT) == []
     assert validate_references(ROOT) == []
 

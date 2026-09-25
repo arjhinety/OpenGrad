@@ -131,8 +131,9 @@ def test_the_committed_report_records_the_stop_and_the_readme_quotes_it() -> Non
         assert f"{label} {agreed} of {sum(counts.values())}" in row, key
 
 
-def test_the_negative_result_quotes_the_report_and_every_status_surface_says_stopped() -> None:
-    # G14 for the write-up, and G16: the status word changes on every surface in the same commit.
+def test_the_negative_result_quotes_the_report_and_every_status_surface_says_reopened() -> None:
+    # G14 for the write-up, and G16: the status word changes on every surface in the same commit. Since
+    # study_002_prereg_v12 (44) the study is reopened; every surface still records the first attempt's stop.
     import json
     from pathlib import Path
 
@@ -163,4 +164,5 @@ def test_the_negative_result_quotes_the_report_and_every_status_surface_says_sto
             surface
         )
         assert "stopped before training" in text.lower(), surface
+        assert "reopened" in text.lower() and "study_002_prereg_v12" in text, surface
         assert f"{floor['raw_agreement']:.3f}" in text, surface

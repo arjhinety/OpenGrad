@@ -104,3 +104,18 @@ stratum would have held 227.
 - **Audit trail:** [`provenance/external-models/`](provenance/external-models/).
 - **Candidates:** [`punans-v1.manifest.json`](punans-v1.manifest.json).
 - **Source screening:** `registry/source_screening.yaml` (`study-002-punans`).
+
+## Addendum, 2026-09-25: the study was reopened
+
+Later the same day the owner reopened Study 002 for a second `P-UNANS` attempt. This result is unchanged by that:
+`P-UNANS-v1` stays stopped, and none of its items or labels is reused. The retry meets the conditions above:
+- **A new amendment written before its own labels:**
+  [44](../../../docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md), `study_002_prereg_v12`.
+- **This result disclosed:** 44 §1.
+- **A source screening beyond KUQ:** `study-002-punans-v2`. It found only 61 fresh questions outside KUQ.
+- **The 0.80 floor unchanged.**
+
+It changes the instrument rather than the sources: membership-only labels, and a trial set labelled first. 44 §10
+records that 0.80 over three labels is easier to reach than 0.80 over six, so a pass there is not a pass of this
+floor as measured here.
+

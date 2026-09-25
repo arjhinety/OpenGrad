@@ -25,7 +25,9 @@ follows is the operational core.
   drawn population before any label existed, and `42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md` →
   `study_002_prereg_v10`, which replaced an annotator that could not run mid-labelling, having read completion
   counts only, and `43-PUNANS-AMENDMENT-DRAFT.md` → `study_002_prereg_v11`, drafted from the owner's decisions,
-  then adopted with its draw authorised), written *before* results it could influence (G1).
+  then adopted with its draw authorised, and `44-PUNANS-V2-AMENDMENT-DRAFT.md` → `study_002_prereg_v12`, a retry
+  after v11's stop rule fired that changed the instrument, kept the floor and disclosed what the change does to
+  it), written *before* results it could influence (G1).
 - **A gate or threshold, to make a run pass.** A threshold that blocks a correct result is a finding about the
   threshold and is recorded, not edited around (`docs/contributing/README.md`).
 

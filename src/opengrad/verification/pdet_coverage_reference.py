@@ -60,17 +60,32 @@ TASK_SPECS: dict[str, tuple[str, str, Path]] = {
         "docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md",
         Path("reports/study-002/punans-v1/reference"),
     ),
+    # The second P-UNANS attempt (44 §8-§10): the same two annotators, a trial set and a main set.
+    "punans-v2-trial": (
+        "study_002_prereg_v12",
+        "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+        Path("reports/study-002/punans-v2/reference"),
+    ),
+    "punans-v2": (
+        "study_002_prereg_v12",
+        "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+        Path("reports/study-002/punans-v2/reference"),
+    ),
 }
 #: The reference's artifact kind, by task; P-DET-COVERAGE tasks keep the kind their references were built with.
 ARTIFACT_KINDS = {
     "answer-strata-v1": "ANSWER_STRATA_MODEL_CONSENSUS_REFERENCE",
     "punans-v1": "PUNANS_MODEL_CONSENSUS_REFERENCE",
+    "punans-v2-trial": "PUNANS_MODEL_CONSENSUS_REFERENCE",
+    "punans-v2": "PUNANS_MODEL_CONSENSUS_REFERENCE",
 }
 #: The declared annotators, by task, where they are not the three of 34. study_002_prereg_v10 (42) left
 #: answer-strata-v1 with two, whose labels must agree.
 TASK_ANNOTATORS: dict[str, tuple[str, ...]] = {
     "answer-strata-v1": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
     "punans-v1": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
+    "punans-v2-trial": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
+    "punans-v2": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
 }
 TASKS = tuple(TASK_SPECS)
 UNANIMOUS = "unanimous"

@@ -1251,3 +1251,32 @@ artifact, so it is corrected in place and the correction recorded here (G15).
   - **Undersized.** The false-premise candidate pool holds fewer than 385 items before labelling, so that
     stratum cannot resolve 10 points. It enters no gate.
   - **Not yet scorable.** `premise_rejection` needs a judge that does not exist yet.
+
+## 29. `study_002_prereg_v12` adopted: Study 002 reopened for a second `P-UNANS` attempt
+
+**Added 2026-09-25.**
+
+- **What happened first.** Under `study_002_prereg_v11` (§28) the two labelling models agreed on 0.770 of
+  `P-UNANS-v1`'s items, below the 0.80 floor, so stop rule 2 stopped the study before training. The owner
+  accepted the stop as final ([negative result](study-002/punans-v1/NEGATIVE-RESULT.md)).
+- **The reversal.** Later the same day the owner reopened the study for a second attempt. The first result is
+  not changed by this: `P-UNANS-v1` stays `STOPPED_AGREEMENT_FLOOR`, and none of its items or labels is reused.
+- **The decision.** After a second source screening (`study-002-punans-v2`, 10 candidates in
+  `registry/source_screening.yaml`), the owner chose:
+  - membership-only labels;
+  - a trial set labelled first;
+  - no false-premise stratum;
+  - unused KUQ questions plus BIG-bench Known Unknowns.
+
+  The owner then adopted [44](../docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md) as drafted, with
+  KUQP, recorded in [03](../docs/research/study-002/03-PREREGISTRATION.md) in the same commit.
+- **A correction made before adoption.** When choosing sources, the owner was told that KUQP's future
+  questions name years that may have passed. They name 2030 to 2120; the count had included the answer field.
+  44 disclosed the error and proposed KUQP, and the owner adopted it.
+- **Consequences, stated before any label:**
+  - **A weaker floor in practice.** The floor is still 0.80, but over three labels instead of six, so chance
+    agreement is higher. A v12 pass must be reported with that caveat, and with κ, which compares across the
+    two attempts.
+  - **Mostly KUQ again.** Beyond KUQ, the public supply was 61 fresh questions.
+  - **No labelling yet.** The trial and main sets are drawn and committed; the owner starts the runs.
+

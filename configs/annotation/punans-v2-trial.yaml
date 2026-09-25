@@ -1,0 +1,144 @@
+# Annotation of P-UNANS-v2-TRIAL: whether anyone can answer each question now (Study 002, study_002_prereg_v12).
+#
+# Amendment: docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md §8-§10 (adopted 2026-09-25).
+# - What is labelled: membership only. Is the question unknowable now? No assistant response is shown.
+# - Items: the 100-question trial set (44 §9). It never enters P-UNANS; it is labelled first.
+# - Reference: the label both models declared below give (44 §10).
+# - No floor applies here: the trial guides the procedure and never decides stop rule 2 (44 §9).
+#
+#   python scripts/run_external_annotation.py punans-v2-trial --annotator model.deepseek-v4.1-flash --size 20
+
+task_id: punans-v2-trial
+version: "1"
+title: P-UNANS-v2-TRIAL unknowability annotation
+task_type: single_label
+annotation_schema_version: punans-annotation-v2
+
+labels: [UNKNOWABLE, NOT_UNKNOWABLE, UNKNOWN]
+shortcuts: {"1": UNKNOWABLE, "2": NOT_UNKNOWABLE, "3": UNKNOWN}
+unknown_labels: [UNKNOWN]
+
+source:
+  path: reports/study-002/punans-v2/punans-v2-trial.population.jsonl
+  format: jsonl
+  id_field: punans_id
+  expected_sha256: cb8e0ef09fc7b82d9aa566991f8cc0841914663ef4a5e4f2286385c1ddbae717
+  expected_items: 100
+
+# 44 §8: the question and the offered tools, nothing else.
+fields:
+  user:
+    label: Question
+    path: user_message
+  tools:
+    label: Available tools
+    path: tools
+
+# 44 §8: blind to the source, the upstream id, the source's own category and who wrote the question. Never
+# displayed, filtered on or sent to the browser. No metadata chips and no filters are declared, for the same reason.
+blind_fields:
+  - gold_policy_label
+  - ambiguity_status
+  - annotator_id
+  - annotator_rationale
+  - annotation_version
+  - source_dataset
+  - source_id
+  - source_category
+  - source_author
+
+extra_fields:
+  - key: ambiguity_status
+    label: Ambiguity status
+    type: select
+    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT]
+    default: NONE
+    required: true
+  - key: annotator_rationale
+    label: Rationale
+    type: text
+    required: false
+    adjudication: false
+    help: Optional. A short note on why, or on what was hard, if you want one.
+
+constraints:
+  - when_label_in: [UNKNOWN]
+    field: ambiguity_status
+    forbidden: [NONE]
+    message: UNKNOWN needs an ambiguity reason (set ambiguity_status).
+  - when_label_not_in: [UNKNOWN]
+    field: ambiguity_status
+    allowed: [NONE]
+    message: An ambiguous item is labeled UNKNOWN; any other label needs ambiguity_status NONE.
+
+disagreement_keys: [label, ambiguity_status]
+
+adjudication_fields:
+  - key: decision_note
+    label: Deciding reason
+    type: text
+    required: true
+
+# 44 §4 only. Never the other sections: they name the sources and the construction.
+instructions:
+  - title: Rubric - what counts as unknowable (44 §4)
+    file: docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md
+    include_sections: ["4."]
+
+# The server refuses to start if the served rubric text contains one of these.
+instruction_forbidden_terms:
+  - KUQ
+  - KUQP
+  - Known Unknown
+  - amayuelas
+  - BIG-bench
+  - BFCL
+  - Berkeley
+  - gorilla
+  - source_category
+  - source_dataset
+  - source_author
+
+record_keys:
+  item_id: punans_id
+  label: gold_policy_label
+  annotation_schema_version: annotation_version
+
+output:
+  dir: reports/study-002/punans-v2/annotation
+  session_file: "punans-v2-trial.annotations.{annotator_id}.{session_id}.jsonl"
+  history_file: "audit/punans-v2-trial.history.{annotator_id}.{session_id}.jsonl"
+  adjudication_history_file: audit/punans-v2-trial.adjudication-history.jsonl
+  disagreements_file: punans-v2-trial.disagreements.jsonl
+  adjudication_file: punans-v2-trial.adjudicated.jsonl
+  gold_file: punans-v2-trial.gold.jsonl
+  manifest_file: punans-v2-trial.annotation-manifest.json
+
+protected_paths:
+  - reports/study-002/punans-v2/punans-v2-trial.population.jsonl
+  - reports/study-002/punans-v2/punans-v2.population.jsonl
+  - reports/study-002/punans-v2/punans-v2.manifest.json
+  - reports/study-002/punans-v2/punans-v2.manifest.json.sha256
+
+state_db: .annotation/punans-v2-trial.sqlite3
+
+# The two-model reference is computed separately (44 §10), never frozen as human gold.
+freeze:
+  allowed_designs: [two_pass, single_annotator]
+  require_adjudication: true
+  single_annotator_review:
+    flagged: true
+    labels: [UNKNOWN]
+
+# 44 §8: the two non-Claude annotators of 42 and 43. Their labels are model judgments (annotator_kind: model).
+model_annotators:
+  - annotator_id: model.gemini-3.8-flash-high
+    model: Gemini 3.8 Flash (High)
+    procedure: configs/annotation/punans-v2.model-procedure.md
+    procedure_sha256: 9ad5e3cd1eb7d2ed00c65965fafb22433462c2e80ee4b7aaaec7de77cd15daed
+    authorization: docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md
+  - annotator_id: model.deepseek-v4.1-flash
+    model: deepseek-v4.1-flash
+    procedure: configs/annotation/punans-v2.model-procedure.md
+    procedure_sha256: 9ad5e3cd1eb7d2ed00c65965fafb22433462c2e80ee4b7aaaec7de77cd15daed
+    authorization: docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md

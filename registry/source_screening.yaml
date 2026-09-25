@@ -1252,7 +1252,13 @@ screenings:
   requirement_source: reports/study-002/punans-v1/NEGATIVE-RESULT.md
   opened: '2026-09-25'
   owner_decision:
-    status: PENDING
+    status: ADOPTED
+    adopted:
+    - kuq
+    - kuqp
+    - bigbench-known-unknowns
+    recorded_in: docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md
+    date: '2026-09-25'
   search:
     date: '2026-09-25'
     method: >-
@@ -1298,7 +1304,7 @@ screenings:
       Contributes questions the first attempt did not draw toward n >= 385 agreed unknowable items, allowing
       for a trial set, screening, the time rule and two-model agreement.
   candidates:
-  - id: kuq-unknowns-all
+  - id: kuq
     display_name: KUQ unknowns_all.jsonl, future-unknown and unsolved-problem categories
     kind: ITEM_SOURCE
     locator:
@@ -1328,7 +1334,7 @@ screenings:
     evidence:
     - https://arxiv.org/abs/2305.13712
     - reports/source-screening/study-002-punans-v2/punans-v2-supply.json
-  - id: kuqp-future
+  - id: kuqp
     display_name: KUQP future questions (Deng et al. 2024)
     kind: ITEM_SOURCE
     locator:

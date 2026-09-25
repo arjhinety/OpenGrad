@@ -31,7 +31,7 @@
       "unknowable_rows": 23,
       "url": "https://raw.githubusercontent.com/google/BIG-bench/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns/task.json"
     },
-    "kuq-unknowns-all": {
+    "kuq": {
       "distinct_questions": 1784,
       "drawn_by_the_first_attempt": 358,
       "exact_text_overlap": {
@@ -56,7 +56,7 @@
       "unknowable_rows": 2078,
       "url": "https://huggingface.co/datasets/amayuelas/KUQ/resolve/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/unknowns_all.jsonl"
     },
-    "kuqp-future": {
+    "kuqp": {
       "distinct_questions": 40,
       "drawn_by_the_first_attempt": 0,
       "exact_text_overlap": {

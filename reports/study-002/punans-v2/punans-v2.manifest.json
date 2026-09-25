@@ -1,0 +1,184 @@
+{
+  "artifact_kind": "PUNANS_V2_CANDIDATE_POPULATIONS",
+  "blinded_fields": [
+    "source_dataset",
+    "source_id",
+    "source_category",
+    "source_author"
+  ],
+  "code_sha256_lf": {
+    "src/opengrad/contamination/levels.py": "36f25de8d849277d2852b3f9d15824a2b032c4fb4637116ad6e3c35665240371",
+    "src/opengrad/verification/answer_strata.py": "5bd4d65ff05e19204d32bdaaaff19263a8053defdf1c3b6849c2c3f53e57bc83",
+    "src/opengrad/verification/punans.py": "ebe526dff98159c33b2b709ac5e3ebc591d0cd75a708ba73a76910485ea6c5ca",
+    "src/opengrad/verification/punans_v2.py": "f3781aa4639b97a965ab0f67fccec7845e168284e8e02f173f33943420771ba0"
+  },
+  "counts": {
+    "available": {
+      "bigbench-known-unknowns": 21,
+      "kuq": 1405,
+      "kuqp": 40
+    },
+    "candidates": {
+      "bigbench-known-unknowns": 23,
+      "kuq": 2078,
+      "kuqp": 40
+    },
+    "duplicates_removed": 288,
+    "evaluation_set_collisions_removed": 0,
+    "first_attempt_removed": {
+      "kuq": 358
+    },
+    "main": {
+      "by_author": {
+        "gpt": 533,
+        "task authors": 8,
+        "turk": 224,
+        "web": 35
+      },
+      "by_source": {
+        "bigbench-known-unknowns": 8,
+        "kuq": 770,
+        "kuqp": 22
+      },
+      "tools_per_item": {
+        "1": 274,
+        "2": 255,
+        "3": 271
+      },
+      "total": 800
+    },
+    "no_eligible_tool_removed": 0,
+    "screen": {
+      "engine_level_counts": {
+        "level_1": 2,
+        "level_2": 2,
+        "level_3": 1,
+        "level_4": 1
+      },
+      "engine_thresholds": {
+        "containment": 0.6,
+        "edit_similarity": 0.8,
+        "jaccard": 0.5,
+        "max_df": 1000,
+        "min_shingles": 25
+      },
+      "flagged": 2,
+      "flagged_by_source": {
+        "kuq": 2
+      },
+      "probe_exact": 2,
+      "probe_half_contained": 2,
+      "training_user_turns": 446466
+    },
+    "time_rule_removed": {
+      "bigbench-known-unknowns": 2,
+      "kuq": 25
+    },
+    "tool_pool": {
+      "functions": 370
+    },
+    "trial": {
+      "by_author": {
+        "gpt": 60,
+        "task authors": 2,
+        "turk": 34,
+        "web": 4
+      },
+      "by_source": {
+        "bigbench-known-unknowns": 2,
+        "kuq": 96,
+        "kuqp": 2
+      },
+      "tools_per_item": {
+        "1": 30,
+        "2": 38,
+        "3": 32
+      },
+      "total": 100
+    },
+    "undrawn": 566
+  },
+  "disjoint_from": [
+    "reports/study-002/punans-v1/punans-v1.population.jsonl",
+    "reports/study-002/answer-strata-v1/answer-strata-v1.population.jsonl",
+    "reports/pdet-coverage/pdet-coverage-v1.population.jsonl",
+    "reports/pdet-coverage-v2/pdet-coverage-v2.population.jsonl"
+  ],
+  "draw_order": "sha256(seed | source_dataset | user_message) ascending; the first 100 are the trial, the next 800 the main set",
+  "gold_labels_present": false,
+  "id_rule": "un2: + sha256(source_dataset : source_id); source_id is the line, item or example index at the pinned revision",
+  "inputs": {
+    "bfcl_simple_python": {
+      "licence": "Apache-2.0",
+      "revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+      "sha256": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991",
+      "url": "https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_simple_python.json"
+    },
+    "bigbench-known-unknowns": {
+      "licence": "Apache-2.0",
+      "revision": "124892ccf54f85402852d68c93736a4fa57bf009",
+      "sha256": "6061bdd796f2225fee6ef9c389e1b1e19f4d83da905dc7b512e0d1ca0e44c557",
+      "url": "https://raw.githubusercontent.com/google/BIG-bench/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns/task.json"
+    },
+    "kuq": {
+      "licence": "MIT",
+      "revision": "f99b53aa226dbb0d1b086db3ec352b0da0aa8f41",
+      "sha256": "8469ab010ce1142bfe3d330635fb58c1e537253568b417b4435a39d658b10855",
+      "url": "https://huggingface.co/datasets/amayuelas/KUQ/resolve/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/unknowns_all.jsonl"
+    },
+    "kuqp": {
+      "licence": "MIT",
+      "revision": "596472f31f73acfdcb95741c277413fd500f8b35",
+      "sha256": "25ee426e7881b3cf950bffb1b6d0ebc6c644eb0c1a2c5939662cce4a01ce40d1",
+      "url": "https://raw.githubusercontent.com/zhaoy777/kuqp-dataset/596472f31f73acfdcb95741c277413fd500f8b35/KUQP%20Dataset/future_questions.json"
+    }
+  },
+  "licences": {
+    "bigbench-known-unknowns": "Apache-2.0",
+    "kuq": "MIT; the MIT notice travels with the items",
+    "kuqp": "MIT; the MIT notice travels with the items",
+    "tools": "Apache-2.0 (BFCL)"
+  },
+  "population_ids": {
+    "main": "P-UNANS-v2",
+    "trial": "P-UNANS-v2-TRIAL"
+  },
+  "populations": {
+    "main": {
+      "file": "punans-v2.population.jsonl",
+      "records": 800,
+      "sha256": "ed82c9cff981ef07d2892ff51c7ff05f2b442eb436e91daac1496172a8bf13c4"
+    },
+    "trial": {
+      "file": "punans-v2-trial.population.jsonl",
+      "records": 100,
+      "sha256": "cb8e0ef09fc7b82d9aa566991f8cc0841914663ef4a5e4f2286385c1ddbae717"
+    }
+  },
+  "preregistration": {
+    "adoption_amendment": "study_002_prereg_v12",
+    "document": "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+    "status_at_build": "ADOPTED"
+  },
+  "presentation_order": "sha256(seed | order | punans_id) ascending, within each set",
+  "protocol_version": "punans-002-v2",
+  "schema_version": 1,
+  "screen_corpora_manifest_sha256": {
+    "button.jsonl": "2692b5cc42ff64f4f0ba94e83e4488bda9556f8c15e8d8acb114eab4335a3746",
+    "glaive": "b80d0868eba3ff457d5e5b7e52395badc8ec6cd6426006ebc32173f9586aa642",
+    "looptool": "2d2749f767a18547fd1a771666b62284efa2d8453ab4a5f2d0dc71709b2d30c5",
+    "toolace": "a16e9a37a0780b6ff4b42e77bfca7869dad329dc25531e2b6719bc2e84617400",
+    "when2call-llm-judge": "a59beaf7811186c21c2fa5eefdd23657c4295233972458f6eaece48ee0316d18",
+    "when2call-mcq": "ff957a8686e5a04748dd3109ebfd70b3f49afa6d0d7bb680591be56870f7789f",
+    "when2call-preference": "9e6b5bc1f1d4450f787c8d98a38e8b4fcdca7021687c6066ea46bdb85f9a1904",
+    "when2call-sft": "0056c2d8134ab69d855800f754e294a9f8530d5997a84abdf9b043e885a2816c",
+    "xlam": "ea15b7e9d3f28d35870e3337a8d1ed9cbc12693afe55122377c1a47b711173d3"
+  },
+  "screening_year": 2026,
+  "seed": "opengrad-punans-002-v2",
+  "sizes": {
+    "main": 800,
+    "trial": 100
+  },
+  "statement": "Candidate items for Study 002's second P-UNANS attempt, before labelling: questions a source marks as unknowable now (future events, unsolved problems). The trial set is labelled first and never enters P-UNANS (44 §9); P-UNANS-unknowable is the main-set items two non-Claude models both label UNKNOWABLE (44 §10)."
+}

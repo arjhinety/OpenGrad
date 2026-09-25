@@ -67,8 +67,8 @@ Terms: [glossary](../docs/GLOSSARY.md).
 | [`prose-classifier/`](prose-classifier/) | 139 | Study 002 | Decision-classifier development sets, check rounds and one-shot tests; see its README |
 | [`releases/`](releases/) | 10 | Study 001 | Hugging Face publication records |
 | [`source-screening/`](source-screening/) | 8 | Study 002 | Data-source screenings: the written report and the artifacts behind its numbers |
-| [`study-002/`](study-002/) | 39 | Study 002 | New Study 002 evidence: the ANSWER strata candidate population and its three-model labels |
+| [`study-002/`](study-002/) | 43 | Study 002 | New Study 002 evidence: the ANSWER strata candidate population and its three-model labels |
 | [`training/`](training/) | 1 | Study 001 | Pre-training component-gate evidence |
 | [`visual/`](visual/) | 12 | Study 001 | Figures |
 
-374 tracked files in total.
+378 tracked files in total.

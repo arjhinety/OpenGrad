@@ -48,13 +48,13 @@ OUT = ROOT / "reports/source-screening/study-002-punans-v2/punans-v2-supply.json
 CACHE = ROOT / ".cache/punans-screening"
 V1_POPULATION = ROOT / "reports/study-002/punans-v1/punans-v1.population.jsonl"
 SOURCES: dict[str, dict[str, str]] = {
-    "kuq-unknowns-all": {
+    "kuq": {
         "url": "https://huggingface.co/datasets/amayuelas/KUQ/resolve/"
         "f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/unknowns_all.jsonl",
         "revision": "f99b53aa226dbb0d1b086db3ec352b0da0aa8f41",
         "sha256": "8469ab010ce1142bfe3d330635fb58c1e537253568b417b4435a39d658b10855",
     },
-    "kuqp-future": {
+    "kuqp": {
         "url": "https://raw.githubusercontent.com/zhaoy777/kuqp-dataset/"
         "596472f31f73acfdcb95741c277413fd500f8b35/KUQP%20Dataset/future_questions.json",
         "revision": "596472f31f73acfdcb95741c277413fd500f8b35",
@@ -68,7 +68,7 @@ KUQ_UNKNOWABLE = ("future unknown", "unsolved problem/mistery")
 
 def fetch(name: str) -> bytes:
     spec = SOURCES[name]
-    path = CACHE / f"{name}{Path(spec['url']).suffix}"
+    path = CACHE / f"v2-{name}{Path(spec['url']).suffix}"
     if not path.is_file():
         CACHE.mkdir(parents=True, exist_ok=True)
         with urllib.request.urlopen(spec["url"], timeout=120) as response:
@@ -81,7 +81,7 @@ def fetch(name: str) -> bytes:
 
 def questions(name: str, data: bytes) -> list[dict[str, str]]:
     """Every item the source marks unknowable: category, author and question."""
-    if name == "kuq-unknowns-all":
+    if name == "kuq":
         rows = [json.loads(line) for line in data.decode("utf-8").splitlines() if line.strip()]
         return [
             {
@@ -92,7 +92,7 @@ def questions(name: str, data: bytes) -> list[dict[str, str]]:
             for r in rows
             if r["category"] in KUQ_UNKNOWABLE
         ]
-    if name == "kuqp-future":
+    if name == "kuqp":
         rows = json.loads(data)
         rows = rows if isinstance(rows, list) else next(iter(rows.values()))
         return [{"category": "future", "author": "gpt", "question": str(r["u"])} for r in rows]

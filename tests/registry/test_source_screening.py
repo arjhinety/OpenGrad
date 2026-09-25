@@ -288,9 +288,14 @@ def _punans_v2() -> tuple[dict, dict]:
     return screening, supply
 
 
-def test_the_punans_v2_screening_pins_every_source_it_read_and_awaits_the_owner() -> None:
+def test_the_punans_v2_screening_pins_every_source_it_read_and_records_the_adoption() -> None:
     screening, supply = _punans_v2()
-    assert screening["owner_decision"] == {"status": "PENDING"}
+    assert screening["owner_decision"] == {
+        "status": "ADOPTED",
+        "adopted": ["kuq", "kuqp", "bigbench-known-unknowns"],
+        "recorded_in": "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+        "date": "2026-09-25",
+    }
     assert supply["overlap_status"] == "COMPLETE"
     assert supply["first_attempt_distinct_questions"] == 1063
     candidates = {c["id"]: c for c in screening["candidates"]}
@@ -313,8 +318,8 @@ def test_the_punans_v2_report_and_draft_quote_the_audit() -> None:
     _, supply = _punans_v2()
     report = (PUNANS_V2 / "REPORT.md").read_text(encoding="utf-8")
     labels = {
-        "kuq-unknowns-all": "KUQ `unknowns_all.jsonl`, future and unsolved",
-        "kuqp-future": "KUQP future",
+        "kuq": "KUQ `unknowns_all.jsonl`, future and unsolved",
+        "kuqp": "KUQP future",
         "bigbench-known-unknowns": "BIG-bench Known Unknowns",
     }
     for name, label in labels.items():
@@ -327,7 +332,7 @@ def test_the_punans_v2_report_and_draft_quote_the_audit() -> None:
         assert s["revision"] in report and s["sha256"][:8] in report, name
         assert sum(v for k, v in s["exact_text_overlap"].items() if k != "training_corpora") == 0
     assert f"| **Total** | | | | | **{supply['fresh_total']:,}** |" in report
-    kuq = supply["sources"]["kuq-unknowns-all"]
+    kuq = supply["sources"]["kuq"]
     authors, categories = kuq["fresh_by_author"], kuq["fresh_by_category"]
     assert (
         f"GPT {authors['gpt']}, crowdworkers {authors['turk']}, the web {authors['web']}" in report
@@ -336,10 +341,8 @@ def test_the_punans_v2_report_and_draft_quote_the_audit() -> None:
         f"future unknown {categories['future unknown']}, unsolved problem "
         f"{categories['unsolved problem/mistery']}" in report
     )
-    beyond = sum(
-        s["fresh_after_exclusions"] for n, s in supply["sources"].items() if n != "kuq-unknowns-all"
-    )
-    kuqp = supply["sources"]["kuqp-future"]["fresh_after_exclusions"]
+    beyond = sum(s["fresh_after_exclusions"] for n, s in supply["sources"].items() if n != "kuq")
+    kuqp = supply["sources"]["kuqp"]["fresh_after_exclusions"]
     bigbench = supply["sources"]["bigbench-known-unknowns"]["fresh_after_exclusions"]
     assert f"{beyond} fresh questions (KUQP {kuqp}, BIG-bench {bigbench})" in report
     draft = PUNANS_V2_DRAFT.read_text(encoding="utf-8")
@@ -352,13 +355,13 @@ def test_the_punans_v2_report_and_draft_quote_the_audit() -> None:
         assert source["revision"] in draft and source["sha256"] in draft, name
 
 
-def test_the_punans_v2_draft_is_not_recorded_until_adopted() -> None:
-    # A draft amendment is recorded in neither 03 nor ERRATA (40, 43), and quotes the first attempt's
-    # result from its artifact.
+def test_the_punans_v2_amendment_is_recorded_twice_and_quotes_the_first_attempt() -> None:
+    # An adopted amendment is recorded in both 03 and ERRATA, in the commit that adopts it, and quotes the
+    # first attempt's result from its artifact.
     draft = PUNANS_V2_DRAFT.read_text(encoding="utf-8")
-    assert "Status: DRAFT, not adopted." in draft
+    assert "Status: ADOPTED 2026-09-25, as drafted, with KUQP." in draft
     for record in ("docs/research/study-002/03-PREREGISTRATION.md", "reports/ERRATA.md"):
-        assert "study_002_prereg_v12" not in (ROOT / record).read_text(encoding="utf-8"), record
+        assert "study_002_prereg_v12" in (ROOT / record).read_text(encoding="utf-8"), record
     v1 = json.loads(
         (ROOT / "reports/study-002/punans-v1/punans-v1.strata.json").read_text(encoding="utf-8")
     )

@@ -58,7 +58,7 @@ that the promotion gate could not see. Causation is not established.
 
 ## Study 002 — the refusal/direct-answer mechanism (refusal relabelling)
 
-**Status: STOPPED BEFORE TRAINING (2026-09-25).** Preregistered stop rule 2 fired: the unanswerable set `P-UNANS` could not reach its labeller-agreement floor (raw agreement 0.770 against 0.80). The study owner accepted the stop as final ([negative result](../../reports/study-002/punans-v1/NEGATIVE-RESULT.md)), then reopened the study the same day for a second `P-UNANS` attempt, drafted as [44](study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md) and not yet adopted; until it is, the study stays stopped. No GPU time has been spent, and no model result exists. Landing page:
+**Status: REOPENED (2026-09-25): second `P-UNANS` attempt, drawn, not yet labelled.** The first attempt stopped before training: preregistered stop rule 2 fired when the unanswerable set `P-UNANS` could not reach its labeller-agreement floor (raw agreement 0.770 against 0.80; [negative result](../../reports/study-002/punans-v1/NEGATIVE-RESULT.md)). The owner first accepted that stop as final, then reopened the study the same day under [44](study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md) (`study_002_prereg_v12`); its trial and main sets are drawn and unlabelled. No GPU time has been spent, and no model result exists. Landing page:
 [opengrad.arjhinety.com/studies/002](https://opengrad.arjhinety.com/studies/002). Design set:
 [`docs/research/study-002/`](study-002/README.md).
 

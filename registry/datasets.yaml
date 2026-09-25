@@ -1092,6 +1092,12 @@ datasets:
     size_bytes: 2391358
     encoding_format: application/jsonlines
     verified_from: sha256 of the file downloaded from content_url on 2026-09-25 (the file is not stored in LFS)
+  - name: unknowns_all.jsonl
+    content_url: https://huggingface.co/datasets/amayuelas/KUQ/resolve/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/unknowns_all.jsonl
+    sha256: 8469ab010ce1142bfe3d330635fb58c1e537253568b417b4435a39d658b10855
+    size_bytes: 5306737
+    encoding_format: application/jsonlines
+    verified_from: sha256 of the file downloaded from content_url on 2026-09-25 (the file is not stored in LFS; git blob e06327d7)
   source_revision:
     value: f99b53aa226dbb0d1b086db3ec352b0da0aa8f41
     verified: true
@@ -1101,7 +1107,7 @@ datasets:
     verified: true
     source: https://huggingface.co/datasets/amayuelas/KUQ/blob/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/README.md
   redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
-  redistribution_basis: registry/source_screening.yaml (study-002-punans, adopted 2026-09-25)
+  redistribution_basis: registry/source_screening.yaml (study-002-punans and study-002-punans-v2, adopted 2026-09-25)
   upstream_access_mode: public
   downstream_access_requirement: public_allowed
   attribution_required: true
@@ -1129,10 +1135,136 @@ datasets:
   overlap_evidence:
   - reports/source-screening/study-002-punans/punans-supply.json
   - reports/study-002/punans-v1/punans-v1.manifest.json
+  - reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+  - reports/study-002/punans-v2/punans-v2.manifest.json
   planned_initial_mixture_percent: null
   notes: P-UNANS candidates (43 §5). Pool U takes 350 future-unknown and unsolved-problem unknowns; pool F takes
     every surviving false-assumption unknown (363). Both come after the time rule, de-duplication and the 41 §6
-    screen. Relabelled blind by two non-Claude models; evaluation only, never trained on.
+    screen. Relabelled blind by two non-Claude models; evaluation only, never trained on. P-UNANS-v2 (44 §5) draws
+    from unknowns_all.jsonl (866 items across its trial and main sets), excluding every question v1 drew;
+    retained_after_filtering and processed_dataset_hash above describe v1.
+- id: kuqp
+  display_name: KUQP (Known-Unknown Questions with explanations), future questions
+  organization: Deng et al. (National University of Singapore)
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: question_answering
+  papers: []
+  retrieval_date: '2026-09-25'
+  date_published:
+    value: '2024-07-10'
+    source: GitHub API created_at of zhaoy777/kuqp-dataset, read 2026-09-25
+  hf_id: null
+  repository: https://github.com/zhaoy777/kuqp-dataset
+  source_repository: https://github.com/zhaoy777/kuqp-dataset
+  distribution:
+  - name: future_questions.json
+    content_url: https://raw.githubusercontent.com/zhaoy777/kuqp-dataset/596472f31f73acfdcb95741c277413fd500f8b35/KUQP%20Dataset/future_questions.json
+    sha256: 25ee426e7881b3cf950bffb1b6d0ebc6c644eb0c1a2c5939662cce4a01ce40d1
+    size_bytes: 6718
+    encoding_format: application/json
+    verified_from: sha256 of the file downloaded from content_url on 2026-09-25
+  source_revision:
+    value: 596472f31f73acfdcb95741c277413fd500f8b35
+    verified: true
+    source: GitHub API commits/main of zhaoy777/kuqp-dataset
+  license:
+    value: MIT
+    verified: true
+    source: https://github.com/zhaoy777/kuqp-dataset/blob/596472f31f73acfdcb95741c277413fd500f8b35/LICENSE
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: registry/source_screening.yaml (study-002-punans-v2, adopted 2026-09-25)
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: 'Deng et al. 2024, Don''t Just Say "I don''t know"! Self-aligning Large Language Models for Responding to Unknown Questions with Explanations (arXiv:2402.15062)'
+  modifications_disclosed: true
+  sample_count:
+    published: 40
+    verified_from: https://raw.githubusercontent.com/zhaoy777/kuqp-dataset/596472f31f73acfdcb95741c277413fd500f8b35/KUQP%20Dataset/future_questions.json
+  retained_after_filtering:
+    value: 24
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/punans-v2/punans-v2.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - futuristic_questions
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: LOW_TRAINING_ONLY
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+  - reports/study-002/punans-v2/punans-v2.manifest.json
+  planned_initial_mixture_percent: null
+  notes: P-UNANS-v2 candidates (44 §5). Only the unanswerable side of each pair is used; the questions ask about
+    years after 2026. Relabelled blind by two non-Claude models; evaluation only, never trained on.
+- id: bigbench-known-unknowns
+  display_name: BIG-bench Known Unknowns
+  organization: Google and the BIG-bench collaboration
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: question_answering
+  papers: []
+  retrieval_date: '2026-09-25'
+  date_published:
+    value: '2021-01-15'
+    source: GitHub API created_at of google/BIG-bench, read 2026-09-25
+  hf_id: null
+  repository: https://github.com/google/BIG-bench
+  source_repository: https://github.com/google/BIG-bench/tree/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns
+  distribution:
+  - name: task.json
+    content_url: https://raw.githubusercontent.com/google/BIG-bench/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns/task.json
+    sha256: 6061bdd796f2225fee6ef9c389e1b1e19f4d83da905dc7b512e0d1ca0e44c557
+    size_bytes: 8265
+    encoding_format: application/json
+    verified_from: sha256 of the file downloaded from content_url on 2026-09-25
+  source_revision:
+    value: 124892ccf54f85402852d68c93736a4fa57bf009
+    verified: true
+    source: the pin of screening study-002-punans (reports/source-screening/study-002-punans/punans-supply.json)
+  license:
+    value: Apache-2.0
+    verified: true
+    source: https://github.com/google/BIG-bench/blob/124892ccf54f85402852d68c93736a4fa57bf009/LICENSE
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: registry/source_screening.yaml (study-002-punans-v2, adopted 2026-09-25)
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: 'Srivastava et al. 2022, Beyond the Imitation Game: Quantifying and extrapolating the capabilities of language models (arXiv:2206.04615)'
+  modifications_disclosed: true
+  sample_count:
+    published: 46
+    verified_from: https://raw.githubusercontent.com/google/BIG-bench/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns/task.json
+  retained_after_filtering:
+    value: 10
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/punans-v2/punans-v2.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - known_unknowns
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: LOW_TRAINING_ONLY
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+  - reports/study-002/punans-v2/punans-v2.manifest.json
+  planned_initial_mixture_percent: null
+  notes: P-UNANS-v2 candidates (44 §5). Items whose highest-scored target is Unknown; BIG-bench is widely present
+    in pretraining data. Relabelled blind by two non-Claude models; evaluation only, never trained on.
 - id: selfaware
   display_name: SelfAware (unanswerable questions)
   organization: Yin et al. (Fudan University)

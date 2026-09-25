@@ -131,7 +131,7 @@ Which public, licence-compatible datasets can supply Study 002's P-UNANS: stand-
 For Study 002's second P-UNANS attempt, which public, licence-compatible sources beyond the first attempt's can supply stand-alone questions no one can answer now (future events, unsolved problems), given that SelfAware failed as such a source and the first attempt's questions are used up?
 
 - Purpose: EVALUATION_POPULATION; requirement: `reports/study-002/punans-v1/NEGATIVE-RESULT.md`
-- Owner decision: **PENDING**
+- Owner decision: **ADOPTED** — adopted kuq, kuqp, bigbench-known-unknowns
 - Report: `reports/source-screening/study-002-punans-v2/REPORT.md`
 
 ### Criteria
@@ -163,8 +163,8 @@ For Study 002's second P-UNANS attempt, which public, licence-compatible sources
 | Candidate | Kind | Licence | C1 | C2 | C3 | C4 | C5 | C6 | C7 | Decision |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `bigbench-known-unknowns` | item | Apache-2.0 | PASS | PASS | PASS | PASS | PARTIAL | PARTIAL | PARTIAL | SHORTLISTED |
-| `kuq-unknowns-all` | item | MIT | PARTIAL | PASS | PASS | PASS | PASS | PARTIAL | PASS | SHORTLISTED |
-| `kuqp-future` | item | MIT | PASS | PASS | PASS | PASS | PASS | PASS | PARTIAL | SHORTLISTED |
+| `kuq` | item | MIT | PARTIAL | PASS | PASS | PASS | PASS | PARTIAL | PASS | SHORTLISTED |
+| `kuqp` | item | MIT | PASS | PASS | PASS | PASS | PASS | PASS | PARTIAL | SHORTLISTED |
 | `coconot` | item | UNRESOLVED | PASS | PASS | ? | PASS | PARTIAL | PARTIAL | PARTIAL | WATCHLIST |
 | `behonest-unknowns` | item | CC-BY-SA-4.0 | **FAIL** | PASS | PASS | PASS | ? | PASS | **FAIL** | EXCLUDED |
 | `honeset` | item | NONE | **FAIL** | PASS | **FAIL** | PASS | ? | ? | **FAIL** | EXCLUDED |

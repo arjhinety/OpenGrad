@@ -72,6 +72,17 @@ TASK_SPECS = {
         "configs/annotation/punans-v1.model-procedure.md",
         "docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md",
     ),
+    # 44 (study_002_prereg_v12): the same two annotators, on the trial set and then the main set.
+    "punans-v2-trial": (
+        ROOT / "reports" / "study-002" / "punans-v2" / "provenance" / "external-models",
+        "configs/annotation/punans-v2.model-procedure.md",
+        "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+    ),
+    "punans-v2": (
+        ROOT / "reports" / "study-002" / "punans-v2" / "provenance" / "external-models",
+        "configs/annotation/punans-v2.model-procedure.md",
+        "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+    ),
 }
 #: The status sentence of the archive, where it is not the three-model one of 34.
 STATUS = {
@@ -81,6 +92,14 @@ STATUS = {
         "refused the model for this account. Not human labels and not human gold."
     ),
     "punans-v1": (
+        "Model judgments by two declared non-Claude annotators, each blind and independent; an item's reference "
+        "label is the label both give ({authorization}). Not human labels and not human gold."
+    ),
+    "punans-v2-trial": (
+        "Model judgments by two declared non-Claude annotators, each blind and independent, on the trial set, "
+        "which never enters P-UNANS ({authorization} section 9). Not human labels and not human gold."
+    ),
+    "punans-v2": (
         "Model judgments by two declared non-Claude annotators, each blind and independent; an item's reference "
         "label is the label both give ({authorization}). Not human labels and not human gold."
     ),

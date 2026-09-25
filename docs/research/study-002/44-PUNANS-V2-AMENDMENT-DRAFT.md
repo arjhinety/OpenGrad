@@ -1,8 +1,13 @@
 # 44 — `P-UNANS`, second attempt: a membership-only instrument with a trial set (`study_002_prereg_v12`)
 
-> **Status: DRAFT, not adopted.** It is recorded in neither [03](03-PREREGISTRATION.md) nor `reports/ERRATA.md`
-> until the owner adopts it, as [40](40-PREREG-V8-DRAFT.md) and [43](43-PUNANS-AMENDMENT-DRAFT.md) were. Until
-> then Study 002 stays **stopped before training**, and nothing is drawn or labelled.
+> **Status: ADOPTED 2026-09-25, as drafted, with KUQP.** The owner adopted it and authorised the draw
+> (*"proceed, but dont do the runs yet"*): the trial and main sets are drawn and committed, and no label is
+> requested until the owner starts the runs. It is recorded in [03](03-PREREGISTRATION.md) and
+> `reports/ERRATA.md` §29 in the same commit, and Study 002 is **reopened**. The text below is kept as drafted,
+> including its draft-time wording, as [40](40-PREREG-V8-DRAFT.md) and [43](43-PUNANS-AMENDMENT-DRAFT.md) were.
+>
+> **As drafted:** *Status: DRAFT, not adopted. It is recorded in neither 03 nor `reports/ERRATA.md` until the
+> owner adopts it. Until then Study 002 stays stopped before training, and nothing is drawn or labelled.*
 >
 > - **What the owner decided on 2026-09-25,** after reading the second source screening
 >   (`registry/source_screening.yaml`, screening `study-002-punans-v2`; report

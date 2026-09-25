@@ -1,10 +1,10 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v11` (2026-09-25).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v11 at
+> **Current version: `study_002_prereg_v12` (2026-09-25).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v12 at
 > the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
-> [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md)). Entries are
-> appended so cited line numbers hold.
+> [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md),
+> [44](44-PUNANS-V2-AMENDMENT-DRAFT.md)). Entries are appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
 committed **before the first Study 002 training run is launched and before any Study 002 evaluation
@@ -390,3 +390,41 @@ Appended here rather than under "Amendments" so that line numbers other document
 - **Arms launched under an earlier version:** none.
 - **Full record:** [43-PUNANS-AMENDMENT-DRAFT.md](43-PUNANS-AMENDMENT-DRAFT.md); the ERRATA entry is
   `reports/ERRATA.md` §28.
+
+### `study_002_prereg_v12` — 2026-09-25
+
+- **Context.** Under v11, stop rule 2 fired: the two labelling models agreed on 0.770 of `P-UNANS-v1`'s items,
+  below the 0.80 floor, and Study 002 stopped before training
+  ([negative result](../../../reports/study-002/punans-v1/NEGATIVE-RESULT.md)). That result stands, and none of
+  its items or labels is reused.
+- **Items changed:** [43](43-PUNANS-AMENDMENT-DRAFT.md) §3–§5 (sources, definition, pool), §8 (labels) and §9
+  (the floor's measure); a trial set is added. In full:
+  - **Sources:** unused KUQ questions (`unknowns_all.jsonl`), KUQP's future questions and BIG-bench Known
+    Unknowns, pinned; SelfAware is dropped.
+  - **Definition:** unknowable questions only. The false-premise stratum and `premise_rejection` are dropped
+    from Study 002.
+  - **Labels:** membership only: `UNKNOWABLE`, `NOT_UNKNOWABLE`, `UNKNOWN`.
+  - **Trial set:** 100 questions, drawn with the 800-question main set before any label, labelled first, never
+    part of `P-UNANS`. The procedure may be revised once after it; the floor may not.
+  - **Floor:** raw agreement ≥ 0.80 on the main set, unchanged in value, with κ reported. 44 §10 records that
+    0.80 is easier to reach over three labels than over six, and that this must be said wherever a pass is
+    reported.
+- **Reason:** the owner reopened the study for a second attempt. The write-up of the first expected the same
+  six-label instrument to fail again on a fresh draw, and the second source screening (`study-002-punans-v2`)
+  found only 61 fresh questions beyond KUQ.
+- **Owner decisions, 2026-09-25:**
+  - reopen Study 002, reversing the acceptance of the stop as final earlier the same day;
+  - after the screening: membership-only labels, a trial set, no false-premise stratum, unused KUQ plus
+    BIG-bench;
+  - adoption as drafted, with KUQP (which the owner had first been told, wrongly, names past years) and the draw
+    authorised, with no labelling runs yet: *"proceed, but dont do the runs yet"*.
+- **Not changed:**
+  - every threshold, including `min_refusal_correctness` 0.70 and n ≥ 385;
+  - stop rule 2 and its 0.80 value;
+  - `P-CONF-v1`, the `ANSWER` strata and `P-UNANS-v1`;
+  - the arms and seeds.
+- **Candidates already scored:** none. The trial and main sets are drawn and committed with this entry, before
+  any label.
+- **Arms launched under an earlier version:** none.
+- **Full record:** [44-PUNANS-V2-AMENDMENT-DRAFT.md](44-PUNANS-V2-AMENDMENT-DRAFT.md); the ERRATA entry is
+  `reports/ERRATA.md` §29.
