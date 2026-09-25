@@ -759,3 +759,482 @@ screenings:
     decisive_criteria: [C3]
     evidence:
     - https://nlp.cs.washington.edu/triviaqa/
+- id: study-002-punans
+  question: >-
+    Which public, licence-compatible datasets can supply Study 002's P-UNANS: stand-alone questions that
+    no one can answer now (future events, unsolved problems, unknowable facts), on which the right
+    behaviour is to decline rather than answer?
+  purpose: EVALUATION_POPULATION
+  requirement_source: docs/research/study-002/06-SPLIT-SPEC.md
+  opened: '2026-09-25'
+  owner_decision:
+    status: PENDING
+  search:
+    date: '2026-09-25'
+    method: >-
+      Papers With Code search (unanswerable, abstention, known-unknowns, false-premise and noncompliance
+      queries) and the repository's scholarly search. The AbstentionBench appendix supplied a vetted list of
+      20 abstention datasets and 3 excluded ones, each considered here. Every shortlisted or watchlisted
+      candidate was downloaded at a pinned revision, checked against its sha256, and counted and probed by
+      scripts/audit_punans_supply.py. Excluded candidates were read at their repository or card for the
+      licence and the property that excludes them.
+    report: reports/source-screening/study-002-punans/REPORT.md
+    artifacts:
+    - reports/source-screening/study-002-punans/punans-supply.json
+  criteria:
+  - id: C1
+    name: unknowable
+    test: >-
+      The source's labels, or a reading of its items, identify questions no one can answer now: future
+      events, unsolved problems, unknowable facts. Excluded: merely open-ended or subjective questions
+      (07-METRIC-SPEC), questions missing context the user could supply (a CLARIFY case, which P-CONF
+      already measures), and false premises (a correction, not a refusal, may be the right reply).
+  - id: C2
+    name: standalone
+    test: The question stands alone, with no passage, document or context it depends on.
+  - id: C3
+    name: licence_permits_redistribution
+    test: The data licence, read at the source, permits redistributing items or items derived from them.
+  - id: C4
+    name: pinned_revision
+    test: An immutable revision of the data can be pinned.
+  - id: C5
+    name: disjoint_from_training
+    test: >-
+      No shared derivation with OpenGrad's training corpora, and exact-text collisions with them, the
+      When2Call held-out questions, P-CONF and P-DET-COVERAGE are few enough for screening to remove.
+  - id: C6
+    name: time_stable
+    test: >-
+      The question stays unanswerable over time, or the items that could have resolved since the source
+      was written can be identified and removed.
+  - id: C7
+    name: supply
+    test: >-
+      Contributes unknowable items toward n >= 385 (study_002_prereg_v8 item B), allowing for losses to
+      screening, the time rule and two-model agreement.
+  candidates:
+  - id: kuq
+    display_name: Known Unknown Questions (KUQ), future-unknown and unsolved-problem categories
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/amayuelas/KUQ
+      revision: f99b53aa226dbb0d1b086db3ec352b0da0aa8f41
+      files:
+      - knowns_unknowns.jsonl
+    license:
+      value: MIT
+      source: https://huggingface.co/datasets/amayuelas/KUQ/blob/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/README.md
+    answer_items:
+      basis: DATA_COUNT
+      count: 1096
+      estimate_artifact: reports/source-screening/study-002-punans/punans-supply.json
+      note: future unknown 659 and unsolved problem 437, of 3,437 crowd-written unknowns; 25 of the 1,096 name a year up to 2026.
+    verdicts:
+      C1: {result: PARTIAL, note: 'Two of six categories fit; controversial, ambiguous, counterfactual and false-assumption questions do not.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: PASS, note: '3 exact-text collisions with the training corpora across all 3,437 unknowns; none with the held-out sets.'}
+      C6: {result: PARTIAL, note: 'Written in 2023: future questions naming a year up to 2026 may have resolved and must be removed.'}
+      C7: {result: PASS}
+    decision: SHORTLISTED
+    evidence:
+    - https://arxiv.org/abs/2305.13712
+    - reports/source-screening/study-002-punans/punans-supply.json
+  - id: selfaware
+    display_name: SelfAware (unanswerable questions)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/yinzhangyue/SelfAware
+      revision: f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c
+      files:
+      - data/SelfAware.json
+    license:
+      value: CC-BY-SA-4.0
+      source: https://github.com/yinzhangyue/SelfAware/blob/f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c/data/SelfAware.json
+      note: The data file declares cc-by-sa-4.0; the repository LICENSE is Apache-2.0. The data file's own statement governs the data, and share-alike applies.
+    answer_items:
+      basis: DATA_COUNT
+      count: 1032
+      estimate_artifact: reports/source-screening/study-002-punans/punans-supply.json
+      note: 1,032 questions marked unanswerable, without a category; none names a year up to 2026.
+    verdicts:
+      C1: {result: PARTIAL, note: 'Items carry no category, and the paper includes subjective and philosophical questions; labelling must remove them.'}
+      C2: {result: PASS}
+      C3: {result: PASS, note: 'The licences conflict, but both permit redistribution; CC-BY-SA-4.0 is the binding one.'}
+      C4: {result: PASS}
+      C5: {result: PASS, note: '3 exact-text collisions with the training corpora; none with the held-out sets.'}
+      C6: {result: PASS}
+      C7: {result: PASS}
+    decision: SHORTLISTED
+    evidence:
+    - https://arxiv.org/abs/2305.18153
+    - reports/source-screening/study-002-punans/punans-supply.json
+  - id: coconot
+    display_name: CoCoNot evaluation split, universal-unknowns and temporal-limitations subsets
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/allenai/coconot
+      revision: 2cbe16aabf9069f17e48c8daad8aeabc29469eb7
+      files:
+      - original/test-00000-of-00001.parquet
+    license:
+      value: UNRESOLVED
+      source: https://huggingface.co/datasets/allenai/coconot/blob/2cbe16aabf9069f17e48c8daad8aeabc29469eb7/README.md
+      note: The card names the AI2 ImpACT-LR licence; the repository's LICENSE.md is ODC-By.
+    answer_items:
+      basis: DATA_COUNT
+      count: 104
+      estimate_artifact: reports/source-screening/study-002-punans/punans-supply.json
+      note: universal unknowns 67, temporal limitations 37; 8 name a year up to 2026.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PASS}
+      C3: {result: UNKNOWN, note: 'Two licences disagree; unresolved.'}
+      C4: {result: PASS}
+      C5: {result: PARTIAL, note: '1 exact-text collision with the training corpora; the training split is in public SFT mixtures.'}
+      C6: {result: PARTIAL}
+      C7: {result: PARTIAL, note: 'At most a supplement.'}
+    decision: WATCHLIST
+    revisit_when: The maintainers resolve whether ImpACT-LR or ODC-By governs the data.
+    evidence:
+    - https://arxiv.org/abs/2407.12043
+    - https://huggingface.co/datasets/allenai/coconot/blob/2cbe16aabf9069f17e48c8daad8aeabc29469eb7/LICENSE.md
+    - reports/source-screening/study-002-punans/punans-supply.json
+  - id: bigbench-known-unknowns
+    display_name: BIG-bench Known Unknowns
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/google/BIG-bench/tree/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns
+      revision: 124892ccf54f85402852d68c93736a4fa57bf009
+      files:
+      - bigbench/benchmark_tasks/known_unknowns/task.json
+    license:
+      value: Apache-2.0
+      source: https://github.com/google/BIG-bench/blob/main/LICENSE
+    answer_items:
+      basis: DATA_COUNT
+      count: 23
+      estimate_artifact: reports/source-screening/study-002-punans/punans-supply.json
+      note: 23 of 46 items target Unknown; 2 name a year up to 2026.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: PARTIAL, note: 'No collision found, but BIG-bench is widely present in pretraining data.'}
+      C6: {result: PARTIAL}
+      C7: {result: PARTIAL, note: 'Too small to matter except as a supplement.'}
+    decision: WATCHLIST
+    revisit_when: The shortlisted sources fall short of n >= 385 after screening, the time rule and two-model agreement.
+    evidence:
+    - https://github.com/google/BIG-bench/tree/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns
+    - reports/source-screening/study-002-punans/punans-supply.json
+  - id: abstentionbench
+    display_name: AbstentionBench (aggregate of 20 abstention datasets)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/facebook/AbstentionBench
+      revision: af06080e2cbfff73f02a7c33135e5567d6f7ce6a
+    license:
+      value: CC-BY-NC-4.0
+      source: https://huggingface.co/datasets/facebook/AbstentionBench
+    answer_items:
+      basis: PAPER
+      note: Its answer-unknown items come from KUQ, BIG-bench Known Unknowns and CoCoNot, screened here at their originals.
+    verdicts:
+      C1: {result: PARTIAL, note: 'Mixes answer-unknown, false-premise, stale and underspecified scenarios.'}
+      C2: {result: PARTIAL}
+      C3: {result: FAIL, note: 'Non-commercial licence; the originals carry permissive ones.'}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PARTIAL}
+      C7: {result: NOT_APPLICABLE, note: 'Redundant with its sources.'}
+    decision: EXCLUDED
+    decisive_criteria: [C3]
+    evidence:
+    - https://arxiv.org/abs/2506.09038
+  - id: falseqa
+    display_name: FalseQA (false-premise questions)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/thunlp/FalseQA
+      revision: null
+    license:
+      value: NONE
+      source: https://github.com/thunlp/FalseQA
+      note: The repository declares no licence.
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'False premises: the right reply may be a correction.'}
+      C2: {result: PASS}
+      C3: {result: FAIL}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C3]
+    evidence:
+    - https://github.com/thunlp/FalseQA
+  - id: qaqa
+    display_name: (QA)2, questions with questionable assumptions
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/najoungkim/QAQA
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/najoungkim/QAQA
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'False or questionable premises.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1]
+    evidence:
+    - https://github.com/najoungkim/QAQA
+  - id: crepe
+    display_name: CREPE, questions with false presuppositions
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/zharry29/CREPE
+      revision: 8aa9eb882aba938b1a972331072ea683f664aef0
+    license:
+      value: CC-BY-4.0
+      source: https://huggingface.co/datasets/zharry29/CREPE
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'False presuppositions.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1]
+    evidence:
+    - https://huggingface.co/datasets/zharry29/CREPE
+  - id: freshqa
+    display_name: FreshQA (fast-changing and false-premise questions)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/freshllms/freshqa
+      revision: null
+    license:
+      value: Apache-2.0
+      source: https://github.com/freshllms/freshqa
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'Questions have answers, which change; they are stale, not unknowable.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: FAIL}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C6]
+    evidence:
+    - https://github.com/freshllms/freshqa
+  - id: squad-v2-unanswerable
+    display_name: SQuAD 2.0 unanswerable questions
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/rajpurkar/SQuAD-explorer
+      revision: null
+    license:
+      value: CC-BY-SA-4.0
+      source: https://rajpurkar.github.io/SQuAD-explorer/
+      note: The dataset page states CC-BY-SA-4.0; the explorer repository is MIT.
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: PARTIAL, note: 'Unanswerable only from its passage; many are answerable from general knowledge.'}
+      C2: {result: FAIL}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://rajpurkar.github.io/SQuAD-explorer/
+  - id: musique-unanswerable
+    display_name: MuSiQue unanswerable multi-hop questions
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/StonyBrookNLP/musique
+      revision: null
+    license:
+      value: CC-BY-4.0
+      source: https://github.com/StonyBrookNLP/musique
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: PARTIAL, note: 'Unanswerable only from the paragraphs supplied.'}
+      C2: {result: FAIL}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C2]
+    evidence:
+    - https://github.com/StonyBrookNLP/musique
+  - id: situatedqa-geo
+    display_name: SituatedQA geographic subset (underspecified questions)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/mikejqzhang/SituatedQA
+      revision: null
+    license:
+      value: NONE
+      source: https://github.com/mikejqzhang/SituatedQA
+      note: The repository declares no licence.
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'Missing context the user could supply: a CLARIFY case.'}
+      C2: {result: PASS}
+      C3: {result: FAIL}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PARTIAL}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C3]
+    evidence:
+    - https://github.com/mikejqzhang/SituatedQA
+  - id: mediq
+    display_name: MediQ with patient context removed
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/stellalisy/mediQ
+      revision: null
+    license:
+      value: CC-BY-4.0
+      source: https://github.com/stellalisy/mediQ
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'Missing patient context: a CLARIFY case.'}
+      C2: {result: FAIL}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C2]
+    evidence:
+    - https://github.com/stellalisy/mediQ
+  - id: bbq-ambiguous
+    display_name: BBQ ambiguous-context questions
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/nyu-mll/BBQ
+      revision: null
+    license:
+      value: CC-BY-4.0
+      source: https://github.com/nyu-mll/BBQ
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'Answer undetermined by an ambiguous context, and a bias probe.'}
+      C2: {result: FAIL}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C2]
+    evidence:
+    - https://github.com/nyu-mll/BBQ
+  - id: moralchoice-ambiguous
+    display_name: MoralChoice ambiguous scenarios
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/ninodimontalcino/moralchoice
+      revision: null
+    license:
+      value: MIT
+      source: https://github.com/ninodimontalcino/moralchoice
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'Contested moral judgement: subjective, not unknowable.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: UNKNOWN}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1]
+    evidence:
+    - https://github.com/ninodimontalcino/moralchoice
+  - id: abstentionbench-reasoning-variants
+    display_name: GSM8K-, MMLU-Math- and GPQA-Abstain (problems with their premises removed)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/facebook/AbstentionBench
+      revision: af06080e2cbfff73f02a7c33135e5567d6f7ce6a
+    license:
+      value: CC-BY-NC-4.0
+      source: https://huggingface.co/datasets/facebook/AbstentionBench
+    answer_items:
+      basis: NOT_ESTIMATED
+    verdicts:
+      C1: {result: FAIL, note: 'Underspecified problems: a CLARIFY case.'}
+      C2: {result: PASS}
+      C3: {result: FAIL}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: NOT_APPLICABLE}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C3]
+    evidence:
+    - https://arxiv.org/abs/2506.09038
+  - id: answer-strata-unsupported-byproduct
+    display_name: ANSWER-STRATA-v1 pool N items the two models labelled UNSUPPORTED
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/arjhinety/OpenGrad/blob/824e049/reports/study-002/answer-strata-v1/answer-strata-v1.strata.json
+      revision: 824e049
+    license:
+      value: Apache-2.0
+      source: https://github.com/ShishirPatil/gorilla/blob/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/LICENSE
+    answer_items:
+      basis: DATA_COUNT
+      count: 178
+      estimate_artifact: reports/study-002/answer-strata-v1/answer-strata-v1.strata.json
+      note: Consensus UNSUPPORTED items of pool N (BFCL no-call prompts).
+    verdicts:
+      C1: {result: FAIL, note: 'They need an absent tool or capability; the answer exists. 41 section 9 also keeps them out of P-UNANS.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: PASS}
+      C6: {result: PARTIAL}
+      C7: {result: PARTIAL}
+    decision: EXCLUDED
+    decisive_criteria: [C1]
+    evidence:
+    - reports/study-002/answer-strata-v1/answer-strata-v1.strata.json
+    - docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md

@@ -66,7 +66,9 @@ description: How OpenGrad's registries, provenance claims and written records st
 
   `owner_decision` stays PENDING until the study owner decides. Adoption names the registered records and the
   amendment that records it (`study-002-answer-heldout` → 41, `study_002_prereg_v9`), and
-  `tests/registry/test_source_screening.py` pins it. An evaluation-only record has `intended_stages: [evaluation]`
+  `tests/registry/test_source_screening.py` pins it. A second screening, `study-002-punans` (Study 002's unanswerable set),
+  has its counts written by `scripts/audit_punans_supply.py`, which downloads each read source at a pinned revision
+  and refuses a file whose sha256 differs. An evaluation-only record has `intended_stages: [evaluation]`
   and `allowed_splits: []`, so the training firewall never admits it.
 - **Views are generated.** `scripts/reporting/generate_source_views.py` writes `docs/datasets/SOURCE_REGISTRY.md`
   and `docs/datasets/SOURCE_SCREENING.md`, including the screening flow counts; the test requires them current.

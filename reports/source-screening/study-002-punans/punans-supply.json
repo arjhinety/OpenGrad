@@ -1,0 +1,92 @@
+{
+  "built_by": "scripts/audit_punans_supply.py",
+  "normalisation": "opengrad.verification.answer_strata.normalise (lowercase, punctuation to space, whitespace collapsed)",
+  "overlap_blocked": [],
+  "overlap_status": "COMPLETE",
+  "screening": "study-002-punans",
+  "screening_year": 2026,
+  "sources": {
+    "bigbench-known-unknowns": {
+      "by_category": {
+        "unknown": 23
+      },
+      "exact_text_overlap": {
+        "answer_strata_candidates": 0,
+        "pdet_coverage": 0,
+        "training_corpora": 0,
+        "when2call_heldout": 0
+      },
+      "names_a_year_up_to_screening_year": {
+        "unknown": 2
+      },
+      "revision": "124892ccf54f85402852d68c93736a4fa57bf009",
+      "sha256": "6061bdd796f2225fee6ef9c389e1b1e19f4d83da905dc7b512e0d1ca0e44c557",
+      "unknowable_items": 23,
+      "url": "https://raw.githubusercontent.com/google/BIG-bench/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns/task.json"
+    },
+    "coconot": {
+      "by_category": {
+        "temporal limitations": 37,
+        "universal unknowns": 67
+      },
+      "exact_text_overlap": {
+        "answer_strata_candidates": 0,
+        "pdet_coverage": 0,
+        "training_corpora": 1,
+        "when2call_heldout": 0
+      },
+      "names_a_year_up_to_screening_year": {
+        "temporal limitations": 6,
+        "universal unknowns": 2
+      },
+      "revision": "2cbe16aabf9069f17e48c8daad8aeabc29469eb7",
+      "sha256": "e84a986e967c19ea2613e3b2abfd76385d977ad0bf5114e3994cc8304be49573",
+      "unknowable_items": 104,
+      "url": "https://huggingface.co/datasets/allenai/coconot/resolve/2cbe16aabf9069f17e48c8daad8aeabc29469eb7/original/test-00000-of-00001.parquet"
+    },
+    "kuq": {
+      "by_category": {
+        "ambiguous": 577,
+        "controversial": 676,
+        "counterfactual": 568,
+        "false assumption": 520,
+        "future unknown": 659,
+        "unsolved problem": 437
+      },
+      "exact_text_overlap": {
+        "answer_strata_candidates": 0,
+        "pdet_coverage": 0,
+        "training_corpora": 3,
+        "when2call_heldout": 0
+      },
+      "names_a_year_up_to_screening_year": {
+        "ambiguous": 2,
+        "controversial": 1,
+        "counterfactual": 14,
+        "false assumption": 8,
+        "future unknown": 21,
+        "unsolved problem": 4
+      },
+      "revision": "f99b53aa226dbb0d1b086db3ec352b0da0aa8f41",
+      "sha256": "798d1677f962d11d069f77d1e3db91ad2ddb483a94b697e46bc8ca62ad0aedf6",
+      "unknowable_items": 3437,
+      "url": "https://huggingface.co/datasets/amayuelas/KUQ/resolve/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/knowns_unknowns.jsonl"
+    },
+    "selfaware": {
+      "by_category": {
+        "unanswerable (no category)": 1032
+      },
+      "exact_text_overlap": {
+        "answer_strata_candidates": 0,
+        "pdet_coverage": 0,
+        "training_corpora": 3,
+        "when2call_heldout": 0
+      },
+      "names_a_year_up_to_screening_year": {},
+      "revision": "f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c",
+      "sha256": "32929585ffdd4048f35f7f167720722eb8ddcf59908ffc958da2f84ea634dc54",
+      "unknowable_items": 1032,
+      "url": "https://raw.githubusercontent.com/yinzhangyue/SelfAware/f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c/data/SelfAware.json"
+    }
+  }
+}

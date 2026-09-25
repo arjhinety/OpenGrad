@@ -70,3 +70,58 @@ Which public, licence-compatible datasets can supply Study 002's held-out ANSWER
 | `triviaqa` | question | Apache-2.0 | n/a | PASS | **FAIL** | ? | ? | PASS | n/a | EXCLUDED |
 | `when2call` | item | CC-BY-4.0 | PASS | **FAIL** | PASS | PASS | **FAIL** | PASS | **FAIL** | EXCLUDED |
 | `xlam-irrelevance-7.5k` | item | CC-BY-4.0 | PASS | **FAIL** | PASS | PASS | **FAIL** | PASS | **FAIL** | EXCLUDED |
+
+## `study-002-punans`
+
+Which public, licence-compatible datasets can supply Study 002's P-UNANS: stand-alone questions that no one can answer now (future events, unsolved problems, unknowable facts), on which the right behaviour is to decline rather than answer?
+
+- Purpose: EVALUATION_POPULATION; requirement: `docs/research/study-002/06-SPLIT-SPEC.md`
+- Owner decision: **PENDING**
+- Report: `reports/source-screening/study-002-punans/REPORT.md`
+
+### Criteria
+
+- **C1** `unknowable` — The source's labels, or a reading of its items, identify questions no one can answer now: future events, unsolved problems, unknowable facts. Excluded: merely open-ended or subjective questions (07-METRIC-SPEC), questions missing context the user could supply (a CLARIFY case, which P-CONF already measures), and false premises (a correction, not a refusal, may be the right reply).
+- **C2** `standalone` — The question stands alone, with no passage, document or context it depends on.
+- **C3** `licence_permits_redistribution` — The data licence, read at the source, permits redistributing items or items derived from them.
+- **C4** `pinned_revision` — An immutable revision of the data can be pinned.
+- **C5** `disjoint_from_training` — No shared derivation with OpenGrad's training corpora, and exact-text collisions with them, the When2Call held-out questions, P-CONF and P-DET-COVERAGE are few enough for screening to remove.
+- **C6** `time_stable` — The question stays unanswerable over time, or the items that could have resolved since the source was written can be identified and removed.
+- **C7** `supply` — Contributes unknowable items toward n >= 385 (study_002_prereg_v8 item B), allowing for losses to screening, the time rule and two-model agreement.
+
+### Flow
+
+| Stage | Count |
+|---|---|
+| Candidates identified | 17 (17 item sources, 0 question sources) |
+| Excluded | 13 |
+| … on C1 `unknowable` | 10 |
+| … on C2 `standalone` | 4 |
+| … on C3 `licence_permits_redistribution` | 4 |
+| … on C6 `time_stable` | 1 |
+| Watch list | 2 |
+| Shortlisted | 2 |
+
+0 candidates hold zero qualifying items by design.
+
+### Candidates
+
+| Candidate | Kind | Licence | C1 | C2 | C3 | C4 | C5 | C6 | C7 | Decision |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `kuq` | item | MIT | PARTIAL | PASS | PASS | PASS | PASS | PARTIAL | PASS | SHORTLISTED |
+| `selfaware` | item | CC-BY-SA-4.0 | PARTIAL | PASS | PASS | PASS | PASS | PASS | PASS | SHORTLISTED |
+| `bigbench-known-unknowns` | item | Apache-2.0 | PASS | PASS | PASS | PASS | PARTIAL | PARTIAL | PARTIAL | WATCHLIST |
+| `coconot` | item | UNRESOLVED | PASS | PASS | ? | PASS | PARTIAL | PARTIAL | PARTIAL | WATCHLIST |
+| `abstentionbench` | item | CC-BY-NC-4.0 | PARTIAL | PARTIAL | **FAIL** | PASS | ? | PARTIAL | n/a | EXCLUDED |
+| `abstentionbench-reasoning-variants` | item | CC-BY-NC-4.0 | **FAIL** | PASS | **FAIL** | PASS | ? | PASS | n/a | EXCLUDED |
+| `answer-strata-unsupported-byproduct` | item | Apache-2.0 | **FAIL** | PASS | PASS | PASS | PASS | PARTIAL | PARTIAL | EXCLUDED |
+| `bbq-ambiguous` | item | CC-BY-4.0 | **FAIL** | **FAIL** | PASS | ? | ? | PASS | n/a | EXCLUDED |
+| `crepe` | item | CC-BY-4.0 | **FAIL** | PASS | PASS | PASS | ? | PASS | n/a | EXCLUDED |
+| `falseqa` | item | NONE | **FAIL** | PASS | **FAIL** | ? | ? | PASS | n/a | EXCLUDED |
+| `freshqa` | item | Apache-2.0 | **FAIL** | PASS | PASS | ? | ? | **FAIL** | n/a | EXCLUDED |
+| `mediq` | item | CC-BY-4.0 | **FAIL** | **FAIL** | PASS | ? | ? | PASS | n/a | EXCLUDED |
+| `moralchoice-ambiguous` | item | MIT | **FAIL** | PASS | PASS | ? | ? | PASS | n/a | EXCLUDED |
+| `musique-unanswerable` | item | CC-BY-4.0 | PARTIAL | **FAIL** | PASS | ? | ? | PASS | n/a | EXCLUDED |
+| `qaqa` | item | Apache-2.0 | **FAIL** | PASS | PASS | ? | ? | PASS | n/a | EXCLUDED |
+| `situatedqa-geo` | item | NONE | **FAIL** | PASS | **FAIL** | ? | ? | PARTIAL | n/a | EXCLUDED |
+| `squad-v2-unanswerable` | item | CC-BY-SA-4.0 | PARTIAL | **FAIL** | PASS | ? | ? | PASS | n/a | EXCLUDED |

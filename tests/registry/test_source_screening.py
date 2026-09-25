@@ -40,9 +40,11 @@ def _log() -> dict:
 def test_committed_log_validates_and_every_candidate_is_counted() -> None:
     ids, errors = validate_source_screening(ROOT)
     assert errors == []
-    assert len(ids) == len(_log()["screenings"][0]["candidates"]) == 27
+    sizes = {s["id"]: len(s["candidates"]) for s in _log()["screenings"]}
+    assert sizes == {"study-002-answer-heldout": 27, "study-002-punans": 17}
+    assert len(ids) == sum(sizes.values()) == 44
     census = audit(ROOT)["screening"]
-    assert (census.discovered, census.checked, census.failed) == (27, 27, 0)
+    assert (census.discovered, census.checked, census.failed) == (44, 44, 0)
 
 
 def test_the_owner_decision_is_recorded_with_its_amendment() -> None:
@@ -180,3 +182,71 @@ def test_the_report_quotes_the_numbers_its_artifacts_produce() -> None:
     by_file = overlap["flagged_by_file"]
     assert f"{by_file['irrelevance']} of 240 `irrelevance`" in report
     assert f"{by_file['live_irrelevance']} of 884 `live_irrelevance`" in report
+
+
+PUNANS = ROOT / "reports/source-screening/study-002-punans"
+
+
+def _punans() -> dict:
+    return next(s for s in _log()["screenings"] if s["id"] == "study-002-punans")
+
+
+def test_the_punans_screening_awaits_the_owner_and_pins_every_source_it_read() -> None:
+    screening = _punans()
+    assert screening["owner_decision"] == {"status": "PENDING"}
+    supply = json.loads((PUNANS / "punans-supply.json").read_text(encoding="utf-8"))
+    assert supply["overlap_status"] == "COMPLETE"
+    candidates = {c["id"]: c for c in screening["candidates"]}
+    # Every candidate the audit downloaded carries the revision the audit pinned, and its count.
+    for name, source in supply["sources"].items():
+        assert candidates[name]["locator"]["revision"] == source["revision"], name
+        assert candidates[name]["answer_items"]["estimate_artifact"] == (
+            "reports/source-screening/study-002-punans/punans-supply.json"
+        )
+    kuq = supply["sources"]["kuq"]["by_category"]
+    assert (
+        candidates["kuq"]["answer_items"]["count"]
+        == kuq["future unknown"] + kuq["unsolved problem"]
+    )
+    for name in ("selfaware", "coconot", "bigbench-known-unknowns"):
+        assert (
+            candidates[name]["answer_items"]["count"] == supply["sources"][name]["unknowable_items"]
+        )
+    decisions = {c["decision"] for c in candidates.values()}
+    assert decisions == {"SHORTLISTED", "WATCHLIST", "EXCLUDED"}
+    assert sorted(i for i, c in candidates.items() if c["decision"] == "SHORTLISTED") == [
+        "kuq",
+        "selfaware",
+    ]
+
+
+def test_the_punans_report_quotes_the_audit() -> None:
+    # G14: every count in the report's supply table is the artifact's.
+    supply = json.loads((PUNANS / "punans-supply.json").read_text(encoding="utf-8"))["sources"]
+    report = (PUNANS / "REPORT.md").read_text(encoding="utf-8")
+    kuq = supply["kuq"]
+    past = kuq["names_a_year_up_to_screening_year"]
+    rows = {
+        "KUQ, future unknown": (kuq["by_category"]["future unknown"], past["future unknown"]),
+        "KUQ, unsolved problem": (kuq["by_category"]["unsolved problem"], past["unsolved problem"]),
+    }
+    for label, (n, dated) in rows.items():
+        assert f"| {label} | {n:,} | {dated} |" in report, label
+    selfaware = supply["selfaware"]
+    assert (
+        f"| SelfAware | {selfaware['unknowable_items']:,} | 0 | {selfaware['exact_text_overlap']['training_corpora']} |"
+        in report
+    )
+    coconot = supply["coconot"]
+    dated = sum(coconot["names_a_year_up_to_screening_year"].values())
+    assert (
+        f"| {coconot['unknowable_items']} | {dated} | {coconot['exact_text_overlap']['training_corpora']} |"
+        in report
+    )
+    assert f"all of KUQ's {sum(kuq['by_category'].values()):,} unknowns" in report
+    fitting = kuq["by_category"]["future unknown"] + kuq["by_category"]["unsolved problem"]
+    assert f"KUQ's two fitting categories ({fitting:,})" in report
+    assert f"SelfAware ({selfaware['unknowable_items']:,})" in report
+    for name, source in supply.items():
+        assert source["revision"] in report, name
+        assert source["sha256"][:8] in report, name
