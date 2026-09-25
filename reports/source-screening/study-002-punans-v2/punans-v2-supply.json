@@ -1,0 +1,82 @@
+{
+  "built_by": "scripts/audit_punans_v2_supply.py",
+  "first_attempt_distinct_questions": 1063,
+  "first_attempt_population": "reports/study-002/punans-v1/punans-v1.population.jsonl",
+  "fresh_total": 1466,
+  "normalisation": "opengrad.verification.answer_strata.normalise (lowercase, punctuation to space, whitespace collapsed)",
+  "overlap_blocked": [],
+  "overlap_status": "COMPLETE",
+  "screening": "study-002-punans-v2",
+  "screening_year": 2026,
+  "sources": {
+    "bigbench-known-unknowns": {
+      "distinct_questions": 23,
+      "drawn_by_the_first_attempt": 0,
+      "exact_text_overlap": {
+        "answer_strata_candidates": 0,
+        "pdet_coverage": 0,
+        "training_corpora": 0,
+        "when2call_heldout": 0
+      },
+      "fresh_after_exclusions": 21,
+      "fresh_by_author": {
+        "task authors": 21
+      },
+      "fresh_by_category": {
+        "unknown": 21
+      },
+      "names_a_year_up_to_screening_year": 2,
+      "revision": "124892ccf54f85402852d68c93736a4fa57bf009",
+      "sha256": "6061bdd796f2225fee6ef9c389e1b1e19f4d83da905dc7b512e0d1ca0e44c557",
+      "unknowable_rows": 23,
+      "url": "https://raw.githubusercontent.com/google/BIG-bench/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns/task.json"
+    },
+    "kuq-unknowns-all": {
+      "distinct_questions": 1784,
+      "drawn_by_the_first_attempt": 358,
+      "exact_text_overlap": {
+        "answer_strata_candidates": 0,
+        "pdet_coverage": 0,
+        "training_corpora": 2,
+        "when2call_heldout": 0
+      },
+      "fresh_after_exclusions": 1405,
+      "fresh_by_author": {
+        "gpt": 904,
+        "turk": 433,
+        "web": 68
+      },
+      "fresh_by_category": {
+        "future unknown": 792,
+        "unsolved problem/mistery": 613
+      },
+      "names_a_year_up_to_screening_year": 19,
+      "revision": "f99b53aa226dbb0d1b086db3ec352b0da0aa8f41",
+      "sha256": "8469ab010ce1142bfe3d330635fb58c1e537253568b417b4435a39d658b10855",
+      "unknowable_rows": 2078,
+      "url": "https://huggingface.co/datasets/amayuelas/KUQ/resolve/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/unknowns_all.jsonl"
+    },
+    "kuqp-future": {
+      "distinct_questions": 40,
+      "drawn_by_the_first_attempt": 0,
+      "exact_text_overlap": {
+        "answer_strata_candidates": 0,
+        "pdet_coverage": 0,
+        "training_corpora": 0,
+        "when2call_heldout": 0
+      },
+      "fresh_after_exclusions": 40,
+      "fresh_by_author": {
+        "gpt": 40
+      },
+      "fresh_by_category": {
+        "future": 40
+      },
+      "names_a_year_up_to_screening_year": 0,
+      "revision": "596472f31f73acfdcb95741c277413fd500f8b35",
+      "sha256": "25ee426e7881b3cf950bffb1b6d0ebc6c644eb0c1a2c5939662cce4a01ce40d1",
+      "unknowable_rows": 40,
+      "url": "https://raw.githubusercontent.com/zhaoy777/kuqp-dataset/596472f31f73acfdcb95741c277413fd500f8b35/KUQP%20Dataset/future_questions.json"
+    }
+  }
+}

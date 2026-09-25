@@ -125,3 +125,50 @@ Which public, licence-compatible datasets can supply Study 002's P-UNANS: stand-
 | `qaqa` | item | Apache-2.0 | **FAIL** | PASS | PASS | ? | ? | PASS | n/a | EXCLUDED |
 | `situatedqa-geo` | item | NONE | **FAIL** | PASS | **FAIL** | ? | ? | PARTIAL | n/a | EXCLUDED |
 | `squad-v2-unanswerable` | item | CC-BY-SA-4.0 | PARTIAL | **FAIL** | PASS | ? | ? | PASS | n/a | EXCLUDED |
+
+## `study-002-punans-v2`
+
+For Study 002's second P-UNANS attempt, which public, licence-compatible sources beyond the first attempt's can supply stand-alone questions no one can answer now (future events, unsolved problems), given that SelfAware failed as such a source and the first attempt's questions are used up?
+
+- Purpose: EVALUATION_POPULATION; requirement: `reports/study-002/punans-v1/NEGATIVE-RESULT.md`
+- Owner decision: **PENDING**
+- Report: `reports/source-screening/study-002-punans-v2/REPORT.md`
+
+### Criteria
+
+- **C1** `unknowable` — The source's labels, or a reading of its items, identify questions no one can answer now: future events, unsolved problems. Excluded: open-ended or subjective questions, questions missing context the user could supply, false premises and non-existent entities, and questions unanswerable only by a particular model.
+- **C2** `standalone` — The question stands alone, with no passage, document or context it depends on.
+- **C3** `licence_permits_redistribution` — The data licence, read at the source, permits redistributing items or items derived from them.
+- **C4** `pinned_revision` — An immutable revision of the data can be pinned.
+- **C5** `disjoint_from_training` — Exact-text collisions with OpenGrad's training corpora, the When2Call held-out questions, the ANSWER strata candidates and P-DET-COVERAGE are few enough for screening to remove.
+- **C6** `time_stable` — The question stays unanswerable over time, or the items that could have resolved since the source was written can be identified and removed.
+- **C7** `fresh_supply` — Contributes questions the first attempt did not draw toward n >= 385 agreed unknowable items, allowing for a trial set, screening, the time rule and two-model agreement.
+
+### Flow
+
+| Stage | Count |
+|---|---|
+| Candidates identified | 10 (10 item sources, 0 question sources) |
+| Excluded | 6 |
+| … on C1 `unknowable` | 6 |
+| … on C3 `licence_permits_redistribution` | 2 |
+| … on C4 `pinned_revision` | 1 |
+| Watch list | 1 |
+| Shortlisted | 3 |
+
+1 candidates hold zero qualifying items by design.
+
+### Candidates
+
+| Candidate | Kind | Licence | C1 | C2 | C3 | C4 | C5 | C6 | C7 | Decision |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `bigbench-known-unknowns` | item | Apache-2.0 | PASS | PASS | PASS | PASS | PARTIAL | PARTIAL | PARTIAL | SHORTLISTED |
+| `kuq-unknowns-all` | item | MIT | PARTIAL | PASS | PASS | PASS | PASS | PARTIAL | PASS | SHORTLISTED |
+| `kuqp-future` | item | MIT | PASS | PASS | PASS | PASS | PASS | PASS | PARTIAL | SHORTLISTED |
+| `coconot` | item | UNRESOLVED | PASS | PASS | ? | PASS | PARTIAL | PARTIAL | PARTIAL | WATCHLIST |
+| `behonest-unknowns` | item | CC-BY-SA-4.0 | **FAIL** | PASS | PASS | PASS | ? | PASS | **FAIL** | EXCLUDED |
+| `honeset` | item | NONE | **FAIL** | PASS | **FAIL** | PASS | ? | ? | **FAIL** | EXCLUDED |
+| `idk-dataset` | item | NONE | **FAIL** | PASS | **FAIL** | PASS | ? | n/a | **FAIL** | EXCLUDED |
+| `kuqp-other` | item | MIT | **FAIL** | PASS | PASS | PASS | ? | n/a | **FAIL** | EXCLUDED |
+| `selfaware` | item | CC-BY-SA-4.0 | **FAIL** | PASS | PASS | PASS | PASS | PASS | **FAIL** | EXCLUDED |
+| `temporal-abstention` | item | NONE | **FAIL** | ? | **FAIL** | **FAIL** | ? | **FAIL** | **FAIL** | EXCLUDED |

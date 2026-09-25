@@ -214,6 +214,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`research/study-002/41-ANSWER-STRATA-AMENDMENT.md`](research/study-002/41-ANSWER-STRATA-AMENDMENT.md) | 41 — The `ANSWER` strata set: sources, construction and labelling (`study_002_prereg_v9`) |
 | [`research/study-002/42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md`](research/study-002/42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md) | 42 — The `ANSWER` strata reference: two models, both must agree (`study_002_prereg_v10`) |
 | [`research/study-002/43-PUNANS-AMENDMENT-DRAFT.md`](research/study-002/43-PUNANS-AMENDMENT-DRAFT.md) | 43 — `P-UNANS`: sources, construction, labelling and scoring (`study_002_prereg_v11`) |
+| [`research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md`](research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md) | 44 — `P-UNANS`, second attempt: a membership-only instrument with a trial set (`study_002_prereg_v12`) |
 | [`research/study-002/HANDOFF.md`](research/study-002/HANDOFF.md) | Study 002 — handoff (2026-09-15) |
 | [`research/study-002/README.md`](research/study-002/README.md) | Study 002 — design set |
 
@@ -223,4 +224,4 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 |---|---|
 | [`training/reference-recipes.md`](training/reference-recipes.md) | External training reference recipes |
 
-127 documents.
+128 documents.

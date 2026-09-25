@@ -1243,3 +1243,333 @@ screenings:
     evidence:
     - reports/study-002/answer-strata-v1/answer-strata-v1.strata.json
     - docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md
+- id: study-002-punans-v2
+  question: >-
+    For Study 002's second P-UNANS attempt, which public, licence-compatible sources beyond the first
+    attempt's can supply stand-alone questions no one can answer now (future events, unsolved problems),
+    given that SelfAware failed as such a source and the first attempt's questions are used up?
+  purpose: EVALUATION_POPULATION
+  requirement_source: reports/study-002/punans-v1/NEGATIVE-RESULT.md
+  opened: '2026-09-25'
+  owner_decision:
+    status: PENDING
+  search:
+    date: '2026-09-25'
+    method: >-
+      Papers With Code search restricted to 2024-2026 (unanswerable, abstention, known-unknowns, honesty and
+      refusal queries), each new candidate read at its repository or Hub card for licence and content, and
+      the first screening's WATCHLIST and SelfAware re-judged against the first attempt's result. Every
+      shortlisted candidate was downloaded at a pinned revision, checked against its sha256, and counted by
+      scripts/audit_punans_v2_supply.py, which also removes every question the first attempt drew. Candidates
+      the first screening excluded for reasons that still hold are not repeated here.
+    report: reports/source-screening/study-002-punans-v2/REPORT.md
+    artifacts:
+    - reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+  criteria:
+  - id: C1
+    name: unknowable
+    test: >-
+      The source's labels, or a reading of its items, identify questions no one can answer now: future
+      events, unsolved problems. Excluded: open-ended or subjective questions, questions missing context the
+      user could supply, false premises and non-existent entities, and questions unanswerable only by a
+      particular model.
+  - id: C2
+    name: standalone
+    test: The question stands alone, with no passage, document or context it depends on.
+  - id: C3
+    name: licence_permits_redistribution
+    test: The data licence, read at the source, permits redistributing items or items derived from them.
+  - id: C4
+    name: pinned_revision
+    test: An immutable revision of the data can be pinned.
+  - id: C5
+    name: disjoint_from_training
+    test: >-
+      Exact-text collisions with OpenGrad's training corpora, the When2Call held-out questions, the ANSWER
+      strata candidates and P-DET-COVERAGE are few enough for screening to remove.
+  - id: C6
+    name: time_stable
+    test: >-
+      The question stays unanswerable over time, or the items that could have resolved since the source was
+      written can be identified and removed.
+  - id: C7
+    name: fresh_supply
+    test: >-
+      Contributes questions the first attempt did not draw toward n >= 385 agreed unknowable items, allowing
+      for a trial set, screening, the time rule and two-model agreement.
+  candidates:
+  - id: kuq-unknowns-all
+    display_name: KUQ unknowns_all.jsonl, future-unknown and unsolved-problem categories
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/amayuelas/KUQ
+      revision: f99b53aa226dbb0d1b086db3ec352b0da0aa8f41
+      files:
+      - unknowns_all.jsonl
+    license:
+      value: MIT
+      source: https://huggingface.co/datasets/amayuelas/KUQ/blob/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/README.md
+    answer_items:
+      basis: DATA_COUNT
+      count: 1405
+      estimate_artifact: reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+      note: >-
+        Fresh after exclusions, of 1,784 distinct questions in the two categories; 358 were drawn by the
+        first attempt. The file adds questions written by GPT, which the first attempt's file does not hold.
+    verdicts:
+      C1: {result: PARTIAL, note: 'Two of six categories fit, as in the first screening.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: PASS, note: 'Two exact-text collisions with the training corpora; none with the held-out sets.'}
+      C6: {result: PARTIAL, note: 'Written in 2023; questions naming a year up to 2026 are removed, undated resolved ones are left to labelling.'}
+      C7: {result: PASS}
+    decision: SHORTLISTED
+    evidence:
+    - https://arxiv.org/abs/2305.13712
+    - reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+  - id: kuqp-future
+    display_name: KUQP future questions (Deng et al. 2024)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/zhaoy777/kuqp-dataset
+      revision: 596472f31f73acfdcb95741c277413fd500f8b35
+      files:
+      - KUQP Dataset/future_questions.json
+    license:
+      value: MIT
+      source: https://github.com/zhaoy777/kuqp-dataset/blob/596472f31f73acfdcb95741c277413fd500f8b35/LICENSE
+    answer_items:
+      basis: DATA_COUNT
+      count: 40
+      estimate_artifact: reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+      note: Questions about named years after 2026; each is paired in the file with an answerable twin, which is not used.
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: PASS}
+      C6: {result: PASS, note: 'The years they name are after 2026.'}
+      C7: {result: PARTIAL, note: 'Small: a supplement.'}
+    decision: SHORTLISTED
+    evidence:
+    - https://arxiv.org/abs/2402.15062
+    - reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+  - id: bigbench-known-unknowns
+    display_name: BIG-bench Known Unknowns
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/google/BIG-bench/tree/124892ccf54f85402852d68c93736a4fa57bf009/bigbench/benchmark_tasks/known_unknowns
+      revision: 124892ccf54f85402852d68c93736a4fa57bf009
+      files:
+      - bigbench/benchmark_tasks/known_unknowns/task.json
+    license:
+      value: Apache-2.0
+      source: https://github.com/google/BIG-bench/blob/main/LICENSE
+    answer_items:
+      basis: DATA_COUNT
+      count: 21
+      estimate_artifact: reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+      note: The first screening's WATCHLIST condition now holds (the first attempt fell short of 385).
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: PARTIAL, note: 'No collision found, but BIG-bench is widely present in pretraining data.'}
+      C6: {result: PARTIAL}
+      C7: {result: PARTIAL, note: 'Small: a supplement.'}
+    decision: SHORTLISTED
+    evidence:
+    - reports/source-screening/study-002-punans-v2/punans-v2-supply.json
+    - reports/study-002/punans-v1/punans-v1.strata.json
+  - id: kuqp-other
+    display_name: KUQP ambiguous, incomplete and incorrect questions
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/zhaoy777/kuqp-dataset
+      revision: 596472f31f73acfdcb95741c277413fd500f8b35
+      files:
+      - KUQP Dataset/ambiguous_questions.json
+      - KUQP Dataset/incomplete_questions.json
+      - KUQP Dataset/incorrect_questions.json
+    license:
+      value: MIT
+      source: https://github.com/zhaoy777/kuqp-dataset/blob/596472f31f73acfdcb95741c277413fd500f8b35/LICENSE
+    answer_items:
+      basis: BY_DESIGN_ZERO
+      note: Ambiguous, incomplete and false-premise questions by the source's own categories.
+    verdicts:
+      C1: {result: FAIL, note: 'Ambiguous or incomplete questions are clarifying-question cases; incorrect ones are false premises.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: NOT_APPLICABLE}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C1]
+    evidence:
+    - https://arxiv.org/abs/2402.15062
+  - id: selfaware
+    display_name: SelfAware (unanswerable questions)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/yinzhangyue/SelfAware
+      revision: f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c
+      files:
+      - data/SelfAware.json
+    license:
+      value: CC-BY-SA-4.0
+      source: https://github.com/yinzhangyue/SelfAware/blob/f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c/data/SelfAware.json
+    answer_items:
+      basis: DATA_COUNT
+      count: 43
+      estimate_artifact: reports/study-002/punans-v1/punans-v1.strata.json
+      note: Of the 350 the first attempt drew, both models labelled 43 unknowable; most were labelled subjective, answerable or underspecified.
+    verdicts:
+      C1: {result: FAIL, note: 'Measured by the first attempt: mostly not unknowable in the reading of both labelling models.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: PASS}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C1]
+    evidence:
+    - reports/study-002/punans-v1/NEGATIVE-RESULT.md
+    - reports/study-002/punans-v1/punans-v1.strata.json
+  - id: behonest-unknowns
+    display_name: BeHonest Unknowns split (Chern et al. 2024)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/GAIR/BeHonest
+      revision: fcdb24a2de2cd236bbd1b4484d99c23512ee7cc6
+      files:
+      - Unknowns/unknowns.json
+    license:
+      value: CC-BY-SA-4.0
+      source: https://huggingface.co/datasets/GAIR/BeHonest/blob/fcdb24a2de2cd236bbd1b4484d99c23512ee7cc6/README.md
+    answer_items:
+      basis: PAPER
+      note: The paper builds the split by merging SelfAware and UnknownBench.
+    verdicts:
+      C1: {result: FAIL, note: 'SelfAware failed in the first attempt, and UnknownBench asks about non-existent concepts or false premises.'}
+      C2: {result: PASS}
+      C3: {result: PASS}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: PASS}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C1]
+    evidence:
+    - https://arxiv.org/abs/2406.13261
+    - https://arxiv.org/abs/2311.09731
+  - id: honeset
+    display_name: HoneSet (HonestLLM, Gao et al. 2024)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/Flossiee/HonestyLLM
+      revision: c94b9f5a0dabc1c52b587d6305e20e344964fc94
+      files:
+      - dataset/HoneSet.json
+    license:
+      value: NONE
+      source: https://github.com/Flossiee/HonestyLLM/tree/c94b9f5a0dabc1c52b587d6305e20e344964fc94
+      note: The repository declares no licence.
+    answer_items:
+      basis: PAPER
+      note: Queries the assistant cannot serve because of its own limits (latest information, missing input, identity, modality, professional capability, sensing).
+    verdicts:
+      C1: {result: FAIL, note: 'The limits are the assistant''s, not questions no one can answer.'}
+      C2: {result: PASS}
+      C3: {result: FAIL, note: 'No licence declared.'}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: UNKNOWN}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C3]
+    evidence:
+    - https://arxiv.org/abs/2406.00380
+  - id: idk-dataset
+    display_name: Idk dataset (Cheng et al. 2024, Can AI Assistants Know What They Don't Know?)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://github.com/OpenMOSS/Say-I-Dont-Know
+      revision: a4768458638fa78a9a43252d319514db425dcaf3
+    license:
+      value: NONE
+      source: https://github.com/OpenMOSS/Say-I-Dont-Know/tree/a4768458638fa78a9a43252d319514db425dcaf3
+      note: The repository declares no licence.
+    answer_items:
+      basis: PAPER
+      note: TriviaQA questions a given model gets wrong; each has an answer.
+    verdicts:
+      C1: {result: FAIL, note: 'Unknown to one model, not to anyone.'}
+      C2: {result: PASS}
+      C3: {result: FAIL, note: 'No licence declared.'}
+      C4: {result: PASS}
+      C5: {result: UNKNOWN}
+      C6: {result: NOT_APPLICABLE}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C3]
+    evidence:
+    - https://arxiv.org/abs/2401.13275
+  - id: temporal-abstention
+    display_name: Temporal QA abstention (Zhou et al. 2026, When Silence Is Golden)
+    kind: ITEM_SOURCE
+    locator:
+      url: https://arxiv.org/abs/2602.04755
+      revision: null
+    license:
+      value: NONE
+      source: https://arxiv.org/abs/2602.04755
+      note: No data or code release is linked.
+    answer_items:
+      basis: PAPER
+      note: Time-sensitive questions whose answers exist for a given date.
+    verdicts:
+      C1: {result: FAIL, note: 'Answerable once the date is fixed: stale, not unknowable.'}
+      C2: {result: UNKNOWN}
+      C3: {result: FAIL}
+      C4: {result: FAIL, note: 'No release to pin.'}
+      C5: {result: UNKNOWN}
+      C6: {result: FAIL}
+      C7: {result: FAIL}
+    decision: EXCLUDED
+    decisive_criteria: [C1, C4]
+    evidence:
+    - https://arxiv.org/abs/2602.04755
+  - id: coconot
+    display_name: CoCoNot evaluation split, universal-unknowns and temporal-limitations subsets
+    kind: ITEM_SOURCE
+    locator:
+      url: https://huggingface.co/datasets/allenai/coconot
+      revision: 2cbe16aabf9069f17e48c8daad8aeabc29469eb7
+      files:
+      - original/test-00000-of-00001.parquet
+    license:
+      value: UNRESOLVED
+      source: https://huggingface.co/datasets/allenai/coconot/blob/2cbe16aabf9069f17e48c8daad8aeabc29469eb7/README.md
+      note: The card names the AI2 ImpACT-LR licence; the repository's LICENSE.md is ODC-By. Unchanged since the first screening.
+    answer_items:
+      basis: DATA_COUNT
+      count: 104
+      estimate_artifact: reports/source-screening/study-002-punans/punans-supply.json
+    verdicts:
+      C1: {result: PASS}
+      C2: {result: PASS}
+      C3: {result: UNKNOWN, note: 'Two licences disagree; unresolved.'}
+      C4: {result: PASS}
+      C5: {result: PARTIAL}
+      C6: {result: PARTIAL}
+      C7: {result: PARTIAL}
+    decision: WATCHLIST
+    revisit_when: The maintainers resolve whether ImpACT-LR or ODC-By governs the data.
+    evidence:
+    - reports/source-screening/study-002-punans/punans-supply.json

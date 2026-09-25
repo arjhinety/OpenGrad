@@ -27,6 +27,7 @@ the script's own first docstring line.
 | [`audit_pdet_coverage_v2_supply.py`](audit_pdet_coverage_v2_supply.py) | Counts-only supply audit for the population that must make DIRECT measurable (35 §2, step 1). |
 | [`audit_pdet_v1_representation.py`](audit_pdet_v1_representation.py) | P-DET-v1 against normalization-v3: a representation-mismatch AUDIT, not a migration. READ-ONLY. |
 | [`audit_punans_supply.py`](audit_punans_supply.py) | Size and probe the public sources screened for Study 002's P-UNANS (screening study-002-punans). |
+| [`audit_punans_v2_supply.py`](audit_punans_v2_supply.py) | Size the sources screened for Study 002's second P-UNANS attempt (screening study-002-punans-v2). |
 | [`audit_sft_refusal_supervision.py`](audit_sft_refusal_supervision.py) | Audit the SFT corpus for refusal text taught as correct behaviour. CPU only. |
 | [`audit_toolace_call_final_shape.py`](audit_toolace_call_final_shape.py) | Do ToolACE's call-final rows look like deliberate next-call targets or like truncated trajectories? |
 | [`audit_xlam_normalization.py`](audit_xlam_normalization.py) | Full-corpus xLAM normalization audit: before/after, with quarantine evidence. |
@@ -112,4 +113,4 @@ the script's own first docstring line.
 | [`reporting/generate_indexes.py`](reporting/generate_indexes.py) | Generate the directory indexes ``reports/README.md``, ``scripts/README.md`` and ``docs/README.md``. |
 | [`reporting/generate_source_views.py`](reporting/generate_source_views.py) | Generate the data-source views: ``docs/datasets/SOURCE_REGISTRY.md`` and ``SOURCE_SCREENING.md``. |
 
-86 scripts.
+87 scripts.
