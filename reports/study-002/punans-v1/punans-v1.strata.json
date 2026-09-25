@@ -1,0 +1,120 @@
+{
+  "agreement": {
+    "cohen_kappa": 0.702827,
+    "floor": 0.8,
+    "items": 1063,
+    "raw_agreement": 0.76952,
+    "rule": "03 stop rule 2 as set by 43 §9: below the floor the population is not built and the study does not proceed to training",
+    "same_label": 818,
+    "status": "STOP"
+  },
+  "amendment": "study_002_prereg_v11",
+  "amendment_document": "docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md",
+  "artifact_kind": "PUNANS_STRATA_REPORT",
+  "check_4": {
+    "min_n": 385,
+    "n": 274,
+    "population": "P-UNANS-unknowable",
+    "status": "UNDER_POWERED"
+  },
+  "false_premise_scoring": "NOT_EVALUABLE until a premise-rejection judge is specified and validated (43 §10)",
+  "members_file": null,
+  "members_sha256": null,
+  "population_sha256": "9965e78444255e24b49985710b99d1eceddbea98e3735d27dc74240aca5372ea",
+  "reference_labels_by_source": {
+    "F:kuq": {
+      "ANSWERABLE": 50,
+      "FALSE_PREMISE": 197,
+      "NO_CONSENSUS": 84,
+      "SUBJECTIVE": 13,
+      "UNDERSPECIFIED": 2,
+      "UNKNOWABLE": 15,
+      "UNKNOWN": 2
+    },
+    "U:kuq": {
+      "ANSWERABLE": 32,
+      "FALSE_PREMISE": 8,
+      "NO_CONSENSUS": 74,
+      "SUBJECTIVE": 17,
+      "UNDERSPECIFIED": 3,
+      "UNKNOWABLE": 216
+    },
+    "U:selfaware": {
+      "ANSWERABLE": 63,
+      "FALSE_PREMISE": 22,
+      "NO_CONSENSUS": 87,
+      "SUBJECTIVE": 100,
+      "UNDERSPECIFIED": 34,
+      "UNKNOWABLE": 43,
+      "UNKNOWN": 1
+    }
+  },
+  "reference_manifest": "reports/study-002/punans-v1/reference/punans-v1.reference.manifest.json",
+  "reference_sha256": "a6673e346d278805ed0409346c390b090b91dd6b7dd55683186b3e658ec6242e",
+  "statement": "The P-UNANS strata of P-UNANS-v1: the items two non-Claude models both label UNKNOWABLE or FALSE_PREMISE (43 §9). Model judgments, not human gold; no pool is redrawn.",
+  "status": "STOPPED_AGREEMENT_FLOOR",
+  "strata": {
+    "P-UNANS-false-premise": {
+      "balance": {
+        "n": 227,
+        "offered_tools": {
+          "1": 72,
+          "2": 78,
+          "3": 77
+        },
+        "prompt_chars": {
+          "max": 204,
+          "median": 52.0,
+          "min": 22,
+          "q1": 44.0,
+          "q3": 64.5
+        }
+      },
+      "by_source": {
+        "F:kuq": 197,
+        "U:kuq": 8,
+        "U:selfaware": 22
+      },
+      "n": 227,
+      "resolvability": {
+        "n": 227,
+        "resolvable_margin": 0.130087,
+        "status": "OK",
+        "within_noise": false,
+        "worst_case_half_width": 0.065044
+      },
+      "sizing_status": "MEETS_FLOOR_ONLY"
+    },
+    "P-UNANS-unknowable": {
+      "balance": {
+        "n": 274,
+        "offered_tools": {
+          "1": 84,
+          "2": 93,
+          "3": 97
+        },
+        "prompt_chars": {
+          "max": 339,
+          "median": 57.0,
+          "min": 16,
+          "q1": 48.0,
+          "q3": 73.0
+        }
+      },
+      "by_source": {
+        "F:kuq": 15,
+        "U:kuq": 216,
+        "U:selfaware": 43
+      },
+      "n": 274,
+      "resolvability": {
+        "n": 274,
+        "resolvable_margin": 0.118406,
+        "status": "OK",
+        "within_noise": false,
+        "worst_case_half_width": 0.059203
+      },
+      "sizing_status": "MEETS_FLOOR_ONLY"
+    }
+  }
+}

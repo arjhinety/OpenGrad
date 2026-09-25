@@ -1,0 +1,65 @@
+{
+  "amendment": "study_002_prereg_v11",
+  "amendment_document": "docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md",
+  "annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/punans-v1.model-procedure.md",
+      "procedure_sha256": "a756ceaf7225f928f10f71f61da4d39b2034bb9195a9ddc95803b68771d6d268"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/punans-v1.model-procedure.md",
+      "procedure_sha256": "a756ceaf7225f928f10f71f61da4d39b2034bb9195a9ddc95803b68771d6d268"
+    }
+  ],
+  "artifact_kind": "PUNANS_MODEL_CONSENSUS_REFERENCE",
+  "package_manifest": "reports/study-002/punans-v1/annotation/wip/punans-v1.annotation-manifest.json",
+  "package_manifest_sha256": "1e3bf9c4515a6abf34080ec6101a983871e7a88d4f2e45d963233536ffdc151b",
+  "population_sha256": "9965e78444255e24b49985710b99d1eceddbea98e3735d27dc74240aca5372ea",
+  "reference_file": "punans-v1.reference.jsonl",
+  "reference_sha256": "a6673e346d278805ed0409346c390b090b91dd6b7dd55683186b3e658ec6242e",
+  "statement": "Reference labels from the agreement of two non-Claude models, both of which must give the label, each labelling blind. Model judgments, not human gold; qualifications against it are MODEL_REFERENCE and provisional; agreement below is model-model agreement.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "summary": {
+    "annotator_label_counts": {
+      "model.deepseek-v4.1-flash": {
+        "ANSWERABLE": 155,
+        "FALSE_PREMISE": 278,
+        "SUBJECTIVE": 157,
+        "UNDERSPECIFIED": 55,
+        "UNKNOWABLE": 364,
+        "UNKNOWN": 54
+      },
+      "model.gemini-3.8-flash-high": {
+        "ANSWERABLE": 246,
+        "FALSE_PREMISE": 265,
+        "SUBJECTIVE": 214,
+        "UNDERSPECIFIED": 43,
+        "UNKNOWABLE": 290,
+        "UNKNOWN": 5
+      }
+    },
+    "consensus": {
+      "NO_CONSENSUS": 245,
+      "unanimous": 818
+    },
+    "dissent_by_annotator": {},
+    "items": 1063,
+    "pairwise_agreement": {
+      "model.gemini-3.8-flash-high|model.deepseek-v4.1-flash": 818
+    },
+    "reference_labels": {
+      "ANSWERABLE": 145,
+      "FALSE_PREMISE": 227,
+      "NO_CONSENSUS": 245,
+      "SUBJECTIVE": 130,
+      "UNDERSPECIFIED": 39,
+      "UNKNOWABLE": 274,
+      "UNKNOWN": 3
+    }
+  },
+  "task_id": "punans-v1"
+}

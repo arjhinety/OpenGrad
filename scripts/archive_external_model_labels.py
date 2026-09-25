@@ -66,6 +66,12 @@ TASK_SPECS = {
         "configs/annotation/answer-strata-v1.model-procedure.md",
         "docs/research/study-002/42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md",
     ),
+    # 43 (study_002_prereg_v11): the two annotators of 42.
+    "punans-v1": (
+        ROOT / "reports" / "study-002" / "punans-v1" / "provenance" / "external-models",
+        "configs/annotation/punans-v1.model-procedure.md",
+        "docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md",
+    ),
 }
 #: The status sentence of the archive, where it is not the three-model one of 34.
 STATUS = {
@@ -73,6 +79,10 @@ STATUS = {
         "Model judgments by two declared non-Claude annotators, each blind and independent; an item's reference "
         "label is the label both give ({authorization}). gpt-5.6-sol, declared by 41, labelled nothing: Codex "
         "refused the model for this account. Not human labels and not human gold."
+    ),
+    "punans-v1": (
+        "Model judgments by two declared non-Claude annotators, each blind and independent; an item's reference "
+        "label is the label both give ({authorization}). Not human labels and not human gold."
     ),
 }
 #: Credential shapes that must never reach an archive (tracked or not).

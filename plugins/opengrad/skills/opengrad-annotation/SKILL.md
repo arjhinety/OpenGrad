@@ -110,6 +110,11 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   procedure `punans-v1.model-procedure.md`) serves only 43 §4. Its labels are UNKNOWABLE, FALSE_PREMISE,
   ANSWERABLE, SUBJECTIVE, UNDERSPECIFIED and UNKNOWN. It is labelled by Gemini and DeepSeek, both of whom must
   agree, with an agreement floor of raw ≥ 0.80.
+  - **After labelling:** `pdet_coverage_reference --task punans-v1`, then `python -m
+    opengrad.verification.punans_report` (`src/opengrad/verification/punans_report.py`). It checks the floor (raw
+    agreement and κ), builds both strata and reports check 4's size. Below the floor it records
+    `STOPPED_AGREEMENT_FLOOR` and writes no membership. That happened on 2026-09-25 (0.770): P-UNANS-v1 is not
+    built, and stop rule 2 blocks training. The floor is never moved after a result.
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters
