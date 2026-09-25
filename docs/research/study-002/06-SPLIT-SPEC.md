@@ -185,3 +185,15 @@ It does not re-partition the frozen 1,277 or re-score any Study 001 claim. The f
 it is, with its fingerprint, so that Study 001's record remains readable and its three-mode numbers
 remain comparable. Study 002 adds a mode to the confirmatory population and freezes the result as a new
 partition artifact with its own fingerprint and its own gold-count table.
+
+> **Status, 2026-09-25: `P-CONF-v1` is built** (owner decision, option A). `src/opengrad/verification/pconf.py`
+> writes `reports/study-002/pconf-v1/`: the new partition artifact this section asks for, with its own
+> fingerprint and gold-count table (`CALL` 453, `ANSWER` 1,055, `CLARIFY` 371, `UNSUPPORTED` 453), and the `ANSWER`
+> items as evaluation records. The frozen 1,277 are reused unchanged.
+> - **The `ANSWER` source:** [41](41-ANSWER-STRATA-AMENDMENT.md), as amended by
+>   [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md).
+> - **The strata stay apart:** `ANSWER-natural` 284 meets the floor only, and `ANSWER-constructed` 771 resolves 7.1 points.
+> - **Balance** is measured in the artifact, not enforced (41 §2).
+> - **Collisions:** none with the development side, P-DET-COVERAGE, or the When2Call held-out text.
+> - **Not scored.** The evaluator must learn to load it first.
+

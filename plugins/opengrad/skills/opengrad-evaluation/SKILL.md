@@ -21,6 +21,12 @@ description: How to measure models correctly in OpenGrad — the immutable B0 ba
     (`docs/CANDIDATE_EVALUATION.md`).
 - **Frozen held-out sets:** `reports/evaluation/behavioral-heldout-v2.manifest.json` with its DEV/CONF partition
   `reports/evaluation/behavioral-heldout-v2-partition.json` and quarantine files. Never train on them.
+- **Study 002's confirmatory population `P-CONF-v1`** (`reports/study-002/pconf-v1/`, built by
+  `src/opengrad/verification/pconf.py`) is that confirmatory side unchanged, plus the `ANSWER` strata as evaluation
+  records. `python -m opengrad.verification.pconf --verify`: CI lacks the When2Call shards, so the balance report
+  and text check are `BLOCKED_INPUT_MISSING` there. It is scored once per arm. The evaluator loads only the
+  `behavioral-heldout-v2` manifest, so wiring `P-CONF` in comes before the first score. Report `ANSWER` per stratum,
+  with a pooled figure only beside them.
   Readiness `training_data_policy`, contamination and leakage gates enforce it.
 - **Checkpoint selection** follows a rule written and committed *before* any checkpoint is scored
   (`docs/evaluation/CHECKPOINT_SELECTION_RULE.md`). Max-over-draws selection on the reporting population is the
