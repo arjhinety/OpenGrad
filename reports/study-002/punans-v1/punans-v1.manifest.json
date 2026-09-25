@@ -1,0 +1,136 @@
+{
+  "artifact_kind": "PUNANS_CANDIDATE_POPULATION",
+  "blinded_fields": [
+    "pool",
+    "source_dataset",
+    "source_id",
+    "source_category"
+  ],
+  "code_sha256_lf": {
+    "src/opengrad/contamination/levels.py": "36f25de8d849277d2852b3f9d15824a2b032c4fb4637116ad6e3c35665240371",
+    "src/opengrad/verification/answer_strata.py": "5bd4d65ff05e19204d32bdaaaff19263a8053defdf1c3b6849c2c3f53e57bc83",
+    "src/opengrad/verification/punans.py": "ebe526dff98159c33b2b709ac5e3ebc591d0cd75a708ba73a76910485ea6c5ca"
+  },
+  "counts": {
+    "available_after_screen": {
+      "F:kuq": 363,
+      "U:kuq": 781,
+      "U:selfaware": 1021
+    },
+    "candidates": {
+      "F:kuq": 520,
+      "U:kuq": 1096,
+      "U:selfaware": 1032
+    },
+    "duplicates_removed": {
+      "F": 149,
+      "U": 295
+    },
+    "evaluation_set_collisions_removed": 0,
+    "no_eligible_tool_removed": 0,
+    "realized": {
+      "F": 363,
+      "U": 700,
+      "total": 1063
+    },
+    "realized_by_source": {
+      "F:kuq": 363,
+      "U:kuq": 350,
+      "U:selfaware": 350
+    },
+    "screen": {
+      "engine_level_counts": {
+        "level_1": 4,
+        "level_2": 4,
+        "level_3": 1,
+        "level_4": 1
+      },
+      "engine_thresholds": {
+        "containment": 0.6,
+        "edit_similarity": 0.8,
+        "jaccard": 0.5,
+        "max_df": 1000,
+        "min_shingles": 25
+      },
+      "flagged": 6,
+      "flagged_by_pool": {
+        "F": 0,
+        "U": 6
+      },
+      "probe_exact": 4,
+      "probe_half_contained": 3,
+      "training_user_turns": 446466
+    },
+    "time_rule_removed": {
+      "F:kuq": 8,
+      "U:kuq": 25
+    },
+    "tool_pool": {
+      "functions": 370
+    },
+    "tools_per_item": {
+      "1": 334,
+      "2": 357,
+      "3": 372
+    }
+  },
+  "disjoint_from": [
+    "reports/study-002/answer-strata-v1/answer-strata-v1.population.jsonl",
+    "reports/pdet-coverage/pdet-coverage-v1.population.jsonl",
+    "reports/pdet-coverage-v2/pdet-coverage-v2.population.jsonl"
+  ],
+  "gold_labels_present": false,
+  "id_rule": "un1: + sha256(pool : source_dataset : source_id); KUQ source_id is the line index at the pinned revision",
+  "inputs": {
+    "bfcl_simple_python": {
+      "licence": "Apache-2.0",
+      "revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+      "sha256": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991",
+      "url": "https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_simple_python.json"
+    },
+    "kuq": {
+      "licence": "MIT",
+      "revision": "f99b53aa226dbb0d1b086db3ec352b0da0aa8f41",
+      "sha256": "798d1677f962d11d069f77d1e3db91ad2ddb483a94b697e46bc8ca62ad0aedf6",
+      "url": "https://huggingface.co/datasets/amayuelas/KUQ/resolve/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/knowns_unknowns.jsonl"
+    },
+    "selfaware": {
+      "licence": "CC-BY-SA-4.0",
+      "revision": "f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c",
+      "sha256": "32929585ffdd4048f35f7f167720722eb8ddcf59908ffc958da2f84ea634dc54",
+      "url": "https://raw.githubusercontent.com/yinzhangyue/SelfAware/f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c/data/SelfAware.json"
+    }
+  },
+  "licences": {
+    "kuq": "MIT; the MIT notice travels with the items",
+    "selfaware": "CC-BY-SA-4.0; share-alike applies to items built from it",
+    "tools": "Apache-2.0 (BFCL)"
+  },
+  "per_source_pool_u": 350,
+  "population_file": "punans-v1.population.jsonl",
+  "population_id": "P-UNANS-v1",
+  "population_records": 1063,
+  "population_sha256": "9965e78444255e24b49985710b99d1eceddbea98e3735d27dc74240aca5372ea",
+  "preregistration": {
+    "adoption_amendment": "study_002_prereg_v11",
+    "document": "docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md",
+    "status_at_build": "ADOPTED"
+  },
+  "presentation_order": "sha256(seed | order | punans_id) ascending",
+  "protocol_version": "punans-001-v1",
+  "schema_version": 1,
+  "screen_corpora_manifest_sha256": {
+    "button.jsonl": "2692b5cc42ff64f4f0ba94e83e4488bda9556f8c15e8d8acb114eab4335a3746",
+    "glaive": "b80d0868eba3ff457d5e5b7e52395badc8ec6cd6426006ebc32173f9586aa642",
+    "looptool": "2d2749f767a18547fd1a771666b62284efa2d8453ab4a5f2d0dc71709b2d30c5",
+    "toolace": "a16e9a37a0780b6ff4b42e77bfca7869dad329dc25531e2b6719bc2e84617400",
+    "when2call-llm-judge": "a59beaf7811186c21c2fa5eefdd23657c4295233972458f6eaece48ee0316d18",
+    "when2call-mcq": "ff957a8686e5a04748dd3109ebfd70b3f49afa6d0d7bb680591be56870f7789f",
+    "when2call-preference": "9e6b5bc1f1d4450f787c8d98a38e8b4fcdca7021687c6066ea46bdb85f9a1904",
+    "when2call-sft": "0056c2d8134ab69d855800f754e294a9f8530d5997a84abdf9b043e885a2816c",
+    "xlam": "ea15b7e9d3f28d35870e3337a8d1ed9cbc12693afe55122377c1a47b711173d3"
+  },
+  "screening_year": 2026,
+  "seed": "opengrad-punans-001-v1",
+  "statement": "Candidate items for Study 002's P-UNANS, before labelling. Pool U holds questions a source marks unknowable (future events, unsolved problems, unanswerable questions); pool F holds false-premise questions. The strata are the items two non-Claude models both label UNKNOWABLE or FALSE_PREMISE (43 §9)."
+}

@@ -1,6 +1,10 @@
-# 43 — `P-UNANS`: sources, construction, labelling and scoring (`study_002_prereg_v11`, DRAFT)
+# 43 — `P-UNANS`: sources, construction, labelling and scoring (`study_002_prereg_v11`)
 
-> **Status: DRAFT, 2026-09-25. Not adopted; nothing is drawn.**
+> **Status: ADOPTED 2026-09-25, as drafted.** The owner adopted it and authorised the draw (*"yes"*). It is
+> recorded in [03](03-PREREGISTRATION.md) and `reports/ERRATA.md` §28 in the same commit. The text below is kept as
+> drafted, including its draft-time wording, as [40](40-PREREG-V8-DRAFT.md) was.
+>
+> **As drafted:**
 > - **What the owner decided on 2026-09-25**, after reading the source screening (`registry/source_screening.yaml`,
 >   screening `study-002-punans`; report `reports/source-screening/study-002-punans/REPORT.md`):
 >   1. **Sources:** KUQ and SelfAware, in fixed shares.

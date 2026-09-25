@@ -24,7 +24,8 @@ follows is the operational core.
   `41-ANSWER-STRATA-AMENDMENT.md` → `study_002_prereg_v9`, which names a data source and was committed with its
   drawn population before any label existed, and `42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md` →
   `study_002_prereg_v10`, which replaced an annotator that could not run mid-labelling, having read completion
-  counts only), written *before* results it could influence (G1).
+  counts only, and `43-PUNANS-AMENDMENT-DRAFT.md` → `study_002_prereg_v11`, drafted from the owner's decisions,
+  then adopted with its draw authorised), written *before* results it could influence (G1).
 - **A gate or threshold, to make a run pass.** A threshold that blocks a correct result is a finding about the
   threshold and is recorded, not edited around (`docs/contributing/README.md`).
 

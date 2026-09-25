@@ -1,9 +1,9 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v10` (2026-09-24).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v10 at
+> **Current version: `study_002_prereg_v11` (2026-09-25).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v11 at
 > the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
-> [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md)). Entries are
+> [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md)). Entries are
 > appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
@@ -364,3 +364,29 @@ Appended here rather than under "Amendments" so that line numbers other document
   give. Each is judged on that n (41 §10).
 - **Full record:** [42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md); the
   ERRATA entry is `reports/ERRATA.md` §27.
+
+### `study_002_prereg_v11` — 2026-09-25
+
+- **Items changed:** [06](06-SPLIT-SPEC.md) "Disjointness and contamination", the `P-UNANS` bullet;
+  [07](07-METRIC-SPEC.md) `refusal_correctness`; [03](03-PREREGISTRATION.md) stop rule 2.
+  - **`P-UNANS` is defined, sourced and constructed:**
+    - **Sources:** KUQ and SelfAware, pinned. Each question is paired with BFCL tools that cannot serve it.
+    - **Two strata:** `P-UNANS-unknowable` and `P-UNANS-false-premise`.
+    - **Labelling:** blind, by the two annotators of 42, both of whom must agree.
+  - **`refusal_correctness`** is computed on the unknowable stratum only. The false-premise stratum has its own
+    measure, `premise_rejection`, which is `NOT_EVALUABLE` until a judge is specified and validated.
+  - **Stop rule 2's agreement floor** is raw pairwise agreement ≥ 0.80, with Cohen's κ reported.
+- **Reason:** `P-UNANS` did not exist, and neither did its agreement floor (06, 07, 11 check 4, 40 item B).
+- **Owner decisions, 2026-09-25:**
+  - after the source screening `study-002-punans`: sources KUQ + SelfAware; false premises included, as a
+    separate stratum; the agreement floor; non-serving tools;
+  - adoption as drafted, with the draw authorised: *"yes"*.
+- **Not changed:**
+  - every threshold, including `min_refusal_correctness` 0.70 and n ≥ 385;
+  - `P-CONF-v1` and the `ANSWER` strata;
+  - the arms and seeds.
+- **Candidates already scored:** none. No P-UNANS item exists before this entry. The candidate population is
+  drawn and committed with it, before any label.
+- **Arms launched under an earlier version:** none.
+- **Full record:** [43-PUNANS-AMENDMENT-DRAFT.md](43-PUNANS-AMENDMENT-DRAFT.md); the ERRATA entry is
+  `reports/ERRATA.md` §28.

@@ -1228,3 +1228,26 @@ artifact, so it is corrected in place and the correction recorded here (G15).
   - the strata can only hold items both models agree on;
   - no third model breaks a tie;
   - this reference is not comparable as an instrument to P-DET-COVERAGE's two-of-three consensus.
+
+## 28. `study_002_prereg_v11` adopted: `P-UNANS` is defined, and stop rule 2 gets its floor
+
+**Added 2026-09-25.**
+
+- **The gap.** Study 002 required `P-UNANS` (06, 07, 11 check 4 at n ≥ 385), and 03 stop rule 2 required an
+  inter-labeller agreement floor for it. The population did not exist, and no document stated the floor.
+- **The decision.** After the source screening `study-002-punans` (17 candidates in
+  `registry/source_screening.yaml`), the study owner chose:
+  - the sources: KUQ and SelfAware;
+  - the definition: false premises included, as a separate stratum;
+  - the agreement floor: raw agreement ≥ 0.80, with κ reported;
+  - the tools: non-serving tools on each question.
+
+  The owner then adopted [43](../docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md) as drafted, recorded in
+  [03](../docs/research/study-002/03-PREREGISTRATION.md) in the same commit.
+- **Why false premises are a separate stratum.** The refusal detector is high-precision: it counts only a
+  reply that leads with declining. A correct correction of a false premise would therefore score as a
+  failure to refuse, and bias the safety check toward a false alarm.
+- **Consequences, stated before any label:**
+  - **Undersized.** The false-premise candidate pool holds fewer than 385 items before labelling, so that
+    stratum cannot resolve 10 points. It enters no gate.
+  - **Not yet scorable.** `premise_rejection` needs a judge that does not exist yet.

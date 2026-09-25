@@ -191,9 +191,14 @@ def _punans() -> dict:
     return next(s for s in _log()["screenings"] if s["id"] == "study-002-punans")
 
 
-def test_the_punans_screening_awaits_the_owner_and_pins_every_source_it_read() -> None:
+def test_the_punans_screening_records_the_adoption_and_pins_every_source_it_read() -> None:
     screening = _punans()
-    assert screening["owner_decision"] == {"status": "PENDING"}
+    assert screening["owner_decision"] == {
+        "status": "ADOPTED",
+        "adopted": ["kuq", "selfaware"],
+        "recorded_in": "docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md",
+        "date": "2026-09-25",
+    }
     supply = json.loads((PUNANS / "punans-supply.json").read_text(encoding="utf-8"))
     assert supply["overlap_status"] == "COMPLETE"
     candidates = {c["id"]: c for c in screening["candidates"]}
@@ -252,7 +257,7 @@ def test_the_punans_report_quotes_the_audit() -> None:
         assert source["sha256"][:8] in report, name
 
 
-def test_the_punans_draft_quotes_the_audit() -> None:
+def test_the_punans_amendment_quotes_the_audit() -> None:
     # G14: the pool sizes in 43 follow from the audit's counts.
     kuq = json.loads((PUNANS / "punans-supply.json").read_text(encoding="utf-8"))["sources"]["kuq"]
     surviving = (
@@ -263,7 +268,7 @@ def test_the_punans_draft_quotes_the_audit() -> None:
         encoding="utf-8"
     )
     assert f"the {surviving} surviving candidates" in draft
-    assert "Status: DRAFT" in draft
+    assert "Status: ADOPTED 2026-09-25" in draft
     for record in ("docs/research/study-002/03-PREREGISTRATION.md", "reports/ERRATA.md"):
-        # A draft is recorded in neither until the owner adopts it.
-        assert "study_002_prereg_v11" not in (ROOT / record).read_text(encoding="utf-8"), record
+        # An amendment is recorded in both, in the commit that adopts it.
+        assert "study_002_prereg_v11" in (ROOT / record).read_text(encoding="utf-8"), record

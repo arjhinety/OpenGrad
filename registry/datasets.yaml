@@ -1067,3 +1067,196 @@ datasets:
   notes: Pool K of the ANSWER strata candidate population (41 §5). Its questions are paired with BFCL tool schemas
     that cannot serve them; the constructed items are distributed under CC-BY-SA-3.0 (share-alike). The data
     licence is CC-BY-SA-3.0, not the CC-BY-4.0 of the paper, which the screening first recorded.
+
+# Evaluation-only sources adopted for Study 002's P-UNANS (study_002_prereg_v11,
+# docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md). None names an sft stage or an allowed split, so the
+# training firewall never admits them.
+- id: kuq
+  display_name: Known Unknown Questions (KUQ)
+  organization: Amayuelas et al. (UC Santa Barbara)
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: question_answering
+  papers: []
+  retrieval_date: '2026-09-25'
+  date_published:
+    value: '2024-06-03'
+    source: Hugging Face API createdAt of amayuelas/KUQ, read 2026-09-25
+  hf_id: amayuelas/KUQ
+  repository: https://huggingface.co/datasets/amayuelas/KUQ
+  source_repository: https://huggingface.co/datasets/amayuelas/KUQ
+  distribution:
+  - name: knowns_unknowns.jsonl
+    content_url: https://huggingface.co/datasets/amayuelas/KUQ/resolve/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/knowns_unknowns.jsonl
+    sha256: 798d1677f962d11d069f77d1e3db91ad2ddb483a94b697e46bc8ca62ad0aedf6
+    size_bytes: 2391358
+    encoding_format: application/jsonlines
+    verified_from: sha256 of the file downloaded from content_url on 2026-09-25 (the file is not stored in LFS)
+  source_revision:
+    value: f99b53aa226dbb0d1b086db3ec352b0da0aa8f41
+    verified: true
+    source: Hugging Face dataset API
+  license:
+    value: MIT
+    verified: true
+    source: https://huggingface.co/datasets/amayuelas/KUQ/blob/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/README.md
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: registry/source_screening.yaml (study-002-punans, adopted 2026-09-25)
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: 'Amayuelas et al. 2023, Knowledge of Knowledge: Exploring Known-Unknowns Uncertainty with Large Language Models (arXiv:2305.13712)'
+  modifications_disclosed: true
+  sample_count:
+    published: 6884
+    verified_from: https://huggingface.co/datasets/amayuelas/KUQ/resolve/f99b53aa226dbb0d1b086db3ec352b0da0aa8f41/knowns_unknowns.jsonl
+  retained_after_filtering:
+    value: 713
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/punans-v1/punans-v1.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - knowns_unknowns
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: LOW_TRAINING_ONLY
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/source-screening/study-002-punans/punans-supply.json
+  - reports/study-002/punans-v1/punans-v1.manifest.json
+  planned_initial_mixture_percent: null
+  notes: P-UNANS candidates (43 §5). Pool U takes 350 future-unknown and unsolved-problem unknowns; pool F takes
+    every surviving false-assumption unknown (363). Both come after the time rule, de-duplication and the 41 §6
+    screen. Relabelled blind by two non-Claude models; evaluation only, never trained on.
+- id: selfaware
+  display_name: SelfAware (unanswerable questions)
+  organization: Yin et al. (Fudan University)
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: question_answering
+  papers: []
+  retrieval_date: '2026-09-25'
+  date_published:
+    value: '2022-12-01'
+    source: GitHub API created_at of yinzhangyue/SelfAware, read 2026-09-25
+  hf_id: null
+  repository: https://github.com/yinzhangyue/SelfAware
+  source_repository: https://github.com/yinzhangyue/SelfAware/tree/f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c/data
+  distribution:
+  - name: SelfAware.json
+    content_url: https://raw.githubusercontent.com/yinzhangyue/SelfAware/f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c/data/SelfAware.json
+    sha256: 32929585ffdd4048f35f7f167720722eb8ddcf59908ffc958da2f84ea634dc54
+    size_bytes: 1286450
+    encoding_format: application/json
+    verified_from: sha256 of the file downloaded from content_url on 2026-09-25
+  source_revision:
+    value: f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c
+    verified: true
+    source: GitHub commits API for the default branch
+  license:
+    value: CC-BY-SA-4.0
+    verified: true
+    source: https://github.com/yinzhangyue/SelfAware/blob/f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c/data/SelfAware.json
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: registry/source_screening.yaml (study-002-punans, adopted 2026-09-25; share-alike)
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: Yin et al. 2023, Do Large Language Models Know What They Don't Know? (Findings of ACL; arXiv:2305.18153)
+  modifications_disclosed: true
+  sample_count:
+    published: 3369
+    verified_from: https://raw.githubusercontent.com/yinzhangyue/SelfAware/f0bad1ff77bd42fc4eb2360281ed646c7bb7bd0c/data/SelfAware.json
+  retained_after_filtering:
+    value: 350
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/punans-v1/punans-v1.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - SelfAware
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: LOW_TRAINING_ONLY
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/source-screening/study-002-punans/punans-supply.json
+  - reports/study-002/punans-v1/punans-v1.manifest.json
+  planned_initial_mixture_percent: null
+  notes: P-UNANS pool U (43 §5), 350 of the unanswerable questions, drawn after de-duplication and the 41 §6 screen.
+    The data file declares CC-BY-SA-4.0 while the repository LICENSE is Apache-2.0; the data file governs, and
+    share-alike applies to the items built from it. Relabelled blind by two non-Claude models; evaluation only.
+- id: bfcl-simple-python-tools
+  display_name: BFCL simple_python function schemas (distractor tools)
+  organization: Gorilla (UC Berkeley)
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: tool_use
+  papers:
+  - bfcl
+  retrieval_date: '2026-09-25'
+  date_published:
+    value: '2024-02-27'
+    source: Hugging Face API createdAt of gorilla-llm/Berkeley-Function-Calling-Leaderboard, read 2026-09-24
+  hf_id: null
+  repository: https://github.com/ShishirPatil/gorilla
+  source_repository: https://github.com/ShishirPatil/gorilla/tree/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data
+  distribution:
+  - name: BFCL_v4_simple_python.json
+    content_url: https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_simple_python.json
+    sha256: 82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991
+    size_bytes: 283274
+    encoding_format: application/jsonlines
+    verified_from: sha256 of the file downloaded from content_url; the pin of 41 §3
+  source_revision:
+    value: 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8
+    verified: true
+    source: the gorilla revision registry/benchmarks.yaml pins for bfcl-v4
+  license:
+    value: Apache-2.0
+    verified: true
+    source: https://github.com/ShishirPatil/gorilla/blob/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/LICENSE
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: docs/research/study-002/41-ANSWER-STRATA-AMENDMENT.md (pinned in §3, and in 43 §3; Apache-2.0)
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: true
+  citation_required: true
+  citation_target: bfcl
+  modifications_disclosed: true
+  sample_count:
+    published: 400
+    verified_from: https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_simple_python.json
+  retained_after_filtering:
+    value: 370
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/punans-v1/punans-v1.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - simple_python
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: HIGH_KNOWN_BENCHMARK_OVERLAP
+  overlap_benchmarks:
+  - bfcl-v4
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/study-002/answer-strata-v1/answer-strata-v1.manifest.json
+  - reports/study-002/punans-v1/punans-v1.manifest.json
+  planned_initial_mixture_percent: null
+  notes: Only the function schemas are used, never the questions. They are the 370 distinct functions offered as
+    tools that cannot serve the question, for ANSWER-constructed (41 §5) and for every P-UNANS item (43 §6). The
+    screen runs on the questions they are paired with.

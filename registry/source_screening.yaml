@@ -768,7 +768,12 @@ screenings:
   requirement_source: docs/research/study-002/06-SPLIT-SPEC.md
   opened: '2026-09-25'
   owner_decision:
-    status: PENDING
+    status: ADOPTED
+    adopted:
+    - kuq
+    - selfaware
+    recorded_in: docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md
+    date: '2026-09-25'
   search:
     date: '2026-09-25'
     method: >-

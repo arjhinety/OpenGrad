@@ -103,6 +103,13 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     (`src/opengrad/verification/answer_strata_report.py`) writes the per-stratum n, the §10 sizing status and the
     §11 balance, plus a membership file of ids and strata. The comparison with the other modes stays
     `BLOCKED_PCONF_NOT_BUILT` until P-CONF exists.
+- **P-UNANS candidates** (43, `study_002_prereg_v11`) come from `src/opengrad/verification/punans.py`:
+  1,063 items in `reports/study-002/punans-v1/` (pool U unknowable: KUQ and SelfAware, 350 each; pool F false
+  premise: KUQ). The same counts-only rules apply. `python -m opengrad.verification.punans --dry-run | --build |
+  --verify`; inputs are cached in `.cache/punans/`. Task `punans-v1` (`configs/annotation/punans-v1.yaml`,
+  procedure `punans-v1.model-procedure.md`) serves only 43 §4. Its labels are UNKNOWABLE, FALSE_PREMISE,
+  ANSWERABLE, SUBJECTIVE, UNDERSPECIFIED and UNKNOWN. It is labelled by Gemini and DeepSeek, both of whom must
+  agree, with an agreement floor of raw ≥ 0.80.
 
   - Both tasks read the one hash-pinned population and pick their layer with `source.select`. Source, stratum,
     layer, gate and every provenance field are blinded, and neither task declares metadata chips or filters

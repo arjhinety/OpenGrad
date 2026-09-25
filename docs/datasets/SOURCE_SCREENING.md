@@ -76,7 +76,7 @@ Which public, licence-compatible datasets can supply Study 002's held-out ANSWER
 Which public, licence-compatible datasets can supply Study 002's P-UNANS: stand-alone questions that no one can answer now (future events, unsolved problems, unknowable facts), on which the right behaviour is to decline rather than answer?
 
 - Purpose: EVALUATION_POPULATION; requirement: `docs/research/study-002/06-SPLIT-SPEC.md`
-- Owner decision: **PENDING**
+- Owner decision: **ADOPTED** — adopted kuq, selfaware
 - Report: `reports/source-screening/study-002-punans/REPORT.md`
 
 ### Criteria
