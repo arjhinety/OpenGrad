@@ -250,3 +250,20 @@ def test_the_punans_report_quotes_the_audit() -> None:
     for name, source in supply.items():
         assert source["revision"] in report, name
         assert source["sha256"][:8] in report, name
+
+
+def test_the_punans_draft_quotes_the_audit() -> None:
+    # G14: the pool sizes in 43 follow from the audit's counts.
+    kuq = json.loads((PUNANS / "punans-supply.json").read_text(encoding="utf-8"))["sources"]["kuq"]
+    surviving = (
+        kuq["by_category"]["false assumption"]
+        - kuq["names_a_year_up_to_screening_year"]["false assumption"]
+    )
+    draft = (ROOT / "docs/research/study-002/43-PUNANS-AMENDMENT-DRAFT.md").read_text(
+        encoding="utf-8"
+    )
+    assert f"the {surviving} surviving candidates" in draft
+    assert "Status: DRAFT" in draft
+    for record in ("docs/research/study-002/03-PREREGISTRATION.md", "reports/ERRATA.md"):
+        # A draft is recorded in neither until the owner adopts it.
+        assert "study_002_prereg_v11" not in (ROOT / record).read_text(encoding="utf-8"), record
