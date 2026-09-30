@@ -123,9 +123,10 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   `src/opengrad/verification/punans_v2.py`: a 100-item trial set and an 800-item main set in
   `reports/study-002/punans-v2/`, drawn together before any label from fresh KUQ, KUQP and BIG-bench questions
   (every P-UNANS-v1 question excluded). Inputs are cached in `.cache/punans-v2/`. Tasks `punans-v2-trial` and
-  `punans-v2` share `punans-v2.model-procedure.md` and serve only 44 §4, with the labels UNKNOWABLE,
-  NOT_UNKNOWABLE and UNKNOWN. The trial is labelled first and never enters P-UNANS. The procedure may be revised
-  once after it, never the floor.
+  `punans-v2` serve only 44 §4, with the labels UNKNOWABLE, NOT_UNKNOWABLE and UNKNOWN. The trial (labelled
+  2026-09-30) used `punans-v2.model-procedure.md`; the main set uses the one revision 44 §9 allows,
+  `punans-v2.model-procedure.rev1.md`, recorded in `reports/study-002/punans-v2/PROCEDURE-REVISION.md`. The trial
+  never enters P-UNANS; no further revision, and never the floor.
   - **After labelling:** `pdet_coverage_reference --task punans-v2-trial` (or `punans-v2`), then `python -m
     opengrad.verification.punans_v2_report --set trial | main`. The main set's floor is raw ≥ 0.80 over three
     labels, with the caveat of 44 §10 carried in the report.

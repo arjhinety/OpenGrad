@@ -80,7 +80,7 @@ TASK_SPECS = {
     ),
     "punans-v2": (
         ROOT / "reports" / "study-002" / "punans-v2" / "provenance" / "external-models",
-        "configs/annotation/punans-v2.model-procedure.md",
+        "configs/annotation/punans-v2.model-procedure.rev1.md",
         "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
     ),
 }

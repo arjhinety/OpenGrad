@@ -115,10 +115,12 @@ def test_every_input_is_a_registered_source_with_the_same_pin() -> None:
 
 def test_both_annotation_tasks_are_blind_and_pin_their_set_and_procedure() -> None:
     manifest = _manifest()
-    digest = punans_v2.sha256_bytes(
-        (ROOT / "configs/annotation/punans-v2.model-procedure.md").read_bytes()
-    )
-    for task, key in (("punans-v2-trial", "trial"), ("punans-v2", "main")):
+    # The main set uses the 44 §9 revision; test_the_main_set_uses_the_one_recorded_revision... pins which.
+    for task, key, procedure in (
+        ("punans-v2-trial", "trial", "punans-v2.model-procedure.md"),
+        ("punans-v2", "main", "punans-v2.model-procedure.rev1.md"),
+    ):
+        digest = punans_v2.sha256_bytes((ROOT / "configs/annotation" / procedure).read_bytes())
         path = ROOT / f"configs/annotation/{task}.yaml"
         cfg = load_task_config(path, root=ROOT)
         assert cfg.metadata == () and cfg.filters == ()
@@ -180,3 +182,52 @@ def test_candidates_take_only_the_unknowable_side_of_each_source() -> None:
         ("kuqp", "unanswerable"),
         ("bigbench-known-unknowns", "a"),
     ]
+
+
+def test_the_main_set_uses_the_one_recorded_revision_and_the_trial_keeps_the_original() -> None:
+    # 44 §9: one revision after the trial, recorded before any main-set label, with its sha256 and reason.
+    original = ROOT / "configs/annotation/punans-v2.model-procedure.md"
+    revised = ROOT / "configs/annotation/punans-v2.model-procedure.rev1.md"
+    record = (OUT / "PROCEDURE-REVISION.md").read_text(encoding="utf-8")
+    for task, procedure in (("punans-v2-trial", original), ("punans-v2", revised)):
+        config = yaml.safe_load(
+            (ROOT / f"configs/annotation/{task}.yaml").read_text(encoding="utf-8")
+        )
+        digest = punans_v2.sha256_bytes(procedure.read_bytes())
+        assert {a["procedure"] for a in config["model_annotators"]} == {
+            procedure.relative_to(ROOT).as_posix()
+        }
+        assert {a["procedure_sha256"] for a in config["model_annotators"]} == {digest}
+        assert f"`{digest}`" in record
+    assert "Where the line falls" not in original.read_text(encoding="utf-8")
+    assert "Where the line falls" in revised.read_text(encoding="utf-8")
+
+
+def test_the_split_categories_cover_exactly_the_trial_disagreements() -> None:
+    from collections import Counter
+
+    refs = [
+        json.loads(line)
+        for line in (OUT / "reference/punans-v2-trial.reference.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    split = {r["punans_id"] for r in refs if len(set(r["votes"].values())) > 1}
+    rows = _items("punans-v2-trial.split-categories.jsonl")
+    assert {r["punans_id"] for r in rows} == split and len(rows) == len(split)
+    counts = Counter(r["category"] for r in rows)
+    record = (OUT / "PROCEDURE-REVISION.md").read_text(encoding="utf-8")
+    for category, label in (
+        (
+            "OPEN_ENDED_FEASIBILITY_OR_IMPACT",
+            "Asks whether something can be achieved, or how a development will play out",
+        ),
+        ("HYPOTHETICAL_OR_PHILOSOPHICAL", "Is hypothetical or philosophical"),
+        ("FALSE_OR_UNESTABLISHED_PREMISE", "Rests on a false or unestablished premise"),
+        ("UNDISCOVERED_THINGS_EXIST", "Asks whether undiscovered things of some kind exist"),
+        ("PRIVATE_FACT_SOMEONE_KNOWS", "Asks for a private fact that the person concerned knows"),
+        ("WHETHER_EVER_DETERMINABLE", "Asks whether something can ever be determined"),
+    ):
+        assert f"| {label} | {counts[category]} |" in record, category
+    assert f"Every one of its {len(split)} disagreements ran one way" in record

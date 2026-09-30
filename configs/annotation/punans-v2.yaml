@@ -131,14 +131,16 @@ freeze:
     labels: [UNKNOWN]
 
 # 44 §8: the two non-Claude annotators of 42 and 43. Their labels are model judgments (annotator_kind: model).
+# The procedure is the 44 §9 revision made after the trial (reports/study-002/punans-v2/PROCEDURE-REVISION.md);
+# the trial task keeps the original.
 model_annotators:
   - annotator_id: model.gemini-3.8-flash-high
     model: Gemini 3.8 Flash (High)
-    procedure: configs/annotation/punans-v2.model-procedure.md
-    procedure_sha256: 9ad5e3cd1eb7d2ed00c65965fafb22433462c2e80ee4b7aaaec7de77cd15daed
+    procedure: configs/annotation/punans-v2.model-procedure.rev1.md
+    procedure_sha256: 2e7fd9c9fae13b5bf6b3b05f9c3f47dc7335455f76d59495e5c2235c3b72ffc4
     authorization: docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md
   - annotator_id: model.deepseek-v4.1-flash
     model: deepseek-v4.1-flash
-    procedure: configs/annotation/punans-v2.model-procedure.md
-    procedure_sha256: 9ad5e3cd1eb7d2ed00c65965fafb22433462c2e80ee4b7aaaec7de77cd15daed
+    procedure: configs/annotation/punans-v2.model-procedure.rev1.md
+    procedure_sha256: 2e7fd9c9fae13b5bf6b3b05f9c3f47dc7335455f76d59495e5c2235c3b72ffc4
     authorization: docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md
