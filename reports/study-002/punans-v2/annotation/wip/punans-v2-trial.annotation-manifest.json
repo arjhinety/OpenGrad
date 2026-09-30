@@ -1,0 +1,163 @@
+{
+  "adjudication": null,
+  "adjudication_flags": {},
+  "adjudicator_ids": [],
+  "annotation_schema_version": "punans-annotation-v2",
+  "annotator_ids": [
+    "model.deepseek-v4.1-flash",
+    "model.gemini-3.8-flash-high"
+  ],
+  "app_version": "opengrad-annotate-1.0.0",
+  "artifact_kind": "ANNOTATION_SNAPSHOT",
+  "completion_state": "INCOMPLETE",
+  "composite": null,
+  "config_path": "configs/annotation/punans-v2-trial.yaml",
+  "definition_history": [],
+  "design": "model_passes",
+  "disagreements": {
+    "adjudicated": 0,
+    "count": 19,
+    "file": "punans-v2-trial.disagreements.jsonl",
+    "keys": [
+      "label",
+      "ambiguity_status"
+    ],
+    "metric_eligible": 19,
+    "unresolved": 19
+  },
+  "exported_at": "2026-09-30T14:00:39.090Z",
+  "frozen": false,
+  "gold": null,
+  "incomplete_reasons": [
+    "19 disagreements not adjudicated (first: un2:07323ac578397dbff848830b0e3a8c1b69305564be773418ab513391a2a4622c)"
+  ],
+  "independent_annotators": false,
+  "inter_annotator_agreement_claimable": false,
+  "limitations": [
+    "Model annotation: at least one session was labeled by a language model. A model pass is not an independent human annotator; no inter-annotator agreement may be claimed."
+  ],
+  "manifest_version": 1,
+  "metric_exclusions": {
+    "excluded_items": 0,
+    "groups": [],
+    "metric_eligible_items": 100,
+    "population_items": 100
+  },
+  "model_annotation": true,
+  "model_annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "authorization": "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/punans-v2.model-procedure.md",
+      "procedure_sha256": "9ad5e3cd1eb7d2ed00c65965fafb22433462c2e80ee4b7aaaec7de77cd15daed"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "authorization": "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/punans-v2.model-procedure.md",
+      "procedure_sha256": "9ad5e3cd1eb7d2ed00c65965fafb22433462c2e80ee4b7aaaec7de77cd15daed"
+    }
+  ],
+  "model_assistance": false,
+  "outputs": {
+    "audit/punans-v2-trial.history.model.deepseek-v4.1-flash.model-deepseek.jsonl": {
+      "bytes": 135262,
+      "records": 100,
+      "sha256": "b098d90f61aec7f622ae28c6a864dfb8ae8b085f25c38b5a3c63da1cb00e87b0"
+    },
+    "audit/punans-v2-trial.history.model.gemini-3.8-flash-high.model-gemini.jsonl": {
+      "bytes": 133699,
+      "records": 100,
+      "sha256": "7b4d3978a53ac22b4bab49ef9a5cd07e8f715f0972c8c58233b84d2774f2d82e"
+    },
+    "punans-v2-trial.annotations.model.deepseek-v4.1-flash.model-deepseek.jsonl": {
+      "bytes": 92406,
+      "records": 100,
+      "sha256": "6af9bf98c7ac2c3edef70cb781314cd96fdffc3335f266afb80b10922c611b31"
+    },
+    "punans-v2-trial.annotations.model.gemini-3.8-flash-high.model-gemini.jsonl": {
+      "bytes": 90867,
+      "records": 100,
+      "sha256": "5ab58790dbb7f85e94989477ceb9cf1be05d8392b51a9907394586d0bc169bd8"
+    },
+    "punans-v2-trial.disagreements.jsonl": {
+      "bytes": 13937,
+      "records": 19,
+      "sha256": "2dd0b3aa4bd380fcba384fbff33e1b0e27e3a8700504947cee131ed4452debf0"
+    }
+  },
+  "package_dir": "reports/study-002/punans-v2/annotation/wip",
+  "record_key_map": {
+    "annotation_schema_version": "annotation_version",
+    "item_id": "punans_id",
+    "label": "gold_policy_label"
+  },
+  "record_keys": {
+    "annotator_id": "annotator_id",
+    "item_id": "punans_id",
+    "label": "gold_policy_label"
+  },
+  "review_queue": null,
+  "sessions": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "annotator_kind": "model",
+      "created_at": "2026-09-30T13:30:10.680Z",
+      "file": "punans-v2-trial.annotations.model.gemini-3.8-flash-high.model-gemini.jsonl",
+      "flagged": 4,
+      "history_entries": 100,
+      "history_file": "audit/punans-v2-trial.history.model.gemini-3.8-flash-high.model-gemini.jsonl",
+      "history_head_sha256": "a4a3ec2fdbfa5a860758e67d90d653fc3a3c04043b0df3d6524f54c827c5ad0b",
+      "label_counts": {
+        "NOT_UNKNOWABLE": 38,
+        "UNKNOWABLE": 62
+      },
+      "labeled": 100,
+      "labeled_metric_eligible": 100,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-gemini",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 0,
+      "unlabeled": 0
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "annotator_kind": "model",
+      "created_at": "2026-09-30T13:32:11.259Z",
+      "file": "punans-v2-trial.annotations.model.deepseek-v4.1-flash.model-deepseek.jsonl",
+      "flagged": 28,
+      "history_entries": 100,
+      "history_file": "audit/punans-v2-trial.history.model.deepseek-v4.1-flash.model-deepseek.jsonl",
+      "history_head_sha256": "50b86133560f9602d31f58a643f6a052c356d275f770d46ad9f31bec74b15b90",
+      "label_counts": {
+        "NOT_UNKNOWABLE": 19,
+        "UNKNOWABLE": 80,
+        "UNKNOWN": 1
+      },
+      "labeled": 100,
+      "labeled_metric_eligible": 100,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-deepseek",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 1,
+      "unlabeled": 0
+    }
+  ],
+  "source": {
+    "format": "jsonl",
+    "items": 100,
+    "path": "reports/study-002/punans-v2/punans-v2-trial.population.jsonl",
+    "sha256": "cb8e0ef09fc7b82d9aa566991f8cc0841914663ef4a5e4f2286385c1ddbae717"
+  },
+  "statement": "Labels in sessions whose annotator_kind is 'model' were produced by the language model named under model_annotators, following the pinned procedure recorded there; they are model judgments, not human annotations. Labels in human sessions were entered through the annotation interface under the annotator and adjudicator identifiers recorded in this package; those identifiers are declared, not authenticated. The interface displays no classifier prediction, model suggestion or pre-filled label to human annotators, and the source population was read but never written. Every change is in the hash-chained change logs listed under outputs. Hashes detect changes to the package; they are not signatures.",
+  "task_definition_sha256": "18e11340e45239d950b56c9c1e86ab243a262d9e48ddc98d987f53457a77c3f4",
+  "task_id": "punans-v2-trial",
+  "task_type": "single_label",
+  "task_version": "1"
+}

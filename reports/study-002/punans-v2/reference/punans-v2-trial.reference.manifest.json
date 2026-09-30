@@ -1,0 +1,54 @@
+{
+  "amendment": "study_002_prereg_v12",
+  "amendment_document": "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+  "annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/punans-v2.model-procedure.md",
+      "procedure_sha256": "9ad5e3cd1eb7d2ed00c65965fafb22433462c2e80ee4b7aaaec7de77cd15daed"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/punans-v2.model-procedure.md",
+      "procedure_sha256": "9ad5e3cd1eb7d2ed00c65965fafb22433462c2e80ee4b7aaaec7de77cd15daed"
+    }
+  ],
+  "artifact_kind": "PUNANS_MODEL_CONSENSUS_REFERENCE",
+  "package_manifest": "reports/study-002/punans-v2/annotation/wip/punans-v2-trial.annotation-manifest.json",
+  "package_manifest_sha256": "92aed3333806fbf2b83d2a3cdcf42c463d1c4074f210da4c59ee37b4921509c9",
+  "population_sha256": "cb8e0ef09fc7b82d9aa566991f8cc0841914663ef4a5e4f2286385c1ddbae717",
+  "reference_file": "punans-v2-trial.reference.jsonl",
+  "reference_sha256": "d24de7a82b1a83040db0b2ed5a09e3eb728a245a44d58edc5cd0f677595caba9",
+  "statement": "Reference labels from the agreement of two non-Claude models, both of which must give the label, each labelling blind. Model judgments, not human gold; qualifications against it are MODEL_REFERENCE and provisional; agreement below is model-model agreement.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "summary": {
+    "annotator_label_counts": {
+      "model.deepseek-v4.1-flash": {
+        "NOT_UNKNOWABLE": 19,
+        "UNKNOWABLE": 80,
+        "UNKNOWN": 1
+      },
+      "model.gemini-3.8-flash-high": {
+        "NOT_UNKNOWABLE": 38,
+        "UNKNOWABLE": 62
+      }
+    },
+    "consensus": {
+      "NO_CONSENSUS": 19,
+      "unanimous": 81
+    },
+    "dissent_by_annotator": {},
+    "items": 100,
+    "pairwise_agreement": {
+      "model.gemini-3.8-flash-high|model.deepseek-v4.1-flash": 81
+    },
+    "reference_labels": {
+      "NOT_UNKNOWABLE": 19,
+      "NO_CONSENSUS": 19,
+      "UNKNOWABLE": 62
+    }
+  },
+  "task_id": "punans-v2-trial"
+}

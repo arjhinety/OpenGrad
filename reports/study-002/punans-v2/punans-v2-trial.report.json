@@ -1,0 +1,83 @@
+{
+  "agreement": {
+    "at_or_above_floor": true,
+    "caveat": "44 §10: the floor is 0.80 over three labels, where v11's was over six. Chance agreement is higher with fewer labels, so 0.80 here is easier to reach than v11's floor was; kappa is the figure that compares across the two attempts.",
+    "cohen_kappa": 0.559981,
+    "floor": 0.8,
+    "items": 100,
+    "raw_agreement": 0.81,
+    "rule": "44 §9: the trial guides the procedure and never decides stop rule 2",
+    "same_label": 81,
+    "status": "TRIAL_NO_FLOOR"
+  },
+  "agreement_by_author": {
+    "gpt": {
+      "cohen_kappa": 0.528302,
+      "items": 60,
+      "raw_agreement": 0.833333,
+      "same_label": 50
+    },
+    "task authors": {
+      "cohen_kappa": 0.0,
+      "items": 2,
+      "raw_agreement": 0.5,
+      "same_label": 1
+    },
+    "turk": {
+      "cohen_kappa": 0.59661,
+      "items": 34,
+      "raw_agreement": 0.794118,
+      "same_label": 27
+    },
+    "web": {
+      "cohen_kappa": 0.428571,
+      "items": 4,
+      "raw_agreement": 0.75,
+      "same_label": 3
+    }
+  },
+  "agreement_by_source": {
+    "bigbench-known-unknowns": {
+      "cohen_kappa": 0.0,
+      "items": 2,
+      "raw_agreement": 0.5,
+      "same_label": 1
+    },
+    "kuq": {
+      "cohen_kappa": 0.589124,
+      "items": 96,
+      "raw_agreement": 0.822917,
+      "same_label": 79
+    },
+    "kuqp": {
+      "cohen_kappa": 0.0,
+      "items": 2,
+      "raw_agreement": 0.5,
+      "same_label": 1
+    }
+  },
+  "amendment": "study_002_prereg_v12",
+  "amendment_document": "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+  "artifact_kind": "PUNANS_V2_TRIAL_REPORT",
+  "population_sha256": "cb8e0ef09fc7b82d9aa566991f8cc0841914663ef4a5e4f2286385c1ddbae717",
+  "reference_labels_by_source": {
+    "bigbench-known-unknowns": {
+      "NO_CONSENSUS": 1,
+      "UNKNOWABLE": 1
+    },
+    "kuq": {
+      "NOT_UNKNOWABLE": 19,
+      "NO_CONSENSUS": 17,
+      "UNKNOWABLE": 60
+    },
+    "kuqp": {
+      "NO_CONSENSUS": 1,
+      "UNKNOWABLE": 1
+    }
+  },
+  "reference_manifest": "reports/study-002/punans-v2/reference/punans-v2-trial.reference.manifest.json",
+  "reference_sha256": "d24de7a82b1a83040db0b2ed5a09e3eb728a245a44d58edc5cd0f677595caba9",
+  "set": "trial",
+  "statement": "P-UNANS-v2's trial set: agreement of two non-Claude models, reported to guide the procedure; it never enters P-UNANS (44 §9).",
+  "status": "TRIAL_REPORT"
+}

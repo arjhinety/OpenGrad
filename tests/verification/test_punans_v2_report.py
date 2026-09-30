@@ -91,3 +91,53 @@ def test_a_reference_that_misses_an_item_or_uses_v1_labels_is_refused() -> None:
         report.build_report([_item("a")], [], "main")
     with pytest.raises(report.PUnansV2ReportError):
         report.build_report([_item("a")], [_ref("a", "SUBJECTIVE", "SUBJECTIVE")], "main")
+
+
+def test_the_committed_trial_report_and_the_readme_agree() -> None:
+    # G14: the trial numbers the study README quotes come from the committed report, reference and archive.
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).parents[2]
+    out = root / "reports/study-002/punans-v2"
+    document = json.loads((out / "punans-v2-trial.report.json").read_text(encoding="utf-8"))
+    assert (
+        document["status"] == "TRIAL_REPORT" and document["agreement"]["status"] == "TRIAL_NO_FLOOR"
+    )
+    assert "strata" not in document and not (out / "punans-v2.strata.json").exists()
+    agreement = document["agreement"]
+    refs = [
+        json.loads(line)
+        for line in (out / "reference/punans-v2-trial.reference.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    split = [r for r in refs if r["votes"][G] != r["votes"][D]]
+    pairs = {(r["votes"][D], r["votes"][G]) for r in split}  # (gemini, deepseek)
+    assert pairs <= {(N, U), (N, X)}  # every disagreement runs one way
+    to_u = sum(1 for r in split if r["votes"][G] == U)
+    to_x = sum(1 for r in split if r["votes"][G] == X)
+    manifest = json.loads(
+        (
+            out
+            / "provenance/external-models/punans-v2-trial.external-models.audit-trail.manifest.json"
+        ).read_text(encoding="utf-8")
+    )
+    deepseek = next(s for s in manifest["sessions"] if s["session_id"] == "model-deepseek")
+    by_version: dict[str, int] = {}
+    for batch in deepseek["batches"]:
+        for attempt in batch["attempts"]:
+            if attempt["recorded_labels"]:
+                by_version[attempt["cli_version"]] = (
+                    by_version.get(attempt["cli_version"], 0) + batch["items"]
+                )
+    readme = (root / "docs/research/study-002/README.md").read_text(encoding="utf-8")
+    assert (
+        f"gave the same label on {agreement['same_label']}: raw agreement {agreement['raw_agreement']:.3f}, "
+        f"κ {agreement['cohen_kappa']:.3f}"
+    ) in readme
+    assert f"All {len(split)} disagreements run one way" in readme
+    assert f"DeepSeek said unknowable ({to_u}) or undecided ({to_x})" in readme
+    assert f"Both called {sum(1 for r in refs if r['reference_label'] == U)} unknowable" in readme
+    assert f"{by_version['3.0.65']} from 3.0.65 and {by_version['3.0.66']} from 3.0.66" in readme

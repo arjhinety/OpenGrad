@@ -196,10 +196,19 @@ def resolve_executable(name: str) -> str | None:
     return None
 
 
-def cli_version(executable: str, version_argv: list[str]) -> str:
+def cli_version(executable: str, version_argv: list[str], env: dict[str, str] | None = None) -> str:
+    """The CLI's reported version, asked with the same environment overrides as a run.
+
+    Every start of cline may update it, a ``--version`` check included: on 2026-09-30 a check without
+    ``CLINE_NO_AUTO_UPDATE`` moved the punans-v2-trial DeepSeek pass from 3.0.65 to 3.0.66 between batches.
+    """
     try:
         done = subprocess.run(
-            [executable, *version_argv], capture_output=True, timeout=120, check=False
+            [executable, *version_argv],
+            capture_output=True,
+            env={**os.environ, **(env or {})},
+            timeout=120,
+            check=False,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return f"unavailable: {type(exc).__name__}"
@@ -347,7 +356,7 @@ def main(argv: list[str] | None = None) -> int:
                 "task_id": config.task_id,
                 "session_id": spec["session"],
                 "annotator_id": args.annotator,
-                "cli_version": cli_version(executable, spec["version_argv"]),
+                "cli_version": cli_version(executable, spec["version_argv"], spec.get("env")),
                 "batch_id": batch["batch_id"],
                 "batch_content_sha256": batch["content_sha256"],
                 "procedure_sha256": batch["procedure_sha256"],

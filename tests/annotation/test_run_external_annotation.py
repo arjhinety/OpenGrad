@@ -75,3 +75,21 @@ def test_an_attempt_records_its_environment_overrides(tmp_path: Path) -> None:
         spec, str(tmp_path / "no-such-cli.exe"), b"prompt", tmp_path, "batch-01.attempt-1", 5
     )
     assert run["env_overrides"] == {"CLINE_NO_AUTO_UPDATE": "1"}
+
+
+def test_the_version_check_carries_the_same_overrides_as_a_run(monkeypatch) -> None:
+    # A bare `cline --version` may update cline; it once moved a pass from 3.0.65 to 3.0.66 mid-task.
+    runner = _runner()
+    seen = {}
+
+    class Done:
+        stdout = b"3.0.66"
+
+    def fake_run(argv, **kwargs):
+        seen.update(kwargs["env"])
+        return Done()
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    spec = runner.ANNOTATORS["model.deepseek-v4.1-flash"]
+    assert runner.cli_version("cline", spec["version_argv"], spec["env"]) == "3.0.66"
+    assert seen["CLINE_NO_AUTO_UPDATE"] == "1"
