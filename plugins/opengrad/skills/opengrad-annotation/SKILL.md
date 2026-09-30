@@ -59,7 +59,10 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     read-only sandbox) and `cline --json` (standard input; its text output interleaves colour codes) outside the
     repository, then records answers through `model-ingest`'s validator. Network drops ("no such host") are
     common: it waits and retries. On Windows it resolves each CLI through PATHEXT (`resolve_executable`), because
-    Python 3.12.0's `shutil.which` returned npm's extensionless `cline` shim, which fails with WinError 193. It never prints item text, labels or rationales. It resumes safely after an
+    Python 3.12.0's `shutil.which` returned npm's extensionless `cline` shim, which fails with WinError 193.
+    It launches cline with `CLINE_NO_AUTO_UPDATE=1`: a self-update during a run, blocked by an orphaned hub
+    holding the package folder, once deleted the launcher mid-batch. Recover with the pinned version recorded in
+    the attempts' `cli_version` (`npm install -g cline@<version>`) after stopping the orphaned `cline.exe` hub. It never prints item text, labels or rationales. It resumes safely after an
     interruption: an unrecorded batch keeps its items unlabelled and they are re-batched.
   - Once all three finish: `opengrad-annotate export <task> --sessions model-gemini model-gpt model-deepseek`,
     `verify --require-source`, then `python -m opengrad.verification.pdet_coverage_reference --task <task>

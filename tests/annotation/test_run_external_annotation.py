@@ -60,3 +60,18 @@ def test_on_windows_the_executable_is_a_pathext_file_never_the_extensionless_shi
     assert runner.resolve_executable("cline") == str(second / "cline.EXE")
     (second / "cline.EXE").unlink()
     assert runner.resolve_executable("cline") is None
+
+
+def test_cline_never_updates_itself_during_a_run() -> None:
+    # A self-update mid-run removed cline's launcher on 2026-09-30; the harness stays at one version.
+    spec = _runner().ANNOTATORS["model.deepseek-v4.1-flash"]
+    assert spec["env"] == {"CLINE_NO_AUTO_UPDATE": "1"}
+
+
+def test_an_attempt_records_its_environment_overrides(tmp_path: Path) -> None:
+    runner = _runner()
+    spec = {**runner.ANNOTATORS["model.deepseek-v4.1-flash"]}
+    run = runner.run_once(
+        spec, str(tmp_path / "no-such-cli.exe"), b"prompt", tmp_path, "batch-01.attempt-1", 5
+    )
+    assert run["env_overrides"] == {"CLINE_NO_AUTO_UPDATE": "1"}

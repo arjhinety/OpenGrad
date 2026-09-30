@@ -117,6 +117,11 @@ ANNOTATORS: dict[str, dict[str, Any]] = {
         "input": "stdin",
         "output": "cline_json",
         "version_argv": ["--version"],
+        # cline updates itself with `npm update -g cline` during a run. A cline hub process still running from
+        # the package folder locks it on Windows, and the update then leaves the package half-removed (the
+        # punans-v2-trial run lost its launcher mid-batch on 2026-09-30). Pinning the CLI also keeps the
+        # labelling harness at one version for a whole task. The runner records the version per attempt.
+        "env": {"CLINE_NO_AUTO_UPDATE": "1"},
     },
 }
 
@@ -225,6 +230,7 @@ def run_once(
             stdin=subprocess.DEVNULL if by_file else None,
             capture_output=True,
             cwd=workdir,
+            env={**os.environ, **spec.get("env", {})},
             timeout=timeout,
             check=False,
         )
@@ -249,6 +255,7 @@ def run_once(
         # Recorded without the author's absolute paths: the executable and the isolated temp files
         # keep their names only (portable_path; reports/ERRATA.md §22).
         "argv": [portable_path(arg, ROOT) for arg in argv],
+        "env_overrides": dict(sorted(spec.get("env", {}).items())),
         "exit_code": exit_code,
         "started_at": started,
         "seconds": round(ended - started, 1),
