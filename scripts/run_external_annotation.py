@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -172,6 +173,24 @@ def procedure_text(config: Any, annotator_id: str) -> bytes:
     return data
 
 
+def resolve_executable(name: str) -> str | None:
+    """The file ``name`` runs as, searched on PATH.
+
+    On Windows only a PATHEXT file can be started. Python 3.12.0's ``shutil.which`` returned npm's
+    extensionless shell shim (``cline``) ahead of ``cline.cmd``, and starting it failed with WinError 193. So
+    each PATH directory is searched in order, trying each PATHEXT extension in order, as cmd.exe does.
+    """
+    if sys.platform != "win32" or Path(name).suffix:
+        return shutil.which(name)
+    extensions = [e for e in os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e]
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        for extension in extensions:
+            candidate = Path(directory) / f"{name}{extension}"
+            if directory and candidate.is_file():
+                return str(candidate)
+    return None
+
+
 def cli_version(executable: str, version_argv: list[str]) -> str:
     try:
         done = subprocess.run(
@@ -276,7 +295,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     spec = ANNOTATORS[args.annotator]
-    executable = shutil.which(spec["executable"])
+    executable = resolve_executable(spec["executable"])
     if executable is None:
         raise SystemExit(f"{spec['executable']} is not on PATH")
     config = load_task_config(ROOT / "configs" / "annotation" / f"{args.task}.yaml", root=ROOT)

@@ -37,3 +37,26 @@ def test_a_missing_executable_is_an_attempt_that_failed_not_a_crash(tmp_path: Pa
     assert (tmp_path / "batch-01.attempt-1.stdout.txt").read_bytes() == b""
     # The isolated directory is substituted and recorded without the author's absolute path.
     assert not any(str(tmp_path) in arg for arg in run["argv"])
+
+
+def test_on_windows_the_executable_is_a_pathext_file_never_the_extensionless_shim(
+    tmp_path: Path, monkeypatch
+) -> None:
+    # npm installs `cline` (a POSIX shell script) beside `cline.cmd`; Python 3.12.0's shutil.which returned
+    # the script, which Windows cannot start (WinError 193).
+    runner = _runner()
+    first, second = tmp_path / "first", tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    (first / "cline").write_text("#!/bin/sh")
+    (first / "cline.CMD").write_text("@echo off")
+    (second / "cline.EXE").write_bytes(b"MZ")
+    monkeypatch.setattr(runner.sys, "platform", "win32")
+    monkeypatch.setenv("PATHEXT", ".COM;.EXE;.BAT;.CMD")
+    monkeypatch.setenv("PATH", runner.os.pathsep.join([str(first), str(second)]))
+    # PATH order wins over PATHEXT order, as in cmd.exe: the first directory's .cmd, not the later .exe.
+    assert runner.resolve_executable("cline") == str(first / "cline.CMD")
+    (first / "cline.CMD").unlink()
+    assert runner.resolve_executable("cline") == str(second / "cline.EXE")
+    (second / "cline.EXE").unlink()
+    assert runner.resolve_executable("cline") is None

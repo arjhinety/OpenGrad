@@ -58,7 +58,8 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     temporary directory, because agy ignores standard input started from Python), `codex exec` (standard input,
     read-only sandbox) and `cline --json` (standard input; its text output interleaves colour codes) outside the
     repository, then records answers through `model-ingest`'s validator. Network drops ("no such host") are
-    common: it waits and retries. It never prints item text, labels or rationales. It resumes safely after an
+    common: it waits and retries. On Windows it resolves each CLI through PATHEXT (`resolve_executable`), because
+    Python 3.12.0's `shutil.which` returned npm's extensionless `cline` shim, which fails with WinError 193. It never prints item text, labels or rationales. It resumes safely after an
     interruption: an unrecorded batch keeps its items unlabelled and they are re-batched.
   - Once all three finish: `opengrad-annotate export <task> --sessions model-gemini model-gpt model-deepseek`,
     `verify --require-source`, then `python -m opengrad.verification.pdet_coverage_reference --task <task>
