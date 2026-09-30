@@ -1280,3 +1280,24 @@ artifact, so it is corrected in place and the correction recorded here (G15).
   - **Mostly KUQ again.** Beyond KUQ, the public supply was 61 fresh questions.
   - **No labelling yet.** The trial and main sets are drawn and committed; the owner starts the runs.
 
+## 30. `study_002_prereg_v13` adopted: constructed `P-UNANS` questions to reach check 4's size
+
+**Added 2026-10-01.**
+
+- **The gap.** Under `study_002_prereg_v12` (§29), P-UNANS-v2's main set passed its agreement floor (raw 0.9525,
+  κ 0.756). But only 67 of its questions were agreed unknowable, against the 385 check 4 needs, so check 4 was
+  `UNDER_POWERED` and failed for every arm.
+- **Why the natural supply ran out.** Most public "unknowable" questions ask how something will develop or
+  whether it can be achieved. A careful reply discusses such a question rather than declining. KUQ's GPT-written
+  questions yielded 2 of 511.
+- **The decision.** The owner chose to construct questions that ask for a specific future outcome, reported
+  separately from the natural 67. The owner then adopted
+  [45](../docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md) with every §10 proposal. It is
+  recorded in [03](../docs/research/study-002/03-PREREGISTRATION.md) in the same commit.
+- **Consequences, stated before any label:**
+  - **Constructed, formulaic questions** test only the plainest form of the failure, a model inventing a winner
+    or a figure. The natural 67 are reported beside them.
+  - **Designed after a result.** The families were chosen after the size result was seen, but before any model
+    was trained or scored. The 385 minimum is unchanged.
+  - **No labelling yet.** The population is built and committed; the owner starts the runs.
+

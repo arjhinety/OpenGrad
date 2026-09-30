@@ -127,6 +127,13 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   2026-09-30) used `punans-v2.model-procedure.md`; the main set uses the one revision 44 §9 allows,
   `punans-v2.model-procedure.rev1.md`, recorded in `reports/study-002/punans-v2/PROCEDURE-REVISION.md`. The trial
   never enters P-UNANS; no further revision, and never the floor.
+- **P-UNANS-v2-constructed** (45, `study_002_prereg_v13`) comes from `src/opengrad/verification/punans_constructed.py`:
+  600 questions asking for specific future outcomes and 150 answerable controls, built from a Wikidata snapshot
+  (`--snapshot` once, then every draw reads only `reports/study-002/punans-v2-constructed/wikidata-snapshot.json`).
+  Task `punans-v2-constructed` uses 44's revised procedure unchanged; `family`, `is_control` and the entity id
+  are blinded. After labelling: `pdet_coverage_reference --task punans-v2-constructed`, then
+  `python -m opengrad.verification.punans_constructed_report` (floor 0.80 over all 750, control rule 90%, check 4
+  on the natural 67 plus the constructed stratum).
   - **After labelling:** `pdet_coverage_reference --task punans-v2-trial` (or `punans-v2`), then `python -m
     opengrad.verification.punans_v2_report --set trial | main`. The main set's floor is raw ≥ 0.80 over three
     labels, with the caveat of 44 §10 carried in the report.

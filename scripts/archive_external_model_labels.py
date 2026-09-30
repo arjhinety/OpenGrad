@@ -83,6 +83,12 @@ TASK_SPECS = {
         "configs/annotation/punans-v2.model-procedure.rev1.md",
         "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
     ),
+    # 45 (study_002_prereg_v13): the constructed questions and controls, under 44's revised procedure.
+    "punans-v2-constructed": (
+        ROOT / "reports" / "study-002" / "punans-v2-constructed" / "provenance" / "external-models",
+        "configs/annotation/punans-v2.model-procedure.rev1.md",
+        "docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md",
+    ),
 }
 #: The status sentence of the archive, where it is not the three-model one of 34.
 STATUS = {
@@ -102,6 +108,11 @@ STATUS = {
     "punans-v2": (
         "Model judgments by two declared non-Claude annotators, each blind and independent; an item's reference "
         "label is the label both give ({authorization}). Not human labels and not human gold."
+    ),
+    "punans-v2-constructed": (
+        "Model judgments by two declared non-Claude annotators, each blind and independent, on constructed "
+        "questions and answerable controls; an item's reference label is the label both give ({authorization}). "
+        "Not human labels and not human gold."
     ),
 }
 #: Credential shapes that must never reach an archive (tracked or not).

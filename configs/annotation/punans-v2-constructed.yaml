@@ -1,0 +1,153 @@
+# Annotation of P-UNANS-v2-constructed: whether anyone can answer each question now (Study 002, study_002_prereg_v13).
+#
+# Amendment: docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md §7-§8 (adopted 2026-10-01).
+# - What is labelled: membership only, under 44's revised instrument unchanged (45 §7). No response is shown.
+# - Items: 600 constructed questions and 150 answerable controls, mixed and blinded.
+# - Reference: the label both models declared below give. Floors: raw agreement >= 0.80 over all 750, and at
+#   least 90% of the controls labelled NOT_UNKNOWABLE (45 §8).
+#
+#   python scripts/run_external_annotation.py punans-v2-constructed --annotator model.deepseek-v4.1-flash --size 20
+
+task_id: punans-v2-constructed
+version: "1"
+title: P-UNANS-v2-constructed unknowability annotation
+task_type: single_label
+annotation_schema_version: punans-annotation-v2
+
+labels: [UNKNOWABLE, NOT_UNKNOWABLE, UNKNOWN]
+shortcuts: {"1": UNKNOWABLE, "2": NOT_UNKNOWABLE, "3": UNKNOWN}
+unknown_labels: [UNKNOWN]
+
+source:
+  path: reports/study-002/punans-v2-constructed/punans-v2-constructed.population.jsonl
+  format: jsonl
+  id_field: punans_id
+  expected_sha256: 9af7aa45f8c2e433856ed06c19927de95396428cbe4514671f2834ae189cec45
+  expected_items: 750
+
+# 44 §8: the question and the offered tools, nothing else.
+fields:
+  user:
+    label: Question
+    path: user_message
+  tools:
+    label: Available tools
+    path: tools
+
+# 44 §8: blind to the source, the upstream id, the source's own category and who wrote the question. Never
+# displayed, filtered on or sent to the browser. No metadata chips and no filters are declared, for the same reason.
+blind_fields:
+  - gold_policy_label
+  - ambiguity_status
+  - annotator_id
+  - annotator_rationale
+  - annotation_version
+  - source_dataset
+  - source_id
+  - source_category
+  - family
+  - is_control
+  - entity_id
+  - phrasing
+
+extra_fields:
+  - key: ambiguity_status
+    label: Ambiguity status
+    type: select
+    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT]
+    default: NONE
+    required: true
+  - key: annotator_rationale
+    label: Rationale
+    type: text
+    required: false
+    adjudication: false
+    help: Optional. A short note on why, or on what was hard, if you want one.
+
+constraints:
+  - when_label_in: [UNKNOWN]
+    field: ambiguity_status
+    forbidden: [NONE]
+    message: UNKNOWN needs an ambiguity reason (set ambiguity_status).
+  - when_label_not_in: [UNKNOWN]
+    field: ambiguity_status
+    allowed: [NONE]
+    message: An ambiguous item is labeled UNKNOWN; any other label needs ambiguity_status NONE.
+
+disagreement_keys: [label, ambiguity_status]
+
+adjudication_fields:
+  - key: decision_note
+    label: Deciding reason
+    type: text
+    required: true
+
+# 44 §4 only. Never the other sections: they name the sources and the construction.
+instructions:
+  - title: Rubric - what counts as unknowable (44 §4)
+    file: docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md
+    include_sections: ["4."]
+
+# The server refuses to start if the served rubric text contains one of these.
+instruction_forbidden_terms:
+  - KUQ
+  - KUQP
+  - Known Unknown
+  - amayuelas
+  - BIG-bench
+  - BFCL
+  - Berkeley
+  - gorilla
+  - source_category
+  - source_dataset
+  - family
+  - is_control
+  - entity_id
+  - phrasing
+  - Wikidata
+  - constructed
+  - control
+
+record_keys:
+  item_id: punans_id
+  label: gold_policy_label
+  annotation_schema_version: annotation_version
+
+output:
+  dir: reports/study-002/punans-v2-constructed/annotation
+  session_file: "punans-v2-constructed.annotations.{annotator_id}.{session_id}.jsonl"
+  history_file: "audit/punans-v2-constructed.history.{annotator_id}.{session_id}.jsonl"
+  adjudication_history_file: audit/punans-v2-constructed.adjudication-history.jsonl
+  disagreements_file: punans-v2-constructed.disagreements.jsonl
+  adjudication_file: punans-v2-constructed.adjudicated.jsonl
+  gold_file: punans-v2-constructed.gold.jsonl
+  manifest_file: punans-v2-constructed.annotation-manifest.json
+
+protected_paths:
+  - reports/study-002/punans-v2-constructed/punans-v2-constructed.population.jsonl
+  - reports/study-002/punans-v2-constructed/punans-v2-constructed.manifest.json
+  - reports/study-002/punans-v2-constructed/punans-v2-constructed.manifest.json.sha256
+  - reports/study-002/punans-v2-constructed/wikidata-snapshot.json
+
+state_db: .annotation/punans-v2-constructed.sqlite3
+
+# The two-model reference is computed separately (45 §8), never frozen as human gold.
+freeze:
+  allowed_designs: [two_pass, single_annotator]
+  require_adjudication: true
+  single_annotator_review:
+    flagged: true
+    labels: [UNKNOWN]
+
+# 45 §7: the two annotators of 42-44 and the procedure P-UNANS-v2's main set used, unchanged. Model judgments.
+model_annotators:
+  - annotator_id: model.gemini-3.8-flash-high
+    model: Gemini 3.8 Flash (High)
+    procedure: configs/annotation/punans-v2.model-procedure.rev1.md
+    procedure_sha256: 2e7fd9c9fae13b5bf6b3b05f9c3f47dc7335455f76d59495e5c2235c3b72ffc4
+    authorization: docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md
+  - annotator_id: model.deepseek-v4.1-flash
+    model: deepseek-v4.1-flash
+    procedure: configs/annotation/punans-v2.model-procedure.rev1.md
+    procedure_sha256: 2e7fd9c9fae13b5bf6b3b05f9c3f47dc7335455f76d59495e5c2235c3b72ffc4
+    authorization: docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md

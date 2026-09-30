@@ -1265,6 +1265,68 @@ datasets:
   planned_initial_mixture_percent: null
   notes: P-UNANS-v2 candidates (44 §5). Items whose highest-scored target is Unknown; BIG-bench is widely present
     in pretraining data. Relabelled blind by two non-Claude models; evaluation only, never trained on.
+- id: wikidata
+  display_name: Wikidata (entity snapshot for constructed P-UNANS questions)
+  organization: Wikimedia Foundation and the Wikidata community
+  role: UPSTREAM_SOURCE
+  lifecycle: ACTIVE
+  category: question_answering
+  papers: []
+  retrieval_date: '2026-09-30'
+  date_published:
+    value: '2012-10-29'
+    source: Wikidata launch date (https://www.wikidata.org/wiki/Wikidata:Introduction)
+  hf_id: null
+  repository: https://www.wikidata.org
+  source_repository: https://query.wikidata.org/sparql
+  distribution:
+  - name: wikidata-snapshot.json
+    content_url: https://github.com/arjhinety/OpenGrad/blob/86c4c10fc7c2b16d28eebb96d9a7d8a9a7a61847/reports/study-002/punans-v2-constructed/wikidata-snapshot.json
+    sha256: 06c893a2cd40d8ed686d95bb0235d5e4eac29ecddf5f30bfac592efe23a61f54
+    size_bytes: 483701
+    encoding_format: application/json
+    verified_from: sha256 of the snapshot the builder wrote from the SPARQL queries it records (https://query.wikidata.org/sparql, 2026-09-30); Wikidata has no immutable revision, so the OpenGrad commit that added the snapshot is the pin
+  source_revision:
+    value: 86c4c10fc7c2b16d28eebb96d9a7d8a9a7a61847
+    verified: true
+    source: the OpenGrad commit that added wikidata-snapshot.json (the snapshot's own pin; Wikidata has none)
+  license:
+    value: CC0-1.0
+    verified: true
+    source: reports/study-002/punans-v2-constructed/WIKIDATA-LICENCE.md
+    source_sha256: ae3235eaa61ee3cf59b2f7145b5cf9bfa651e61508189c6d38fd884b2075a8a9
+  redistribution: REDISTRIBUTION_WITH_ATTRIBUTION
+  redistribution_basis: docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md (study_002_prereg_v13, adopted 2026-10-01); CC0 places the data in the public domain
+  upstream_access_mode: public
+  downstream_access_requirement: public_allowed
+  attribution_required: false
+  citation_required: false
+  citation_target: 'Vrandecic and Kroetzsch 2014, Wikidata: a free collaborative knowledgebase (Communications of the ACM 57(10))'
+  modifications_disclosed: true
+  sample_count:
+    published: null
+    verified_from: https://query.wikidata.org/sparql
+  retained_after_filtering:
+    value: 750
+    status: FULL_DATA_VALIDATED
+  processed_dataset_hash:
+    value: null
+    status: FULL_DATA_VALIDATED
+    manifest: reports/study-002/punans-v2-constructed/punans-v2-constructed.manifest.json
+  intended_stages:
+  - evaluation
+  allowed_splits: []
+  forbidden_splits:
+  - wikidata-snapshot
+  contamination_status: SCREENED_LEVELS_1_4
+  benchmark_overlap_risk: LOW_TRAINING_ONLY
+  known_source_overlap: AUDITED
+  overlap_evidence:
+  - reports/source-screening/study-002-punans-constructed/wikidata-supply.json
+  - reports/study-002/punans-v2-constructed/punans-v2-constructed.manifest.json
+  planned_initial_mixture_percent: null
+  notes: Entities (competitions, cities) for 45's constructed questions and controls. The question text is written by
+    OpenGrad from fixed phrasings; Wikidata supplies names, edition years and population years only. Evaluation only.
 - id: selfaware
   display_name: SelfAware (unanswerable questions)
   organization: Yin et al. (Fudan University)

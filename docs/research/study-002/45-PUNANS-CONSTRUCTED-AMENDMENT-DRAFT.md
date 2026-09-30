@@ -1,8 +1,13 @@
 # 45 — `P-UNANS`: constructed questions to reach check 4's size (`study_002_prereg_v13`)
 
-> **Status: DRAFT, not adopted.** It is recorded in neither [03](03-PREREGISTRATION.md) nor `reports/ERRATA.md`
-> until the owner adopts it, as [40](40-PREREG-V8-DRAFT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md) and
-> [44](44-PUNANS-V2-AMENDMENT-DRAFT.md) were. Nothing is built or labelled until then.
+> **Status: ADOPTED 2026-10-01, as drafted.** The owner chose every §10 proposal: check 4 on the natural 67
+> plus the constructed stratum, answerable controls with the 90% rule, families F1 and F2, and 300 + 300
+> questions with 75 + 75 controls. The owner authorised the build without labelling runs. It is recorded in
+> [03](03-PREREGISTRATION.md) and `reports/ERRATA.md` §30 in the same commit. The text below is kept as
+> drafted, as 40, 43 and 44 were.
+>
+> **As drafted:** *Status: DRAFT, not adopted. It is recorded in neither 03 nor `reports/ERRATA.md` until the
+> owner adopts it. Nothing is built or labelled until then.*
 >
 > - **What the owner decided on 2026-10-01,** after P-UNANS-v2's main-set result: draft an amendment for
 >   **constructed** questions that ask for specific future outcomes, reported separately from the natural

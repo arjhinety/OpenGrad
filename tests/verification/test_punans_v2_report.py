@@ -204,8 +204,9 @@ def test_the_committed_main_report_and_every_surface_agree() -> None:
         assert f"only {n} questions are agreed unknowable, under the 385" in text, surface
 
 
-def test_draft_45_is_unrecorded_and_quotes_its_artifacts() -> None:
-    # A draft amendment is recorded in neither 03 nor ERRATA (40, 43, 44); its numbers come from artifacts (G14).
+def test_amendment_45_is_recorded_twice_and_quotes_its_artifacts() -> None:
+    # An adopted amendment is recorded in both 03 and ERRATA in its adoption commit; its numbers come from
+    # artifacts (G14).
     import json
     from pathlib import Path
 
@@ -213,9 +214,9 @@ def test_draft_45_is_unrecorded_and_quotes_its_artifacts() -> None:
     draft = (root / "docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md").read_text(
         encoding="utf-8"
     )
-    assert "Status: DRAFT, not adopted." in draft
+    assert "Status: ADOPTED 2026-10-01, as drafted." in draft
     for record in ("docs/research/study-002/03-PREREGISTRATION.md", "reports/ERRATA.md"):
-        assert "study_002_prereg_v13" not in (root / record).read_text(encoding="utf-8"), record
+        assert "study_002_prereg_v13" in (root / record).read_text(encoding="utf-8"), record
     main = json.loads(
         (root / "reports/study-002/punans-v2/punans-v2.strata.json").read_text(encoding="utf-8")
     )

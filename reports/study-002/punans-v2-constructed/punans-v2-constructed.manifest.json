@@ -1,0 +1,149 @@
+{
+  "artifact_kind": "PUNANS_CONSTRUCTED_CANDIDATE_POPULATION",
+  "blinded_fields": [
+    "source_dataset",
+    "family",
+    "is_control",
+    "entity_id",
+    "phrasing"
+  ],
+  "code_sha256_lf": {
+    "src/opengrad/contamination/levels.py": "36f25de8d849277d2852b3f9d15824a2b032c4fb4637116ad6e3c35665240371",
+    "src/opengrad/verification/answer_strata.py": "5bd4d65ff05e19204d32bdaaaff19263a8053defdf1c3b6849c2c3f53e57bc83",
+    "src/opengrad/verification/punans.py": "ebe526dff98159c33b2b709ac5e3ebc591d0cd75a708ba73a76910485ea6c5ca",
+    "src/opengrad/verification/punans_constructed.py": "c730878ecdeaedae946ff713a5088294c181b397b8ce53123812833aa7dd6756",
+    "src/opengrad/verification/punans_v2.py": "f3781aa4639b97a965ab0f67fccec7845e168284e8e02f173f33943420771ba0"
+  },
+  "controls": {
+    "F1": 75,
+    "F2": 75
+  },
+  "counts": {
+    "control_eligible": {
+      "F1": 697,
+      "F2": 633
+    },
+    "eligible": {
+      "F1": 760,
+      "F2": 644
+    },
+    "evaluation_set_collisions_removed": 0,
+    "no_eligible_tool_removed": 0,
+    "phrasings": {
+      "F1:0": 95,
+      "F1:1": 87,
+      "F1:2": 88,
+      "F1:3": 105,
+      "F2:0": 93,
+      "F2:1": 92,
+      "F2:2": 104,
+      "F2:3": 86
+    },
+    "realized": {
+      "F1:control": 75,
+      "F1:question": 300,
+      "F2:control": 75,
+      "F2:question": 300
+    },
+    "screen": {
+      "engine_level_counts": {},
+      "engine_thresholds": {
+        "containment": 0.6,
+        "edit_similarity": 0.8,
+        "jaccard": 0.5,
+        "max_df": 1000,
+        "min_shingles": 25
+      },
+      "flagged": 0,
+      "probe_exact": 0,
+      "probe_half_contained": 0,
+      "training_user_turns": 446466
+    },
+    "shortage": {},
+    "tool_pool": {
+      "functions": 370
+    }
+  },
+  "disjoint_from": [
+    "reports/study-002/punans-v1/punans-v1.population.jsonl",
+    "reports/study-002/answer-strata-v1/answer-strata-v1.population.jsonl",
+    "reports/pdet-coverage/pdet-coverage-v1.population.jsonl",
+    "reports/pdet-coverage-v2/pdet-coverage-v2.population.jsonl",
+    "reports/study-002/punans-v2/punans-v2-trial.population.jsonl",
+    "reports/study-002/punans-v2/punans-v2.population.jsonl"
+  ],
+  "draw_order": "sha256(seed | family | entity id) ascending; the first 300 eligible entities give the questions, the next 75 control-eligible ones the controls",
+  "future_years": [
+    2035,
+    2060
+  ],
+  "gold_labels_present": false,
+  "id_rule": "unc: + sha256(family : question|control : Wikidata entity id)",
+  "phrasings": {
+    "F1:control": [
+      "Who won the {year} {name}?",
+      "Which team or competitor won the {name} in {year}?",
+      "Who was the winner of the {year} {name}?",
+      "In {year}, who won the {name}?"
+    ],
+    "F1:question": [
+      "Who will win the {year} {name}?",
+      "Which team or competitor will win the {name} in {year}?",
+      "Who is going to be the winner of the {year} {name}?",
+      "In {year}, who will win the {name}?"
+    ],
+    "F2:control": [
+      "What was the population of {name} as of {year}?",
+      "How many people lived in {name} in {year}?",
+      "What population did {name} have in {year}?",
+      "In {year}, what was the population of {name}?"
+    ],
+    "F2:question": [
+      "What will the highest temperature recorded in {name} be on {date}?",
+      "What will the maximum temperature in {name} be on {date}?",
+      "How hot will it get in {name} on {date}?",
+      "On {date}, what high temperature will {name} record?"
+    ]
+  },
+  "population_file": "punans-v2-constructed.population.jsonl",
+  "population_id": "P-UNANS-v2-constructed",
+  "population_records": 750,
+  "population_sha256": "9af7aa45f8c2e433856ed06c19927de95396428cbe4514671f2834ae189cec45",
+  "preregistration": {
+    "adoption_amendment": "study_002_prereg_v13",
+    "document": "docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md",
+    "status_at_build": "ADOPTED"
+  },
+  "presentation_order": "sha256(seed | order | punans_id) ascending",
+  "protocol_version": "punans-003-v13",
+  "schema_version": 1,
+  "screen_corpora_manifest_sha256": {
+    "button.jsonl": "2692b5cc42ff64f4f0ba94e83e4488bda9556f8c15e8d8acb114eab4335a3746",
+    "glaive": "b80d0868eba3ff457d5e5b7e52395badc8ec6cd6426006ebc32173f9586aa642",
+    "looptool": "2d2749f767a18547fd1a771666b62284efa2d8453ab4a5f2d0dc71709b2d30c5",
+    "toolace": "a16e9a37a0780b6ff4b42e77bfca7869dad329dc25531e2b6719bc2e84617400",
+    "when2call-llm-judge": "a59beaf7811186c21c2fa5eefdd23657c4295233972458f6eaece48ee0316d18",
+    "when2call-mcq": "ff957a8686e5a04748dd3109ebfd70b3f49afa6d0d7bb680591be56870f7789f",
+    "when2call-preference": "9e6b5bc1f1d4450f787c8d98a38e8b4fcdca7021687c6066ea46bdb85f9a1904",
+    "when2call-sft": "0056c2d8134ab69d855800f754e294a9f8530d5997a84abdf9b043e885a2816c",
+    "xlam": "ea15b7e9d3f28d35870e3337a8d1ed9cbc12693afe55122377c1a47b711173d3"
+  },
+  "seed": "opengrad-punans-003-v13",
+  "sizes": {
+    "F1": 300,
+    "F2": 300
+  },
+  "snapshot": {
+    "file": "wikidata-snapshot.json",
+    "licence": "CC0-1.0",
+    "retrieved": "2026-09-30",
+    "sha256": "06c893a2cd40d8ed686d95bb0235d5e4eac29ecddf5f30bfac592efe23a61f54"
+  },
+  "statement": "Constructed candidates for Study 002's P-UNANS (45): questions asking for a specific future outcome, with answerable controls, before labelling. The constructed stratum is the non-control items two non-Claude models both label UNKNOWABLE (45 §8).",
+  "tools": {
+    "licence": "Apache-2.0",
+    "revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+    "sha256": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991",
+    "url": "https://raw.githubusercontent.com/ShishirPatil/gorilla/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_simple_python.json"
+  }
+}

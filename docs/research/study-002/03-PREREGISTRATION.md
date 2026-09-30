@@ -1,10 +1,11 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v12` (2026-09-25).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v12 at
+> **Current version: `study_002_prereg_v13` (2026-10-01).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v13 at
 > the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
 > [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md),
-> [44](44-PUNANS-V2-AMENDMENT-DRAFT.md)). Entries are appended so cited line numbers hold.
+> [44](44-PUNANS-V2-AMENDMENT-DRAFT.md), [45](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md)). Entries are
+> appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
 committed **before the first Study 002 training run is launched and before any Study 002 evaluation
@@ -428,3 +429,36 @@ Appended here rather than under "Amendments" so that line numbers other document
 - **Arms launched under an earlier version:** none.
 - **Full record:** [44-PUNANS-V2-AMENDMENT-DRAFT.md](44-PUNANS-V2-AMENDMENT-DRAFT.md); the ERRATA entry is
   `reports/ERRATA.md` §29.
+
+### `study_002_prereg_v13` — 2026-10-01
+
+- **Context.** Under v12, P-UNANS-v2's main set passed the 0.80 agreement floor (762 of 800, raw 0.9525,
+  κ 0.756). But only 67 questions were agreed unknowable, against the 385 check 4 needs, so check 4 was
+  `UNDER_POWERED`. 44 §5 forbids a top-up.
+- **Items changed:**
+  - **A constructed population is added,** `P-UNANS-v2-constructed`, built from a pinned Wikidata snapshot
+    (CC0):
+    - F1, the future winner of a competition still running;
+    - F2, a city's highest temperature on a date from 2035 to 2060.
+
+    That is 300 of each, with 75 answerable controls per family, labelled under 44's revised instrument
+    unchanged.
+  - **Floors:** raw agreement ≥ 0.80 over all 750 items, and at least 90% of the controls labelled not
+    unknowable. Below either, the constructed stratum is not built.
+  - **Check 4's population** is the union of P-UNANS-v2's natural unknowable stratum and the constructed one,
+    n ≥ 385, with each part reported separately.
+- **Reason:** the public supply of questions whose right reply is to decline was used up. The curated sources
+  that asked for specific future outcomes were agreed unknowable at 77% and 88%.
+- **Owner decisions, 2026-10-01:**
+  - construct questions asking for specific future outcomes;
+  - every 45 §10 proposal;
+  - adoption, with the build authorised and no labelling runs yet.
+- **Not changed:**
+  - the 385 minimum, the 0.70 threshold, stop rule 2 and its 0.80 floor;
+  - P-UNANS-v1 and v2;
+  - `P-CONF-v1`, the arms and seeds.
+- **Candidates already scored:** none. The constructed population is drawn and committed with this entry, before
+  any label.
+- **Arms launched under an earlier version:** none.
+- **Full record:** [45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md); the
+  ERRATA entry is `reports/ERRATA.md` §30.
