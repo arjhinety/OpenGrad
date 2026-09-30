@@ -202,3 +202,45 @@ def test_the_committed_main_report_and_every_surface_agree() -> None:
     for surface in ("README.md", "docs/research/STUDIES.md"):
         text = (root / surface).read_text(encoding="utf-8")
         assert f"only {n} questions are agreed unknowable, under the 385" in text, surface
+
+
+def test_draft_45_is_unrecorded_and_quotes_its_artifacts() -> None:
+    # A draft amendment is recorded in neither 03 nor ERRATA (40, 43, 44); its numbers come from artifacts (G14).
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).parents[2]
+    draft = (root / "docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md").read_text(
+        encoding="utf-8"
+    )
+    assert "Status: DRAFT, not adopted." in draft
+    for record in ("docs/research/study-002/03-PREREGISTRATION.md", "reports/ERRATA.md"):
+        assert "study_002_prereg_v13" not in (root / record).read_text(encoding="utf-8"), record
+    main = json.loads(
+        (root / "reports/study-002/punans-v2/punans-v2.strata.json").read_text(encoding="utf-8")
+    )
+    agreement = main["agreement"]
+    assert (
+        f"gave the same label on {agreement['same_label']} of 800: raw {agreement['raw_agreement']:.4f}, "
+        f"κ {agreement['cohen_kappa']:.3f}"
+    ) in draft
+    n = main["check_4"]["n"]
+    assert f"they agreed on only **{n}** unknowable questions" in draft
+    assert f"the union holds about\n  {n} + 480" in draft or f"about {n} + 480" in " ".join(
+        draft.split()
+    )
+    supply = json.loads(
+        (
+            root / "reports/source-screening/study-002-punans-constructed/wikidata-supply.json"
+        ).read_text(encoding="utf-8")
+    )["queries"]
+    flat = " ".join(draft.split())
+    assert (
+        f"{supply['competition_series_with_a_winner_named_since_2021']['count']:,} competition series"
+        in flat
+    )
+    assert f"{supply['cities_over_one_million_with_a_population_figure']['count']} cities" in flat
+    assert (
+        f"Of {supply['conjectures']['count']} items typed as conjectures, only "
+        f"{supply['conjectures_recording_who_proved_them']['count']} record who proved them"
+    ) in flat

@@ -1,0 +1,30 @@
+{
+  "built_by": "scripts/audit_punans_constructed_supply.py",
+  "endpoint": "https://query.wikidata.org/sparql",
+  "note": "A dated record of supply, not a pin: Wikidata changes daily.",
+  "queries": {
+    "cities_over_one_million_with_a_population_figure": {
+      "count": 665,
+      "sparql": "SELECT (COUNT(DISTINCT ?c) AS ?n) WHERE { ?c wdt:P31/wdt:P279* wd:Q515 ; wdt:P1082 ?p . FILTER(?p > 1000000) }"
+    },
+    "competition_series_with_5_editions_naming_a_winner": {
+      "count": 2264,
+      "sparql": "SELECT (COUNT(*) AS ?n) WHERE { { SELECT ?series WHERE { ?ed wdt:P3450 ?series ; wdt:P1346 ?w . } GROUP BY ?series HAVING (COUNT(?ed) >= 5) } }"
+    },
+    "competition_series_with_a_winner_named_since_2021": {
+      "count": 1141,
+      "sparql": "SELECT (COUNT(DISTINCT ?series) AS ?n) WHERE { ?ed wdt:P3450 ?series ; wdt:P1346 ?w ; wdt:P585 ?t . FILTER(YEAR(?t) >= 2021) }"
+    },
+    "conjectures": {
+      "count": 286,
+      "sparql": "SELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { ?x wdt:P31 wd:Q319141 . }"
+    },
+    "conjectures_recording_who_proved_them": {
+      "count": 13,
+      "sparql": "SELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { ?x wdt:P31 wd:Q319141 ; wdt:P1318 ?proved . }"
+    }
+  },
+  "retrieved": "2026-09-30",
+  "screening": "study-002-punans-constructed",
+  "source": "Wikidata (CC0-1.0), SPARQL endpoint"
+}
