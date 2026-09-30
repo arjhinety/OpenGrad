@@ -54,4 +54,23 @@ than on the definition.
 - **Not tested.** The revision was written from these 19 questions, so labelling them again would overstate its
   effect. The main set is its only test, and 44 §10's floor judges it there.
 - **Harness.** The main set is labelled with cline 3.0.66 (`CLINE_NO_AUTO_UPDATE=1` for every start) and agy as
-  installed. The runner records each attempt's version.
+  installed. The runner records each attempt's version. The trial's DeepSeek labels came from two versions, 60
+  from 3.0.65 and 40 from 3.0.66, after cline updated itself between batches.
+
+## Outcome, 2026-10-01: the size prediction was wrong
+
+The main set was labelled under this revision
+([`punans-v2.strata.json`](punans-v2.strata.json)):
+- **Agreement rose, as expected.** The models agreed on 762 of 800: raw 0.9525,
+  κ 0.756. The floor passes.
+- **The unknowable set collapsed, which was not expected.** Gemini called 73 of the 800 questions
+  unknowable and DeepSeek 97. Both agreed on 67. The prediction above, that the set would shrink toward
+  Gemini's trial rate of 62 in 100, was wrong: the revision moved both models, not only DeepSeek.
+- **Most of KUQ is not unknowable under this reading.** Its GPT-written questions yielded 2
+  of 511; its crowd-written ones 36 of 224. Most ask
+  how something will develop or whether it can be achieved, which a careful reply discusses rather than
+  declines.
+- **Whether the revision drew the line too tightly cannot be tested.** 44 allows no second revision. The trial
+  was labelled under the original wording and the main set under this one, so the two rates are not a controlled
+  comparison.
+

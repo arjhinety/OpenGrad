@@ -1,0 +1,125 @@
+{
+  "agreement": {
+    "caveat": "44 §10: the floor is 0.80 over three labels, where v11's was over six. Chance agreement is higher with fewer labels, so 0.80 here is easier to reach than v11's floor was; kappa is the figure that compares across the two attempts.",
+    "cohen_kappa": 0.756246,
+    "floor": 0.8,
+    "items": 800,
+    "raw_agreement": 0.9525,
+    "rule": "03 stop rule 2 as set by 44 §10: below the floor the population is not built and the study does not proceed to training",
+    "same_label": 762,
+    "status": "PASS"
+  },
+  "agreement_by_author": {
+    "gpt": {
+      "cohen_kappa": 0.857999,
+      "items": 533,
+      "raw_agreement": 0.988743,
+      "same_label": 527
+    },
+    "task authors": {
+      "cohen_kappa": 1.0,
+      "items": 8,
+      "raw_agreement": 1.0,
+      "same_label": 8
+    },
+    "turk": {
+      "cohen_kappa": 0.651265,
+      "items": 224,
+      "raw_agreement": 0.875,
+      "same_label": 196
+    },
+    "web": {
+      "cohen_kappa": 0.642857,
+      "items": 35,
+      "raw_agreement": 0.885714,
+      "same_label": 31
+    }
+  },
+  "agreement_by_source": {
+    "bigbench-known-unknowns": {
+      "cohen_kappa": 1.0,
+      "items": 8,
+      "raw_agreement": 1.0,
+      "same_label": 8
+    },
+    "kuq": {
+      "cohen_kappa": 0.686063,
+      "items": 770,
+      "raw_agreement": 0.953247,
+      "same_label": 734
+    },
+    "kuqp": {
+      "cohen_kappa": 0.69863,
+      "items": 22,
+      "raw_agreement": 0.909091,
+      "same_label": 20
+    }
+  },
+  "amendment": "study_002_prereg_v12",
+  "amendment_document": "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+  "artifact_kind": "PUNANS_V2_STRATA_REPORT",
+  "check_4": {
+    "min_n": 385,
+    "n": 67,
+    "population": "P-UNANS-unknowable",
+    "status": "UNDER_POWERED"
+  },
+  "members_file": "punans-v2.strata-members.jsonl",
+  "members_sha256": "65bac829c08a167cda27f8b104247386ecdb55c50e79ac00ce59fa989a34b5a4",
+  "population_sha256": "ed82c9cff981ef07d2892ff51c7ff05f2b442eb436e91daac1496172a8bf13c4",
+  "reference_labels_by_source": {
+    "bigbench-known-unknowns": {
+      "NOT_UNKNOWABLE": 1,
+      "UNKNOWABLE": 7
+    },
+    "kuq": {
+      "NOT_UNKNOWABLE": 690,
+      "NO_CONSENSUS": 36,
+      "UNKNOWABLE": 43,
+      "UNKNOWN": 1
+    },
+    "kuqp": {
+      "NOT_UNKNOWABLE": 3,
+      "NO_CONSENSUS": 2,
+      "UNKNOWABLE": 17
+    }
+  },
+  "reference_manifest": "reports/study-002/punans-v2/reference/punans-v2.reference.manifest.json",
+  "reference_sha256": "3a4c268f63422d5f11b6d5529287994e9d765bc3b8341c3a9acf9e1c320abac4",
+  "set": "main",
+  "statement": "P-UNANS-v2's unknowable stratum: the main-set items two non-Claude models both label UNKNOWABLE (44 §10). Model judgments, not human gold; nothing is redrawn.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "strata": {
+    "P-UNANS-unknowable": {
+      "balance": {
+        "n": 67,
+        "offered_tools": {
+          "1": 16,
+          "2": 30,
+          "3": 21
+        },
+        "prompt_chars": {
+          "max": 106,
+          "median": 56.0,
+          "min": 28,
+          "q1": 46.0,
+          "q3": 71.5
+        }
+      },
+      "by_source": {
+        "bigbench-known-unknowns": 7,
+        "kuq": 43,
+        "kuqp": 17
+      },
+      "n": 67,
+      "resolvability": {
+        "n": 67,
+        "resolvable_margin": 0.239448,
+        "status": "UNDER_POWERED",
+        "within_noise": false,
+        "worst_case_half_width": 0.119724
+      },
+      "sizing_status": "UNDER_POWERED"
+    }
+  }
+}

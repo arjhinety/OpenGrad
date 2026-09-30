@@ -1,0 +1,56 @@
+{
+  "amendment": "study_002_prereg_v12",
+  "amendment_document": "docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md",
+  "annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/punans-v2.model-procedure.rev1.md",
+      "procedure_sha256": "2e7fd9c9fae13b5bf6b3b05f9c3f47dc7335455f76d59495e5c2235c3b72ffc4"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/punans-v2.model-procedure.rev1.md",
+      "procedure_sha256": "2e7fd9c9fae13b5bf6b3b05f9c3f47dc7335455f76d59495e5c2235c3b72ffc4"
+    }
+  ],
+  "artifact_kind": "PUNANS_MODEL_CONSENSUS_REFERENCE",
+  "package_manifest": "reports/study-002/punans-v2/annotation/wip/punans-v2.annotation-manifest.json",
+  "package_manifest_sha256": "f48a4afd412926e1f5e1940d5244f1a685559969a60e7e868fadea9e31fd0ebd",
+  "population_sha256": "ed82c9cff981ef07d2892ff51c7ff05f2b442eb436e91daac1496172a8bf13c4",
+  "reference_file": "punans-v2.reference.jsonl",
+  "reference_sha256": "3a4c268f63422d5f11b6d5529287994e9d765bc3b8341c3a9acf9e1c320abac4",
+  "statement": "Reference labels from the agreement of two non-Claude models, both of which must give the label, each labelling blind. Model judgments, not human gold; qualifications against it are MODEL_REFERENCE and provisional; agreement below is model-model agreement.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "summary": {
+    "annotator_label_counts": {
+      "model.deepseek-v4.1-flash": {
+        "NOT_UNKNOWABLE": 700,
+        "UNKNOWABLE": 97,
+        "UNKNOWN": 3
+      },
+      "model.gemini-3.8-flash-high": {
+        "NOT_UNKNOWABLE": 726,
+        "UNKNOWABLE": 73,
+        "UNKNOWN": 1
+      }
+    },
+    "consensus": {
+      "NO_CONSENSUS": 38,
+      "unanimous": 762
+    },
+    "dissent_by_annotator": {},
+    "items": 800,
+    "pairwise_agreement": {
+      "model.gemini-3.8-flash-high|model.deepseek-v4.1-flash": 762
+    },
+    "reference_labels": {
+      "NOT_UNKNOWABLE": 694,
+      "NO_CONSENSUS": 38,
+      "UNKNOWABLE": 67,
+      "UNKNOWN": 1
+    }
+  },
+  "task_id": "punans-v2"
+}

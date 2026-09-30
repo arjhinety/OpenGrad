@@ -104,7 +104,7 @@ def test_the_committed_trial_report_and_the_readme_agree() -> None:
     assert (
         document["status"] == "TRIAL_REPORT" and document["agreement"]["status"] == "TRIAL_NO_FLOOR"
     )
-    assert "strata" not in document and not (out / "punans-v2.strata.json").exists()
+    assert "strata" not in document
     agreement = document["agreement"]
     refs = [
         json.loads(line)
@@ -134,10 +134,71 @@ def test_the_committed_trial_report_and_the_readme_agree() -> None:
                 )
     readme = (root / "docs/research/study-002/README.md").read_text(encoding="utf-8")
     assert (
-        f"gave the same label on {agreement['same_label']}: raw agreement {agreement['raw_agreement']:.3f}, "
-        f"κ {agreement['cohen_kappa']:.3f}"
+        f"the models agreed on {agreement['same_label']}: raw {agreement['raw_agreement']:.3f}, "
+        f"κ {agreement['cohen_kappa']:.3f}, every disagreement one way"
     ) in readme
-    assert f"All {len(split)} disagreements run one way" in readme
-    assert f"DeepSeek said unknowable ({to_u}) or undecided ({to_x})" in readme
-    assert f"Both called {sum(1 for r in refs if r['reference_label'] == U)} unknowable" in readme
-    assert f"{by_version['3.0.65']} from 3.0.65 and {by_version['3.0.66']} from 3.0.66" in readme
+    record = (out / "PROCEDURE-REVISION.md").read_text(encoding="utf-8")
+    assert f"Every one of its {len(split)} disagreements ran one way" in record
+    assert to_u + to_x == len(split)
+    flat = " ".join(record.split())
+    assert f"{by_version['3.0.65']} from 3.0.65 and {by_version['3.0.66']} from 3.0.66" in flat
+
+
+def test_the_committed_main_report_and_every_surface_agree() -> None:
+    # G14 and G16: the main set's floor and stratum come from the committed report; the surfaces quote them.
+    import json
+    from collections import Counter
+    from pathlib import Path
+
+    root = Path(__file__).parents[2]
+    out = root / "reports/study-002/punans-v2"
+    document = json.loads((out / "punans-v2.strata.json").read_text(encoding="utf-8"))
+    agreement, n = document["agreement"], document["check_4"]["n"]
+    assert document["status"] == "MODEL_REFERENCE_PROVISIONAL" and agreement["status"] == "PASS"
+    assert agreement["raw_agreement"] >= report.AGREEMENT_FLOOR
+    assert document["check_4"]["status"] == "UNDER_POWERED" and n < report.CHECK_4_MIN_N
+    members = [
+        json.loads(line)
+        for line in (out / "punans-v2.strata-members.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    assert len(members) == n
+    items = {
+        json.loads(line)["punans_id"]: json.loads(line)
+        for line in (out / "punans-v2.population.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+    refs = [
+        json.loads(line)
+        for line in (out / "reference/punans-v2.reference.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    total: Counter[str] = Counter()
+    unknowable: Counter[str] = Counter()
+    for ref in refs:
+        item = items[ref["punans_id"]]
+        key = (
+            item["source_dataset"]
+            if item["source_dataset"] != "kuq"
+            else f"kuq-{item['source_author']}"
+        )
+        total[key] += 1
+        unknowable[key] += ref["reference_label"] == U
+    readme = (root / "docs/research/study-002/README.md").read_text(encoding="utf-8")
+    assert (
+        f"they agreed on {agreement['same_label']} of the 800 main-set questions: raw agreement "
+        f"{agreement['raw_agreement']:.4f}, κ {agreement['cohen_kappa']:.3f}"
+    ) in readme
+    assert f"both models called only {n} of the 800 unknowable" in readme
+    assert f"yielded {unknowable['kuq-gpt']} of {total['kuq-gpt']}" in readme
+    assert (
+        f"yielded {unknowable['kuqp']} of {total['kuqp']} and {unknowable['bigbench-known-unknowns']} of "
+        f"{total['bigbench-known-unknowns']}"
+    ) in readme
+    for surface in ("README.md", "docs/research/STUDIES.md"):
+        text = (root / surface).read_text(encoding="utf-8")
+        assert f"only {n} questions are agreed unknowable, under the 385" in text, surface
