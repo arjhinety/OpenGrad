@@ -77,3 +77,45 @@ def test_a_reference_that_misses_an_item_or_uses_other_labels_is_refused() -> No
         report.build_report([_item("a")], [], 0)
     with pytest.raises(report.PUnansConstructedReportError):
         report.build_report([_item("a")], [_ref("a", "SUBJECTIVE", "SUBJECTIVE")], 0)
+
+
+def test_the_committed_report_and_every_surface_agree() -> None:
+    # G14 and G16: the constructed result and check 4's population come from the committed report.
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).parents[2]
+    out = root / "reports/study-002/punans-v2-constructed"
+    document = json.loads((out / report.REPORT_NAME).read_text(encoding="utf-8"))
+    agreement, controls, check = (
+        document["agreement"],
+        document["control_rule"],
+        document["check_4"],
+    )
+    assert document["status"] == "MODEL_REFERENCE_PROVISIONAL"
+    assert agreement["status"] == "PASS" and controls["status"] == "PASS"
+    assert check["n"] == check["natural_n"] + check["constructed_n"] >= report.CHECK_4_MIN_N
+    members = (out / report.MEMBERS_NAME).read_text(encoding="utf-8").splitlines()
+    assert len([m for m in members if m.strip()]) == check["constructed_n"]
+    natural = json.loads(
+        (root / "reports/study-002/punans-v2/punans-v2.strata.json").read_text(encoding="utf-8")
+    )
+    assert check["natural_n"] == natural["check_4"]["n"]
+    readme = (root / "docs/research/study-002/README.md").read_text(encoding="utf-8")
+    assert (
+        f"agreed on {agreement['same_label']} of {agreement['items']} (raw "
+        f"{agreement['raw_agreement']:.1f}, κ {agreement['cohen_kappa']:.1f})"
+    ) in readme
+    assert (
+        f"labelled {controls['reference_not_unknowable']} of {controls['controls']} controls not unknowable"
+    ) in readme
+    assert (
+        f"check 4's population is {check['n']}, `EVALUABLE`: {check['natural_n']} natural and "
+        f"{check['constructed_n']} constructed"
+    ) in readme
+    for surface in ("README.md", "docs/research/STUDIES.md"):
+        text = (root / surface).read_text(encoding="utf-8")
+        assert (
+            f"holds {check['n']} ({check['natural_n']} natural, {check['constructed_n']} constructed)"
+            in text
+        ), surface

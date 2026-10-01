@@ -1,0 +1,101 @@
+{
+  "agreement": {
+    "cohen_kappa": 1.0,
+    "floor": 0.8,
+    "items": 750,
+    "raw_agreement": 1.0,
+    "rule": "45 §8: below the floor the constructed stratum is not built",
+    "same_label": 750,
+    "status": "PASS"
+  },
+  "agreement_by_family": {
+    "F1": {
+      "cohen_kappa": 1.0,
+      "items": 375,
+      "raw_agreement": 1.0,
+      "same_label": 375
+    },
+    "F2": {
+      "cohen_kappa": 1.0,
+      "items": 375,
+      "raw_agreement": 1.0,
+      "same_label": 375
+    }
+  },
+  "amendment": "study_002_prereg_v13",
+  "amendment_document": "docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md",
+  "artifact_kind": "PUNANS_CONSTRUCTED_STRATA_REPORT",
+  "check_4": {
+    "constructed_n": 599,
+    "min_n": 385,
+    "n": 666,
+    "natural_n": 67,
+    "population": "P-UNANS-v2 natural unknowable + P-UNANS-constructed-unknowable",
+    "status": "EVALUABLE"
+  },
+  "constructed_stratum_built": true,
+  "control_rule": {
+    "controls": 150,
+    "floor": 0.9,
+    "reference_not_unknowable": 150,
+    "rule": "45 §8: below 90% the labellers did not tell the questions from their answerable twins, and the constructed stratum is not built",
+    "share": 1.0,
+    "status": "PASS"
+  },
+  "members_file": "punans-v2-constructed.strata-members.jsonl",
+  "members_sha256": "cbeaa84cb3c2050de8a828e21cdd7c753ad791323e4668fbb3916f5ab32ff975",
+  "natural_members_file": "reports/study-002/punans-v2/punans-v2.strata-members.jsonl",
+  "population_sha256": "9af7aa45f8c2e433856ed06c19927de95396428cbe4514671f2834ae189cec45",
+  "reference_labels_by_family": {
+    "F1:control": {
+      "NOT_UNKNOWABLE": 75
+    },
+    "F1:question": {
+      "UNKNOWABLE": 300
+    },
+    "F2:control": {
+      "NOT_UNKNOWABLE": 75
+    },
+    "F2:question": {
+      "NOT_UNKNOWABLE": 1,
+      "UNKNOWABLE": 299
+    }
+  },
+  "reference_manifest": "reports/study-002/punans-v2-constructed/reference/punans-v2-constructed.reference.manifest.json",
+  "reference_sha256": "ea3ed3890db652469f81aa11a182cc85971c193ab330b49bb5bc73669f360cdc",
+  "statement": "P-UNANS-v2-constructed: the non-control items two non-Claude models both label UNKNOWABLE (45 §8), and check 4's population, the union with P-UNANS-v2's natural stratum. Model judgments, not human gold; nothing is redrawn.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "strata": {
+    "P-UNANS-constructed-unknowable": {
+      "balance": {
+        "n": 599,
+        "offered_tools": {
+          "1": 200,
+          "2": 214,
+          "3": 185
+        },
+        "prompt_chars": {
+          "max": 124,
+          "median": 74.0,
+          "min": 32,
+          "q1": 58.0,
+          "q3": 85.0
+        }
+      },
+      "by_family": {
+        "F1": 300,
+        "F2": 299
+      },
+      "counted_toward_check_4": 599,
+      "n": 599,
+      "resolvability": {
+        "n": 599,
+        "resolvable_margin": 0.080082,
+        "status": "OK",
+        "within_noise": false,
+        "worst_case_half_width": 0.040041
+      },
+      "sizing_status": "RESOLVES_10_POINTS"
+    }
+  }
+}

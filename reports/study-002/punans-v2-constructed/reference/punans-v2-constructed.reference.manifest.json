@@ -1,0 +1,51 @@
+{
+  "amendment": "study_002_prereg_v13",
+  "amendment_document": "docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md",
+  "annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/punans-v2.model-procedure.rev1.md",
+      "procedure_sha256": "2e7fd9c9fae13b5bf6b3b05f9c3f47dc7335455f76d59495e5c2235c3b72ffc4"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/punans-v2.model-procedure.rev1.md",
+      "procedure_sha256": "2e7fd9c9fae13b5bf6b3b05f9c3f47dc7335455f76d59495e5c2235c3b72ffc4"
+    }
+  ],
+  "artifact_kind": "PUNANS_MODEL_CONSENSUS_REFERENCE",
+  "package_manifest": "reports/study-002/punans-v2-constructed/annotation/wip/punans-v2-constructed.annotation-manifest.json",
+  "package_manifest_sha256": "287d7c5ea15336a9a42c653e0728a1fb8521a7f9ce50bf036347f33416d442b4",
+  "population_sha256": "9af7aa45f8c2e433856ed06c19927de95396428cbe4514671f2834ae189cec45",
+  "reference_file": "punans-v2-constructed.reference.jsonl",
+  "reference_sha256": "ea3ed3890db652469f81aa11a182cc85971c193ab330b49bb5bc73669f360cdc",
+  "statement": "Reference labels from the agreement of two non-Claude models, both of which must give the label, each labelling blind. Model judgments, not human gold; qualifications against it are MODEL_REFERENCE and provisional; agreement below is model-model agreement.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "summary": {
+    "annotator_label_counts": {
+      "model.deepseek-v4.1-flash": {
+        "NOT_UNKNOWABLE": 151,
+        "UNKNOWABLE": 599
+      },
+      "model.gemini-3.8-flash-high": {
+        "NOT_UNKNOWABLE": 151,
+        "UNKNOWABLE": 599
+      }
+    },
+    "consensus": {
+      "unanimous": 750
+    },
+    "dissent_by_annotator": {},
+    "items": 750,
+    "pairwise_agreement": {
+      "model.gemini-3.8-flash-high|model.deepseek-v4.1-flash": 750
+    },
+    "reference_labels": {
+      "NOT_UNKNOWABLE": 151,
+      "UNKNOWABLE": 599
+    }
+  },
+  "task_id": "punans-v2-constructed"
+}
