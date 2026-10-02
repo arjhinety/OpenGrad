@@ -209,3 +209,12 @@ Each of those is a documented defect rather than a hypothetical, and each is cit
 
 The absolute upper bound (an arm costing the whole 36-hour lineage) is ≈ $1,868.76. Evaluation adds
 ≈ $29–87 at ≈ $1–3 per run. Tier C stays contingent on a decisive Tier A.
+
+## Note: the readiness record exists as code (appended 2026-10-03)
+
+`python -m opengrad.verification.study_002_readiness` evaluates the fourteen checks above from committed
+artifacts and prints the record; `--write PATH` writes it once and refuses to overwrite. On the committed
+repository it returns `BLOCKED` with six checks passing (2, 3, 5, 10, 11, 13); the other eight each name the
+artifact they lack (`tests/verification/test_study_002_readiness.py` pins this state). The provenance validators
+`V3`–`V11`, the sentinel registry, the seed plan, the cost ledger and the CPU exposure planner it reads were
+added with it.

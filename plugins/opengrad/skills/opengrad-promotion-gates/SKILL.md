@@ -54,6 +54,7 @@ Every gate is written so each of those is impossible.
 | Quantization preservation | `src/opengrad/promotion/quantization.py` (`quantization_preservation_v1`) | `release/gguf/quantization_preservation_v1.json` |
 | Promotion artifacts | `src/opengrad/promotion/artifacts.py` | `runs/<id>/promotion/` |
 | Readiness (baseline, SFT, DPO) | `src/opengrad/readiness.py` | `opengrad readiness <config> --json` |
+| Study 002 GPU readiness record (doc 16, 14 checks; READY / BLOCKED / INCOMPLETE) | `src/opengrad/verification/study_002_readiness.py` | `python -m opengrad.verification.study_002_readiness [--write PATH]`; a written record is never overwritten |
 | Pre-training component gate | `_model_components_state` in `src/opengrad/readiness_states.py` | `reports/training/model-components-validation.json` |
 | Stage authorization | `src/opengrad/experiments/gates.py` | — |
 
@@ -86,6 +87,7 @@ opengrad reject  <checkpoint_id> --reason "<which rule failed>"
 - **Where tests live:** `tests/evaluation/test_tool_use_promotion_policy.py`,
   `tests/evaluation/test_tool_use_promotion_v5.py`, `tests/verification/test_study_002_gate.py`,
   `tests/verification/test_population_validators.py`, `tests/verification/test_provenance_validators.py`,
+  `tests/verification/test_study_002_readiness.py`,
   `tests/verification/test_resolvability.py`,
   `tests/experiments/test_promotion_and_regression.py`, `tests/experiments/test_gates.py`,
   `tests/config/test_readiness.py`.
