@@ -32,6 +32,12 @@ description: How to change or run OpenGrad training correctly — the real SFT a
 - **Rendered-sample cache.** The cache (`src/opengrad/training/preprocess.py`) is keyed by corpus hash, renderer,
   template hash, tokenizer revision, window, supervision selection and source exclusions. Never reuse a cache
   across those.
+- **Exposure is planned, not scaled** (Study 002, `study_002_prereg_v14`). Batches are token-budgeted, so steps do
+  not hold supervised tokens fixed. `src/opengrad/training/exposure_planner.py` replays `deterministic_batches` on
+  CPU from the rendered cache and returns the step at which each fraction of a token budget is reached (an
+  unfinished accumulation window at an epoch's end is counted, then discarded, as the trainer does). Use the
+  100% step as `max_steps`; the logged `supervised_tokens_seen` must equal the plan exactly (`check_logged`).
+  If the loop's counting or stopping changes, change the replay in the same commit.
 - **`train_loss` is the SFT loss alone.** DPO logs `loss`, `reward_margin` and `preference_accuracy`. Carried MTP
   adds `mtp_loss` beside them, never folded in.
 
