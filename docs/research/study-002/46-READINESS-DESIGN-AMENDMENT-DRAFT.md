@@ -1,7 +1,14 @@
 # 46 — Readiness design: arms, exposure, flags and instruments (`study_002_prereg_v14`)
 
-> **Status: DRAFT, not adopted.** It is recorded in neither [03](03-PREREGISTRATION.md) nor
-> `reports/ERRATA.md` until the owner adopts it. Nothing is built, labelled, generated or trained until then.
+> **Status: ADOPTED 2026-10-02, as drafted.** The owner chose the proposal on each of the eight §14 choices:
+> drop `R2` and H4; supervised tokens fixed, steps planned; classifier v2's flag set; the base model's own
+> answers; drop `C1`; `S2` is canonical-v3; classifier v2 as the measured output instrument; `S-ANS-E` on GSM8K.
+> The other proposals come in with it. It is recorded in [03](03-PREREGISTRATION.md) and `reports/ERRATA.md`
+> §31 in the same commit. The owner authorised the readiness engineering that follows, with no labelling run,
+> GPU time or training. The text below is kept as drafted, as 40 and 43–45 were.
+>
+> **As drafted:** *Status: DRAFT, not adopted. It is recorded in neither 03 nor `reports/ERRATA.md` until the
+> owner adopts it. Nothing is built, labelled, generated or trained until then.*
 >
 > - **What the owner decided on 2026-10-01,** after an audit of the fourteen checks of
 >   [16](16-GPU-READINESS-GATE.md): *"Draft v14 first"*. The design questions the audit found are settled

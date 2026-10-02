@@ -186,3 +186,26 @@ published:
   the work and found nothing wrong.
 
 Each of those is a documented defect rather than a hypothetical, and each is cited above at its source.
+
+## Note under `study_002_prereg_v14` (appended 2026-10-02)
+
+[46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md) changes how four checks read:
+- **Check 2:** `study_002_gate_v1` at contract 3, wrapping `tool_use_promotion_v6` with `ADOPTED_PARAMETERS`,
+  under the current `study_002_prereg_vN`; no amendment dated after a candidate's score; the commit recorded in
+  the readiness record.
+- **Check 6:** `prose-decision-classifier-v2` measured on `P-DET-OUT`, with the floors 11 now holds.
+- **Check 7:** a disposition for every record in the flag set of 46 §5, not "all 18,114".
+- **Check 12:** the CPU smoke run of 46 §12.
+
+**Cost, recomputed for 29 runs** (the same assumption ladder at the same $1.79 per GPU-hour):
+
+| Tier | Runs | At SFT ≈ ⅓ (12 h/arm) | At SFT ≈ ½ (18 h/arm) | At SFT ≈ ⅔ (24 h/arm) |
+|---|---|---|---|---|
+| A — confirmatory | 6 | ≈ $128.88 | ≈ $193.32 | ≈ $257.76 |
+| B — competing explanations | 9 | ≈ $193.32 | ≈ $289.98 | ≈ $386.64 |
+| C — conditional, exploratory | 12 | ≈ $257.76 | ≈ $386.64 | ≈ $515.52 |
+| repeats | 2 | ≈ $42.96 | ≈ $64.44 | ≈ $85.92 |
+| **total** | **29** | **≈ $622.92** | **≈ $934.38** | **≈ $1,245.84** |
+
+The absolute upper bound (an arm costing the whole 36-hour lineage) is ≈ $1,868.76. Evaluation adds
+≈ $29–87 at ≈ $1–3 per run. Tier C stays contingent on a decisive Tier A.

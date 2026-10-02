@@ -1,10 +1,11 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v13` (2026-10-01).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v13 at
+> **Current version: `study_002_prereg_v14` (2026-10-02).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v14 at
 > the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
 > [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md),
-> [44](44-PUNANS-V2-AMENDMENT-DRAFT.md), [45](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md)). Entries are
+> [44](44-PUNANS-V2-AMENDMENT-DRAFT.md), [45](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md),
+> [46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md)). Entries are
 > appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
@@ -462,3 +463,38 @@ Appended here rather than under "Amendments" so that line numbers other document
 - **Arms launched under an earlier version:** none.
 - **Full record:** [45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md); the
   ERRATA entry is `reports/ERRATA.md` §30.
+
+### `study_002_prereg_v14` — 2026-10-02
+
+- **Context.** An audit of [16](16-GPU-READINESS-GATE.md)'s fourteen checks found design defects that no
+  engineering could fix: arm `R2` trains on exactly `C0`'s tokens (the decision label is never rendered), 04
+  fixes both steps and supervised tokens, `C1` and `S2` are undefined, and the evaluator judges prose replies by
+  an unmeasured keyword rule.
+- **Items changed** ([46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md)):
+  - **Arms:** `R2` and H4 are dropped; `C1` is dropped and its id retired; `S2` is canonical-v3, exploratory.
+    Every Tier C arm is defined before any Tier A score, or dropped. The set is 29 runs with the two
+    repeats.
+  - **Exposure:** every arm trains to 5,678,531 supervised tokens (M0's logged tally at step 2,400; `X1` to half),
+    with steps planned on CPU, checkpoints at 25/50/75/100% of it, and a 1% tolerance.
+  - **Flag set:** canonical-v2-final records labelled `ANSWER` whose first reply `prose-decision-classifier-v2`
+    predicts `UNSUPPORTED`, triaged blind by two non-Claude models. Stop rule 2 (raw agreement ≥ 0.80) and stop
+    rule 1 (flag precision ≥ 0.90) apply to that triage.
+  - **Corrected text:** the base model's own answers; `D25` ⊂ `D50` ⊂ `R1`; `R3` removes every agreed decline.
+  - **Output instrument:** `prose-decision-classifier-v2` judges every prose reply, measured on `P-DET-OUT`
+    before any arm, with precision ≥ 0.90 for answers and for declines.
+  - **`S-ANS-E`** runs on GSM8K with a fixed instruction. Check 3's margin is 10 points. Checks 2 and 7 and stop
+    rule 4 are reworded. A rule fixes the determinism mode, and check 12's smoke run is defined.
+- **Reason:** defects. As written, the design would pay for runs that test nothing (`R2`), could not hold its own
+  exposure control, and would score every arm with an instrument that calls a plain refusal an answer.
+- **Owner decisions, 2026-10-02:** the proposal on each of 46 §14's eight choices; adoption, with the readiness
+  engineering authorised and no labelling run, GPU time or training.
+- **Not changed:**
+  - every threshold value in [11](11-THRESHOLDS.md), the 0.80 agreement floor, the `n ≥ 200` floor and
+    `P-UNANS`'s `n ≥ 385`;
+  - every population;
+  - arms `C0`, `R1`, `R3`, `C2`, `X1`, `D25`, `D50` and `S1`, the seeds, `REP-A` and `REP-B`;
+  - the corpus every arm derives from.
+- **Candidates already scored:** none. No arm has been trained or scored.
+- **Arms launched under an earlier version:** none.
+- **Full record:** [46-READINESS-DESIGN-AMENDMENT-DRAFT.md](46-READINESS-DESIGN-AMENDMENT-DRAFT.md); the ERRATA
+  entry is `reports/ERRATA.md` §31.

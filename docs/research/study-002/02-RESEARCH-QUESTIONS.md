@@ -119,3 +119,11 @@ The study-level verdict is one of, and is computed rather than written
 `NOT_EVALUABLE` is not a null result and may not be reported as one. It is the verdict Study 001 would
 have produced had the ANSWER mode been a required, non-vacuous dimension
 (`src/opengrad/promotion/tool_use_policy.py:33-37`).
+
+## Note on H4 and the verdict vocabulary (appended 2026-10-02)
+
+`study_002_prereg_v14` ([46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md) §3) drops H4: the SFT renderer never reads
+the decision label, so a label-only correction trains on the reference's tokens and cannot be tested. The verdict
+`MECHANISM_SUPPORTED_RELABEL_RECOMMENDED` becomes `MECHANISM_SUPPORTED_CORRECTION_RECOMMENDED`, and
+`MECHANISM_SUPPORTED_CORRECTION_INSUFFICIENT` means "`R1` does not restore direct answering". `C1` is dropped
+(46 §7); the competing explanation of H1 rests on `R3` and `C2`.

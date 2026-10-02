@@ -155,3 +155,17 @@ arithmetic that Study 001's tables never showed.
 > resolution, so over-call on 824 items can resolve the 10pp this study claims on. The row that cannot is
 > `CLARIFY` at n = 371 (10.2pp); it needs n ≥ 385 or its claims are `WITHIN_NOISE`
 > ([40](40-PREREG-V8-DRAFT.md) item D, adopted 2026-09-24).
+
+## Thresholds added by `study_002_prereg_v14` (appended 2026-10-02)
+
+Declared by [46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md) before any of their measurements exists:
+
+| Threshold | Value | Applies to | Below it |
+|---|---|---|---|
+| exposure tolerance | logged supervised tokens within 1% of the target at every saved checkpoint, and equal to the plan | every arm (46 §4) | the arm is unmatched; its comparisons are descriptive |
+| triage agreement (stop rule 2) | raw agreement ≥ 0.80, κ reported | the triage of the flag set (46 §5) | no training |
+| flag precision (stop rule 1) | ≥ 0.90 of agreed flagged records are declines | the triage of the flag set (46 §5) | the corpus intervention does not proceed |
+| output precision (stop rule 1, model output) | ≥ 0.90 for answers and for declines | `P-DET-OUT` (46 §8) | the study stops at the detector |
+
+"The margin a population is used to test" (16 check 3) is 10 points for every comparison between arms; `CLARIFY`
+and `ANSWER-natural` comparisons are descriptive, and floors fail closed (46 §10).

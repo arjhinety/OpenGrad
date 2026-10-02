@@ -172,3 +172,19 @@ check in [16](16-GPU-READINESS-GATE.md), not a nice-to-have.
 The `readiness.py` line ranges in the table above predate later edits and the 2026-09-24 split of that
 module. The model-revision, tokenizer and chat-template checks are `_model_identity_gates` in
 `src/opengrad/readiness.py`.
+
+## Note on the arm set and exposure (appended 2026-10-02)
+
+Under `study_002_prereg_v14` ([46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md)) the tables above are read with these
+changes:
+- **`R2` and `C1` are dropped** (46 §3, §7). Tier B is `R3`, `C2`, `X1`; the set is 29 runs with the two
+  repeats. `S2` is canonical-v3, trained like `C0`.
+- **Supervised tokens are held fixed, not steps** (46 §4): every arm trains to 5,678,531 supervised tokens (`X1` to
+  half), with steps planned per run and a 1% tolerance in 11.
+- **The flagged records** are classifier v2's declines under `ANSWER`, triaged by two models (46 §5); `R1`'s
+  corrected text is the base model's own answer (46 §6).
+- **The scaffold table:** the `ANSWER`-mode population and the refusal-correctness population are built
+  (`P-CONF-v1`, `P-UNANS`); `HEURISTIC_REGEX_v2` is replaced by classifier v2 as the measured output instrument
+  (46 §8).
+
+The cost-per-tier table above is superseded by the note in [16](16-GPU-READINESS-GATE.md).

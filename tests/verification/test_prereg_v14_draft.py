@@ -1,4 +1,4 @@
-"""Draft 46 (`study_002_prereg_v14`): every number and code fact it quotes comes from an artifact (G14)."""
+"""Amendment 46 (`study_002_prereg_v14`): every number and code fact it quotes comes from an artifact (G14)."""
 
 from __future__ import annotations
 
@@ -25,10 +25,29 @@ def _json(path: str) -> dict:
     return json.loads((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_the_draft_is_recorded_in_neither_03_nor_errata() -> None:
-    assert "> **Status: DRAFT, not adopted.**" in DRAFT.read_text(encoding="utf-8")
-    for record in ("docs/research/study-002/03-PREREGISTRATION.md", "reports/ERRATA.md"):
-        assert "study_002_prereg_v14" not in (ROOT / record).read_text(encoding="utf-8"), record
+def test_the_amendment_is_adopted_and_recorded_twice() -> None:
+    # An adopted amendment changes its status line and is recorded in 03 and ERRATA in one commit.
+    text = DRAFT.read_text(encoding="utf-8")
+    assert "> **Status: ADOPTED 2026-10-02, as drafted.**" in text
+    assert "> **As drafted:** *Status: DRAFT, not adopted." in text
+    prereg = (ROOT / "docs/research/study-002/03-PREREGISTRATION.md").read_text(encoding="utf-8")
+    assert "> **Current version: `study_002_prereg_v14` (2026-10-02).**" in prereg
+    assert "### `study_002_prereg_v14` — 2026-10-02" in prereg
+    errata = (ROOT / "reports/ERRATA.md").read_text(encoding="utf-8")
+    assert "## 31. `study_002_prereg_v14` adopted: the readiness gate's design" in errata
+
+
+def test_the_recomputed_cost_table_follows_from_the_run_count() -> None:
+    from decimal import Decimal
+
+    note = (ROOT / "docs/research/study-002/16-GPU-READINESS-GATE.md").read_text(encoding="utf-8")
+    note = note.split("## Note under `study_002_prereg_v14`")[1]
+    rate, runs = Decimal("1.79"), {"A": 6, "B": 9, "C": 12, "repeats": 2}
+    total = sum(runs.values())
+    cells = " | ".join(f"**≈ ${rate * hours * total:,.2f}**" for hours in (12, 18, 24))
+    assert f"| **total** | **{total}** | {cells} |" in note
+    assert f"| B — competing explanations | {runs['B']} |" in note
+    assert f"≈ ${rate * 36 * total:,.2f}" in note
 
 
 def test_the_flag_counts_come_from_the_canonical_v2_audit() -> None:

@@ -1301,3 +1301,29 @@ artifact, so it is corrected in place and the correction recorded here (G15).
     was trained or scored. The 385 minimum is unchanged.
   - **No labelling yet.** The population is built and committed; the owner starts the runs.
 
+## 31. `study_002_prereg_v14` adopted: the readiness gate's design
+
+**Added 2026-10-02.**
+
+- **What the audit found.** Before any readiness engineering, the owner had the design under
+  [16](../docs/research/study-002/16-GPU-READINESS-GATE.md)'s fourteen checks audited. Four defects could not be
+  engineered around:
+  - **Arm `R2` duplicated `C0`.** The SFT renderer builds a training example from messages and tools only; the
+    decision label is counted, never rendered. "Relabel only" changed no trained token, so H4 was untestable.
+  - **04 held both steps and supervised tokens fixed.** Batches are token-budgeted, so only one can hold; Study
+    001's "matched" arm saw 1.19× its reference's tokens for this reason (§2).
+  - **Two arms were undefined:** no record is marked "synthetic/back-translated" (`C1`), and `S2` named no
+    corpus.
+  - **The evaluator's prose rule is unmeasured,** and it calls "I'm sorry, but I can't assist with that." an
+    `ANSWER`. Every behavioural floor of the gate would have rested on it.
+- **The decision.** The owner adopted
+  [46](../docs/research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md), choosing its proposal on all eight
+  choices. It is recorded in [03](../docs/research/study-002/03-PREREGISTRATION.md) in the same commit.
+- **Consequences:**
+  - **The study narrows.** It says nothing about labels as a training signal, and the "any narrow SFT"
+    explanation rests on `R3` and `C2`.
+  - **29 runs, not 35.** The cost table of 16 is recomputed in a dated note there; the 03 line that froze the
+    old envelope stays as written.
+  - **New measurements stand between the study and training:** the triage of the flag set, and `P-DET-OUT` for
+    the output instrument. Each has floors set before it exists.
+  - **Written after population results, before any model result.** No threshold changes.

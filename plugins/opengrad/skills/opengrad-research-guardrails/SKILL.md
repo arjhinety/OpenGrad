@@ -28,7 +28,8 @@ follows is the operational core.
   then adopted with its draw authorised, and `44-PUNANS-V2-AMENDMENT-DRAFT.md` → `study_002_prereg_v12`, a retry
   after v11's stop rule fired that changed the instrument, kept the floor and disclosed what the change does to
   it, and `45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md` → `study_002_prereg_v13`, which added constructed
-  questions to reach a size without lowering it), written *before* results it could influence (G1).
+  questions to reach a size without lowering it, and `46-READINESS-DESIGN-AMENDMENT-DRAFT.md` → `study_002_prereg_v14`,
+  which dropped two arms that could test nothing as written before any readiness code was built), written *before* results it could influence (G1).
 - **A gate or threshold, to make a run pass.** A threshold that blocks a correct result is a finding about the
   threshold and is recorded, not edited around (`docs/contributing/README.md`).
 
