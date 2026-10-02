@@ -104,3 +104,10 @@ They exist so that the failure mode the audit found — a number that is *wrong 
 its artifact* rather than because anyone was dishonest — cannot survive to the paper. The ledger is the
 evidence that the failure mode is common: 19 transcription findings, 10 stale findings, and **zero** invented
 ones.
+
+## Note on `V3`–`V11` (appended 2026-10-02)
+
+`V3`–`V11` exist as code in `src/opengrad/verification/provenance_validators.py`, in the shape above, with
+`V8` as a census reader over the `accounting.py` identities. Each fails its fixture from the table above with
+its code (`self_test`, `tests/verification/test_provenance_validators.py`), and an absent input is
+`BLOCKED_INPUT_MISSING`, never a pass. Rule 6 (every validator exercised on the CPU smoke run) is still open.
