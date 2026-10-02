@@ -1,0 +1,38 @@
+# Study 002 seed, arm and repeat plan (readiness check 9, 16:24), under study_002_prereg_v14.
+#
+# 05 fixes k = 3 with seeds 0, 1, 2 in every arm; 46 fixes the arm set and the exposure budget. Arm training
+# configs are generated from this plan once each arm's corpus exists (their corpus manifests must resolve), and
+# a test checks that every arm config present agrees with it.
+schema_version: 1
+preregistration: study_002_prereg_v14
+seeds: [0, 1, 2]
+# 46 §4: every arm trains to M0's logged supervised tokens at step 2,400
+# (runs/m0_sft_canonical_v2_final/metrics/train_log.jsonl); X1 to half. Steps are planned per run.
+exposure:
+  supervised_token_budget: 5678531
+  source: runs/m0_sft_canonical_v2_final/metrics/train_log.jsonl
+  checkpoint_fractions: [0.25, 0.5, 0.75, 1.0]
+  tolerance: 0.01
+arms:
+  - {id: C0, tier: A, corpus: canonical-v2-final as published, budget_fraction: 1.0}
+  - {id: R1, tier: A, corpus: canonical-v2-final with every DECLINE_UNJUSTIFIED record corrected, budget_fraction: 1.0}
+  - {id: R3, tier: B, corpus: canonical-v2-final with every agreed decline removed, budget_fraction: 1.0}
+  - {id: C2, tier: B, corpus: canonical-v2-final without When2Call, budget_fraction: 1.0}
+  - {id: X1, tier: B, corpus: canonical-v2-final as published, budget_fraction: 0.5}
+  - {id: D25, tier: C, corpus: as R1 with the first 25% of corrections, budget_fraction: 1.0}
+  - {id: D50, tier: C, corpus: as R1 with the first 50% of corrections, budget_fraction: 1.0}
+  - {id: S1, tier: C, corpus: canonical-v2-final at a second model scale, budget_fraction: 1.0, model: null}
+  - {id: S2, tier: C, corpus: canonical-v3, budget_fraction: 1.0}
+# Dropped by 46 (§3, §7). The ids are not reused.
+retired_arms: [R2, C1]
+repeats:
+  - {id: REP-A, kind: rerun, arm: C0, seed: 0, measures: nondeterminism floor}
+  - {id: REP-B, kind: rescore, checkpoint: A_M0, measures: evaluator reproducibility}
+# 05:35-37: every source of randomness the trainer consumes, and what seeds it.
+random_sources:
+  - {source: example order and batch composition, seeded_by: "reproducibility.seed + trainer.shuffle_seed_offset (deterministic_batches)"}
+  - {source: python random, seeded_by: reproducibility.seed (training/determinism.py)}
+  - {source: numpy, seeded_by: reproducibility.seed (training/determinism.py)}
+  - {source: torch CPU and CUDA generators (dropout and any stochastic layer), seeded_by: reproducibility.seed (training/determinism.py)}
+# 46 §12: one mode for every arm, chosen by the GPU preflight before Tier A. Undecided until then.
+determinism_mode: null

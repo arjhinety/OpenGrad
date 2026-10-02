@@ -17,6 +17,11 @@ description: How OpenGrad's registries, provenance claims and written records st
 .venv/Scripts/opengrad-validate.exe      # same checks as `opengrad validate --json`; CI runs it
 ```
 
+- **Study 002 registrations** (readiness checks 9, 10, 14): `registry/study_002_sentinels.yaml` (the sentinel
+  inventory of doc 08 as amended by 46; must equal the gate's `REQUIRED_SENTINELS`), `configs/study_002/seed-plan.yaml`
+  (arms, seeds, repeats, exposure budget) and `reports/study-002/cost/cost-ledger.json` under
+  `registry/study_002_cost_ledger.schema.json`. `available_credit` stays `NOT_CONFIRMED` until the owner states
+  it; the envelope is never a balance.
 - **Validation** lives in `src/opengrad/registry/validate.py` (entry point, checks, `result_from`), with the
   `validate_*` validators in `validators.py`. That covers schema validity, revision pins,
   `derived_from` citations and the publication revision chain (exactly one current Hub revision per

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "study": "study-002",
+  "preregistration": "study_002_prereg_v14",
+  "envelope": {
+    "low_usd": 622.92,
+    "high_usd": 1245.84,
+    "basis": "16, note under study_002_prereg_v14: 29 runs at $1.79 per GPU-hour on the 12/18/24-hour assumption ladder, evaluation excluded. Approximate; a basis, not a measurement.",
+    "envelope_is_not_a_balance": true
+  },
+  "available_credit": {
+    "status": "NOT_CONFIRMED",
+    "usd": null
+  },
+  "entries": []
+}

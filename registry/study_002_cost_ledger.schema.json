@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/arrogance231/OpenGrad/registry/study_002_cost_ledger.schema.json",
+  "title": "Study 002 cost ledger (reports/study-002/cost/cost-ledger.json, schema_version 1)",
+  "description": "Readiness check 14 (16:29, 16:139-174). The Study 001 ledger's distinctions kept intact (superseded is not waste; waste is asserted from a run log; container overhead is not loaded onto a benchmark; CPU work is $0 GPU cost), plus arm, seed, tier and disposition per entry. The planning envelope is recorded beside the available credit and is never read as a balance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "study", "preregistration", "envelope", "available_credit", "entries"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "study": {"const": "study-002"},
+    "preregistration": {"type": "string", "pattern": "^study_002_prereg_v[0-9]+$"},
+    "envelope": {
+      "description": "The planning envelope of 16, as a range. Not an account balance and not available credit.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["low_usd", "high_usd", "basis", "envelope_is_not_a_balance"],
+      "properties": {
+        "low_usd": {"type": "number", "minimum": 0},
+        "high_usd": {"type": "number", "minimum": 0},
+        "basis": {"type": "string", "minLength": 1},
+        "envelope_is_not_a_balance": {"const": true}
+      }
+    },
+    "available_credit": {
+      "description": "The quantity check 14 needs: credit or spend authorisation confirmed by the owner before the first launch.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "usd"],
+      "properties": {
+        "status": {"enum": ["NOT_CONFIRMED", "CONFIRMED"]},
+        "usd": {"type": ["number", "null"], "minimum": 0},
+        "confirmed_on": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+        "confirmed_by": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1}
+      },
+      "if": {"properties": {"status": {"const": "CONFIRMED"}}},
+      "then": {"required": ["confirmed_on", "confirmed_by", "source"], "properties": {"usd": {"type": "number"}}},
+      "else": {"properties": {"usd": {"type": "null"}}}
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["run_id", "arm", "seed", "tier", "disposition", "provider", "gpu", "gpu_hourly_usd", "container_seconds", "usd"],
+        "properties": {
+          "run_id": {"type": "string", "minLength": 1},
+          "arm": {"type": "string", "minLength": 1},
+          "seed": {"type": ["integer", "null"]},
+          "tier": {"enum": ["A", "B", "C", "REPEAT", "PREFLIGHT", "DATA"]},
+          "disposition": {"enum": ["RETAINED", "SUPERSEDED", "REPLACEMENT", "DISCARDED"]},
+          "provider": {"type": "string", "minLength": 1},
+          "gpu": {"type": "string", "minLength": 1},
+          "gpu_hourly_usd": {"type": "number", "minimum": 0},
+          "container_seconds": {"type": "number", "minimum": 0},
+          "usd": {"type": "number", "minimum": 0},
+          "note": {"type": "string"}
+        }
+      }
+    }
+  }
+}

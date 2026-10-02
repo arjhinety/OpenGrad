@@ -1,0 +1,84 @@
+# Study 002 sentinel registration (readiness check 10, 16:25).
+#
+# Every sentinel of 08-SENTINEL-SPEC.md "Sentinel inventory", with its prompt modes and whether it blocks, as
+# amended by study_002_prereg_v14 (46 §9: S-ANS-E runs on GSM8K with a fixed instruction). The gate's
+# REQUIRED_SENTINELS (src/opengrad/verification/study_002_gate.py) must agree with this file; a test checks it.
+# V7 (sentinel_completeness) reads the modes from here.
+schema_version: 1
+preregistration: study_002_prereg_v14
+specification: docs/research/study-002/08-SENTINEL-SPEC.md
+sentinels:
+  - id: S-ANS-0
+    instrument: GSM8K 0-shot
+    population: gsm8k test, 1,319 questions (frozen file)
+    endpoints: [answer_rate, refusal_rate]
+    modes: [0-shot]
+    blocking: true
+    reason: anti-pattern guard
+  - id: S-ANS-8
+    instrument: GSM8K 8-shot
+    population: gsm8k test, the same 1,319 questions (frozen file)
+    endpoints: [accuracy, accuracy_given_answer]
+    modes: [8-shot]
+    blocking: true
+    reason: H2 endpoint
+  - id: S-ANS-E
+    instrument: GSM8K with the elicit instruction
+    population: gsm8k test, the same 1,319 questions as S-ANS-0 (46 §9)
+    endpoints: [answer_rate, accuracy, accuracy_given_answer]
+    modes: [elicit]
+    blocking: true
+    reason: H2 limit
+    # 46 §9, verbatim. Placed before the 0-shot user turn, separated by one blank line. Never tuned.
+    instruction: Answer the question below directly if you can. If you cannot answer it, you may say so.
+  - id: S-TP-4
+    instrument: tool-policy four-mode population
+    population: P-CONF-v1
+    endpoints: [per_mode_accuracy, call_f1, over_call_rate]
+    modes: [0-shot]
+    blocking: true
+    reason: H5
+  - id: S-REF
+    instrument: refusal-correctness probe
+    population: P-UNANS (check 4's population, natural and constructed)
+    endpoints: [refusal_correctness]
+    modes: [0-shot]
+    blocking: true
+    reason: H6
+  - id: S-IF
+    instrument: IFEval strict and loose
+    population: ifeval (frozen file)
+    endpoints: [prompt_level_strict_acc, prompt_level_loose_acc, failure_classes]
+    modes: [0-shot]
+    blocking: true
+    reason: format and instruction
+  - id: S-MMLU
+    instrument: MMLU-Pro 5-shot at 2048 tokens
+    population: mmlu-pro (frozen file)
+    endpoints: [accuracy, truncation_rate, adversarial_interval]
+    modes: [5-shot]
+    blocking: true
+    reason: ability
+  - id: S-OW7
+    instrument: OpenWeights 7-case
+    population: the frozen 7 cases
+    endpoints: [per_case_pass, failure_class]
+    modes: [0-shot]
+    blocking: false
+    reason: reported, never decisive (08 "Why S-OW7 never decides anything")
+  - id: S-NV
+    instrument: non-vacuity census
+    population: every scored population
+    endpoints: [mode_coverage, census_reconciliation]
+    modes: []
+    blocking: true
+    reason: L1
+schedule:
+  - when: at each checkpoint evaluated during selection
+    runs: [S-ANS-0, S-NV]
+  - when: once per arm, before any promotion decision
+    runs: [all]
+  - when: after the arm set completes, before the verdict
+    runs: [S-TP-4, S-REF]
+  - when: on any re-run or replacement
+    runs: [all]
