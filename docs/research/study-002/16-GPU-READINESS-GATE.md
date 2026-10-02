@@ -215,6 +215,11 @@ The absolute upper bound (an arm costing the whole 36-hour lineage) is ≈ $1,86
 `python -m opengrad.verification.study_002_readiness` evaluates the fourteen checks above from committed
 artifacts and prints the record; `--write PATH` writes it once and refuses to overwrite. On the committed
 repository it returns `BLOCKED` with six checks passing (2, 3, 5, 10, 11, 13); the other eight each name the
-artifact they lack (`tests/verification/test_study_002_readiness.py` pins this state). The provenance validators
+artifact they lack (check 8 also names three trainer changes it needs; see 46, note of 2026-10-03) (`tests/verification/test_study_002_readiness.py` pins this state). The provenance validators
 `V3`–`V11`, the sentinel registry, the seed plan, the cost ledger and the CPU exposure planner it reads were
 added with it.
+
+## Note: the working envelope under v14 (appended 2026-10-03)
+
+The working planning envelope above ("≈ $800–1,600") is for 35 runs. For v14's 29 it is ≈ $622.92–1,245.84
+excluding evaluation and ≈ $651.92–1,332.84 including it. It is still not a balance.

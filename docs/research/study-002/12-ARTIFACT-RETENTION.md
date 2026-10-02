@@ -88,3 +88,7 @@ published corpus plus one file.
 `[16](16-GPU-READINESS-GATE.md)` refuses to spend GPU time until the retention paths exist and are
 exercised on a smoke run. A retention policy that has never been executed is a claim about a scaffold,
 which is `#66`/`#67` again.
+
+## Note under `study_002_prereg_v14` (appended 2026-10-03)
+
+**The disposition map (46 §5):** it covers every record in the flag set of 46 §5, not "the 18,114", with the dispositions of 46 §5–§6 (`NOT_A_DECLINE`, `DECLINE_JUSTIFIED`, `DECLINE_UNJUSTIFIED`, disagreement, `CORRECTION_FAILED`). It reconstructs `R1`, `R3`, `D25` and `D50`; `R2` is dropped.

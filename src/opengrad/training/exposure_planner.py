@@ -15,6 +15,11 @@ The plan's step for a target is the first optimizer step whose cumulative tally 
 `max_steps` is the 100% step and the cosine schedule ends where training ends. The trainer's logged
 `supervised_tokens_seen` at each planned step must equal the plan exactly: any difference is a defect in one of
 the two, never noise.
+
+Two conditions limit that guarantee (46, note of 2026-10-03). A run that resumes from a checkpoint restarts its
+data order at batch 0 while keeping its counters, so it cannot match its plan; until the trainer resumes at the
+micro-batch it stopped at, a resumed run is unmatched. And the trainer saves checkpoints every `save_steps`, not
+at the planned steps.
 """
 
 from __future__ import annotations
@@ -166,10 +171,54 @@ def check_logged(plan: ExposurePlan, logged: dict[int, int]) -> list[str]:
     return problems
 
 
-def _trainer_settings(config_path: Path) -> dict[str, int]:
+def _load_config(config_path: Path) -> dict[str, Any]:
     import yaml
 
-    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    loaded = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def cache_mismatches(cache_dir: Path, config: dict[str, Any]) -> list[str]:
+    """Ways the cache's recorded identity disagrees with the run config's filters and window.
+
+    A plan computed from another arm's cache (C0's for C2, say) is wrong without any error, so the CLI refuses.
+    """
+    from opengrad.training.preprocess import CACHE_MANIFEST
+
+    path = cache_dir / CACHE_MANIFEST
+    if not path.is_file():
+        return [f"{path} does not exist: the cache records no identity"]
+    identity = json.loads(path.read_text(encoding="utf-8")).get("identity") or {}
+    trainer = config.get("trainer") or {}
+    model = config.get("model") or {}
+    datasets = config.get("datasets") or {}
+    manifest_ids = list(datasets.get("manifest_ids") or [])
+    corpus = (datasets.get("hashes") or {}).get(manifest_ids[0]) if manifest_ids else None
+    expected = {
+        "corpus_manifest_sha256": corpus,
+        "model_id": model.get("model_id"),
+        "model_revision": model.get("model_revision"),
+        "tokenizer_revision": model.get("tokenizer_revision"),
+        "max_seq_length": int(trainer.get("max_seq_length", 2048)),
+        "supervision_include": sorted(
+            str(i) for i in ((config.get("supervision") or {}).get("include") or [])
+        ),
+        "exclude_sources": sorted(str(i) for i in (datasets.get("exclude_sources") or [])),
+    }
+    actual = {
+        key: sorted(identity.get(key) or [])
+        if isinstance(expected[key], list)
+        else identity.get(key)
+        for key in expected
+    }
+    return [
+        f"{key}: cache has {actual[key]!r}, config has {expected[key]!r}"
+        for key in expected
+        if actual[key] != expected[key]
+    ]
+
+
+def _trainer_settings(config: dict[str, Any]) -> dict[str, int]:
     trainer = config.get("trainer", {})
     return {
         "seed": int(config.get("reproducibility", {}).get("seed", 42)),
@@ -191,7 +240,11 @@ def main(argv: list[str] | None = None) -> int:
         "--seed", type=int, help="override reproducibility.seed; the offset still applies"
     )
     args = parser.parse_args(argv)
-    settings = _trainer_settings(args.config)
+    config = _load_config(args.config)
+    mismatches = cache_mismatches(args.cache, config)
+    if mismatches:
+        parser.error("the cache does not belong to this config: " + "; ".join(mismatches))
+    settings = _trainer_settings(config)
     if args.seed is not None:
         settings["seed"] = args.seed
     settings["seed"] += settings.pop("shuffle_seed_offset")

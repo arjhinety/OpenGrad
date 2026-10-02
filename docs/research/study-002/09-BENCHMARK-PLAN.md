@@ -111,3 +111,7 @@ A pass that was superseded, or whose results were discarded, still appears with 
 hides discarded work makes the next study's budget look cheaper than it is. That is exactly what the
 768-token MMLU-Pro pass would have done had its cost not been counted — it is retained at $3.8864 and 3,081.7
 container-seconds in `results/benchmarks/h200/capability_v1/cost_ledger.json`.
+
+## Note under `study_002_prereg_v14` (appended 2026-10-03)
+
+**Run count (46):** 29 runs, not 35, so the evaluation estimate is ≈ $29–87 at ≈ $1–3 per run.

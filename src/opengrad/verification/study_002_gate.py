@@ -43,8 +43,8 @@ The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 
 Two rules the preregistration stated but did not quantify until ``study_002_prereg_v8``
 (`docs/research/study-002/40-PREREG-V8-DRAFT.md`, adopted 2026-09-24) are held as
-:class:`PreregParameters`: the truncation "declared factor" (11:74) and the ``P-UNANS`` size that
-resolves ``refusal_correctness`` (11:127). :data:`ADOPTED_PARAMETERS` carries v8's values. A
+:class:`PreregParameters`: the truncation "declared factor" (11:76) and the ``P-UNANS`` size that
+resolves ``refusal_correctness`` (11:139). :data:`ADOPTED_PARAMETERS` carries v8's values. A
 parameter set that leaves either ``None`` makes checks 4 and 12b ``BLOCKED_INPUT_MISSING``, never PASS.
 
 Bundle keys (the gate's input contract; a key that is absent blocks its checks rather than passing
@@ -185,8 +185,8 @@ class PreregParameters:
 
     * ``truncation_max_ratio`` / ``truncation_min_gap``: within a stage, two arms' truncation rates
       are imbalanced when they differ by more than ``truncation_min_gap`` (absolute) **and** the
-      larger exceeds ``truncation_max_ratio`` times the smaller (11:74, "the declared factor").
-    * ``p_unans_min_n``: the ``P-UNANS`` size that resolves ``refusal_correctness`` (11:127).
+      larger exceeds ``truncation_max_ratio`` times the smaller (11:76, "the declared factor").
+    * ``p_unans_min_n``: the ``P-UNANS`` size that resolves ``refusal_correctness`` (11:139).
     """
 
     truncation_max_ratio: float | None = None

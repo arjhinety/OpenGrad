@@ -153,11 +153,65 @@ def _conversation(decision: str) -> ToolConversation:
 
 
 def test_relabelling_changes_no_rendered_input() -> None:
-    # §3: R2 trains on C0's tokens, because the renderer never reads the decision label.
-    answer, unsupported = _conversation("ANSWER"), _conversation("UNSUPPORTED")
-    assert _qwen_messages(answer) == _qwen_messages(unsupported)
-    assert _qwen_tools(answer) == _qwen_tools(unsupported)
+    # §3 as corrected on 2026-10-03: the label is validated, never rendered. Every valid label passes the same
+    # validation and yields the same messages, tools and canonical hash, so R2 trains on C0's tokens.
+    from opengrad.data.canonical import canonical_dict
+
+    labelled = {d: _conversation(d) for d in ("ANSWER", "CALL", "CLARIFY", "UNSUPPORTED")}
+    for conversation in labelled.values():
+        conversation.validate_training_semantics()
+    first = labelled["ANSWER"]
+    for conversation in labelled.values():
+        assert _qwen_messages(conversation) == _qwen_messages(first)
+        assert _qwen_tools(conversation) == _qwen_tools(first)
+        assert (
+            canonical_dict(conversation)["canonical_hash"]
+            == canonical_dict(first)["canonical_hash"]
+        )
     assert "metadata" not in inspect.getsource(Qwen35_2BRenderer.render_sft)
+    note = " ".join(DRAFT.read_text(encoding="utf-8").split("(appended 2026-10-03)")[1].split())
+    assert "never *renders* the decision label, but `render_sft` validates the record" in note
+
+
+def test_03s_cited_lines_hold() -> None:
+    # The adoption header once gained a line and moved every later one; these are the lines others cite.
+    lines = (
+        (ROOT / "docs/research/study-002/03-PREREGISTRATION.md")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    )
+    assert lines[59].startswith(
+        "**Not known, and therefore not assumed:** the detector's precision"
+    )
+    assert lines[90].startswith("1. **Detector precision stop.**")
+    assert lines[99].startswith("4. **Vacuous-gate stop.**")
+
+
+def test_doc_10s_confirmatory_family_is_the_four_that_exist() -> None:
+    note = (ROOT / "docs/research/study-002/10-STATISTICS-PLAN.md").read_text(encoding="utf-8")
+    note = note.split("## Note under `study_002_prereg_v14`")[1]
+    family = ["H1 (`R1` vs `C0`)", "H5 (", "H6 (", "`C2` vs `C0`"]
+    assert all(member in note for member in family)
+    assert (
+        f"0.05 / {len(family)} = {0.05 / len(family):.4f}" in note
+        and f"0.05 / 8 = {0.05 / 8:.5f}" in note
+    )
+    prereg = (ROOT / "docs/research/study-002/03-PREREGISTRATION.md").read_text(encoding="utf-8")
+    assert "#### Addendum to `study_002_prereg_v14` — 2026-10-03" in prereg
+    assert "### §31 addendum (2026-10-03)" in (ROOT / "reports/ERRATA.md").read_text(
+        encoding="utf-8"
+    )
+
+
+def test_16s_working_envelope_is_recomputed() -> None:
+    from decimal import Decimal
+
+    rate, runs = Decimal("1.79"), 29
+    lo, hi = rate * 12 * runs, rate * 24 * runs
+    note = (ROOT / "docs/research/study-002/16-GPU-READINESS-GATE.md").read_text(encoding="utf-8")
+    flat = " ".join(note.split("## Note: the working envelope under v14")[1].split())
+    assert f"≈ ${lo:,.2f}–{hi:,.2f} excluding evaluation" in flat
+    assert f"≈ ${lo + runs:,.2f}–{hi + 3 * runs:,.2f} including it" in flat
 
 
 def test_the_run_count_and_s2_size() -> None:

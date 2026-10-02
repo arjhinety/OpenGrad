@@ -197,3 +197,6 @@ partition artifact with its own fingerprint and its own gold-count table.
 > - **Collisions:** none with the development side, P-DET-COVERAGE, or the When2Call held-out text.
 > - **Not scored.** The evaluator must learn to load it first.
 
+## Note under `study_002_prereg_v14` (appended 2026-10-03)
+
+**`P-DET` (46 §8):** the output instrument is `prose-decision-classifier-v2`, measured on `P-DET-OUT` (replies of Study 001's checkpoints, none to a `P-CONF`, `P-UNANS` or sealed item), not `HEURISTIC_REGEX_v2`, which is not built.

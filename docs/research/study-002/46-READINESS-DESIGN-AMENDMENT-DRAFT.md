@@ -395,3 +395,34 @@ In the adoption commit:
 - the status surfaces, including the public site, record it.
 
 The engineering of [16](16-GPU-READINESS-GATE.md) follows, in the order the owner chooses.
+
+## Corrections and limits found after adoption (appended 2026-10-03)
+
+An independent audit of the v14 commits found the following. The text above stays as adopted.
+- **§3, "never reads".** The renderer never *renders* the decision label, but `render_sft` validates the record
+  (`validate_training_semantics` → `ToolConversation.validate`, `src/opengrad/data/canonical.py`). That
+  validation reads `metadata.behavior.decision`, and an invalid value makes the record unrenderable. For the four
+  valid labels nothing a record trains on changes: tokens, loss mask, order and `canonical_hash` (computed over
+  tools and messages) are identical. The conclusion stands, and relabelling between valid labels must keep labels
+  valid.
+- **§5, classifier v2's precision.** The 0.978 (decline precision on single-exchange items) was measured on a
+  stratum with no answer-gold items, so the error that matters most for the flag set, a real answer called a
+  decline, was not measurable there. The triage's stop rule 1 measures it; nothing is gated on 0.978.
+- **§8, the evaluator's rule.** Besides a question mark, the phrases "could you clarify", "please provide" and
+  "which one" also make a reply a clarification.
+- **§11.** The self-test's healthy bundle is `healthy_under_adopted_prereg` in
+  `src/opengrad/verification/study_002_gate.py`, not 16:55-58, which states the principle only.
+- **§4, how much of the intervention a run sees.** At `T` a run sees about a sixth of its corpus (0.169 passes
+  for M0), so a single run trains on roughly a sixth of the corrected records. Across three seeds, about two
+  in five are seen at least once. A weak `R1` effect could therefore mean too few corrections were seen.
+  - Every `R1`, `D25` and `D50` result is reported with the number of corrected records that seed actually
+    trained on, read from its batch-composition log.
+  - The budget is not raised to compensate: `T` is what makes `C0` a reproduction of Study 001. Exposure as a
+    factor would be its own arm.
+- **§4, two open conditions on matching.**
+  - A run that resumes from a checkpoint restarts its data order, so its tally cannot match its plan. Until the
+    trainer resumes at the micro-batch it stopped at, a resumed run is unmatched (descriptive).
+  - The trainer saves checkpoints every `save_steps`, not at planned steps. Saving at planned steps is
+    engineering still to do.
+- **[10](10-STATISTICS-PLAN.md)'s confirmatory family** is restated by the owner's decision of 2026-10-03 (03,
+  addendum to v14).

@@ -71,19 +71,79 @@ def test_a_preflight_record_must_be_ready_compatible_and_name_the_determinism_mo
     assert readiness.check_1_preflight(tmp_path).status == readiness.BLOCKED
 
 
-def test_the_detector_needs_both_precisions_at_the_floor(tmp_path: Path) -> None:
+def test_the_detector_needs_300_agreed_items_3_checkpoints_and_both_precisions(
+    tmp_path: Path,
+) -> None:
     path = tmp_path / readiness.PDET_OUT_RESULT
     path.parent.mkdir(parents=True)
-    path.write_text(
-        json.dumps({"precision": {"ANSWER": 0.93, "UNSUPPORTED": 0.90}}), encoding="utf-8"
+    good = {
+        "agreed_items": 300,
+        "sources": ["BASE", "M0", "M1_DPO_CURRENT"],
+        "stratified": True,
+        "precision": {"ANSWER": 0.93, "UNSUPPORTED": 0.90},
+    }
+    for result, expected in (
+        (good, PASS),
+        (good | {"precision": {"ANSWER": 0.93, "UNSUPPORTED": 0.899}}, readiness.BLOCKED),
+        (good | {"precision": {"ANSWER": 0.95}}, readiness.BLOCKED),
+        (good | {"agreed_items": 10}, readiness.BLOCKED),
+        (good | {"sources": ["M0", "M0"]}, readiness.BLOCKED),
+        (good | {"stratified": False}, readiness.BLOCKED),
+        (good | {"precision": {"ANSWER": float("nan"), "UNSUPPORTED": True}}, readiness.BLOCKED),
+    ):
+        path.write_text(json.dumps(result), encoding="utf-8")
+        assert readiness.check_6_detector(tmp_path).status == expected, result
+
+
+def test_check_9_needs_a_config_for_every_arm_and_seed(tmp_path: Path) -> None:
+    import shutil
+
+    plan = tmp_path / "configs/study_002/seed-plan.yaml"
+    plan.parent.mkdir(parents=True)
+    shutil.copy(ROOT / "configs/study_002/seed-plan.yaml", plan)
+    configs = tmp_path / readiness.ARM_CONFIGS
+    configs.mkdir(parents=True)
+    (configs / "c0-s0.yaml").write_text(
+        "experiment_id: study_002_c0_s0\nstudy_002: {arm: C0}\nreproducibility: {seed: 0}\n",
+        encoding="utf-8",
     )
-    assert readiness.check_6_detector(tmp_path).status == PASS
-    path.write_text(
-        json.dumps({"precision": {"ANSWER": 0.93, "UNSUPPORTED": 0.899}}), encoding="utf-8"
-    )
-    assert readiness.check_6_detector(tmp_path).status == readiness.BLOCKED
-    path.write_text(json.dumps({"precision": {"ANSWER": 0.95}}), encoding="utf-8")
-    assert readiness.check_6_detector(tmp_path).status == readiness.BLOCKED
+    check = readiness.check_9_seeds(tmp_path)
+    assert check.status == readiness.BLOCKED and check.detail["arm_seed_pairs_missing"] == 26
+    for arm in readiness.V14_ARMS:
+        for seed in (0, 1, 2):
+            (configs / f"{arm}-s{seed}.yaml").write_text(
+                f"experiment_id: study_002_{arm}_s{seed}\nstudy_002: {{arm: {arm}}}\nreproducibility: {{seed: {seed}}}\n",
+                encoding="utf-8",
+            )
+    assert readiness.check_9_seeds(tmp_path).status == PASS
+
+
+def test_check_8_stays_blocked_until_the_trainer_gaps_close(tmp_path: Path) -> None:
+    plans = tmp_path / readiness.EXPOSURE_PLANS
+    plans.mkdir(parents=True)
+    (plans / "c0-s0.json").write_text("{}", encoding="utf-8")
+    check = readiness.check_8_exposure(tmp_path)
+    assert check.status == readiness.BLOCKED
+    assert check.gaps == list(readiness.EXPOSURE_TRAINER_GAPS)
+
+
+def test_an_existing_but_unvalidated_artifact_is_not_run(tmp_path: Path) -> None:
+    for path, check in (
+        (readiness.FLAG_SET_DISPOSITIONS, readiness.check_7_corpus),
+        (readiness.CPU_SMOKE_RECORD, readiness.check_12_smoke),
+    ):
+        (tmp_path / path).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / path).write_text("{}", encoding="utf-8")
+        assert check(tmp_path).status == readiness.NOT_RUN
+
+
+def test_check_2_reads_the_policy_and_parameters_from_code() -> None:
+    check = readiness.check_2_gate_version(ROOT)
+    assert check.detail["policy"] == "tool_use_promotion_v6"
+    prereg = (ROOT / "docs/research/study-002/03-PREREGISTRATION.md").read_text(encoding="utf-8")
+    v8 = " ".join(prereg.split("### `study_002_prereg_v8`")[1].split("### ")[0].split())
+    assert "more than 2.0× the smaller" in v8 and "2 percentage points" in v8 and "n ≥ 385" in v8
+    assert readiness.V8_PARAMETERS == (2.0, 0.02, 385)
 
 
 def test_an_unreadable_artifact_is_a_gap_not_a_crash(tmp_path: Path) -> None:
@@ -112,3 +172,51 @@ def test_the_surfaces_quote_the_records_passing_checks() -> None:
     readme = (ROOT / "docs/research/study-002/README.md").read_text(encoding="utf-8")
     assert f"is `BLOCKED`: checks {listed} pass" in readme
     assert len(passing) == 6
+
+
+def test_check_9_flags_a_duplicate_arm_seed_config(tmp_path: Path) -> None:
+    import shutil
+
+    plan = tmp_path / "configs/study_002/seed-plan.yaml"
+    plan.parent.mkdir(parents=True)
+    shutil.copy(ROOT / "configs/study_002/seed-plan.yaml", plan)
+    configs = tmp_path / readiness.ARM_CONFIGS
+    configs.mkdir(parents=True)
+    for arm in readiness.V14_ARMS:
+        for seed in (0, 1, 2):
+            (configs / f"{arm}-s{seed}.yaml").write_text(
+                f"experiment_id: study_002_{arm}_s{seed}\nstudy_002: {{arm: {arm}}}\nreproducibility: {{seed: {seed}}}\n",
+                encoding="utf-8",
+            )
+    (configs / "zz-copy.yaml").write_text(
+        "experiment_id: study_002_c0_s0\nstudy_002: {arm: C0}\nreproducibility: {seed: 0}\n",
+        encoding="utf-8",
+    )
+    check = readiness.check_9_seeds(tmp_path)
+    assert check.status == readiness.BLOCKED and any("duplicates" in gap for gap in check.gaps)
+
+
+def test_check_2_finds_study_002_runs_by_the_name_check_9_enforces(tmp_path: Path) -> None:
+    (tmp_path / "runs/study_002_c0_s0").mkdir(parents=True)
+    (tmp_path / "runs/m0_sft_canonical_v2_final").mkdir(parents=True)
+    assert readiness._study_002_runs(tmp_path) == ["study_002_c0_s0"]
+
+
+def test_check_9_requires_the_study_002_experiment_id(tmp_path: Path) -> None:
+    import shutil
+
+    plan = tmp_path / "configs/study_002/seed-plan.yaml"
+    plan.parent.mkdir(parents=True)
+    shutil.copy(ROOT / "configs/study_002/seed-plan.yaml", plan)
+    configs = tmp_path / readiness.ARM_CONFIGS
+    configs.mkdir(parents=True)
+    for arm in readiness.V14_ARMS:
+        for seed in (0, 1, 2):
+            (configs / f"{arm}-s{seed}.yaml").write_text(
+                f"experiment_id: {arm}_s{seed}\nstudy_002: {{arm: {arm}}}\nreproducibility: {{seed: {seed}}}\n",
+                encoding="utf-8",
+            )
+    check = readiness.check_9_seeds(tmp_path)
+    assert check.status == readiness.BLOCKED and any(
+        "experiment_id must start" in g for g in check.gaps
+    )

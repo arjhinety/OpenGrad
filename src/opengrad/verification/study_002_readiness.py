@@ -16,7 +16,9 @@ a correction is a new record (16:7-10).
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
+import math
 import re
 import subprocess
 from collections.abc import Callable
@@ -27,6 +29,7 @@ from typing import Any
 
 import yaml
 
+from opengrad.promotion.tool_use_policy import V6_POLICY_VERSION
 from opengrad.verification import study_002_gate as gate
 from opengrad.verification.accounting import FAIL, PASS
 from opengrad.verification.population_validators import (
@@ -34,6 +37,7 @@ from opengrad.verification.population_validators import (
     v2_metric_denominator,
     v12_resolvable_margin,
 )
+from opengrad.verification.provenance_validators import load_sentinel_registry
 from opengrad.verification.provenance_validators import self_test as provenance_self_test
 from opengrad.verification.resolvability import resolvable_margin
 
@@ -64,6 +68,14 @@ EXPOSURE_PLANS = "reports/study-002/exposure"
 ARM_CONFIGS = "configs/experiments/study_002"
 CPU_SMOKE_RECORD = "reports/study-002/smoke/cpu-smoke.json"
 STUDY_002_SCORES = "reports/study-002/evaluation"
+#: Study 002 run directories under runs/ (Study 001's runs keep their own names).
+STUDY_002_RUN_PREFIX = "study_002_"
+#: v8 items A and B, as recorded in 03's `study_002_prereg_v8` entry.
+V8_PARAMETERS = (2.0, 0.02, 385)
+#: 16:21 as amended by 46 §8.
+PDET_OUT_MIN_ITEMS = 300
+PDET_OUT_MIN_SOURCES = 3
+OUTPUT_PRECISION_FLOOR = 0.90
 
 
 @dataclass
@@ -107,11 +119,28 @@ def check_1_preflight(root: Path) -> Check:
 
 def _current_prereg(root: Path) -> str | None:
     try:
-        header = (root / "docs/research/study-002/03-PREREGISTRATION.md").read_text(encoding="utf-8")
+        header = (root / "docs/research/study-002/03-PREREGISTRATION.md").read_text(
+            encoding="utf-8"
+        )
     except OSError:
         return None
     match = re.search(r"Current version: `(study_002_prereg_v\d+)`", header)
     return match.group(1) if match else None
+
+
+def _study_002_runs(root: Path) -> list[str]:
+    """Run directories that belong to Study 002.
+
+    A run's directory is `runs/<experiment_id>`, and check 9 requires every Study 002 arm config's
+    `experiment_id` to start with `study_002_`, so the name is what identifies a Study 002 run. (The trainer's
+    `resolved_config.yaml` carries a fixed set of keys, not the config's `study_002` block, so it cannot.)
+    """
+    runs = root / "runs"
+    if not runs.is_dir():
+        return []
+    return sorted(
+        p.name for p in runs.iterdir() if p.is_dir() and p.name.startswith(STUDY_002_RUN_PREFIX)
+    )
 
 
 def check_2_gate_version(root: Path) -> Check:
@@ -119,16 +148,21 @@ def check_2_gate_version(root: Path) -> Check:
     if gate.GATE_VERSION != "study_002_gate_v1" or gate.STUDY_002_GATE_CONTRACT != 3:
         gaps.append(f"gate is {gate.GATE_VERSION} contract {gate.STUDY_002_GATE_CONTRACT}")
     params = gate.ADOPTED_PARAMETERS
-    if None in (params.truncation_max_ratio, params.truncation_min_gap, params.p_unans_min_n):
-        gaps.append("ADOPTED_PARAMETERS holds an undeclared value")
+    declared = (params.truncation_max_ratio, params.truncation_min_gap, params.p_unans_min_n)
+    if declared != V8_PARAMETERS:
+        gaps.append(f"ADOPTED_PARAMETERS {declared} are not v8's {V8_PARAMETERS}")
+    gate_source = inspect.getsource(gate)
+    policy = V6_POLICY_VERSION if "PromotionPolicyV6().evaluate" in gate_source else None
+    if policy is None:
+        gaps.append("the gate does not evaluate with tool_use_promotion_v6")
     prereg = _current_prereg(root)
     if prereg is None:
         gaps.append("03 names no current preregistration version")
     scores = root / STUDY_002_SCORES
-    scored = scores.is_dir() and any(scores.iterdir())
+    scored = (scores.is_dir() and any(scores.iterdir())) or bool(_study_002_runs(root))
     if scored:
         gaps.append(
-            f"{STUDY_002_SCORES} holds candidate scores; amendment dates must be checked against them"
+            "Study 002 scores or runs exist; amendment dates must be checked against them before this passes"
         )
     return Check(
         2,
@@ -142,7 +176,7 @@ def check_2_gate_version(root: Path) -> Check:
         {
             "gate": gate.GATE_VERSION,
             "contract": gate.STUDY_002_GATE_CONTRACT,
-            "policy": "tool_use_promotion_v6",
+            "policy": policy,
             "preregistration": prereg,
             "candidate_scores_exist": scored,
         },
@@ -241,17 +275,41 @@ def check_6_detector(root: Path) -> Check:
             "classifier v2 is not yet measured on model replies (46 §8); P-DET-OUT is not drawn",
         )
     result = _json(root, PDET_OUT_RESULT)
-    gaps = [
-        f"{cls} precision {p} is below 0.90"
-        for cls, p in (result.get("precision") or {}).items()
-        if not isinstance(p, (int, float)) or p < 0.90
-    ]
-    if set(result.get("precision") or {}) != {"ANSWER", "UNSUPPORTED"}:
+    gaps = []
+    if (
+        not isinstance(result.get("agreed_items"), int)
+        or result["agreed_items"] < PDET_OUT_MIN_ITEMS
+    ):
+        gaps.append(f"fewer than {PDET_OUT_MIN_ITEMS} items both labellers agree on")
+    if len(set(result.get("sources") or [])) < PDET_OUT_MIN_SOURCES:
+        gaps.append(f"replies from fewer than {PDET_OUT_MIN_SOURCES} checkpoints")
+    if result.get("stratified") is not True:
+        gaps.append(
+            "the sample is not recorded as stratified by checkpoint, prompt mode and decision"
+        )
+    precision = result.get("precision") or {}
+    if set(precision) != {"ANSWER", "UNSUPPORTED"}:
         gaps.append("precision must be reported for the answer and the decline class")
+    gaps += [
+        f"{cls} precision {p!r} is below {OUTPUT_PRECISION_FLOOR}"
+        for cls, p in precision.items()
+        if isinstance(p, bool)
+        or not isinstance(p, (int, float))
+        or not math.isfinite(p)
+        or p < OUTPUT_PRECISION_FLOOR
+    ]
     return Check(6, "detector measured", BLOCKED if gaps else PASS, [PDET_OUT_RESULT], gaps)
 
 
+def _not_validated(number: int, name: str, artifact: str) -> Check:
+    return Check(
+        number, name, NOT_RUN, [artifact], [f"{artifact} exists; validating it is not implemented"]
+    )
+
+
 def check_7_corpus(root: Path) -> Check:
+    if (root / FLAG_SET_DISPOSITIONS).is_file():
+        return _not_validated(7, "corpus fingerprint recorded", FLAG_SET_DISPOSITIONS)
     return _missing(
         7,
         "corpus fingerprint recorded",
@@ -260,22 +318,29 @@ def check_7_corpus(root: Path) -> Check:
     )
 
 
+#: Trainer gaps that break 46 §4's exposure guarantee (46, note of 2026-10-03). Each is cleared only by a
+#: trainer change with its own test; until then check 8 cannot pass.
+EXPOSURE_TRAINER_GAPS = (
+    (
+        "the trainer resumes a checkpoint at batch 0 of epoch 0 while keeping its counters, so a resumed "
+        "run cannot match its plan; it must resume at the micro-batch it stopped at"
+    ),
+    "the trainer saves checkpoints every save_steps, not at the planned 25/50/75/100% steps",
+    "the trainer writes no batch-composition log (record ids, sources and dispositions per step)",
+)
+
+
 def check_8_exposure(root: Path) -> Check:
+    name = "exposures matched and measurable"
+    gaps = list(EXPOSURE_TRAINER_GAPS)
     plans = root / EXPOSURE_PLANS
     if not plans.is_dir() or not any(plans.glob("*.json")):
-        return _missing(
-            8,
-            "exposures matched and measurable",
-            EXPOSURE_PLANS,
-            "the planner exists (training/exposure_planner.py), but no arm corpus is rendered to plan "
-            "from, and no run has a batch-composition log",
+        gaps.insert(
+            0,
+            f"{EXPOSURE_PLANS} does not exist: the planner exists (training/exposure_planner.py), but no "
+            "arm corpus is rendered to plan from",
         )
-    return Check(
-        8,
-        "exposures matched and measurable",
-        NOT_RUN,
-        gaps=["plans exist; matching them against batch-composition logs is not implemented"],
-    )
+    return Check(8, name, BLOCKED, [EXPOSURE_PLANS], gaps)
 
 
 def check_9_seeds(root: Path) -> Check:
@@ -291,16 +356,30 @@ def check_9_seeds(root: Path) -> Check:
     if not plan.get("random_sources"):
         gaps.append("no list of random sources (05:35-37)")
     configs = sorted((root / ARM_CONFIGS).glob("*.yaml")) if (root / ARM_CONFIGS).is_dir() else []
-    if not configs:
-        gaps.append(
-            f"no arm config under {ARM_CONFIGS}: seeds are planned but no arm carries them yet"
-        )
+    found: set[tuple[Any, Any]] = set()
     for config in configs:
-        seed = (
-            yaml.safe_load(config.read_text(encoding="utf-8")).get("reproducibility") or {}
-        ).get("seed")
-        if seed not in plan.get("seeds", []):
-            gaps.append(f"{config.relative_to(root).as_posix()} has seed {seed!r}")
+        loaded = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
+        arm = (loaded.get("study_002") or {}).get("arm")
+        seed = (loaded.get("reproducibility") or {}).get("seed")
+        if not str(loaded.get("experiment_id", "")).startswith(STUDY_002_RUN_PREFIX):
+            gaps.append(
+                f"{config.relative_to(root).as_posix()}: experiment_id must start with {STUDY_002_RUN_PREFIX!r}, "
+                "so its run directory identifies it as Study 002 (check 2)"
+            )
+        if arm not in V14_ARMS or seed not in plan.get("seeds", []):
+            gaps.append(f"{config.relative_to(root).as_posix()} declares arm {arm!r} seed {seed!r}")
+        if (arm, seed) in found:
+            gaps.append(
+                f"{config.relative_to(root).as_posix()} duplicates arm {arm!r} seed {seed!r}"
+            )
+        found.add((arm, seed))
+    expected = {(arm, seed) for arm in V14_ARMS for seed in plan.get("seeds", [])}
+    missing = sorted(expected - found, key=str)
+    if missing:
+        gaps.append(
+            f"{len(missing)} of {len(expected)} arm-seed configs are missing under {ARM_CONFIGS} "
+            "(each declares study_002.arm and reproducibility.seed)"
+        )
     return Check(
         9,
         "seeds fixed",
@@ -309,6 +388,7 @@ def check_9_seeds(root: Path) -> Check:
         gaps,
         {
             "arm_configs": len(configs),
+            "arm_seed_pairs_missing": len(missing),
             "s1_model": next(
                 (a.get("model") for a in plan.get("arms", []) if a["id"] == "S1"), None
             ),
@@ -319,7 +399,7 @@ def check_9_seeds(root: Path) -> Check:
 def check_10_sentinels(root: Path) -> Check:
     path = "registry/study_002_sentinels.yaml"
     registry = yaml.safe_load((root / path).read_text(encoding="utf-8"))
-    declared = {s["id"]: tuple(s["modes"]) for s in registry["sentinels"]}
+    declared = load_sentinel_registry(root)
     gaps = []
     if declared != gate.REQUIRED_SENTINELS:
         gaps.append("the registry and the gate's REQUIRED_SENTINELS disagree")
@@ -394,6 +474,8 @@ def check_11_validators(root: Path) -> Check:
 
 
 def check_12_smoke(root: Path) -> Check:
+    if (root / CPU_SMOKE_RECORD).is_file():
+        return _not_validated(12, "retention paths exercised", CPU_SMOKE_RECORD)
     return _missing(
         12,
         "retention paths exercised",
@@ -476,16 +558,22 @@ def _commit(root: Path) -> str | None:
         return None
 
 
+def _dirty(root: Path) -> bool:
+    try:
+        status = subprocess.run(
+            ["git", "status", "--porcelain"], cwd=root, capture_output=True, text=True, check=True
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return True
+    return bool(status.strip())
+
+
 def readiness_record(root: Path) -> dict[str, Any]:
     checks = []
     for run in CHECKS:
         try:
             checks.append(run(root))
-        except (
-            OSError,
-            KeyError,
-            ValueError,
-        ) as exc:  # an unreadable artifact is a gap, never a crash or a pass
+        except Exception as exc:  # noqa: BLE001 -- any failure is a named gap, never a crash or a pass
             number = int(run.__name__.split("_")[1])
             checks.append(
                 Check(number, run.__name__, BLOCKED, gaps=[f"{type(exc).__name__}: {exc}"])
@@ -512,6 +600,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.write is not None:
         if args.write.exists():
             parser.error(f"{args.write} exists; a readiness record is never overwritten (16:7-10)")
+        if _dirty(args.root):
+            parser.error(
+                "the working tree has uncommitted changes; a record names a commit it must match"
+            )
         args.write.parent.mkdir(parents=True, exist_ok=True)
         args.write.write_text(text, encoding="utf-8")
     print(text, end="")

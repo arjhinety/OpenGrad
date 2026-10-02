@@ -71,3 +71,38 @@ def test_check_logged_reports_every_difference() -> None:
 def test_impossible_plans_are_refused(kwargs) -> None:
     with pytest.raises(ep.ExposurePlanError):
         _plan(**kwargs)
+
+
+def test_the_cli_refuses_a_cache_from_another_arm(tmp_path) -> None:
+    import json
+
+    c0 = {
+        "model": {"model_id": "Qwen/Qwen3.5-2B", "model_revision": "r", "tokenizer_revision": "r"},
+        "datasets": {
+            "manifest_ids": ["canonical_v2_final"],
+            "hashes": {"canonical_v2_final": "c0hash"},
+        },
+        "trainer": {"max_seq_length": 2048},
+    }
+    identity = {
+        "corpus_manifest_sha256": "c0hash",
+        "model_id": "Qwen/Qwen3.5-2B",
+        "model_revision": "r",
+        "tokenizer_revision": "r",
+        "max_seq_length": 2048,
+        "supervision_include": [],
+        "exclude_sources": [],
+    }
+    (tmp_path / "sft_cache.json").write_text(json.dumps({"identity": identity}), encoding="utf-8")
+    assert ep.cache_mismatches(tmp_path, c0) == []
+    r1 = c0 | {"datasets": {"manifest_ids": ["r1"], "hashes": {"r1": "r1hash"}}}
+    assert ep.cache_mismatches(tmp_path, r1) == [
+        "corpus_manifest_sha256: cache has 'c0hash', config has 'r1hash'"
+    ]
+    c2 = c0 | {"datasets": c0["datasets"] | {"exclude_sources": ["when2call"]}}
+    assert ep.cache_mismatches(tmp_path, c2) == [
+        "exclude_sources: cache has [], config has ['when2call']"
+    ]
+    s1 = c0 | {"model": c0["model"] | {"model_id": "another-size"}}
+    assert ep.cache_mismatches(tmp_path, s1)
+    assert ep.cache_mismatches(tmp_path / "nowhere", c0)

@@ -1327,3 +1327,24 @@ artifact, so it is corrected in place and the correction recorded here (G15).
   - **New measurements stand between the study and training:** the triage of the flag set, and `P-DET-OUT` for
     the output instrument. Each has floors set before it exists.
   - **Written after population results, before any model result.** No threshold changes.
+
+### §31 addendum (2026-10-03): the confirmatory family, and corrections to 46
+
+An independent audit of the v14 commits found the following:
+- **Doc 10's confirmatory family still listed H4 and `C1` vs `C0`.** On 2026-10-03 the owner chose to correct over
+  the four comparisons that remain: H1, H5, H6 and `C2` vs `C0`. The strictest Holm threshold becomes 0.0125, not
+  0.00625. Recorded in 03 and in a dated note on 10.
+- **03's header had gained a line in the adoption commit.** That shifted every later line by one and broke 46's
+  citations of `03:60`, `03:91-94` and `03:100-102`. The header was rejoined, so those lines hold again.
+- **46's text is corrected by a dated note there**, not edited in place:
+  - the renderer *validates* the decision label (an invalid one makes a record unrenderable) but never renders
+    it;
+  - classifier v2's 0.978 decline precision was measured on items with no answer gold;
+  - the evaluator rule's clarify triggers;
+  - one wrong citation;
+  - the exposure limits below.
+- **The exposure guarantee of 46 §4 has two open conditions:**
+  - a resumed run restarts its data order, so it cannot match its plan;
+  - the trainer saves checkpoints only every `save_steps`, not at planned steps.
+
+  Until both are fixed in the trainer, a resumed run is unmatched, and planned-step checkpoints do not exist.

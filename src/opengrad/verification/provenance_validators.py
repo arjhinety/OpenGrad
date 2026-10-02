@@ -9,8 +9,8 @@ exercised by :func:`self_test` and by the readiness record's check 11).
 * ``V3 metric_attachment`` -- every number carries the attachment of 15:41 (`FAIL_UNATTACHED_METRIC`).
 * ``V4 vocabulary_lock`` -- every mode name is canonical, or an alias the artifact maps through 06's alias
   table (`FAIL_VOCABULARY`).
-* ``V5 one_shot`` -- `P-CONF` and `P-UNANS` are scored once per arm, seed and protocol; a re-score must name
-  the run it replaces (`FAIL_ONE_SHOT`).
+* ``V5 one_shot`` -- `P-CONF` and `P-UNANS` (any version) are scored once per arm, seed and protocol; a re-score
+  must name the earlier run of the same key that it replaces (`FAIL_ONE_SHOT`).
 * ``V6 row_key`` -- every row carries arm, partition, protocol, device class and provider (`FAIL_UNKEYED_ROW`).
 * ``V7 sentinel_completeness`` -- every arm ran every registered sentinel in every required mode
   (`FAIL_MISSING_SENTINEL`).
@@ -87,6 +87,32 @@ ROW_KEY_FIELDS = ("arm", "partition", "protocol", "device_class", "provider")
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
+#: Ways a table may name Study 001 or Study 002. Anything else is an unknown study, which V11 fails.
+_STUDY_NAMES = {
+    "001": {"1", "001", "study 001", "study-001", "study_001"},
+    "002": {"2", "002", "study 002", "study-002", "study_002"},
+}
+
+
+def load_sentinel_registry(root: Path) -> dict[str, tuple[str, ...]]:
+    """Sentinel id -> required prompt modes, from `registry/study_002_sentinels.yaml` (V7's input)."""
+    import yaml
+
+    registry = yaml.safe_load(
+        (root / "registry/study_002_sentinels.yaml").read_text(encoding="utf-8")
+    )
+    return {
+        str(s["id"]): tuple(str(m) for m in s.get("modes") or ()) for s in registry["sentinels"]
+    }
+
+
+def _one_shot_partition(partition: str) -> str | None:
+    """The one-shot population a partition id belongs to (`P-CONF-v1` -> `P-CONF`), or None."""
+    for name in ONE_SHOT_PARTITIONS:
+        if partition == name or partition.startswith(name + "-"):
+            return name
+    return None
+
 
 def _blocked(name: str, reason: str) -> ValidationResult:
     return result_from(
@@ -157,6 +183,12 @@ def v4_vocabulary_lock(
     for index, record in enumerate(records):
         record_id = str(record.get("id") or f"record-{index}")
         ids.append(record_id)
+        names = _mode_names(record)
+        if not names:
+            errors.append(
+                f"{record_id}: {CODE_VOCABULARY}: names no modes under a key the lock reads"
+            )
+            continue
         declared = record.get("mode_aliases") or {}
         for alias, target in dict(declared).items():
             if MODE_ALIASES.get(str(alias)) != target:
@@ -164,7 +196,7 @@ def v4_vocabulary_lock(
                     f"{record_id}: {CODE_VOCABULARY}: declares {alias!r} -> {target!r}, "
                     "which is not 06's alias table"
                 )
-        for mode in sorted(set(_mode_names(record))):
+        for mode in sorted(set(names)):
             if mode in CANONICAL_MODES:
                 continue
             if mode in MODE_ALIASES and mode in declared:
@@ -186,23 +218,53 @@ def v5_one_shot(
     A second scoring pass is accepted only as a replacement: it names, in `replacement_of`, the run id of
     the pass it replaces (06:163-165), and that run must exist.
     """
-    scored = [a for a in artifacts if str(a.get("partition")) in ONE_SHOT_PARTITIONS]
+    scored = [a for a in artifacts if _one_shot_partition(str(a.get("partition"))) is not None]
     if not scored:
         return _blocked(name, "no prediction artifact on P-CONF or P-UNANS")
-    run_ids = {str(a.get("run_id")) for a in scored}
+
+    def key_of(artifact: Mapping[str, Any]) -> tuple[str, ...]:
+        # The full partition id: P-UNANS-v2 and P-UNANS-v2-constructed are two strata scored separately.
+        return tuple(str(artifact.get(f)) for f in ("arm", "seed", "partition", "protocol"))
+
+    by_run = {str(a.get("run_id")): a for a in scored}
+    replaced: Counter[str] = Counter(
+        str(a["replacement_of"]) for a in scored if a.get("replacement_of") is not None
+    )
+
+    def ends_at_an_original(run_id: str) -> bool:
+        """A chain of replacements must end at a run that replaces nothing; a ring never does."""
+        seen: set[str] = set()
+        current: str | None = run_id
+        while current is not None:
+            if current in seen or current not in by_run:
+                return False
+            seen.add(current)
+            nxt = by_run[current].get("replacement_of")
+            current = None if nxt is None else str(nxt)
+        return True
+
     keys: Counter[tuple[str, ...]] = Counter()
     ids, errors = [], []
     for index, artifact in enumerate(scored):
         artifact_id = str(artifact.get("run_id") or f"artifact-{index}")
         ids.append(artifact_id)
+        key = key_of(artifact)
         replaces = artifact.get("replacement_of")
         if replaces is not None:
-            if str(replaces) not in run_ids:
+            target = by_run.get(str(replaces))
+            if (
+                target is None
+                or str(replaces) == artifact_id
+                or key_of(target) != key
+                or str(target.get("replacement_of")) == artifact_id  # two runs replacing each other
+                or replaced[str(replaces)] > 1  # one run replaced twice
+                or not ends_at_an_original(artifact_id)  # a ring of replacements with no original
+            ):
                 errors.append(
-                    f"{artifact_id}: {CODE_ONE_SHOT}: replaces {replaces!r}, which is not a recorded run"
+                    f"{artifact_id}: {CODE_ONE_SHOT}: replaces {replaces!r}, which is not a recorded run of the "
+                    "same arm, seed, partition and protocol that only this run replaces"
                 )
             continue
-        key = tuple(str(artifact.get(f)) for f in ("arm", "seed", "partition", "protocol"))
         keys[key] += 1
         if keys[key] > 1:
             errors.append(
@@ -230,21 +292,26 @@ def v6_row_key(rows: Sequence[Mapping[str, Any]], *, name: str = "row_key") -> V
 def v7_sentinel_completeness(
     required: Mapping[str, Sequence[str]],
     ran: Mapping[str, Mapping[str, Sequence[str]]],
+    arms: Sequence[str],
     *,
     name: str = "sentinel_completeness",
 ) -> ValidationResult:
-    """Every arm ran every registered sentinel, in every mode the registry requires.
+    """Every required arm ran every registered sentinel, in every mode the registry requires.
 
-    `required` maps sentinel id to its modes (an empty tuple: a census sentinel with no prompt mode).
-    `ran` maps arm to {sentinel id: modes it has an artifact for}.
+    `required` maps sentinel id to its modes (an empty tuple: a census sentinel with no prompt mode); read it
+    with :func:`load_sentinel_registry`. `ran` maps arm to {sentinel id: modes it has an artifact for}. `arms`
+    is every arm that must have run them: an arm absent from `ran` fails rather than going unchecked.
     """
     if not required:
         return _blocked(name, "no sentinel registry")
-    if not ran:
-        return _blocked(name, "no arm has sentinel artifacts")
+    if not arms:
+        return _blocked(name, "no arm is required")
     ids, errors = [], []
-    for arm in sorted(ran):
+    for arm in sorted(set(arms) | set(ran)):
         ids.append(arm)
+        if arm not in ran:
+            errors.append(f"{arm}: {CODE_MISSING_SENTINEL}: no sentinel artifact at all")
+            continue
         recorded = ran[arm]
         for sentinel, modes in required.items():
             if sentinel not in recorded:
@@ -346,9 +413,14 @@ def v9_fingerprint_from_artifact(
 
 
 def v10_claim_evidence(
-    claims: Sequence[Mapping[str, Any]], root: Path, *, name: str = "claim_evidence"
+    claims: Sequence[Mapping[str, Any]],
+    root: Path,
+    number_rows: Sequence[str],
+    *,
+    name: str = "claim_evidence",
 ) -> ValidationResult:
-    """Every claim names a number row and an evidence file that exists and hashes to the recorded sha256."""
+    """Every claim names a number row that exists and an evidence file that hashes to the recorded sha256."""
+    known_rows = {str(row) for row in number_rows}
     claims = list(claims)
     if not claims:
         return _blocked(name, "no claims")
@@ -364,6 +436,11 @@ def v10_claim_evidence(
         if missing:
             errors.append(f"{claim_id}: {CODE_UNSUPPORTED_CLAIM}: missing {', '.join(missing)}")
             continue
+        if str(claim["number_row"]) not in known_rows:
+            errors.append(
+                f"{claim_id}: {CODE_UNSUPPORTED_CLAIM}: number row {claim['number_row']!r} does not exist"
+            )
+            continue
         try:
             actual = read_fingerprint(root, str(claim["evidence_path"]), None)
         except (OSError, ValueError):
@@ -377,6 +454,14 @@ def v10_claim_evidence(
                 "recorded sha256"
             )
     return result_from(name, REQUIRED_NONEMPTY, ids, errors)
+
+
+def _study(value: Any) -> str | None:
+    text = str(value).strip().casefold() if value is not None else ""
+    for study, names in _STUDY_NAMES.items():
+        if text in names:
+            return study
+    return None
 
 
 def v11_cross_study_comparability(
@@ -395,7 +480,14 @@ def v11_cross_study_comparability(
         table_id = str(table.get("id") or f"table-{index}")
         ids.append(table_id)
         rows = list(table.get("rows") or [])
-        studies = {str(row.get("study")) for row in rows}
+        studies = set()
+        for row_index, row in enumerate(rows):
+            study = _study(row.get("study"))
+            if study is None:
+                errors.append(
+                    f"{table_id}: {CODE_INCOMPARABLE}: row {row_index} names no known study ({row.get('study')!r})"
+                )
+            studies.add(study)
         if not {"001", "002"} <= studies:
             continue
         for row_index, row in enumerate(rows):
@@ -464,7 +556,9 @@ def _fixtures(root: Path) -> dict[str, tuple[Callable[[], ValidationResult], str
         ),
         "V7": (
             lambda: v7_sentinel_completeness(
-                {"S-REF": ("0-shot",), "S-ANS-0": ("0-shot",)}, {"C0": {"S-ANS-0": ["0-shot"]}}
+                {"S-REF": ("0-shot",), "S-ANS-0": ("0-shot",)},
+                {"C0": {"S-ANS-0": ["0-shot"]}},
+                ["C0"],
             ),
             CODE_MISSING_SENTINEL,
         ),
@@ -498,6 +592,7 @@ def _fixtures(root: Path) -> dict[str, tuple[Callable[[], ValidationResult], str
                     }
                 ],
                 root,
+                ["r"],
             ),
             CODE_UNSUPPORTED_CLAIM,
         ),

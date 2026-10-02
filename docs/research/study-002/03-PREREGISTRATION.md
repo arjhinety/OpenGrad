@@ -5,8 +5,7 @@
 > the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
 > [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md),
 > [44](44-PUNANS-V2-AMENDMENT-DRAFT.md), [45](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md),
-> [46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md)). Entries are
-> appended so cited line numbers hold.
+> [46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md)). Entries are appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
 committed **before the first Study 002 training run is launched and before any Study 002 evaluation
@@ -498,3 +497,14 @@ Appended here rather than under "Amendments" so that line numbers other document
 - **Arms launched under an earlier version:** none.
 - **Full record:** [46-READINESS-DESIGN-AMENDMENT-DRAFT.md](46-READINESS-DESIGN-AMENDMENT-DRAFT.md); the ERRATA
   entry is `reports/ERRATA.md` §31.
+
+#### Addendum to `study_002_prereg_v14` — 2026-10-03
+
+- **Item changed:** [10](10-STATISTICS-PLAN.md)'s confirmatory Holm–Bonferroni family. v14 dropped H4 and `C1`, and
+  the adoption did not restate the family. It is now H1, H5, H6 and `C2` vs `C0`. The strictest threshold moves
+  from 0.00625 to 0.0125.
+- **Owner decision, 2026-10-03:** correct over the four comparisons that exist, rather than keep the original
+  denominator.
+- **Found by** an independent audit of the v14 commits, before any result.
+- **Candidates already scored:** none.
+- ERRATA: `reports/ERRATA.md` §31, addendum.

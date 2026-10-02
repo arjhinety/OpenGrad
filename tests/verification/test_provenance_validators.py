@@ -31,10 +31,10 @@ def test_every_validator_fails_its_15_fixture_with_its_code() -> None:
         pv.v4_vocabulary_lock([]),
         pv.v5_one_shot([{"partition": "P-DEV"}]),
         pv.v6_row_key([]),
-        pv.v7_sentinel_completeness({"S-REF": ("0-shot",)}, {}),
+        pv.v7_sentinel_completeness({"S-REF": ("0-shot",)}, {}, []),
         pv.v8_census_reconciliation({}),
         pv.v9_fingerprint_from_artifact([], ROOT),
-        pv.v10_claim_evidence([], ROOT),
+        pv.v10_claim_evidence([], ROOT, []),
         pv.v11_cross_study_comparability([]),
     ],
 )
@@ -90,11 +90,15 @@ def test_v6_and_v7_pass_complete_inputs() -> None:
     assert pv.v6_row_key([row]).status == PASS
     required = {"S-ANS-0": ("0-shot",), "S-NV": ()}
     assert (
-        pv.v7_sentinel_completeness(required, {"C0": {"S-ANS-0": ["0-shot"], "S-NV": []}}).status
+        pv.v7_sentinel_completeness(
+            required, {"C0": {"S-ANS-0": ["0-shot"], "S-NV": []}}, ["C0"]
+        ).status
         == PASS
     )
     wrong_mode = {"C0": {"S-ANS-0": ["8-shot"], "S-NV": []}}
-    assert pv.CODE_MISSING_SENTINEL in _codes(pv.v7_sentinel_completeness(required, wrong_mode))
+    assert pv.CODE_MISSING_SENTINEL in _codes(
+        pv.v7_sentinel_completeness(required, wrong_mode, ["C0"])
+    )
 
 
 def test_v8_passes_a_census_that_adds_up() -> None:
@@ -127,12 +131,12 @@ def test_v10_passes_a_resolving_claim(tmp_path: Path) -> None:
         "evidence_path": "e.json",
         "evidence_sha256": hashlib.sha256(b"{}").hexdigest(),
     }
-    assert pv.v10_claim_evidence([claim], tmp_path).status == PASS
+    assert pv.v10_claim_evidence([claim], tmp_path, ["r"]).status == PASS
     assert pv.CODE_UNSUPPORTED_CLAIM in _codes(
-        pv.v10_claim_evidence([claim | {"evidence_sha256": "0" * 64}], tmp_path)
+        pv.v10_claim_evidence([claim | {"evidence_sha256": "0" * 64}], tmp_path, ["r"])
     )
     assert pv.CODE_UNSUPPORTED_CLAIM in _codes(
-        pv.v10_claim_evidence([claim | {"number_row": None}], tmp_path)
+        pv.v10_claim_evidence([claim | {"number_row": None}], tmp_path, ["r"])
     )
 
 
@@ -146,3 +150,98 @@ def test_v11_accepts_single_study_tables_and_fully_keyed_mixed_ones() -> None:
         ],
     }
     assert pv.v11_cross_study_comparability([single, keyed]).status == PASS
+
+
+def test_v4_fails_a_record_that_names_no_modes() -> None:
+    assert pv.CODE_VOCABULARY in _codes(
+        pv.v4_vocabulary_lock([{"id": "x", "scores": {"DIRECT": 1}}])
+    )
+
+
+def test_v5_reads_versioned_partitions_and_checks_what_a_replacement_replaces() -> None:
+    base = {"arm": "C0", "seed": 0, "protocol": "0-shot"}
+    twice = [
+        base | {"run_id": "a", "partition": "P-UNANS-v2"},
+        base | {"run_id": "b", "partition": "P-UNANS-v2"},
+    ]
+    assert pv.CODE_ONE_SHOT in _codes(pv.v5_one_shot(twice))
+    self_replacing = [base | {"run_id": "a", "partition": "P-CONF-v1", "replacement_of": "a"}]
+    assert pv.CODE_ONE_SHOT in _codes(pv.v5_one_shot(self_replacing))
+    other_arm = [
+        base | {"run_id": "a", "partition": "P-CONF-v1"},
+        base | {"run_id": "b", "partition": "P-CONF-v1", "arm": "R1", "replacement_of": "a"},
+    ]
+    assert pv.CODE_ONE_SHOT in _codes(pv.v5_one_shot(other_arm))
+    assert pv.v5_one_shot([base | {"run_id": "a", "partition": "P-DEVELOPMENT"}]).status != PASS
+
+
+def test_v7_fails_a_required_arm_with_no_artifacts() -> None:
+    result = pv.v7_sentinel_completeness({"S-NV": ()}, {"C0": {"S-NV": []}}, ["C0", "R1"])
+    assert "R1: " + pv.CODE_MISSING_SENTINEL in _codes(result)
+
+
+def test_v7_reads_its_modes_from_the_registry() -> None:
+    from opengrad.verification.study_002_gate import REQUIRED_SENTINELS
+
+    assert pv.load_sentinel_registry(ROOT) == REQUIRED_SENTINELS
+
+
+def test_v10_fails_a_claim_whose_number_row_does_not_exist(tmp_path: Path) -> None:
+    (tmp_path / "e.json").write_bytes(b"{}")
+    claim = {
+        "id": "c",
+        "number_row": "ghost",
+        "evidence_path": "e.json",
+        "evidence_sha256": hashlib.sha256(b"{}").hexdigest(),
+    }
+    assert pv.CODE_UNSUPPORTED_CLAIM in _codes(pv.v10_claim_evidence([claim], tmp_path, ["r"]))
+
+
+def test_v11_recognises_study_names_and_fails_unknown_ones() -> None:
+    spelled = {
+        "id": "t",
+        "rows": [{"study": "Study 001", "value": 0.5}, {"study": 2, "value": 0.6}],
+    }
+    assert pv.CODE_INCOMPARABLE in _codes(pv.v11_cross_study_comparability([spelled]))
+    unknown = {"id": "u", "rows": [{"study": "S1"}]}
+    assert pv.CODE_INCOMPARABLE in _codes(pv.v11_cross_study_comparability([unknown]))
+
+
+def test_v5_scores_each_p_unans_stratum_separately() -> None:
+    base = {"arm": "C0", "seed": 0, "protocol": "0-shot"}
+    strata = [
+        base | {"run_id": "a", "partition": "P-UNANS-v2"},
+        base | {"run_id": "b", "partition": "P-UNANS-v2-constructed"},
+    ]
+    assert pv.v5_one_shot(strata).status == PASS
+
+
+def test_v5_refuses_mutual_and_double_replacements() -> None:
+    base = {"arm": "C0", "seed": 0, "protocol": "0-shot", "partition": "P-CONF-v1"}
+    mutual = [
+        base | {"run_id": "a", "replacement_of": "b"},
+        base | {"run_id": "b", "replacement_of": "a"},
+    ]
+    assert pv.CODE_ONE_SHOT in _codes(pv.v5_one_shot(mutual))
+    double = [
+        base | {"run_id": "a"},
+        base | {"run_id": "b", "replacement_of": "a"},
+        base | {"run_id": "c", "replacement_of": "a"},
+    ]
+    assert pv.CODE_ONE_SHOT in _codes(pv.v5_one_shot(double))
+
+
+def test_v5_refuses_a_ring_of_replacements() -> None:
+    base = {"arm": "C0", "seed": 0, "protocol": "0-shot", "partition": "P-CONF-v1"}
+    ring = [
+        base | {"run_id": "a", "replacement_of": "c"},
+        base | {"run_id": "b", "replacement_of": "a"},
+        base | {"run_id": "c", "replacement_of": "b"},
+    ]
+    assert pv.CODE_ONE_SHOT in _codes(pv.v5_one_shot(ring))
+    chain = [
+        base | {"run_id": "a"},
+        base | {"run_id": "b", "replacement_of": "a"},
+        base | {"run_id": "c", "replacement_of": "b"},
+    ]
+    assert pv.v5_one_shot(chain).status == PASS

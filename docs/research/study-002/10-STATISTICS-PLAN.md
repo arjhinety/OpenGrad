@@ -137,3 +137,20 @@ verdict.
 - It cannot attribute a change to a cause on a single lineage. G13 stands, and the frozen verdict states it
   in the author's own words: *"Single lineage, single base model, no replicate; no cross-family
   generalization claimed."* (`results/final_campaign_verdict.json:589-593`)
+
+## Note under `study_002_prereg_v14` (appended 2026-10-03)
+
+v14 ([46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md)) dropped `R2` (and with it H4) and `C1`, so two members of the
+confirmatory family above no longer exist. On 2026-10-03 the owner chose to correct over the comparisons that
+remain. The confirmatory family is now exactly four, Holm–Bonferroni at family-wise α = 0.05:
+- H1 (`R1` vs `C0`);
+- H5 (tool-policy non-regression);
+- H6 (refusal correctness on `P-UNANS`);
+- `C2` vs `C0` (the source-specific competing explanation).
+
+The strictest Holm threshold is therefore 0.05 / 4 = 0.0125, against 0.05 / 8 = 0.00625 for the family as first
+written. The bar is looser, and that is recorded here rather than left to a reader. The change follows from
+arms that could test nothing, and was made before any arm was trained or scored. (The family as first written
+was itself ambiguous: it counted "four" competing-explanation comparisons where the table above marks three as
+confirmatory, one of them H4.) In the table above, `R2` vs `R1` and `C1` vs `C0` are withdrawn; `R3`, `X1`, the
+dose arms and `S1`/`S2` keep their status.

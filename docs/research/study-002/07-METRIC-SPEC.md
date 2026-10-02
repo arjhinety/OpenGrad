@@ -203,3 +203,7 @@ drift from its source without the row changing too.
 - They cannot licence the word "accuracy" unqualified. A bare "accuracy" in a Study 002 report means
   `correct / n` on a named population, printed with `n`; anything else is a defect of the same family as
   `#9` and `#84`.
+
+## Note under `study_002_prereg_v14` (appended 2026-10-03)
+
+**`HEURISTIC_REGEX_v2` is replaced (46 §8).** Every prose reply is judged by `prose-decision-classifier-v2`, measured on `P-DET-OUT` before any arm, with precision ≥ 0.90 for answers and for declines (the floor is now in 11). The v1 regex and the evaluator's keyword rule are reported beside it on the sentinels, never mixed.

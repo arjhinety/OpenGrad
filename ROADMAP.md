@@ -111,10 +111,10 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
     > **Status (2026-09-24).** The current state, what it is blocked on and the decisions it needs are
     > kept in one place: [Study 002 — Current state](docs/research/study-002/README.md#current-state).
-    > In short: the refusal detector became a frozen, once-tested classifier (v2); canonical-v3 is built
-    > but is no arm's corpus; the gate is executable; and the study is blocked on an `ANSWER` held-out
-    > source and two undeclared preregistration values. The six-item pre-flight below is the plan as it
-    > stood on 2026-09-13, kept for the record.
+    > In short (updated 2026-10-03): `P-CONF-v1` and `P-UNANS` are built; `study_002_prereg_v14` settled the
+    > readiness design (29 runs; canonical-v3 is exploratory arm `S2`); and the readiness record
+    > (`python -m opengrad.verification.study_002_readiness`) is `BLOCKED`, with each failing check naming
+    > what it lacks. The six-item pre-flight below is the plan as it stood on 2026-09-13, kept for the record.
 
     Diagnosis (executed, see [general-capability regression](reports/GENERAL_CAPABILITY_REGRESSION.md)):
     the post-SFT checkpoints refuse **100% of bare GSM8K questions** while solving 55.5% of the

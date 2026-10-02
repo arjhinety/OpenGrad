@@ -69,3 +69,7 @@ writing and hardest to remove later:
 - that the correction is a net win, unless H5 **and** H6 hold;
 - that any result is an ability change, on the strength of a decision endpoint;
 - "significant" without a margin, or "lower bound" without a derived bound.
+
+## Note under `study_002_prereg_v14` (appended 2026-10-03)
+
+**Under v14 (46):** row 8 (`R2` vs `R1`, H4) is withdrawn: the trainer never renders the label, so it cannot be tested. Row 9's only confirmatory comparison is `C2` vs `C0` ([10](10-STATISTICS-PLAN.md), note of 2026-10-03); `X1` and `R3` are descriptive, and `C1` is dropped.

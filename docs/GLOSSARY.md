@@ -29,7 +29,7 @@ Study 001's held-out set had no ANSWER items, which is why its regression went u
 
 | Term | Meaning | Defined in |
 |---|---|---|
-| **arm C0, C1, C2, R1, …** | Training arms of the experiment matrix. `C0` reproduces Canonical-v2; arm `C1` removes the synthetic subset. | [04-ARM-MATRIX](research/study-002/04-ARM-MATRIX.md) |
+| **arm C0, C2, R1, …** | Training arms of the experiment matrix. `C0` reproduces Canonical-v2. Arm `C1` ("without the synthetic subset") and arm `R2` were dropped by `study_002_prereg_v14`, and their ids are retired. | [04-ARM-MATRIX](research/study-002/04-ARM-MATRIX.md) |
 | **criterion C1 (coverage)** | Every mode in `P-CONF` has n > 0. | [06-SPLIT-SPEC](research/study-002/06-SPLIT-SPEC.md) §C1 |
 | **criterion C2 (resolvability)** | Every row prints n and its resolvable margin; no claim on a row that cannot resolve 10pp. | [06-SPLIT-SPEC](research/study-002/06-SPLIT-SPEC.md) §C2 |
 | **workstream C1** | Building canonical-v3 (provenance repair, schema normalization, classifier labels, decision balance). "C1 is authorised" means this. | [21-C1-IMPLEMENTATION-STATUS](research/study-002/21-C1-IMPLEMENTATION-STATUS.md) |
@@ -39,7 +39,7 @@ Study 001's held-out set had no ANSWER items, which is why its regression went u
 | **P-DET, P-DET-COVERAGE** | Labelled samples for validating the refusal/decision classifier. P-DET-v1 is frozen (581 items); P-DET-COVERAGE-v1/v2 add DIRECT and CALL coverage. | [22-PDET-PROTOCOL](research/study-002/22-PDET-PROTOCOL.md), [30](research/study-002/30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md), [36](research/study-002/36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md) |
 | **REP-A** | A re-run of arm C0 at a fixed seed: the nondeterminism floor every threshold margin is compared with. | [05-SEED-AND-REPRODUCIBILITY-POLICY](research/study-002/05-SEED-AND-REPRODUCIBILITY-POLICY.md) |
 | **V1 … V12** | The provenance validators (mode coverage, metric denominators, …, resolvable margin). | [15-PROVENANCE-VALIDATORS](research/study-002/15-PROVENANCE-VALIDATORS.md) |
-| **`study_002_prereg_vN`** | A preregistration version; v1 is the original contract, v2–v8 are amendments (v8 adopted 2026-09-24). | [03-PREREGISTRATION](research/study-002/03-PREREGISTRATION.md) |
+| **`study_002_prereg_vN`** | A preregistration version; v1 is the original contract, v2–v14 are amendments (v14 adopted 2026-10-02). | [03-PREREGISTRATION](research/study-002/03-PREREGISTRATION.md) |
 | **`study_002_gate_v1`** | The Study 002 evaluation gate (17 checks at contract 3, over `tool_use_promotion_v6`). | [11-THRESHOLDS](research/study-002/11-THRESHOLDS.md) |
 | **G1 … G17** | Guardrails derived from the claims Study 001 got wrong. | [GUARDRAILS](research/GUARDRAILS.md) |
 

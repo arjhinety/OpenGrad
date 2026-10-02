@@ -77,9 +77,9 @@ Scope, pre-registered before any GPU time is spent, against the
 
 1. **Dataset corrections, starting with refusal relabelling** ([`ROADMAP.md`](../../ROADMAP.md)
    step 16, `BLOCKED_ON_PREFLIGHT`). A heuristic detector flags 18,114 of Canonical-v2's 173,237
-   records as refusal-shaped targets labelled ANSWER. The detector's precision is measured on a
-   hand-labelled sample first. Relabelling goes into a new corpus version; Canonical-v2 stays as
-   published. M0 is retrained with only the labels changed, and GSM8K zero-shot, IFEval, MMLU-Pro
+   records as refusal-shaped targets labelled ANSWER. Under `study_002_prereg_v14` the flagged records are
+   triaged by two models first, and the precision measured there. Corrections go into a new corpus version; Canonical-v2 stays as
+   published. M0 is retrained with the wrongly declined targets corrected (under `study_002_prereg_v14` the label alone is never seen by the trainer), and GSM8K zero-shot, IFEval, MMLU-Pro
    and the tool-policy metrics are re-measured against pre-registered thresholds. A null result is
    publishable.
 2. **On-policy distillation (M2, RQ4) — deferred to [Study 003](study-002/18-STUDY-003-ROADMAP.md).**
@@ -115,7 +115,7 @@ audit of Study 001 to the closure report. The parts a reader is most likely to w
   `refusal_correctness` floor on genuinely unanswerable ones, and `NOT_EVALUABLE` as a verdict, because a
   gate that could not run must not be indistinguishable from one that ran and passed
   ([`11-THRESHOLDS.md`](study-002/11-THRESHOLDS.md)).
-- **Eleven arms in three tiers**, each varying one factor, with the competing explanations run regardless
+- **Nine arms in three tiers** (eleven before `study_002_prereg_v14` dropped `R2` and `C1`), each varying one factor, with the competing explanations run regardless
   of the primary result and a dose ladder on the same corpus
   ([`04-ARM-MATRIX.md`](study-002/04-ARM-MATRIX.md)).
 - **A pre-GPU gate of fourteen blocking checks**, including a self-test that the new gate can actually fail,

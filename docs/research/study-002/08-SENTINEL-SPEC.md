@@ -150,3 +150,7 @@ better, and the 8-shot/0-shot gap is the quantified statement of "the ability wa
 `S-ANS-8` is also the guard against a **false** H1. If `R1` raises `S-ANS-0` but drops `S-ANS-8`, the
 intervention did not restore a decision — it damaged a capability, and the verdict is not
 `MECHANISM_SUPPORTED_*`. That asymmetry is checked by the gate rather than left to a reader.
+
+## Note under `study_002_prereg_v14` (appended 2026-10-03)
+
+**`S-ANS-E` (46 §9):** runs on GSM8K, the same 1,319 questions as `S-ANS-0` and `S-ANS-8`, with the fixed instruction of 46 §9. Its endpoints are `answer_rate`, `accuracy` and `accuracy_given_answer`; `no_call_accuracy` leaves it (GSM8K offers no tools). The registration is `registry/study_002_sentinels.yaml`.

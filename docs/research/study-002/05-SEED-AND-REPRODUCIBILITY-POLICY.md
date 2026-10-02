@@ -116,3 +116,7 @@ The two modes of [14](14-HETEROGENEITY-POLICY.md) are a config field, `reproduci
 torch and CUDA and records which; `DECLARED_DETERMINISTIC` also sets torch's deterministic algorithms, cuDNN
 determinism and `CUBLAS_WORKSPACE_CONFIG`. A training config that declares neither fails the readiness gate
 `determinism_declared`, except the frozen Study 001 configs, which are recorded `UNDECLARED`.
+
+## Note under `study_002_prereg_v14` (appended 2026-10-03)
+
+**Determinism (46 §12):** one mode for every arm, chosen by the GPU preflight on the primary host before Tier A: `DECLARED_DETERMINISTIC` if two 50-step runs of `C0`'s config complete with identical losses, otherwise `NON_DETERMINISTIC_KERNEL`. `REP-A` measures the residual either way. The seed plan is `configs/study_002/seed-plan.yaml`.
