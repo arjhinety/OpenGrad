@@ -103,7 +103,7 @@ def test_check_9_needs_a_config_for_every_arm_and_seed(tmp_path: Path) -> None:
     shutil.copy(ROOT / "configs/study_002/seed-plan.yaml", plan)
     configs = tmp_path / readiness.ARM_CONFIGS
     configs.mkdir(parents=True)
-    (configs / "c0-s0.yaml").write_text(
+    (configs / "C0-s0.yaml").write_text(
         "experiment_id: study_002_c0_s0\nstudy_002: {arm: C0}\nreproducibility: {seed: 0}\n",
         encoding="utf-8",
     )
