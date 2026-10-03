@@ -1,4 +1,4 @@
-"""Draft 47 (per-source flag precision for 46 §5): every number and rule it states is pinned; it stays a draft.
+"""47 (per-source flag precision for 46 §5, adopted as v15): every number and rule it states is pinned.
 
 Flag counts and the recall population come from the flag-set manifest; prior counts (the v1 regex, 03's prior)
 from Study 001's refusal audit of the corpus M0 trained on; floors, minimums, seeds and sample sizes from
@@ -648,3 +648,47 @@ def test_v15_is_adopted_and_recorded_twice_with_the_artifacts_numbers() -> None:
         (ROOT / "docs/research/study-002/README.md").read_text(encoding="utf-8").split()
     )
     assert f"the flag set itself is built, {_n(f['total'])} records," in readme
+
+
+def test_the_v15_notes_in_46_11_and_errata_use_the_adopted_constants() -> None:
+    def section(path: str, start: str) -> str:
+        text = " ".join((ROOT / path).read_text(encoding="utf-8").split())
+        return text.split(start)[1]
+
+    precision = f"{ft.PER_SOURCE_FLOOR:.2f}"
+    agreement = f"{ft.PER_SOURCE_AGREEMENT_FLOOR:.2f}"
+    note = section(
+        "docs/research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md",
+        "## Note under `study_002_prereg_v15` (appended 2026-10-03)",
+    )
+    for phrase in (
+        f"precision ≥ {precision} and raw agreement ≥ {agreement} on at least {ft.MIN_AGREED} agreed items.",
+        f"**The trial** of {ft.TRIAL_SIZE} records gives ToolACE at least {ft.TRIAL_MINIMUM['toolace']}.",
+        (
+            f"**The recall sample** of {ft.RECALL_SIZE} gives ToolACE and When2Call at least "
+            f"{ft.RECALL_MINIMUM['toolace']} each;"
+        ),
+    ):
+        assert phrase in note, phrase
+    table = section(
+        "docs/research/study-002/11-THRESHOLDS.md",
+        "## Thresholds added by `study_002_prereg_v15` (appended 2026-10-03)",
+    )
+    for phrase in (
+        f"| per-source flag precision (stop rule 1) | ≥ {precision} of a source's agreed flagged records",
+        f"| per-source agreement (stop rule 2) | raw agreement ≥ {agreement} within the source |",
+        f"| per-source evaluability | ≥ {ft.MIN_AGREED} agreed items |",
+        f"| recall cell | ≥ {ft.DESCRIPTIVE_BELOW} expected sampled replies |",
+        f"| recall without `ABSTAIN` | ≥ {ft.DESCRIPTIVE_BELOW} expected sampled replies outside `ABSTAIN` |",
+    ):
+        assert phrase in table, phrase
+    errata = section(
+        "reports/ERRATA.md",
+        "## 32. `study_002_prereg_v15` adopted: per-source floors for the flag-set triage",
+    )
+    for phrase in (
+        f"precision ≥ {precision} and raw agreement ≥ {agreement} on at least {ft.MIN_AGREED} agreed items",
+        f"cells expected below {ft.DESCRIPTIVE_BELOW} descriptive only;",
+        f"where its expected sample is below {ft.DESCRIPTIVE_BELOW}.",
+    ):
+        assert phrase in errata, phrase

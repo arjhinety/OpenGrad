@@ -175,10 +175,10 @@ def flag_precision(
     the adopted rules. Per-source figures are always reported, for every labelled source and every source in
     `sources` (one with no labels is reported empty, never left out). With `per_source_floor` or
     `per_source_agreement_floor` each source also gets a status; with `min_agreed` as well, a source with fewer agreed
-    items is `NOT_EVALUABLE`. A source that fails or is `NOT_EVALUABLE` is listed: under draft 47 neither passes.
+    items is `NOT_EVALUABLE`. A source that fails or is `NOT_EVALUABLE` is listed: under 47 neither passes.
     `exclude` marks sources whose dispositions become `SOURCE_EXCLUDED`; it never changes the pooled figures,
     which cover every labelled record, so an exclusion cannot rescue a pooled failure. What makes a source
-    excluded is draft 47's rule, not this function's.
+    excluded is 47's rule (:func:`triage_decision`), not this function's.
     """
     if set(labels) - set(source_of):
         raise TriageError("a labelled record has no source")
@@ -224,14 +224,25 @@ def flag_precision(
 
 
 def triage_decision(
-    labels: Mapping[str, tuple[str, str]], source_of: Mapping[str, str]
+    labels: Mapping[str, tuple[str, str]],
+    source_of: Mapping[str, str],
+    members: Collection[str],
 ) -> dict[str, Any]:
     """47 §3's rules on the full triage: stop, or proceed with the sources that are not excluded.
 
-    The pooled floors (stop rules 1 and 2) are over all of the flag set, excluded sources included. A source
-    below a per-source floor, or `NOT_EVALUABLE` (fewer than `MIN_AGREED` agreed items), fails. A failing source
-    in `STOP_SOURCES` stops the corpus intervention; one in `EXCLUDABLE_SOURCES` is excluded.
+    `members` is the flag set's record ids (the members file), and `labels` must label exactly those: the pooled
+    floors (stop rules 1 and 2) are over all of the flag set, excluded sources included, so leaving labels out
+    (or passing the trial's) could shrink the pool. A source below a per-source floor, or `NOT_EVALUABLE` (fewer
+    than `MIN_AGREED` agreed items), fails. A failing source in `STOP_SOURCES` stops the corpus intervention; one
+    in `EXCLUDABLE_SOURCES` is excluded.
     """
+    if set(labels) != set(members):
+        raise TriageError(
+            f"the labels cover {len(set(labels) & set(members))} of the flag set's {len(set(members))} records"
+            f" and {len(set(labels) - set(members))} outside it; the decision needs exactly the flag set"
+        )
+    if set(labels) - set(source_of):
+        raise TriageError("a labelled record has no source")
     if {source_of[r] for r in labels} - set(SOURCES):
         raise TriageError(f"a labelled record's source is not one of {SOURCES}")
     report = flag_precision(

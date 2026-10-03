@@ -1356,7 +1356,8 @@ An independent audit of the v14 commits found the following:
   source. A failing Glaive or When2Call stops the corpus intervention; a failing ToolACE is excluded. The pooled
   floors stay over all 19,051 flagged records, so an exclusion never rescues a pooled failure. The trial and the
   recall sample are stratified by source, the recall share is weighted by population, and recall is reported per
-  predicted label with cells expected below 10 descriptive only.
+  predicted label with cells expected below 10 descriptive only; the figure without `ABSTAIN` is withheld
+  where its expected sample is below 10.
 - **Why:** the pooled floors could pass while one source failed. Glaive is 74.6% of the flags, ToolACE is where
   the two detectors disagree most, and classifier v2 was never tested on When2Call.
 - **When:** adopted 2026-10-03, before the triage task exists and before any triage label. The owner chose the

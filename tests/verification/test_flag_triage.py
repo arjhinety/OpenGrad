@@ -311,24 +311,25 @@ def test_a_failing_glaive_or_when2call_stops_and_a_failing_toolace_is_excluded()
     g, w, t = "glaive-function-calling-v2", "when2call", "toolace"
     # All pass: 0.95 everywhere on 200 agreed items each.
     labels, source_of = _labels(_decision_spec({g: (190, 10), w: (190, 10), t: (190, 10)}))
-    assert ft.triage_decision(labels, source_of)["decision"] == "PROCEED"
+    assert ft.triage_decision(labels, source_of, labels)["decision"] == "PROCEED"
     # ToolACE at 0.80 on 100 items, the pool still above 0.90: excluded, the study proceeds.
     labels, source_of = _labels(_decision_spec({g: (950, 50), w: (950, 50), t: (80, 20)}))
-    decision = ft.triage_decision(labels, source_of)
+    decision = ft.triage_decision(labels, source_of, labels)
     assert decision["decision"] == "PROCEED" and decision["excluded_sources"] == [t]
     assert decision["report"]["per_source"][t]["excluded"]
     assert decision["report"]["pooled"]["agreed"] == 2100  # the pool keeps ToolACE
     # When2Call at 0.85: stop rule 1, whatever the pool says.
     labels, source_of = _labels(_decision_spec({g: (950, 50), w: (170, 30), t: (190, 10)}))
-    decision = ft.triage_decision(labels, source_of)
+    decision = ft.triage_decision(labels, source_of, labels)
     assert decision["decision"] == "STOP" and decision["stopping_sources"] == [w]
     assert decision["stop_rules"] == [1] and decision["report"]["pooled"]["status"] == "PASS"
     # Glaive with fewer than 100 agreed items is NOT_EVALUABLE, which fails: stop.
     labels, source_of = _labels(_decision_spec({g: (99, 0), w: (190, 10), t: (190, 10)}))
-    assert ft.triage_decision(labels, source_of)["stopping_sources"] == [g]
+    assert ft.triage_decision(labels, source_of, labels)["stopping_sources"] == [g]
     # A source outside the three is refused.
     with pytest.raises(ft.TriageError):
-        ft.triage_decision(*_labels(_decision_spec({"xlam": (1, 0)})))
+        labels, source_of = _labels(_decision_spec({"xlam": (1, 0)}))
+        ft.triage_decision(labels, source_of, labels)
 
 
 def test_toolaces_exclusion_never_rescues_a_pooled_failure() -> None:
@@ -337,8 +338,22 @@ def test_toolaces_exclusion_never_rescues_a_pooled_failure() -> None:
     flags = manifest["flag_set"]["by_source"]
     share = {"glaive-function-calling-v2": 0.92, "when2call": 0.92, "toolace": 0.40}
     spec = {s: (round(p * flags[s]), flags[s] - round(p * flags[s])) for s, p in share.items()}
-    decision = ft.triage_decision(*_labels(_decision_spec(spec)))
+    labels, source_of = _labels(_decision_spec(spec))
+    decision = ft.triage_decision(labels, source_of, labels)
     assert decision["excluded_sources"] == ["toolace"]
     assert round(decision["report"]["pooled"]["precision"], 3) == 0.896
     assert decision["decision"] == "STOP" and decision["stop_rules"] == [1]
     assert decision["stopping_sources"] == []
+
+
+def test_the_decision_needs_labels_for_exactly_the_flag_set() -> None:
+    # Dropping ToolACE's labels would pool over Glaive and When2Call only: the rescue 47 §3 C forbids.
+    g, w, t = "glaive-function-calling-v2", "when2call", "toolace"
+    labels, source_of = _labels(_decision_spec({g: (950, 50), w: (950, 50), t: (40, 60)}))
+    members = set(labels)
+    without_toolace = {r: pair for r, pair in labels.items() if source_of[r] != t}
+    with pytest.raises(ft.TriageError):
+        ft.triage_decision(without_toolace, source_of, members)
+    with pytest.raises(ft.TriageError):  # a label outside the flag set (a trial-only id, say)
+        ft.triage_decision({**labels, "elsewhere": ("NOT_A_DECLINE",) * 2}, source_of, members)
+    assert ft.triage_decision(labels, source_of, members)["excluded_sources"] == [t]

@@ -435,6 +435,7 @@ adopted.
   on at least 100 agreed items. A failing Glaive or When2Call stops the corpus intervention; a failing ToolACE is
   excluded, its records disposed `SOURCE_EXCLUDED` (text unchanged in every arm).
 - **The pooled floors above stay over all of `F`,** whatever is excluded.
-- **The trial** gives ToolACE at least 20 of its 100 records, and its labels never count toward a floor.
+- **The trial** of 100 records gives ToolACE at least 20. Trial records are labelled again in the full
+  triage, and only those labels count toward a floor.
 - **The recall sample** of 400 gives ToolACE and When2Call at least 80 each; its pooled share is weighted by
   population, and it is reported per predicted label.

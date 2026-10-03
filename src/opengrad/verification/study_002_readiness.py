@@ -314,7 +314,8 @@ def check_7_corpus(root: Path) -> Check:
         7,
         "corpus fingerprint recorded",
         FLAG_SET_DISPOSITIONS,
-        "the flag set (46 §5) is not computed or triaged, and no arm corpus is built",
+        "the flag set (46 §5) is built (reports/study-002/flag-set/) but not triaged: no dispositions "
+        "file, and no arm corpus is built",
     )
 
 

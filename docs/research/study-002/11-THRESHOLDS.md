@@ -181,3 +181,4 @@ stay over all of the flag set.
 | per-source agreement (stop rule 2) | raw agreement ≥ 0.80 within the source | Glaive, When2Call, ToolACE (47 §3 B) | as above |
 | per-source evaluability | ≥ 100 agreed items | each source (47 §3 D) | `NOT_EVALUABLE`, treated as failing |
 | recall cell | ≥ 10 expected sampled replies | each source and predicted label of the recall sample (47 §3 F) | descriptive only |
+| recall without `ABSTAIN` | ≥ 10 expected sampled replies outside `ABSTAIN` | each source of the recall sample (47 §3 F) | the figure is withheld |
