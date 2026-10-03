@@ -263,9 +263,14 @@ def load_package(
     return manifest, records, [item.item_id for item in items]
 
 
-def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
+def build(
+    task: str, package: Path, root: Path = ROOT, variant: str | None = None
+) -> dict[str, Any]:
     """Write ``<task>.reference.jsonl`` and its manifest under the task's output directory
-    (:data:`TASK_SPECS`). Never overwrites a different reference: a rebuild must reproduce the same bytes."""
+    (:data:`TASK_SPECS`). Never overwrites a different reference: a rebuild must reproduce the same bytes.
+
+    A ``variant`` (for example ``gemini-r2``, the re-label of INC-0002) writes ``<task>.reference.<variant>.jsonl``
+    beside the original, which stays as it is."""
     from opengrad.annotation.config import load_task_config
 
     manifest, records, item_ids = load_package(task, package, root)
@@ -282,8 +287,9 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
     amendment, amendment_document, output_dir = TASK_SPECS[task]
     out = root / output_dir
     out.mkdir(parents=True, exist_ok=True)
-    reference_path = out / f"{task}.reference.jsonl"
-    manifest_path = out / f"{task}.reference.manifest.json"
+    stem = f"{task}.reference" + (f".{variant}" if variant else "")
+    reference_path = out / f"{stem}.jsonl"
+    manifest_path = out / f"{stem}.manifest.json"
     reference_manifest = {
         "artifact_kind": ARTIFACT_KINDS.get(task, "PDET_COVERAGE_MODEL_CONSENSUS_REFERENCE"),
         "status": "MODEL_REFERENCE_PROVISIONAL",
@@ -311,6 +317,7 @@ def build(task: str, package: Path, root: Path = ROOT) -> dict[str, Any]:
         "reference_file": reference_path.name,
         "reference_sha256": _sha256(payload),
         "summary": summary,
+        **({"variant": variant} if variant else {}),
     }
     manifest_bytes = (json.dumps(reference_manifest, indent=2, sort_keys=True) + "\n").encode(
         "utf-8"
@@ -333,8 +340,11 @@ def main(argv: list[str] | None = None) -> int:
         "--package", required=True, type=Path, help="a verified annotation package manifest"
     )
     parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument(
+        "--variant", help="write a named variant beside the original reference (e.g. gemini-r2)"
+    )
     args = parser.parse_args(argv)
-    built = build(args.task, args.package, args.root)
+    built = build(args.task, args.package, args.root, args.variant)
     # Counts only: no item id, label per item or item text is printed.
     print(
         json.dumps(

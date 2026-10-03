@@ -163,3 +163,28 @@ def test_a_two_annotator_reference_ignores_a_third_session_and_counts_one_pair()
     assert refs[0]["reference_ambiguity_status"] == "NONE"
     assert summary["consensus"] == {UNANIMOUS: 1, NO_CONSENSUS: 1}
     assert summary["pairwise_agreement"] == {f"{GEMINI}|{DEEPSEEK}": 1}
+
+
+def test_a_variant_is_written_beside_the_original_never_over_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import opengrad.verification.pdet_coverage_reference as module
+
+    task = "pdet-coverage-v1"
+    amendment, document, _ = module.TASK_SPECS[task]
+    monkeypatch.setitem(module.TASK_SPECS, task, (amendment, document, tmp_path))
+    monkeypatch.setattr(
+        module, "load_package", lambda task, package, root: ({"source": {"sha256": "s"}}, [], [])
+    )
+    monkeypatch.setattr(
+        module, "build_reference", lambda records, ids, **kw: ([{"pdetcov_id": "a"}], {"items": 1})
+    )
+    original = (tmp_path / f"{task}.reference.jsonl", b"the frozen reference\n")
+    original[0].write_bytes(original[1])
+    built = module.build(task, PACKAGE, PACKAGE.parents[4], "gemini-r2")
+    assert built["variant"] == "gemini-r2"
+    assert (tmp_path / f"{task}.reference.gemini-r2.jsonl").is_file()
+    assert (tmp_path / f"{task}.reference.gemini-r2.manifest.json").is_file()
+    assert original[0].read_bytes() == original[1]
+    with pytest.raises(ReferenceError):  # without the variant it would land on the frozen reference
+        module.build(task, PACKAGE, PACKAGE.parents[4])

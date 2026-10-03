@@ -151,6 +151,8 @@ CREDENTIALS = re.compile(rb"sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pa
 TASKS = tuple(TASK_SPECS)
 SESSIONS = {
     "model-gemini": "model.gemini-3.8-flash-high",
+    # The tool-gated re-label of INC-0002 (docs/INCIDENT_LOG.md), archived as its own variant.
+    "model-gemini-r2": "model.gemini-3.8-flash-high",
     "model-gpt": "model.gpt-5.6-sol",
     "model-deepseek": "model.deepseek-v4.1-flash",
 }
@@ -399,7 +401,10 @@ def scan(*groups: dict[str, bytes]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--task", choices=TASKS, required=True)
-    task = parser.parse_args(argv).task
+    parser.add_argument("--sessions", nargs="+", choices=sorted(SESSIONS), help="default: every session present")
+    parser.add_argument("--variant", help="archive under <task>.external-models.<variant>.audit-trail")
+    args = parser.parse_args(argv)
+    task = args.task
     out, procedure, authorization = TASK_SPECS[task]
     members: dict[str, bytes] = {
         f"procedure/{Path(procedure).name}": (ROOT / procedure).read_bytes(),
@@ -408,17 +413,19 @@ def main(argv: list[str] | None = None) -> int:
     streams: dict[str, bytes] = {}
     sessions = [
         audit_session(task, session, members, streams)
-        for session in SESSIONS
+        for session in (args.sessions or SESSIONS)
         if (ROOT / ".annotation" / f"{task}.model-batches" / session).is_dir()
     ]
     scanned = scan(members, streams)
-    stem = f"{task}.external-models.audit-trail"
-    local_name = f"{task}.external-models.cli-streams.tar.gz"
+    infix = f".{args.variant}" if args.variant else ""
+    stem = f"{task}.external-models{infix}.audit-trail"
+    local_name = f"{task}.external-models{infix}.cli-streams.tar.gz"
     archive = tar_gz(members)
     local = tar_gz(streams)
     manifest = {
         "schema": SCHEMA,
         "task_id": task,
+        **({"variant": args.variant} if args.variant else {}),
         "authorization": authorization,
         "status": STATUS.get(
             task,
