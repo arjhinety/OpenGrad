@@ -58,7 +58,7 @@ Terms: [glossary](../docs/GLOSSARY.md).
 | [`experiments/`](experiments/) | 1 | Study 001 | Experiment-level records |
 | [`failures/`](failures/) | 2 | Study 001 | Failure clustering |
 | [`hardware/`](hardware/) | 1 | Study 001 | GPU smoke records |
-| [`incidents/`](incidents/) | 1 | Study 001 | Incident records (see docs/INCIDENT_LOG.md) |
+| [`incidents/`](incidents/) | 2 | Study 001 | Incident records (see docs/INCIDENT_LOG.md) |
 | [`normalization-v3/`](normalization-v3/) | 10 | Study 002 | normalization-v3: builds, verification, audits, re-anchoring |
 | [`optimization/`](optimization/) | 1 | Study 001 | Optimization producer records |
 | [`pdet/`](pdet/) | 17 | Study 002 | P-DET-v1: the frozen population, annotation exports, review queue, model-label provenance |
@@ -71,4 +71,4 @@ Terms: [glossary](../docs/GLOSSARY.md).
 | [`training/`](training/) | 1 | Study 001 | Pre-training component-gate evidence |
 | [`visual/`](visual/) | 12 | Study 001 | Figures |
 
-450 tracked files in total.
+451 tracked files in total.
