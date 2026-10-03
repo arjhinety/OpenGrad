@@ -894,8 +894,9 @@ papers:
   category: model_annotation
   methodology_summary: Introduces cross-model disagreement (Cross-Model Perplexity and Entropy) as a label-free
     correctness signal that beats within-model uncertainty, for example AUROC 0.75 against 0.59 on MMLU.
-  implementation_relevance: Supports using disagreement between two models as a signal of difficulty,
-    as the triage's drop-out counts do.
+  implementation_relevance: A different kind of disagreement from the triage's, namely a second model's
+    surprise at the first model's answer, as a signal that the answer is wrong. It is not two labellers
+    disagreeing.
   limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
     case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
     are not yet read.

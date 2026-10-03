@@ -14,7 +14,7 @@ does. The full records are in [`docs/references/papers.yaml`](../../references/p
   the items were chosen ([46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md) §5).
 - **Decided before any label exists:**
   - agreement and precision floors;
-  - floors per source as well as pooled, with sources that can stop the study
+  - floors per source as well as pooled, where a failing source can stop the corpus intervention
     ([47](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md));
   - a 100-record trial, with one allowed revision of the procedure;
   - a 400-reply sample of unflagged replies, to estimate what the classifier missed.
@@ -36,12 +36,12 @@ does. The full records are in [`docs/references/papers.yaml`](../../references/p
 
 **Does two models agreeing mean they are right?** Not on its own: models' errors are correlated.
 - Kim et al. (2025, arXiv 2506.07962): across over 350 LLMs, errors are substantially correlated (on one
-  leaderboard, models agree 60% of the time when both err), most strongly among larger, more accurate models,
-  even across providers.
-- Kuai et al. (2026, arXiv 2604.07650): shared pretraining data, distillation and alignment entangle models'
-  behaviour, so in multi-model judging "apparent agreement" can reflect shared error modes.
-- Gorbett and Jana (2026, arXiv 2603.25450): disagreement between models is a useful signal that an answer is
-  wrong.
+  leaderboard, models agree 60% of the time when both err); larger, more accurate models have highly
+  correlated errors, even across architectures and providers.
+- Kuai et al. (2026, arXiv 2604.07650): shared pretraining data, distillation and alignment can entangle
+  models' behaviour, so in multi-model judging "apparent agreement" can reflect shared error modes.
+- Gorbett and Jana (2026, arXiv 2603.25450): a second model's surprise at reading the first model's answer is a
+  label-free signal that the answer is wrong. This is a different disagreement from two labellers'.
 
 **Where do model judges fail?**
 - Ye et al. (2024, arXiv 2410.02736): twelve potential biases of LLM judges; significant biases persist in some
