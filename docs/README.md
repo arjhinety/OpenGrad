@@ -217,6 +217,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md`](research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md) | 44 — `P-UNANS`, second attempt: a membership-only instrument with a trial set (`study_002_prereg_v12`) |
 | [`research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md`](research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md) | 45 — `P-UNANS`: constructed questions to reach check 4's size (`study_002_prereg_v13`) |
 | [`research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md`](research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md) | 46 — Readiness design: arms, exposure, flags and instruments (`study_002_prereg_v14`) |
+| [`research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md`](research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md) | 47 — Per-source flag precision and agreement for the triage (`study_002_prereg_v15`) |
 | [`research/study-002/HANDOFF.md`](research/study-002/HANDOFF.md) | Study 002 — handoff (2026-09-15) |
 | [`research/study-002/README.md`](research/study-002/README.md) | Study 002 — design set |
 
@@ -226,4 +227,4 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 |---|---|
 | [`training/reference-recipes.md`](training/reference-recipes.md) | External training reference recipes |
 
-130 documents.
+131 documents.

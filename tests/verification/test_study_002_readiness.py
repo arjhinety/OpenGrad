@@ -20,7 +20,7 @@ def test_the_committed_repository_is_blocked_with_six_checks_passing() -> None:
     assert sorted(statuses) == list(range(1, 15))
     assert [n for n, s in statuses.items() if s == PASS] == [2, 3, 5, 10, 11, 13]
     assert record["status"] == readiness.BLOCKED and record["passed"] == 6
-    assert record["preregistration"] == "study_002_prereg_v14"
+    assert record["preregistration"] == "study_002_prereg_v15"
     for check in record["checks"]:
         assert (check["status"] == PASS) == (not check["gaps"]), check["number"]
 

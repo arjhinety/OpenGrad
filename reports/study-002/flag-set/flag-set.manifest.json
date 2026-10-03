@@ -1,0 +1,102 @@
+{
+  "answer_labelled_first_replies": {
+    "eligible_by_predicted_label": {
+      "ABSTAIN": 448,
+      "CALL": 12,
+      "CLARIFY": 3737,
+      "DIRECT": 33982,
+      "UNSUPPORTED": 19051
+    },
+    "ineligible_by_reason": {
+      "first_reply_empty": 1
+    }
+  },
+  "artifact_kind": "STUDY_002_FLAG_SET",
+  "classifier_version": "prose-decision-classifier-v2",
+  "code_sha256_lf": {
+    "src/opengrad/data/classifier_input.py": "d2c958397d6b2aad16177b44e8ef641ae7f3ca47d3b0f8efb3a7b92150fa2ab6",
+    "src/opengrad/data/decision_classifier_v2.py": "47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382",
+    "src/opengrad/verification/flag_set.py": "920f0b23cd0173eead553e91a7db4d80a88c09139879668f50e9fce455671397"
+  },
+  "corpus": {
+    "record_count": 173237,
+    "release_manifest_sha256": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
+    "repository": "arrochi112/OpenGrad-ToolPolicy-Canonical-v2",
+    "revision": "df1a1f5135cc4b08e24b7ff20582084988932c61",
+    "shards_verified": 176
+  },
+  "definition": "canonical-v2-final records labelled ANSWER whose first reply (contract prose-decision-input-v2 shape) prose-decision-classifier-v2 predicts UNSUPPORTED",
+  "detector_sha256": "549a960ad6a14c435e95aa408d113f40c7571c7c86cc2dc5d1900f89c9424678",
+  "flag_set": {
+    "by_source": {
+      "glaive-function-calling-v2": 14205,
+      "toolace": 867,
+      "when2call": 3979
+    },
+    "by_unit_kind": {
+      "has_continuation": 78,
+      "single_exchange": 18973
+    },
+    "n": 19051
+  },
+  "members": {
+    "file": "flag-set.members.jsonl",
+    "rows": 19051,
+    "sha256": "bb5ebe413fc56475a9fb1e694f287488d606c3fee91194e68e8f691805430980"
+  },
+  "precision_reporting": {
+    "eligible_answer_first_replies_by_source_and_label": {
+      "glaive-function-calling-v2": {
+        "ABSTAIN": 82,
+        "CLARIFY": 636,
+        "DIRECT": 33829,
+        "UNSUPPORTED": 14205
+      },
+      "toolace": {
+        "ABSTAIN": 366,
+        "CALL": 12,
+        "CLARIFY": 655,
+        "DIRECT": 73,
+        "UNSUPPORTED": 867
+      },
+      "when2call": {
+        "CLARIFY": 2446,
+        "DIRECT": 80,
+        "UNSUPPORTED": 3979
+      }
+    },
+    "flags_by_source": {
+      "glaive-function-calling-v2": 14205,
+      "toolace": 867,
+      "when2call": 3979
+    },
+    "sources": [
+      "glaive-function-calling-v2",
+      "toolace",
+      "when2call"
+    ],
+    "unit": "per source and pooled"
+  },
+  "preregistration": {
+    "adoption_amendment": "study_002_prereg_v14",
+    "document": "docs/research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md",
+    "section": "\u00a75"
+  },
+  "prior_heuristic_regex_v1": {
+    "also_in_flag_set": 18022,
+    "also_in_flag_set_by_source": {
+      "glaive-function-calling-v2": 14041,
+      "toolace": 10,
+      "when2call": 3971
+    },
+    "by_source": {
+      "glaive-function-calling-v2": 14066,
+      "toolace": 10,
+      "when2call": 4038
+    },
+    "n": 18114,
+    "scope": "single-exchange records labelled ANSWER whose reply HEURISTIC_REGEX_v1 calls a refusal"
+  },
+  "records_read": 173237,
+  "statement": "Counts and identifiers only. A flag is a classifier prediction, not a label: the triage of 46 \u00a75 decides each record's disposition, and measures the flag precision stop rule 1 needs."
+}

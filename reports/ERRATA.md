@@ -1348,3 +1348,24 @@ An independent audit of the v14 commits found the following:
   - the trainer saves checkpoints only every `save_steps`, not at planned steps.
 
   Until both are fixed in the trainer, a resumed run is unmatched, and planned-step checkpoints do not exist.
+
+## 32. `study_002_prereg_v15` adopted: per-source floors for the flag-set triage
+
+- **What changed:** [47](../docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md) adds per-source floors
+  to 46 §5's triage of the flag set: precision ≥ 0.90 and raw agreement ≥ 0.80 on at least 100 agreed items per
+  source. A failing Glaive or When2Call stops the corpus intervention; a failing ToolACE is excluded. The pooled
+  floors stay over all 19,051 flagged records, so an exclusion never rescues a pooled failure. The trial and the
+  recall sample are stratified by source, the recall share is weighted by population, and recall is reported per
+  predicted label with cells expected below 10 descriptive only.
+- **Why:** the pooled floors could pass while one source failed. Glaive is 74.6% of the flags, ToolACE is where
+  the two detectors disagree most, and classifier v2 was never tested on When2Call.
+- **When:** adopted 2026-10-03, before the triage task exists and before any triage label. The owner chose the
+  proposal on every item of 47 §6. It is recorded in
+  [03](../docs/research/study-002/03-PREREGISTRATION.md) in the same commit.
+- **Consequences:**
+  - **New ways to stop.** A source can now stop the study even when the pool passes. No threshold value moved.
+  - **The rules are code** (`src/opengrad/verification/flag_triage.py`, `triage_decision` and `recall_report`),
+    pinned by tests, before any label exists.
+  - **The flag-set record pins only the v1 regex,** not all of `src/opengrad/evaluation/capability.py`: an
+    unrelated edit to that shared module no longer invalidates the flag set. A test fails if the detector reads
+    anything its fingerprint does not cover.

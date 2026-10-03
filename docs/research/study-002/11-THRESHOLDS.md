@@ -169,3 +169,15 @@ Declared by [46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md) before any of their mea
 
 "The margin a population is used to test" (16 check 3) is 10 points for every comparison between arms; `CLARIFY`
 and `ANSWER-natural` comparisons are descriptive, and floors fail closed (46 §10).
+
+## Thresholds added by `study_002_prereg_v15` (appended 2026-10-03)
+
+Declared by [47](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md) before any triage label exists. The pooled floors above
+stay over all of the flag set.
+
+| Threshold | Value | Applies to | Below it |
+|---|---|---|---|
+| per-source flag precision (stop rule 1) | ≥ 0.90 of a source's agreed flagged records are declines | Glaive, When2Call, ToolACE (47 §3 A) | Glaive or When2Call: the corpus intervention stops; ToolACE: excluded |
+| per-source agreement (stop rule 2) | raw agreement ≥ 0.80 within the source | Glaive, When2Call, ToolACE (47 §3 B) | as above |
+| per-source evaluability | ≥ 100 agreed items | each source (47 §3 D) | `NOT_EVALUABLE`, treated as failing |
+| recall cell | ≥ 10 expected sampled replies | each source and predicted label of the recall sample (47 §3 F) | descriptive only |

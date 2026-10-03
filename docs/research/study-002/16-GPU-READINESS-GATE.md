@@ -223,3 +223,10 @@ added with it.
 
 The working planning envelope above ("≈ $800–1,600") is for 35 runs. For v14's 29 it is ≈ $622.92–1,245.84
 excluding evaluation and ≈ $651.92–1,332.84 including it. It is still not a balance.
+
+## Note: check 7 under v15 (appended 2026-10-03)
+
+Check 7's disposition map gains `SOURCE_EXCLUDED`: under [47](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md)
+(`study_002_prereg_v15`), a ToolACE that fails its per-source floor is excluded, and its flagged records keep
+their text in every arm. A failing Glaive or When2Call stops the corpus intervention instead. The rules are code
+(`flag_triage.triage_decision`).

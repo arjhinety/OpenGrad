@@ -426,3 +426,15 @@ An independent audit of the v14 commits found the following. The text above stay
     engineering still to do.
 - **[10](10-STATISTICS-PLAN.md)'s confirmatory family** is restated by the owner's decision of 2026-10-03 (03,
   addendum to v14).
+
+## Note under `study_002_prereg_v15` (appended 2026-10-03)
+
+[47](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md), adopted 2026-10-03, adds to §5's triage. The text above stays as
+adopted.
+- **Per-source floors.** Glaive, When2Call and ToolACE must each reach precision ≥ 0.90 and raw agreement ≥ 0.80
+  on at least 100 agreed items. A failing Glaive or When2Call stops the corpus intervention; a failing ToolACE is
+  excluded, its records disposed `SOURCE_EXCLUDED` (text unchanged in every arm).
+- **The pooled floors above stay over all of `F`,** whatever is excluded.
+- **The trial** gives ToolACE at least 20 of its 100 records, and its labels never count toward a floor.
+- **The recall sample** of 400 gives ToolACE and When2Call at least 80 each; its pooled share is weighted by
+  population, and it is reported per predicted label.

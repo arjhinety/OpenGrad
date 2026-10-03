@@ -1,11 +1,11 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v14` (2026-10-02).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v14 at
+> **Current version: `study_002_prereg_v15` (2026-10-03).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v15 at
 > the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
 > [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md),
 > [44](44-PUNANS-V2-AMENDMENT-DRAFT.md), [45](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md),
-> [46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md)). Entries are appended so cited line numbers hold.
+> [46](46-READINESS-DESIGN-AMENDMENT-DRAFT.md), [47](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md)). Entries are appended so cited line numbers hold.
 
 **`study_002_prereg_v1`.** This document is the frozen decision contract for Study 002. It is
 committed **before the first Study 002 training run is launched and before any Study 002 evaluation
@@ -508,3 +508,37 @@ Appended here rather than under "Amendments" so that line numbers other document
 - **Found by** an independent audit of the v14 commits, before any result.
 - **Candidates already scored:** none.
 - ERRATA: `reports/ERRATA.md` §31, addendum.
+
+### `study_002_prereg_v15` — 2026-10-03
+
+- **Context.** The flag set `F` that 46 §5 triages holds 19,051 records: Glaive 14,205, When2Call 3,979, ToolACE
+  867. Its floors (stop rule 2, raw agreement ≥ 0.80; stop rule 1, flag precision ≥ 0.90) were pooled over all of
+  `F`, so a pass could hide a source the classifier misreads. ToolACE is where classifier v2 and the v1 regex
+  disagree most (867 flags against 10), and classifier v2 was never tested on When2Call.
+- **Items changed** ([47](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md) §3):
+  - **Per-source floors:** each source's precision on agreed items ≥ 0.90 and raw agreement ≥ 0.80. A source
+    with fewer than 100 agreed items is `NOT_EVALUABLE` and fails.
+  - **A failing source:** Glaive or When2Call stops the corpus intervention (stop rule 1 for precision, 2 for
+    agreement). ToolACE is excluded: its flagged records keep their text, disposed `SOURCE_EXCLUDED`.
+  - **The pooled floors stay over all of `F`,** ToolACE included even when excluded. Exclusion changes
+    dispositions only and never rescues a pooled failure.
+  - **The 100-record trial** gives ToolACE at least 20 (Glaive 59, When2Call 21, ToolACE 20). Trial records are
+    labelled again in the full triage, and only those labels count.
+  - **The 400-reply recall sample** gives ToolACE and When2Call at least 80 each (Glaive 240). Its pooled share of
+    declines is weighted by each source's population; the sample's own share is reported only beside it.
+  - **Recall is reported per source and predicted label.** A cell expected below 10 sampled replies is
+    descriptive only. Implied missed declines are given again without `ABSTAIN`-predicted replies, withheld where
+    that sample is expected below 10.
+- **Reason:** a pooled figure can pass while a source fails. Excluding Glaive or When2Call would change what `R1`
+  vs `C0` tests, so only ToolACE can be excluded.
+- **Owner decisions, 2026-10-03:** the source-dependent consequence, the pooled floors over all of `F`, the
+  stratified recall sample with population weights, the per-label reporting and the cut-off of 10; then adoption
+  of every proposal in 47 §6, including the withholding the draft added.
+- **Not changed:**
+  - every threshold value: 0.90 and 0.80 are reused, not moved;
+  - 46's flag-set definition, labels and triage procedure;
+  - every population, the arms and the arms' seeds.
+- **Candidates already scored:** none. **Triage labels:** none exist; the triage task is not built.
+- **Arms launched under an earlier version:** none.
+- **Full record:** [47-PER-SOURCE-FLAG-PRECISION-DRAFT.md](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md); the ERRATA
+  entry is `reports/ERRATA.md` §32.

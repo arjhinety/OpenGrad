@@ -85,6 +85,13 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   Its annotation task is `pdet-coverage-v2` (`configs/annotation/pdet-coverage-v2.yaml`, procedure
   `pdet-coverage-v2.model-procedure.md`: v1's plus a first-reply instruction), run with the same three external
   annotators and the same finish-up steps.
+- **Study 002's flag set and its triage** (46 §5, 47): `python -m opengrad.verification.flag_set --dry-run |
+  --build | --verify` writes `reports/study-002/flag-set/` (counts, ids and hashes only; never overwrites).
+  The manifest pins the builder, classifier v2's modules and the v1 regex's own code (`detector_sha256`),
+  not all of `capability.py`. `src/opengrad/verification/flag_triage.py` holds the trial and recall draws,
+  the per-source precision and recall reports and `triage_decision` (a failing Glaive or When2Call stops,
+  ToolACE can be excluded, the pooled floors stay over all of the flag set). No triage label exists yet;
+  each labelling run needs the owner's word.
 - **Classifier v2 development sets** (37 §3): `src/opengrad/verification/classifier_devset_v2.py --set dev --build |
   --verify` draws first replies into `reports/prose-classifier/dev-v2/`, excluding P-DET-COVERAGE-v2 and everything
   it excludes. Task `prose-classifier-dev-v2` (`configs/annotation/prose-classifier-dev-v2.yaml`) is labelled by

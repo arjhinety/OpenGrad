@@ -112,7 +112,8 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
     > **Status (2026-09-24).** The current state, what it is blocked on and the decisions it needs are
     > kept in one place: [Study 002 — Current state](docs/research/study-002/README.md#current-state).
     > In short (updated 2026-10-03): `P-CONF-v1` and `P-UNANS` are built; `study_002_prereg_v14` settled the
-    > readiness design (29 runs; canonical-v3 is exploratory arm `S2`); and the readiness record
+    > readiness design (29 runs; canonical-v3 is exploratory arm `S2`); `study_002_prereg_v15` gave the
+    > flag-set triage per-source floors; and the readiness record
     > (`python -m opengrad.verification.study_002_readiness`) is `BLOCKED`, with each failing check naming
     > what it lacks. The six-item pre-flight below is the plan as it stood on 2026-09-13, kept for the record.
 
