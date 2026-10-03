@@ -29,7 +29,7 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0009 | 2026-10-03 | OpenGrad verification | `OURS` | The triage report checked the flag set against the population it was reporting, i.e. against itself | Fixed (reads the members file) |
 | UP-0010 | 2026-10-03 | OpenGrad verification | `OURS` | Triage `verify` crashed on absent populations; no way to restore them; first `--restore` could write half | Fixed (`BLOCKED_INPUT_MISSING`, `--restore`, check before write) |
 | UP-0011 | 2026-10-03 | OpenGrad registry validation | `OURS` | A malformed `papers.yaml` makes `opengrad-validate` die with a traceback, not a validation error | Open |
-| UP-0012 | 2026-10-03 | OpenGrad runner, agy 1.2.x | `OURS` (+ `UNCLEAR` upstream) | agy ran labelling batches with every tool auto-approved: web search, and file browsing outside its empty directory | Open: owner decision |
+| UP-0012 | 2026-10-03 | OpenGrad runner, agy 1.2.x | `OURS` (+ `UNCLEAR` upstream) | agy ran labelling batches with every tool auto-approved: web search, and file browsing outside its empty directory | Gated in the runner (2026-10-04); upstream part open |
 | UP-0013 | 2026-10-04 | OpenGrad tests | `OURS` | A pushed commit grew the hygiene allowlist, and a test pinning the credential count failed CI | Fixed (count 3 -> 9, ERRATA §33) |
 
 ---
@@ -139,28 +139,35 @@ created in its first minute and records web-tool calls per attempt in the archiv
 tool calls itself (`toolCallCount`).
 
 **The trial (`first-reply-review-v1-trial`, 2026-10-03).** Gemini (agy 1.2.16): 5 attempts, all 5 visible, 0
-web-tool calls, 0 web steps; its only tool calls were 11 `view_file` reads of its own input. DeepSeek (cline
-3.0.66): 5 attempts, all visible, 0 tool calls. Recorded in
+web-tool calls. A separate scan of the store found its only tool calls were 11 `view_file` reads of its own input;
+that count is not in the manifest, which records web tools. DeepSeek (cline 3.0.66): 5 attempts, all visible, 0
+tool calls. Web-tool counts recorded in
 `reports/study-002/flag-triage/provenance/external-models/first-reply-review-v1-trial.external-models.audit-trail.manifest.json`.
 
-**Earlier runs (counts only; 282 of 291 Gemini attempts matched to a conversation).**
+**Earlier runs (counts only; 278 of the 287 Gemini attempts before the trial matched to a conversation).**
 - `search_web` calls: 10, in 5 attempts. Two of those attempts kept their labels, both in `pdet-coverage-v2`
   (batch 10 attempt 2, batch 24). The others (`pdet-coverage-v1` batch 11, `pdet-coverage-v2` batch 13,
   `answer-strata-v1` batch 01) recorded no labels.
 - In `pdet-coverage-v1` and `pdet-coverage-v2`, Gemini also listed, searched and read files across the home folder
   and the OpenGrad repository. In kept batches it read paths under `.annotation/` (7 batches in v1, 9 in v2), and
-  in 5 kept batches it opened another model's answer file (v1 batches 10, 11 and 18; v2 batches 04 and 10). All
+  in 6 kept batches it read another model's answer file (`view_file` in v1 batches 10, 11 and 18 and v2 batches 04
+  and 10; `grep_search` in v2 batch 20). All
   three models ran at the same time, so those answers existed. `pdet-coverage-v1-routing` browsed the home folder,
   not the repository.
 - No such calls in `answer-strata-v1`'s kept batches, `punans-v1`, `punans-v2`, `punans-v2-trial` or
-  `punans-v2-constructed`: their only tool reads were of their own input.
+  `punans-v2-constructed`, in every batch that could be matched: their only tool reads were of their own input.
+  Three kept batches cannot be matched (`answer-strata-v1` 46 and 50, `punans-v1` 04).
 
 **Not yet decided.** What this means for the P-DET-COVERAGE references and what was built on them, and how agy is
 locked down before the full triage run, are the study owner's decisions.
 - **2026-10-04, fix:** `scripts/agy_tool_gate.py`, a PreToolUse hook written into each run directory
   (`.agents/hooks.json`), allows only `view_file` of the input and denies everything else; the runner refuses an
-  attempt the hook never saw. Canary (agy 1.2.16): told to search the web and list a directory, the model's search
-  was denied by the hook (conversation store: 1 attempted `search_web`, 0 web steps) and it reported both blocked.
+  attempt in which the hook never allowed a read of the input. Canary (agy 1.2.16): told to search the web and
+  list a directory, the model called `search_web` once and the gate log shows it denied; its result step in the
+  store is 116 bytes with a field none of September's 10 executed searches had (theirs were 3.9 to 12.3 KB). "0
+  web steps" proves nothing here, since executed searches of this kind showed none either. The model never called
+  `list_dir`. The canary's run directory and gate log were deleted; its conversation file remains in the local
+  agy store.
   The owner chose this over changing the global agy settings. Incident: `docs/INCIDENT_LOG.md` INC-0002.
 
 ## UP-0013 — a ratchet test outside the targeted set (`OURS`)

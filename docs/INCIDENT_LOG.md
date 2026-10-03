@@ -192,30 +192,41 @@ agy's run records keep only its printed answer. Its local conversation store kee
   repository. In kept batches it read paths under `.annotation/`, the git-ignored working state that holds every
   model's batches, answers and stores: 7 batches in v1, 9 in v2. The routing layer (v1) browsed the home folder,
   not the repository.
-- **Other models' answers.** In 5 kept batches Gemini opened an answer file of gpt-5.6-sol or deepseek-v4.1-flash:
-  v1 batches 10, 11 and 18, v2 batches 04 and 10. The three models ran at the same time, so those answers existed.
-- Of all Gemini attempts, 282 of 291 could be matched to their stored conversation; 9 cannot be checked.
+- **Other models' answers.** In 6 kept batches Gemini read an answer file of gpt-5.6-sol or deepseek-v4.1-flash:
+  it opened one with `view_file` in v1 batches 10, 11 and 18 and v2 batches 04 and 10, and searched one with
+  `grep_search` (matches returned) in v2 batch 20. The three models ran at the same time, so those answers existed.
+- Of the 287 Gemini attempts before the triage trial, 278 could be matched to their stored conversation (the
+  conversation file created in the attempt's first minute); 9 cannot be checked.
 
 ### What was not affected
 
 - deepseek-v4.1-flash (cline reports its own tool calls): 0 tool calls in every visible attempt of every task.
 - gpt-5.6-sol (codex, read-only sandbox): its transcripts show no command, tool or web event in any task.
 - Gemini's kept batches of `answer-strata-v1`, `punans-v1`, `punans-v2`, `punans-v2-trial` and
-  `punans-v2-constructed`, and the flag-set triage trial: their only file reads were of their own input.
+  `punans-v2-constructed`, and the flag-set triage trial: in every one that could be matched to its conversation,
+  the only tool calls were reads of its own input. Three kept batches cannot be matched and so cannot be checked:
+  `answer-strata-v1` batches 46 and 50 and `punans-v1` batch 04.
 
 ### What it does to published claims
 
 Where Gemini read the repository or another model's answers, its vote was not independent and possibly not blind,
 so the two-of-three consensus in those batches is weaker than the references state. Whether any label changed
-because of it is unknown: answering would mean reading the content. Classifier v2's single test (37 §8) and
-everything built on it used these references, so those results carry this caveat until the re-labelled references
-exist and are compared. The frozen references and the test stay as they are; the comparison will be new artifacts.
+because of it is unknown: answering would mean reading the content. Every result measured against these references
+carries this caveat until the re-labelled references exist and are compared; [`reports/ERRATA.md`](../reports/ERRATA.md)
+§34 lists them. The frozen references and tests stay as they are; the comparison will be new artifacts.
 
 ### What changed
 
 - `scripts/agy_tool_gate.py`: a PreToolUse hook, written into every agy run directory, allows only reading the
-  run's input file and denies everything else. The runner refuses an attempt the hook never saw. A canary run
-  (agy 1.2.16, 2026-10-04) asked the model to search the web and list a directory: the hook denied the search,
-  and the conversation store shows it never executed.
+  run's input file and denies everything else. The runner refuses an attempt in which the hook never allowed a
+  read of the input, so a hook that is not in force cannot pass unnoticed.
+- A canary run (agy 1.2.16, 2026-10-04) asked the model to search the web and list a directory. The gate log
+  showed the search denied. In the conversation store, the search's result step is 116 bytes and carries a field
+  none of the 10 executed searches of September had; those results were 3.9 to 12.3 KB. The model never tried to
+  list the directory, so that half of the canary tested nothing. Its run directory and gate log were deleted;
+  only the conversation file remains, in the local agy store.
+- Not proven: that every kind of tool call (MCP tools, subagents) passes through the hook, and what agy does if
+  the hook times out or fails. The archive therefore compares, per attempt, every tool call in the conversation
+  store with the gate log; a mismatch means a call bypassed the gate.
 - `scripts/archive_external_model_labels.py` records every attempt's web-tool calls in the archive manifest.
 - `scripts/run_external_annotation.py --session` lets a re-label go into a new session, leaving the old intact.

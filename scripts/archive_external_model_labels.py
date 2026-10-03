@@ -335,19 +335,28 @@ def agy_web_calls(run: dict[str, Any]) -> dict[str, Any]:
     files = [f for f in AGY_CONVERSATIONS.glob("*.db") if start <= f.stat().st_ctime <= end] if AGY_CONVERSATIONS.is_dir() else []
     if len(files) != 1:
         return {"visible": False, "why": f"{len(files)} agy conversations were created in the attempt's first minute, not 1"}
-    rows = sqlite3.connect(f"file:{files[0]}?mode=ro", uri=True).execute("select step_type, step_payload from steps").fetchall()
+    connection = sqlite3.connect(f"file:{files[0]}?mode=ro", uri=True)
+    try:
+        rows = connection.execute("select step_type, step_payload from steps").fetchall()
+    finally:
+        connection.close()
     calls: dict[str, int] = {}
+    tools: dict[str, int] = {}
     for step_type, payload in rows:
         if step_type == AGY_MODEL_STEP and isinstance(payload, bytes):
             for name in _field(payload, AGY_TOOL_NAME_PATH):
+                tool = name.decode("utf-8", "replace")
+                tools[tool] = tools.get(tool, 0) + 1
                 if name in AGY_WEB_TOOLS:
-                    calls[name.decode()] = calls.get(name.decode(), 0) + 1
+                    calls[tool] = calls.get(tool, 0) + 1
     web_steps = sum(1 for step_type, _ in rows if step_type in AGY_WEB_STEPS)
     return {
         "visible": True,
         "source": f"agy conversation store, {files[0].name}",
         "steps": len(rows),
         "web_tool_calls": calls,
+        "tool_calls": dict(sorted(tools.items())),
+        # Executed searches of agy 1.2.x came back as generic result steps, not types 31/33, so 0 here proves nothing.
         "web_steps": web_steps,
         "any": bool(calls or web_steps),
     }
@@ -376,8 +385,16 @@ def web_tool_calls(session: str, run: dict[str, Any], stdout: Path) -> dict[str,
         if gate is not None and result.get("visible"):
             # A run under the tool gate (scripts/agy_tool_gate.py): a call the hook denied never executed.
             denied = sum(gate["denied"].get(name.decode(), 0) for name in AGY_WEB_TOOLS)
+            seen = {
+                tool: gate["allowed"].get(tool, 0) + gate["denied"].get(tool, 0)
+                for tool in {*gate["allowed"], *gate["denied"]}
+            }
             result["tool_gate"] = gate
-            result["any"] = bool(sum(result["web_tool_calls"].values()) > denied or result["web_steps"])
+            # Every call in the store must have passed the gate; a difference means a call bypassed it.
+            result["gate_saw_every_call"] = seen == result["tool_calls"]
+            result["any"] = bool(
+                sum(result["web_tool_calls"].values()) > denied or result["web_steps"] or not result["gate_saw_every_call"]
+            )
         return result
     if session.startswith("model-deepseek"):
         return cline_tool_calls(stdout.read_bytes()) if stdout.is_file() else {"visible": False, "why": "no stdout"}

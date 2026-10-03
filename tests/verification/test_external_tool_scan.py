@@ -116,19 +116,32 @@ def test_the_runner_writes_the_hook_and_reads_back_what_it_saw(tmp_path: Path) -
     assert runner.ANNOTATORS["model.gemini-3.8-flash-high"]["tool_gate"] is True
 
 
-def test_a_search_the_gate_denied_is_not_counted_as_executed(
+def test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(archive, "AGY_CONVERSATIONS", tmp_path)
     con = sqlite3.connect(tmp_path / "conversation.db")
     con.execute("create table steps (step_type integer, step_payload blob)")
-    con.execute("insert into steps values (?, ?)", (15, _call(b"search_web", {"query": "q"})))
+    con.executemany(
+        "insert into steps values (?, ?)",
+        [
+            (15, _call(b"view_file", {"AbsolutePath": "input.md"})),
+            (15, _call(b"search_web", {"query": "q"})),
+        ],
+    )
     con.commit()
     con.close()
     run = {"started_at": time.time() - 1, "seconds": 30}
-    gated = {
-        **run,
-        "tool_gate": {"fired": True, "allowed": {"view_file": 1}, "denied": {"search_web": 1}},
-    }
-    assert archive.web_tool_calls("model-gemini", run, tmp_path / "none")["any"] is True
-    assert archive.web_tool_calls("model-gemini-r2", gated, tmp_path / "none")["any"] is False
+    gate_log = {"fired": True, "allowed": {"view_file": 1}, "denied": {"search_web": 1}}
+    ungated = archive.web_tool_calls("model-gemini", run, tmp_path / "none")
+    assert ungated["any"] is True and ungated["tool_calls"] == {"search_web": 1, "view_file": 1}
+    gated = archive.web_tool_calls(
+        "model-gemini-r2", {**run, "tool_gate": gate_log}, tmp_path / "none"
+    )
+    assert gated["any"] is False and gated["gate_saw_every_call"] is True
+    # The gate log missed the search: it bypassed the hook, so it counts as executed.
+    bypass = {"fired": True, "allowed": {"view_file": 1}, "denied": {}}
+    missed = archive.web_tool_calls(
+        "model-gemini-r2", {**run, "tool_gate": bypass}, tmp_path / "none"
+    )
+    assert missed["any"] is True and missed["gate_saw_every_call"] is False

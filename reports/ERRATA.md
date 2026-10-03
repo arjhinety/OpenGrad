@@ -1392,13 +1392,25 @@ An independent audit of the v14 commits found the following:
 **Added 2026-10-03.** No number is changed here; the affected numbers are named and will be compared with re-labelled
 references.
 - **What:** in P-DET-COVERAGE-v1 and v2, the Gemini 3.8 Flash (High) labeller searched the web and read files in
-  this repository, including another model's answers in 5 kept batches (v1 batches 10, 11, 18; v2 batches 04, 10).
+  this repository, including another model's answers in 6 kept batches (v1 batches 10, 11, 18; v2 batches 04, 10,
+  20).
   Details, counts and cause: [`docs/INCIDENT_LOG.md`](../docs/INCIDENT_LOG.md) INC-0002.
 - **Affected:** the P-DET-COVERAGE-v1 and v2 model references (`study_002_prereg_v5`, `v6`), and what was measured
-  against them: classifier v2's single test (37 §8: DIRECT, UNSUPPORTED and CLARIFY qualify) and the balancing
-  permission that rests on it ([38](../docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md)).
-- **Not affected:** the P-DET-v1 population and its labels; Gemini's labels in `answer-strata-v1` and the `punans`
-  tasks; every deepseek-v4.1-flash and gpt-5.6-sol label.
+  against or built on them:
+  - classifier v1's single test (33 §8, on the v1 reference) and the decisions of 35 that followed it;
+  - classifier v2's single test (37 §8, on the v2 reference: DIRECT, UNSUPPORTED and CLARIFY qualify);
+  - both decisions of [38](../docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md), the
+    balancing permission and the C1 authorisation, and what rests on C1: 39's canonical-v3 specification, the
+    canonical-v3 artifacts that name 38 as their authority, the provenance gate, S2 = canonical-v3 in the
+    preregistration, and 21's implementation status;
+  - 46's figures for classifier v2's decline precision and recall (0.978 and 0.964) and the test that pins them;
+  - the supply and DIRECT-prevalence audits that project from these references' label yields.
+
+  38 §5 lists what would withdraw its permissions, and labels that were not independent are not among them.
+  Whether this withdraws them is the owner's decision.
+- **Not affected:** the P-DET-v1 population and its labels; every deepseek-v4.1-flash and gpt-5.6-sol label; and
+  Gemini's kept labels in `answer-strata-v1` and the `punans` tasks, in every batch that could be checked (all but
+  `answer-strata-v1` batches 46 and 50 and `punans-v1` batch 04, which cannot be matched to their conversations).
 - **What is being done:** by the owner's decision of 2026-10-03, Gemini re-labels every P-DET-COVERAGE-v1 and v2
   batch under a tool gate, in new sessions. The references are rebuilt as new versions and compared with the
   frozen ones; the frozen artifacts are not edited.
