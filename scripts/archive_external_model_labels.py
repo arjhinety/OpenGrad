@@ -368,9 +368,16 @@ def cline_tool_calls(stdout: bytes) -> dict[str, Any]:
 
 
 def web_tool_calls(session: str, run: dict[str, Any], stdout: Path) -> dict[str, Any]:
-    if session == "model-gemini":
-        return agy_web_calls(run)
-    if session == "model-deepseek":
+    if session.startswith("model-gemini"):
+        result = agy_web_calls(run)
+        gate = run.get("tool_gate")
+        if gate is not None and result.get("visible"):
+            # A run under the tool gate (scripts/agy_tool_gate.py): a call the hook denied never executed.
+            denied = sum(gate["denied"].get(name.decode(), 0) for name in AGY_WEB_TOOLS)
+            result["tool_gate"] = gate
+            result["any"] = bool(sum(result["web_tool_calls"].values()) > denied or result["web_steps"])
+        return result
+    if session.startswith("model-deepseek"):
         return cline_tool_calls(stdout.read_bytes()) if stdout.is_file() else {"visible": False, "why": "no stdout"}
     return {"visible": False, "why": f"no scan for session {session}"}
 

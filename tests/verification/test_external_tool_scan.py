@@ -11,7 +11,9 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "scripts"))
+import agy_tool_gate as gate
 import archive_external_model_labels as archive
+import run_external_annotation as runner
 
 
 def _varint(value: int) -> bytes:
@@ -73,3 +75,60 @@ def test_an_agy_search_is_counted_and_a_missing_conversation_is_not_visible(
     result = archive.agy_web_calls(run)
     assert result["visible"] and result["any"]
     assert result["web_tool_calls"] == {"search_web": 1} and result["web_steps"] == 1
+
+
+def test_the_gate_allows_only_reading_the_input_file(tmp_path: Path) -> None:
+    def call(name: str, **args: str) -> dict[str, object]:
+        return {"toolCall": {"name": name, "args": args}}
+
+    allowed = gate.decide(
+        call("view_file", AbsolutePath=str(tmp_path / "input.md")), tmp_path, "input.md"
+    )
+    assert allowed == {"decision": "allow"}
+    for denied in (
+        call("view_file", AbsolutePath=str(tmp_path / "other.md")),
+        call("view_file", AbsolutePath=str(tmp_path / "sub" / ".." / ".." / "input.md")),
+        call("search_web", query="input.md"),
+        call("read_url_content", Url="https://example.org"),
+        call("list_dir", DirectoryPath=str(tmp_path)),
+        call("call_mcp_tool", ServerName="x", ToolName="y"),
+        {"toolCall": {"name": "view_file"}},
+        "not a payload",
+    ):
+        assert gate.decide(denied, tmp_path, "input.md")["decision"] == "deny"
+
+
+def test_the_runner_writes_the_hook_and_reads_back_what_it_saw(tmp_path: Path) -> None:
+    runner.write_tool_gate(tmp_path)
+    hooks = json.loads((tmp_path / ".agents" / "hooks.json").read_text(encoding="utf-8"))
+    (group,) = hooks["opengrad-tool-gate"]["PreToolUse"]
+    assert group["matcher"] == "*" and str(runner.TOOL_GATE) in group["hooks"][0]["command"]
+    assert runner.read_tool_gate(tmp_path) == {"fired": False, "allowed": {}, "denied": {}}
+    (tmp_path / ".agents" / "gate-log.jsonl").write_text(
+        '{"tool": "view_file", "decision": "allow"}\n{"tool": "search_web", "decision": "deny"}\n',
+        encoding="utf-8",
+    )
+    assert runner.read_tool_gate(tmp_path) == {
+        "fired": True,
+        "allowed": {"view_file": 1},
+        "denied": {"search_web": 1},
+    }
+    assert runner.ANNOTATORS["model.gemini-3.8-flash-high"]["tool_gate"] is True
+
+
+def test_a_search_the_gate_denied_is_not_counted_as_executed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(archive, "AGY_CONVERSATIONS", tmp_path)
+    con = sqlite3.connect(tmp_path / "conversation.db")
+    con.execute("create table steps (step_type integer, step_payload blob)")
+    con.execute("insert into steps values (?, ?)", (15, _call(b"search_web", {"query": "q"})))
+    con.commit()
+    con.close()
+    run = {"started_at": time.time() - 1, "seconds": 30}
+    gated = {
+        **run,
+        "tool_gate": {"fired": True, "allowed": {"view_file": 1}, "denied": {"search_web": 1}},
+    }
+    assert archive.web_tool_calls("model-gemini", run, tmp_path / "none")["any"] is True
+    assert archive.web_tool_calls("model-gemini-r2", gated, tmp_path / "none")["any"] is False

@@ -12,6 +12,7 @@ supersede an earlier one, and both stay.
 | ID | Date | Summary | State |
 |---|---|---|---|
 | INC-0001 | 2026-09-10 | Checkpoint weights deleted before upload; partly unrecoverable | Open — weights unrecoverable |
+| INC-0002 | 2026-10-03 | Gemini labeller searched the web and read the repository, including other models' answers | Open — Gemini re-labelling P-DET-COVERAGE |
 
 ---
 
@@ -168,3 +169,53 @@ stay checkable, with digests recorded in
 | step 200 | 3,650 | `f35e3fb4…` | `arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO` `evaluation/checkpoint-200/` |
 | step 300 | 3,650 | `606c0d9b…` | `arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO` `evaluation/checkpoint-300/` |
 
+---
+
+## INC-0002 — The Gemini labeller was not confined to its input
+
+**Date found:** 2026-10-03 (the runs were on 2026-09-17 and 2026-09-18)
+**Severity:** High for the P-DET-COVERAGE-v1 and v2 references, which assume three independent blind labellers
+**Cause:** our runner relied on agy's own settings. On this machine agy runs every tool without asking
+(`toolPermission: always-proceed`), and the `--sandbox` flag the runner passed restricts terminal commands only.
+The procedure told the model to open nothing and search nothing; nothing enforced it
+([`docs/UPSTREAM_ISSUES.md`](UPSTREAM_ISSUES.md) UP-0012).
+**State:** open. The owner decided (2026-10-03) to re-label every Gemini batch of P-DET-COVERAGE-v1 (both layers) and
+P-DET-COVERAGE-v2 with tools locked down, and to rebuild the references as new versions.
+
+### What happened
+
+agy's run records keep only its printed answer. Its local conversation store keeps every step, and reading it
+(tool names, argument structure and counts only, no item text) shows:
+- **Web searches.** 10 `search_web` calls in 5 Gemini attempts. Two of those attempts kept their labels, both in
+  P-DET-COVERAGE-v2 (batch 10 attempt 2, batch 24).
+- **Browsing.** In P-DET-COVERAGE-v1 and v2, Gemini listed, searched and read files across the home folder and this
+  repository. In kept batches it read paths under `.annotation/`, the git-ignored working state that holds every
+  model's batches, answers and stores: 7 batches in v1, 9 in v2. The routing layer (v1) browsed the home folder,
+  not the repository.
+- **Other models' answers.** In 5 kept batches Gemini opened an answer file of gpt-5.6-sol or deepseek-v4.1-flash:
+  v1 batches 10, 11 and 18, v2 batches 04 and 10. The three models ran at the same time, so those answers existed.
+- Of all Gemini attempts, 282 of 291 could be matched to their stored conversation; 9 cannot be checked.
+
+### What was not affected
+
+- deepseek-v4.1-flash (cline reports its own tool calls): 0 tool calls in every visible attempt of every task.
+- gpt-5.6-sol (codex, read-only sandbox): its transcripts show no command, tool or web event in any task.
+- Gemini's kept batches of `answer-strata-v1`, `punans-v1`, `punans-v2`, `punans-v2-trial` and
+  `punans-v2-constructed`, and the flag-set triage trial: their only file reads were of their own input.
+
+### What it does to published claims
+
+Where Gemini read the repository or another model's answers, its vote was not independent and possibly not blind,
+so the two-of-three consensus in those batches is weaker than the references state. Whether any label changed
+because of it is unknown: answering would mean reading the content. Classifier v2's single test (37 §8) and
+everything built on it used these references, so those results carry this caveat until the re-labelled references
+exist and are compared. The frozen references and the test stay as they are; the comparison will be new artifacts.
+
+### What changed
+
+- `scripts/agy_tool_gate.py`: a PreToolUse hook, written into every agy run directory, allows only reading the
+  run's input file and denies everything else. The runner refuses an attempt the hook never saw. A canary run
+  (agy 1.2.16, 2026-10-04) asked the model to search the web and list a directory: the hook denied the search,
+  and the conversation store shows it never executed.
+- `scripts/archive_external_model_labels.py` records every attempt's web-tool calls in the archive manifest.
+- `scripts/run_external_annotation.py --session` lets a re-label go into a new session, leaving the old intact.

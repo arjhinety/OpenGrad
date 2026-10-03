@@ -56,6 +56,10 @@ STDIN_POINTER = (
 #: The input file for CLIs that do not read standard input when started from Python (measured for agy). It
 #: is the only file in the isolated directory.
 INPUT_FILE = "input.md"
+#: agy runs every tool unasked on this machine and ``--sandbox`` limits commands only (docs/UPSTREAM_ISSUES.md UP-0012).
+#: A run with ``tool_gate`` gets ``.agents/hooks.json`` in its isolated directory, whose PreToolUse hook (this script)
+#: allows only reading the input file and logs every decision; an attempt the hook never saw is not recorded.
+TOOL_GATE = ROOT / "scripts" / "agy_tool_gate.py"
 FILE_POINTER = (
     f"Read the file {INPUT_FILE} in your working directory. It contains your complete instructions followed by "
     "the batch to annotate. Follow those instructions exactly. Do not open any other file and run no commands."
@@ -82,6 +86,7 @@ ANNOTATORS: dict[str, dict[str, Any]] = {
             FILE_POINTER,
         ],
         "input": "file",
+        "tool_gate": True,
         "version_argv": ["--version"],
     },
     "model.gpt-5.6-sol": {
@@ -231,6 +236,8 @@ def run_once(
     by_file = spec["input"] == "file"
     if by_file:
         (workdir / INPUT_FILE).write_bytes(prompt)
+    if spec.get("tool_gate"):
+        write_tool_gate(workdir)
     started = time.time()
     try:
         done = subprocess.run(
@@ -250,8 +257,11 @@ def run_once(
         # npm-installed CLIs update themselves and briefly remove their launcher; the attempt is retried.
         exit_code, stdout, stderr = "executable_missing", b"", b""
     ended = time.time()
+    gate = read_tool_gate(workdir) if spec.get("tool_gate") else None
     created = sorted(
-        path.name for path in workdir.iterdir() if not (by_file and path.name == INPUT_FILE)
+        path.name
+        for path in workdir.iterdir()
+        if not (by_file and path.name == INPUT_FILE) and not (gate is not None and path.name == ".agents")
     )
     last_message = last.read_bytes() if last.is_file() else b""
     shutil.rmtree(workdir, ignore_errors=True)
@@ -273,8 +283,38 @@ def run_once(
         "stderr_sha256": sha256_bytes(stderr),
         "last_message_sha256": sha256_bytes(last_message) if last_message else None,
         "files_created_in_isolated_dir": created,
+        **({"tool_gate": gate} if gate is not None else {}),
         **final_text(spec, stdout, last_message),
     }
+
+
+def write_tool_gate(workdir: Path) -> None:
+    """Write the PreToolUse hook that lets agy read only its input file (scripts/agy_tool_gate.py)."""
+    parts = [sys.executable, str(TOOL_GATE), INPUT_FILE]
+    command = " ".join(parts)
+    if any(" " in part for part in parts):
+        # cmd /c strips one outer pair of quotes, so a quoted command line is wrapped once more.
+        command = '"' + " ".join(f'"{part}"' for part in parts) + '"'
+    hooks = {
+        "opengrad-tool-gate": {
+            "PreToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": command, "timeout": 30}]}]
+        }
+    }
+    (workdir / ".agents").mkdir()
+    (workdir / ".agents" / "hooks.json").write_text(json.dumps(hooks, indent=2), encoding="utf-8")
+
+
+def read_tool_gate(workdir: Path) -> dict[str, Any]:
+    """What the hook saw: tool names and decisions only. ``fired`` is false if the hook never ran."""
+    log = workdir / ".agents" / "gate-log.jsonl"
+    allowed: dict[str, int] = {}
+    denied: dict[str, int] = {}
+    lines = log.read_text(encoding="utf-8").splitlines() if log.is_file() else []
+    for line in lines:
+        entry = json.loads(line)
+        bucket = allowed if entry.get("decision") == "allow" else denied
+        bucket[entry.get("tool", "?")] = bucket.get(entry.get("tool", "?"), 0) + 1
+    return {"fired": bool(lines), "allowed": allowed, "denied": denied}
 
 
 def final_text(spec: dict[str, Any], stdout: bytes, last_message: bytes) -> dict[str, Any]:
@@ -308,9 +348,14 @@ def main(argv: list[str] | None = None) -> int:
         default=90,
         help="seconds to wait before retrying (network drops are common)",
     )
+    parser.add_argument(
+        "--session",
+        help="session id (default: the annotator's own); a re-label goes into a new session and leaves the old intact",
+    )
     args = parser.parse_args(argv)
 
-    spec = ANNOTATORS[args.annotator]
+    spec = dict(ANNOTATORS[args.annotator])
+    spec["session"] = args.session or spec["session"]
     executable = resolve_executable(spec["executable"])
     if executable is None:
         raise SystemExit(f"{spec['executable']} is not on PATH")
@@ -365,6 +410,12 @@ def main(argv: list[str] | None = None) -> int:
                 "answers_found": answers is not None,
             }
             status = "no JSON answer array in the output"
+            gate = run.get("tool_gate")
+            if spec.get("tool_gate") and not (gate and gate["allowed"].get("view_file")):
+                # The model must read its input through view_file; if the hook never allowed one, it was not
+                # in force, and the answers are not recorded.
+                answers = None
+                status = "rejected: the tool gate never allowed reading the input, so it was not in force"
             if answers is not None:
                 (batch_dir / f"{stem}.answers.json").write_bytes(
                     (json.dumps(answers, ensure_ascii=False, indent=2) + "\n").encode("utf-8")

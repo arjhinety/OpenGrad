@@ -156,3 +156,8 @@ web-tool calls, 0 web steps; its only tool calls were 11 `view_file` reads of it
 
 **Not yet decided.** What this means for the P-DET-COVERAGE references and what was built on them, and how agy is
 locked down before the full triage run, are the study owner's decisions.
+- **2026-10-04, fix:** `scripts/agy_tool_gate.py`, a PreToolUse hook written into each run directory
+  (`.agents/hooks.json`), allows only `view_file` of the input and denies everything else; the runner refuses an
+  attempt the hook never saw. Canary (agy 1.2.16): told to search the web and list a directory, the model's search
+  was denied by the hook (conversation store: 1 attempted `search_web`, 0 web steps) and it reported both blocked.
+  The owner chose this over changing the global agy settings. Incident: `docs/INCIDENT_LOG.md` INC-0002.

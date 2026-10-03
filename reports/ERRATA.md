@@ -1386,3 +1386,19 @@ An independent audit of the v14 commits found the following:
 - **Also public now:** each item's source and predicted label sit beside its text. The labellers are told to
   open nothing and run in an empty directory, but a labeller that reads this repository could learn how the
   items were chosen. The owner accepted this when choosing to commit the file before labelling.
+
+## 34. The P-DET-COVERAGE references: Gemini's votes were not all independent
+
+**Added 2026-10-03.** No number is changed here; the affected numbers are named and will be compared with re-labelled
+references.
+- **What:** in P-DET-COVERAGE-v1 and v2, the Gemini 3.8 Flash (High) labeller searched the web and read files in
+  this repository, including another model's answers in 5 kept batches (v1 batches 10, 11, 18; v2 batches 04, 10).
+  Details, counts and cause: [`docs/INCIDENT_LOG.md`](../docs/INCIDENT_LOG.md) INC-0002.
+- **Affected:** the P-DET-COVERAGE-v1 and v2 model references (`study_002_prereg_v5`, `v6`), and what was measured
+  against them: classifier v2's single test (37 §8: DIRECT, UNSUPPORTED and CLARIFY qualify) and the balancing
+  permission that rests on it ([38](../docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md)).
+- **Not affected:** the P-DET-v1 population and its labels; Gemini's labels in `answer-strata-v1` and the `punans`
+  tasks; every deepseek-v4.1-flash and gpt-5.6-sol label.
+- **What is being done:** by the owner's decision of 2026-10-03, Gemini re-labels every P-DET-COVERAGE-v1 and v2
+  batch under a tool gate, in new sessions. The references are rebuilt as new versions and compared with the
+  frozen ones; the frozen artifacts are not edited.

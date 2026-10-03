@@ -10,6 +10,7 @@ the script's own first docstring line.
 
 | Script | Purpose |
 |---|---|
+| [`agy_tool_gate.py`](agy_tool_gate.py) | The PreToolUse hook that confines an agy labelling run to reading its own input (docs/UPSTREAM_ISSUES.md UP-0012). |
 | [`archive_devset_model_labels.py`](archive_devset_model_labels.py) | Archive the audit trail of the `model-dev` labels on the classifier development set (33 §3). |
 | [`archive_external_model_labels.py`](archive_external_model_labels.py) | Archive the audit trail of the three external model annotators of P-DET-COVERAGE-v1 (34 §3). |
 | [`archive_pdet_model_batches.py`](archive_pdet_model_batches.py) | Archive the P-DET `model-a` audit trail out of the git-ignored working directory. |
@@ -114,4 +115,4 @@ the script's own first docstring line.
 | [`reporting/generate_indexes.py`](reporting/generate_indexes.py) | Generate the directory indexes ``reports/README.md``, ``scripts/README.md`` and ``docs/README.md``. |
 | [`reporting/generate_source_views.py`](reporting/generate_source_views.py) | Generate the data-source views: ``docs/datasets/SOURCE_REGISTRY.md`` and ``SOURCE_SCREENING.md``. |
 
-88 scripts.
+89 scripts.
