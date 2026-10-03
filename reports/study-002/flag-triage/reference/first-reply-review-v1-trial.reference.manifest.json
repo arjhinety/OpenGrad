@@ -1,0 +1,56 @@
+{
+  "amendment": "study_002_prereg_v15",
+  "amendment_document": "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+  "annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/first-reply-review-v1.model-procedure.md",
+      "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/first-reply-review-v1.model-procedure.md",
+      "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+    }
+  ],
+  "artifact_kind": "FLAG_TRIAGE_MODEL_CONSENSUS_REFERENCE",
+  "package_manifest": "reports/study-002/flag-triage/annotation/wip/flag-triage-trial.annotation-manifest.json",
+  "package_manifest_sha256": "ad9f0d96fce53c3872e162a6106feac6681b0d202a464adb57c93e60d95dc37e",
+  "population_sha256": "0d0054d6d630b90d65cdea7622264d4ca59f949d601d3578ab43d532dc028a45",
+  "reference_file": "first-reply-review-v1-trial.reference.jsonl",
+  "reference_sha256": "322e9c62c43a2dce2bd7ff309cac3370865b06923597c1482b915b534fdc2112",
+  "statement": "Reference labels from the agreement of two non-Claude models, both of which must give the label, each labelling blind. Model judgments, not human gold; qualifications against it are MODEL_REFERENCE and provisional; agreement below is model-model agreement.",
+  "status": "MODEL_REFERENCE_PROVISIONAL",
+  "summary": {
+    "annotator_label_counts": {
+      "model.deepseek-v4.1-flash": {
+        "DECLINE_JUSTIFIED": 91,
+        "DECLINE_UNJUSTIFIED": 7,
+        "UNKNOWN": 2
+      },
+      "model.gemini-3.8-flash-high": {
+        "DECLINE_JUSTIFIED": 88,
+        "DECLINE_UNJUSTIFIED": 10,
+        "UNKNOWN": 2
+      }
+    },
+    "consensus": {
+      "NO_CONSENSUS": 3,
+      "unanimous": 97
+    },
+    "dissent_by_annotator": {},
+    "items": 100,
+    "pairwise_agreement": {
+      "model.gemini-3.8-flash-high|model.deepseek-v4.1-flash": 97
+    },
+    "reference_labels": {
+      "DECLINE_JUSTIFIED": 88,
+      "DECLINE_UNJUSTIFIED": 7,
+      "NO_CONSENSUS": 3,
+      "UNKNOWN": 2
+    }
+  },
+  "task_id": "first-reply-review-v1-trial"
+}

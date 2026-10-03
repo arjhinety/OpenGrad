@@ -68,7 +68,10 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     `verify --require-source`, then `python -m opengrad.verification.pdet_coverage_reference --task <task>
     --package <manifest>`. The export says INCOMPLETE only because gold freezes compare at most two passes.
     Archive the trail with `scripts/archive_external_model_labels.py --task <task>` (raw CLI streams stay under
-    `local/`, untracked).
+    `local/`, untracked). The archive also records, per attempt, the web-tool calls each CLI made (cline's own
+    `toolCallCount`; agy's conversation store under `~/.gemini/antigravity-cli/conversations`, matched by the
+    attempt's first minute). agy runs every tool unasked on this machine (`docs/UPSTREAM_ISSUES.md` UP-0012):
+    check the counts before trusting a batch.
   - **Supply for a next population** (35 §2, §4): `scripts/audit_pdet_coverage_v2_supply.py` counts the unused
     layer B pool (after P-DET-COVERAGE-v1 and every development and check set) and projects DIRECT from existing
     label yields. Counts only. Its 2026-09-17 run found about 22 expected DIRECT among single exchanges, short of 50.

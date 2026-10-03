@@ -223,6 +223,7 @@ def audit_session(task: str, session: str, members: dict[str, bytes], streams: d
                 "stdout_sha256": run.get("stdout_sha256"),
                 "stderr_sha256": run.get("stderr_sha256"),
                 "answers_file_sha256": sha256(answers_file.read_bytes()) if answers_file.is_file() else None,
+                "web_tool_calls": web_tool_calls(session, run, directory / f"{stem}.stdout.txt"),
             }
         )
     entries = history(ROOT / ".annotation" / f"{task}.sqlite3", task, session)
@@ -258,12 +259,120 @@ def audit_session(task: str, session: str, members: dict[str, bytes], streams: d
         "attempts": sum(len(b["attempts"]) for b in rows),
         "labels_recorded": sum(b["labels_recorded"] for b in rows),
         "files_created_in_isolated_dirs": isolated_files,
+        "web_tool_calls": {
+            "attempts_scanned": sum(len(b["attempts"]) for b in rows),
+            "attempts_not_visible": sum(1 for b in rows for a in b["attempts"] if not a["web_tool_calls"]["visible"]),
+            "attempts_with_calls": sum(1 for b in rows for a in b["attempts"] if a["web_tool_calls"].get("any")),
+            "batches_with_calls_that_recorded_labels": sorted(
+                b["batch_id"] for b in rows if any(a["web_tool_calls"].get("any") and a["recorded_labels"] for a in b["attempts"])
+            ),
+        },
         "ingest": {
             "history_entries": len(entries),
             "labeled_items": len({entry["item_id"] for entry in entries}),
             "history_head_sha256": entries[-1]["entry_sha256"] if entries else None,
         },
     }
+
+
+#: Web tools of the two CLIs. agy (Gemini) names its own ``search_web``, ``read_url_content`` and
+#: ``browser_subagent``; cline reports only how many tool calls a run made, so any call there counts as unexplained.
+AGY_WEB_TOOLS = (b"search_web", b"read_url_content", b"browser_subagent")
+#: agy keeps every conversation as a SQLite file of steps (``~/.gemini/antigravity-cli/conversations``). In agy 1.2.x
+#: a model step (type 15) names each tool it calls at protobuf field path 20.7.2, and step types 31 and 33 are a URL
+#: read and a web search. Read from this machine's stores (2026-10-03), checked against conversations with known
+#: searches; not a documented format.
+AGY_CONVERSATIONS = Path.home() / ".gemini" / "antigravity-cli" / "conversations"
+AGY_MODEL_STEP, AGY_TOOL_NAME_PATH, AGY_WEB_STEPS = 15, (20, 7, 2), (31, 33)
+
+
+def _varint(data: bytes, i: int) -> tuple[int, int]:
+    result = shift = 0
+    while True:
+        byte = data[i]
+        i += 1
+        result |= (byte & 0x7F) << shift
+        shift += 7
+        if byte < 0x80:
+            return result, i
+
+
+def _field(data: bytes, path: tuple[int, ...]) -> list[bytes]:
+    """Every length-delimited value at ``path`` in a protobuf message; [] where the bytes do not parse."""
+    found: list[bytes] = []
+    i = 0
+    try:
+        while i < len(data):
+            key, i = _varint(data, i)
+            number, wire = key >> 3, key & 7
+            if wire == 0:
+                _, i = _varint(data, i)
+            elif wire == 1:
+                i += 8
+            elif wire == 5:
+                i += 4
+            elif wire == 2:
+                size, i = _varint(data, i)
+                value = data[i : i + size]
+                i += size
+                if number == path[0]:
+                    found += [value] if len(path) == 1 else _field(value, path[1:])
+            else:
+                return found
+    except IndexError:
+        pass
+    return found
+
+
+def agy_web_calls(run: dict[str, Any]) -> dict[str, Any]:
+    """Web-tool calls in the agy conversation(s) created while this attempt ran; counts only, never content."""
+    # agy creates the attempt's conversation file a few seconds after launch (4-5 s measured); it also opens every
+    # older file, so modification times say nothing. The window is the first minute of the attempt.
+    start = float(run["started_at"])
+    end = start + min(60.0, float(run.get("seconds") or 0))
+    files = [f for f in AGY_CONVERSATIONS.glob("*.db") if start <= f.stat().st_ctime <= end] if AGY_CONVERSATIONS.is_dir() else []
+    if len(files) != 1:
+        return {"visible": False, "why": f"{len(files)} agy conversations were created in the attempt's first minute, not 1"}
+    rows = sqlite3.connect(f"file:{files[0]}?mode=ro", uri=True).execute("select step_type, step_payload from steps").fetchall()
+    calls: dict[str, int] = {}
+    for step_type, payload in rows:
+        if step_type == AGY_MODEL_STEP and isinstance(payload, bytes):
+            for name in _field(payload, AGY_TOOL_NAME_PATH):
+                if name in AGY_WEB_TOOLS:
+                    calls[name.decode()] = calls.get(name.decode(), 0) + 1
+    web_steps = sum(1 for step_type, _ in rows if step_type in AGY_WEB_STEPS)
+    return {
+        "visible": True,
+        "source": f"agy conversation store, {files[0].name}",
+        "steps": len(rows),
+        "web_tool_calls": calls,
+        "web_steps": web_steps,
+        "any": bool(calls or web_steps),
+    }
+
+
+def cline_tool_calls(stdout: bytes) -> dict[str, Any]:
+    """Tool calls cline reported in its --json event stream (its iteration-end events carry ``toolCallCount``)."""
+    counts: list[int] = []
+    for line in stdout.decode("utf-8", "replace").splitlines():
+        try:
+            event = json.loads(re.sub(r"\x1b\[[0-9;]*m", "", line))
+        except ValueError:
+            continue
+        inner = event.get("event") if isinstance(event, dict) else None
+        if isinstance(inner, dict) and "toolCallCount" in inner:
+            counts.append(int(inner["toolCallCount"]))
+    if not counts:
+        return {"visible": False, "why": "no toolCallCount in the cline event stream"}
+    return {"visible": True, "source": "cline --json toolCallCount", "tool_calls": sum(counts), "any": sum(counts) > 0}
+
+
+def web_tool_calls(session: str, run: dict[str, Any], stdout: Path) -> dict[str, Any]:
+    if session == "model-gemini":
+        return agy_web_calls(run)
+    if session == "model-deepseek":
+        return cline_tool_calls(stdout.read_bytes()) if stdout.is_file() else {"visible": False, "why": "no stdout"}
+    return {"visible": False, "why": f"no scan for session {session}"}
 
 
 def scan(*groups: dict[str, bytes]) -> str:

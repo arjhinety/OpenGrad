@@ -28,6 +28,8 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0008 | 2026-10-03 | OpenGrad process | `OURS` | The publication-hygiene scan was not rerun after a rubric edit, so a committed phrase tripped it | Fixed (reworded, scan rerun) |
 | UP-0009 | 2026-10-03 | OpenGrad verification | `OURS` | The triage report checked the flag set against the population it was reporting, i.e. against itself | Fixed (reads the members file) |
 | UP-0010 | 2026-10-03 | OpenGrad verification | `OURS` | Triage `verify` crashed on absent populations; no way to restore them; first `--restore` could write half | Fixed (`BLOCKED_INPUT_MISSING`, `--restore`, check before write) |
+| UP-0011 | 2026-10-03 | OpenGrad registry validation | `OURS` | A malformed `papers.yaml` makes `opengrad-validate` die with a traceback, not a validation error | Open |
+| UP-0012 | 2026-10-03 | OpenGrad runner, agy 1.2.x | `OURS` (+ `UNCLEAR` upstream) | agy ran labelling batches with every tool auto-approved: web search, and file browsing outside its empty directory | Open: owner decision |
 
 ---
 
@@ -109,3 +111,48 @@ files report `BLOCKED_INPUT_MISSING`, and `--restore` rebuilds them from the pin
 rebuild reproduces the committed manifest exactly. The first version of `--restore` wrote one file before
 finding the other differed, so a refusal could leave a half-restored directory; its own test caught that before
 commit, and it now checks both before writing either.
+
+## UP-0011 — the validator crashes on a malformed reference file (`OURS`)
+
+An unquoted value containing ": " made `docs/references/papers.yaml` invalid YAML. `opengrad-validate` then died
+with a PyYAML `ScannerError` traceback from `validators._paper_ids`, which loads the file a second time outside
+`check_references`' own load-error handling, instead of reporting a validation error. PyYAML's behaviour is
+correct (`NOT A BUG` on its side). The broken file reached a local commit because the check and the commit were
+chained with `;` rather than `&&`; it was fixed and amended before any push. Lessons: chain a commit after its
+checks with `&&`; `_paper_ids` should reuse the reported load error.
+
+## UP-0012 — agy could search the web and browse files during labelling (`OURS`, with an `UNCLEAR` upstream part)
+
+**What allowed it.** This machine's agy settings (`~/.gemini/antigravity-cli/settings.json`) have `toolPermission:
+always-proceed` and `allowNonWorkspaceAccess: true`, so in print mode agy runs any tool without asking. Our runner
+(`scripts/run_external_annotation.py`) starts agy with `--sandbox`, which restricts terminal commands only, and
+overrides neither setting. Its prompt tells the model to open nothing else and run nothing; nothing enforces it.
+That is ours. Whether `--sandbox` should also cover web and file tools, and whether print mode should honour a
+deny list, is `UNCLEAR` until reproduced with a minimal prompt.
+
+**How it was seen.** The run records keep only agy's printed answer, so a tool call is not in them. agy keeps
+each conversation as a SQLite file of steps in `~/.gemini/antigravity-cli/conversations`; a model step names each
+tool it calls (protobuf field 20.7.2) with its JSON arguments (20.7.3). That format is read from this machine's
+files, not documented. `scripts/archive_external_model_labels.py` now matches each attempt to the conversation
+created in its first minute and records web-tool calls per attempt in the archive manifest. cline reports its
+tool calls itself (`toolCallCount`).
+
+**The trial (`first-reply-review-v1-trial`, 2026-10-03).** Gemini (agy 1.2.16): 5 attempts, all 5 visible, 0
+web-tool calls, 0 web steps; its only tool calls were 11 `view_file` reads of its own input. DeepSeek (cline
+3.0.66): 5 attempts, all visible, 0 tool calls. Recorded in
+`reports/study-002/flag-triage/provenance/external-models/first-reply-review-v1-trial.external-models.audit-trail.manifest.json`.
+
+**Earlier runs (counts only; 282 of 291 Gemini attempts matched to a conversation).**
+- `search_web` calls: 10, in 5 attempts. Two of those attempts kept their labels, both in `pdet-coverage-v2`
+  (batch 10 attempt 2, batch 24). The others (`pdet-coverage-v1` batch 11, `pdet-coverage-v2` batch 13,
+  `answer-strata-v1` batch 01) recorded no labels.
+- In `pdet-coverage-v1` and `pdet-coverage-v2`, Gemini also listed, searched and read files across the home folder
+  and the OpenGrad repository. In kept batches it read paths under `.annotation/` (7 batches in v1, 9 in v2), and
+  in 5 kept batches it opened another model's answer file (v1 batches 10, 11 and 18; v2 batches 04 and 10). All
+  three models ran at the same time, so those answers existed. `pdet-coverage-v1-routing` browsed the home folder,
+  not the repository.
+- No such calls in `answer-strata-v1`'s kept batches, `punans-v1`, `punans-v2`, `punans-v2-trial` or
+  `punans-v2-constructed`: their only tool reads were of their own input.
+
+**Not yet decided.** What this means for the P-DET-COVERAGE references and what was built on them, and how agy is
+locked down before the full triage run, are the study owner's decisions.

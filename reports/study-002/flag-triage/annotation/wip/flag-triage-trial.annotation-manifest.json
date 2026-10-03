@@ -1,0 +1,164 @@
+{
+  "adjudication": null,
+  "adjudication_flags": {},
+  "adjudicator_ids": [],
+  "annotation_schema_version": "first-reply-review-v1",
+  "annotator_ids": [
+    "model.deepseek-v4.1-flash",
+    "model.gemini-3.8-flash-high"
+  ],
+  "app_version": "opengrad-annotate-1.0.0",
+  "artifact_kind": "ANNOTATION_SNAPSHOT",
+  "completion_state": "INCOMPLETE",
+  "composite": null,
+  "config_path": "configs/annotation/first-reply-review-v1-trial.yaml",
+  "definition_history": [],
+  "design": "model_passes",
+  "disagreements": {
+    "adjudicated": 0,
+    "count": 3,
+    "file": "flag-triage-trial.disagreements.jsonl",
+    "keys": [
+      "label",
+      "ambiguity_status"
+    ],
+    "metric_eligible": 3,
+    "unresolved": 3
+  },
+  "exported_at": "2026-10-03T15:53:04.972Z",
+  "frozen": false,
+  "gold": null,
+  "incomplete_reasons": [
+    "3 disagreements not adjudicated (first: r1:1f419941ede746ff0899274e)"
+  ],
+  "independent_annotators": false,
+  "inter_annotator_agreement_claimable": false,
+  "limitations": [
+    "Model annotation: at least one session was labeled by a language model. A model pass is not an independent human annotator; no inter-annotator agreement may be claimed."
+  ],
+  "manifest_version": 1,
+  "metric_exclusions": {
+    "excluded_items": 0,
+    "groups": [],
+    "metric_eligible_items": 100,
+    "population_items": 100
+  },
+  "model_annotation": true,
+  "model_annotators": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "authorization": "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+      "model": "Gemini 3.8 Flash (High)",
+      "procedure": "configs/annotation/first-reply-review-v1.model-procedure.md",
+      "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "authorization": "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+      "model": "deepseek-v4.1-flash",
+      "procedure": "configs/annotation/first-reply-review-v1.model-procedure.md",
+      "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+    }
+  ],
+  "model_assistance": false,
+  "outputs": {
+    "audit/flag-triage-trial.history.model.deepseek-v4.1-flash.model-deepseek.jsonl": {
+      "bytes": 133182,
+      "records": 100,
+      "sha256": "24e45e5793b77c5e4f94eeb2f56778868fe35a4f6d5d17438f47cbdf3b7be8c2"
+    },
+    "audit/flag-triage-trial.history.model.gemini-3.8-flash-high.model-gemini.jsonl": {
+      "bytes": 134560,
+      "records": 100,
+      "sha256": "4d483e0c63ce9c553e158c34a885f294ea2bebb5badddfcbb76e67b853afa3e8"
+    },
+    "flag-triage-trial.annotations.model.deepseek-v4.1-flash.model-deepseek.jsonl": {
+      "bytes": 89148,
+      "records": 100,
+      "sha256": "ee3a76edfd808dd407d3adef91b8fe99468eee14235522c087027c467e0e3d3a"
+    },
+    "flag-triage-trial.annotations.model.gemini-3.8-flash-high.model-gemini.jsonl": {
+      "bytes": 90531,
+      "records": 100,
+      "sha256": "e9cd6df31be5abe49372b3796b5a9cc4dcd63256f5d0a94c9b3030c13ebfc491"
+    },
+    "flag-triage-trial.disagreements.jsonl": {
+      "bytes": 2069,
+      "records": 3,
+      "sha256": "e068200448deea204b22a94072e2a0ebae4e54b6e78a20351bef4d68b08a7e98"
+    }
+  },
+  "package_dir": "reports/study-002/flag-triage/annotation/wip",
+  "record_key_map": {
+    "annotation_schema_version": "annotation_version",
+    "item_id": "triage_id",
+    "label": "gold_policy_label"
+  },
+  "record_keys": {
+    "annotator_id": "annotator_id",
+    "item_id": "triage_id",
+    "label": "gold_policy_label"
+  },
+  "review_queue": null,
+  "sessions": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "annotator_kind": "model",
+      "created_at": "2026-10-03T15:43:42.824Z",
+      "file": "flag-triage-trial.annotations.model.gemini-3.8-flash-high.model-gemini.jsonl",
+      "flagged": 1,
+      "history_entries": 100,
+      "history_file": "audit/flag-triage-trial.history.model.gemini-3.8-flash-high.model-gemini.jsonl",
+      "history_head_sha256": "d40a26129d7f72c62b4e1ccda6f8cf968521b485177ca52b133f5e6384e8c161",
+      "label_counts": {
+        "DECLINE_JUSTIFIED": 88,
+        "DECLINE_UNJUSTIFIED": 10,
+        "UNKNOWN": 2
+      },
+      "labeled": 100,
+      "labeled_metric_eligible": 100,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-gemini",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 2,
+      "unlabeled": 0
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "annotator_kind": "model",
+      "created_at": "2026-10-03T15:33:22.992Z",
+      "file": "flag-triage-trial.annotations.model.deepseek-v4.1-flash.model-deepseek.jsonl",
+      "flagged": 6,
+      "history_entries": 100,
+      "history_file": "audit/flag-triage-trial.history.model.deepseek-v4.1-flash.model-deepseek.jsonl",
+      "history_head_sha256": "fec70349f1a405cabe2cdc98e28cf24fd4d88f9af0ebdfa8c1dcd4c70b206573",
+      "label_counts": {
+        "DECLINE_JUSTIFIED": 91,
+        "DECLINE_UNJUSTIFIED": 7,
+        "UNKNOWN": 2
+      },
+      "labeled": 100,
+      "labeled_metric_eligible": 100,
+      "relabels": 0,
+      "role": "annotator",
+      "session_id": "model-deepseek",
+      "skipped": 0,
+      "undos": 0,
+      "unknown": 2,
+      "unlabeled": 0
+    }
+  ],
+  "source": {
+    "format": "jsonl",
+    "items": 100,
+    "path": "reports/study-002/flag-triage/flag-triage.population.jsonl",
+    "sha256": "0d0054d6d630b90d65cdea7622264d4ca59f949d601d3578ab43d532dc028a45"
+  },
+  "statement": "Labels in sessions whose annotator_kind is 'model' were produced by the language model named under model_annotators, following the pinned procedure recorded there; they are model judgments, not human annotations. Labels in human sessions were entered through the annotation interface under the annotator and adjudicator identifiers recorded in this package; those identifiers are declared, not authenticated. The interface displays no classifier prediction, model suggestion or pre-filled label to human annotators, and the source population was read but never written. Every change is in the hash-chained change logs listed under outputs. Hashes detect changes to the package; they are not signatures.",
+  "task_definition_sha256": "66f52fa8ee88ade8f59ca8d41fdb885c8422bd4dd0d9c9e8cfda3afc9b278bc1",
+  "task_id": "first-reply-review-v1-trial",
+  "task_type": "single_label",
+  "task_version": "1"
+}

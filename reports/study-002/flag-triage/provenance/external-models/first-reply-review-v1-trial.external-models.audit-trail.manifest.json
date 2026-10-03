@@ -1,0 +1,709 @@
+{
+  "archive": {
+    "bytes": 119649,
+    "file": "first-reply-review-v1-trial.external-models.audit-trail.tar.gz",
+    "members": [
+      {
+        "bytes": 135184,
+        "path": "ingest/model-deepseek.history.jsonl",
+        "sha256": "c728f82ec3fc19912d8d5a152462fcc0e90ca4d3674c0f46edf2e7b0bd44043a"
+      },
+      {
+        "bytes": 136670,
+        "path": "ingest/model-gemini.history.jsonl",
+        "sha256": "61a16d5d0018195405eb25b6845a04f26d8e19a1ccefaec37e201cbbc71ada0d"
+      },
+      {
+        "bytes": 5448,
+        "path": "model-deepseek/batch-01.attempt-1.answers.json",
+        "sha256": "5a0e6da05c6fcc8adeca20d0bd869938d8786a456e2e7639578fc80415488eb5"
+      },
+      {
+        "bytes": 2207,
+        "path": "model-deepseek/batch-01.attempt-1.run.json",
+        "sha256": "ee31e0d16b154a07e4140a74899acd86bc5cf0655fe7b289109770506bfacbb5"
+      },
+      {
+        "bytes": 27629,
+        "path": "model-deepseek/batch-01.json",
+        "sha256": "e9f04da6362c03a761722d9313616653ed4b4cfe4a72032c6da0f6f48ad69bea"
+      },
+      {
+        "bytes": 21184,
+        "path": "model-deepseek/batch-01.md",
+        "sha256": "614dd66013925e39840778e58e7b80981a95ebd1ac9636c1316e4c8d76b47dce"
+      },
+      {
+        "bytes": 5893,
+        "path": "model-deepseek/batch-02.attempt-1.answers.json",
+        "sha256": "e15e9f0f129b65423c636ec56428ea562dce350df7ed7a9ab3c869ca67af7814"
+      },
+      {
+        "bytes": 2205,
+        "path": "model-deepseek/batch-02.attempt-1.run.json",
+        "sha256": "13acb2125c0717bf68fd41df698f63a20bb7618fd900da02f882b8a055325e7a"
+      },
+      {
+        "bytes": 28243,
+        "path": "model-deepseek/batch-02.json",
+        "sha256": "854d160ba8ac4c6f55f7b999d0af2b19f06275d0db20e892b423b53d991af1e8"
+      },
+      {
+        "bytes": 21374,
+        "path": "model-deepseek/batch-02.md",
+        "sha256": "05c73c6c74580ab5ef74c9dbd1549a3557bd80ad60e95a002474b86642a0f6f2"
+      },
+      {
+        "bytes": 5199,
+        "path": "model-deepseek/batch-03.attempt-1.answers.json",
+        "sha256": "757ab16410174ce751c423d8d229528eed9a968f67cc2717b3cc2d6432f358e5"
+      },
+      {
+        "bytes": 2206,
+        "path": "model-deepseek/batch-03.attempt-1.run.json",
+        "sha256": "cbf0044df4d572958828a0ff3f0306bece6ca2cb36d81e640272ad1a76ca8734"
+      },
+      {
+        "bytes": 27104,
+        "path": "model-deepseek/batch-03.json",
+        "sha256": "1314b90e4cf31684be976b2fbb6a1e4b7a7d926b626fcd15e21e855c20c56064"
+      },
+      {
+        "bytes": 20297,
+        "path": "model-deepseek/batch-03.md",
+        "sha256": "7fbebdeba9cfedfb391479e2f517068450b6b47ac17f31a00c2f485796d53fc7"
+      },
+      {
+        "bytes": 5697,
+        "path": "model-deepseek/batch-04.attempt-1.answers.json",
+        "sha256": "44068e7c7a39ee342307b62477ac418b76927bc019d738975eb841fccd337f7a"
+      },
+      {
+        "bytes": 2206,
+        "path": "model-deepseek/batch-04.attempt-1.run.json",
+        "sha256": "57878744f80667b8e4b9b12ff4ab7d5013967fee1c067aab086b8306bc86ea97"
+      },
+      {
+        "bytes": 32033,
+        "path": "model-deepseek/batch-04.json",
+        "sha256": "7876c4bbc610888e34f1b1a214fd664dcc640f9c9d2aefe0ee25cf98f3dcc4ed"
+      },
+      {
+        "bytes": 24484,
+        "path": "model-deepseek/batch-04.md",
+        "sha256": "1d3b747c85399318647d71e63668976177fa5cf2cb8f7e2962849629cacd0826"
+      },
+      {
+        "bytes": 5726,
+        "path": "model-deepseek/batch-05.attempt-1.answers.json",
+        "sha256": "49ed82d433504854f296d4c488879fe7b7c77bfb2a6834e323a11ba2ceae87c3"
+      },
+      {
+        "bytes": 2207,
+        "path": "model-deepseek/batch-05.attempt-1.run.json",
+        "sha256": "2f388aaf398b87b446194f83ba50a0f76ac120796097379a115c8e140c4af1a1"
+      },
+      {
+        "bytes": 30423,
+        "path": "model-deepseek/batch-05.json",
+        "sha256": "b182112c65c31bf92b8dcbbf5c83a68121ca7618226610b65e795895023c4b0a"
+      },
+      {
+        "bytes": 23064,
+        "path": "model-deepseek/batch-05.md",
+        "sha256": "09afbc72f222fe9889075a3ed6ae8260b0d857ea5f9770fb2b7a2e34c60978de"
+      },
+      {
+        "bytes": 5840,
+        "path": "model-gemini/batch-01.attempt-1.answers.json",
+        "sha256": "8e3788cd505d93f9ed18f890079b50e18650a6edbc34e985b0729c5dc1b9b4d5"
+      },
+      {
+        "bytes": 1345,
+        "path": "model-gemini/batch-01.attempt-1.run.json",
+        "sha256": "5ffc22a935d9c8627aaef274b2d9aa02ddcb83893bf8e524ebd9732ae9366fef"
+      },
+      {
+        "bytes": 27633,
+        "path": "model-gemini/batch-01.json",
+        "sha256": "d39ebe60a4ecc3d9cc4ea7b1b7ea44bc7b1e9b847954c1fae68d9fc07cacfaa4"
+      },
+      {
+        "bytes": 21184,
+        "path": "model-gemini/batch-01.md",
+        "sha256": "614dd66013925e39840778e58e7b80981a95ebd1ac9636c1316e4c8d76b47dce"
+      },
+      {
+        "bytes": 6226,
+        "path": "model-gemini/batch-02.attempt-1.answers.json",
+        "sha256": "86b203959173397e28908eff315fc51b8713190dea4089170f238d1a0dc14389"
+      },
+      {
+        "bytes": 1344,
+        "path": "model-gemini/batch-02.attempt-1.run.json",
+        "sha256": "89e5fdcbd92407198efc7bee2265c4b2996f81493069204251b9984ab1d8abda"
+      },
+      {
+        "bytes": 28247,
+        "path": "model-gemini/batch-02.json",
+        "sha256": "9250550ee1810bbd1d801f3e665120dc4f93cf47d3a08a6313a284fcbb5b2e68"
+      },
+      {
+        "bytes": 21374,
+        "path": "model-gemini/batch-02.md",
+        "sha256": "05c73c6c74580ab5ef74c9dbd1549a3557bd80ad60e95a002474b86642a0f6f2"
+      },
+      {
+        "bytes": 5545,
+        "path": "model-gemini/batch-03.attempt-1.answers.json",
+        "sha256": "37cace63b60db049cef2fb79c5ea7737bb8e1cedff7a156cace1e54d48c59270"
+      },
+      {
+        "bytes": 1344,
+        "path": "model-gemini/batch-03.attempt-1.run.json",
+        "sha256": "e90e6c9131ef13b14897662f0b496b6036369a55a8852032881d1a7a000bb438"
+      },
+      {
+        "bytes": 27108,
+        "path": "model-gemini/batch-03.json",
+        "sha256": "1501e76abcf949bf61c79472d9aeeb47058f6056918e026ce171978075ba449c"
+      },
+      {
+        "bytes": 20297,
+        "path": "model-gemini/batch-03.md",
+        "sha256": "7fbebdeba9cfedfb391479e2f517068450b6b47ac17f31a00c2f485796d53fc7"
+      },
+      {
+        "bytes": 5586,
+        "path": "model-gemini/batch-04.attempt-1.answers.json",
+        "sha256": "ece8f3327753ea4164d1c1f752ddfbf756cfa9a9ee575334bd7a6f1b10f713f1"
+      },
+      {
+        "bytes": 1344,
+        "path": "model-gemini/batch-04.attempt-1.run.json",
+        "sha256": "b0270fa4c7d58244ab54bba9b8e556f44d06879bdd462c425b34de1e53b4d1d0"
+      },
+      {
+        "bytes": 32037,
+        "path": "model-gemini/batch-04.json",
+        "sha256": "235b81ba28175b291dd55d016944abd19dd1162047a6ef32ec2e4bbe73606acc"
+      },
+      {
+        "bytes": 24484,
+        "path": "model-gemini/batch-04.md",
+        "sha256": "1d3b747c85399318647d71e63668976177fa5cf2cb8f7e2962849629cacd0826"
+      },
+      {
+        "bytes": 6149,
+        "path": "model-gemini/batch-05.attempt-1.answers.json",
+        "sha256": "350a1319c89ffe151b97174c3a2f330cb4ce6884978862e81c5878f1c1e81c97"
+      },
+      {
+        "bytes": 1344,
+        "path": "model-gemini/batch-05.attempt-1.run.json",
+        "sha256": "7306274442c8797a1930687cad4cac31155b4849b027d5feb34d896cecc9bbc8"
+      },
+      {
+        "bytes": 30427,
+        "path": "model-gemini/batch-05.json",
+        "sha256": "6c2c8d8bc935776e8d18a511c90926e873f5e5f09178d8b753f033976c49c252"
+      },
+      {
+        "bytes": 23064,
+        "path": "model-gemini/batch-05.md",
+        "sha256": "09afbc72f222fe9889075a3ed6ae8260b0d857ea5f9770fb2b7a2e34c60978de"
+      },
+      {
+        "bytes": 3910,
+        "path": "procedure/first-reply-review-v1.model-procedure.md",
+        "sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+      },
+      {
+        "bytes": 17498,
+        "path": "runner/run_external_annotation.py",
+        "sha256": "829905a22045cbac4ad07f7dacfcd9efb9be291c02c569735cd72dfd389791e2"
+      }
+    ],
+    "sha256": "bc3ff01fe24798eacbf4e24fdf9c56a0bc8072bca8e82380e54f2c5c54b29ac9"
+  },
+  "authorization": "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+  "built_by": "scripts/archive_external_model_labels.py",
+  "cli_streams": {
+    "bytes": 274427,
+    "file": "local/first-reply-review-v1-trial.external-models.cli-streams.tar.gz",
+    "members": [
+      {
+        "bytes": 0,
+        "path": "model-deepseek/batch-01.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 6679287,
+        "path": "model-deepseek/batch-01.attempt-1.stdout.txt",
+        "sha256": "5ad6b020412359a4787d90e6296cac13bf0206b6880b3aacf4d818382e042e28"
+      },
+      {
+        "bytes": 0,
+        "path": "model-deepseek/batch-02.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 373018,
+        "path": "model-deepseek/batch-02.attempt-1.stdout.txt",
+        "sha256": "c528fa303a1cce63fc39722172b98f3ea079e26fdc0dcdaed9825ca2ac1ffa1e"
+      },
+      {
+        "bytes": 0,
+        "path": "model-deepseek/batch-03.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 568710,
+        "path": "model-deepseek/batch-03.attempt-1.stdout.txt",
+        "sha256": "125b50f8d9a57931807ffeaf4d511dc76b8ad90109c8aab30047d24c73703859"
+      },
+      {
+        "bytes": 0,
+        "path": "model-deepseek/batch-04.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 536680,
+        "path": "model-deepseek/batch-04.attempt-1.stdout.txt",
+        "sha256": "4bf6291d4622740f291397bc11be8c843cdaa43aac7e0e09a8da36d3467ca3e0"
+      },
+      {
+        "bytes": 0,
+        "path": "model-deepseek/batch-05.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 965193,
+        "path": "model-deepseek/batch-05.attempt-1.stdout.txt",
+        "sha256": "a5533169cad79609e9ae0a610530c70b10a01ec3f7308661a0254da39f4bf957"
+      },
+      {
+        "bytes": 0,
+        "path": "model-gemini/batch-01.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 5840,
+        "path": "model-gemini/batch-01.attempt-1.stdout.txt",
+        "sha256": "8e3788cd505d93f9ed18f890079b50e18650a6edbc34e985b0729c5dc1b9b4d5"
+      },
+      {
+        "bytes": 0,
+        "path": "model-gemini/batch-02.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 6226,
+        "path": "model-gemini/batch-02.attempt-1.stdout.txt",
+        "sha256": "86b203959173397e28908eff315fc51b8713190dea4089170f238d1a0dc14389"
+      },
+      {
+        "bytes": 0,
+        "path": "model-gemini/batch-03.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 5545,
+        "path": "model-gemini/batch-03.attempt-1.stdout.txt",
+        "sha256": "37cace63b60db049cef2fb79c5ea7737bb8e1cedff7a156cace1e54d48c59270"
+      },
+      {
+        "bytes": 0,
+        "path": "model-gemini/batch-04.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 5586,
+        "path": "model-gemini/batch-04.attempt-1.stdout.txt",
+        "sha256": "ece8f3327753ea4164d1c1f752ddfbf756cfa9a9ee575334bd7a6f1b10f713f1"
+      },
+      {
+        "bytes": 0,
+        "path": "model-gemini/batch-05.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 6149,
+        "path": "model-gemini/batch-05.attempt-1.stdout.txt",
+        "sha256": "350a1319c89ffe151b97174c3a2f330cb4ce6884978862e81c5878f1c1e81c97"
+      }
+    ],
+    "sha256": "af77fe169dfb9ed618c97ce9ed6ed25ecc106626ea257bf79259e945945d4c17",
+    "tracked": false,
+    "why": "Raw CLI stdout and stderr are unfiltered tool logs that may carry account or session details, and they are large. They are kept verbatim, out of version control; their hashes are recorded here and in each run record. A scan for the operator's e-mail address and common credential patterns found none (2026-10-03)."
+  },
+  "procedure": {
+    "path": "configs/annotation/first-reply-review-v1.model-procedure.md",
+    "sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+  },
+  "runner": {
+    "path": "scripts/run_external_annotation.py",
+    "sha256": "829905a22045cbac4ad07f7dacfcd9efb9be291c02c569735cd72dfd389791e2"
+  },
+  "schema": "opengrad-external-model-label-audit-trail-v1",
+  "sessions": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "attempts": 5,
+      "batches": [
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "8e3788cd505d93f9ed18f890079b50e18650a6edbc34e985b0729c5dc1b9b4d5",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "1.2.16",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "383ef9f95d4f44636cf79b8d9a26c04169a1d904a8c75121fb6c26426f5404f4",
+              "recorded_labels": 20,
+              "seconds": 122.1,
+              "status": "recorded 20 labels (1 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "8e3788cd505d93f9ed18f890079b50e18650a6edbc34e985b0729c5dc1b9b4d5",
+              "web_tool_calls": {
+                "any": false,
+                "source": "agy conversation store, ec4c45e1-476b-4a17-ba9d-44d08b113394.db",
+                "steps": 6,
+                "visible": true,
+                "web_steps": 0,
+                "web_tool_calls": {}
+              }
+            }
+          ],
+          "batch_id": "01",
+          "content_sha256": "ad79866502e630511ab2176abb9d30ec543f1dae50b1f8484712e7130313c9db",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "86b203959173397e28908eff315fc51b8713190dea4089170f238d1a0dc14389",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "1.2.16",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "17dafe328f87f0ab5ba5dbc0b9c037974e3f8f9d6162a836ab2bd8872269f04a",
+              "recorded_labels": 20,
+              "seconds": 65.4,
+              "status": "recorded 20 labels (0 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "86b203959173397e28908eff315fc51b8713190dea4089170f238d1a0dc14389",
+              "web_tool_calls": {
+                "any": false,
+                "source": "agy conversation store, c02ee143-bd29-4b5b-a8df-a4fcf3d68bb7.db",
+                "steps": 6,
+                "visible": true,
+                "web_steps": 0,
+                "web_tool_calls": {}
+              }
+            }
+          ],
+          "batch_id": "02",
+          "content_sha256": "6de68e9093d5d0974ec312e9cd4d9a4cf4a3769cc34e70d3705bccbb7c2911cb",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "37cace63b60db049cef2fb79c5ea7737bb8e1cedff7a156cace1e54d48c59270",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "1.2.16",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "08a5a9a7ecd6500ff0c37cfff38483f1c51aab8e9fae39c32171be06f425218d",
+              "recorded_labels": 20,
+              "seconds": 72.4,
+              "status": "recorded 20 labels (0 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "37cace63b60db049cef2fb79c5ea7737bb8e1cedff7a156cace1e54d48c59270",
+              "web_tool_calls": {
+                "any": false,
+                "source": "agy conversation store, b0905039-f7cf-41b3-8cff-3152a124bb28.db",
+                "steps": 6,
+                "visible": true,
+                "web_steps": 0,
+                "web_tool_calls": {}
+              }
+            }
+          ],
+          "batch_id": "03",
+          "content_sha256": "21135638221afa1fd392a559fadc8b7345ce9c78d973f0e42d746e0b4cf89063",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "ece8f3327753ea4164d1c1f752ddfbf756cfa9a9ee575334bd7a6f1b10f713f1",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "1.2.16",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "e400ca69989882d495238bbca1aa56bb1cc46a52ae071a1ac64280aae99e7f8c",
+              "recorded_labels": 20,
+              "seconds": 71.3,
+              "status": "recorded 20 labels (0 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "ece8f3327753ea4164d1c1f752ddfbf756cfa9a9ee575334bd7a6f1b10f713f1",
+              "web_tool_calls": {
+                "any": false,
+                "source": "agy conversation store, 6ef85237-e20f-4eac-b4e3-4f6700fa1752.db",
+                "steps": 6,
+                "visible": true,
+                "web_steps": 0,
+                "web_tool_calls": {}
+              }
+            }
+          ],
+          "batch_id": "04",
+          "content_sha256": "6a4823ba326c7ae4fbbaaf360712cb6e2a400fb61006ade0bdfaa889e3432845",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "350a1319c89ffe151b97174c3a2f330cb4ce6884978862e81c5878f1c1e81c97",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "1.2.16",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "ed960fecce20f01a09096725f067b3d0133bdee11ad7dc54f8d1593b67966151",
+              "recorded_labels": 20,
+              "seconds": 91.7,
+              "status": "recorded 20 labels (0 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "350a1319c89ffe151b97174c3a2f330cb4ce6884978862e81c5878f1c1e81c97",
+              "web_tool_calls": {
+                "any": false,
+                "source": "agy conversation store, 54204aba-f602-47c1-9d6f-769f19d8923c.db",
+                "steps": 8,
+                "visible": true,
+                "web_steps": 0,
+                "web_tool_calls": {}
+              }
+            }
+          ],
+          "batch_id": "05",
+          "content_sha256": "53af14edb8952c9dc1a96909aa260d0dfe0106836e1d8e94ed398db42eff14cc",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        }
+      ],
+      "cli_versions": [
+        "1.2.16"
+      ],
+      "files_created_in_isolated_dirs": 0,
+      "ingest": {
+        "history_entries": 100,
+        "history_head_sha256": "d40a26129d7f72c62b4e1ccda6f8cf968521b485177ca52b133f5e6384e8c161",
+        "labeled_items": 100
+      },
+      "labels_recorded": 100,
+      "session_id": "model-gemini",
+      "web_tool_calls": {
+        "attempts_not_visible": 0,
+        "attempts_scanned": 5,
+        "attempts_with_calls": 0,
+        "batches_with_calls_that_recorded_labels": []
+      }
+    },
+    {
+      "annotator_id": "model.deepseek-v4.1-flash",
+      "attempts": 5,
+      "batches": [
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "5a0e6da05c6fcc8adeca20d0bd869938d8786a456e2e7639578fc80415488eb5",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "3.0.66",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "383ef9f95d4f44636cf79b8d9a26c04169a1d904a8c75121fb6c26426f5404f4",
+              "recorded_labels": 20,
+              "seconds": 319.9,
+              "status": "recorded 20 labels (4 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "5ad6b020412359a4787d90e6296cac13bf0206b6880b3aacf4d818382e042e28",
+              "web_tool_calls": {
+                "any": false,
+                "source": "cline --json toolCallCount",
+                "tool_calls": 0,
+                "visible": true
+              }
+            }
+          ],
+          "batch_id": "01",
+          "content_sha256": "ad79866502e630511ab2176abb9d30ec543f1dae50b1f8484712e7130313c9db",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "e15e9f0f129b65423c636ec56428ea562dce350df7ed7a9ab3c869ca67af7814",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "3.0.66",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "17dafe328f87f0ab5ba5dbc0b9c037974e3f8f9d6162a836ab2bd8872269f04a",
+              "recorded_labels": 20,
+              "seconds": 46.7,
+              "status": "recorded 20 labels (0 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "c528fa303a1cce63fc39722172b98f3ea079e26fdc0dcdaed9825ca2ac1ffa1e",
+              "web_tool_calls": {
+                "any": false,
+                "source": "cline --json toolCallCount",
+                "tool_calls": 0,
+                "visible": true
+              }
+            }
+          ],
+          "batch_id": "02",
+          "content_sha256": "6de68e9093d5d0974ec312e9cd4d9a4cf4a3769cc34e70d3705bccbb7c2911cb",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "757ab16410174ce751c423d8d229528eed9a968f67cc2717b3cc2d6432f358e5",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "3.0.66",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "08a5a9a7ecd6500ff0c37cfff38483f1c51aab8e9fae39c32171be06f425218d",
+              "recorded_labels": 20,
+              "seconds": 63.1,
+              "status": "recorded 20 labels (0 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "125b50f8d9a57931807ffeaf4d511dc76b8ad90109c8aab30047d24c73703859",
+              "web_tool_calls": {
+                "any": false,
+                "source": "cline --json toolCallCount",
+                "tool_calls": 0,
+                "visible": true
+              }
+            }
+          ],
+          "batch_id": "03",
+          "content_sha256": "21135638221afa1fd392a559fadc8b7345ce9c78d973f0e42d746e0b4cf89063",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "44068e7c7a39ee342307b62477ac418b76927bc019d738975eb841fccd337f7a",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "3.0.66",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "e400ca69989882d495238bbca1aa56bb1cc46a52ae071a1ac64280aae99e7f8c",
+              "recorded_labels": 20,
+              "seconds": 62.4,
+              "status": "recorded 20 labels (1 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "4bf6291d4622740f291397bc11be8c843cdaa43aac7e0e09a8da36d3467ca3e0",
+              "web_tool_calls": {
+                "any": false,
+                "source": "cline --json toolCallCount",
+                "tool_calls": 0,
+                "visible": true
+              }
+            }
+          ],
+          "batch_id": "04",
+          "content_sha256": "6a4823ba326c7ae4fbbaaf360712cb6e2a400fb61006ade0bdfaa889e3432845",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "49ed82d433504854f296d4c488879fe7b7c77bfb2a6834e323a11ba2ceae87c3",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "3.0.66",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "ed960fecce20f01a09096725f067b3d0133bdee11ad7dc54f8d1593b67966151",
+              "recorded_labels": 20,
+              "seconds": 117.5,
+              "status": "recorded 20 labels (1 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "a5533169cad79609e9ae0a610530c70b10a01ec3f7308661a0254da39f4bf957",
+              "web_tool_calls": {
+                "any": false,
+                "source": "cline --json toolCallCount",
+                "tool_calls": 0,
+                "visible": true
+              }
+            }
+          ],
+          "batch_id": "05",
+          "content_sha256": "53af14edb8952c9dc1a96909aa260d0dfe0106836e1d8e94ed398db42eff14cc",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b"
+        }
+      ],
+      "cli_versions": [
+        "3.0.66"
+      ],
+      "files_created_in_isolated_dirs": 0,
+      "ingest": {
+        "history_entries": 100,
+        "history_head_sha256": "fec70349f1a405cabe2cdc98e28cf24fd4d88f9af0ebdfa8c1dcd4c70b206573",
+        "labeled_items": 100
+      },
+      "labels_recorded": 100,
+      "session_id": "model-deepseek",
+      "web_tool_calls": {
+        "attempts_not_visible": 0,
+        "attempts_scanned": 5,
+        "attempts_with_calls": 0,
+        "batches_with_calls_that_recorded_labels": []
+      }
+    }
+  ],
+  "status": "Model judgments by two declared non-Claude annotators, each blind and independent, on the flag-set triage's 100-record trial, which counts toward no floor (docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md). Not human labels and not human gold.",
+  "task_id": "first-reply-review-v1-trial"
+}
