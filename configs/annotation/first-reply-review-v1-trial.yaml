@@ -1,0 +1,157 @@
+# Annotation of the 100-record trial of the flag set's triage (46 §5, 47 §3 E). It counts toward no floor.
+#
+# Amendments: docs/research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md §5 (study_002_prereg_v14) and
+# docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md (study_002_prereg_v15).
+# - The task id is neutral on purpose: the labellers see it, and must not learn how the items were chosen.
+# - Shown: the offered tools, the user's first message and the first reply. Blind to everything else.
+# - Two non-Claude annotators label independently; reports: python -m opengrad.verification.flag_triage_report.
+# - No labelling run starts without the study owner's word.
+#
+#   python scripts/run_external_annotation.py first-reply-review-v1-trial --annotator model.deepseek-v4.1-flash --size 20
+
+task_id: first-reply-review-v1-trial
+version: "1"
+title: First-reply review (trial)
+task_type: single_label
+annotation_schema_version: first-reply-review-v1
+
+labels: [NOT_A_DECLINE, DECLINE_JUSTIFIED, DECLINE_UNJUSTIFIED, UNKNOWN]
+shortcuts: {"1": NOT_A_DECLINE, "2": DECLINE_JUSTIFIED, "3": DECLINE_UNJUSTIFIED, "4": UNKNOWN}
+unknown_labels: [UNKNOWN]
+
+source:
+  path: reports/study-002/flag-triage/flag-triage.population.jsonl
+  format: jsonl
+  id_field: triage_id
+  expected_sha256: 0d0054d6d630b90d65cdea7622264d4ca59f949d601d3578ab43d532dc028a45
+  expected_items: 100
+  select:
+    field: in_trial
+    equals: "yes"
+
+# 46 §5: each item shows the offered tools, the user's first message and the first reply.
+fields:
+  user:
+    label: User's first message
+    path: user_message
+  assistant:
+    label: Assistant's first reply
+    path: assistant_response
+  tools:
+    label: Available tools
+    path: tools
+
+# 46 §5: source, record id and label are hidden. Never displayed, filtered on or sent to the browser; no metadata
+# chips and no filters are declared, for the same reason.
+blind_fields:
+  - gold_policy_label
+  - ambiguity_status
+  - annotator_id
+  - annotator_rationale
+  - annotation_version
+  - opengrad_id
+  - canonical_hash
+  - source_dataset
+  - unit_kind
+  - in_trial
+  - predicted_label
+
+extra_fields:
+  - key: ambiguity_status
+    label: Ambiguity status
+    type: select
+    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT]
+    default: NONE
+    required: true
+  - key: annotator_rationale
+    label: Rationale
+    type: text
+    required: false
+    adjudication: false
+    help: Optional. A short note on why, or on what was hard, if you want one.
+
+constraints:
+  - when_label_in: [UNKNOWN]
+    field: ambiguity_status
+    forbidden: [NONE]
+    message: UNKNOWN needs an ambiguity reason (set ambiguity_status).
+  - when_label_not_in: [UNKNOWN]
+    field: ambiguity_status
+    allowed: [NONE]
+    message: An ambiguous item is labeled UNKNOWN; any other label needs ambiguity_status NONE.
+
+disagreement_keys: [label, ambiguity_status]
+
+adjudication_fields:
+  - key: decision_note
+    label: Deciding reason
+    type: text
+    required: true
+
+# Sections 1-3 only: the preamble names the flag set and is never served.
+instructions:
+  - title: Rubric - first-reply review
+    file: configs/annotation/first-reply-review-v1.rubric.md
+    include_sections: ["1.", "2.", "3."]
+
+# The server refuses to start if the served rubric text contains one of these.
+instruction_forbidden_terms:
+  - Glaive
+  - When2Call
+  - ToolACE
+  - xLAM
+  - classifier
+  - flag set
+  - flagged
+  - recall
+  - UNSUPPORTED
+  - source_dataset
+  - opengrad_id
+  - in_trial
+  - predicted_label
+
+record_keys:
+  item_id: triage_id
+  label: gold_policy_label
+  annotation_schema_version: annotation_version
+
+output:
+  dir: reports/study-002/flag-triage/annotation
+  session_file: "flag-triage-trial.annotations.{annotator_id}.{session_id}.jsonl"
+  history_file: "audit/flag-triage-trial.history.{annotator_id}.{session_id}.jsonl"
+  adjudication_history_file: audit/flag-triage-trial.adjudication-history.jsonl
+  disagreements_file: flag-triage-trial.disagreements.jsonl
+  adjudication_file: flag-triage-trial.adjudicated.jsonl
+  gold_file: flag-triage-trial.gold.jsonl
+  manifest_file: flag-triage-trial.annotation-manifest.json
+
+protected_paths:
+  - reports/study-002/flag-triage/flag-triage.population.jsonl
+  - reports/study-002/flag-triage/flag-recall.population.jsonl
+  - reports/study-002/flag-triage/flag-triage.manifest.json
+  - reports/study-002/flag-set/flag-set.members.jsonl
+  - reports/study-002/flag-set/flag-set.manifest.json
+
+state_db: .annotation/first-reply-review-v1-trial.sqlite3
+
+# The two-model labels are reported by flag_triage_report, never frozen as human gold.
+freeze:
+  allowed_designs: [two_pass, single_annotator]
+  require_adjudication: true
+  single_annotator_review:
+    flagged: true
+    labels: [UNKNOWN]
+
+# 46 §5: Gemini 3.8 Flash (High) and deepseek-v4.1-flash. No Claude model labels: Claude designed the
+# intervention and built the classifier. Their labels are model judgments (annotator_kind: model).
+model_annotators:
+  - annotator_id: model.gemini-3.8-flash-high
+    model: Gemini 3.8 Flash (High)
+    procedure: configs/annotation/first-reply-review-v1.model-procedure.md
+    procedure_sha256: ea5e35fff7d649e3947ff7ec25e3a85aa2bf0d6b02afca467ae223b1a239ec03
+    authorization: docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md
+  - annotator_id: model.deepseek-v4.1-flash
+    model: deepseek-v4.1-flash
+    procedure: configs/annotation/first-reply-review-v1.model-procedure.md
+    procedure_sha256: ea5e35fff7d649e3947ff7ec25e3a85aa2bf0d6b02afca467ae223b1a239ec03
+    authorization: docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md

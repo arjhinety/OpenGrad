@@ -1,0 +1,113 @@
+{
+  "artifact_kind": "STUDY_002_FLAG_TRIAGE_POPULATIONS",
+  "blinded_fields": [
+    "opengrad_id",
+    "canonical_hash",
+    "source_dataset",
+    "unit_kind",
+    "in_trial",
+    "predicted_label"
+  ],
+  "code_sha256_lf": {
+    "src/opengrad/verification/flag_triage.py": "d3efad0d1d768287b4f0bc25068af344db022adf62f052f393b275f99017f708",
+    "src/opengrad/verification/flag_triage_population.py": "e2180ca8549f51dea4fe7222af22da383b2bfb7d6ba22ab34c82c71c76a6fa67"
+  },
+  "corpus": {
+    "record_count": 173237,
+    "release_manifest_sha256": "8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161",
+    "repository": "arrochi112/OpenGrad-ToolPolicy-Canonical-v2",
+    "revision": "df1a1f5135cc4b08e24b7ff20582084988932c61",
+    "shards_verified": 176
+  },
+  "flag_set": {
+    "manifest_sha256": "4b1be90ed4377f4a775010dfc98e257e4e3be7f54557023ffdb28641e637b1fd",
+    "members_sha256": "bb5ebe413fc56475a9fb1e694f287488d606c3fee91194e68e8f691805430980",
+    "n": 19051
+  },
+  "gold_labels_present": false,
+  "id_rule": {
+    "recall": "\"r2:\" + sha256(\"opengrad-flag-recall-item-v15|\" + opengrad_id)[:24]",
+    "triage": "\"r1:\" + sha256(\"opengrad-flag-triage-item-v15|\" + opengrad_id)[:24]"
+  },
+  "populations": {
+    "recall": {
+      "allocation": {
+        "glaive-function-calling-v2": 240,
+        "toolace": 80,
+        "when2call": 80
+      },
+      "by_source_and_predicted_label": {
+        "glaive-function-calling-v2": {
+          "CLARIFY": 2,
+          "DIRECT": 238
+        },
+        "toolace": {
+          "ABSTAIN": 28,
+          "CALL": 1,
+          "CLARIFY": 46,
+          "DIRECT": 5
+        },
+        "when2call": {
+          "CLARIFY": 76,
+          "DIRECT": 4
+        }
+      },
+      "file": "flag-recall.population.jsonl",
+      "minimum": {
+        "toolace": 80,
+        "when2call": 80
+      },
+      "population_by_source": {
+        "glaive-function-calling-v2": 34547,
+        "toolace": 1106,
+        "when2call": 2526
+      },
+      "records": 400,
+      "seed": "opengrad-flag-triage-recall-v14",
+      "sha256": "b3274414fc245f5c4b919c62d3c58740ec1b3a1dd3cdfbe052f4c6637e97a54b"
+    },
+    "triage": {
+      "by_source": {
+        "glaive-function-calling-v2": 14205,
+        "toolace": 867,
+        "when2call": 3979
+      },
+      "file": "flag-triage.population.jsonl",
+      "records": 19051,
+      "sha256": "0d0054d6d630b90d65cdea7622264d4ca59f949d601d3578ab43d532dc028a45",
+      "trial": {
+        "by_source": {
+          "glaive-function-calling-v2": 59,
+          "toolace": 20,
+          "when2call": 21
+        },
+        "minimum": {
+          "toolace": 20
+        },
+        "records": 100,
+        "seed": "opengrad-flag-triage-trial-v14",
+        "select": {
+          "equals": "yes",
+          "field": "in_trial"
+        }
+      }
+    }
+  },
+  "preregistration": {
+    "adoption_amendments": [
+      "study_002_prereg_v14",
+      "study_002_prereg_v15"
+    ],
+    "documents": [
+      "docs/research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md",
+      "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md"
+    ]
+  },
+  "presentation_order": "ascending item id",
+  "shown_fields": [
+    "user_message",
+    "assistant_response",
+    "tools"
+  ],
+  "statement": "Item text from the verified release, first reply only. No label exists. Each labelling run needs the owner's word."
+}

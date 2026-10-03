@@ -90,8 +90,15 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   The manifest pins the builder, classifier v2's modules and the v1 regex's own code (`detector_sha256`),
   not all of `capability.py`. `src/opengrad/verification/flag_triage.py` holds the trial and recall draws,
   the per-source precision and recall reports and `triage_decision` (a failing Glaive or When2Call stops,
-  ToolACE can be excluded, the pooled floors stay over all of the flag set). No triage label exists yet;
-  each labelling run needs the owner's word.
+  ToolACE can be excluded, the pooled floors stay over all of the flag set; it needs the members file's ids).
+  The triage's populations come from `python -m opengrad.verification.flag_triage_population --dry-run | --build |
+  --verify` (`reports/study-002/flag-triage/`: the 19,051 items with the 100-record trial marked by a blinded
+  `in_trial`, and the 400-reply recall sample). Its tasks have neutral ids because the labellers see them:
+  `first-reply-review-v1-trial`, `first-reply-review-v1` and `first-reply-review-v1-sample`, with item ids `r1:`/`r2:`
+  and the rubric `configs/annotation/first-reply-review-v1.rubric.md` (sections 1-3 served). Never name the flag
+  set, a source, the classifier or recall in anything a labeller sees. Reports: `python -m
+  opengrad.verification.flag_triage_report --set trial|triage|recall`. No triage label exists yet; each labelling
+  run needs the owner's word.
 - **Classifier v2 development sets** (37 §3): `src/opengrad/verification/classifier_devset_v2.py --set dev --build |
   --verify` draws first replies into `reports/prose-classifier/dev-v2/`, excluding P-DET-COVERAGE-v2 and everything
   it excludes. Task `prose-classifier-dev-v2` (`configs/annotation/prose-classifier-dev-v2.yaml`) is labelled by

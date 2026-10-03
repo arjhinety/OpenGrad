@@ -89,6 +89,22 @@ TASK_SPECS = {
         "configs/annotation/punans-v2.model-procedure.rev1.md",
         "docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md",
     ),
+    # 46 §5 and 47 (study_002_prereg_v15): the flag-set triage, under neutral task ids.
+    "first-reply-review-v1-trial": (
+        ROOT / "reports" / "study-002" / "flag-triage" / "provenance" / "external-models",
+        "configs/annotation/first-reply-review-v1.model-procedure.md",
+        "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+    ),
+    "first-reply-review-v1": (
+        ROOT / "reports" / "study-002" / "flag-triage" / "provenance" / "external-models",
+        "configs/annotation/first-reply-review-v1.model-procedure.md",
+        "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+    ),
+    "first-reply-review-v1-sample": (
+        ROOT / "reports" / "study-002" / "flag-triage" / "provenance" / "external-models",
+        "configs/annotation/first-reply-review-v1.model-procedure.md",
+        "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+    ),
 }
 #: The status sentence of the archive, where it is not the three-model one of 34.
 STATUS = {
@@ -113,6 +129,21 @@ STATUS = {
         "Model judgments by two declared non-Claude annotators, each blind and independent, on constructed "
         "questions and answerable controls; an item's reference label is the label both give ({authorization}). "
         "Not human labels and not human gold."
+    ),
+    "first-reply-review-v1-trial": (
+        "Model judgments by two declared non-Claude annotators, each blind and independent, on the flag-set "
+        "triage's 100-record trial, which counts toward no floor ({authorization}). Not human labels and not "
+        "human gold."
+    ),
+    "first-reply-review-v1": (
+        "Model judgments by two declared non-Claude annotators, each blind and independent, on every record of "
+        "the flag set; both labels are kept, and the triage's floors are computed from them ({authorization}). "
+        "Not human labels and not human gold."
+    ),
+    "first-reply-review-v1-sample": (
+        "Model judgments by two declared non-Claude annotators, each blind and independent, on the recall "
+        "sample of unflagged replies; both labels are kept, and the recall share is computed from them "
+        "({authorization}). Not human labels and not human gold."
     ),
 }
 #: Credential shapes that must never reach an archive (tracked or not).

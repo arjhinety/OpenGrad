@@ -77,6 +77,23 @@ TASK_SPECS: dict[str, tuple[str, str, Path]] = {
         "docs/research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md",
         Path("reports/study-002/punans-v2-constructed/reference"),
     ),
+    # The triage of the flag set (46 §5, 47 §3): its trial, the full review and the recall sample, under neutral
+    # task ids because the labellers see them. The same two annotators; both votes are kept for the report.
+    "first-reply-review-v1-trial": (
+        "study_002_prereg_v15",
+        "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+        Path("reports/study-002/flag-triage/reference"),
+    ),
+    "first-reply-review-v1": (
+        "study_002_prereg_v15",
+        "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+        Path("reports/study-002/flag-triage/reference"),
+    ),
+    "first-reply-review-v1-sample": (
+        "study_002_prereg_v15",
+        "docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md",
+        Path("reports/study-002/flag-triage/reference"),
+    ),
 }
 #: The reference's artifact kind, by task; P-DET-COVERAGE tasks keep the kind their references were built with.
 ARTIFACT_KINDS = {
@@ -85,6 +102,9 @@ ARTIFACT_KINDS = {
     "punans-v2-trial": "PUNANS_MODEL_CONSENSUS_REFERENCE",
     "punans-v2": "PUNANS_MODEL_CONSENSUS_REFERENCE",
     "punans-v2-constructed": "PUNANS_MODEL_CONSENSUS_REFERENCE",
+    "first-reply-review-v1-trial": "FLAG_TRIAGE_MODEL_CONSENSUS_REFERENCE",
+    "first-reply-review-v1": "FLAG_TRIAGE_MODEL_CONSENSUS_REFERENCE",
+    "first-reply-review-v1-sample": "FLAG_TRIAGE_MODEL_CONSENSUS_REFERENCE",
 }
 #: The declared annotators, by task, where they are not the three of 34. study_002_prereg_v10 (42) left
 #: answer-strata-v1 with two, whose labels must agree.
@@ -94,6 +114,9 @@ TASK_ANNOTATORS: dict[str, tuple[str, ...]] = {
     "punans-v2-trial": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
     "punans-v2": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
     "punans-v2-constructed": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
+    "first-reply-review-v1-trial": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
+    "first-reply-review-v1": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
+    "first-reply-review-v1-sample": ("model.gemini-3.8-flash-high", "model.deepseek-v4.1-flash"),
 }
 TASKS = tuple(TASK_SPECS)
 UNANIMOUS = "unanimous"
