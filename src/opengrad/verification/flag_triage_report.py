@@ -117,7 +117,12 @@ def report(root: Path, set_name: str) -> dict[str, Any]:
         out["status"] = "TRIAL_NO_FLOOR"
         out["precision"] = ft.flag_precision(labels, source_of, sources=ft.SOURCES)
     elif set_name == "triage":
-        out["decision"] = ft.triage_decision(labels, source_of, set(source_of))
+        # The members come from the flag set's own file (hash-checked), not from the population being reported.
+        flag_manifest, members = pop._flag_set(root)
+        if manifest["flag_set"]["members_sha256"] != flag_manifest["members"]["sha256"]:
+            raise FlagTriageReportError("the populations were built from another flag set")
+        flag_members = {member["opengrad_id"] for member in members}
+        out["decision"] = ft.triage_decision(labels, source_of, flag_members)
         out["status"] = out["decision"]["decision"]
     else:
         recall = manifest["populations"]["recall"]

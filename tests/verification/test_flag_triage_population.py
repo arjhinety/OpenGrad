@@ -36,6 +36,8 @@ LEAKS = (
     "recall",
     "unsupported",
     "triage",
+    "study 002",
+    "opengrad",
 )
 
 
@@ -205,3 +207,51 @@ def test_the_report_refuses_a_reference_built_elsewhere(tmp_path: Path) -> None:
     )
     with pytest.raises(rep.FlagTriageReportError, match="different population"):
         rep.load(tmp_path, "triage")
+
+
+def test_absent_populations_are_a_missing_input_not_a_crash(tmp_path: Path) -> None:
+    out = tmp_path / pop.OUTPUT_DIR
+    out.mkdir(parents=True)
+    (out / pop.MANIFEST_NAME).write_text(json.dumps({"populations": {}}), encoding="utf-8")
+    result = pop.verify(tmp_path, rebuild=False)
+    assert result["status"] == "BLOCKED_INPUT_MISSING" and "--restore" in result["reason"]
+
+
+def test_restore_writes_only_a_rebuild_that_reproduces_the_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    out = tmp_path / pop.OUTPUT_DIR
+    out.mkdir(parents=True)
+    manifest = {"populations": {"triage": {"records": 1}}}
+    (out / pop.MANIFEST_NAME).write_text(json.dumps(manifest), encoding="utf-8")
+    triage, recall = [{"triage_id": "r1:a"}], [{"recall_id": "r2:b"}]
+    monkeypatch.setattr(pop, "build", lambda root: ({"populations": {}}, triage, recall))
+    with pytest.raises(pop.TriagePopulationError, match="does not reproduce"):
+        pop.restore(tmp_path)
+    assert not (out / pop.TRIAGE_NAME).exists() and not (out / pop.RECALL_NAME).exists()
+    monkeypatch.setattr(pop, "build", lambda root: (manifest, triage, recall))
+    (out / pop.RECALL_NAME).write_bytes(b"something else\n")
+    with pytest.raises(pop.TriagePopulationError, match="differs"):
+        pop.restore(tmp_path)
+    assert not (out / pop.TRIAGE_NAME).exists()  # a refusal writes nothing, not even the other file
+    (out / pop.RECALL_NAME).unlink()
+    assert pop.restore(tmp_path)["written"] == [pop.TRIAGE_NAME, pop.RECALL_NAME]
+    assert (out / pop.TRIAGE_NAME).read_bytes() == pop._lines(triage)
+
+
+def test_the_triage_report_checks_labels_against_the_flag_set_file(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    rows = _rows({"toolace": 1})
+    j = "DECLINE_JUSTIFIED"
+    refs = [{"triage_id": "r1:toolace0", "votes": dict.fromkeys(rep.ANNOTATORS, j)}]
+    manifest = {"populations": {"triage": {"sha256": "x"}}, "flag_set": {"members_sha256": "m"}}
+    monkeypatch.setattr(rep, "load", lambda root, name: (rows, refs, manifest))
+    # A flag set with one more member than the population: the report must refuse, not decide.
+    members = [{"opengrad_id": "toolace-0"}, {"opengrad_id": "toolace-1"}]
+    monkeypatch.setattr(pop, "_flag_set", lambda root: ({"members": {"sha256": "m"}}, members))
+    with pytest.raises(ft.TriageError):
+        rep.report(ROOT, "triage")
+    monkeypatch.setattr(pop, "_flag_set", lambda root: ({"members": {"sha256": "other"}}, members))
+    with pytest.raises(rep.FlagTriageReportError, match="another flag set"):
+        rep.report(ROOT, "triage")

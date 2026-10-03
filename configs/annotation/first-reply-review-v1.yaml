@@ -101,6 +101,7 @@ instruction_forbidden_terms:
   - flag set
   - flagged
   - recall
+  - triage
   - UNSUPPORTED
   - source_dataset
   - opengrad_id
@@ -145,10 +146,10 @@ model_annotators:
   - annotator_id: model.gemini-3.8-flash-high
     model: Gemini 3.8 Flash (High)
     procedure: configs/annotation/first-reply-review-v1.model-procedure.md
-    procedure_sha256: ea5e35fff7d649e3947ff7ec25e3a85aa2bf0d6b02afca467ae223b1a239ec03
+    procedure_sha256: adfa6a409a669d8f599f999c2164ca97ffecfafce2f024c9504a15856e798bad
     authorization: docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md
   - annotator_id: model.deepseek-v4.1-flash
     model: deepseek-v4.1-flash
     procedure: configs/annotation/first-reply-review-v1.model-procedure.md
-    procedure_sha256: ea5e35fff7d649e3947ff7ec25e3a85aa2bf0d6b02afca467ae223b1a239ec03
+    procedure_sha256: adfa6a409a669d8f599f999c2164ca97ffecfafce2f024c9504a15856e798bad
     authorization: docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md

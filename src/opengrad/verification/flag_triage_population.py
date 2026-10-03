@@ -20,6 +20,10 @@ Counts and hashes only: nothing here prints item text.
     python -m opengrad.verification.flag_triage_population --dry-run   # counts, writes nothing
     python -m opengrad.verification.flag_triage_population --build     # writes reports/study-002/flag-triage/
     python -m opengrad.verification.flag_triage_population --verify
+    python -m opengrad.verification.flag_triage_population --restore   # rewrites absent populations, if identical
+
+The population files are large and need not be committed: `--restore` rebuilds them from the pinned release and
+writes them only if the rebuild reproduces the committed manifest exactly.
 """
 
 from __future__ import annotations
@@ -45,6 +49,7 @@ RECALL_ITEM_SALT = "opengrad-flag-recall-item-v15"
 CODE_MODULES = (
     "src/opengrad/verification/flag_triage_population.py",
     "src/opengrad/verification/flag_triage.py",
+    "src/opengrad/verification/flag_set.py",
 )
 #: Never shown to a labeller (46 §5: source, record id and label are hidden).
 BLINDED = (
@@ -244,6 +249,15 @@ def verify(root: Path = ROOT, *, rebuild: bool = True) -> dict[str, Any]:
     manifest = json.loads((root / OUTPUT_DIR / MANIFEST_NAME).read_text(encoding="utf-8"))
     errors: list[str] = []
     populations = manifest["populations"]
+    absent = [
+        name for name in (TRIAGE_NAME, RECALL_NAME) if not (root / OUTPUT_DIR / name).is_file()
+    ]
+    if absent:
+        return {
+            "status": "BLOCKED_INPUT_MISSING",
+            "errors": [],
+            "reason": f"{', '.join(absent)} not present; rebuild with --restore",
+        }
     rows: dict[str, list[dict[str, Any]]] = {}
     for key, name in (("triage", TRIAGE_NAME), ("recall", RECALL_NAME)):
         data = (root / OUTPUT_DIR / name).read_bytes()
@@ -288,9 +302,31 @@ def verify(root: Path = ROOT, *, rebuild: bool = True) -> dict[str, Any]:
         errors.append("rebuilding gives a different triage population")
     if _lines(recall) != (root / OUTPUT_DIR / RECALL_NAME).read_bytes():
         errors.append("rebuilding gives a different recall population")
-    if rebuilt["populations"] != populations:
-        errors.append("rebuilding gives a different populations block")
+    if rebuilt != manifest:
+        errors.append("rebuilding gives a different manifest")
     return {**result, "status": "FAIL" if errors else "PASS", "errors": errors}
+
+
+def restore(root: Path = ROOT) -> dict[str, Any]:
+    """Rebuild the populations and write the absent ones, only if the rebuild reproduces the committed manifest."""
+    out = root / OUTPUT_DIR
+    manifest = json.loads((out / MANIFEST_NAME).read_text(encoding="utf-8"))
+    rebuilt, triage, recall = build(root)
+    if rebuilt != manifest:
+        raise TriagePopulationError(
+            "the rebuild does not reproduce the committed manifest; nothing written"
+        )
+    data = {TRIAGE_NAME: _lines(triage), RECALL_NAME: _lines(recall)}
+    # Every check before any write, so a refusal leaves the directory as it was.
+    for name, expected in data.items():
+        if (out / name).is_file() and (out / name).read_bytes() != expected:
+            raise TriagePopulationError(
+                f"{name} exists and differs from the rebuild; nothing overwritten"
+            )
+    written = [name for name in data if not (out / name).is_file()]
+    for name in written:
+        (out / name).write_bytes(data[name])
+    return {"status": "PASS", "written": written}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -299,7 +335,11 @@ def main(argv: list[str] | None = None) -> int:
     group.add_argument("--dry-run", action="store_true")
     group.add_argument("--build", action="store_true")
     group.add_argument("--verify", action="store_true")
+    group.add_argument("--restore", action="store_true")
     args = parser.parse_args(argv)
+    if args.restore:
+        print(json.dumps(restore(ROOT), indent=2))
+        return 0
     if args.verify:
         result = verify(ROOT)
         print(json.dumps(result, indent=2))

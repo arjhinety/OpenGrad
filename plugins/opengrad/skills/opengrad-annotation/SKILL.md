@@ -93,10 +93,13 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
   ToolACE can be excluded, the pooled floors stay over all of the flag set; it needs the members file's ids).
   The triage's populations come from `python -m opengrad.verification.flag_triage_population --dry-run | --build |
   --verify` (`reports/study-002/flag-triage/`: the 19,051 items with the 100-record trial marked by a blinded
-  `in_trial`, and the 400-reply recall sample). Its tasks have neutral ids because the labellers see them:
+  `in_trial`, and the 400-reply recall sample). If the population files are absent, `--verify` says
+  `BLOCKED_INPUT_MISSING` and `--restore` rebuilds them, writing only if the rebuild reproduces the committed
+  manifest. Its tasks have neutral ids because the labellers see them:
   `first-reply-review-v1-trial`, `first-reply-review-v1` and `first-reply-review-v1-sample`, with item ids `r1:`/`r2:`
   and the rubric `configs/annotation/first-reply-review-v1.rubric.md` (sections 1-3 served). Never name the flag
-  set, a source, the classifier or recall in anything a labeller sees. Reports: `python -m
+  set, a source, the classifier, recall, the study or a document number in anything a labeller sees, the model
+  procedure's preamble included (models receive it verbatim). Reports: `python -m
   opengrad.verification.flag_triage_report --set trial|triage|recall`. No triage label exists yet; each labelling
   run needs the owner's word.
 - **Classifier v2 development sets** (37 §3): `src/opengrad/verification/classifier_devset_v2.py --set dev --build |

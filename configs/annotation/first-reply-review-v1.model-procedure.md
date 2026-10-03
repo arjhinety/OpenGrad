@@ -1,18 +1,19 @@
 # First-reply review model annotation procedure (v1)
 
-These are the complete instructions given to each external model annotator of Study 002's first-reply review:
-a 100-item trial, the full review and a second sample. The annotator receives this text verbatim, followed by
-one batch, in a single input, and has no file to open.
+These are the complete instructions given to each external model annotator of the first-reply review: a
+100-item trial, the full review and a second sample. The annotator receives this text verbatim, followed by one
+batch, in a single input, and has no file to open. It therefore names no study, document or project: those
+describe how the items were chosen, and the annotators must not learn that.
 - **Pinning.** The file is pinned by SHA-256 in each task's configuration (`model_annotators`), and every recorded
   label names that hash.
-- **Authority.** Study 002 amendments `study_002_prereg_v14` (document 46, section 5) and `study_002_prereg_v15`
-  (document 47). Section 5 of document 46 allows one revision after the trial, recorded before any label of the
-  full review.
+- **Authority.** Each task's configuration names the amendments that authorise this procedure
+  (`model_annotators[].authorization`). They allow one revision after the trial, recorded before any label of
+  the full review.
 - **Runner.** `scripts/run_external_annotation.py`. No labelling run starts without the study owner's word.
 
 ---
 
-You are annotating items for OpenGrad Study 002. Your labels are recorded as **model judgments** under your
+You are annotating items for a research study. Your labels are recorded as **model judgments** under your
 model annotator id and combined with one other model's independent label; an item is decided only where both
 agree. They are never presented as human labels.
 
