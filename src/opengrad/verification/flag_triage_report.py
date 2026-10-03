@@ -30,6 +30,8 @@ from opengrad.verification import flag_triage_population as pop
 ROOT = pop.ROOT
 REFERENCE_DIR = pop.OUTPUT_DIR / "reference"
 ANNOTATORS = ("model.deepseek-v4.1-flash", "model.gemini-3.8-flash-high")
+#: The ambiguity reason for a decline although an offered tool could have done it (owner decision, 2026-10-03).
+DECLINED_DESPITE_TOOL = "DECLINED_DESPITE_TOOL"
 SETS: dict[str, dict[str, str]] = {
     "trial": {"task": "first-reply-review-v1-trial", "population": "triage", "id": "triage_id"},
     "triage": {"task": "first-reply-review-v1", "population": "triage", "id": "triage_id"},
@@ -99,6 +101,24 @@ def labels_by_record(
     return labels
 
 
+def declined_despite_tool(
+    rows: list[dict[str, Any]], references: list[dict[str, Any]], id_field: str
+) -> dict[str, int]:
+    """Per source, the items both models called `UNKNOWN` for a decline although an offered tool fitted.
+
+    They count as not a decline in flag precision like every agreed `UNKNOWN` (47 §4); this only counts them.
+    """
+    source_of_item = {row[id_field]: row["source_dataset"] for row in rows}
+    counts = dict.fromkeys(sorted(set(source_of_item.values())), 0)
+    for reference in references:
+        if (
+            reference.get("reference_label") == "UNKNOWN"
+            and reference.get("reference_ambiguity_status") == DECLINED_DESPITE_TOOL
+        ):
+            counts[source_of_item[reference[id_field]]] += 1
+    return counts
+
+
 def report(root: Path, set_name: str) -> dict[str, Any]:
     spec = SETS[set_name]
     rows, references, manifest = load(root, set_name)
@@ -112,6 +132,7 @@ def report(root: Path, set_name: str) -> dict[str, Any]:
         "population_sha256": manifest["populations"][spec["population"]]["sha256"],
         "items": len(labels),
         "preregistration": ["study_002_prereg_v14", "study_002_prereg_v15"],
+        "agreed_unknown_declined_despite_tool": declined_despite_tool(rows, references, spec["id"]),
     }
     if set_name == "trial":
         out["status"] = "TRIAL_NO_FLOOR"

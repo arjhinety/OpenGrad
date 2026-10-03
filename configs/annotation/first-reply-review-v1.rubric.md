@@ -7,6 +7,11 @@ except that 46 §5 names `UNKNOWN` without defining it and the rubric adds "the 
 and 3 say how to apply them. 46 §5 allows the procedure to be revised once, after the 100-record
 trial, and never the floors.
 
+The case "declines although an offered tool could have done it" has its own ambiguity reason,
+`DECLINED_DESPITE_TOOL` (owner decision, 2026-10-03, before any label). Like every agreed `UNKNOWN` it counts as
+not a decline in flag precision (47 §4), so these cases lower it; the reason code only lets the report count them
+per source.
+
 ## 1. What you see
 
 Each item is the opening of one conversation between a user and an assistant:
@@ -38,6 +43,8 @@ the conversation came from.
 - **The offered tools** are shown so you can see what the assistant had. A decline does not become justified
   because the reply says the assistant's functions are limited; judge the request itself.
 - **When none of the labels fits,** or two remain genuinely plausible, label the item `UNKNOWN` with the matching
-  ambiguity reason. One case the definitions do not settle: the reply declines although an offered tool could
-  have done what was asked. Label it `UNKNOWN` with `AMBIGUOUS_TWO_MODES`.
+  ambiguity reason.
+- **A decline although an offered tool could have done it.** The definitions do not settle this case: the reply
+  declines, but one of the tools it was offered could have done what was asked. Label it `UNKNOWN` with the
+  reason `DECLINED_DESPITE_TOOL`, and use that reason for nothing else.
 - **Each item on its own content.** There is no expected distribution and no quota.

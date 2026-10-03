@@ -182,6 +182,39 @@ def test_the_report_maps_opaque_ids_back_and_needs_both_votes() -> None:
         rep.labels_by_record(rows, refs[:1], "triage_id")
 
 
+def test_the_report_counts_agreed_declines_despite_a_tool_per_source() -> None:
+    rows = _rows({"glaive": 2, "toolace": 2})
+    u = {"reference_label": "UNKNOWN"}
+    refs = [
+        {"triage_id": "r1:glaive0", **u, "reference_ambiguity_status": rep.DECLINED_DESPITE_TOOL},
+        {"triage_id": "r1:glaive1", **u, "reference_ambiguity_status": "AMBIGUOUS_TWO_MODES"},
+        {"triage_id": "r1:toolace0", **u, "reference_ambiguity_status": rep.DECLINED_DESPITE_TOOL},
+        # Two different reasons: no agreed reason, so not counted.
+        {"triage_id": "r1:toolace1", **u, "reference_ambiguity_status": None},
+    ]
+    assert rep.declined_despite_tool(rows, refs, "triage_id") == {"glaive": 1, "toolace": 1}
+
+
+def test_the_reason_code_is_offered_and_served() -> None:
+    for task in TASKS:
+        config = yaml.safe_load(
+            (ROOT / f"configs/annotation/{task}.yaml").read_text(encoding="utf-8")
+        )
+        (status,) = [f for f in config["extra_fields"] if f["key"] == "ambiguity_status"]
+        assert rep.DECLINED_DESPITE_TOOL in status["options"]
+        served = " ".join(
+            doc["content"]
+            for doc in load_instructions(
+                load_task_config(ROOT / f"configs/annotation/{task}.yaml", root=ROOT)
+            )
+        )
+        assert rep.DECLINED_DESPITE_TOOL in served
+    procedure = (ROOT / "configs/annotation/first-reply-review-v1.model-procedure.md").read_text(
+        encoding="utf-8"
+    )
+    assert procedure.count(rep.DECLINED_DESPITE_TOOL) == 2
+
+
 def test_the_report_refuses_a_reference_built_elsewhere(tmp_path: Path) -> None:
     out = tmp_path / pop.OUTPUT_DIR
     out.mkdir(parents=True)

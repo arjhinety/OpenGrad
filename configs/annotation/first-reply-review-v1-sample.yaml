@@ -57,7 +57,8 @@ extra_fields:
   - key: ambiguity_status
     label: Ambiguity status
     type: select
-    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT]
+    # DECLINED_DESPITE_TOOL: a decline although an offered tool could have done it (owner decision, 2026-10-03).
+    options: [NONE, AMBIGUOUS_TWO_MODES, NON_SUBSTANTIVE, MISSING_CONTEXT, DECLINED_DESPITE_TOOL]
     default: NONE
     required: true
   - key: annotator_rationale
@@ -146,10 +147,10 @@ model_annotators:
   - annotator_id: model.gemini-3.8-flash-high
     model: Gemini 3.8 Flash (High)
     procedure: configs/annotation/first-reply-review-v1.model-procedure.md
-    procedure_sha256: adfa6a409a669d8f599f999c2164ca97ffecfafce2f024c9504a15856e798bad
+    procedure_sha256: c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b
     authorization: docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md
   - annotator_id: model.deepseek-v4.1-flash
     model: deepseek-v4.1-flash
     procedure: configs/annotation/first-reply-review-v1.model-procedure.md
-    procedure_sha256: adfa6a409a669d8f599f999c2164ca97ffecfafce2f024c9504a15856e798bad
+    procedure_sha256: c399844566ed4bffe07c6f18afbe023ee21bc5e23e0178025764ab8cc830a26b
     authorization: docs/research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md
