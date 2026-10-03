@@ -1370,3 +1370,19 @@ An independent audit of the v14 commits found the following:
   - **The flag-set record pins only the v1 regex,** not all of `src/opengrad/evaluation/capability.py`: an
     unrelated edit to that shared module no longer invalidates the flag set. A test fails if the detector reads
     anything its fingerprint does not cover.
+
+## 33. The upstream credential string of §22, in one more tracked file
+
+**Added 2026-10-03.** No number changes.
+- **What:** the flag-set triage population (`reports/study-002/flag-triage/flag-triage.population.jsonl`),
+  committed by the study owner's decision of 2026-10-03, carries the GitHub-token-format string of §22 six
+  times, in the tools field of six When2Call items. It is the same string: its sha256 begins `6b70010961f2` in
+  both files. The file also carries one home-directory path from the same upstream data, not this machine's.
+- **What it supersedes:** §22 says no other tracked file carries a live-format credential. That stopped being
+  true with this commit.
+- **What was done:** nothing new is exposed: the string has been public in this repository since `308b4ca` and
+  was reported upstream on 2026-09-24. The population is hash-pinned by its manifest, so its bytes are kept;
+  both findings are in `scripts/repo/publication_hygiene_allowlist.yaml` with exact counts.
+- **Also public now:** each item's source and predicted label sit beside its text. The labellers are told to
+  open nothing and run in an empty directory, but a labeller that reads this repository could learn how the
+  items were chosen. The owner accepted this when choosing to commit the file before labelling.

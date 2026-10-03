@@ -20,6 +20,21 @@
   count: 2
   reason: The same upstream row, as shown to the model annotator in batch 06 (.json and .md). Pinned tarball.
   reference: reports/ERRATA.md §22
+- path: reports/study-002/flag-triage/flag-triage.population.jsonl
+  category: api_secret
+  count: 6
+  reason: >-
+    The same token (sha256 prefix 6b70010961f2, equal to the one above), in the tools field of six
+    When2Call items of the flag-set triage population. Upstream data, already public in this repository;
+    the population is hash-pinned by its manifest. Committed by owner decision, 2026-10-03.
+  reference: reports/ERRATA.md §33
+- path: reports/study-002/flag-triage/flag-triage.population.jsonl
+  category: private_path
+  count: 1
+  reason: >-
+    A home-directory path inside one When2Call item's text, from the upstream data; not this machine's
+    user folder. The population is hash-pinned by its manifest.
+  reference: reports/ERRATA.md §33
 
 # -- the author's local paths inside hash-pinned audit trails (reports/ERRATA.md §22) --------------
 
