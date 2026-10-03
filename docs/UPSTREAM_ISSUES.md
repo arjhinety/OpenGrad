@@ -30,6 +30,7 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0010 | 2026-10-03 | OpenGrad verification | `OURS` | Triage `verify` crashed on absent populations; no way to restore them; first `--restore` could write half | Fixed (`BLOCKED_INPUT_MISSING`, `--restore`, check before write) |
 | UP-0011 | 2026-10-03 | OpenGrad registry validation | `OURS` | A malformed `papers.yaml` makes `opengrad-validate` die with a traceback, not a validation error | Open |
 | UP-0012 | 2026-10-03 | OpenGrad runner, agy 1.2.x | `OURS` (+ `UNCLEAR` upstream) | agy ran labelling batches with every tool auto-approved: web search, and file browsing outside its empty directory | Open: owner decision |
+| UP-0013 | 2026-10-04 | OpenGrad tests | `OURS` | A pushed commit grew the hygiene allowlist, and a test pinning the credential count failed CI | Fixed (count 3 -> 9, ERRATA §33) |
 
 ---
 
@@ -161,3 +162,11 @@ locked down before the full triage run, are the study owner's decisions.
   attempt the hook never saw. Canary (agy 1.2.16): told to search the web and list a directory, the model's search
   was denied by the hook (conversation store: 1 attempted `search_web`, 0 web steps) and it reported both blocked.
   The owner chose this over changing the global agy settings. Incident: `docs/INCIDENT_LOG.md` INC-0002.
+
+## UP-0013 — a ratchet test outside the targeted set (`OURS`)
+
+`4aaf8e5` committed the triage population with six allowlisted occurrences of the upstream token (ERRATA §33).
+`tests/publication/test_publication_hygiene.py` pins the number of accepted `api_secret` findings (3), so CI failed
+on Linux and Windows (run 37134813092). The local checks ran the scan itself and the targeted tests, but not
+`tests/publication`, and the audit did not either. Fixed: the count is 9, with both errata named. Lesson: a change
+to `scripts/repo/publication_hygiene_allowlist.yaml` runs `tests/publication`.

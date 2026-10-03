@@ -28,8 +28,9 @@ def test_the_repository_passes_its_hygiene_scan() -> None:
     findings = scanner.scan(ROOT)
     problems, accepted = scanner.evaluate(findings, scanner.load_allowlist())
     assert problems == [], "\n".join(problems[:20])
-    # The one upstream credential, in the population and in two tarball members.
-    assert sum(1 for f in accepted if f["category"] == "api_secret") == 3
+    # The one upstream credential: in the P-DET-v1 population and two tarball members (ERRATA §22), and six
+    # times in the flag-set triage population (ERRATA §33). The same string throughout.
+    assert sum(1 for f in accepted if f["category"] == "api_secret") == 9
 
 
 def test_the_scanner_catches_tokens_in_text_data_and_tarballs(tmp_path) -> None:
