@@ -126,7 +126,10 @@ Related rules:
 - **Corrections:**
   - a wrong number in a frozen study goes to `reports/ERRATA.md`;
   - an operational mistake that changes what can be claimed goes to `docs/INCIDENT_LOG.md`, with evidence under
-    `reports/incidents/`.
+    `reports/incidents/`;
+  - every problem hit while working (a test, CI, a library, a CLI, a model API) goes to `docs/UPSTREAM_ISSUES.md`,
+    classed `OURS`, `UPSTREAM` (only with an isolated reproduction, the version and a tracker search), `UNCLEAR`
+    or `NOT A BUG`, in the same commit as its fix, so real upstream bugs can be filed later with the owner's word.
 
   Entries are appended and superseded, never rewritten.
 

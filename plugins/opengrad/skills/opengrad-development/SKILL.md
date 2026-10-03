@@ -92,6 +92,8 @@ Python is 3.11 (`.python-version`); the pre-commit ruff `rev` equals ruff in `uv
   never reformat untouched files; that buries the real diff.
 - Report failures faithfully. Separate pre-existing failures from new ones by running the same tests on a
   clean worktree (`git worktree add --detach <scratch> HEAD`), then remove it.
+- Every problem found while working is logged in `docs/UPSTREAM_ISSUES.md` as ours or a library's, with the
+  version and a reproduction (see `opengrad-registry-provenance`).
 - Pre-existing failures are tracked in `references/known-failures.md`. Update that file in the commit that
   fixes or introduces one.
 

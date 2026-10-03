@@ -36,6 +36,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`SYNTHETIC_PREFERENCE_GENERATION.md`](SYNTHETIC_PREFERENCE_GENERATION.md) | Synthetic Preference Generation & DPO Adjudication |
 | [`TEACHER_SELECTION.md`](TEACHER_SELECTION.md) | Teacher Model Selection & Tokenizer Compatibility |
 | [`TRAINING_LIFECYCLE.md`](TRAINING_LIFECYCLE.md) | Training Lifecycle Specification |
+| [`UPSTREAM_ISSUES.md`](UPSTREAM_ISSUES.md) | Upstream issues log |
 
 ## architecture
 
@@ -227,4 +228,4 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 |---|---|
 | [`training/reference-recipes.md`](training/reference-recipes.md) | External training reference recipes |
 
-131 documents.
+132 documents.
