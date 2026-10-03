@@ -488,3 +488,418 @@ papers:
   checked_sources:
   - https://doi.org/10.1109/TMC.2024.3513457
   verification_status: field_level_verified_with_explicit_unresolved_fields
+- id: alt_test_llm_annotators
+  title: 'The Alternative Annotator Test for LLM-as-a-Judge: How to Statistically Justify Replacing Human
+    Annotators with LLMs'
+  authors:
+  - Nitay Calderon
+  - Roi Reichart
+  - Rotem Dror
+  year: 2025
+  venue: arXiv
+  arxiv: '2501.10970'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2501.10970
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Proposes the Alternative Annotator Test (alt-test), a statistical procedure that
+    needs only a modest subset of human-annotated examples to justify using LLM annotations, plus a measure
+    for comparing LLM annotators; ten datasets, six LLMs, four prompting techniques.
+  implementation_relevance: 'The standard to meet if Study 002''s two-model labels are to stand in for
+    human labels: a modest human subset and a test, not agreement between models alone.'
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2501.10970
+  - pwc paper info 2501.10970 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: automated_annotation_requires_validation
+  title: Automated Annotation with Generative AI Requires Validation
+  authors:
+  - Nicholas Pangakis
+  - Samuel Wolken
+  - Neil Fasching
+  year: 2023
+  venue: arXiv
+  arxiv: '2306.00176'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2306.00176
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Argues that any automated annotation with an LLM must validate it against human
+    labels, task by task; replicates 27 annotation tasks across 11 datasets with GPT-4 and finds performance
+    highly contingent on dataset and task.
+  implementation_relevance: 'The main objection a reviewer will raise to the flag-set triage: no human
+    validation set.'
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2306.00176
+  - pwc paper info 2306.00176 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: no_free_labels
+  title: 'No Free Labels: Limitations of LLM-as-a-Judge Without Human Grounding'
+  authors:
+  - Michael Krumdick
+  - Charles Lovering
+  - Varshini Reddy
+  - Seth Ebner
+  - Chris Tanner
+  year: 2025
+  venue: COLM 2026
+  arxiv: '2503.05061'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2503.05061
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Shows LLM judges grading correctness struggle on the questions they cannot answer
+    themselves, even when aggregate agreement with humans looks high; releases 1,200 human-labelled responses
+    and recommends a human-written reference answer.
+  implementation_relevance: 'Bears on DECLINE_UNJUSTIFIED: deciding whether a capable assistant could
+    answer depends on the labeller''s own ability to answer.'
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2503.05061
+  - pwc paper info 2503.05061 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: chatgpt_outperforms_crowdworkers
+  title: ChatGPT Outperforms Crowd-Workers for Text-Annotation Tasks
+  authors:
+  - Fabrizio Gilardi
+  - Meysam Alizadeh
+  - Maël Kubli
+  year: 2023
+  venue: arXiv
+  arxiv: '2303.15056'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2303.15056
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: On 2,382 tweets, ChatGPT's zero-shot accuracy exceeds crowd-workers' on four of
+    five tasks, and its intercoder agreement exceeds crowd-workers' and trained annotators' on all; about
+    twenty times cheaper than MTurk.
+  implementation_relevance: The early evidence that model annotation can match or beat crowd annotation,
+    the premise of using model labellers at all.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2303.15056
+  - pwc paper info 2303.15056 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: confidence_driven_inference
+  title: Can Unconfident LLM Annotations Be Used for Confident Conclusions?
+  authors:
+  - Kristina Gligorić
+  - Tijana Zrnic
+  - Cinoo Lee
+  - Emmanuel J. Candès
+  - Dan Jurafsky
+  year: 2024
+  venue: arXiv
+  arxiv: '2408.15204'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2408.15204
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Confidence-Driven Inference combines LLM annotations and LLM confidence to choose
+    which human annotations to collect, giving valid confidence intervals and needing over 25% fewer human
+    annotations in three social-science settings.
+  implementation_relevance: A way to spend a small human-annotation budget efficiently if one is ever
+    added to the triage.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2408.15204
+  - pwc paper info 2408.15204 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: correlated_errors_llms
+  title: Correlated Errors in Large Language Models
+  authors:
+  - Elliot Myunghoon Kim
+  - Avi Garg
+  - Kenny Peng
+  - Nikhil Garg
+  year: 2025
+  venue: ICML 2025
+  arxiv: '2506.07962'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2506.07962
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Across over 350 LLMs, model errors are substantially correlated (on one leaderboard,
+    models agree 60% of the time when both err); larger and more accurate models have highly correlated
+    errors even across architectures and providers; shows effects on LLM-as-judge evaluation.
+  implementation_relevance: Why agreement between Gemini and DeepSeek is evidence of consistency, not
+    of correctness.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2506.07962
+  - pwc paper info 2506.07962 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: llm_behavioral_entanglement
+  title: How Independent are Large Language Models? A Statistical Framework for Auditing Behavioral Entanglement
+    and Reweighting Verifier Ensembles
+  authors:
+  - Chenchen Kuai
+  - Jiwan Jiang
+  - Zihao Zhu
+  - Hao Wang
+  - Keshu Wu
+  - Zihao Li
+  - Yunlong Zhang
+  - Chenxi Liu
+  - Zhengzhong Tu
+  - Zhiwen Fan
+  - Yang Zhou
+  year: 2026
+  venue: COLM 2026
+  arxiv: '2604.07650'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2604.07650
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Finds widespread behavioural entanglement among 18 LLMs from six families (shared
+    pretraining data, distillation and alignment), where agreement can reflect shared error modes; links
+    stronger dependency to over-endorsement bias in judges and proposes de-entangled reweighting of verifier
+    ensembles.
+  implementation_relevance: The same caution as correlated errors, stated for multi-model judging pipelines
+    like the triage.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2604.07650
+  - pwc paper info 2604.07650 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: coannotating
+  title: 'CoAnnotating: Uncertainty-Guided Work Allocation between Human and Large Language Models for
+    Data Annotation'
+  authors:
+  - Minzhi Li
+  - Taiwei Shi
+  - Caleb Ziems
+  - Min-Yen Kan
+  - Nancy F. Chen
+  - Zhengyuan Liu
+  - Diyi Yang
+  year: 2023
+  venue: arXiv
+  arxiv: '2310.15638'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2310.15638
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: CoAnnotating allocates annotation work between humans and LLMs using the LLM's
+    uncertainty, with up to 21% improvement over a random baseline.
+  implementation_relevance: A design for mixing a few human labels into a model-labelled set, should one
+    be added.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2310.15638
+  - pwc paper info 2310.15638 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: calm_llm_judge_biases
+  title: Justice or Prejudice? Quantifying Biases in LLM-as-a-Judge
+  authors:
+  - Jiayi Ye
+  - Yanbo Wang
+  - Yue Huang
+  - Dongping Chen
+  - Qihui Zhang
+  - Nuno Moniz
+  - Tian Gao
+  - Werner Geyer
+  - Chao Huang
+  - Pin-Yu Chen
+  - Nitesh V Chawla
+  - Xiangliang Zhang
+  year: 2024
+  venue: arXiv
+  arxiv: '2410.02736'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2410.02736
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Identifies 12 potential biases of LLM-as-a-Judge and the CALM framework to quantify
+    them; finds significant biases persist in specific tasks.
+  implementation_relevance: Background for the triage's blinding and fixed procedure.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2410.02736
+  - pwc paper info 2410.02736 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: noisy_but_valid
+  title: 'Noisy but Valid: Robust Statistical Evaluation of LLMs with Imperfect Judges'
+  authors:
+  - Chen Feng
+  - Minghe Shen
+  - Ananth Balashankar
+  - Carsten Gerner-Beuerle
+  - Miguel R. D. Rodrigues
+  year: 2026
+  venue: ICLR 2026
+  arxiv: '2601.20913'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2601.20913
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: A hypothesis-testing framework that uses a small human-labelled calibration set
+    to estimate an LLM judge's true- and false-positive rates and keeps finite-sample Type-I error control
+    on a large judge-labelled set; positioned against Prediction-Powered Inference.
+  implementation_relevance: How a stop rule computed on model labels could carry a statistical guarantee,
+    given a small human set.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2601.20913
+  - pwc paper info 2601.20913 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: or_bench
+  title: 'OR-Bench: An Over-Refusal Benchmark for Large Language Models'
+  authors:
+  - Justin Cui
+  - Wei-Lin Chiang
+  - Ion Stoica
+  - Cho-Jui Hsieh
+  year: 2024
+  venue: arXiv
+  arxiv: '2405.20947'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2405.20947
+  official_implementation: null
+  category: over_refusal
+  methodology_summary: 'OR-Bench: 80,000 automatically generated over-refusal prompts in 10 categories,
+    about 1,000 hard ones and 600 toxic contrasts; measures over-refusal of 32 LLMs across 8 families.'
+  implementation_relevance: Over-refusal measured in models; Study 002 traces refusals to the supervised
+    training data.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2405.20947
+  - pwc paper info 2405.20947 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: xstest
+  title: 'XSTest: A Test Suite for Identifying Exaggerated Safety Behaviours in Large Language Models'
+  authors:
+  - Paul Röttger
+  - Hannah Rose Kirk
+  - Bertie Vidgen
+  - Giuseppe Attanasio
+  - Federico Bianchi
+  - Dirk Hovy
+  year: 2023
+  venue: arXiv
+  arxiv: '2308.01263'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2308.01263
+  official_implementation: null
+  category: over_refusal
+  methodology_summary: 'XSTest: 250 safe prompts across ten types that well-calibrated models should not
+    refuse, and 200 unsafe contrasts; identifies exaggerated safety behaviours.'
+  implementation_relevance: The standard test suite for refusing safe prompts, the behaviour Study 002
+    studies.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2308.01263
+  - pwc paper info 2308.01263 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: who_annotates_in_nlp
+  title: Who Annotates in NLP? A Large-scale Assessment of Human Annotation Reporting between 2018 and
+    2025
+  authors:
+  - Kunilovskaya, Maria
+  - Bhatia, Gagan
+  - Albertelli, Lisa Sophie
+  - Chen, Yanran
+  - Greisinger, Christian
+  - Kiefer, Lotta
+  - Leiter, Christoph
+  - Roy, Subhadeep
+  - Achamaleh, Tewodros
+  - Manzoor, Muhammad Arslan
+  - Pohl, Sebastian
+  - Hou, Yufang
+  - Eger, Steffen
+  year: 2026
+  venue: arXiv
+  arxiv: '2606.02255'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2606.02255
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Audits annotation reporting across 2,667 annotation tasks in 1,603 ACL-venue papers
+    (2018-2025); papers often omit details needed to assess validity, including adjudication and agreement
+    values; gives minimum reporting recommendations.
+  implementation_relevance: 'A checklist for writing up the triage: report the labellers, procedure, adjudication
+    and agreement.'
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2606.02255
+  - pwc paper info 2606.02255 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: llm_as_a_jury
+  title: Who can we trust? LLM-as-a-jury for Comparative Assessment
+  authors:
+  - Mengjie Qian
+  - Guangzhi Sun
+  - Mark Gales
+  - Kate Knill
+  year: 2026
+  venue: ICML 2026
+  arxiv: '2602.16610'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2602.16610
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Shows LLM judges' comparison probabilities are inconsistent and proposes BT-sigma,
+    a judge-aware Bradley-Terry model that infers each judge's reliability from pairwise comparisons alone.
+  implementation_relevance: Judge reliability can differ by task; the triage instead reports agreement
+    per source.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2602.16610
+  - pwc paper info 2602.16610 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
+- id: cross_model_disagreement
+  title: Cross-Model Disagreement as a Label-Free Correctness Signal
+  authors:
+  - Matt Gorbett
+  - Suman Jana
+  year: 2026
+  venue: COLM 2026
+  arxiv: '2603.25450'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2603.25450
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: Introduces cross-model disagreement (Cross-Model Perplexity and Entropy) as a label-free
+    correctness signal that beats within-model uncertainty, for example AUROC 0.75 against 0.59 on MMLU.
+  implementation_relevance: Supports using disagreement between two models as a signal of difficulty,
+    as the triage's drop-out counts do.
+  limitations: Abstract only, read 2026-10-03 through the Papers With Code CLI for a possible Study 002
+    case study (docs/research/study-002/CASE-STUDY-RELATED-WORK.md); the full paper and any implementation
+    are not yet read.
+  checked_sources:
+  - https://arxiv.org/abs/2603.25450
+  - pwc paper info 2603.25450 (Papers With Code catalog, 2026-10-03)
+  verification_status: abstract_verified_full_text_unread
