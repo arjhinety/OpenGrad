@@ -55,6 +55,7 @@ the script's own first docstring line.
 | [`build_xlam_from_derivative.py`](build_xlam_from_derivative.py) | Reconstruct xLAM source-shaped records from the published Canonical-v1 derivative. |
 | [`characterize_refusal.py`](characterize_refusal.py) | Characterise WHAT triggers refusal, per stage, from the per-example evidence. CPU only. |
 | [`close_ptq_phase.py`](close_ptq_phase.py) | Freeze the PTQ phase into one immutable, self-verifying provenance record. |
+| [`compare_gemini_relabel.py`](compare_gemini_relabel.py) | INC-0002: compare Gemini's tool-gated re-label of P-DET-COVERAGE with its original labels. |
 | [`derive_ablation_yield_report.py`](derive_ablation_yield_report.py) | Derive the minus-xLAM yield report from the measured full-corpus report. |
 | [`evaluate_prose_classifier_dev.py`](evaluate_prose_classifier_dev.py) | Agreement of ``prose-decision-classifier-v1`` with the model labels on its development set (33 §5). |
 | [`evaluate_prose_classifier_v2_dev.py`](evaluate_prose_classifier_v2_dev.py) | Agreement of ``prose-decision-classifier-v2`` with model labels on its development data (37 §3-§4). |
@@ -115,4 +116,4 @@ the script's own first docstring line.
 | [`reporting/generate_indexes.py`](reporting/generate_indexes.py) | Generate the directory indexes ``reports/README.md``, ``scripts/README.md`` and ``docs/README.md``. |
 | [`reporting/generate_source_views.py`](reporting/generate_source_views.py) | Generate the data-source views: ``docs/datasets/SOURCE_REGISTRY.md`` and ``SOURCE_SCREENING.md``. |
 
-89 scripts.
+90 scripts.

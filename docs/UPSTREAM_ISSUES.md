@@ -121,6 +121,10 @@ with a PyYAML `ScannerError` traceback from `validators._paper_ids`, which loads
 correct (`NOT A BUG` on its side). The broken file reached a local commit because the check and the commit were
 chained with `;` rather than `&&`; it was fixed and amended before any push. Lessons: chain a commit after its
 checks with `&&`; `_paper_ids` should reuse the reported load error.
+- **Again, 2026-10-04:** a check piped into `tail` (`pytest ... | tail -1 && git commit`) let a failing index test
+  through, because a pipeline's exit status is the last command's; and a later commit was gated on its tests but
+  not on the hygiene scan, which had flagged a home-folder-style path in a new test. Both were caught at once and
+  amended before any push. Capture each check's exit code before filtering its output, and gate on every check.
 
 ## UP-0012 — agy could search the web and browse files during labelling (`OURS`, with an `UNCLEAR` upstream part)
 
