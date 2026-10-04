@@ -1,0 +1,218 @@
+{
+  "archive": {
+    "bytes": 59173,
+    "file": "pdet-coverage-v1-routing.external-models.gemini-r2.audit-trail.tar.gz",
+    "members": [
+      {
+        "bytes": 42966,
+        "path": "ingest/model-gemini-r2.history.jsonl",
+        "sha256": "a5d58ecf86f83036e1528c6ca628e679c0ece291bd5ad98684aa86a4e87307f1"
+      },
+      {
+        "bytes": 7020,
+        "path": "model-gemini-r2/batch-01.attempt-1.answers.json",
+        "sha256": "67c5a53b0240d6c608340163369753c9d6ae6f8c03cd8bcaa25be7736fe57536"
+      },
+      {
+        "bytes": 1447,
+        "path": "model-gemini-r2/batch-01.attempt-1.run.json",
+        "sha256": "26081a70fa9b101b14f6962301acd29a170cf51746bef10e0252bb0379736198"
+      },
+      {
+        "bytes": 76992,
+        "path": "model-gemini-r2/batch-01.json",
+        "sha256": "e244e57f04f36b4b1dbd400d0bfb260f4df40a4cb06cf5fdd70ea5554b090196"
+      },
+      {
+        "bytes": 61373,
+        "path": "model-gemini-r2/batch-01.md",
+        "sha256": "67df7f7cf812f895d19adbecb3311dc42bd8b090f0b6c983ee62052a200949a0"
+      },
+      {
+        "bytes": 3593,
+        "path": "model-gemini-r2/batch-02.attempt-1.answers.json",
+        "sha256": "ffdf4d7f68d3fca95b65ddf79dd5531df2d0757de1a781907522d27b1b148c78"
+      },
+      {
+        "bytes": 1447,
+        "path": "model-gemini-r2/batch-02.attempt-1.run.json",
+        "sha256": "87719c1121a3c64b50b3309280271882c032c820d9ab7b005a1ae4bda7c4dffb"
+      },
+      {
+        "bytes": 46606,
+        "path": "model-gemini-r2/batch-02.json",
+        "sha256": "3d20f72f333f54a0c5b1c4186f207814c281d9dd273e5e79d9603b009fde4f2d"
+      },
+      {
+        "bytes": 38494,
+        "path": "model-gemini-r2/batch-02.md",
+        "sha256": "c3432ba54cbc97ff3412c3416ebc83a829d059e53875aab61bad6b4e91dba836"
+      },
+      {
+        "bytes": 3462,
+        "path": "procedure/pdet-coverage-v1.model-procedure.md",
+        "sha256": "4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab"
+      },
+      {
+        "bytes": 20301,
+        "path": "runner/run_external_annotation.py",
+        "sha256": "f2511d410fd740e4f48c9038c030bd1c07e0e17fc866c6b111e6cdf70dce9e32"
+      }
+    ],
+    "sha256": "51acfe929f9882b36a3b81cb3ae5e026ffd6ab4fadea9e5c696b75544a11fd27"
+  },
+  "authorization": "docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md",
+  "built_by": "scripts/archive_external_model_labels.py",
+  "cli_streams": {
+    "bytes": 2763,
+    "file": "local/pdet-coverage-v1-routing.external-models.gemini-r2.cli-streams.tar.gz",
+    "members": [
+      {
+        "bytes": 0,
+        "path": "model-gemini-r2/batch-01.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 7020,
+        "path": "model-gemini-r2/batch-01.attempt-1.stdout.txt",
+        "sha256": "67c5a53b0240d6c608340163369753c9d6ae6f8c03cd8bcaa25be7736fe57536"
+      },
+      {
+        "bytes": 0,
+        "path": "model-gemini-r2/batch-02.attempt-1.stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 3593,
+        "path": "model-gemini-r2/batch-02.attempt-1.stdout.txt",
+        "sha256": "ffdf4d7f68d3fca95b65ddf79dd5531df2d0757de1a781907522d27b1b148c78"
+      }
+    ],
+    "sha256": "f5941800fe1a4da6ca17c3ff9f7b2ff19f04c7a577520ba710900bb90c487967",
+    "tracked": false,
+    "why": "Raw CLI stdout and stderr are unfiltered tool logs that may carry account or session details, and they are large. They are kept verbatim, out of version control; their hashes are recorded here and in each run record. A scan for the operator's e-mail address and common credential patterns found none (2026-10-04)."
+  },
+  "procedure": {
+    "path": "configs/annotation/pdet-coverage-v1.model-procedure.md",
+    "sha256": "4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab"
+  },
+  "runner": {
+    "path": "scripts/run_external_annotation.py",
+    "sha256": "f2511d410fd740e4f48c9038c030bd1c07e0e17fc866c6b111e6cdf70dce9e32"
+  },
+  "schema": "opengrad-external-model-label-audit-trail-v1",
+  "sessions": [
+    {
+      "annotator_id": "model.gemini-3.8-flash-high",
+      "attempts": 2,
+      "batches": [
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "67c5a53b0240d6c608340163369753c9d6ae6f8c03cd8bcaa25be7736fe57536",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "1.2.16",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "4c2655c6b343818ba4fde4c036e5cfa4050cb91f0a69c4a5668a6178eb51780d",
+              "recorded_labels": 20,
+              "seconds": 57.2,
+              "status": "recorded 20 labels (0 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "67c5a53b0240d6c608340163369753c9d6ae6f8c03cd8bcaa25be7736fe57536",
+              "web_tool_calls": {
+                "any": false,
+                "gate_saw_every_call": true,
+                "source": "agy conversation store, dab640ae-e241-4775-a104-339a0e4a8b0a.db",
+                "steps": 8,
+                "tool_calls": {
+                  "view_file": 3
+                },
+                "tool_gate": {
+                  "allowed": {
+                    "view_file": 3
+                  },
+                  "denied": {},
+                  "fired": true
+                },
+                "visible": true,
+                "web_steps": 0,
+                "web_tool_calls": {}
+              }
+            }
+          ],
+          "batch_id": "01",
+          "content_sha256": "4821d6c6ad400fbcff6bea2110255f464b9cbbffbe0a3d59a84eebdf0832a920",
+          "items": 20,
+          "labels_recorded": 20,
+          "outcome": "recorded",
+          "procedure_sha256": "4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab"
+        },
+        {
+          "attempts": [
+            {
+              "answers_file_sha256": "ffdf4d7f68d3fca95b65ddf79dd5531df2d0757de1a781907522d27b1b148c78",
+              "answers_found": true,
+              "attempt": 1,
+              "cli_version": "1.2.16",
+              "exit_code": 0,
+              "files_created_in_isolated_dir": [],
+              "prompt_sha256": "032c449822eb0ea8e4045123d71cf1b96fc7cca5cd557d0c25cff946cbe280e6",
+              "recorded_labels": 10,
+              "seconds": 44.5,
+              "status": "recorded 10 labels (0 flagged)",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stdout_sha256": "ffdf4d7f68d3fca95b65ddf79dd5531df2d0757de1a781907522d27b1b148c78",
+              "web_tool_calls": {
+                "any": false,
+                "gate_saw_every_call": true,
+                "source": "agy conversation store, ab1b9263-c1a6-4503-9b6e-c3f7a54e3ac2.db",
+                "steps": 6,
+                "tool_calls": {
+                  "view_file": 2
+                },
+                "tool_gate": {
+                  "allowed": {
+                    "view_file": 2
+                  },
+                  "denied": {},
+                  "fired": true
+                },
+                "visible": true,
+                "web_steps": 0,
+                "web_tool_calls": {}
+              }
+            }
+          ],
+          "batch_id": "02",
+          "content_sha256": "61a335e8253cfb1ca923245c2c595a28dc570d8bbe60982e7b30977927ea9dbf",
+          "items": 10,
+          "labels_recorded": 10,
+          "outcome": "recorded",
+          "procedure_sha256": "4d36a3f8d97ebd5b62987ee2c01118ac1fafb4b0625673f867288f986d84e7ab"
+        }
+      ],
+      "cli_versions": [
+        "1.2.16"
+      ],
+      "files_created_in_isolated_dirs": 0,
+      "ingest": {
+        "history_entries": 30,
+        "history_head_sha256": "06464fbbc77a66d9fff4017c4e4a166c7c62110a4a4effabc9ae5fecc8fda58c",
+        "labeled_items": 30
+      },
+      "labels_recorded": 30,
+      "session_id": "model-gemini-r2",
+      "web_tool_calls": {
+        "attempts_not_visible": 0,
+        "attempts_scanned": 2,
+        "attempts_with_calls": 0,
+        "batches_with_calls_that_recorded_labels": []
+      }
+    }
+  ],
+  "status": "Model judgments by three declared non-Claude annotators, each blind and independent. They form the provisional MODEL_REFERENCE of the three-model consensus (docs/research/study-002/34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md); not human labels and not human gold.",
+  "task_id": "pdet-coverage-v1-routing",
+  "variant": "gemini-r2"
+}

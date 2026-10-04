@@ -58,12 +58,12 @@ Terms: [glossary](../docs/GLOSSARY.md).
 | [`experiments/`](experiments/) | 1 | Study 001 | Experiment-level records |
 | [`failures/`](failures/) | 2 | Study 001 | Failure clustering |
 | [`hardware/`](hardware/) | 1 | Study 001 | GPU smoke records |
-| [`incidents/`](incidents/) | 2 | Study 001 | Incident records (see docs/INCIDENT_LOG.md) |
+| [`incidents/`](incidents/) | 3 | Study 001 | Incident records (see docs/INCIDENT_LOG.md) |
 | [`normalization-v3/`](normalization-v3/) | 10 | Study 002 | normalization-v3: builds, verification, audits, re-anchoring |
 | [`optimization/`](optimization/) | 1 | Study 001 | Optimization producer records |
 | [`pdet/`](pdet/) | 17 | Study 002 | P-DET-v1: the frozen population, annotation exports, review queue, model-label provenance |
-| [`pdet-coverage/`](pdet-coverage/) | 34 | Study 002 | P-DET-COVERAGE-v1 (and its routing task): population, three-model labels, reference, audit trails |
-| [`pdet-coverage-v2/`](pdet-coverage-v2/) | 22 | Study 002 | P-DET-COVERAGE-v2: population, three-model labels, reference, audit trails |
+| [`pdet-coverage/`](pdet-coverage/) | 62 | Study 002 | P-DET-COVERAGE-v1 (and its routing task): population, three-model labels, reference, audit trails |
+| [`pdet-coverage-v2/`](pdet-coverage-v2/) | 36 | Study 002 | P-DET-COVERAGE-v2: population, three-model labels, reference, audit trails |
 | [`prose-classifier/`](prose-classifier/) | 139 | Study 002 | Decision-classifier development sets, check rounds and one-shot tests; see its README |
 | [`releases/`](releases/) | 10 | Study 001 | Hugging Face publication records |
 | [`source-screening/`](source-screening/) | 9 | Study 002 | Data-source screenings: the written report and the artifacts behind its numbers |
@@ -71,4 +71,4 @@ Terms: [glossary](../docs/GLOSSARY.md).
 | [`training/`](training/) | 1 | Study 001 | Pre-training component-gate evidence |
 | [`visual/`](visual/) | 12 | Study 001 | Figures |
 
-451 tracked files in total.
+494 tracked files in total.

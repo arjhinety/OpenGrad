@@ -258,10 +258,13 @@ def run_once(
         exit_code, stdout, stderr = "executable_missing", b"", b""
     ended = time.time()
     gate = read_tool_gate(workdir) if spec.get("tool_gate") else None
+    ours = {".agents/hooks.json", ".agents/gate-log.jsonl"} if gate is not None else set()
     created = sorted(
-        path.name
-        for path in workdir.iterdir()
-        if not (by_file and path.name == INPUT_FILE) and not (gate is not None and path.name == ".agents")
+        path.relative_to(workdir).as_posix()
+        for path in workdir.rglob("*")
+        if path.is_file()
+        and not (by_file and path.name == INPUT_FILE and path.parent == workdir)
+        and path.relative_to(workdir).as_posix() not in ours
     )
     last_message = last.read_bytes() if last.is_file() else b""
     shutil.rmtree(workdir, ignore_errors=True)
@@ -297,7 +300,9 @@ def write_tool_gate(workdir: Path) -> None:
         command = '"' + " ".join(f'"{part}"' for part in parts) + '"'
     hooks = {
         "opengrad-tool-gate": {
-            "PreToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": command, "timeout": 30}]}]
+            "PreToolUse": [
+                {"matcher": "*", "hooks": [{"type": "command", "command": command, "timeout": 30}]}
+            ]
         }
     }
     (workdir / ".agents").mkdir()

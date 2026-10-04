@@ -45,6 +45,14 @@
     Nine pinned dev-set audit-trail manifests record the Read tool's absolute file_path. The writer
     (scripts/archive_devset_model_labels.py) now records repo-relative paths; these are kept byte-exact.
   reference: reports/ERRATA.md §22
+- path: reports/pdet-coverage-v2/provenance/external-models/pdet-coverage-v2.external-models.gemini-r2.audit-trail.tar.gz!model-gemini-r2/batch-16.*
+  category: private_path
+  count: 8
+  reason: >-
+    Not a local path: home-directory paths inside upstream item text, four times in one re-labelled batch
+    (.json and .md), as the labeller was shown it. The same items sit in the frozen P-DET-COVERAGE-v2
+    archive. The re-label runner records portable paths, so its own argv carries none.
+  reference: docs/INCIDENT_LOG.md INC-0002
 - path: reports/pdet*/provenance/*/*.audit-trail.tar.gz!*
   category: private_path
   count: 251

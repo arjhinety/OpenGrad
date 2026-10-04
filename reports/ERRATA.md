@@ -1414,3 +1414,7 @@ references.
 - **What is being done:** by the owner's decision of 2026-10-03, Gemini re-labels every P-DET-COVERAGE-v1 and v2
   batch under a tool gate, in new sessions. The references are rebuilt as new versions and compared with the
   frozen ones; the frozen artifacts are not edited.
+- **Result (2026-10-04):** the re-label and its pre-planned comparison found no detectable effect of the
+  exposure, and every qualification of classifier v1's and v2's tests is unchanged when re-scored against the
+  re-labelled references; 3 of 306 (v1) and 4 of 420 (v2) reference labels change. Details and limits:
+  [`docs/INCIDENT_LOG.md`](../docs/INCIDENT_LOG.md) INC-0002, "The re-label and the comparison".

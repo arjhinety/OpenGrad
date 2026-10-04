@@ -1,0 +1,1337 @@
+{
+  "artifact_kind": "INC_0002_RELABEL_COMPARISON",
+  "classifier_tests": {
+    "classifier_v1_test": {
+      "evaluation": {
+        "c1_authorised": false,
+        "direct_poststratified_precision": {
+          "glaive": {
+            "bootstrap95": [
+              0.9188144329896907,
+              1.0
+            ],
+            "direct_predictions": 41,
+            "status": "PASS",
+            "strata_without_sample": [],
+            "threshold": 0.8,
+            "value": 0.9749430825914084,
+            "weights": {
+              "M": 0.0013283926448996715,
+              "P1": 0.004474585751240999,
+              "P2": 0.004544501153604139,
+              "Q": 0.007341117248129763,
+              "R": 0.9823114032021254
+            }
+          },
+          "toolace": {
+            "bootstrap95": [
+              0.0,
+              0.0
+            ],
+            "direct_predictions": 9,
+            "status": "NOT_EVALUABLE",
+            "strata_without_sample": [],
+            "threshold": 0.8,
+            "value": 0.0,
+            "weights": {
+              "M": 0.3580121703853955,
+              "P1": 0.1881338742393509,
+              "P2": 0.25,
+              "Q": 0.08519269776876268,
+              "R": 0.11561866125760649,
+              "X": 0.0030425963488843813
+            }
+          }
+        },
+        "global_rows": {
+          "abstention_rate": "PASS",
+          "macro_f1": "PASS"
+        },
+        "populations": {
+          "P-DET-COVERAGE-v1": {
+            "confusion": {
+              "CALL->CALL": 3,
+              "CLARIFY->CLARIFY": 50,
+              "CLARIFY->DIRECT": 6,
+              "DIRECT->CLARIFY": 1,
+              "DIRECT->DIRECT": 40,
+              "DIRECT->UNSUPPORTED": 2,
+              "UNKNOWN->ABSTAIN": 16,
+              "UNKNOWN->CLARIFY": 4,
+              "UNKNOWN->DIRECT": 4,
+              "UNSUPPORTED->CLARIFY": 1,
+              "UNSUPPORTED->DIRECT": 4,
+              "UNSUPPORTED->UNSUPPORTED": 175
+            },
+            "items": 306,
+            "per_mode": {
+              "CALL": {
+                "f1": 1.0,
+                "gold": 3,
+                "precision": 1.0,
+                "precision_denominator": 3,
+                "predicted": 3,
+                "predicted_on_ambiguous": 0,
+                "recall": 1.0,
+                "true_positive": 3
+              },
+              "CLARIFY": {
+                "f1": 0.9259259259259259,
+                "gold": 56,
+                "precision": 0.9615384615384616,
+                "precision_denominator": 52,
+                "predicted": 52,
+                "predicted_on_ambiguous": 4,
+                "recall": 0.8928571428571429,
+                "true_positive": 50
+              },
+              "DIRECT": {
+                "f1": 0.8602150537634408,
+                "gold": 43,
+                "precision": 0.8,
+                "precision_denominator": 50,
+                "predicted": 50,
+                "predicted_on_ambiguous": 4,
+                "recall": 0.9302325581395349,
+                "true_positive": 40
+              },
+              "UNSUPPORTED": {
+                "f1": 0.9803921568627451,
+                "gold": 180,
+                "precision": 0.9887005649717514,
+                "precision_denominator": 177,
+                "predicted": 177,
+                "predicted_on_ambiguous": 0,
+                "recall": 0.9722222222222222,
+                "true_positive": 175
+              }
+            },
+            "population": "P-DET-COVERAGE-v1",
+            "rows": {
+              "CALL.challenge_recall": {
+                "k": 3,
+                "n": 3,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": 1.0,
+                "wilson95": [
+                  0.4385029682449546,
+                  1.0
+                ]
+              },
+              "CALL.on_ambiguous_in_M": {
+                "k": 0,
+                "n": 1,
+                "status": "PASS",
+                "threshold": 0,
+                "value": 0,
+                "wilson95": null
+              },
+              "CALL.precision": {
+                "k": 3,
+                "n": 3,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.95,
+                "value": 1.0,
+                "wilson95": [
+                  0.4385029682449546,
+                  1.0
+                ]
+              },
+              "CLARIFY.challenge_recall": {
+                "k": 48,
+                "n": 54,
+                "status": "PASS",
+                "threshold": 0.6,
+                "value": 0.8888888888888888,
+                "wilson95": [
+                  0.7780529897881872,
+                  0.9480697750300044
+                ]
+              },
+              "CLARIFY.f1": {
+                "k": 50,
+                "n": 56,
+                "status": "PASS",
+                "threshold": 0.7,
+                "value": 0.9259259259259259,
+                "wilson95": [
+                  0.7853155482892853,
+                  0.9499606442888293
+                ]
+              },
+              "DIRECT.challenge_recall": {
+                "k": 23,
+                "n": 25,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": 0.92,
+                "wilson95": [
+                  0.7503389104960468,
+                  0.9777795987151524
+                ]
+              },
+              "DIRECT.precision": {
+                "k": 40,
+                "n": 50,
+                "status": "PASS",
+                "threshold": 0.8,
+                "value": 0.8,
+                "wilson95": [
+                  0.6696289406777459,
+                  0.887562499842239
+                ]
+              },
+              "DIRECT.recall": {
+                "k": 40,
+                "n": 43,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.8,
+                "value": 0.9302325581395349,
+                "wilson95": [
+                  0.8139101309875801,
+                  0.9759884104227855
+                ]
+              },
+              "UNSUPPORTED.challenge_recall": {
+                "k": 94,
+                "n": 95,
+                "status": "PASS",
+                "threshold": 0.6,
+                "value": 0.9894736842105263,
+                "wilson95": [
+                  0.9427612985868637,
+                  0.9981394237376521
+                ]
+              },
+              "UNSUPPORTED.recall": {
+                "k": 175,
+                "n": 180,
+                "status": "PASS",
+                "threshold": 0.75,
+                "value": 0.9722222222222222,
+                "wilson95": [
+                  0.936631929551566,
+                  0.9880778779669105
+                ]
+              },
+              "abstention_rate": {
+                "k": 0,
+                "n": 282,
+                "status": "PASS",
+                "threshold": 0.15,
+                "value": 0.0,
+                "wilson95": [
+                  0.0,
+                  0.013439124039399194
+                ]
+              },
+              "macro_f1": {
+                "k": 0,
+                "modes": [
+                  "CLARIFY",
+                  "UNSUPPORTED"
+                ],
+                "n": 282,
+                "status": "PASS",
+                "threshold": 0.75,
+                "value": 0.9531590413943355,
+                "wilson95": null
+              }
+            },
+            "usable": 282
+          },
+          "P-DET-v1": {
+            "confusion": {
+              "CLARIFY->CLARIFY": 267,
+              "CLARIFY->DIRECT": 4,
+              "CLARIFY->UNSUPPORTED": 5,
+              "UNKNOWN->DIRECT": 1,
+              "UNKNOWN->UNSUPPORTED": 1,
+              "UNSUPPORTED->CLARIFY": 2,
+              "UNSUPPORTED->DIRECT": 4,
+              "UNSUPPORTED->UNSUPPORTED": 291
+            },
+            "items": 575,
+            "per_mode": {
+              "CALL": {
+                "f1": 0.0,
+                "gold": 0,
+                "precision": null,
+                "precision_denominator": 0,
+                "predicted": 0,
+                "predicted_on_ambiguous": 0,
+                "recall": null,
+                "true_positive": 0
+              },
+              "CLARIFY": {
+                "f1": 0.9798165137614679,
+                "gold": 276,
+                "precision": 0.9925650557620818,
+                "precision_denominator": 269,
+                "predicted": 269,
+                "predicted_on_ambiguous": 0,
+                "recall": 0.967391304347826,
+                "true_positive": 267
+              },
+              "DIRECT": {
+                "f1": 0.0,
+                "gold": 0,
+                "precision": 0.0,
+                "precision_denominator": 8,
+                "predicted": 8,
+                "predicted_on_ambiguous": 0,
+                "recall": null,
+                "true_positive": 0
+              },
+              "UNSUPPORTED": {
+                "f1": 0.9813874788494077,
+                "gold": 296,
+                "precision": 0.9830508474576272,
+                "precision_denominator": 295,
+                "predicted": 295,
+                "predicted_on_ambiguous": 0,
+                "recall": 0.9797297297297297,
+                "true_positive": 290
+              }
+            },
+            "population": "P-DET-v1",
+            "rows": {
+              "CALL.challenge_recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": null,
+                "wilson95": null
+              },
+              "CALL.precision": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.95,
+                "value": null,
+                "wilson95": null
+              },
+              "CLARIFY.challenge_recall": {
+                "k": 78,
+                "n": 81,
+                "status": "PASS",
+                "threshold": 0.6,
+                "value": 0.9629629629629629,
+                "wilson95": [
+                  0.8966768869310617,
+                  0.9873248858167019
+                ]
+              },
+              "CLARIFY.f1": {
+                "k": 267,
+                "n": 276,
+                "status": "PASS",
+                "threshold": 0.7,
+                "value": 0.9798165137614679,
+                "wilson95": [
+                  0.9391992365036425,
+                  0.9827513604066999
+                ]
+              },
+              "DIRECT.challenge_recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": null,
+                "wilson95": null
+              },
+              "DIRECT.precision": {
+                "k": 0,
+                "n": 8,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.8,
+                "value": 0.0,
+                "wilson95": [
+                  0.0,
+                  0.32440756488388023
+                ]
+              },
+              "DIRECT.recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.8,
+                "value": null,
+                "wilson95": null
+              },
+              "UNSUPPORTED.challenge_recall": {
+                "k": 89,
+                "n": 93,
+                "status": "PASS",
+                "threshold": 0.6,
+                "value": 0.956989247311828,
+                "wilson95": [
+                  0.8945744042948608,
+                  0.9831488460062415
+                ]
+              },
+              "UNSUPPORTED.recall": {
+                "k": 290,
+                "n": 296,
+                "status": "PASS",
+                "threshold": 0.75,
+                "value": 0.9797297297297297,
+                "wilson95": [
+                  0.9564895747522926,
+                  0.990677641939488
+                ]
+              },
+              "abstention_rate": {
+                "k": 0,
+                "n": 572,
+                "status": "PASS",
+                "threshold": 0.15,
+                "value": 0.0,
+                "wilson95": [
+                  0.0,
+                  0.006671035511339035
+                ]
+              },
+              "macro_f1": {
+                "k": 0,
+                "modes": [
+                  "CLARIFY",
+                  "UNSUPPORTED"
+                ],
+                "n": 572,
+                "status": "PASS",
+                "threshold": 0.75,
+                "value": 0.9806019963054378,
+                "wilson95": null
+              }
+            },
+            "usable": 572
+          }
+        },
+        "qualification": {
+          "CALL": {
+            "qualifies": false,
+            "rows": {
+              "CALL.challenge_recall": "NOT_EVALUABLE",
+              "CALL.on_ambiguous_in_M": "PASS",
+              "CALL.precision": "NOT_EVALUABLE"
+            }
+          },
+          "CLARIFY": {
+            "qualifies": true,
+            "rows": {
+              "CLARIFY.challenge_recall": "PASS",
+              "CLARIFY.f1": "PASS"
+            }
+          },
+          "DIRECT": {
+            "permitted_sources": [],
+            "qualifies": false,
+            "rows": {
+              "DIRECT.challenge_recall": "NOT_EVALUABLE",
+              "DIRECT.precision": "PASS",
+              "DIRECT.recall": "NOT_EVALUABLE"
+            }
+          },
+          "UNSUPPORTED": {
+            "qualifies": true,
+            "rows": {
+              "UNSUPPORTED.challenge_recall": "PASS",
+              "UNSUPPORTED.recall": "PASS"
+            }
+          }
+        },
+        "version": "pdet-coverage-metrics-v1"
+      },
+      "frozen": {
+        "c1_authorised": false,
+        "qualification": {
+          "CALL": {
+            "qualifies": false,
+            "rows": {
+              "CALL.challenge_recall": "NOT_EVALUABLE",
+              "CALL.on_ambiguous_in_M": "PASS",
+              "CALL.precision": "NOT_EVALUABLE"
+            }
+          },
+          "CLARIFY": {
+            "qualifies": true,
+            "rows": {
+              "CLARIFY.challenge_recall": "PASS",
+              "CLARIFY.f1": "PASS"
+            }
+          },
+          "DIRECT": {
+            "permitted_sources": [],
+            "qualifies": false,
+            "rows": {
+              "DIRECT.challenge_recall": "NOT_EVALUABLE",
+              "DIRECT.precision": "PASS",
+              "DIRECT.recall": "NOT_EVALUABLE"
+            }
+          },
+          "UNSUPPORTED": {
+            "qualifies": true,
+            "rows": {
+              "UNSUPPORTED.challenge_recall": "PASS",
+              "UNSUPPORTED.recall": "PASS"
+            }
+          }
+        }
+      },
+      "relabelled": {
+        "c1_authorised": false,
+        "qualification": {
+          "CALL": {
+            "qualifies": false,
+            "rows": {
+              "CALL.challenge_recall": "NOT_EVALUABLE",
+              "CALL.on_ambiguous_in_M": "PASS",
+              "CALL.precision": "NOT_EVALUABLE"
+            }
+          },
+          "CLARIFY": {
+            "qualifies": true,
+            "rows": {
+              "CLARIFY.challenge_recall": "PASS",
+              "CLARIFY.f1": "PASS"
+            }
+          },
+          "DIRECT": {
+            "permitted_sources": [],
+            "qualifies": false,
+            "rows": {
+              "DIRECT.challenge_recall": "NOT_EVALUABLE",
+              "DIRECT.precision": "PASS",
+              "DIRECT.recall": "NOT_EVALUABLE"
+            }
+          },
+          "UNSUPPORTED": {
+            "qualifies": true,
+            "rows": {
+              "UNSUPPORTED.challenge_recall": "PASS",
+              "UNSUPPORTED.recall": "PASS"
+            }
+          }
+        }
+      }
+    },
+    "classifier_v2_test": {
+      "evaluation": {
+        "c1_authorised": true,
+        "direct_poststratified_precision": {
+          "glaive": {
+            "bootstrap95": [
+              1.0,
+              1.0
+            ],
+            "direct_predictions": 129,
+            "status": "PASS",
+            "strata_without_sample": [],
+            "threshold": 0.8,
+            "value": 1.0,
+            "weights": {
+              "M": 0.006427823292250743,
+              "P1": 0.10644647545805415,
+              "P2": 0.3451798499218044,
+              "Q": 0.3345194197741653,
+              "R": 0.20312208559909323,
+              "X": 0.004304345954632194
+            }
+          },
+          "toolace": {
+            "bootstrap95": [
+              0.0,
+              0.17220735170920085
+            ],
+            "direct_predictions": 11,
+            "status": "NOT_EVALUABLE",
+            "strata_without_sample": [
+              "X"
+            ],
+            "threshold": 0.8,
+            "value": 0.045876653421152894,
+            "weights": {
+              "M": 0.3499260719566289,
+              "P1": 0.18482010842779695,
+              "P2": 0.24297683587974372,
+              "Q": 0.10596352883193691,
+              "R": 0.11335633316904879,
+              "X": 0.002957121734844751
+            }
+          }
+        },
+        "global_rows": {
+          "abstention_rate": "PASS",
+          "macro_f1": "PASS"
+        },
+        "populations": {
+          "P-DET-COVERAGE-v1": {
+            "confusion": {
+              "CLARIFY->CLARIFY": 88,
+              "CLARIFY->DIRECT": 5,
+              "CLARIFY->UNSUPPORTED": 3,
+              "DIRECT->ABSTAIN": 1,
+              "DIRECT->CLARIFY": 1,
+              "DIRECT->DIRECT": 130,
+              "UNKNOWN->ABSTAIN": 48,
+              "UNKNOWN->CLARIFY": 1,
+              "UNKNOWN->DIRECT": 2,
+              "UNSUPPORTED->CLARIFY": 2,
+              "UNSUPPORTED->DIRECT": 5,
+              "UNSUPPORTED->UNSUPPORTED": 134
+            },
+            "items": 420,
+            "per_mode": {
+              "CALL": {
+                "f1": 0.0,
+                "gold": 0,
+                "precision": null,
+                "precision_denominator": 0,
+                "predicted": 0,
+                "predicted_on_ambiguous": 0,
+                "recall": null,
+                "true_positive": 0
+              },
+              "CLARIFY": {
+                "f1": 0.9411764705882353,
+                "gold": 96,
+                "precision": 0.967032967032967,
+                "precision_denominator": 91,
+                "predicted": 91,
+                "predicted_on_ambiguous": 1,
+                "recall": 0.9166666666666666,
+                "true_positive": 88
+              },
+              "DIRECT": {
+                "f1": 0.9558823529411765,
+                "gold": 132,
+                "precision": 0.9285714285714286,
+                "precision_denominator": 140,
+                "predicted": 140,
+                "predicted_on_ambiguous": 2,
+                "recall": 0.9848484848484849,
+                "true_positive": 130
+              },
+              "UNSUPPORTED": {
+                "f1": 0.9640287769784173,
+                "gold": 141,
+                "precision": 0.9781021897810219,
+                "precision_denominator": 137,
+                "predicted": 137,
+                "predicted_on_ambiguous": 0,
+                "recall": 0.950354609929078,
+                "true_positive": 134
+              }
+            },
+            "population": "P-DET-COVERAGE-v1",
+            "rows": {
+              "CALL.challenge_recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": null,
+                "wilson95": null
+              },
+              "CALL.on_ambiguous_in_M": {
+                "k": 0,
+                "n": 9,
+                "status": "PASS",
+                "threshold": 0,
+                "value": 0,
+                "wilson95": null
+              },
+              "CALL.precision": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.95,
+                "value": null,
+                "wilson95": null
+              },
+              "CLARIFY.challenge_recall": {
+                "k": 84,
+                "n": 92,
+                "status": "PASS",
+                "threshold": 0.6,
+                "value": 0.9130434782608695,
+                "wilson95": [
+                  0.8376974325974105,
+                  0.9552788110362063
+                ]
+              },
+              "CLARIFY.f1": {
+                "k": 88,
+                "n": 96,
+                "status": "PASS",
+                "threshold": 0.7,
+                "value": 0.9411764705882353,
+                "wilson95": [
+                  0.8441009676029043,
+                  0.9571693758490329
+                ]
+              },
+              "DIRECT.challenge_recall": {
+                "k": 110,
+                "n": 112,
+                "status": "PASS",
+                "threshold": 0.6,
+                "value": 0.9821428571428571,
+                "wilson95": [
+                  0.9372195125788385,
+                  0.9950891884637512
+                ]
+              },
+              "DIRECT.precision": {
+                "k": 130,
+                "n": 140,
+                "status": "PASS",
+                "threshold": 0.8,
+                "value": 0.9285714285714286,
+                "wilson95": [
+                  0.8735102126286542,
+                  0.9607416156261346
+                ]
+              },
+              "DIRECT.recall": {
+                "k": 130,
+                "n": 132,
+                "status": "PASS",
+                "threshold": 0.8,
+                "value": 0.9848484848484849,
+                "wilson95": [
+                  0.9464398960595944,
+                  0.9958350258326641
+                ]
+              },
+              "UNSUPPORTED.challenge_recall": {
+                "k": 102,
+                "n": 106,
+                "status": "PASS",
+                "threshold": 0.6,
+                "value": 0.9622641509433962,
+                "wilson95": [
+                  0.906965843891179,
+                  0.9852291528993844
+                ]
+              },
+              "UNSUPPORTED.recall": {
+                "k": 134,
+                "n": 141,
+                "status": "PASS",
+                "threshold": 0.75,
+                "value": 0.950354609929078,
+                "wilson95": [
+                  0.9010743041142573,
+                  0.975746469675512
+                ]
+              },
+              "abstention_rate": {
+                "k": 1,
+                "n": 369,
+                "status": "PASS",
+                "threshold": 0.15,
+                "value": 0.0027100271002710027,
+                "wilson95": [
+                  0.0004785466164122015,
+                  0.015188860219648333
+                ]
+              },
+              "macro_f1": {
+                "k": 0,
+                "modes": [
+                  "CLARIFY",
+                  "DIRECT",
+                  "UNSUPPORTED"
+                ],
+                "n": 369,
+                "status": "PASS",
+                "threshold": 0.75,
+                "value": 0.9536958668359429,
+                "wilson95": null
+              }
+            },
+            "usable": 369
+          },
+          "P-DET-v1": {
+            "confusion": {},
+            "items": 0,
+            "per_mode": {
+              "CALL": {
+                "f1": 0.0,
+                "gold": 0,
+                "precision": null,
+                "precision_denominator": 0,
+                "predicted": 0,
+                "predicted_on_ambiguous": 0,
+                "recall": null,
+                "true_positive": 0
+              },
+              "CLARIFY": {
+                "f1": 0.0,
+                "gold": 0,
+                "precision": null,
+                "precision_denominator": 0,
+                "predicted": 0,
+                "predicted_on_ambiguous": 0,
+                "recall": null,
+                "true_positive": 0
+              },
+              "DIRECT": {
+                "f1": 0.0,
+                "gold": 0,
+                "precision": null,
+                "precision_denominator": 0,
+                "predicted": 0,
+                "predicted_on_ambiguous": 0,
+                "recall": null,
+                "true_positive": 0
+              },
+              "UNSUPPORTED": {
+                "f1": 0.0,
+                "gold": 0,
+                "precision": null,
+                "precision_denominator": 0,
+                "predicted": 0,
+                "predicted_on_ambiguous": 0,
+                "recall": null,
+                "true_positive": 0
+              }
+            },
+            "population": "P-DET-v1",
+            "rows": {
+              "CALL.challenge_recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": null,
+                "wilson95": null
+              },
+              "CALL.precision": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.95,
+                "value": null,
+                "wilson95": null
+              },
+              "CLARIFY.challenge_recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": null,
+                "wilson95": null
+              },
+              "CLARIFY.f1": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.7,
+                "value": 0.0,
+                "wilson95": null
+              },
+              "DIRECT.challenge_recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": null,
+                "wilson95": null
+              },
+              "DIRECT.precision": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.8,
+                "value": null,
+                "wilson95": null
+              },
+              "DIRECT.recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.8,
+                "value": null,
+                "wilson95": null
+              },
+              "UNSUPPORTED.challenge_recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.6,
+                "value": null,
+                "wilson95": null
+              },
+              "UNSUPPORTED.recall": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.75,
+                "value": null,
+                "wilson95": null
+              },
+              "abstention_rate": {
+                "k": 0,
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.15,
+                "value": null,
+                "wilson95": null
+              },
+              "macro_f1": {
+                "k": 0,
+                "modes": [],
+                "n": 0,
+                "status": "NOT_EVALUABLE",
+                "threshold": 0.75,
+                "value": null,
+                "wilson95": null
+              }
+            },
+            "usable": 0
+          }
+        },
+        "qualification": {
+          "CALL": {
+            "qualifies": false,
+            "rows": {
+              "CALL.challenge_recall": "NOT_EVALUABLE",
+              "CALL.on_ambiguous_in_M": "PASS",
+              "CALL.precision": "NOT_EVALUABLE"
+            }
+          },
+          "CLARIFY": {
+            "qualifies": true,
+            "rows": {
+              "CLARIFY.challenge_recall": "PASS",
+              "CLARIFY.f1": "PASS"
+            }
+          },
+          "DIRECT": {
+            "permitted_sources": [
+              "glaive"
+            ],
+            "qualifies": true,
+            "rows": {
+              "DIRECT.challenge_recall": "PASS",
+              "DIRECT.precision": "PASS",
+              "DIRECT.recall": "PASS"
+            }
+          },
+          "UNSUPPORTED": {
+            "qualifies": true,
+            "rows": {
+              "UNSUPPORTED.challenge_recall": "PASS",
+              "UNSUPPORTED.recall": "PASS"
+            }
+          }
+        },
+        "version": "pdet-coverage-metrics-v1"
+      },
+      "frozen": {
+        "c1_authorised": true,
+        "qualification": {
+          "CALL": {
+            "qualifies": false,
+            "rows": {
+              "CALL.challenge_recall": "NOT_EVALUABLE",
+              "CALL.on_ambiguous_in_M": "PASS",
+              "CALL.precision": "NOT_EVALUABLE"
+            }
+          },
+          "CLARIFY": {
+            "qualifies": true,
+            "rows": {
+              "CLARIFY.challenge_recall": "PASS",
+              "CLARIFY.f1": "PASS"
+            }
+          },
+          "DIRECT": {
+            "permitted_sources": [
+              "glaive"
+            ],
+            "qualifies": true,
+            "rows": {
+              "DIRECT.challenge_recall": "PASS",
+              "DIRECT.precision": "PASS",
+              "DIRECT.recall": "PASS"
+            }
+          },
+          "UNSUPPORTED": {
+            "qualifies": true,
+            "rows": {
+              "UNSUPPORTED.challenge_recall": "PASS",
+              "UNSUPPORTED.recall": "PASS"
+            }
+          }
+        }
+      },
+      "relabelled": {
+        "c1_authorised": true,
+        "qualification": {
+          "CALL": {
+            "qualifies": false,
+            "rows": {
+              "CALL.challenge_recall": "NOT_EVALUABLE",
+              "CALL.on_ambiguous_in_M": "PASS",
+              "CALL.precision": "NOT_EVALUABLE"
+            }
+          },
+          "CLARIFY": {
+            "qualifies": true,
+            "rows": {
+              "CLARIFY.challenge_recall": "PASS",
+              "CLARIFY.f1": "PASS"
+            }
+          },
+          "DIRECT": {
+            "permitted_sources": [
+              "glaive"
+            ],
+            "qualifies": true,
+            "rows": {
+              "DIRECT.challenge_recall": "PASS",
+              "DIRECT.precision": "PASS",
+              "DIRECT.recall": "PASS"
+            }
+          },
+          "UNSUPPORTED": {
+            "qualifies": true,
+            "rows": {
+              "UNSUPPORTED.challenge_recall": "PASS",
+              "UNSUPPORTED.recall": "PASS"
+            }
+          }
+        }
+      }
+    },
+    "self_check": "re-scoring on the frozen references reproduces both frozen evaluations exactly"
+  },
+  "limit": "No batch was clean: group D also browsed (outside the repository), so it is not a pure run-to-run baseline.",
+  "operationalisation": "The plan's agreement drop is measured as agreement lost: among items where gpt-5.6-sol and deepseek-v4.1-flash agree, the share where old Gemini matched them and new Gemini does not. Agreement gained (the reverse) is reported beside it.",
+  "plan": "reports/incidents/INC-0002-relabel-comparison-plan.md",
+  "plan_sha256": "1f1a73fedfbd5c7d36eb9d89557f1ab45ac11c0b19938e9bf3a367ee6f694f1e",
+  "tasks": {
+    "pdet-coverage-v1": {
+      "by_group": {
+        "A": {
+          "agreement_gained": 0,
+          "agreement_lost": 0,
+          "agreement_lost_rate": 0.0,
+          "agreement_lost_wilson_95": [
+            -0.0,
+            0.083799
+          ],
+          "consensus_kind_changed": 0,
+          "label_change_rate": 0.0,
+          "label_change_wilson_95": [
+            0.0,
+            0.077074
+          ],
+          "label_changed": 0,
+          "n": 46,
+          "new_matched_others": 42,
+          "old_matched_others": 42,
+          "others_agree": 42,
+          "reference_label_changed": 0,
+          "status_changed": 0
+        },
+        "B": {
+          "agreement_gained": 0,
+          "agreement_lost": 0,
+          "agreement_lost_rate": 0.0,
+          "agreement_lost_wilson_95": [
+            0.0,
+            0.047518
+          ],
+          "consensus_kind_changed": 0,
+          "label_change_rate": 0.0125,
+          "label_change_wilson_95": [
+            0.00221,
+            0.067463
+          ],
+          "label_changed": 1,
+          "n": 80,
+          "new_matched_others": 77,
+          "old_matched_others": 77,
+          "others_agree": 77,
+          "reference_label_changed": 1,
+          "status_changed": 1
+        },
+        "D": {
+          "agreement_gained": 0,
+          "agreement_lost": 1,
+          "agreement_lost_rate": 0.005747,
+          "agreement_lost_wilson_95": [
+            0.001015,
+            0.031831
+          ],
+          "consensus_kind_changed": 1,
+          "label_change_rate": 0.016667,
+          "label_change_wilson_95": [
+            0.005684,
+            0.047848
+          ],
+          "label_changed": 3,
+          "n": 180,
+          "new_matched_others": 171,
+          "old_matched_others": 172,
+          "others_agree": 174,
+          "reference_label_changed": 2,
+          "status_changed": 3
+        }
+      },
+      "contrasts": {
+        "A-D": {
+          "agreement_lost": {
+            "difference": -0.005747,
+            "excludes_zero": false,
+            "interval_95": [
+              -0.031831,
+              0.078185
+            ]
+          },
+          "label_change": {
+            "difference": -0.016667,
+            "excludes_zero": false,
+            "interval_95": [
+              -0.047848,
+              0.061185
+            ]
+          }
+        },
+        "B-D": {
+          "agreement_lost": {
+            "difference": -0.005747,
+            "excludes_zero": false,
+            "interval_95": [
+              -0.031831,
+              0.042006
+            ]
+          },
+          "label_change": {
+            "difference": -0.004167,
+            "excludes_zero": false,
+            "interval_95": [
+              -0.037002,
+              0.051883
+            ]
+          }
+        }
+      },
+      "items": 306,
+      "old_batches": {
+        "batches": {
+          "A": 3,
+          "B": 4,
+          "D": 9
+        },
+        "batches_that_searched_the_web": {}
+      },
+      "reference": {
+        "frozen_manifest_sha256": "fc461314338b55635a64905efba9ed1567e7ce76d1cc564b55cc201d859653a3",
+        "frozen_summary": {
+          "CALL": 3,
+          "CLARIFY": 56,
+          "DIRECT": 44,
+          "UNKNOWN": 23,
+          "UNSUPPORTED": 180
+        },
+        "relabelled_manifest_sha256": "9c6879b12923e708c5451dc8e02eca825d005b4c652523bae9fcc808dd7ee71d",
+        "relabelled_summary": {
+          "CALL": 3,
+          "CLARIFY": 56,
+          "DIRECT": 43,
+          "UNKNOWN": 24,
+          "UNSUPPORTED": 180
+        }
+      }
+    },
+    "pdet-coverage-v1-routing": {
+      "by_group": {
+        "D": {
+          "agreement_gained": 0,
+          "agreement_lost": 0,
+          "agreement_lost_rate": 0.0,
+          "agreement_lost_wilson_95": [
+            0.0,
+            0.113513
+          ],
+          "consensus_kind_changed": 0,
+          "label_change_rate": 0.0,
+          "label_change_wilson_95": [
+            0.0,
+            0.113513
+          ],
+          "label_changed": 0,
+          "n": 30,
+          "new_matched_others": 30,
+          "old_matched_others": 30,
+          "others_agree": 30,
+          "reference_label_changed": 0,
+          "status_changed": 0
+        }
+      },
+      "contrasts": {},
+      "items": 30,
+      "old_batches": {
+        "batches": {
+          "D": 3
+        },
+        "batches_that_searched_the_web": {}
+      },
+      "reference": {
+        "frozen_manifest_sha256": "2a4ab71392aedd76fc41ceaf789f6c1dded97fc3cb71e6e64a0a7d5739d98eab",
+        "frozen_summary": {
+          "CALL": 30
+        },
+        "relabelled_manifest_sha256": "7342088b2268a632a0d3031deb60a57cc65d7a693a80877cb2abd497b8424500",
+        "relabelled_summary": {
+          "CALL": 30
+        }
+      }
+    },
+    "pdet-coverage-v2": {
+      "by_group": {
+        "A": {
+          "agreement_gained": 0,
+          "agreement_lost": 0,
+          "agreement_lost_rate": 0.0,
+          "agreement_lost_wilson_95": [
+            -0.0,
+            0.061129
+          ],
+          "consensus_kind_changed": 0,
+          "label_change_rate": 0.0,
+          "label_change_wilson_95": [
+            0.0,
+            0.060172
+          ],
+          "label_changed": 0,
+          "n": 60,
+          "new_matched_others": 59,
+          "old_matched_others": 59,
+          "others_agree": 59,
+          "reference_label_changed": 0,
+          "status_changed": 4
+        },
+        "B": {
+          "agreement_gained": 0,
+          "agreement_lost": 0,
+          "agreement_lost_rate": 0.0,
+          "agreement_lost_wilson_95": [
+            -0.0,
+            0.023736
+          ],
+          "consensus_kind_changed": 0,
+          "label_change_rate": 0.0125,
+          "label_change_wilson_95": [
+            0.003435,
+            0.044425
+          ],
+          "label_changed": 2,
+          "n": 160,
+          "new_matched_others": 158,
+          "old_matched_others": 158,
+          "others_agree": 158,
+          "reference_label_changed": 2,
+          "status_changed": 1
+        },
+        "D": {
+          "agreement_gained": 0,
+          "agreement_lost": 0,
+          "agreement_lost_rate": 0.0,
+          "agreement_lost_wilson_95": [
+            0.0,
+            0.019223
+          ],
+          "consensus_kind_changed": 0,
+          "label_change_rate": 0.01,
+          "label_change_wilson_95": [
+            0.002747,
+            0.035722
+          ],
+          "label_changed": 2,
+          "n": 200,
+          "new_matched_others": 195,
+          "old_matched_others": 195,
+          "others_agree": 196,
+          "reference_label_changed": 2,
+          "status_changed": 4
+        }
+      },
+      "contrasts": {
+        "A-D": {
+          "agreement_lost": {
+            "difference": 0.0,
+            "excludes_zero": false,
+            "interval_95": [
+              -0.019223,
+              0.061129
+            ]
+          },
+          "label_change": {
+            "difference": -0.01,
+            "excludes_zero": false,
+            "interval_95": [
+              -0.035722,
+              0.050607
+            ]
+          }
+        },
+        "B-D": {
+          "agreement_lost": {
+            "difference": 0.0,
+            "excludes_zero": false,
+            "interval_95": [
+              -0.019223,
+              0.023736
+            ]
+          },
+          "label_change": {
+            "difference": 0.0025,
+            "excludes_zero": false,
+            "interval_95": [
+              -0.024772,
+              0.035239
+            ]
+          }
+        }
+      },
+      "items": 420,
+      "old_batches": {
+        "batches": {
+          "A": 3,
+          "B": 8,
+          "D": 10
+        },
+        "batches_that_searched_the_web": {
+          "A": 1,
+          "B": 1
+        }
+      },
+      "reference": {
+        "frozen_manifest_sha256": "f92f678266b3bf79f57d7519b707264b82edb4a5d7f23f98223cfbaf6e610741",
+        "frozen_summary": {
+          "CLARIFY": 99,
+          "DIRECT": 132,
+          "UNKNOWN": 51,
+          "UNSUPPORTED": 138
+        },
+        "relabelled_manifest_sha256": "e35c4e591e7f7c58a752d073cd59de66c00ae601d67111308b56200259016b75",
+        "relabelled_summary": {
+          "CLARIFY": 96,
+          "DIRECT": 132,
+          "UNKNOWN": 51,
+          "UNSUPPORTED": 141
+        }
+      }
+    }
+  }
+}
