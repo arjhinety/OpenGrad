@@ -74,6 +74,8 @@ opengrad-annotate check pdet-coverage-v1-routing   # layer A, 30 items (…-rout
     check the counts before trusting a batch. Since 2026-10-04 every agy run carries a PreToolUse hook
     (`scripts/agy_tool_gate.py`) that allows only reading its input; an attempt the hook never saw is refused.
     A re-label goes into a new session (`--session model-gemini-r2`); INC-0002 in `docs/INCIDENT_LOG.md` is why.
+    Since 2026-10-04 the current P-DET-COVERAGE references are the re-labelled `*.reference.gemini-r2.*` (built with
+    `pdet_coverage_reference --variant gemini-r2`); the frozen ones stay as the record (owner decision).
   - **Supply for a next population** (35 §2, §4): `scripts/audit_pdet_coverage_v2_supply.py` counts the unused
     layer B pool (after P-DET-COVERAGE-v1 and every development and check set) and projects DIRECT from existing
     label yields. Counts only. Its 2026-09-17 run found about 22 expected DIRECT among single exchanges, short of 50.

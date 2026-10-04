@@ -91,3 +91,15 @@ Named in advance, so that no later result can be read charitably after the fact:
 - Reference: `reports/pdet-coverage-v2/reference/` (`MODEL_REFERENCE_PROVISIONAL`), commit 150f10f.
 - Classifier: tag `prose-decision-classifier-v2`, commit ff1b306, source sha256 LF `47436ca9…`.
 - Preregistration: recorded as `study_002_prereg_v7` in [03](03-PREREGISTRATION.md).
+
+## 7. Dated notes
+
+- **2026-10-04, INC-0002.** The Gemini labeller of the P-DET-COVERAGE-v2 reference this rests on was found to have
+  searched the web and read the repository, including other models' answers in three kept batches
+  ([`docs/INCIDENT_LOG.md`](../../INCIDENT_LOG.md) INC-0002). §5 does not list that as a withdrawal condition.
+  Gemini re-labelled every item under a tool gate, and classifier v2's saved predictions, re-scored against the
+  re-labelled reference, keep every qualification (DIRECT on glaive, UNSUPPORTED, CLARIFY; CALL not evaluable)
+  and the C1 rule; four reference labels in v2 differ out of 420
+  ([`reports/incidents/INC-0002-relabel-comparison.json`](../../../reports/incidents/INC-0002-relabel-comparison.json)).
+  **The owner decided that both permissions stand.** The re-labelled reference
+  (`reports/pdet-coverage-v2/reference/pdet-coverage-v2.reference.gemini-r2.jsonl`) is the current one.

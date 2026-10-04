@@ -1418,3 +1418,5 @@ references.
   exposure, and every qualification of classifier v1's and v2's tests is unchanged when re-scored against the
   re-labelled references; 3 of 306 (v1) and 4 of 420 (v2) reference labels change. Details and limits:
   [`docs/INCIDENT_LOG.md`](../docs/INCIDENT_LOG.md) INC-0002, "The re-label and the comparison".
+- **Decisions (2026-10-04):** the re-labelled references (`*.reference.gemini-r2.*`) are current from now on;
+  the frozen ones stay as the record. 38's permissions stand (38 §7).

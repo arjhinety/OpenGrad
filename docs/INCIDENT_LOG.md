@@ -12,7 +12,7 @@ supersede an earlier one, and both stay.
 | ID | Date | Summary | State |
 |---|---|---|---|
 | INC-0001 | 2026-09-10 | Checkpoint weights deleted before upload; partly unrecoverable | Open — weights unrecoverable |
-| INC-0002 | 2026-10-03 | Gemini labeller searched the web and read the repository, including other models' answers | Open — Gemini re-labelling P-DET-COVERAGE |
+| INC-0002 | 2026-10-03 | Gemini labeller searched the web and read the repository, including other models' answers | Closed 2026-10-04 — re-labelled under a tool gate; no detectable effect |
 
 ---
 
@@ -179,8 +179,9 @@ stay checkable, with digests recorded in
 (`toolPermission: always-proceed`), and the `--sandbox` flag the runner passed restricts terminal commands only.
 The procedure told the model to open nothing and search nothing; nothing enforced it
 ([`docs/UPSTREAM_ISSUES.md`](UPSTREAM_ISSUES.md) UP-0012).
-**State:** open. The owner decided (2026-10-03) to re-label every Gemini batch of P-DET-COVERAGE-v1 (both layers) and
-P-DET-COVERAGE-v2 with tools locked down, and to rebuild the references as new versions.
+**State:** closed 2026-10-04. The owner decided (2026-10-03) to re-label every Gemini batch of P-DET-COVERAGE-v1
+(both layers) and P-DET-COVERAGE-v2 with tools locked down, and to rebuild the references as new versions. That is
+done, and the comparison and the decisions that followed are at the end of this entry.
 
 ### What happened
 
@@ -262,3 +263,13 @@ its output is [`reports/incidents/INC-0002-relabel-comparison.json`](../reports/
   batches in other tasks cannot be checked (above). 46's 0.978 and 0.964 were not recomputed.
 - **What it does not decide.** Which references count from now on, and whether 38's permissions stand, are the
   owner's decisions.
+
+### Decisions (2026-10-04)
+
+The owner decided, after the comparison:
+- **The re-labelled references are current.** Future work uses `*.reference.gemini-r2.*` for P-DET-COVERAGE-v1,
+  its routing layer and P-DET-COVERAGE-v2. The frozen references stay as the record, and the artifacts already
+  built on them (the two one-shot classifier tests, the supply audits) are not re-run or edited.
+- **38's permissions stand.** Re-scored against the re-labelled reference, classifier v2 keeps every
+  qualification, so the balancing permission and the C1 authorisation of
+  [38](research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md) stand (dated note in 38 §7).
