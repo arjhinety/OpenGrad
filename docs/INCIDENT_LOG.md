@@ -236,7 +236,7 @@ carries this caveat until the re-labelled references exist and are compared; [`r
 
 Gemini re-labelled every item of P-DET-COVERAGE-v1 (306 layer B, 30 routing) and P-DET-COVERAGE-v2 (420) in session
 `model-gemini-r2`, under the tool gate: all 39 recorded attempts were matched to their conversation, the gate saw
-every tool call in each, and none was a web call. The labels, references (`*.reference.gemini-r2.*`) and archives
+every tool call in each, and none was a web call. In one v1 attempt Gemini tried `run_command`; the gate denied it. The labels, references (`*.reference.gemini-r2.*`) and archives
 (`*.external-models.gemini-r2.*`) are new artifacts; nothing frozen was changed. The comparison followed the plan
 committed before it ran ([`reports/incidents/INC-0002-relabel-comparison-plan.md`](../reports/incidents/INC-0002-relabel-comparison-plan.md));
 its output is [`reports/incidents/INC-0002-relabel-comparison.json`](../reports/incidents/INC-0002-relabel-comparison.json).
@@ -257,7 +257,9 @@ its output is [`reports/incidents/INC-0002-relabel-comparison.json`](../reports/
   reproduces both frozen evaluations exactly), every qualification is unchanged. Classifier v1: UNSUPPORTED and
   CLARIFY qualify, C1 not authorised. Classifier v2: DIRECT (glaive only), UNSUPPORTED and CLARIFY qualify, CALL
   does not, and the rules authorise C1. Three metric values of v1 and six of v2 move slightly (for example v2's
-  macro F1, 0.956 to 0.954); no status changes.
+  macro F1, 0.956 to 0.954); no status changes. One now sits exactly on its bar: v1's DIRECT precision on
+  P-DET-COVERAGE-v1 is 40 of 50 = 0.800 against 0.80 (it passes, and DIRECT does not qualify in v1 anyway). v2's
+  UNSUPPORTED challenge recall falls from 0.981 to 0.962, still above its bar.
 - **Limits.** A model's labels vary between runs, and every old batch browsed somewhere, so group D is not a pure
   run-to-run baseline. "No detectable effect" is not "no effect": the A groups are 46 and 60 items. Three kept
   batches in other tasks cannot be checked (above). 46's 0.978 and 0.964 were not recomputed.
