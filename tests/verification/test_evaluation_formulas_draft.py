@@ -32,6 +32,23 @@ def _in_draft(*literals: str) -> None:
 
 def test_the_quoted_passages_are_in_their_sources() -> None:
     docs = ROOT / "docs/research/study-002"
+    # The sections the draft cites by name exist as headings in their documents.
+    headings = {
+        "10-STATISTICS-PLAN.md": [
+            "Units",
+            "Estimators",
+            "The primary test",
+            "Multiplicity",
+            "What this plan cannot do",
+        ],
+        "03-PREREGISTRATION.md": ["Registration of the unit of analysis"],
+        "11-THRESHOLDS.md": ["Thresholds added by `study_002_prereg_v14`"],
+    }
+    for name, titles in headings.items():
+        lines = (docs / name).read_text(encoding="utf-8").splitlines()
+        for title in titles:
+            assert any(line.startswith(f"## {title}") for line in lines), (name, title)
+            _in_draft(f'"{title}"')
     quotes = {
         "10-STATISTICS-PLAN.md": [
             "at least the margin fixed in [11](11-THRESHOLDS.md)",
@@ -61,18 +78,24 @@ def test_the_quoted_passages_are_in_their_sources() -> None:
         ],
         "07-METRIC-SPEC.md": ["is reported as an interval spanning the recall uncertainty"],
         "15-PROVENANCE-VALIDATORS.md": ["prints `n` and its resolvable margin"],
+        "46-READINESS-DESIGN-AMENDMENT-DRAFT.md": [
+            "carried into H1's interval as `07:126-134` requires"
+        ],
     }
     for name, passages in quotes.items():
         source = _flat((docs / name).read_text(encoding="utf-8"))
         missing = [passage for passage in passages if _flat(passage) not in source]
         assert not missing, (name, missing)
         _in_draft(*passages)
-    validators = (ROOT / "src/opengrad/verification/population_validators.py").read_text(
-        encoding="utf-8"
-    )
-    docstring_quote = "a comparison whose observed margin is below the resolvable margin"
-    assert _flat(docstring_quote) in _flat(validators)
-    _in_draft(docstring_quote)
+    code_quotes = {
+        "src/opengrad/verification/population_validators.py": (
+            "a comparison whose observed margin is below the resolvable margin"
+        ),
+        "src/opengrad/promotion/tool_use_policy.py": "non-regression against the baseline",
+    }
+    for path, passage in code_quotes.items():
+        assert _flat(passage) in _flat((ROOT / path).read_text(encoding="utf-8")), path
+        _in_draft(passage)
 
 
 def test_kappa_and_the_trials_agreement() -> None:
@@ -204,7 +227,7 @@ def test_the_margin_for_a_paired_difference() -> None:
         r"$M(1055) = 0.060342$",
     )
     for retired in ("0.199778", "0.141264", "0.089343"):
-        assert retired not in DRAFT
+        assert retired not in _flat(DRAFT)
 
 
 def test_the_tables_match_the_code_constants() -> None:
@@ -259,6 +282,11 @@ def test_the_tables_match_the_code_constants() -> None:
     assert decision(parse_valid_rate=0.9899994) != "PROMOTE"
     assert decision(over_call_rate=0.2000004) == "PROMOTE"
     assert decision(over_call_rate=0.2000006) != "PROMOTE"
+    # Check 14 with no comparison rows blocks the whole gate rather than failing or passing.
+    assert str(gate.study_002_gate(bundle).overall) == "PASS"
+    assert (
+        str(gate.study_002_gate({**bundle, "comparisons": []}).overall) == "BLOCKED_INPUT_MISSING"
+    )
     # Check 14's row shape: the self-test row carries a margin and a different delta.
     assert bundle["comparisons"] == [{"id": "R1_vs_C0", "n": 1277, "margin": 0.08, "delta": 0.12}]
     # Flag precision is rounded to 6 places, then compared with a plain >=.
@@ -268,6 +296,8 @@ def test_the_tables_match_the_code_constants() -> None:
     _in_draft(
         "the gate's self-test gives the two different values (0.08 and 0.12)",
         "A row is `{id, n, margin, delta}`",
+        "`BLOCKED_INPUT_MISSING`, not a failure, and the gate cannot pass",
+        "(0.120685 pooled, 0.141173 constructed)",
     )
     _in_draft(
         "| `CALL.on_ambiguous_in_M` | `CALL` predictions on ambiguous gold in stratum M | = 0 | always |",
@@ -302,7 +332,7 @@ def test_the_tables_match_the_code_constants() -> None:
         "2,000-replicate",
         "at least 20 `DIRECT` predictions",
     )
-    assert not re.search(r"made at 9 decimal places", DRAFT)
+    assert not re.search(r"made at 9 decimal places", _flat(DRAFT))
 
 
 def test_the_three_seed_sign_check_under_no_effect() -> None:

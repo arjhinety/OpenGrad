@@ -220,3 +220,9 @@ The Codex audit of 7e97306 answered in Chinese. Its first line, "Êó† **[P1]** Âè
 gstack validator (`lib/outside-review-result.ts`, gstack 1.91.27.0) matched the literal `[P1]` and printed
 `VERDICT: findings`, `FINDINGS: P1`, exit 3. The review itself had one P2 finding. Not yet reproduced in isolation or
 searched for upstream, so `UNCLEAR`. Workaround: read the review text before trusting the verdict line.
+
+Later, 2026-10-06: the cause above is wrong; language plays no part. The validator strips markdown and counts every
+bracketed tag matching `\[(P[0-3])\]` as a finding (`outside-review-result.ts`, line 99), negated or not. Reproduced
+in isolation with English text: a review reading "no **[P1]** findings." gives `FINDINGS: P1`, exit 3. Still
+`UNCLEAR` until the tracker is searched: the review format reserves `[P1]` for findings, so this may be `NOT A BUG`.
+Found by the re-audit of dea2cd0.

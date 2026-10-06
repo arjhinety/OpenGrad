@@ -143,7 +143,7 @@ When2Call, then $\hat p = 0.015254$, and the implied missed declines would be 34
 consistency, not of correctness, since model errors correlate (Kim et al., 2025, in the case-study notes). Lee et
 al. (2025) show that accuracy estimated from an imperfect model judge is biased, and give a correction and
 intervals when a calibration set with known answers exists. This study has no human-labelled calibration set, so no
-such correction is applied, and results are stated as "both models judged".
+such correction is applied, and results are stated as what both models judged.
 
 ## 4. Qualifying the decision classifier (`pdet-coverage-metrics-v1`, 22 §6, 30 §11)
 
@@ -219,7 +219,7 @@ $$\lvert r_1 - r_2 \rvert > 0.02 \quad\text{and}\quad \max(r_1, r_2) > 2.0 \cdot
 
 **Comparison rows** (gate check 14, `v12_resolvable_margin`). A row is `{id, n, margin, delta}`. The check reads $n$
 and the `margin` field, and passes a row when $\lvert\text{margin}\rvert \ge M(n)$ at 9 places:
-- with no comparison rows at all the check is `BLOCKED_INPUT_MISSING`, not a failure;
+- with no comparison rows at all the check is `BLOCKED_INPUT_MISSING`, not a failure, and the gate cannot pass;
 - a row with no usable $n$ or no margin fails as unresolved;
 - a row with $n < 200$ is counted `UNDER_POWERED` and skipped;
 - a row below its $M(n)$ is `WITHIN_NOISE` and supports nothing;
@@ -263,10 +263,12 @@ the verdict `NOT_EVALUABLE`.
 **Condition 1's margin is 10 points.** 10 sends condition 1 to "the margin fixed in [11]". 11 (under "Thresholds
 added by `study_002_prereg_v14`", proposed in 46 §10) fixes one margin for comparisons between arms: "The margin a
 population is used to test" is "10 points for every comparison between arms". 06 (§C2, on the `ANSWER` strata)
-says the same and closes the other door: 11 "fixes that margin", and "no claim in this study uses a margin below
+points to 11 and closes the other door: 11 "fixes that margin", and "no claim in this study uses a margin below
 10pp". So condition 1 is $\bar\Delta_{\text{answer}} \ge 0.10$. 10's opening adds a separate requirement, "a point
 estimate larger than the population's resolvable margin", $\bar\Delta_{\text{answer}} > M(n)$. The two stack rather
-than compete, and on both candidate sets below, $M(n) < 0.10$, so the 10-point margin is the one that binds.
+than compete. Which one binds depends on open question 3. Under its first reading, $M(n) < 0.10$ on both candidate
+sets below, so the 10-point margin binds. Under its second, the requirement is $2M(n)$, which is above 0.10 on both
+sets (0.120685 pooled, 0.141173 constructed), so it binds instead.
 
 **Which $n$ H1 is measured on is not stated outright.** 46 gives the `ANSWER` set as 1,055 items pooled, 771
 constructed and 284 natural (the same counts as `reports/study-002/answer-strata-v1/answer-strata-v1.strata.json`).
@@ -349,7 +351,7 @@ preregistered rule needs a numbered amendment first.
    H1's set is either the pooled `ANSWER` set or its 771 constructed items ([§6](#6-the-hypotheses-10-statistics-planmd)).
    On the pooled set, $n = 1{,}055$: $M = 0.060342$ under the first reading, $0.120685$ under the second. On the
    constructed items: 0.070586 under the first, and under the second it would be 0.141173. Both second-reading
-   values are above the fixed 10-point margin (46 §10), so under it no 10-point comparison between arms on either
+   values are above the fixed 10-point margin (11; proposed in 46 §10), so under it no 10-point comparison between arms on either
    set could be resolved. Check 14 uses $M(n)$, so the code
    follows the first reading's numbers, whatever the reasoning behind them was. (An earlier version of this question
    took the second reading at $n = 385$ without saying it was a reading; an independent review corrected it on
