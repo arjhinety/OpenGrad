@@ -973,7 +973,7 @@ papers:
   methodology_summary: Defines and measures variance metrics for evaluation benchmarks, including seed
     variance across initialisations, over many models, with recommendations for practitioners.
   implementation_relevance: Background for reporting per-seed values and their range rather than a single
-    run (10, Estimators); the paper does not address how many seeds are enough.
+    run (10, Estimators); its abstract does not address how many seeds are enough.
   limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
     formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
     not read.
@@ -1000,8 +1000,8 @@ papers:
   methodology_summary: Fine-tunes BERT hundreds of times varying only the random seed; distinct seeds
     give substantially different results, with weight initialisation and data order contributing comparably
     to the variance.
-  implementation_relevance: Background for training each Study 002 arm with several seeds; it does not
-    support three seeds or a sign-agreement rule, which are the study's own choices (10).
+  implementation_relevance: Background for training each Study 002 arm with several seeds; its abstract
+    does not support three seeds or a sign-agreement rule, which are the study's own choices (10).
   limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
     formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
     not read.

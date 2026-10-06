@@ -71,22 +71,32 @@ def test_newcombe_and_holm() -> None:
 
 
 def test_the_draws_and_the_recall_illustration() -> None:
-    flagged = {"glaive-function-calling-v2": 14205, "when2call": 3979, "toolace": 867}
-    assert ft.trial_allocation(flagged, 100, ft.TRIAL_MINIMUM) == {
+    manifest = json.loads(
+        (ROOT / "reports/study-002/flag-set/flag-set.manifest.json").read_text(encoding="utf-8")
+    )
+    flagged = manifest["flag_set"]["by_source"]
+    assert flagged == {"glaive-function-calling-v2": 14205, "when2call": 3979, "toolace": 867}
+    assert ft.TRIAL_SIZE == 100
+    assert ft.trial_allocation(flagged, ft.TRIAL_SIZE, ft.TRIAL_MINIMUM) == {
         "glaive-function-calling-v2": 59,
         "toolace": 20,
         "when2call": 21,
     }
-    manifest = json.loads(
-        (ROOT / "reports/study-002/flag-set/flag-set.manifest.json").read_text(encoding="utf-8")
-    )
     population = ft.recall_population(manifest["precision_reporting"])
     assert population == {"glaive-function-calling-v2": 34547, "toolace": 1106, "when2call": 2526}
-    assert ft.trial_allocation(population, 400, ft.RECALL_MINIMUM) == {
+    assert sum(population.values()) == 38179
+    assert ft.RECALL_SIZE == 400
+    assert ft.trial_allocation(population, ft.RECALL_SIZE, ft.RECALL_MINIMUM) == {
         "glaive-function-calling-v2": 240,
         "toolace": 80,
         "when2call": 80,
     }
+    assert ft.DESCRIPTIVE_BELOW == 10
+    _in_draft(
+        "$N$ = 14,205 Glaive,\n3,979 When2Call and 867 ToolACE flagged replies",
+        "A sample of 400 unflagged `ANSWER` replies, stratified 240 / 80 / 80",
+        r"$E_{s,\ell} < 10$ is descriptive only",
+    )
     shares = {"glaive-function-calling-v2": 0.01, "toolace": 0.10, "when2call": 0.05}
     pooled = sum(shares[s] * population[s] for s in population) / sum(population.values())
     assert round(pooled, 6) == 0.015254
@@ -109,6 +119,13 @@ def test_the_margin_for_a_paired_difference() -> None:
     for n in (385, 771, 1055):
         assert round(z * math.sqrt(1 / n), 12) == round(margin(n), 12)
     assert round(margin(1055), 6) == 0.060342
+    assert round(margin(771), 6) == 0.070586
+    assert 771 + 284 == 1055
+    _in_draft(
+        "1,055 items pooled, 771 constructed\nand 284 natural",
+        r"$M(771) = 0.070586$",
+        "constructed items: 0.070586 under the first",
+    )
     doubled = round(2 * margin(1055), 6)
     assert doubled == 0.120685
     assert doubled > 0.10  # above the fixed 10-point margin
@@ -171,6 +188,18 @@ def test_the_tables_match_the_code_constants() -> None:
     assert (metrics.MIN_GOLD, metrics.MIN_PREDICTIONS, metrics.MIN_GOLD_CHALLENGE) == (50, 50, 30)
     assert (metrics.MIN_PREDICTIONS_POSTSTRATIFIED, metrics.BOOTSTRAP_REPLICATES) == (20, 2000)
     assert metrics.GLOBAL_ROWS == ("macro_f1", "abstention_rate")
+    assert metrics.MAX_CALL_ON_AMBIGUOUS_IN_M == 0
+    # Rounding to 6 places, then comparing: within 5e-7 on the wrong side of a bar passes, 6e-7 does not.
+    places = V6_COMPARISON_PLACES
+    assert round(0.9899996, places) >= 0.99 > round(0.9899994, places)
+    assert round(0.2000004, places) <= 0.20 < round(0.2000006, places)
+    _in_draft(
+        "| `CALL.on_ambiguous_in_M` | `CALL` predictions on ambiguous gold in stratum M | = 0 | always |",
+        "| every required mode | $n \\ge 200$; below that the mode is `UNDER_POWERED`, which fails the gate |",
+        "(`parse_valid_rate` 0.9899996 meets ≥ 0.99)",
+        "(`over_call_rate` 0.2000004 meets ≤ 0.20)",
+        "| `no_call_accuracy`, `unsupported_accuracy`, `clarification_accuracy` | ≥ 0.40, ≥ 0.30, ≥ 0.50 |",
+    )
     assert "CALL.on_ambiguous_in_M" in metrics.MODE_ROWS["CALL"]
     _in_draft(
         r"F1_{\text{call}}^{\text{base}} \ge 0.90$",

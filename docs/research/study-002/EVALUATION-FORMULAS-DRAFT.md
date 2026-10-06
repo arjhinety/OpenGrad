@@ -5,11 +5,12 @@ what the adopted documents and the code already decide, so the formulas can be c
 in a paper. Where a document and the code are the authority, this draft names both and changes neither. Where the
 documents leave a step undefined, the draft lists it as an open question and does not fill it in
 ([§8](#8-open-questions)). Every worked number below was computed with the project's own code.
-`tests/verification/test_evaluation_formulas_draft.py` recomputes the worked numbers with that code, checks the
-thresholds in the tables against the code's constants, and fails if this text and the code disagree. Two kinds of
-number are read rather than recomputed: the trial's agreement and κ come from the committed trial report (the test
-recomputes its Wilson interval from the counts), and the flagged and population sizes come from the committed
-flag-set manifest or the trial allocation.
+`tests/verification/test_evaluation_formulas_draft.py` recomputes the worked numbers with that code and checks the
+thresholds in the tables against the code's constants: it fails if the text or the code changes a number it
+covers. It does not derive the text from the code, and it does not cover everything. Two kinds of number are read
+rather than recomputed: the trial's agreement and κ come from the committed trial report (the test recomputes its
+Wilson interval from the counts), and the flagged and population sizes come from the committed flag-set manifest.
+The `ANSWER` set sizes (1,055, 771, 284) are copied from 46.
 
 Citations are of two kinds ([§9](#9-references)):
 - papers found and checked with the Papers With Code CLI (`pwc paper info`), of which only the abstract has been
@@ -71,8 +72,8 @@ or 1:
 $$M(n) = 2 z \sqrt{\frac{0.25}{n}} = \frac{z}{\sqrt{n}}.$$
 
 The half-width it doubles is the normal one, $z\sqrt{0.25/n}$, slightly larger (more conservative) than Wilson's at
-$p = 0.5$. The factor 2 makes room for a comparison of two rates; what that means for a paired difference is open
-question 3. Code: `resolvable_margin`, `src/opengrad/verification/resolvability.py`.
+$p = 0.5$. 06 gives no reason for the factor 2; one reading is that it makes room for a comparison of two rates.
+What it means for a paired difference is open question 3. Code: `resolvable_margin`, `src/opengrad/verification/resolvability.py`.
 
 | $n$ | $M(n)$ | Where it matters |
 |---|---|---|
@@ -202,24 +203,28 @@ Here $\text{acc}_{\text{ANSWER}}$ is `no_call_accuracy`. **Macro recall** is the
 | every required mode | $n \ge 200$; below that the mode is `UNDER_POWERED`, which fails the gate |
 
 The policy rounds each observed value to 6 decimal places and compares at 6 (`V6_COMPARISON_PLACES`); the gate's
-own comparisons (`at_least`, `at_most`, used by check 14) are at 9 (`COMPARISON_PLACES`). Either way a value exactly
-on a threshold is decided by the threshold, not by floating-point error ($0.9 - 0.6 = 0.30000000000000004$ in
-binary). Rounding to 6 places also means a value less than $5 \times 10^{-7}$ below a floor passes.
+own comparisons (`at_least`, `at_most`, used by checks 12b and 14) are at 9 (`COMPARISON_PLACES`). Either way a
+value exactly on a threshold is decided by the threshold, not by floating-point error
+($0.9 - 0.6 = 0.30000000000000004$ in binary). Rounding to 6 places also means a value within $5 \times 10^{-7}$ on
+the wrong side of a bar passes: below a floor (`parse_valid_rate` 0.9899996 meets ≥ 0.99) or above a ceiling
+(`over_call_rate` 0.2000004 meets ≤ 0.20). Flag precision (§3) is likewise rounded to 6 places before its ≥.
 
 **Truncation balance** (`study_002_prereg_v8` A). Two arms' truncation rates $r_1, r_2$ within a stage are imbalanced
 when both of these hold:
 
 $$\lvert r_1 - r_2 \rvert > 0.02 \quad\text{and}\quad \max(r_1, r_2) > 2.0 \cdot \min(r_1, r_2).$$
 
-**Comparison rows** (gate check 14, `v12_resolvable_margin`). Each row carries an $n$ and a `margin`, which 06 calls
-the *observed* margin: the observed difference. With $\delta$ that value, the check is
-$\lvert\delta\rvert \ge M(n)$ at 9 places:
+**Comparison rows** (gate check 14, `v12_resolvable_margin`). A row is `{id, n, margin, delta}`. The check reads $n$
+and the `margin` field, and passes a row when $\lvert\text{margin}\rvert \ge M(n)$ at 9 places:
+- a row with no usable $n$ or no margin fails as unresolved;
 - a row with $n < 200$ is counted `UNDER_POWERED` and skipped;
 - a row below its $M(n)$ is `WITHIN_NOISE` and supports nothing;
 - the check fails if no row clears its margin.
 
-The code reads neither the row's `delta` field nor anything saying whether the comparison is paired. That a row
-compares two arms on the same items is the documents' intent (06, 10), not something the code checks.
+What the `margin` field holds is not defined in the code. This draft reads it as 06's "observed margin", the
+observed difference between arms, but the row also has a `delta` field, which the check never reads, and the gate's
+self-test gives the two different values (0.08 and 0.12). Nor does the code know whether a comparison is paired:
+that a row compares two arms on the same items is the documents' intent (06, 10), not something the code checks.
 
 ## 6. The hypotheses (10-STATISTICS-PLAN.md)
 
@@ -249,11 +254,16 @@ If (1) and (2) hold but (3) fails, the verdict is `MECHANISM_INCONCLUSIVE`. If (
 finding is reported as a different one (more willing, not more correct). Any required endpoint `UNMEASURED` makes
 the verdict `NOT_EVALUABLE`.
 
-The margin in condition 1 is a fixed number, not $M(n)$. 11 fixes one margin for comparisons between arms: "The
-margin a population is used to test (16 check 3) is 10 points for every comparison between arms" (46 §10). This
-draft reads that as condition 1's margin, $\bar\Delta_{\text{answer}} \ge 0.10$; 10 does not name the value itself.
-H1's `ANSWER` set is 1,055 items pooled (771 constructed, 284 natural; 46), where $M(1055) = 0.060342$, so a
-10-point difference clears both.
+10 does not name condition 1's margin, and two readings exist. 11, below its threshold summary, fixes one margin
+for comparisons between arms: "The margin a population is used to test" is "10 points for every comparison between
+arms" (proposed in 46 §10). Read that way, condition 1 is $\bar\Delta_{\text{answer}} \ge 0.10$. But 10's opening
+says a claim needs "a point estimate larger than the population's resolvable margin", which reads as $M(n)$.
+
+Which $n$ H1 is measured on is not settled either. 46 gives the `ANSWER` set as 1,055 items pooled, 771 constructed
+and 284 natural; 41 §9 allows a pooled figure "only beside the two separate ones, never instead of them", and 46
+§10 declares natural-stratum comparisons descriptive. So the confirmatory comparison may be on the 771 constructed
+items. The two readings of the margin then give 0.10 or $M(771) = 0.070586$, and on the pooled set 0.10 or
+$M(1055) = 0.060342$.
 
 **The multiplicity rule, exactly as 10 states it** ("Multiplicity", and the note under `study_002_prereg_v14`). The
 confirmatory family is H1 (`R1` vs `C0`), H5 (tool-policy non-regression), H6 (refusal correctness on `P-UNANS`) and
@@ -321,13 +331,16 @@ preregistered rule needs a numbered amendment first.
    - **A difference must exceed its own worst-case half-width.** Then $M(n)$ is exactly right for a paired
      difference: the factor 2 that makes room for two rates and the larger variance of a difference cancel
      ($2\sqrt{0.25} = \sqrt{1}$). For arms that disagree less it is conservative. At $q = 0.2$ and $n = 1{,}055$
-     the half-width is $z\sqrt{0.2/n} = 0.026986$.
+     the half-width is $z\sqrt{0.2/n} = 0.026986$. Under this reading the margin test is the worst case of "the
+     interval excludes 0", so it overlaps H1's condition 2.
    - **A difference must be twice its own half-width, as one rate's margin is twice one rate's half-width.** Then
      the paired margin is $2z/\sqrt{n} = 2M(n)$.
 
-   On H1's pooled `ANSWER` set, $n = 1{,}055$: $M = 0.060342$ under the first reading, $0.120685$ under the second.
-   The second is above the fixed 10-point margin (46 §10), so under it no 10-point comparison between arms on that
-   set could be resolved; on the 771 constructed items it would be 0.141173. Check 14 uses $M(n)$, so the code
+   H1's set is either the pooled `ANSWER` set or its 771 constructed items ([§6](#6-the-hypotheses-10-statistics-planmd)).
+   On the pooled set, $n = 1{,}055$: $M = 0.060342$ under the first reading, $0.120685$ under the second. On the
+   constructed items: 0.070586 under the first, and under the second it would be 0.141173. Both second-reading
+   values are above the fixed 10-point margin (46 §10), so under it no 10-point comparison between arms on either
+   set could be resolved. Check 14 uses $M(n)$, so the code
    follows the first reading's numbers, whatever the reasoning behind them was. (An earlier version of this question
    took the second reading at $n = 385$ without saying it was a reading; an independent review corrected it on
    2026-10-06. The variance bound is elementary algebra, checked in the test and cited to no source; the literature
@@ -390,8 +403,9 @@ preregistered rule needs a numbered amendment first.
    the gate require from the baseline only `call_f1` and `answer_rate` (`V6_BASELINE_METRICS`, `BASELINE_METRICS`).
    So a baseline that lacks any of the four passes that regression check by skipping it. (The gate also requires
    call precision and call recall from the candidate; v6 alone does not.) v6's own comment says it does not fill
-   in absent metrics the way v5 did, so this looks unintended. H5 is falsified if `call_precision` degrades (02), so
-   it bears on H5. Logged as UP-0014; no code is changed here.
+   in absent metrics the way v5 did, so this looks unintended. It also bears on H5, which 02 falsifies if
+   `call_precision` degrades "or any of them is unmeasurable rather than measured": a skipped check is exactly an
+   unmeasured one. Logged as UP-0014; no code is changed here.
 
 ## 9. References
 
