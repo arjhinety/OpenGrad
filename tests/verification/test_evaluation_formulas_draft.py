@@ -125,6 +125,27 @@ def test_the_margin_for_a_paired_difference() -> None:
     )
 
 
+def test_the_three_seed_sign_check_under_no_effect() -> None:
+    import itertools
+    from fractions import Fraction
+
+    # Each seed-wise delta is independently positive or negative with probability 1/2.
+    patterns = list(itertools.product((-1, 1), repeat=3))
+    same_sign = [p for p in patterns if len(set(p)) == 1]
+    all_positive = [p for p in same_sign if p[0] == 1]
+    assert Fraction(len(same_sign), len(patterns)) == Fraction(1, 4)
+    assert 2 * Fraction(1, 2) ** 3 == Fraction(1, 4)
+    assert float(Fraction(len(same_sign), len(patterns))) == 0.25
+    assert float(Fraction(len(all_positive), len(patterns))) == 0.125
+    assert len(list(itertools.combinations_with_replacement(range(3), 3))) == 10
+    _in_draft(
+        r"2 \times (1/2)^3 = 0.25",
+        r"$(1/2)^3 = 0.125$",
+        "only 10 distinct multisets",
+        "arXiv 1806.08295",
+    )
+
+
 def test_the_draft_holds_no_control_characters() -> None:
     # A Python escape once turned the "\t" of "\text" into a tab; the LaTeX must survive as written.
     assert not [ch for ch in DRAFT if ord(ch) < 32 and ch != "\n"]

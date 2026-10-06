@@ -1368,3 +1368,30 @@ papers:
   - https://arxiv.org/abs/2402.00530
   - pwc paper info 2402.00530 (Papers With Code catalog, 2026-10-06)
   verification_status: abstract_verified_full_text_unread
+- id: how_many_seeds
+  title: How Many Random Seeds? Statistical Power Analysis in Deep Reinforcement Learning Experiments
+  authors:
+  - Cédric Colas
+  - Olivier Sigaud
+  - Pierre-Yves Oudeyer
+  year: 2018
+  venue: arXiv
+  arxiv: '1806.08295'
+  doi: null
+  canonical_url: https://arxiv.org/abs/1806.08295
+  official_implementation: null
+  category: evaluation_statistics
+  methodology_summary: Tutorial relating the number of random seeds to the probabilities of statistical
+    errors when comparing two algorithms, for the t-test and the bootstrap confidence-interval test, and
+    how deviations from the tests' assumptions make error estimates inaccurate; written for deep reinforcement
+    learning.
+  implementation_relevance: 'Background for H1''s seed question (EVALUATION-FORMULAS-DRAFT.md, open question
+    6): Study 002 trains three seeds per arm and its interval resamples items, not seeds. It does not
+    analyse a sign check.'
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is not read. Deep
+    RL, not fine-tuning.
+  checked_sources:
+  - https://arxiv.org/abs/1806.08295
+  - pwc paper info 1806.08295 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread

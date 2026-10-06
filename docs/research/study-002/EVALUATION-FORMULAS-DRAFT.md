@@ -300,6 +300,33 @@ preregistered rule needs a numbered amendment first.
 5. **A pooled value exactly on the bar.** In the trial, When2Call sat exactly at 0.90. The rule is $\ge$, so it passes.
    That is the rule as adopted; the open point is only that precision of 0.90 on as few as 100 agreed items has a
    Wilson lower bound of 0.826 (90 of 100).
+6. **Seed variance and the sign check.** H1's cluster bootstrap (10, "Estimators") resamples **items only**: it keeps
+   each arm's three trained models fixed and redraws the items they are scored on. Its 95% interval therefore
+   measures which items happened to be drawn, not which training seeds; training-seed variance is outside it. 10
+   says as much ("What this plan cannot do": it "cannot separate seed variance from item variance at `k = 3`") and
+   leaves seeds to condition 3. On its own, condition 3 is weak evidence. Suppose the arm has no effect and the three
+   seed-wise deltas $\Delta_1, \Delta_2, \Delta_3$ are independent and symmetric about 0, none exactly 0. Each is
+   then positive with probability $1/2$, and
+
+   $$\Pr(\text{condition 3}) = \Pr(\text{all positive}) + \Pr(\text{all negative}) = 2 \times (1/2)^3 = 0.25.$$
+
+   Condition 1 also requires a positive mean, which leaves only the all-positive case: under the same assumptions
+   the two sign requirements together pass with probability $(1/2)^3 = 0.125$, and that bounds the chance of a
+   false `SUPPORTED` from above. Conditions 1 (the margin), 2 and 4 lower it only to the extent that item-level checks
+   catch what seed noise produced. A seed that happens to run high moves the mean while the item bootstrap, blind
+   to seeds, stays narrow (this last point is reasoning, not computed). The assumptions matter in both directions:
+   seeds that share something (the same `C0` run, the same data order) make the deltas positively correlated and
+   raise 0.25; a delta of exactly 0, possible because each rate is a count over $n$ items, lowers it, and 10 does
+   not say what sign 0 has. Open: should H1's interval also carry seed variance, or should every H1 result state
+   that it does not? With $k = 3$, resampling seeds offers only 10 distinct multisets.
+
+   Literature, abstracts checked with `pwc paper info` (2026-10-06): Colas, Sigaud and Oudeyer (2018) relate the
+   number of random seeds to the probabilities of statistical errors, for the t-test and the bootstrap
+   confidence-interval test, in deep reinforcement learning rather than fine-tuning; Dodge et al. (2020) find that
+   distinct seeds give substantially different fine-tuning results; Madaan et al. (2024) measure seed variance in
+   evaluation benchmarks. None analyses a three-seed sign check, so 0.25 is cited to no one: it is elementary
+   probability, recomputed in the test. Bouthillier et al. (2021, arXiv 2103.03098), on accounting for variance in
+   ML benchmarks, has no record in the catalog and is not cited.
 
 ## 9. References
 
@@ -320,6 +347,6 @@ preregistered rule needs a numbered amendment first.
 [`docs/references/papers.yaml`](../../references/papers.yaml)).**
 - Statistics of evaluation: Miller (2024, arXiv 2411.00640); Bowyer et al. (2025, arXiv 2503.01747); Madaan et al.
   (2024, arXiv 2406.10229); Dodge et al. (2020, arXiv 2002.06305); Card et al. (2020, arXiv 2010.06595); Bestgen
-  (2022, arXiv 2205.11134); Lee et al. (2025, arXiv 2511.21140).
+  (2022, arXiv 2205.11134); Lee et al. (2025, arXiv 2511.21140); Colas, Sigaud and Oudeyer (2018, arXiv 1806.08295).
 - Where Study 002 is going: see the case-study notes,
   [`CASE-STUDY-RELATED-WORK.md`](CASE-STUDY-RELATED-WORK.md), "Statistics and the study's direction".
