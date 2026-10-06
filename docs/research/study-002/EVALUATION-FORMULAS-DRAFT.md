@@ -4,13 +4,15 @@
 what the adopted documents and the code already decide, so the formulas can be checked before any audit and reused
 in a paper. Where a document and the code are the authority, this draft names both and changes neither. Where the
 documents leave a step undefined, the draft lists it as an open question and does not fill it in
-([§8](#8-open-questions)). Every worked number below was computed with the project's own code.
-`tests/verification/test_evaluation_formulas_draft.py` recomputes the worked numbers with that code and checks the
-thresholds in the tables against the code's constants: it fails if the text or the code changes a number it
-covers. It does not derive the text from the code, and it does not cover everything. Two kinds of number are read
-rather than recomputed: the trial's agreement and κ come from the committed trial report (the test recomputes its
-Wilson interval from the counts), and the flagged and population sizes come from the committed flag-set manifest.
-The `ANSWER` set sizes (1,055, 771, 284) are copied from 46.
+([§8](#8-open-questions)). The worked numbers below were computed with the project's own code, or by plain
+arithmetic where no project code applies (the seed-sign probabilities, the Holm thresholds, 98.75%).
+`tests/verification/test_evaluation_formulas_draft.py` recomputes them, checks the thresholds in the tables against
+the code's constants, calls the promotion policy for the rounding examples, and checks the quoted passages against
+their source documents: it fails if the text or the code changes something it covers. It does not derive the text
+from the code, and it does not cover everything. Some numbers are read rather than recomputed: the trial's
+agreement and κ from the committed trial report (the test recomputes its Wilson interval from the counts), the
+flagged and population sizes from the committed flag-set manifest, and the `ANSWER` set sizes from the committed
+answer-strata file.
 
 Citations are of two kinds ([§9](#9-references)):
 - papers found and checked with the Papers With Code CLI (`pwc paper info`), of which only the abstract has been
@@ -205,8 +207,9 @@ Here $\text{acc}_{\text{ANSWER}}$ is `no_call_accuracy`. **Macro recall** is the
 The policy rounds each observed value to 6 decimal places and compares at 6 (`V6_COMPARISON_PLACES`); the gate's
 own comparisons (`at_least`, `at_most`, used by checks 12b and 14) are at 9 (`COMPARISON_PLACES`). Either way a
 value exactly on a threshold is decided by the threshold, not by floating-point error
-($0.9 - 0.6 = 0.30000000000000004$ in binary). Rounding to 6 places also means a value within $5 \times 10^{-7}$ on
-the wrong side of a bar passes: below a floor (`parse_valid_rate` 0.9899996 meets ≥ 0.99) or above a ceiling
+($0.9 - 0.6 = 0.30000000000000004$ in binary). Rounding to 6 places also means a value within about
+$5 \times 10^{-7}$ on the wrong side of a bar passes (exactly half is decided by floating-point representation):
+below a floor (`parse_valid_rate` 0.9899996 meets ≥ 0.99) or above a ceiling
 (`over_call_rate` 0.2000004 meets ≤ 0.20). Flag precision (§3) is likewise rounded to 6 places before its ≥.
 
 **Truncation balance** (`study_002_prereg_v8` A). Two arms' truncation rates $r_1, r_2$ within a stage are imbalanced
@@ -216,13 +219,16 @@ $$\lvert r_1 - r_2 \rvert > 0.02 \quad\text{and}\quad \max(r_1, r_2) > 2.0 \cdot
 
 **Comparison rows** (gate check 14, `v12_resolvable_margin`). A row is `{id, n, margin, delta}`. The check reads $n$
 and the `margin` field, and passes a row when $\lvert\text{margin}\rvert \ge M(n)$ at 9 places:
+- with no comparison rows at all the check is `BLOCKED_INPUT_MISSING`, not a failure;
 - a row with no usable $n$ or no margin fails as unresolved;
 - a row with $n < 200$ is counted `UNDER_POWERED` and skipped;
 - a row below its $M(n)$ is `WITHIN_NOISE` and supports nothing;
 - the check fails if no row clears its margin.
 
-What the `margin` field holds is not defined in the code. This draft reads it as 06's "observed margin", the
-observed difference between arms, but the row also has a `delta` field, which the check never reads, and the gate's
+What the `margin` field holds is not defined by the gate's input format. This draft reads it as 06's "observed
+margin", the observed difference between arms, as the module's own docstring does ("a comparison whose observed
+margin is below the resolvable margin"). 15 reads the other way: a row "prints `n` and its resolvable margin". And
+the row also has a `delta` field, which the check never reads, and the gate's
 self-test gives the two different values (0.08 and 0.12). Nor does the code know whether a comparison is paired:
 that a row compares two arms on the same items is the documents' intent (06, 10), not something the code checks.
 
@@ -254,16 +260,20 @@ If (1) and (2) hold but (3) fails, the verdict is `MECHANISM_INCONCLUSIVE`. If (
 finding is reported as a different one (more willing, not more correct). Any required endpoint `UNMEASURED` makes
 the verdict `NOT_EVALUABLE`.
 
-10 does not name condition 1's margin, and two readings exist. 11, below its threshold summary, fixes one margin
-for comparisons between arms: "The margin a population is used to test" is "10 points for every comparison between
-arms" (proposed in 46 §10). Read that way, condition 1 is $\bar\Delta_{\text{answer}} \ge 0.10$. But 10's opening
-says a claim needs "a point estimate larger than the population's resolvable margin", which reads as $M(n)$.
+**Condition 1's margin is 10 points.** 10 sends condition 1 to "the margin fixed in [11]". 11 (under "Thresholds
+added by `study_002_prereg_v14`", proposed in 46 §10) fixes one margin for comparisons between arms: "The margin a
+population is used to test" is "10 points for every comparison between arms". 06 (§C2, on the `ANSWER` strata)
+says the same and closes the other door: 11 "fixes that margin", and "no claim in this study uses a margin below
+10pp". So condition 1 is $\bar\Delta_{\text{answer}} \ge 0.10$. 10's opening adds a separate requirement, "a point
+estimate larger than the population's resolvable margin", $\bar\Delta_{\text{answer}} > M(n)$. The two stack rather
+than compete, and on both candidate sets below, $M(n) < 0.10$, so the 10-point margin is the one that binds.
 
-Which $n$ H1 is measured on is not settled either. 46 gives the `ANSWER` set as 1,055 items pooled, 771 constructed
-and 284 natural; 41 §9 allows a pooled figure "only beside the two separate ones, never instead of them", and 46
-§10 declares natural-stratum comparisons descriptive. So the confirmatory comparison may be on the 771 constructed
-items. The two readings of the margin then give 0.10 or $M(771) = 0.070586$, and on the pooled set 0.10 or
-$M(1055) = 0.060342$.
+**Which $n$ H1 is measured on is not stated outright.** 46 gives the `ANSWER` set as 1,055 items pooled, 771
+constructed and 284 natural (the same counts as `reports/study-002/answer-strata-v1/answer-strata-v1.strata.json`).
+41 §9 allows a pooled figure "only beside the two separate ones, never instead of them"; 03 reports the two strata
+separately, "each judged against 06 on its own n"; and 46 §10 declares natural-stratum comparisons descriptive.
+Together these point to the 771 constructed items as the confirmatory set, with the pooled figure beside it, but no
+document names H1's $n$. On the constructed items $M(771) = 0.070586$; on the pooled set $M(1055) = 0.060342$.
 
 **The multiplicity rule, exactly as 10 states it** ("Multiplicity", and the note under `study_002_prereg_v14`). The
 confirmatory family is H1 (`R1` vs `C0`), H5 (tool-policy non-regression), H6 (refusal correctness on `P-UNANS`) and
@@ -371,8 +381,8 @@ preregistered rule needs a numbered amendment first.
    false `SUPPORTED` from above. Conditions 1 (the margin), 2 and 4 lower it only to the extent that item-level checks
    catch what seed noise produced. A seed that happens to run high moves the mean while the item bootstrap, blind
    to seeds, stays narrow (this last point is reasoning, not computed). The assumptions matter in both directions:
-   - If the three deltas share a component, for example one `C0` run subtracted in all three, they are positively
-     correlated and 0.25 rises. Sharing a factor does not by itself guarantee that.
+   - If one `C0` run were subtracted in all three deltas, they would share its term, be positively correlated, and
+     0.25 would rise. Other shared factors (the same data order, say) need not correlate the deltas at all.
    - The deltas are also scored on the same items, which can correlate them. That is item variance, which
      condition 2's bootstrap covers, not condition 3.
    - A delta of exactly 0, possible because each rate is a count over $n$ items, lowers 0.25, and 10 does not say

@@ -20,9 +20,59 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import compare_gemini_relabel as compare
 
 
+def _flat(text: str) -> str:
+    return " ".join(text.split())
+
+
 def _in_draft(*literals: str) -> None:
-    missing = [literal for literal in literals if literal not in DRAFT]
+    # Whitespace is collapsed on both sides, so rewrapping a paragraph does not break a check.
+    missing = [literal for literal in literals if _flat(literal) not in _flat(DRAFT)]
     assert not missing, missing
+
+
+def test_the_quoted_passages_are_in_their_sources() -> None:
+    docs = ROOT / "docs/research/study-002"
+    quotes = {
+        "10-STATISTICS-PLAN.md": [
+            "at least the margin fixed in [11](11-THRESHOLDS.md)",
+            "larger than the population's resolvable margin",
+            "cannot separate seed variance from item variance at `k = 3`",
+            "clustered; paired by seed",
+        ],
+        "11-THRESHOLDS.md": [
+            "The margin a population is used to test",
+            "10 points for every comparison between arms",
+        ],
+        "06-SPLIT-SPEC.md": [
+            "fixes that margin",
+            "no claim in this study uses a margin below 10pp",
+        ],
+        "41-ANSWER-STRATA-AMENDMENT.md": [
+            "only beside the two separate ones, never instead of them"
+        ],
+        "03-PREREGISTRATION.md": [
+            "The **unit of inference** is the seed, clustered by item",
+            "each judged against 06 on its own n",
+        ],
+        "02-RESEARCH-QUESTIONS.md": [
+            "degrade beyond the frozen thresholds",
+            "or any of them is unmeasurable rather than measured",
+            "drops beyond threshold",
+        ],
+        "07-METRIC-SPEC.md": ["is reported as an interval spanning the recall uncertainty"],
+        "15-PROVENANCE-VALIDATORS.md": ["prints `n` and its resolvable margin"],
+    }
+    for name, passages in quotes.items():
+        source = _flat((docs / name).read_text(encoding="utf-8"))
+        missing = [passage for passage in passages if _flat(passage) not in source]
+        assert not missing, (name, missing)
+        _in_draft(*passages)
+    validators = (ROOT / "src/opengrad/verification/population_validators.py").read_text(
+        encoding="utf-8"
+    )
+    docstring_quote = "a comparison whose observed margin is below the resolvable margin"
+    assert _flat(docstring_quote) in _flat(validators)
+    _in_draft(docstring_quote)
 
 
 def test_kappa_and_the_trials_agreement() -> None:
@@ -120,9 +170,16 @@ def test_the_margin_for_a_paired_difference() -> None:
         assert round(z * math.sqrt(1 / n), 12) == round(margin(n), 12)
     assert round(margin(1055), 6) == 0.060342
     assert round(margin(771), 6) == 0.070586
-    assert 771 + 284 == 1055
+    strata = json.loads(
+        (ROOT / "reports/study-002/answer-strata-v1/answer-strata-v1.strata.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    sizes = {name: stratum["n"] for name, stratum in strata["strata"].items()}
+    assert sizes == {"ANSWER-constructed": 771, "ANSWER-natural": 284}
+    assert strata["pooled_beside_strata"]["n"] == 1055
     _in_draft(
-        "1,055 items pooled, 771 constructed\nand 284 natural",
+        "1,055 items pooled, 771 constructed and 284 natural",
         r"$M(771) = 0.070586$",
         "constructed items: 0.070586 under the first",
     )
@@ -189,10 +246,29 @@ def test_the_tables_match_the_code_constants() -> None:
     assert (metrics.MIN_PREDICTIONS_POSTSTRATIFIED, metrics.BOOTSTRAP_REPLICATES) == (20, 2000)
     assert metrics.GLOBAL_ROWS == ("macro_f1", "abstention_rate")
     assert metrics.MAX_CALL_ON_AMBIGUOUS_IN_M == 0
-    # Rounding to 6 places, then comparing: within 5e-7 on the wrong side of a bar passes, 6e-7 does not.
-    places = V6_COMPARISON_PLACES
-    assert round(0.9899996, places) >= 0.99 > round(0.9899994, places)
-    assert round(0.2000004, places) <= 0.20 < round(0.2000006, places)
+    # The policy itself, on the gate's healthy bundle: within about 5e-7 on the wrong side of a bar
+    # still promotes, 6e-7 does not.
+    bundle = gate.healthy_bundle()
+
+    def decision(**changes: float) -> str:
+        candidate = {**bundle["candidate"], **changes}
+        return str(policy.evaluate(candidate, bundle["baseline"])["decision"])
+
+    assert decision() == "PROMOTE"
+    assert decision(parse_valid_rate=0.9899996) == "PROMOTE"
+    assert decision(parse_valid_rate=0.9899994) != "PROMOTE"
+    assert decision(over_call_rate=0.2000004) == "PROMOTE"
+    assert decision(over_call_rate=0.2000006) != "PROMOTE"
+    # Check 14's row shape: the self-test row carries a margin and a different delta.
+    assert bundle["comparisons"] == [{"id": "R1_vs_C0", "n": 1277, "margin": 0.08, "delta": 0.12}]
+    # Flag precision is rounded to 6 places, then compared with a plain >=.
+    triage_source = _flat(Path(ft.__file__).read_text(encoding="utf-8"))
+    assert '"precision": round(declines / len(agreed), 6)' in triage_source
+    assert 'return "PASS" if value >= floor else "FAIL"' in triage_source
+    _in_draft(
+        "the gate's self-test gives the two different values (0.08 and 0.12)",
+        "A row is `{id, n, margin, delta}`",
+    )
     _in_draft(
         "| `CALL.on_ambiguous_in_M` | `CALL` predictions on ambiguous gold in stratum M | = 0 | always |",
         "| every required mode | $n \\ge 200$; below that the mode is `UNDER_POWERED`, which fails the gate |",

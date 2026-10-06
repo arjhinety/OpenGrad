@@ -33,6 +33,7 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0013 | 2026-10-04 | OpenGrad tests | `OURS` | A pushed commit grew the hygiene allowlist, and a test pinning the credential count failed CI | Fixed (count 3 -> 9, ERRATA §33) |
 | UP-0014 | 2026-10-06 | `tool_use_policy.py`, `study_002_gate.py` | `OURS` | Regression checks are skipped when the baseline lacks the metric; v6 and the gate require only two baseline metrics | Open; no code changed (formulas draft, open question 8) |
 | UP-0015 | 2026-10-06 | formulas draft | `OURS` | The draft misread the resolvable margin for a paired difference and misstated four other points; independent reviews caught them before push | Fixed in the draft and its test |
+| UP-0016 | 2026-10-06 | gstack `outside-review-result.ts` (gstack 1.91.27.0) | `UNCLEAR` | The Codex review validator reported a critical finding because Codex wrote "no [P1] findings" in Chinese | Open; read the review text, not only the verdict |
 
 ---
 
@@ -207,3 +208,15 @@ code. Not fixed: the policy is preregistered, and changing what it requires is t
 One reviewer finding was itself wrong: `CALL.on_ambiguous_in_M` is a `CALL` row, not a global one. Lesson: a draft that
 restates rules gets its numbers and its readings checked against the code, and every reviewer finding is checked
 too before it is relayed.
+
+Later, 2026-10-06: the pre-push audit of 7e97306 found one more. The draft called condition 1's margin "two readings"
+(10 points, or $M(n)$), but 06 says 11 "fixes that margin" and "no claim in this study uses a margin below 10pp": the
+margin is 10 points and $M(n)$ is a further requirement. Fixed in the draft; the test now checks each quoted passage
+against its source document.
+
+## UP-0016 — a review verdict parsed from the wrong language (`UNCLEAR`)
+
+The Codex audit of 7e97306 answered in Chinese. Its first line, "无 **[P1]** 发现", means "no [P1] findings", but the
+gstack validator (`lib/outside-review-result.ts`, gstack 1.91.27.0) matched the literal `[P1]` and printed
+`VERDICT: findings`, `FINDINGS: P1`, exit 3. The review itself had one P2 finding. Not yet reproduced in isolation or
+searched for upstream, so `UNCLEAR`. Workaround: read the review text before trusting the verdict line.
