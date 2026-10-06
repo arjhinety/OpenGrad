@@ -68,6 +68,51 @@ recommendations.
   refusing safe prompts.
 - Study 002 asks where such refusals come from in the supervised training data.
 
+## Statistics and the study's direction (added 2026-10-06)
+
+Found and checked the same way (`pwc search`, `pwc paper info`, abstracts only), for the formulas in
+[EVALUATION-FORMULAS-DRAFT.md](EVALUATION-FORMULAS-DRAFT.md) and for where Study 002 is going.
+
+**How the numbers are reported.**
+- Miller (2024, arXiv 2411.00640) gives formulas for analysing language-model evaluations, comparing two models and
+  planning an evaluation.
+- Bowyer et al. (2025, arXiv 2503.01747): normal-approximation error bars are too small on evaluations of fewer than
+  a few hundred items; one reason this study uses the Wilson interval.
+- Card et al. (2020, arXiv 2010.06595): underpowered NLP comparisons are common; one reason every row prints its
+  resolvable margin.
+- Dodge et al. (2020, arXiv 2002.06305) and Madaan et al. (2024, arXiv 2406.10229): fine-tuning seeds and benchmarks
+  vary substantially; why each arm has three seeds and a claim needs their signs to agree.
+- Bestgen (2022, arXiv 2205.11134) argues for bootstrap intervals of differences over significance alone, as 10
+  does.
+- Lee et al. (2025, arXiv 2511.21140): a model judge's accuracy estimate is biased, and correcting it needs a
+  calibration set with known answers, which the triage does not have.
+
+**Why supervised data can teach over-refusal (the study's premise).**
+- Bianchi et al. (2023, arXiv 2309.07875): a few hundred safety examples improve safety, but too much safety-tuning
+  makes models refuse safe prompts that resemble unsafe ones.
+- Kim et al. (2026, arXiv 2609.04714): boilerplate refusal statements in safety-tuning data induce reliance on
+  superficial cues and false refusals; training on the rationale alone reduces them.
+- Li et al. (2024, arXiv 2402.00530): filtering instruction-tuning data changes what the model learns, the kind of
+  corpus intervention Study 002 tests.
+
+**Abstention and unanswerable questions (H6, `P-UNANS`).**
+- Wen et al. (2024, arXiv 2407.18418) survey abstention; Kirichenko et al. (2025, arXiv 2506.09038) benchmark it over
+  20 datasets, including unknown answers and false premises.
+- Zhang et al. (2023, arXiv 2311.09677) teach a model to say it does not know (R-Tuning), the other side of
+  over-refusal.
+- `P-UNANS` draws on KUQ (Amayuelas et al., 2023, arXiv 2305.13712) and SelfAware (Yin et al., 2023, arXiv
+  2305.18153).
+
+**When to call a tool (the decision modes).**
+- ToolBeHonest (Zhang et al., 2024, arXiv 2406.20015) covers recognising missing or limited tools, close to
+  `UNSUPPORTED`.
+- When2Tool (Sun et al., 2026, arXiv 2605.09252) studies when a tool call is needed at all, close to `DIRECT`
+  versus `CALL`.
+
+**Not found in the catalog.** The classic statistics papers behind the formulas (Wilson 1927, Cohen 1960, Holm 1979,
+Newcombe 1998, Efron 1979) predate arXiv. Four were checked on Crossref instead; Holm was not verified. Nothing in
+the catalog turned up on turning a bootstrap interval into a p-value or a multiplicity-adjusted interval.
+
 ## What a reviewer will ask, and the honest answer today
 
 - **"How do you know the model labels are right?"** We don't, beyond agreement. The triage has no human validation
@@ -102,3 +147,31 @@ recommendations.
 - "SFT data quality filtering mislabeled training examples refusal";
 - "Prediction-Powered Inference";
 - "XSTest exaggerated safety behaviours".
+
+## Searches run (2026-10-06)
+
+`pwc search` with:
+- "adding error bars to evals clustered standard errors language model evaluation";
+- "statistical significance testing NLP bootstrap hitchhiker";
+- "variance random seeds fine-tuning pretrained language models early stopping";
+- "accounting for variance in machine learning benchmarks";
+- "statistical power NLP experiments little power";
+- "confidence intervals binomial proportion evaluation small test sets";
+- "bootstrap confidence interval p-value test inversion multiple comparisons adjusted";
+- "simultaneous confidence intervals multiple testing machine learning model comparison";
+- "safety tuning exaggerated safety refusals fine-tuning data safety-tuned llamas";
+- "refusal behavior learned from supervised fine-tuning data instruction tuning";
+- "abstention large language models survey know your limits";
+- "refusal-aware instruction tuning unanswerable questions R-Tuning";
+- "known unknown questions dataset LLM uncertainty" (no results) and "Knowledge of Knowledge known-unknowns
+  uncertainty large language models KUQ";
+- "do large language models know what they don't know SelfAware";
+- "instruction tuning data quality filtering low quality examples improves";
+- "label noise in instruction tuning data effect";
+- "tool use LLM refusal when tools unavailable hallucinated tool calls benchmark";
+- for the classics, which the catalog does not hold: "Holm sequentially rejective multiple test procedure", "Wilson
+  score interval probable inference", "Cohen coefficient of agreement nominal scales kappa", "Newcombe interval
+  estimation difference between independent proportions", "Efron bootstrap methods another look at the jackknife",
+  "hitchhiker's guide to testing statistical significance in natural language processing", "empirical investigation
+  of statistical significance in NLP Berg-Kirkpatrick", "multiple comparisons NLP multiple datasets replicability
+  analysis".

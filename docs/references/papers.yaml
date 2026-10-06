@@ -904,3 +904,467 @@ papers:
   - https://arxiv.org/abs/2603.25450
   - pwc paper info 2603.25450 (Papers With Code catalog, 2026-10-03)
   verification_status: abstract_verified_full_text_unread
+- id: error_bars_for_evals
+  title: 'Adding Error Bars to Evals: A Statistical Approach to Language Model Evaluations'
+  authors:
+  - Evan Miller
+  year: 2024
+  venue: arXiv
+  arxiv: '2411.00640'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2411.00640
+  official_implementation: null
+  category: evaluation_statistics
+  methodology_summary: Treats evaluation questions as drawn from an unseen super-population and gives
+    formulas for analysing evaluation data, measuring differences between two models and planning an evaluation
+    experiment.
+  implementation_relevance: Background for reporting every Study 002 rate with an interval and every arm
+    comparison as a difference.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2411.00640
+  - pwc paper info 2411.00640 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: no_clt_small_evals
+  title: 'Position: Don''t use the CLT in LLM evals with fewer than a few hundred datapoints'
+  authors:
+  - Sam Bowyer
+  - Laurence Aitchison
+  - Desi R. Ivanova
+  year: 2025
+  venue: arXiv
+  arxiv: '2503.01747'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2503.01747
+  official_implementation: null
+  category: evaluation_statistics
+  methodology_summary: 'Position paper: CLT-based error bars fail on LLM evaluations with fewer than a
+    few hundred items, usually giving error bars that are too small; recommends alternative frequentist
+    and Bayesian methods.'
+  implementation_relevance: Supports the Wilson interval over the normal (Wald) one for small populations
+    such as the per-source triage figures.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2503.01747
+  - pwc paper info 2503.01747 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: benchmark_variance
+  title: Quantifying Variance in Evaluation Benchmarks
+  authors:
+  - Lovish Madaan
+  - Aaditya K. Singh
+  - Rylan Schaeffer
+  - Andrew Poulton
+  - Sanmi Koyejo
+  - Pontus Stenetorp
+  - Sharan Narang
+  - Dieuwke Hupkes
+  year: 2024
+  venue: arXiv
+  arxiv: '2406.10229'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2406.10229
+  official_implementation: null
+  category: evaluation_statistics
+  methodology_summary: Defines and measures variance metrics for evaluation benchmarks, including seed
+    variance across initialisations, over many models, with recommendations for practitioners.
+  implementation_relevance: Supports reporting three seeds' values and their range rather than a single
+    run (10, Estimators).
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2406.10229
+  - pwc paper info 2406.10229 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: finetuning_seed_variance
+  title: 'Fine-Tuning Pretrained Language Models: Weight Initializations, Data Orders, and Early Stopping'
+  authors:
+  - Jesse Dodge
+  - Gabriel Ilharco
+  - Roy Schwartz
+  - Ali Farhadi
+  - Hannaneh Hajishirzi
+  - Noah Smith
+  year: 2020
+  venue: arXiv
+  arxiv: '2002.06305'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2002.06305
+  official_implementation: null
+  category: evaluation_statistics
+  methodology_summary: Fine-tunes BERT hundreds of times varying only the random seed; distinct seeds
+    give substantially different results, with weight initialisation and data order contributing comparably
+    to the variance.
+  implementation_relevance: Why each Study 002 arm is trained with three seeds and a claim needs sign
+    agreement across them.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2002.06305
+  - pwc paper info 2002.06305 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: little_power
+  title: With Little Power Comes Great Responsibility
+  authors:
+  - Dallas Card
+  - Peter Henderson
+  - Urvashi Khandelwal
+  - Robin Jia
+  - Kyle Mahowald
+  - Dan Jurafsky
+  year: 2020
+  venue: arXiv
+  arxiv: '2010.06595'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2010.06595
+  official_implementation: null
+  category: evaluation_statistics
+  methodology_summary: Meta-analyses NLP papers and datasets and finds underpowered experiments common;
+    small test sets leave most comparisons to the state of the art underpowered; gives power-analysis
+    practice.
+  implementation_relevance: The reason every Study 002 row prints its resolvable margin and a mode below
+    n = 200 is UNDER_POWERED.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2010.06595
+  - pwc paper info 2010.06595 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: difference_and_ci
+  title: Please, Don't Forget the Difference and the Confidence Interval when Seeking for the State-of-the-Art
+    Status
+  authors:
+  - Yves Bestgen
+  year: 2022
+  venue: arXiv
+  arxiv: '2205.11134'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2205.11134
+  official_implementation: null
+  category: evaluation_statistics
+  methodology_summary: Argues for bootstrap confidence intervals of the difference between NLP systems
+    instead of SOTA status and significance testing alone.
+  implementation_relevance: Supports 10's choice of the paired bootstrap interval of a difference as the
+    headline, not a p-value.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2205.11134
+  - pwc paper info 2205.11134 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: llm_judge_reporting
+  title: How to Correctly Report LLM-as-a-Judge Evaluations
+  authors:
+  - Chungpa Lee
+  - Thomas Zeng
+  - Jongwon Jeong
+  - Jy-yong Sohn
+  - Kangwook Lee
+  year: 2025
+  venue: ICML 2026
+  arxiv: '2511.21140'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2511.21140
+  official_implementation: null
+  category: model_annotation
+  methodology_summary: LLM judges' accuracy estimates are biased by imperfect specificity and sensitivity;
+    gives a plug-in bias correction with confidence intervals from a test and a calibration set, and an
+    adaptive calibration sample allocation.
+  implementation_relevance: 'What a corrected flag-precision estimate would need: a calibration set with
+    known answers, which the triage does not have.'
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2511.21140
+  - pwc paper info 2511.21140 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: safety_tuned_llamas
+  title: 'Safety-Tuned LLaMAs: Lessons From Improving the Safety of Large Language Models that Follow
+    Instructions'
+  authors:
+  - Federico Bianchi
+  - Mirac Suzgun
+  - Giuseppe Attanasio
+  - Paul Röttger
+  - Dan Jurafsky
+  - Tatsunori Hashimoto
+  - James Zou
+  year: 2023
+  venue: arXiv
+  arxiv: '2309.07875'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2309.07875
+  official_implementation: null
+  category: over_refusal
+  methodology_summary: 'Adding about 3% safety examples when instruction-tuning LLaMA substantially improves
+    safety, but too much safety-tuning yields exaggerated safety: refusing safe prompts that superficially
+    resemble unsafe ones.'
+  implementation_relevance: Evidence that refusal behaviour is shaped by the share of refusal examples
+    in fine-tuning data, Study 002's premise.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2309.07875
+  - pwc paper info 2309.07875 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: refuse_without_refusal
+  title: 'Refuse without Refusal: A Structural Analysis of Safety-Tuning Responses for Reducing False
+    Refusals in Language Models'
+  authors:
+  - Minji Kim
+  - Hyounghun Kim
+  year: 2026
+  venue: arXiv
+  arxiv: '2609.04714'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2609.04714
+  official_implementation: null
+  category: over_refusal
+  methodology_summary: Splits safety-tuning responses into a boilerplate refusal statement and a rationale;
+    the refusal statements induce reliance on superficial cues and false refusals, while training on rationales
+    alone reduces false refusals at comparable safety.
+  implementation_relevance: Supports the idea that the wording of refusal examples in supervised data
+    drives false refusals.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2609.04714
+  - pwc paper info 2609.04714 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: abstention_survey
+  title: 'Know Your Limits: A Survey of Abstention in Large Language Models'
+  authors:
+  - Bingbing Wen
+  - Jihan Yao
+  - Shangbin Feng
+  - Chenjun Xu
+  - Yulia Tsvetkov
+  - Bill Howe
+  - Lucy Lu Wang
+  year: 2024
+  venue: arXiv
+  arxiv: '2407.18418'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2407.18418
+  official_implementation: null
+  category: abstention
+  methodology_summary: Survey of abstention in LLMs from the query, the model and human values, organising
+    methods, benchmarks and evaluation metrics.
+  implementation_relevance: Frames refusal correctness (H6) and the decline labels within the abstention
+    literature.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2407.18418
+  - pwc paper info 2407.18418 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: abstentionbench
+  title: 'AbstentionBench: Reasoning LLMs Fail on Unanswerable Questions'
+  authors:
+  - Polina Kirichenko
+  - Mark Ibrahim
+  - Kamalika Chaudhuri
+  - Samuel J. Bell
+  year: 2025
+  venue: arXiv
+  arxiv: '2506.09038'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2506.09038
+  official_implementation: null
+  category: abstention
+  methodology_summary: AbstentionBench evaluates abstention across 20 datasets (unknown answers, underspecification,
+    false premises, subjective and outdated questions) on 20 frontier LLMs.
+  implementation_relevance: Comparable categories to P-UNANS (unknowable and false-premise questions);
+    a possible external check.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2506.09038
+  - pwc paper info 2506.09038 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: r_tuning
+  title: 'R-Tuning: Instructing Large Language Models to Say `I Don''t Know'''
+  authors:
+  - Hanning Zhang
+  - Shizhe Diao
+  - Yong Lin
+  - Yi R. Fung
+  - Qing Lian
+  - Xingyao Wang
+  - Yangyi Chen
+  - Heng Ji
+  - Tong Zhang
+  year: 2023
+  venue: arXiv
+  arxiv: '2311.09677'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2311.09677
+  official_implementation: null
+  category: abstention
+  methodology_summary: 'Refusal-Aware Instruction Tuning: instruction tuning forces answers even beyond
+    the model''s knowledge; R-Tuning identifies that gap and teaches the model to say it does not know.'
+  implementation_relevance: 'The opposite direction to over-refusal: what refusal examples should teach,
+    for H6.'
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2311.09677
+  - pwc paper info 2311.09677 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: selfaware
+  title: Do Large Language Models Know What They Don't Know?
+  authors:
+  - Zhangyue Yin
+  - Qiushi Sun
+  - Qipeng Guo
+  - Jiawen Wu
+  - Xipeng Qiu
+  - Xuanjing Huang
+  year: 2023
+  venue: arXiv
+  arxiv: '2305.18153'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2305.18153
+  official_implementation: null
+  category: abstention
+  methodology_summary: Evaluates LLM self-knowledge by their ability to identify unanswerable questions,
+    with an automated uncertainty detector and the SelfAware dataset of unanswerable and answerable questions.
+  implementation_relevance: The source of SelfAware questions used in P-UNANS's first attempt.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2305.18153
+  - pwc paper info 2305.18153 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: kuq
+  title: 'Knowledge of Knowledge: Exploring Known-Unknowns Uncertainty with Large Language Models'
+  authors:
+  - Alfonso Amayuelas
+  - Kyle Wong
+  - Liangming Pan
+  - Wenhu Chen
+  - William Wang
+  year: 2023
+  venue: arXiv
+  arxiv: '2305.13712'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2305.13712
+  official_implementation: null
+  category: abstention
+  methodology_summary: Introduces the Known-Unknown Questions (KUQ) dataset and a categorisation of uncertainty
+    sources, and fine-tunes open LLMs to distinguish known from unknown questions.
+  implementation_relevance: The source of KUQ questions used in P-UNANS.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2305.13712
+  - pwc paper info 2305.13712 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: toolbehonest
+  title: 'ToolBeHonest: A Multi-level Hallucination Diagnostic Benchmark for Tool-Augmented Large Language
+    Models'
+  authors:
+  - Yuxiang Zhang
+  - Jing Chen
+  - Junjie Wang
+  - Yaxin Liu
+  - Cheng Yang
+  - Chufan Shi
+  - Xinyu Zhu
+  - Zihao Lin
+  - Hanwen Wan
+  - Yujiu Yang
+  - Tetsuya Sakai
+  - Tian Feng
+  - Hayato Yamana
+  year: 2024
+  venue: arXiv
+  arxiv: '2406.20015'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2406.20015
+  official_implementation: null
+  category: tool_use_evaluation
+  methodology_summary: 'ToolBH diagnoses hallucination in tool-augmented LLMs: solvability detection,
+    solution planning and missing-tool analysis, over missing-necessary, potential and limited-functionality
+    toolsets; 700 samples.'
+  implementation_relevance: 'Related to the UNSUPPORTED mode: recognising that the offered tools cannot
+    do what is asked.'
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2406.20015
+  - pwc paper info 2406.20015 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: when2tool
+  title: LLM Agents Already Know When to Call Tools -- Even Without Reasoning
+  authors:
+  - Chung-En Sun
+  - Linbo Liu
+  - Ge Yan
+  - Zimo Wang
+  - Tsui-Wei Weng
+  year: 2026
+  venue: arXiv
+  arxiv: '2605.09252'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2605.09252
+  official_implementation: null
+  category: tool_use_evaluation
+  methodology_summary: 'When2Tool: 18 environments with controlled difficulty on when a tool call is actually
+    needed (computation scale, knowledge boundaries, execution reliability); evaluates prompt-only and
+    reason-then-act baselines.'
+  implementation_relevance: Related to the DIRECT versus CALL decision Study 002 measures.
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2605.09252
+  - pwc paper info 2605.09252 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
+- id: superfiltering
+  title: 'Superfiltering: Weak-to-Strong Data Filtering for Fast Instruction-Tuning'
+  authors:
+  - Ming Li
+  - Yong Zhang
+  - Shwai He
+  - Zhitao Li
+  - Hongyu Zhao
+  - Jianzong Wang
+  - Ning Cheng
+  - Tianyi Zhou
+  year: 2024
+  venue: arXiv
+  arxiv: '2402.00530'
+  doi: null
+  canonical_url: https://arxiv.org/abs/2402.00530
+  official_implementation: null
+  category: data_quality
+  methodology_summary: A small, weaker model can select instruction-tuning data for a larger model, because
+    weak and strong models perceive instruction difficulty consistently; filtering improves efficiency
+    and performance.
+  implementation_relevance: 'Context for Study 002''s corpus intervention: changing a supervised corpus
+    to change behaviour.'
+  limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
+    formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
+    not read.
+  checked_sources:
+  - https://arxiv.org/abs/2402.00530
+  - pwc paper info 2402.00530 (Papers With Code catalog, 2026-10-06)
+  verification_status: abstract_verified_full_text_unread
