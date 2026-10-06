@@ -4,9 +4,12 @@
 what the adopted documents and the code already decide, so the formulas can be checked before any audit and reused
 in a paper. Where a document and the code are the authority, this draft names both and changes neither. Where the
 documents leave a step undefined, the draft lists it as an open question and does not fill it in
-([§8](#8-open-questions)). Every worked number below was computed with the project's own code, and
-`tests/verification/test_evaluation_formulas_draft.py` recomputes each one and fails if this text and the code
-disagree.
+([§8](#8-open-questions)). Every worked number below was computed with the project's own code.
+`tests/verification/test_evaluation_formulas_draft.py` recomputes the worked numbers with that code, checks the
+thresholds in the tables against the code's constants, and fails if this text and the code disagree. Two kinds of
+number are read rather than recomputed: the trial's agreement and κ come from the committed trial report (the test
+recomputes its Wilson interval from the counts), and the flagged and population sizes come from the committed
+flag-set manifest or the trial allocation.
 
 Citations are of two kinds ([§9](#9-references)):
 - papers found and checked with the Papers With Code CLI (`pwc paper info`), of which only the abstract has been
@@ -67,8 +70,9 @@ or 1:
 
 $$M(n) = 2 z \sqrt{\frac{0.25}{n}} = \frac{z}{\sqrt{n}}.$$
 
-This is the normal half-width, slightly larger (more conservative) than Wilson's at $p = 0.5$. Code:
-`resolvable_margin`, `src/opengrad/verification/resolvability.py`.
+The half-width it doubles is the normal one, $z\sqrt{0.25/n}$, slightly larger (more conservative) than Wilson's at
+$p = 0.5$. The factor 2 makes room for a comparison of two rates; what that means for a paired difference is open
+question 3. Code: `resolvable_margin`, `src/opengrad/verification/resolvability.py`.
 
 | $n$ | $M(n)$ | Where it matters |
 |---|---|---|
@@ -77,8 +81,8 @@ This is the normal half-width, slightly larger (more conservative) than Wilson's
 | 453 | 0.092087 | `P-CONF`'s `CALL` and `UNSUPPORTED` |
 | 824 | 0.068279 | the non-`CALL` items behind `over_call_rate` |
 
-Card et al. (2020) show that many NLP comparisons are underpowered because test sets are small; the margin is how
-this study states that limit for every row.
+Card et al. (2020) show that many NLP comparisons are underpowered because test sets are small. The margin is not a
+power calculation; it is how this study states, row by row, the smallest difference a set of that size can resolve.
 
 **Difference of two independent proportions** (used only in the INC-0002 comparison): Newcombe's hybrid score
 interval (Newcombe, 1998, method 10). With $\hat p_1 = k_1/n_1$, $\hat p_2 = k_2/n_2$ and their Wilson limits
@@ -123,7 +127,10 @@ off the stratified sample:
 $$\hat p = \frac{\sum_s N_s\, \hat p_s}{\sum_s N_s}, \qquad \widehat{M}_s = \operatorname{round}\big(\hat p_s N_s\big),$$
 
 where $\widehat{M}_s$ estimates the declines in source $s$ that no flag caught (and that therefore stay in every
-arm). A source × predicted-label cell expects $E_{s,\ell} = n_s N_{s,\ell} / N_s$ sampled replies; a cell with
+arm). Strictly, $\hat p_s$ is the decline share among unflagged replies, not recall in the classifier sense. It is
+estimated on agreed items only, which assumes that whether the two models disagree is unrelated to whether a reply
+is a decline; `recall_report` also reports the share if every disagreement were a decline, as a bound. A source ×
+predicted-label cell expects $E_{s,\ell} = n_s N_{s,\ell} / N_s$ sampled replies; a cell with
 $E_{s,\ell} < 10$ is descriptive only. Code: `recall_report`, `expected_by_label`.
 
 *Illustration only (invented shares, not a result):* if $\hat p_s$ were 0.01, 0.10 and 0.05 for Glaive, ToolACE and
@@ -150,7 +157,7 @@ ambiguous (`UNKNOWN`) gold are added to the precision denominator: a call there 
 | `DIRECT.recall`, `UNSUPPORTED.recall` | $R_m$ | ≥ 0.80, ≥ 0.75 | $G_m \ge 50$ |
 | `DIRECT.precision`, `CALL.precision` | $P_m$ | ≥ 0.80, ≥ 0.95 | denominator ≥ 50 |
 | `CLARIFY.f1` | $F1_{\text{CLARIFY}}$ | ≥ 0.70 | $G \ge 50$ |
-| `m.challenge_recall` | $R_m$ on hard strata R, Q, M, X only | ≥ 0.60 | ≥ 30 gold there |
+| `m.challenge_recall` | $R_m$ on the hard items only: strata R, Q, M, X on P-DET-COVERAGE-v1, the frozen challenge component on P-DET-v1 | ≥ 0.60 | ≥ 30 gold there |
 | `macro_f1` | $\frac{1}{\lvert\mathcal{M}\rvert}\sum_{m \in \mathcal{M}} F1_m$, $\mathcal{M} = \{m : G_m \ge 50\}$ | ≥ 0.75 | $\mathcal{M} \neq \varnothing$ |
 | `abstention_rate` | $\lvert\{i \in U : \hat y_i = \texttt{ABSTAIN}\}\rvert / \lvert U\rvert$ | ≤ 0.15 | $U \neq \varnothing$ |
 | `CALL.on_ambiguous_in_M` | `CALL` predictions on ambiguous gold in stratum M | = 0 | always |
@@ -160,12 +167,12 @@ of the eligible pool gets its population weight $w_h = N_h / N$, and
 
 $$\hat P^{\texttt{DIRECT}} = \frac{\sum_h w_h\, TP_h / n_h}{\sum_h w_h\, \mathrm{Pred}_h / n_h},$$
 
-a ratio estimator over the sampled strata, with a 2,000-replicate stratified percentile bootstrap interval (Efron,
-1979). It must reach 0.80 with at least 20 `DIRECT` predictions and every stratum sampled.
+a ratio estimator over the sampled strata, with a 2,000-replicate stratified percentile bootstrap interval (the
+bootstrap is Efron's, 1979; that paper does not define the percentile interval). It must reach 0.80 with at least 20 `DIRECT` predictions and every stratum sampled.
 
 **Verdicts.** A row fails if it fails on any population, passes if it passes on at least one and fails on none, and
-is otherwise `NOT_EVALUABLE`. A mode qualifies when `macro_f1` and `abstention_rate` pass and every row of the mode
-passes. `DIRECT` also needs at least one source whose post-stratified precision passes. C1 is authorised by the rules
+is otherwise `NOT_EVALUABLE`. A mode qualifies when the two global rows, `macro_f1` and `abstention_rate`, pass and
+every row of the mode passes; `CALL.on_ambiguous_in_M` is one of `CALL`'s rows, not a global one. `DIRECT` also needs at least one source whose post-stratified precision passes. C1 is authorised by the rules
 when `DIRECT` and `UNSUPPORTED` both qualify. Code: `evaluate`, `src/opengrad/verification/pdet_coverage_metrics.py`.
 
 ## 5. The trained model: the gate and the promotion policy
@@ -188,22 +195,31 @@ Here $\text{acc}_{\text{ANSWER}}$ is `no_call_accuracy`. **Macro recall** is the
 | `no_call_accuracy`, `unsupported_accuracy`, `clarification_accuracy` | ≥ 0.40, ≥ 0.30, ≥ 0.50 |
 | `over_call_rate` | ≤ 0.20 |
 | `parse_valid_rate` | ≥ 0.99 |
-| regression on call precision, call recall, clarification and unsupported accuracy | $x^{\text{cand}} - x^{\text{base}} \ge -0.10$ |
+| regression on call precision, call recall, clarification and unsupported accuracy | $x^{\text{cand}} - x^{\text{base}} \ge -0.10$, each checked only when both candidate and baseline carry the metric (open question 8) |
 | `answer_rate`, `refusal_rate` on `ANSWER`-gold | ≥ 0.60, ≤ 0.25 |
 | answer-rate drop against the baseline | $\text{answer\_rate}^{\text{base}} - \text{answer\_rate}^{\text{cand}} \le 0.30$ |
-| `refusal_correctness` on `P-UNANS` | ≥ 0.70, and only on $n \ge 385$ |
-| every required mode | $n \ge 200$, or `UNDER_POWERED` |
+| `refusal_correctness` on `P-UNANS` | ≥ 0.70, with `P-UNANS` $n \ge 385$; a smaller `P-UNANS` fails the gate as `UNDER_POWERED` |
+| every required mode | $n \ge 200$; below that the mode is `UNDER_POWERED`, which fails the gate |
 
-Comparisons are made at 9 decimal places, so a value exactly on a threshold is decided by the threshold, not by
-floating-point error ($0.9 - 0.6 = 0.30000000000000004$ in binary).
+The policy rounds each observed value to 6 decimal places and compares at 6 (`V6_COMPARISON_PLACES`); the gate's
+own comparisons (`at_least`, `at_most`, used by check 14) are at 9 (`COMPARISON_PLACES`). Either way a value exactly
+on a threshold is decided by the threshold, not by floating-point error ($0.9 - 0.6 = 0.30000000000000004$ in
+binary). Rounding to 6 places also means a value less than $5 \times 10^{-7}$ below a floor passes.
 
 **Truncation balance** (`study_002_prereg_v8` A). Two arms' truncation rates $r_1, r_2$ within a stage are imbalanced
 when both of these hold:
 
 $$\lvert r_1 - r_2 \rvert > 0.02 \quad\text{and}\quad \max(r_1, r_2) > 2.0 \cdot \min(r_1, r_2).$$
 
-**Comparison rows** (gate check 14). Each row prints its $n$ and margin; a row whose observed difference is smaller
-than its resolvable margin $M(n)$ is `WITHIN_NOISE` and supports nothing.
+**Comparison rows** (gate check 14, `v12_resolvable_margin`). Each row carries an $n$ and a `margin`, which 06 calls
+the *observed* margin: the observed difference. With $\delta$ that value, the check is
+$\lvert\delta\rvert \ge M(n)$ at 9 places:
+- a row with $n < 200$ is counted `UNDER_POWERED` and skipped;
+- a row below its $M(n)$ is `WITHIN_NOISE` and supports nothing;
+- the check fails if no row clears its margin.
+
+The code reads neither the row's `delta` field nor anything saying whether the comparison is paired. That a row
+compares two arms on the same items is the documents' intent (06, 10), not something the code checks.
 
 ## 6. The hypotheses (10-STATISTICS-PLAN.md)
 
@@ -233,9 +249,15 @@ If (1) and (2) hold but (3) fails, the verdict is `MECHANISM_INCONCLUSIVE`. If (
 finding is reported as a different one (more willing, not more correct). Any required endpoint `UNMEASURED` makes
 the verdict `NOT_EVALUABLE`.
 
+The margin in condition 1 is a fixed number, not $M(n)$. 11 fixes one margin for comparisons between arms: "The
+margin a population is used to test (16 check 3) is 10 points for every comparison between arms" (46 §10). This
+draft reads that as condition 1's margin, $\bar\Delta_{\text{answer}} \ge 0.10$; 10 does not name the value itself.
+H1's `ANSWER` set is 1,055 items pooled (771 constructed, 284 natural; 46), where $M(1055) = 0.060342$, so a
+10-point difference clears both.
+
 **The multiplicity rule, exactly as 10 states it** ("Multiplicity", and the note under `study_002_prereg_v14`). The
 confirmatory family is H1 (`R1` vs `C0`), H5 (tool-policy non-regression), H6 (refusal correctness on `P-UNANS`) and
-`C2` vs `C0`, with Holm–Bonferroni (Holm, 1979) at family-wise $\alpha = 0.05$. Holm orders the four p-values
+`C2` vs `C0`, with Holm–Bonferroni (Holm, 1979; that reference is not yet verified, [§9](#9-references)) at family-wise $\alpha = 0.05$. Holm orders the four p-values
 $p_{(1)} \le \dots \le p_{(4)}$ and rejects $H_{(j)}$ while
 
 $$p_{(j)} \le \frac{\alpha}{4 - j + 1},$$
@@ -258,7 +280,7 @@ For scale: with 0 of 46 changed, the Wilson upper bound on the change rate is 0.
 
 ## 8. Open questions
 
-Found while writing this draft. None is answered here; each needs the owner's decision, and any change to a
+Found while writing this draft, and by its independent reviews (2026-10-06). None is answered here; each needs the owner's decision, and any change to a
 preregistered rule needs a numbered amendment first.
 
 1. **From bootstrap to the family rule.** How does H1's cluster bootstrap yield a p-value, or an interval at an
@@ -269,37 +291,58 @@ preregistered rule needs a numbered amendment first.
 
    `pwc search` found no paper in the catalog on either route, so neither is cited. H1's rule (95%) and the family
    rule may also disagree on the same data: a 95% interval can exclude 0 while the 98.75% one does not.
+
+   The gap is wider than H1. Holm needs a p-value for all four members. H5 and H6 are stated as threshold checks
+   (02: falsified if the tool-policy metrics "degrade beyond the frozen thresholds", or if refusal correctness
+   "drops beyond threshold"), with no null hypothesis or test named. `C2` vs `C0` has no decision rule in 10. Nor
+   do the documents say whether the tests are one-sided or two-sided. H1 asks for a positive direction, and a
+   two-sided 95% interval that excludes 0 on the positive side is a one-sided test at 2.5%.
 2. **Which bootstrap interval.** 10 fixes the resampling (items, paired, 10,000 resamples) but not the interval method
    (percentile, basic or BCa).
-3. **The margin for a paired difference.** 10 and `resolvability.resolvable_margin` size the margin for **one rate**,
-   from the worst-case variance of a 0/1 outcome, $p(1-p) \le 0.25$:
+3. **What the margin means for a paired difference.** 06, 10 and `resolvable_margin` derive the margin from **one
+   rate**: a 0/1 outcome has variance $p(1-p) \le 0.25$, so one rate's worst-case 95% half-width is
+   $z\sqrt{0.25/n}$, and the margin is twice that:
 
-   $$M_{\text{rate}}(n) = 2 z \sqrt{\frac{0.25}{n}}.$$
+   $$M(n) = 2 z \sqrt{\frac{0.25}{n}} = \frac{z}{\sqrt{n}}.$$
 
-   Gate check 14 (`v12_resolvable_margin`, `src/opengrad/verification/population_validators.py`) and H1 apply it to a
-   **difference between two arms on the same items**. Per item that difference is $d_i = x_i - y_i \in \{-1, 0, 1\}$,
-   with variance
+   The rows it is meant for (H1's, and check 14's as the documents intend them) are **differences between two arms
+   on the same items**. Per item that difference is $d_i = x_i - y_i \in \{-1, 0, 1\}$, with variance
 
    $$\operatorname{Var}(d) = q - (p_1 - p_2)^2 \le q \le 1,$$
 
-   where $q$ is the share of items on which the two arms disagree. The worst case, $\operatorname{Var}(d) = 1$, is two
-   arms that disagree on every item, half the time each way. The same construction then gives
+   where $q$ is the share of items on which the two arms disagree. Since $\lvert p_1 - p_2\rvert \le q$, the maximum,
+   1, is reached at $q = 1$ and $p_1 = p_2$: arms that disagree on every item, half the time each way. The
+   difference's own worst-case 95% half-width is therefore
 
-   $$M_{\text{paired}}(n) = 2 z \sqrt{\frac{1}{n}} = 2\, M_{\text{rate}}(n).$$
+   $$h_{\text{paired}}(n) = z\sqrt{\frac{1}{n}} = M(n).$$
 
-   At $n = 385$, computed with the project's code: $M_{\text{rate}} = 0.099889$ and $M_{\text{paired}} = 0.199778$. For
-   comparison, two *independent* samples of 385 give $2z\sqrt{0.5/n} = 0.141264$. The single-rate margin is not
-   always too small: bounded by the disagreement share instead, $2z\sqrt{q/n}$ is 0.089343 at $q = 0.2$, below
-   $M_{\text{rate}}$, and passes it only when the arms disagree on more than a quarter of the items. So which margin
-   is right depends on how often arms disagree, which no document fixes in advance. (The literature search found
-   nothing on this; the bound above is elementary algebra, checked by a brute-force search over all joint
-   distributions of the two arms' 0/1 outcomes, but it is not cited to a source.)
-4. **The answer and refusal metrics.** `answer_rate`, `refusal_rate` and `refusal_correctness` will be computed by the
-   decline classifier 46 calls for, which is not built yet. Their exact definitions (what counts as answered or
-   refused, how an `UNKNOWN` reply counts) are fixed only once it is.
-5. **A pooled value exactly on the bar.** In the trial, When2Call sat exactly at 0.90. The rule is $\ge$, so it passes.
-   That is the rule as adopted; the open point is only that precision of 0.90 on as few as 100 agreed items has a
-   Wilson lower bound of 0.826 (90 of 100).
+   The documents do not say which of two readings of "resolvable" they mean, and the readings disagree by a factor
+   of 2:
+   - **A difference must exceed its own worst-case half-width.** Then $M(n)$ is exactly right for a paired
+     difference: the factor 2 that makes room for two rates and the larger variance of a difference cancel
+     ($2\sqrt{0.25} = \sqrt{1}$). For arms that disagree less it is conservative. At $q = 0.2$ and $n = 1{,}055$
+     the half-width is $z\sqrt{0.2/n} = 0.026986$.
+   - **A difference must be twice its own half-width, as one rate's margin is twice one rate's half-width.** Then
+     the paired margin is $2z/\sqrt{n} = 2M(n)$.
+
+   On H1's pooled `ANSWER` set, $n = 1{,}055$: $M = 0.060342$ under the first reading, $0.120685$ under the second.
+   The second is above the fixed 10-point margin (46 §10), so under it no 10-point comparison between arms on that
+   set could be resolved; on the 771 constructed items it would be 0.141173. Check 14 uses $M(n)$, so the code
+   follows the first reading's numbers, whatever the reasoning behind them was. (An earlier version of this question
+   took the second reading at $n = 385$ without saying it was a reading; an independent review corrected it on
+   2026-10-06. The variance bound is elementary algebra, checked in the test and cited to no source; the literature
+   search found nothing on it.)
+4. **The answer and refusal metrics.** 46 §8 names the instrument: the frozen `prose-decision-classifier-v2`,
+   applied after the parser has extracted any tool call, with precision floors of 0.90 for answers and for declines
+   measured on `P-DET-OUT` before any arm. 07 defines `answer_rate` as attempted / $n$, `refusal_rate` as refusals /
+   $n$, and `refusal_correctness` as refusals / $n$ on genuinely unanswerable items. This draft found no rule for how
+   a reply the instrument calls neither an answer nor a decline (a clarifying question, or the classifier's
+   `ABSTAIN`) counts toward "attempted" and "refusals".
+5. **A per-source value exactly on the bar.** In the trial (`TRIAL_NO_FLOOR`, which decides nothing), When2Call's
+   precision was exactly 0.90, 18 of 20. The rule is $\ge$, so in the full check a value of 0.90 meets the precision
+   condition; with only 20 agreed items, under the 100 required, the source would be `NOT_EVALUABLE` there
+   (47 §3 D). The open point is only that precision of 0.90 on as few as 100 agreed items has a Wilson
+   lower bound of 0.826 (90 of 100).
 6. **Seed variance and the sign check.** H1's cluster bootstrap (10, "Estimators") resamples **items only**: it keeps
    each arm's three trained models fixed and redraws the items they are scored on. Its 95% interval therefore
    measures which items happened to be drawn, not which training seeds; training-seed variance is outside it. 10
@@ -315,10 +358,18 @@ preregistered rule needs a numbered amendment first.
    false `SUPPORTED` from above. Conditions 1 (the margin), 2 and 4 lower it only to the extent that item-level checks
    catch what seed noise produced. A seed that happens to run high moves the mean while the item bootstrap, blind
    to seeds, stays narrow (this last point is reasoning, not computed). The assumptions matter in both directions:
-   seeds that share something (the same `C0` run, the same data order) make the deltas positively correlated and
-   raise 0.25; a delta of exactly 0, possible because each rate is a count over $n$ items, lowers it, and 10 does
-   not say what sign 0 has. Open: should H1's interval also carry seed variance, or should every H1 result state
-   that it does not? With $k = 3$, resampling seeds offers only 10 distinct multisets.
+   - If the three deltas share a component, for example one `C0` run subtracted in all three, they are positively
+     correlated and 0.25 rises. Sharing a factor does not by itself guarantee that.
+   - The deltas are also scored on the same items, which can correlate them. That is item variance, which
+     condition 2's bootstrap covers, not condition 3.
+   - A delta of exactly 0, possible because each rate is a count over $n$ items, lowers 0.25, and 10 does not say
+     what sign 0 has.
+
+   The documents also disagree on the unit. 03 ("Registration of the unit of analysis") says "The **unit of
+   inference** is the seed, clustered by item"; 10 ("Units") makes the item the unit of inference, "clustered;
+   paired by seed". 03's wording reads as if seed variance belongs in the inference; 10's bootstrap leaves it out.
+   Open: should H1's interval also carry seed variance, or should every H1 result state that it does not? With
+   $k = 3$, resampling seeds offers only 10 distinct multisets.
 
    Literature, abstracts checked with `pwc paper info` (2026-10-06): Colas, Sigaud and Oudeyer (2018) relate the
    number of random seeds to the probabilities of statistical errors, for the t-test and the bootstrap
@@ -327,6 +378,20 @@ preregistered rule needs a numbered amendment first.
    evaluation benchmarks. None analyses a three-seed sign check, so 0.25 is cited to no one: it is elementary
    probability, recomputed in the test. Bouthillier et al. (2021, arXiv 2103.03098), on accounting for variance in
    ML benchmarks, has no record in the catalog and is not cited.
+7. **The detector's error in H1's interval.** 46 §8 says the instrument's recall is "carried into H1's interval as
+   `07:126-134` requires". 07 says that when recall is low the effect "is reported as an interval spanning the recall
+   uncertainty rather than as a point". Neither says how that uncertainty combines with the item bootstrap, or with
+   the Holm step of question 1. H1's interval thus has three sources of error (items, seeds, the detector), and
+   only the first has a stated method.
+8. **Regression checks that can be skipped.** The non-regression loop that v5 and v6 inherit
+   (`PromotionPolicyV2.evaluate`, "non-regression against the baseline", `src/opengrad/promotion/tool_use_policy.py`)
+   checks call precision, call recall,
+   clarification accuracy and unsupported accuracy only when both candidate and baseline carry the metric. v6 and
+   the gate require from the baseline only `call_f1` and `answer_rate` (`V6_BASELINE_METRICS`, `BASELINE_METRICS`).
+   So a baseline that lacks any of the four passes that regression check by skipping it. (The gate also requires
+   call precision and call recall from the candidate; v6 alone does not.) v6's own comment says it does not fill
+   in absent metrics the way v5 did, so this looks unintended. H5 is falsified if `call_precision` degrades (02), so
+   it bears on H5. Logged as UP-0014; no code is changed here.
 
 ## 9. References
 

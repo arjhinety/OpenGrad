@@ -31,6 +31,8 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0011 | 2026-10-03 | OpenGrad registry validation | `OURS` | A malformed `papers.yaml` makes `opengrad-validate` die with a traceback, not a validation error | Open |
 | UP-0012 | 2026-10-03 | OpenGrad runner, agy 1.2.x | `OURS` (+ `UNCLEAR` upstream) | agy ran labelling batches with every tool auto-approved: web search, and file browsing outside its empty directory | Gated in the runner (2026-10-04); upstream part open |
 | UP-0013 | 2026-10-04 | OpenGrad tests | `OURS` | A pushed commit grew the hygiene allowlist, and a test pinning the credential count failed CI | Fixed (count 3 -> 9, ERRATA §33) |
+| UP-0014 | 2026-10-06 | `tool_use_policy.py`, `study_002_gate.py` | `OURS` | Regression checks are skipped when the baseline lacks the metric; v6 and the gate require only two baseline metrics | Open; no code changed (formulas draft, open question 8) |
+| UP-0015 | 2026-10-06 | formulas draft | `OURS` | The draft misread the resolvable margin for a paired difference and misstated four other points; independent reviews caught them before push | Fixed in the draft and its test |
 
 ---
 
@@ -181,3 +183,27 @@ locked down before the full triage run, are the study owner's decisions.
 on Linux and Windows (run 37134813092). The local checks ran the scan itself and the targeted tests, but not
 `tests/publication`, and the audit did not either. Fixed: the count is 9, with both errata named. Lesson: a change
 to `scripts/repo/publication_hygiene_allowlist.yaml` runs `tests/publication`.
+
+## UP-0014 — regression checks that skip silently (`OURS`)
+
+The non-regression loop that `tool_use_promotion_v5` and v6 inherit (`PromotionPolicyV2.evaluate`) checks call
+precision, call recall, clarification accuracy and unsupported accuracy only when both the candidate and the baseline
+carry the metric. v6 requires from the baseline only `call_f1` and `answer_rate` (`V6_BASELINE_METRICS`), and the
+gate the same (`BASELINE_METRICS`); v6 alone also does not require call precision or call recall from the candidate.
+A baseline without one of the four passes that check by skipping it. v6's comment says it does not fill in absent
+metrics the way v5 did, so this looks unintended. Found by the Opus review of the formulas draft, confirmed in the
+code. Not fixed: the policy is preregistered, and changing what it requires is the owner's decision.
+
+## UP-0015 — errors in the formulas draft, caught by review (`OURS`)
+
+`EVALUATION-FORMULAS-DRAFT.md` (8ff3c8e, cbcd437) was reviewed by Codex and an Opus subagent before any push.
+- Open question 3 doubled the resolvable margin for a paired difference. The existing margin already equals a paired
+  difference's worst-case half-width; doubling is a second reading, which the draft had not called a reading.
+- It said comparisons are made at 9 decimal places; the policy uses 6.
+- It said check 14 applies the margin to paired differences; the code does not know.
+- It said the answer and refusal instrument was not built; 46 names the frozen classifier v2.
+- It said its test recomputes every number; some were read from the trial report.
+
+One reviewer finding was itself wrong: `CALL.on_ambiguous_in_M` is a `CALL` row, not a global one. Lesson: a draft that
+restates rules gets its numbers and its readings checked against the code, and every reviewer finding is checked
+too before it is relayed.

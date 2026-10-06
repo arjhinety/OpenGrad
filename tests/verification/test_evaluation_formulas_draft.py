@@ -37,6 +37,7 @@ def test_kappa_and_the_trials_agreement() -> None:
     assert (pooled["raw_agreement"], pooled["cohen_kappa"]) == (0.97, 0.843587)
     assert (pooled["declines"], pooled["agreed"], pooled["precision"]) == (95, 97, 0.979381)
     assert pooled["precision_wilson_95"] == [0.927912, 0.994327]
+    assert [round(x, 6) for x in wilson(95, 97)] == pooled["precision_wilson_95"]
     assert (when2call["declines"], when2call["agreed"], when2call["precision"]) == (18, 20, 0.9)
     assert when2call["raw_agreement"] == 0.952381
     _in_draft(
@@ -102,15 +103,19 @@ def test_the_margin_for_a_paired_difference() -> None:
     import itertools
     import math
 
-    n = 385
     z = resolvability.Z_95
-    single = resolvability.resolvable_margin(n)
-    paired = 2 * z * math.sqrt(1 / n)
-    assert (round(single, 6), round(paired, 6)) == (0.099889, 0.199778)
-    assert round(paired / single, 9) == 2.0
-    assert round(2 * z * math.sqrt(0.5 / n), 6) == 0.141264
-    assert round(2 * z * math.sqrt(0.2 / n), 6) == 0.089343
-    # The worst-case variance of d = x - y over every joint distribution of two 0/1 outcomes is 1.
+    margin = resolvability.resolvable_margin
+    # The paired difference's own worst-case half-width, z * sqrt(1/n), is the existing margin exactly.
+    for n in (385, 771, 1055):
+        assert round(z * math.sqrt(1 / n), 12) == round(margin(n), 12)
+    assert round(margin(1055), 6) == 0.060342
+    doubled = round(2 * margin(1055), 6)
+    assert doubled == 0.120685
+    assert doubled > 0.10  # above the fixed 10-point margin
+    assert round(2 * margin(771), 6) == 0.141173
+    assert round(z * math.sqrt(0.2 / 1055), 6) == 0.026986
+    # Var(d) = q - (p1 - p2)^2 over joint distributions of two 0/1 outcomes (a grid in steps of 0.05):
+    # plus = P(x=1, y=0), minus = P(x=0, y=1), q = plus + minus, p1 - p2 = plus - minus. The maximum is 1.
     grid = [i / 20 for i in range(21)]
     variances = [
         plus + minus - (plus - minus) ** 2
@@ -119,10 +124,80 @@ def test_the_margin_for_a_paired_difference() -> None:
     ]
     assert max(variances) == 1.0
     _in_draft(
-        r"$M_{\text{rate}} = 0.099889$ and $M_{\text{paired}} = 0.199778$",
-        "0.141264",
-        "0.089343 at $q = 0.2$",
+        r"$z\sqrt{0.2/n} = 0.026986$",
+        r"$M = 0.060342$ under the first reading, $0.120685$ under the second",
+        "it would be 0.141173",
+        r"$M(1055) = 0.060342$",
     )
+    for retired in ("0.199778", "0.141264", "0.089343"):
+        assert retired not in DRAFT
+
+
+def test_the_tables_match_the_code_constants() -> None:
+    import re
+
+    from opengrad.promotion.tool_use_policy import V6_COMPARISON_PLACES, PromotionPolicyV6
+    from opengrad.verification import pdet_coverage_metrics as metrics
+    from opengrad.verification import study_002_gate as gate
+
+    policy = PromotionPolicyV6()
+    assert (policy.min_call_f1_retention, policy.min_macro_recall) == (0.90, 0.40)
+    assert (
+        policy.min_no_call_accuracy,
+        policy.min_unsupported_accuracy,
+        policy.min_clarification_accuracy,
+    ) == (0.40, 0.30, 0.50)
+    assert (policy.max_over_call_rate, policy.min_parse_valid_rate) == (0.20, 0.99)
+    assert policy.max_regression == {"default": 0.10}
+    assert (policy.min_answer_rate, policy.max_refusal_rate) == (0.60, 0.25)
+    assert (policy.max_answer_rate_drop_vs_base, policy.min_refusal_correctness) == (0.30, 0.70)
+    assert (V6_COMPARISON_PLACES, resolvability.COMPARISON_PLACES) == (6, 9)
+    assert gate.ADOPTED_PARAMETERS == gate.PreregParameters(2.0, 0.02, 385)
+    assert gate.BASELINE_METRICS == ("call_f1", "answer_rate")
+    assert resolvability.MODE_FLOOR == 200
+    assert (ft.POOLED_FLOOR, ft.POOLED_AGREEMENT_FLOOR) == (0.90, 0.80)
+    assert (ft.PER_SOURCE_FLOOR, ft.PER_SOURCE_AGREEMENT_FLOOR, ft.MIN_AGREED) == (0.90, 0.80, 100)
+    assert metrics.THRESHOLDS["DIRECT.recall"] == metrics.THRESHOLDS["DIRECT.precision"] == 0.80
+    assert (metrics.THRESHOLDS["UNSUPPORTED.recall"], metrics.THRESHOLDS["CALL.precision"]) == (
+        0.75,
+        0.95,
+    )
+    assert (metrics.THRESHOLDS["CLARIFY.f1"], metrics.THRESHOLDS["macro_f1"]) == (0.70, 0.75)
+    assert (metrics.THRESHOLDS["abstention_rate"], metrics.THRESHOLDS["challenge.recall"]) == (
+        0.15,
+        0.60,
+    )
+    assert metrics.THRESHOLDS["DIRECT.poststratified_precision"] == 0.80
+    assert (metrics.MIN_GOLD, metrics.MIN_PREDICTIONS, metrics.MIN_GOLD_CHALLENGE) == (50, 50, 30)
+    assert (metrics.MIN_PREDICTIONS_POSTSTRATIFIED, metrics.BOOTSTRAP_REPLICATES) == (20, 2000)
+    assert metrics.GLOBAL_ROWS == ("macro_f1", "abstention_rate")
+    assert "CALL.on_ambiguous_in_M" in metrics.MODE_ROWS["CALL"]
+    _in_draft(
+        r"F1_{\text{call}}^{\text{base}} \ge 0.90$",
+        "| macro recall | ≥ 0.40 |",
+        "| ≥ 0.40, ≥ 0.30, ≥ 0.50 |",
+        "| `over_call_rate` | ≤ 0.20 |",
+        "| `parse_valid_rate` | ≥ 0.99 |",
+        r"x^{\text{base}} \ge -0.10$",
+        "| `answer_rate`, `refusal_rate` on `ANSWER`-gold | ≥ 0.60, ≤ 0.25 |",
+        r"\le 0.30$ |",
+        "≥ 0.70, with `P-UNANS` $n \\ge 385$",
+        "compares at 6 (`V6_COMPARISON_PLACES`)",
+        "are at 9 (`COMPARISON_PLACES`)",
+        r"\max(r_1, r_2) > 2.0 \cdot \min(r_1, r_2)",
+        r"\lvert r_1 - r_2 \rvert > 0.02",
+        r"P_F \ge 0.90 \;\wedge\; a_F \ge 0.80",
+        r"A_s \ge 100 \;\wedge\; P_s \ge 0.90 \;\wedge\; a_s \ge 0.80",
+        "| ≥ 0.80, ≥ 0.75 | $G_m \\ge 50$ |",
+        "| ≥ 0.80, ≥ 0.95 | denominator ≥ 50 |",
+        "| ≥ 0.70 | $G \\ge 50$ |",
+        "| ≥ 0.60 | ≥ 30 gold there |",
+        "| ≥ 0.75 | $\\mathcal{M} \\neq \\varnothing$ |",
+        "| ≤ 0.15 | $U \\neq \\varnothing$ |",
+        "2,000-replicate",
+        "at least 20 `DIRECT` predictions",
+    )
+    assert not re.search(r"made at 9 decimal places", DRAFT)
 
 
 def test_the_three_seed_sign_check_under_no_effect() -> None:

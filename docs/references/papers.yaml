@@ -972,8 +972,8 @@ papers:
   category: evaluation_statistics
   methodology_summary: Defines and measures variance metrics for evaluation benchmarks, including seed
     variance across initialisations, over many models, with recommendations for practitioners.
-  implementation_relevance: Supports reporting three seeds' values and their range rather than a single
-    run (10, Estimators).
+  implementation_relevance: Background for reporting per-seed values and their range rather than a single
+    run (10, Estimators); the paper does not address how many seeds are enough.
   limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
     formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
     not read.
@@ -1000,8 +1000,8 @@ papers:
   methodology_summary: Fine-tunes BERT hundreds of times varying only the random seed; distinct seeds
     give substantially different results, with weight initialisation and data order contributing comparably
     to the variance.
-  implementation_relevance: Why each Study 002 arm is trained with three seeds and a claim needs sign
-    agreement across them.
+  implementation_relevance: Background for training each Study 002 arm with several seeds; it does not
+    support three seeds or a sign-agreement rule, which are the study's own choices (10).
   limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
     formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
     not read.
@@ -1028,8 +1028,8 @@ papers:
   methodology_summary: Meta-analyses NLP papers and datasets and finds underpowered experiments common;
     small test sets leave most comparisons to the state of the art underpowered; gives power-analysis
     practice.
-  implementation_relevance: The reason every Study 002 row prints its resolvable margin and a mode below
-    n = 200 is UNDER_POWERED.
+  implementation_relevance: Background for printing every Study 002 row's resolvable margin and calling a
+    mode below n = 200 UNDER_POWERED; those rules predate this citation and are not a power analysis.
   limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
     formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
     not read.
@@ -1108,8 +1108,8 @@ papers:
   methodology_summary: 'Adding about 3% safety examples when instruction-tuning LLaMA substantially improves
     safety, but too much safety-tuning yields exaggerated safety: refusing safe prompts that superficially
     resemble unsafe ones.'
-  implementation_relevance: Evidence that refusal behaviour is shaped by the share of refusal examples
-    in fine-tuning data, Study 002's premise.
+  implementation_relevance: Evidence that refusal behaviour is shaped by the share of safety examples
+    in fine-tuning data, close to Study 002's premise.
   limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
     formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
     not read.
@@ -1359,8 +1359,8 @@ papers:
   methodology_summary: A small, weaker model can select instruction-tuning data for a larger model, because
     weak and strong models perceive instruction difficulty consistently; filtering improves efficiency
     and performance.
-  implementation_relevance: 'Context for Study 002''s corpus intervention: changing a supervised corpus
-    to change behaviour.'
+  implementation_relevance: Context for Study 002's corpus intervention, an intervention on the supervised
+    corpus; the paper's own aim is efficiency and performance, not behaviour.
   limitations: Abstract only, read 2026-10-06 through the Papers With Code CLI for Study 002's evaluation
     formulas and case study (docs/research/study-002/EVALUATION-FORMULAS-DRAFT.md); the full paper is
     not read.

@@ -78,22 +78,24 @@ Found and checked the same way (`pwc search`, `pwc paper info`, abstracts only),
   planning an evaluation.
 - Bowyer et al. (2025, arXiv 2503.01747): normal-approximation error bars are too small on evaluations of fewer than
   a few hundred items; one reason this study uses the Wilson interval.
-- Card et al. (2020, arXiv 2010.06595): underpowered NLP comparisons are common; one reason every row prints its
-  resolvable margin.
+- Card et al. (2020, arXiv 2010.06595): underpowered NLP comparisons are common; background for printing every
+  row's resolvable margin (which is not a power analysis).
 - Dodge et al. (2020, arXiv 2002.06305) and Madaan et al. (2024, arXiv 2406.10229): fine-tuning seeds and benchmarks
-  vary substantially; why each arm has three seeds and a claim needs their signs to agree.
+  vary substantially; background for training each arm with several seeds. Neither analyses three seeds or a sign
+  check: those are the study's own choices (10), and their weakness is open question 6 of the formulas draft.
 - Bestgen (2022, arXiv 2205.11134) argues for bootstrap intervals of differences over significance alone, as 10
   does.
 - Lee et al. (2025, arXiv 2511.21140): a model judge's accuracy estimate is biased, and correcting it needs a
   calibration set with known answers, which the triage does not have.
 
 **Why supervised data can teach over-refusal (the study's premise).**
-- Bianchi et al. (2023, arXiv 2309.07875): a few hundred safety examples improve safety, but too much safety-tuning
-  makes models refuse safe prompts that resemble unsafe ones.
+- Bianchi et al. (2023, arXiv 2309.07875): adding about 3% safety examples improves safety, but too much
+  safety-tuning makes models refuse safe prompts that resemble unsafe ones.
 - Kim et al. (2026, arXiv 2609.04714): boilerplate refusal statements in safety-tuning data induce reliance on
   superficial cues and false refusals; training on the rationale alone reduces them.
-- Li et al. (2024, arXiv 2402.00530): filtering instruction-tuning data changes what the model learns, the kind of
-  corpus intervention Study 002 tests.
+- Li et al. (2024, arXiv 2402.00530): a small model can select instruction-tuning data for a larger one, improving
+  efficiency and performance; an example of intervening on the supervised corpus, as Study 002 does, though its aim
+  is efficiency, not behaviour.
 
 **Abstention and unanswerable questions (H6, `P-UNANS`).**
 - Wen et al. (2024, arXiv 2407.18418) survey abstention; Kirichenko et al. (2025, arXiv 2506.09038) benchmark it over
