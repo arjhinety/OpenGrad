@@ -1649,9 +1649,13 @@ self-declared"; the check 14 gap in §35's last later line).
   - The `partition` and `corpus` fingerprints are required, and V9 reads each from the file it names. The
     `partition` fingerprint must be the sha256 of the frozen `P-CONF` partition
     (`reports/study-002/pconf-v1/pconf-v1.partition.json`).
-  - Each row's partition fingerprint must be a *partition* fingerprint the bundle read back: the entry named
-    `partition`, or one named `partition:<id>` for another scored population. It cannot be the corpus fingerprint
-    or any other file.
+  - Each row's partition fingerprint must be the pinned partition its metric is measured on. For
+    `refusal_correctness`, that is one of the two strata of check 4's `P-UNANS`, whose sha256 the gate checks:
+    - `reports/study-002/punans-v2/punans-v2.strata.json`;
+    - `reports/study-002/punans-v2-constructed/punans-v2-constructed.strata.json`.
+
+    For every other metric it is `P-CONF`.
+    A row cannot bind to the corpus fingerprint or any other file.
   - A `field` that is not a string fails instead of raising (V9).
 - **Contract 5, check 14:**
   - Each comparison row names one of seven populations the gate knows: `P-CONF`, `CALL`, `UNSUPPORTED`,
@@ -1666,17 +1670,18 @@ self-declared"; the check 14 gap in §35's last later line).
   check 13.
 - **Tests:** the healthy fixture binds to the committed `P-CONF` partition
   (`reports/study-002/pconf-v1/pconf-v1.partition.json`, LF on every platform) and to the canonical-v3 manifest's
-  corpus fingerprint. The self-test grew from 18 to 28 cases, and readiness check 2 expects contract 5.
+  corpus fingerprint. The self-test grew from 18 to 30 cases, and readiness check 2 expects contract 5.
 - **Audit of the first version (before any push):** an independent audit made it pass a `CLARIFY` comparison by
   naming the population `clarify` and pointing its size at another field. It also bound metric rows to the corpus
-  fingerprint, and raised on a fingerprint `field` of `7`. The version above closes each, with a test for each.
+  fingerprint, raised on a fingerprint `field` of `7`, and passed a descriptive row with no margin. A second
+  audit bound metric rows to any file by naming its entry `partition:<id>`, so that naming was removed and the
+  partitions are pinned by the gate. The version above closes each, with a test for each.
 
 ### Still not enforced after contract 5
 
 - **The values in the bundle.** A metric row's partition fingerprint is checked, but not its `n`, denominator, arm
   or `artifact_sha256` (any well-formed sha256 passes). It does not prove that the candidate dict holds the number
-  the row produced. A `partition:<id>` entry is read back from its file, but no file is pinned for it. Re-deriving
-  the rates from per-example records is the bundle producer's job (48 item 8).
+  the row produced. Re-deriving the rates from per-example records is the bundle producer's job (48 item 8).
 - **Arm generation metadata, REP-A's residual and H1's statistics.** These are 48 items 3, 5 and 6, in the order
   the owner approved.
 - **Everything §35 assigns to the numbered amendment.**

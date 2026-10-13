@@ -52,8 +52,9 @@ The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 11. ``sentinels`` -- every sentinel in 08 ran, in its mode -- ``PROVENANCE_INCOMPLETE``
 12. ``truncation`` -- a truncation rate in [0, 1] for every sentinel stage and every arm -- ``INVALID_COMPARISON``
 12b. ``truncation_balance`` -- imbalance within the declared factor -- ``INVALID_COMPARISON``
-13. ``provenance`` -- every metric the verdict reads has a row carrying 15 V3's attachment, bound to a
-    partition fingerprint the bundle read from an artifact (V9); the ``corpus`` fingerprint is read from
+13. ``provenance`` -- every metric the verdict reads has a row carrying 15 V3's attachment, bound to the
+    pinned partition its metric is measured on (:data:`P_UNANS_PARTITIONS` for ``refusal_correctness``,
+    ``P-CONF`` for the rest); the ``corpus`` fingerprint is read from
     an artifact, and the ``partition`` fingerprint is the frozen ``P-CONF`` partition's --
     ``FAIL_UNATTACHED_METRIC`` / ``FAIL_FINGERPRINT`` / ``PROVENANCE_INCOMPLETE``
 14. ``comparison_margins`` -- every row names a population the gate knows, prints the ``n`` the gate
@@ -225,6 +226,18 @@ REQUIRED_FINGERPRINTS = ("partition", "corpus")
 #: reads population sizes from this file, so a bundle cannot choose where a size comes from.
 STUDY_002_PARTITION = "reports/study-002/pconf-v1/pconf-v1.partition.json"
 STUDY_002_PARTITION_SHA256 = "caacacb582de85c0daeac037ffea7801897045ec31a2ff5dddc9f5e3bb617c8c"
+
+#: The two strata of check 4's ``P-UNANS`` population (67 natural, 599 constructed; the files
+#: ``study_002_readiness`` check 5 reads), with their sha256 at adoption. ``refusal_correctness`` is
+#: measured there, so its metric rows bind to one of these, and every other metric row to ``P-CONF``.
+P_UNANS_PARTITIONS: dict[str, str] = {
+    "reports/study-002/punans-v2/punans-v2.strata.json": (
+        "4e84fdf2d0cf7b25be7c78876c211e09078d798480cbf2a5df84fe3554b82f7b"
+    ),
+    "reports/study-002/punans-v2-constructed/punans-v2-constructed.strata.json": (
+        "b51e6bb86b0f8d5a121c183d900b1736df7d8f1b8bbe5dd143ff8dadb2534ded"
+    ),
+}
 
 #: Every population a comparison row may name, and the field of :data:`STUDY_002_PARTITION` that holds
 #: its size. An unknown name (``"clarify"``, ``"CLARIFY "``) is unresolved, not a new population.
@@ -592,15 +605,20 @@ class Study002Gate:
         return [row if isinstance(row, dict) else {} for row in rows]
 
     def _read_back(self, entries: list[dict[str, Any]]) -> tuple[set[str], list[str]]:
-        """(names, errors) of the V9 entries whose value equals what their artifact holds."""
-        if not entries:
-            return set(), []
-        result = v9_fingerprint_from_artifact(entries, self.root)
-        failed = {error.split(":", 1)[0] for error in result.errors}
-        names = {
-            str(entry.get("name") or f"fingerprint-{index}") for index, entry in enumerate(entries)
-        }
-        return names - failed, list(result.errors)
+        """(names, errors) of the V9 entries whose value equals what their artifact holds.
+
+        Each entry is checked on its own, so a failing entry never takes another's name with it.
+        """
+        passed: set[str] = set()
+        failed: set[str] = set()
+        errors: list[str] = []
+        for index, entry in enumerate(entries):
+            name = str(entry.get("name") or f"fingerprint-{index}")
+            result = v9_fingerprint_from_artifact([entry], self.root)
+            errors.extend(result.errors)
+            (failed if result.errors else passed).add(name)
+        # Two entries under one name, one of them failing, leave that name unverified.
+        return passed - failed, errors
 
     def provenance(self) -> ValidationResult:
         rows = self._rows("metric_rows")
@@ -632,19 +650,23 @@ class Study002Gate:
                 f"partition: {CODE_FINGERPRINT}: the partition fingerprint is not the sha256 of "
                 f"{STUDY_002_PARTITION}"
             )
-        # A metric row binds to a partition, never to the corpus or to any other file the bundle read:
-        # entries named ``partition`` (P-CONF) or ``partition:<id>`` (another scored population).
-        partitions = {
-            str(entry.get("value"))
-            for name, entry in named
-            if name in verified and (name == "partition" or name.startswith("partition:"))
-        }
+        # A metric row binds to the partition its metric is measured on, which the gate pins: P-UNANS
+        # for refusal_correctness, P-CONF for every other metric. Never to the corpus or another file.
+        p_unans, unans_errors = self._pinned(P_UNANS_PARTITIONS)
+        errors.extend(unans_errors)
         for index, row in enumerate(rows):
             fingerprint = row.get("partition_fingerprint")
-            if fingerprint is not None and str(fingerprint) not in partitions:
+            if fingerprint is None:
+                continue  # V3 reports the missing field
+            allowed = (
+                p_unans
+                if row.get("metric") == "refusal_correctness"
+                else ({STUDY_002_PARTITION_SHA256} if "partition" in verified else set())
+            )
+            if str(fingerprint) not in allowed:
                 errors.append(
                     f"{row.get('id') or f'row-{index}'}: {CODE_FINGERPRINT}: its partition "
-                    "fingerprint is not a partition fingerprint the bundle read from an artifact"
+                    f"fingerprint is not the pinned partition {row.get('metric')} is measured on"
                 )
         # The gate's own list: every metric the verdict reads is attached, not only the rows the
         # bundle chose to send.
@@ -655,6 +677,24 @@ class Study002Gate:
             if metric not in sent
         )
         return result_from("provenance", REQUIRED_NONEMPTY, ["metric_rows", "fingerprints"], errors)
+
+    def _pinned(self, files: dict[str, str]) -> tuple[set[str], list[str]]:
+        """The pinned sha256 of each file that still holds it, and an error for each that does not."""
+        held: set[str] = set()
+        errors: list[str] = []
+        for path, expected in files.items():
+            try:
+                actual = read_fingerprint(self.root, path, None)
+            except (OSError, ValueError) as exc:
+                errors.append(f"{path}: {CODE_FINGERPRINT}: cannot be read ({type(exc).__name__})")
+                continue
+            if actual == expected:
+                held.add(expected)
+            else:
+                errors.append(
+                    f"{path}: {CODE_FINGERPRINT}: is {actual[:12]}…, not {expected[:12]}…"
+                )
+        return held, errors
 
     def _population_sizes(self) -> tuple[dict[str, int], list[str]]:
         """Each known population's ``n``, read from the frozen partition after checking its sha256."""
@@ -811,14 +851,18 @@ FIXTURE_CORPUS_FINGERPRINT = "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a
 
 
 def _metric_row(metric: str, arm: str) -> dict[str, Any]:
+    if metric == "refusal_correctness":
+        partition_id, fingerprint = "P-UNANS-v2", next(iter(P_UNANS_PARTITIONS.values()))
+    else:
+        partition_id, fingerprint = "P-CONF-v1", STUDY_002_PARTITION_SHA256
     return {
         "id": f"{arm}:{metric}",
         "metric": metric,
         "metric_version": "07-v1",
         "arm": arm,
         "seed": 0,
-        "partition_id": "P-CONF-v1",
-        "partition_fingerprint": STUDY_002_PARTITION_SHA256,
+        "partition_id": partition_id,
+        "partition_fingerprint": fingerprint,
         "n": 1677,
         "denominator": 1677,
         "evaluator_version": "fixture",
@@ -1032,6 +1076,17 @@ def self_test() -> dict[str, Any]:
     for row in corpus_bound["metric_rows"]:
         row["partition_fingerprint"] = FIXTURE_CORPUS_FINGERPRINT
     cases["metric_rows_bound_to_the_corpus"] = _case(corpus_bound, FAIL, CODE_FINGERPRINT)
+
+    hatch = healthy_bundle()
+    hatch["fingerprints"].append({**hatch["fingerprints"][1], "name": "partition:x"})
+    for row in hatch["metric_rows"]:
+        row["partition_fingerprint"] = FIXTURE_CORPUS_FINGERPRINT
+    cases["metric_rows_bound_to_a_file_named_as_a_partition"] = _case(hatch, FAIL, CODE_FINGERPRINT)
+
+    swapped = healthy_bundle()
+    for row in swapped["metric_rows"]:
+        row["partition_fingerprint"] = STUDY_002_PARTITION_SHA256
+    cases["refusal_correctness_bound_to_p_conf"] = _case(swapped, FAIL, CODE_FINGERPRINT)
 
     bad_field = healthy_bundle()
     bad_field["fingerprints"][1]["field"] = 7

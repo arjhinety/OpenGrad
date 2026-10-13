@@ -95,7 +95,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 26
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 28
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
