@@ -11,6 +11,7 @@ Contract 3 wraps `tool_use_promotion_v6` and runs with the values `study_002_pre
 from __future__ import annotations
 
 import copy
+import hashlib
 
 import pytest
 
@@ -94,7 +95,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 22
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 26
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
@@ -298,7 +299,7 @@ def test_a_metric_row_bound_to_an_unverified_partition_fails() -> None:
 def test_a_difference_on_a_descriptive_population_supports_nothing(population: str) -> None:
     """46 §10: a between-arm difference on CLARIFY or ANSWER-natural is WITHIN_NOISE, however large."""
     bundle = healthy_bundle()
-    n = bundle["populations"][population]["n"]
+    n = {"CLARIFY": 371, "ANSWER-natural": 284}[population]
     bundle["comparisons"] = [{"id": "r", "population": population, "n": n, "margin": 0.30}]
     report = _gate(bundle)
     assert any(CODE_WITHIN_NOISE in e for e in _errors(report, "comparison_margins"))
@@ -315,21 +316,80 @@ def test_a_difference_on_a_descriptive_population_supports_nothing(population: s
         lambda r: r.update(population="P-UNKNOWN"),
         lambda r: r.pop("population"),
         lambda r: r.update(population=["P-CONF"]),
+        lambda r: r.update(population="p-conf"),
+        lambda r: r.update(population="P-CONF "),
     ],
 )
-def test_a_row_whose_population_is_not_bound_to_an_artifact_fails(change) -> None:
+def test_a_row_whose_population_the_gate_does_not_read_fails(change) -> None:
     bundle = healthy_bundle()
     change(bundle["comparisons"][0])
     assert any(CODE_UNRESOLVED_ROW in e for e in _errors(_gate(bundle), "comparison_margins"))
 
 
-def test_a_population_size_its_artifact_does_not_hold_binds_nothing() -> None:
-    bundle = healthy_bundle()
-    bundle["populations"]["P-CONF"]["n"] = 5000
-    bundle["comparisons"][0]["n"] = 5000
-    errors = _errors(_gate(bundle), "comparison_margins")
+def test_the_gate_reads_every_population_size_from_the_frozen_partition() -> None:
+    import json
+
+    from opengrad.verification.resolvability import resolvable_margin
+    from opengrad.verification.study_002_gate import (
+        POPULATION_FIELDS,
+        REPO_ROOT,
+        STUDY_002_PARTITION,
+        STUDY_002_PARTITION_SHA256,
+    )
+
+    path = REPO_ROOT / STUDY_002_PARTITION
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == STUDY_002_PARTITION_SHA256
+    sidecar = (REPO_ROOT / f"{STUDY_002_PARTITION}.sha256").read_text(encoding="utf-8").split()[0]
+    assert sidecar == STUDY_002_PARTITION_SHA256
+    document = json.loads(path.read_text(encoding="utf-8"))
+    sizes = {}
+    for name, field in POPULATION_FIELDS.items():
+        value = document
+        for part in field.split("."):
+            value = value[part]
+        sizes[name] = value
+    assert sizes == {
+        "P-CONF": 1277,
+        "CALL": 453,
+        "UNSUPPORTED": 453,
+        "CLARIFY": 371,
+        "ANSWER": 1055,
+        "ANSWER-constructed": 771,
+        "ANSWER-natural": 284,
+    }
+    # 46 §10's table: exactly CLARIFY and ANSWER-natural resolve more than 10 points.
+    assert {n for n, size in sizes.items() if resolvable_margin(size) > 0.10} == set(
+        DESCRIPTIVE_POPULATIONS
+    )
+
+
+def test_a_partition_that_is_not_the_frozen_one_binds_nothing(tmp_path) -> None:
+    from opengrad.verification.study_002_gate import STUDY_002_PARTITION
+
+    copy_path = tmp_path / STUDY_002_PARTITION
+    copy_path.parent.mkdir(parents=True)
+    copy_path.write_text(
+        '{"components": {"confirmatory_when2call": {"count": 1277}}}', encoding="utf-8"
+    )
+    report = study_002_gate(healthy_bundle(), ADOPTED_PARAMETERS, root=tmp_path)
+    errors = _errors(report, "comparison_margins")
     assert any(CODE_FINGERPRINT in e for e in errors)
-    assert any(CODE_UNRESOLVED_ROW in e for e in errors)
+    assert report.overall == FAIL
+
+
+def test_the_partition_fingerprint_must_name_the_frozen_partition() -> None:
+    bundle = healthy_bundle()
+    corpus = bundle["fingerprints"][1]
+    bundle["fingerprints"][0] = {**corpus, "name": "partition"}
+    for row in bundle["metric_rows"]:
+        row["partition_fingerprint"] = corpus["value"]
+    assert any(CODE_FINGERPRINT in e for e in _errors(_gate(bundle), "provenance"))
+
+
+def test_a_descriptive_row_without_a_margin_is_unresolved() -> None:
+    bundle = healthy_bundle()
+    bundle["comparisons"].append({"id": "c", "population": "CLARIFY", "n": 371, "margin": None})
+    assert any(CODE_UNRESOLVED_ROW in e for e in _errors(_gate(bundle), "comparison_margins"))
 
 
 @pytest.mark.parametrize(
@@ -576,8 +636,8 @@ def test_contract_4_fails_what_contract_3_passed(change, check, code) -> None:
         lambda b: b.__setitem__("modes", 5),
         lambda b: b["sentinels_ran"].__setitem__("S-IF", 5),
         lambda b: b["fingerprints"].append(["unhashable"]),
-        lambda b: b.__setitem__("populations", ["P-CONF"]),
-        lambda b: b["populations"].__setitem__("P-CONF", "1277"),
+        lambda b: b["fingerprints"][1].__setitem__("field", 7),
+        lambda b: b["fingerprints"][1].__setitem__("field", ["corpus_fingerprint"]),
         lambda b: b.__setitem__("metric_rows", "rows"),
         lambda b: b["candidate"]["confusion_matrix"]["CALL"].__setitem__("CALL", "430"),
         lambda b: b.__setitem__("comparisons", {"a": 1}),

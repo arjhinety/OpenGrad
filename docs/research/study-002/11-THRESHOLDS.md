@@ -188,7 +188,7 @@ stay over all of the flag set.
 > rates in [0, 1], and fails rather than raises on malformed input. As with contract 2 (§19), this implements the
 > table as written; no value above changes. §35 lists what contract 4 does not yet enforce.
 
-> **Contract 5, 2026-10-13 (`reports/ERRATA.md` §37).** Check 13 now runs 15 V3 on every metric the verdict
-> reads and V9 on every fingerprint, instead of checking that field names are listed. Check 14 reads each
-> comparison row's population size from an artifact, and treats a difference on `CLARIFY`, `ANSWER-natural` or any
+> **Contract 5, 2026-10-13 (`reports/ERRATA.md` §37).** Check 13 now runs 15 V3 on every metric the verdict reads
+> and V9 on every fingerprint, instead of checking that field names are listed. Check 14 reads each comparison row's
+> population size from the frozen `P-CONF` partition, and treats a difference on `CLARIFY`, `ANSWER-natural` or any
 > population resolving more than 10 points as `WITHIN_NOISE` (46 §10). No value above changes.

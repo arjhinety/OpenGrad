@@ -267,18 +267,18 @@ count of the cases where it fails, recorded beside the number it produces.
 
 `nvidia/When2Call` at revision `0582f7749df63a96fdc3070932e83e72396ace53`, the `mcq` test file (cached under
 `.cache/normalization/raw/`; pinned in `reports/evaluation/behavioral-heldout-v2.manifest.json`). 21 pairs of rows
-share both question and tool set, so
-the rendered prompt is the same (B0's `prompt_sha256` matches within each pair). In 16 of them the gold decisions
-differ, `CALL` against `CLARIFY`; in 5 both are `UNSUPPORTED`. Repro: group the rows by sha256 of `question` and
-of the JSON-serialised `tools`; take groups with more than one row; compare the gold decisions
-(`expected_decision` in `reports/baselines/qwen35_2b_baseline/predictions.jsonl`). Effect: on each of the 16 pairs a
-model scores at most one of two; 8 pairs cross OpenGrad's dev/confirmatory partition and 8 lie wholly in dev (ERRATA
-§36). Not yet searched for or reported upstream. Study 002's `P-CONF` takes the confirmatory side only, so it holds
-8 of these items, each with its contradictory twin in dev; no pair lies wholly inside it.
+share both question and tool set, so the rendered prompt is the same (B0's `prompt_sha256` matches within each
+pair). In 16 of them the gold decisions differ, `CALL` against `CLARIFY`; in 5 both are `UNSUPPORTED`. Repro: group
+the rows by sha256 of `question` and of the JSON-serialised `tools`; take groups with more than one row; compare the
+gold decisions (`expected_decision` in `reports/baselines/qwen35_2b_baseline/predictions.jsonl`). Effect: on each of
+the 16 pairs a model scores at most one of two; 8 pairs cross OpenGrad's dev/confirmatory partition and 8 lie wholly
+in dev (ERRATA §36). Not yet searched for or reported upstream. Study 002's `P-CONF` takes the confirmatory side
+only, so it holds 8 of these items, each with its contradictory twin in dev; no pair lies wholly inside it.
 
 Later line for UP-0018, 2026-10-13: the prefix-caching item is fixed in `VLLMInferenceBackend` (pinned `False` and
 recorded in its engine metadata), and `scripts/select_checkpoint.py` now refuses the confirmatory side.
 
 Later line for UP-0017, 2026-10-13: "self-declared inputs" is closed in part by gate contract 5 (ERRATA §37).
-Metric rows, fingerprints and population sizes are read back from artifacts, and check 14 applies 46 §10. The
-values in the candidate dict are still declared until the bundle producer re-derives them.
+Fingerprints are read back from artifacts, each metric row is bound to a partition fingerprint, the gate reads
+population sizes from the frozen `P-CONF` partition, and check 14 applies 46 §10. A metric row's `n`, arm and
+artifact hash, and the values in the candidate dict, are still declared until the bundle producer re-derives them.

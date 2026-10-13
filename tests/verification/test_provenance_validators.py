@@ -119,6 +119,8 @@ def test_v9_reads_bytes_or_a_json_field(tmp_path: Path) -> None:
         {"name": "x", "value": "abd", "artifact": "corpus.json", "field": "identity.hash"},
         {"name": "x", "value": "abc", "artifact": "corpus.json", "field": "identity.missing"},
         {"name": "x", "value": "abc", "artifact": "../outside.json"},
+        {"name": "x", "value": "abc", "artifact": "corpus.json", "field": 7},
+        {"name": "x", "value": "abc", "artifact": "corpus.json", "field": ["identity", "hash"]},
     ):
         assert pv.CODE_FINGERPRINT in _codes(pv.v9_fingerprint_from_artifact([bad], tmp_path)), bad
 

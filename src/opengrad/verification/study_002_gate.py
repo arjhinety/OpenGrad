@@ -10,7 +10,7 @@ population the bundle cannot measure is ``FAIL_NONVACUOUS``.
 comparison row's ``n`` on trust. Contract 5 implements, as written, what 15 V3 / V9 and 46 §10 (v14)
 state (`reports/ERRATA.md` §37; no amendment): every number the verdict reads carries its V3
 attachment, every fingerprint is read from the artifact it names (V9), each comparison row names a
-population whose ``n`` is read from an artifact, and a between-arm difference on a population that
+population whose ``n`` the gate reads from the frozen partition, and a between-arm difference on a population that
 resolves more than 10 points (``CLARIFY``, ``ANSWER-natural``) is ``WITHIN_NOISE`` and supports nothing.
 
 **Contract 4 (2026-10-13).** A gate audit found inputs through which a broken candidate still
@@ -53,11 +53,11 @@ The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 12. ``truncation`` -- a truncation rate in [0, 1] for every sentinel stage and every arm -- ``INVALID_COMPARISON``
 12b. ``truncation_balance`` -- imbalance within the declared factor -- ``INVALID_COMPARISON``
 13. ``provenance`` -- every metric the verdict reads has a row carrying 15 V3's attachment, bound to a
-    partition fingerprint the bundle read from an artifact (V9), and the ``partition`` and ``corpus``
-    fingerprints are read from artifacts -- ``FAIL_UNATTACHED_METRIC`` / ``FAIL_FINGERPRINT`` /
-    ``PROVENANCE_INCOMPLETE``
-14. ``comparison_margins`` -- every row names a population whose ``n`` is read from an artifact, and
-    prints that ``n`` and a margin; a row on a population that resolves more than 10 points is
+    partition fingerprint the bundle read from an artifact (V9); the ``corpus`` fingerprint is read from
+    an artifact, and the ``partition`` fingerprint is the frozen ``P-CONF`` partition's --
+    ``FAIL_UNATTACHED_METRIC`` / ``FAIL_FINGERPRINT`` / ``PROVENANCE_INCOMPLETE``
+14. ``comparison_margins`` -- every row names a population the gate knows, prints the ``n`` the gate
+    reads for it from the frozen ``P-CONF`` partition, and prints a margin; a row on a population that resolves more than 10 points is
     ``WITHIN_NOISE`` (46 §10); at least one row clears its resolvable margin, the rest are
     ``WITHIN_NOISE`` and support nothing -- ``FAIL_UNRESOLVED_ROW`` / ``FAIL_FINGERPRINT`` / ``WITHIN_NOISE``
 15. ``policy_decision`` -- ``tool_use_promotion_v6`` returns ``PROMOTE`` -- the v6 failure codes
@@ -83,9 +83,9 @@ them):
   metric the verdict reads;
 * ``fingerprints``: ``[{name, value, artifact, field?}]`` -- 15 V9 entries, ``partition`` and ``corpus``
   among them (``field`` is a dotted JSON path; without it the artifact's sha256 is the value);
-* ``populations``: ``{name: {n, artifact, field}}`` -- each population's size, read from an artifact;
 * ``truncation``: ``{stage: {arm: rate}}``;
-* ``comparisons``: ``[{id, population, n, margin, delta}]``.
+* ``comparisons``: ``[{id, population, n, margin, delta}]`` -- ``population`` is one of
+  :data:`POPULATION_FIELDS`, whose ``n`` the gate reads from the frozen ``P-CONF`` partition.
 
 The bundle is produced by the evaluation, not by this module; no artifact of that shape exists yet,
 so today the gate is exercised on synthetic bundles by its tests. On an empty bundle it reports
@@ -131,6 +131,7 @@ from opengrad.verification.population_validators import (
 from opengrad.verification.provenance_validators import (
     CODE_FINGERPRINT,
     CODE_UNATTACHED_METRIC,
+    read_fingerprint,
     v3_metric_attachment,
     v9_fingerprint_from_artifact,
 )
@@ -219,14 +220,32 @@ REQUIRED_STAGES: tuple[str, ...] = tuple(
 #: The fingerprints every bundle reads from an artifact (15 V9: "corpus and partition fingerprints").
 REQUIRED_FINGERPRINTS = ("partition", "corpus")
 
+#: The frozen confirmatory population `P-CONF-v1` (``study_002_prereg_v9``) and its sha256, which its
+#: ``.sha256`` sidecar pins. Checked out with LF endings on every platform (`.gitattributes`). The gate
+#: reads population sizes from this file, so a bundle cannot choose where a size comes from.
+STUDY_002_PARTITION = "reports/study-002/pconf-v1/pconf-v1.partition.json"
+STUDY_002_PARTITION_SHA256 = "caacacb582de85c0daeac037ffea7801897045ec31a2ff5dddc9f5e3bb617c8c"
+
+#: Every population a comparison row may name, and the field of :data:`STUDY_002_PARTITION` that holds
+#: its size. An unknown name (``"clarify"``, ``"CLARIFY "``) is unresolved, not a new population.
+POPULATION_FIELDS: dict[str, str] = {
+    "P-CONF": "components.confirmatory_when2call.count",
+    "CALL": "resolvability.CALL.n",
+    "UNSUPPORTED": "resolvability.UNSUPPORTED.n",
+    "CLARIFY": "resolvability.CLARIFY.n",
+    "ANSWER": "resolvability.ANSWER.n",
+    "ANSWER-constructed": "resolvability.ANSWER-constructed.n",
+    "ANSWER-natural": "resolvability.ANSWER-natural.n",
+}
+
 #: 46 §10 (``study_002_prereg_v14``): "The margin a population is used to test is 10 points, for every
 #: comparison between arms." A population that resolves more than that supports no comparison.
 TESTED_MARGIN = 0.10
 
 #: The populations 46 §10 declares descriptive: they resolve more than 10 points (``CLARIFY`` 10.18pp at
 #: n = 371, ``ANSWER-natural`` 11.63pp at n = 284), and "A between-arm difference on those two
-#: populations is ``WITHIN_NOISE`` and supports nothing." Named as well as derived from ``n``, so a row
-#: cannot escape the rule through its population's size.
+#: populations is ``WITHIN_NOISE`` and supports nothing." Named as well as derived from ``n``; both
+#: sizes are read from the frozen partition, never from the bundle.
 DESCRIPTIVE_POPULATIONS = frozenset({"CLARIFY", "ANSWER-natural"})
 
 
@@ -600,17 +619,32 @@ class Study002Gate:
             for name in REQUIRED_FINGERPRINTS
             if name not in verified
         )
-        values = {
-            str(entry.get("value"))
+        named = [
+            (str(entry.get("name") or f"fingerprint-{index}"), entry)
             for index, entry in enumerate(entries)
-            if str(entry.get("name") or f"fingerprint-{index}") in verified
+        ]
+        if any(
+            name == "partition"
+            and (entry.get("artifact") != STUDY_002_PARTITION or entry.get("field") is not None)
+            for name, entry in named
+        ):
+            errors.append(
+                f"partition: {CODE_FINGERPRINT}: the partition fingerprint is not the sha256 of "
+                f"{STUDY_002_PARTITION}"
+            )
+        # A metric row binds to a partition, never to the corpus or to any other file the bundle read:
+        # entries named ``partition`` (P-CONF) or ``partition:<id>`` (another scored population).
+        partitions = {
+            str(entry.get("value"))
+            for name, entry in named
+            if name in verified and (name == "partition" or name.startswith("partition:"))
         }
         for index, row in enumerate(rows):
             fingerprint = row.get("partition_fingerprint")
-            if fingerprint is not None and str(fingerprint) not in values:
+            if fingerprint is not None and str(fingerprint) not in partitions:
                 errors.append(
                     f"{row.get('id') or f'row-{index}'}: {CODE_FINGERPRINT}: its partition "
-                    "fingerprint is not one the bundle read from an artifact"
+                    "fingerprint is not a partition fingerprint the bundle read from an artifact"
                 )
         # The gate's own list: every metric the verdict reads is attached, not only the rows the
         # bundle chose to send.
@@ -622,62 +656,67 @@ class Study002Gate:
         )
         return result_from("provenance", REQUIRED_NONEMPTY, ["metric_rows", "fingerprints"], errors)
 
-    def _populations(self) -> tuple[dict[str, int], list[str]]:
-        """Each population's ``n``, kept only when its artifact holds that ``n`` (V9)."""
-        declared = self.bundle.get("populations")
-        if not isinstance(declared, dict):
-            return {}, []
-        entries, sizes = [], {}
-        for name, spec in declared.items():
-            spec = spec if isinstance(spec, dict) else {}
-            count = finite_number(spec.get("n"))
-            if count is None or count <= 0 or count != int(count):
-                continue
-            sizes[str(name)] = int(count)
-            entries.append(
-                {
-                    "name": str(name),
-                    "value": str(int(count)),
-                    "artifact": spec.get("artifact"),
-                    "field": spec.get("field"),
-                }
-            )
-        verified, errors = self._read_back(entries)
-        return {name: n for name, n in sizes.items() if name in verified}, errors
+    def _population_sizes(self) -> tuple[dict[str, int], list[str]]:
+        """Each known population's ``n``, read from the frozen partition after checking its sha256."""
+        try:
+            actual = read_fingerprint(self.root, STUDY_002_PARTITION, None)
+        except (OSError, ValueError) as exc:
+            return {}, [
+                (
+                    f"partition: {CODE_FINGERPRINT}: {STUDY_002_PARTITION} cannot be read "
+                    f"({type(exc).__name__})"
+                )
+            ]
+        if actual != STUDY_002_PARTITION_SHA256:
+            return {}, [
+                (
+                    f"partition: {CODE_FINGERPRINT}: {STUDY_002_PARTITION} is {actual[:12]}…, "
+                    f"not the frozen {STUDY_002_PARTITION_SHA256[:12]}…"
+                )
+            ]
+        sizes = {}
+        for name, field in POPULATION_FIELDS.items():
+            sizes[name] = int(read_fingerprint(self.root, STUDY_002_PARTITION, field))
+        return sizes, []
 
     def comparison_margins(self) -> ValidationResult:
         rows = self._rows("comparisons")
-        bound, errors = self._populations()
+        sizes, errors = self._population_sizes()
         tested, descriptive = [], []
         for index, row in enumerate(rows):
             row_id = str(row.get("id") or f"row-{index}")
             population = row.get("population")
             n = finite_number(row.get("n"))
-            if not isinstance(population, str) or population not in bound:
+            if not isinstance(population, str) or population not in sizes:
                 errors.append(
-                    f"{row_id}: {CODE_UNRESOLVED_ROW}: names no population whose n is read from "
-                    f"an artifact ({population!r})"
+                    f"{row_id}: {CODE_UNRESOLVED_ROW}: names no population the gate reads from "
+                    f"{STUDY_002_PARTITION} ({population!r})"
                 )
-            elif n is None or n != bound[population]:
+            elif n is None or n != sizes[population]:
                 errors.append(
                     f"{row_id}: {CODE_UNRESOLVED_ROW}: prints n={row.get('n')!r}, but "
-                    f"{population} holds {bound[population]}"
+                    f"{population} holds {sizes[population]}"
+                )
+            elif finite_number(row.get("margin")) is None:
+                # 15:92: a row with no margin is unresolved, descriptive or not.
+                errors.append(
+                    f"{row_id}: {CODE_UNRESOLVED_ROW}: row prints no margin ({row.get('margin')!r})"
                 )
             elif (
                 population in DESCRIPTIVE_POPULATIONS
-                or resolvable_margin(bound[population]) > TESTED_MARGIN
+                or resolvable_margin(sizes[population]) > TESTED_MARGIN
             ):
                 descriptive.append(row_id)
             else:
                 tested.append(row)
-        # A row v12 has not seen yet (a margin it cannot read) still fails there; a descriptive row
-        # is counted with the WITHIN_NOISE rows and supports nothing.
-        result = v12_resolvable_margin(tested if tested else rows if not descriptive else [])
-        if descriptive and not tested:
+        if tested or not rows:
+            result = v12_resolvable_margin(tested)
+        else:
+            # Every row is descriptive or already failed: there is nothing for v12 to resolve.
             result = result_from(
                 "comparison_margins",
                 REQUIRED_NONEMPTY,
-                descriptive,
+                [str(row.get("id") or f"row-{index}") for index, row in enumerate(rows)],
                 [],
                 detail={"within_noise": 0, "under_powered": 0, "supporting": 0},
             )
@@ -766,10 +805,7 @@ def study_002_gate(
     return Study002Gate(bundle, parameters, root).report()
 
 
-#: Committed artifacts the healthy fixture binds to. Both are checked out with LF endings
-#: (`.gitattributes`), so the fingerprints below hold on every platform.
-PCONF_PARTITION = "reports/study-002/pconf-v1/pconf-v1.partition.json"
-PCONF_PARTITION_SHA256 = "caacacb582de85c0daeac037ffea7801897045ec31a2ff5dddc9f5e3bb617c8c"
+#: The corpus manifest the healthy fixture binds to (LF on every platform, `.gitattributes`).
 FIXTURE_CORPUS_MANIFEST = "reports/canonical-v3/canonical-v3.manifest.json"
 FIXTURE_CORPUS_FINGERPRINT = "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a"
 
@@ -782,7 +818,7 @@ def _metric_row(metric: str, arm: str) -> dict[str, Any]:
         "arm": arm,
         "seed": 0,
         "partition_id": "P-CONF-v1",
-        "partition_fingerprint": PCONF_PARTITION_SHA256,
+        "partition_fingerprint": STUDY_002_PARTITION_SHA256,
         "n": 1677,
         "denominator": 1677,
         "evaluator_version": "fixture",
@@ -840,7 +876,11 @@ def healthy_bundle() -> dict[str, Any]:
         "metric_rows": [_metric_row(metric, "R1") for metric in CANDIDATE_METRICS]
         + [_metric_row(metric, "C0") for metric in BASELINE_METRICS],
         "fingerprints": [
-            {"name": "partition", "value": PCONF_PARTITION_SHA256, "artifact": PCONF_PARTITION},
+            {
+                "name": "partition",
+                "value": STUDY_002_PARTITION_SHA256,
+                "artifact": STUDY_002_PARTITION,
+            },
             {
                 "name": "corpus",
                 "value": FIXTURE_CORPUS_FINGERPRINT,
@@ -848,19 +888,6 @@ def healthy_bundle() -> dict[str, Any]:
                 "field": "corpus_fingerprint",
             },
         ],
-        "populations": {
-            "P-CONF": {
-                "n": 1277,
-                "artifact": PCONF_PARTITION,
-                "field": "components.confirmatory_when2call.count",
-            },
-            "CLARIFY": {"n": 371, "artifact": PCONF_PARTITION, "field": "resolvability.CLARIFY.n"},
-            "ANSWER-natural": {
-                "n": 284,
-                "artifact": PCONF_PARTITION,
-                "field": "resolvability.ANSWER-natural.n",
-            },
-        },
         "truncation": {
             "0-shot": {"C0": 0.02, "R1": 0.03},
             "8-shot": {"C0": 0.01, "R1": 0.01},
@@ -990,6 +1017,25 @@ def self_test() -> dict[str, Any]:
         {"id": "R1_vs_C0:CLARIFY", "population": "CLARIFY", "n": 371, "margin": 0.15}
     ]
     cases["comparison_on_a_descriptive_population"] = _case(clarify_only, FAIL, CODE_WITHIN_NOISE)
+
+    renamed = healthy_bundle()
+    renamed["comparisons"] = [{"id": "c", "population": "clarify", "n": 1277, "margin": 0.2}]
+    cases["comparison_on_a_population_the_gate_does_not_know"] = _case(
+        renamed, FAIL, CODE_UNRESOLVED_ROW
+    )
+
+    marginless = healthy_bundle()
+    marginless["comparisons"].append({"id": "c", "population": "CLARIFY", "n": 371, "margin": None})
+    cases["descriptive_row_without_a_margin"] = _case(marginless, FAIL, CODE_UNRESOLVED_ROW)
+
+    corpus_bound = healthy_bundle()
+    for row in corpus_bound["metric_rows"]:
+        row["partition_fingerprint"] = FIXTURE_CORPUS_FINGERPRINT
+    cases["metric_rows_bound_to_the_corpus"] = _case(corpus_bound, FAIL, CODE_FINGERPRINT)
+
+    bad_field = healthy_bundle()
+    bad_field["fingerprints"][1]["field"] = 7
+    cases["fingerprint_field_that_is_not_a_path"] = _case(bad_field, FAIL, CODE_FINGERPRINT)
 
     inflated = healthy_bundle()
     inflated["comparisons"][0]["n"] = 5000

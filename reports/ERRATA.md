@@ -1643,27 +1643,40 @@ self-declared"; the check 14 gap in §35's last later line).
   - V3 and V9 existed as code but the gate never called them.
   - Check 14 took each comparison row's `n` on trust, and counted a row as support whenever its difference
     cleared M(n). A `CLARIFY` row with a 15-point difference therefore supported a claim.
-- **Contract 5, check 13:** the bundle carries `metric_rows`, and V3 runs on them. Every metric the verdict reads
-  needs a row: the gate's own list of 12, not the bundle's. Each row's partition fingerprint must be one the bundle
-  read back from an artifact. The `partition` and `corpus` fingerprints are required, and V9 reads each from the
-  file it names.
+- **Contract 5, check 13:**
+  - The bundle carries `metric_rows`, and V3 runs on them.
+  - Every metric the verdict reads needs a row: the gate's own list of 12, not the bundle's.
+  - The `partition` and `corpus` fingerprints are required, and V9 reads each from the file it names. The
+    `partition` fingerprint must be the sha256 of the frozen `P-CONF` partition
+    (`reports/study-002/pconf-v1/pconf-v1.partition.json`).
+  - Each row's partition fingerprint must be a *partition* fingerprint the bundle read back: the entry named
+    `partition`, or one named `partition:<id>` for another scored population. It cannot be the corpus fingerprint
+    or any other file.
+  - A `field` that is not a string fails instead of raising (V9).
 - **Contract 5, check 14:**
-  - Each comparison row names a population.
-  - The population's `n` is read back from an artifact (`populations: {name: {n, artifact, field}}`, checked by
-    V9), and the row's `n` must equal it.
+  - Each comparison row names one of seven populations the gate knows: `P-CONF`, `CALL`, `UNSUPPORTED`,
+    `CLARIFY`, `ANSWER`, `ANSWER-constructed`, `ANSWER-natural`. An unknown name, including a different case or a
+    trailing space, is unresolved.
+  - The gate reads each population's `n` itself, from the frozen partition after checking its sha256. The row's
+    `n` must equal it, and the bundle cannot say where a size comes from.
+  - A row with no margin is unresolved, descriptive or not.
   - A row on `CLARIFY`, on `ANSWER-natural`, or on any population whose resolvable margin exceeds 10 points is
     `WITHIN_NOISE`. Beside a resolving row it is excluded; alone it leaves no support, and the check fails.
 - **Bundle shape:** `provenance.present` is gone; a bundle that only names fields is `BLOCKED_INPUT_MISSING` at
   check 13.
 - **Tests:** the healthy fixture binds to the committed `P-CONF` partition
   (`reports/study-002/pconf-v1/pconf-v1.partition.json`, LF on every platform) and to the canonical-v3 manifest's
-  corpus fingerprint. The self-test grew from 18 to 24 cases, and readiness check 2 expects contract 5.
+  corpus fingerprint. The self-test grew from 18 to 28 cases, and readiness check 2 expects contract 5.
+- **Audit of the first version (before any push):** an independent audit made it pass a `CLARIFY` comparison by
+  naming the population `clarify` and pointing its size at another field. It also bound metric rows to the corpus
+  fingerprint, and raised on a fingerprint `field` of `7`. The version above closes each, with a test for each.
 
 ### Still not enforced after contract 5
 
-- **The values in the bundle.** A metric row proves where a number came from, not that the candidate dict holds
-  the number that row produced. Re-deriving the rates from per-example records is the bundle producer's job
-  (48 item 8).
+- **The values in the bundle.** A metric row's partition fingerprint is checked, but not its `n`, denominator, arm
+  or `artifact_sha256` (any well-formed sha256 passes). It does not prove that the candidate dict holds the number
+  the row produced. A `partition:<id>` entry is read back from its file, but no file is pinned for it. Re-deriving
+  the rates from per-example records is the bundle producer's job (48 item 8).
 - **Arm generation metadata, REP-A's residual and H1's statistics.** These are 48 items 3, 5 and 6, in the order
   the owner approved.
 - **Everything §35 assigns to the numbered amendment.**

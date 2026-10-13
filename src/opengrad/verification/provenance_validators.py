@@ -397,6 +397,12 @@ def v9_fingerprint_from_artifact(
         if not _present(artifact) or not _present(entry.get("value")):
             errors.append(f"{entry_id}: {CODE_FINGERPRINT}: names no artifact or no value")
             continue
+        if entry.get("field") is not None and not isinstance(entry.get("field"), str):
+            # A field that is not a dotted path cannot be read; it fails rather than raises.
+            errors.append(
+                f"{entry_id}: {CODE_FINGERPRINT}: field {entry.get('field')!r} is not a path"
+            )
+            continue
         try:
             actual = read_fingerprint(root, str(artifact), entry.get("field"))
         except (OSError, ValueError, KeyError, UnicodeDecodeError) as exc:

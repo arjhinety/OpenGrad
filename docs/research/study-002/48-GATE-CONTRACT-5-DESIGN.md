@@ -22,7 +22,7 @@ one before anything is adopted.
 
 | # | What the documents say | What the code did | Change | Status |
 |---|---|---|---|---|
-| 1 | 15 V3: every number carries metric + version, arm, seed, partition id + fingerprint, `n`, denominator, evaluator version, artifact sha256; V9: fingerprints are read from artifacts | check 13 checked that field names were listed; V3 and V9 were never called | V3 on every metric the verdict reads; V9 on every fingerprint; population sizes read from artifacts | contract 5, ERRATA §37 |
+| 1 | 15 V3: every number carries metric + version, arm, seed, partition id + fingerprint, `n`, denominator, evaluator version, artifact sha256; V9: fingerprints are read from artifacts | check 13 checked that field names were listed; V3 and V9 were never called | V3 on every metric the verdict reads, each bound to a partition fingerprint; V9 on every fingerprint; population sizes read by the gate from the frozen `P-CONF` partition | contract 5, ERRATA §37 |
 | 2 | 46 §10 (v14): a between-arm difference on a population resolving more than 10 points is `WITHIN_NOISE` | check 14 counted any row clearing M(n) | rows name their population; `CLARIFY`, `ANSWER-natural` and any population with M(n) > 10pp support nothing | contract 5, ERRATA §37 |
 | 3 | 04: tokenizer and template hash pinned; evaluator, generation config and decoder at one version; one device class | no check compared the arms' generation metadata | a check that every arm's run record agrees on those, `INVALID_COMPARISON` otherwise | next |
 | 4 | 04 "one generation config"; the H200 runs pin prefix caching off | `VLLMInferenceBackend` set nothing, and B0's record cannot show vLLM's default | pinned `False`, recorded in the engine metadata | done (`a88ba88`) |
