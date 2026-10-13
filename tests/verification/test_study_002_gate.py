@@ -803,6 +803,11 @@ def test_without_a_truncation_table_the_runs_cannot_be_matched() -> None:
         ("max_tokens", {"gsm8k": 512.0}),
         ("max_tokens", {"gsm8k": True}),
         ("decoding", {}),
+        ("decoding", {"": None}),
+        ("decoding", {"temperature": None}),
+        ("decoding", {1: 0.0, "top_k": 1}),
+        ("max_tokens", {1: 512, "gsm8k": 512}),
+        ("max_tokens", {"": 512}),
         ("enable_prefix_caching", "no"),
         ("enable_prefix_caching", 0),
     ],
@@ -880,9 +885,21 @@ def test_repeat_records_are_exempt_from_the_one_record_rule_and_the_arm_set() ->
         {"rep_a": {"repeat": "REP-C"}},
         {"rep_a": {"repeat": ["REP-A"]}},
         {"rep_b": {"repeat": "REP-A", "arm": "C0"}},
+        {"rep_b": {"seed": 7}},
     ],
 )
 def test_a_repeat_is_held_to_every_factor_and_to_05s_definition(changes) -> None:
     report = _gate(_with_repeats(healthy_bundle(), **changes))
     assert any(CODE_INVALID_COMPARISON in e for e in _errors(report, "generation_identity"))
     assert report.overall == FAIL
+
+
+def test_rep_a_must_re_run_an_arm_that_was_scored() -> None:
+    bundle = _with_repeats(healthy_bundle())
+    for run in bundle["arm_runs"]:
+        if run["arm"] == "C0" and "repeat" not in run:
+            run["arm"] = "C1"
+    for arms in bundle["truncation"].values():
+        arms["C1"] = arms.pop("C0")
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any("REP-A" in e and "no scored runs" in e for e in errors)

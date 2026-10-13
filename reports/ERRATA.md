@@ -1722,16 +1722,20 @@ owner's reason for contract 5).
   - Every record names its provider. Providers may differ, since 04 records them, but the device class may not.
   - At least two arms, and every arm runs exactly the seeds 0, 1 and 2. This implements 05 as written: "`k = 3`
     seeds per arm, identical values across all arms", with the slots `s0`, `s1`, `s2` "seeded `0`, `1`, `2`"
-    (readiness already checks `configs/study_002/seed-plan.yaml` for them). Arms on seeds 3, 4, 5 fail, even though
-    they agree. Seeds are integers, so `0`, `0.0` and `"0"` are one seed written three ways, not three. A second
-    record for the same arm and seed fails, and so does an arm named only with whitespace. - The arms in `arm_runs`
-    are exactly the arms in the `truncation` table. An arm with run records but no truncation rates, or truncation
-    rates but no run records, fails, and so do run records with no truncation table at all (owner, 2026-10-13). -
-    **Not cross-checked:** comparison rows name no arm (`{id, population, n, margin, delta}`), so an arm that
+    (readiness already checks `configs/study_002/seed-plan.yaml` for them). Arms on seeds 3, 4, 5 fail, even
+    though they agree. Seeds are integers, so `0`, `0.0` and `"0"` are one seed written three ways, not three. A
+    second record for the same arm and seed fails, and so does an arm named only with whitespace.
+  - The arms in `arm_runs` are exactly the arms in the `truncation` table. An arm with run records but no
+    truncation rates, or truncation rates but no run records, fails, and so do run records with no truncation
+    table at all (owner, 2026-10-13).
+  - **Not cross-checked:** comparison rows name no arm (`{id, population, n, margin, delta}`), so an arm that
     appears only in a comparison cannot be matched against `arm_runs` yet.
   - **Repeat runs (05, "What the two repeats measure").** A repeat's record sits in `arm_runs` with a `repeat`
     id. `REP-A` must be `C0` on seed 0 ("`C0`, seed `s0`, re-run"). `REP-B` must be `A_M0` ("`A_M0` re-scored
-    under the Study 002 evaluator"), any seed. Each id appears once, and no other id is accepted. A repeat is
+    under the Study 002 evaluator"), on one of the seeds 0, 1, 2, since 05's seed table assigns them to "every
+    arm and both repeated controls". `REP-A`'s arm must be one of the scored arms. Each id appears once, and no
+    other id is accepted. Holding `REP-B` to the device class is stricter than 04's "Device class for primary
+    runs", and follows from "re-scored under the Study 002 evaluator". A repeat is
     held to every factor above, since a repeat run under another template or evaluator would not measure
     nondeterminism or evaluator reproducibility. It is left out of the arm set, the seed count and the
     one-record-per-run rule, because it is not an arm's scored run. The alternative, a separate bundle key, was
@@ -1741,7 +1745,10 @@ owner's reason for contract 5).
   particular value. Prefix caching on in every run agrees. Whether each record is true is the run producer's job,
   as for §37's metric rows.
 - **Audit before push:** the first version accepted three spellings of one seed as `k = 3`, empty or
-  placeholder values as recorded, duplicate run records and a whitespace arm name. Each now fails, with a test.
+  placeholder values as recorded, duplicate run records and a whitespace arm name. A second audit found map keys
+  that were empty or not strings (one raised instead of failing), a `REP-B` on any seed, and a `REP-A` on an
+  arm that was not scored. Each now fails, with a test. A free-text value such as an engine name of `"x"` is
+  still accepted: the check tests that the factor is recorded and agrees, not what it says.
   The check moved to `study_002_gate_runs.py` to keep the gate module under the 1,000-line limit.
 - **Tests:** the self-test grew from 30 to 38 cases, the gate from 17 to 18 checks, and readiness check 2 expects
   contract 6.

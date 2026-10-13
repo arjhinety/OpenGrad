@@ -1,7 +1,7 @@
 """Check 12c of ``study_002_gate_v1``: every arm was evaluated alike (04, 05).
 
 Split from `study_002_gate.py` to keep it under the module-size limit (`tests/repo/test_module_size.py`).
-The gate calls :func:`generation_identity_errors` and re-exports the constants.
+The gate calls :func:`generation_identity_errors`; the constants are imported from here.
 """
 
 from __future__ import annotations
@@ -36,8 +36,8 @@ REQUIRED_SEEDS = frozenset({0, 1, 2})
 #: 05 "What the two repeats measure": ``REP-A`` is "``C0``, seed ``s0``, re-run" (the nondeterminism floor);
 #: ``REP-B`` is "``A_M0`` re-scored under the Study 002 evaluator" (configs/study_002/seed-plan.yaml). A
 #: repeat's record carries ``repeat`` and is held to every factor 04 fixes, but it is not an arm's scored
-#: run: it is left out of the arm set, the seed count and the one-record-per-run rule. ``None`` means any
-#: seed (a re-score of a frozen checkpoint has no training seed of the study's).
+#: run: it is left out of the arm set, the seed count and the one-record-per-run rule. ``None`` means one
+#: of :data:`REQUIRED_SEEDS` (05's seed table: "every arm and both repeated controls").
 REPEATS: dict[str, tuple[str, int | None]] = {"REP-A": ("C0", 0), "REP-B": ("A_M0", None)}
 
 
@@ -51,14 +51,13 @@ def _recorded(field: str, value: Any) -> bool:
         return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
     if field == "enable_prefix_caching":
         return isinstance(value, bool)
-    if field == "max_tokens":
-        return (
-            isinstance(value, dict)
-            and bool(value)
-            and all(type(v) is int and v > 0 for v in value.values())
-        )
-    if field == "decoding":
-        return isinstance(value, dict) and bool(value)
+    if field in ("max_tokens", "decoding"):
+        # Keys are non-empty strings: mixed key types cannot be compared, and "" names nothing.
+        if not isinstance(value, dict) or not value or not all(_text(k) for k in value):
+            return False
+        if field == "max_tokens":
+            return all(type(v) is int and v > 0 for v in value.values())
+        return all(v is not None for v in value.values())
     return _text(value)
 
 
@@ -86,7 +85,9 @@ def generation_identity_errors(runs: list[dict[str, Any]], truncation_arms: set[
                 errors.append(
                     f"{run_id}: {CODE_INVALID_COMPARISON}: {repeat!r} is not a repeat 05 names"
                 )
-            elif arm != expected[0] or expected[1] not in (None, seed):
+            elif arm != expected[0] or seed not in (
+                REQUIRED_SEEDS if expected[1] is None else {expected[1]}
+            ):
                 errors.append(
                     f"{run_id}: {CODE_INVALID_COMPARISON}: {repeat} is {expected[0]}"
                     + (f", seed {expected[1]}" if expected[1] is not None else "")
@@ -120,6 +121,12 @@ def generation_identity_errors(runs: list[dict[str, Any]], truncation_arms: set[
             f"({', '.join(sorted(seeds)) or 'none'}) are not the truncation table's "
             f"({', '.join(sorted(truncation_arms)) or 'none'})"
         )
+    # REP-A re-runs a scored arm; the residual it measures means nothing for an arm that was not scored.
+    errors.extend(
+        f"{repeat}: {CODE_INVALID_COMPARISON}: re-runs {REPEATS[repeat][0]}, which has no scored runs"
+        for repeat in sorted(repeats_seen)
+        if repeat == "REP-A" and REPEATS[repeat][0] not in seeds
+    )
     if len(seeds) < 2:
         errors.append(
             f"arm_runs: {CODE_INVALID_COMPARISON}: {len(seeds)} arm(s); a comparison needs two"
