@@ -1551,9 +1551,8 @@ adversarial, and two diagnostic figures rest on assumptions their reports did no
   49.04% to 48.97%, and the observed gap from 12.0pp to 11.96pp. M0 has no such reply, and M1-v2 has one (+1
   correct).
 - **Not explained by it:** M0 is parsed as A on 20.2% of attempted items, and M1-v2 on 20.4%, against 11.7% gold A.
-  Base is 13.4%, against 12.1% gold A among its attempted items. Since M0 has no lower-case matches, this excess is
-  not the case bug. Its cause is unmeasured and
-  no claim rests on it.
+  Base is 13.4%, against 12.1% gold A among its attempted items. Since M0 has no lower-case matches, M0's excess is
+  not the case bug. Its cause is unmeasured and no claim rests on it.
 
 ### IFEval: the heuristic refusal flag also catches replies that followed every instruction
 
@@ -1587,7 +1586,7 @@ adversarial, and two diagnostic figures rest on assumptions their reports did no
   - In 21 of the 1,287 groups that share a question, two rows also share the tool set, and B0 received the same
     prompt for both (identical `prompt_sha256`). Five such pairs agree (both `UNSUPPORTED`). **16 carry
     contradictory gold, `CALL` against `CLARIFY`, for the same input**, so any model scores at most one of the two.
-    8 of the 16 cross the dev/confirmatory line, and 8 sit within one side. Two agreeing pairs also cross.
+    8 of the 16 cross the dev/confirmatory line, and 8 sit within dev. Two agreeing pairs also cross.
     This is a label conflict in the upstream data (UP-0019).
 - **What it changes:** checkpoint selection on dev saw the wording of about half the confirmatory questions, mostly
   paired with the opposite decision. "Disjoint" holds for items, not for questions.
@@ -1616,9 +1615,9 @@ adversarial, and two diagnostic figures rest on assumptions their reports did no
 - **Base architecture.** Base loads as `Qwen3_5ForConditionalGeneration` and the trained stages as
   `Qwen3_5ForCausalLM`. This is already disclosed at `GENERAL_CAPABILITY_REGRESSION.md:230-234`.
 - **The hash lines in `reports/H200_BENCHMARK_RUN.md:63-65`.** They say "matches frozen" and are true by value.
-  That run (`scripts/modal/h200_eval.py`, M1-v2 only) stops on a weight or config mismatch (lines 126-129). No code
-  compares the chat-template hash, which equals the pinned value. The generator prints the words without
-  comparing anything (UP-0018).
+  That run (`scripts/modal/h200_eval.py`, M1-v2 only) stops on a weight or config mismatch (lines 126-129).
+  Neither `h200_eval.py` nor the report generator compares the chat-template hash, which equals the pinned value.
+  The generator prints the words without comparing anything (UP-0018).
 - **`scripts/audit_campaign_final.py`.** It counts an MMLU-Pro refusal even when the reply was also attempted. No
   frozen number is affected: no MMLU-Pro reply in any stage is flagged as a refusal (UP-0018).
 - **Prompts and decoding.** Rendered prompts are identical across stages (per-row `prompt_sha256`), and so are the

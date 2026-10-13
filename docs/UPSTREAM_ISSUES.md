@@ -266,13 +266,15 @@ count of the cases where it fails, recorded beside the number it produces.
 ## UP-0019 — When2Call gives one input two contradictory gold labels (`UPSTREAM`)
 
 `nvidia/When2Call` at revision `0582f7749df63a96fdc3070932e83e72396ace53`, the `mcq` test file (cached under
-`.cache/normalization/raw/`; pinned in `reports/evaluation/behavioral-heldout-v2.manifest.json`). 21 pairs of rows share both question and tool set, so
+`.cache/normalization/raw/`; pinned in `reports/evaluation/behavioral-heldout-v2.manifest.json`). 21 pairs of rows
+share both question and tool set, so
 the rendered prompt is the same (B0's `prompt_sha256` matches within each pair). In 16 of them the gold decisions
 differ, `CALL` against `CLARIFY`; in 5 both are `UNSUPPORTED`. Repro: group the rows by sha256 of `question` and
 of the JSON-serialised `tools`; take groups with more than one row; compare the gold decisions
 (`expected_decision` in `reports/baselines/qwen35_2b_baseline/predictions.jsonl`). Effect: on each of the 16 pairs a
-model scores at most one of two; 8 pairs cross OpenGrad's dev/confirmatory partition (ERRATA §36). Not yet
-searched for or reported upstream. Study 002's `P-CONF` inherits the pairs.
+model scores at most one of two; 8 pairs cross OpenGrad's dev/confirmatory partition and 8 lie wholly in dev (ERRATA
+§36). Not yet searched for or reported upstream. Study 002's `P-CONF` takes the confirmatory side only, so it holds
+8 of these items, each with its contradictory twin in dev; no pair lies wholly inside it.
 
 Later line for UP-0018, 2026-10-13: the prefix-caching item is fixed in `VLLMInferenceBackend` (pinned `False` and
 recorded in its engine metadata), and `scripts/select_checkpoint.py` now refuses the confirmatory side.
