@@ -63,7 +63,7 @@ def _errors(report, name: str) -> list[str]:
 
 
 def test_the_gate_is_versioned() -> None:
-    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 6
+    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 7
 
 
 def test_a_healthy_bundle_passes_every_check_under_the_adopted_prereg() -> None:
@@ -104,7 +104,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 36
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 39
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
@@ -860,11 +860,12 @@ def test_every_arm_runs_exactly_the_seeds_05_fixes(seeds) -> None:
 
 def _with_repeats(bundle: dict, **changes) -> dict:
     """The healthy runs plus REP-A (C0, seed 0, re-run) and REP-B (A_M0 re-scored), as 05 defines them."""
-    first = bundle["arm_runs"][0]
-    bundle["arm_runs"] += [
-        {**first, "repeat": "REP-A", **changes.get("rep_a", {})},
-        {**first, "arm": "A_M0", "seed": 42, "repeat": "REP-B", **changes.get("rep_b", {})},
-    ]
+    # The healthy runs already end with REP-A; add REP-B and apply each change.
+    first = {k: v for k, v in bundle["arm_runs"][0].items() if k != "metrics"}
+    bundle["arm_runs"][-1].update(changes.get("rep_a", {}))
+    bundle["arm_runs"].append(
+        {**first, "arm": "A_M0", "seed": 42, "repeat": "REP-B", **changes.get("rep_b", {})}
+    )
     return bundle
 
 
@@ -930,3 +931,54 @@ def test_rep_b_fails_when_a_m0s_run_record_cannot_be_read(tmp_path) -> None:
     report = study_002_gate(_with_repeats(healthy_bundle()), ADOPTED_PARAMETERS, root=tmp_path)
     errors = _errors(report, "generation_identity")
     assert any("REP-B" in e and "unreadable" in e for e in errors)
+
+
+# -- contract 7: one determinism mode, and REP-A's evidence (reports/ERRATA.md §39) ----------------
+
+
+def test_non_deterministic_runs_may_differ_from_rep_a() -> None:
+    """14: under NON_DETERMINISTIC_KERNEL the residual is measured, not required to be zero."""
+    bundle = healthy_bundle()
+    for run in bundle["arm_runs"]:
+        run["determinism_mode"] = "NON_DETERMINISTIC_KERNEL"
+    bundle["arm_runs"][-1]["metrics"]["call_f1"] = 0.76
+    assert _status(_gate(bundle), "generation_identity") == PASS
+
+
+def test_under_declared_determinism_any_difference_is_a_defect() -> None:
+    from opengrad.verification.study_002_gate_runs import CODE_DETERMINISM
+
+    bundle = healthy_bundle()
+    bundle["arm_runs"][-1]["metrics"]["answer_rate"] = 0.7400001
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any(CODE_DETERMINISM in e and "answer_rate" in e for e in errors)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda runs: runs[0].pop("determinism_mode"),
+        lambda runs: runs[0].update(determinism_mode="deterministic"),
+        lambda runs: runs[-1].update(determinism_mode="NON_DETERMINISTIC_KERNEL"),
+        lambda runs: runs.pop(),
+        lambda runs: runs[-1].pop("metrics"),
+        lambda runs: runs[0].pop("metrics"),
+        lambda runs: runs[-1].update(metrics={}),
+        lambda runs: runs[-1].update(metrics={"call_f1": float("nan")}),
+        lambda runs: runs[-1].update(metrics={"call_f1": True}),
+        lambda runs: runs[-1]["metrics"].pop("call_f1"),
+    ],
+)
+def test_rep_a_evidence_and_one_mode_are_required(change) -> None:
+    bundle = healthy_bundle()
+    change(bundle["arm_runs"])
+    report = _gate(bundle)
+    assert _status(report, "generation_identity") == FAIL
+    assert report.overall == FAIL
+
+
+def test_rep_b_declares_no_determinism_mode() -> None:
+    """REP-B re-scores a Study 001 checkpoint; it is not an arm, so 46 §12's mode does not apply."""
+    bundle = _with_repeats(healthy_bundle())
+    bundle["arm_runs"][-1].pop("determinism_mode")
+    assert _status(_gate(bundle), "generation_identity") == PASS

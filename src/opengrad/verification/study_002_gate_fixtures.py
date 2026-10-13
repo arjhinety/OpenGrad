@@ -35,7 +35,7 @@ from opengrad.verification.study_002_gate import (
     PreregParameters,
     study_002_gate,
 )
-from opengrad.verification.study_002_gate_runs import CODE_INVALID_COMPARISON
+from opengrad.verification.study_002_gate_runs import CODE_DETERMINISM, CODE_INVALID_COMPARISON
 
 #: The corpus manifest the healthy fixture binds to (LF on every platform, `.gitattributes`).
 FIXTURE_CORPUS_MANIFEST = "reports/canonical-v3/canonical-v3.manifest.json"
@@ -63,6 +63,36 @@ def _metric_row(metric: str, arm: str) -> dict[str, Any]:
 
 
 # -- the vacuity self-test (16-GPU-READINESS-GATE.md check 13) -------------------------------------
+
+
+#: C0 seed 0's metrics, which REP-A reproduces exactly under ``DECLARED_DETERMINISTIC`` (14).
+_C0_SEED_0_METRICS = {"call_f1": 0.75, "answer_rate": 0.74, "refusal_correctness": 0.80}
+
+
+def _healthy_runs() -> list[dict[str, Any]]:
+    """C0 and R1 on 05's seeds 0, 1, 2, evaluated alike (04), plus REP-A (C0, seed 0, re-run; 05, 14)."""
+    runs: list[dict[str, Any]] = [
+        {
+            "arm": arm,
+            "seed": seed,
+            "provider": "nvidia",
+            "tokenizer_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+            "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+            "evaluator_version": "fixture",
+            "engine": "vllm",
+            "engine_version": "0.29.0",
+            "max_tokens": {"P-CONF": 512, "gsm8k": 512, "ifeval": 2560, "mmlu_pro": 2048},
+            "decoding": {"temperature": 0.0, "top_k": 1, "top_p": 1.0},
+            "enable_prefix_caching": False,
+            "device_class": "H200",
+            "determinism_mode": "DECLARED_DETERMINISTIC",
+        }
+        for arm in ("C0", "R1")
+        for seed in (0, 1, 2)
+    ]
+    runs[0]["metrics"] = dict(_C0_SEED_0_METRICS)
+    runs.append({**runs[0], "repeat": "REP-A", "metrics": dict(_C0_SEED_0_METRICS)})
+    return runs
 
 
 def healthy_bundle() -> dict[str, Any]:
@@ -124,24 +154,7 @@ def healthy_bundle() -> dict[str, Any]:
                 "field": "corpus_fingerprint",
             },
         ],
-        "arm_runs": [
-            {
-                "arm": arm,
-                "seed": seed,
-                "provider": "nvidia",
-                "tokenizer_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
-                "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
-                "evaluator_version": "fixture",
-                "engine": "vllm",
-                "engine_version": "0.29.0",
-                "max_tokens": {"P-CONF": 512, "gsm8k": 512, "ifeval": 2560, "mmlu_pro": 2048},
-                "decoding": {"temperature": 0.0, "top_k": 1, "top_p": 1.0},
-                "enable_prefix_caching": False,
-                "device_class": "H200",
-            }
-            for arm in ("C0", "R1")
-            for seed in (0, 1, 2)
-        ],
+        "arm_runs": _healthy_runs(),
         "truncation": {
             "0-shot": {"C0": 0.02, "R1": 0.03},
             "8-shot": {"C0": 0.01, "R1": 0.01},
@@ -307,7 +320,7 @@ def self_test() -> dict[str, Any]:
     cases["arm_runs_with_a_different_budget"] = _case(other_budget, FAIL, CODE_INVALID_COMPARISON)
 
     other_template = healthy_bundle()
-    other_template["arm_runs"][-1]["chat_template_sha256"] = "1" * 64
+    other_template["arm_runs"][5]["chat_template_sha256"] = "1" * 64
     cases["arm_runs_with_a_different_template"] = _case(
         other_template, FAIL, CODE_INVALID_COMPARISON
     )
@@ -334,13 +347,26 @@ def self_test() -> dict[str, Any]:
     cases["arms_on_seeds_3_4_5"] = _case(other_seeds, FAIL, CODE_INVALID_COMPARISON)
 
     rep_a_drift = healthy_bundle()
-    rep_a_drift["arm_runs"].append(
-        {**rep_a_drift["arm_runs"][0], "repeat": "REP-A", "chat_template_sha256": "2" * 64}
-    )
+    rep_a_drift["arm_runs"][-1]["chat_template_sha256"] = "2" * 64
     cases["rep_a_with_a_different_template"] = _case(rep_a_drift, FAIL, CODE_INVALID_COMPARISON)
 
+    # -- contract 6 passed these (reports/ERRATA.md §39) -------------------------------------------
+    not_reproduced = healthy_bundle()
+    not_reproduced["arm_runs"][-1]["metrics"]["call_f1"] = 0.76
+    cases["rep_a_not_reproduced_under_declared_determinism"] = _case(
+        not_reproduced, FAIL, CODE_DETERMINISM
+    )
+
+    two_modes = healthy_bundle()
+    two_modes["arm_runs"][3]["determinism_mode"] = "NON_DETERMINISTIC_KERNEL"
+    cases["arms_in_two_determinism_modes"] = _case(two_modes, FAIL, CODE_INVALID_COMPARISON)
+
+    no_rep_a = healthy_bundle()
+    del no_rep_a["arm_runs"][-1]
+    cases["no_rep_a_record"] = _case(no_rep_a, FAIL, CODE_INVALID_COMPARISON)
+
     one_seed_short = healthy_bundle()
-    one_seed_short["arm_runs"] = one_seed_short["arm_runs"][:-1]
+    del one_seed_short["arm_runs"][5]
     cases["an_arm_with_two_seeds"] = _case(one_seed_short, FAIL, CODE_INVALID_COMPARISON)
 
     bad_field = healthy_bundle()

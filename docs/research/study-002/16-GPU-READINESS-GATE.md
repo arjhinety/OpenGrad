@@ -243,3 +243,6 @@ to artifacts (15 V3 / V9) and apply 46 §10. No threshold or amendment changed.
 
 Later, 2026-10-13: check 2 now reads **contract 6** (`reports/ERRATA.md` §38), which adds check 12c, 04's
 held-fixed evaluation factors. No threshold or amendment changed.
+
+Later, 2026-10-13: check 2 now reads **contract 7** (`reports/ERRATA.md` §39): one determinism mode and the
+`REP-A` evidence 14 requires. No threshold or amendment changed.

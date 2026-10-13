@@ -6,6 +6,12 @@ shared accounting contract (`opengrad.verification.accounting`), and it is delib
 no: a required input that is absent is ``BLOCKED_INPUT_MISSING`` (never a pass), and a required
 population the bundle cannot measure is ``FAIL_NONVACUOUS``.
 
+**Contract 7 (2026-10-13).** Contract 6 never read ``REP-A``. Contract 7 implements, as written, 46 §12
+("One determinism mode for every arm") and 14's evidence column (`reports/ERRATA.md` §39; no amendment):
+check 12c also requires every arm's runs and ``REP-A`` to declare one determinism mode, a ``REP-A`` record
+in either mode, and, under ``DECLARED_DETERMINISTIC``, ``REP-A``'s metrics to equal ``C0`` seed 0's exactly
+(``FAIL_DETERMINISM``). How large a residual may be is not written, so the gate does not judge it.
+
 **Contract 6 (2026-10-13).** Contract 5 compared arms whose runs may have used different tokenizers,
 templates, evaluators, generation settings or devices. Contract 6 implements, as written, 04's "Fixed
 across every arm" table (`reports/ERRATA.md` §38; no amendment): check 12c requires every arm's run
@@ -61,7 +67,9 @@ The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 12b. ``truncation_balance`` -- imbalance within the declared factor -- ``INVALID_COMPARISON``
 12c. ``generation_identity`` -- every arm's run records agree on 04's held-fixed evaluation factors
      (:data:`RUN_IDENTITY_FIELDS`), record a provider, run exactly 05's seeds 0, 1, 2, and cover exactly
-     the arms of the ``truncation`` table -- ``INVALID_COMPARISON``
+     the arms of the ``truncation`` table; one determinism mode, a ``REP-A`` record, and under
+     ``DECLARED_DETERMINISTIC`` an exact reproduction (46 §12, 14) -- ``INVALID_COMPARISON`` /
+     ``FAIL_DETERMINISM``
 13. ``provenance`` -- every metric the verdict reads has a row carrying 15 V3's attachment, bound to the
     pinned partition its metric is measured on (:data:`P_UNANS_PARTITIONS` for ``refusal_correctness``,
     ``P-CONF`` for the rest); a row for a metric 07 reports but the verdict does not read
@@ -149,12 +157,13 @@ from opengrad.verification.resolvability import at_most, resolvable_margin
 from opengrad.verification.study_002_gate_runs import (
     A_M0_RUN_RECORD,
     CODE_INVALID_COMPARISON,
+    determinism_errors,
     generation_identity_errors,
 )
 
 #: The gate's own contract. Bump when the check set, its discovery rules or its non-vacuity
 #: requirements change, so a PASS under one contract is never read as a PASS under another.
-STUDY_002_GATE_CONTRACT = 6
+STUDY_002_GATE_CONTRACT = 7
 
 #: The repository the gate reads fingerprinted artifacts from (15 V9).
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -657,6 +666,7 @@ class Study002Gate:
         except (OSError, ValueError, KeyError):
             a_m0_seed = None
         errors = generation_identity_errors(runs, truncation_arms, a_m0_seed)
+        errors += determinism_errors(runs)
         return result_from("generation_identity", REQUIRED_NONEMPTY, ["arm_runs"], errors)
 
     def provenance(self) -> ValidationResult:

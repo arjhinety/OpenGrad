@@ -7,10 +7,16 @@ The gate calls :func:`generation_identity_errors`; the constants are imported fr
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any
 
 CODE_INVALID_COMPARISON = "INVALID_COMPARISON"
+#: 14: "A run that declares ``DECLARED_DETERMINISTIC`` and fails ``REP-A`` is a **defect**".
+CODE_DETERMINISM = "FAIL_DETERMINISM"
+
+#: 14's two classes. 46 §12: "One determinism mode for every arm, chosen by a rule".
+DETERMINISM_MODES = frozenset({"DECLARED_DETERMINISTIC", "NON_DETERMINISTIC_KERNEL"})
 
 #: 04 "Fixed across every arm": "Tokenizer and chat-template hash | pinned", "Evaluator version, generation
 #: config, decoder | one version", "Device class for primary runs | one class, with the provider recorded".
@@ -142,4 +148,81 @@ def generation_identity_errors(
         for arm, s in sorted(seeds.items())
         if s != REQUIRED_SEEDS
     )
+    return errors
+
+
+def _metrics(value: Any) -> dict[str, float] | None:
+    """A non-empty map of metric name to finite number, or ``None``."""
+    if not isinstance(value, dict) or not value:
+        return None
+    if not all(
+        _text(k) and isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+        for k, v in value.items()
+    ):
+        return None
+    return {str(k): float(v) for k, v in value.items()}
+
+
+def determinism_errors(runs: list[dict[str, Any]]) -> list[str]:
+    """46 §12 and 14, as written: one determinism mode for every arm, and the ``REP-A`` evidence it requires.
+
+    14, "Evidence required": under ``DECLARED_DETERMINISTIC``, "``REP-A`` ... reproduces the metric values
+    exactly"; under ``NON_DETERMINISTIC_KERNEL``, "``REP-A`` residual measured and reported". Either way a
+    ``REP-A`` record is required, and it and ``C0``'s seed-0 run carry the same metrics. How large a residual
+    is too large is not written (48, part (b)), so this function never judges its size.
+    ``REP-B`` re-scores a Study 001 checkpoint and is not an arm, so it declares no mode.
+    """
+    errors: list[str] = []
+    declaring = [run for run in runs if run.get("repeat") != "REP-B"]
+    modes = set()
+    for index, run in enumerate(declaring):
+        mode = run.get("determinism_mode")
+        if mode in DETERMINISM_MODES:
+            modes.add(mode)
+        else:
+            errors.append(
+                f"{run.get('arm')!r}/seed {run.get('seed')!r}: {CODE_INVALID_COMPARISON}: declares no "
+                f"determinism mode ({mode!r}; 14 names {', '.join(sorted(DETERMINISM_MODES))})"
+                if run
+                else f"run-{index}: {CODE_INVALID_COMPARISON}: declares no determinism mode"
+            )
+    if len(modes) > 1:
+        errors.append(
+            f"arm_runs: {CODE_INVALID_COMPARISON}: {len(modes)} determinism modes; 46 §12 requires one "
+            "for every arm"
+        )
+    rep_a = [run for run in runs if run.get("repeat") == "REP-A"]
+    if not rep_a:
+        errors.append(
+            f"REP-A: {CODE_INVALID_COMPARISON}: no REP-A record; 14 requires it in either mode"
+        )
+        return errors
+    base = [
+        run
+        for run in runs
+        if run.get("repeat") is None
+        and run.get("arm") == "C0"
+        and type(run.get("seed")) is int
+        and run.get("seed") == 0
+    ]
+    repeated = _metrics(rep_a[0].get("metrics"))
+    original = _metrics(base[0].get("metrics")) if base else None
+    if repeated is None or original is None:
+        errors.append(
+            f"REP-A: {CODE_INVALID_COMPARISON}: REP-A and C0's seed-0 run must both carry metrics "
+            "(a non-empty map of finite numbers)"
+        )
+        return errors
+    if set(repeated) != set(original):
+        errors.append(
+            f"REP-A: {CODE_INVALID_COMPARISON}: REP-A and C0 seed 0 report different metrics; the "
+            "residual cannot be measured"
+        )
+    elif modes == {"DECLARED_DETERMINISTIC"}:
+        differ = sorted(name for name in original if repeated[name] != original[name])
+        if differ:
+            errors.append(
+                f"REP-A: {CODE_DETERMINISM}: declared DECLARED_DETERMINISTIC, but REP-A does not "
+                f"reproduce C0 seed 0 exactly ({', '.join(differ)}); 14 calls this a defect"
+            )
     return errors

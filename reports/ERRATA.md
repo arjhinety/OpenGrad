@@ -1769,3 +1769,32 @@ greedy (05: "so that no seed enters the score"), so no seed enters the re-score 
 seed 0 or 7 fails, and so does any `REP-B` when that record cannot be read. 05's table is not changed: correcting
 its wording for `REP-B` would take a numbered amendment, and is listed for the next one (48, part (b)). `REP-A`
 is unchanged: it re-runs `C0` on seed 0. Logged as UP-0021.
+
+## 39. Study 002 gate contract 7: one determinism mode, and the `REP-A` evidence 14 requires
+
+**Added 2026-10-13,** as the written part of [48](../docs/research/study-002/48-GATE-CONTRACT-5-DESIGN.md) item 5,
+on the §19, §35, §37 and §38 precedent. No arm has been scored, so no verdict changes, and no threshold, rule or
+population changes. The owner chose (2026-10-13) to implement what is written now and send the rest to the
+amendment.
+
+- **As written:**
+  - 46 §12 (`study_002_prereg_v14`): "One determinism mode for every arm, chosen by a rule", and "`REP-A`
+    measures the residual either way".
+  - 14, "Evidence required": under `DECLARED_DETERMINISTIC`, "`REP-A` ... reproduces the metric values
+    exactly"; under `NON_DETERMINISTIC_KERNEL`, "`REP-A` residual measured and reported".
+  - 14: "A run that declares `DECLARED_DETERMINISTIC` and fails `REP-A` is a **defect**".
+- **Contract 6:** the gate never read `REP-A` or a determinism mode.
+- **Contract 7, check 12c:**
+  - Every arm's runs and `REP-A` declare `determinism_mode`, one of 14's two classes, and all declare the same
+    one. `REP-B` declares none: it re-scores a Study 001 checkpoint and is not an arm.
+  - A `REP-A` record is required in either mode, since 14 lists it as the evidence for both.
+  - `REP-A` and `C0`'s seed-0 run both carry `metrics`, a non-empty map of finite numbers, with the same names.
+  - Under `DECLARED_DETERMINISTIC`, any difference between them fails with `FAIL_DETERMINISM`. Under
+    `NON_DETERMINISTIC_KERNEL` they may differ.
+- **Not implemented, for the amendment (48 B11):** how large a residual may be. 05 says a threshold is rejected
+  when `REP-A`'s residual is "larger than" its margin. 11 asks for noise "an order of magnitude smaller", for one
+  threshold. Neither defines the residual (per metric, or the largest), and both place the comparison at
+  "pre-GPU review", before `REP-A` can run. The gate therefore checks that the residual can be measured, never
+  whether it is small enough.
+- **Tests:** the self-test grew from 38 to 41 cases, and readiness check 2 expects contract 7. The check is in
+  `study_002_gate_runs.py`.

@@ -131,3 +131,6 @@ so the line numbers the Study 002 preregistration cites above stay stable.
   supports nothing. The values themselves are not yet re-derived. v6 is unchanged.
 - **2026-10-13 (contract 6):** `study_002_gate_v1` also requires the arms to have been evaluated alike, as 04
   holds them fixed ([`reports/ERRATA.md`](../reports/ERRATA.md) §38). v6 is unchanged.
+- **2026-10-13 (contract 7):** `study_002_gate_v1` requires one determinism mode and `REP-A`'s evidence (14), and
+  fails a run declared deterministic that `REP-A` does not reproduce ([`reports/ERRATA.md`](../reports/ERRATA.md)
+  §39). v6 is unchanged.

@@ -197,3 +197,8 @@ stay over all of the flag set.
 > held-fixed evaluation factors (tokenizer and template hashes, evaluator, engine, generation config, prefix
 > caching, device class), to record their provider, and to run exactly 05's seeds 0, 1 and 2; 05's repeats `REP-A`
 > and `REP-B` are held to the same factors. No value above changes.
+
+> **Contract 7, 2026-10-13 (`reports/ERRATA.md` §39).** Check 12c also requires one determinism mode for every arm
+> (46 §12), a `REP-A` record, and under `DECLARED_DETERMINISTIC` an exact reproduction of `C0` seed 0 (14). The
+> comparison of `REP-A`'s residual with each margin, stated at the top of this file, is not yet defined well enough
+> to implement and goes to the next amendment (48 B11). No value above changes.
