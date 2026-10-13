@@ -1716,16 +1716,32 @@ owner's reason for contract 5).
   - Every record carries the tokenizer sha256, the chat-template sha256, the evaluator version, the engine and its
     version, the per-benchmark `max_tokens`, the decoding settings, `enable_prefix_caching` and the device class,
     and all records agree on each.
+  - Each value must be a real one: both hashes 64 lowercase hex characters, the evaluator, engine, engine version
+    and device class non-empty strings, `max_tokens` a non-empty map of positive integers, `decoding` a non-empty
+    map, and `enable_prefix_caching` a boolean. Agreement on an empty or placeholder value does not count.
   - Every record names its provider. Providers may differ, since 04 records them, but the device class may not.
-  - At least two arms, every arm with `k = 3` seeds, and the same seeds in every arm.
-  - The arms in `arm_runs` are exactly the arms in the `truncation` table. An arm with run records but no
-    truncation rates, or truncation rates but no run records, fails, and so do run records with no truncation
-    table at all (owner, 2026-10-13).
-  - **Not cross-checked:** comparison rows name no arm (`{id, population, n, margin, delta}`), so an arm that
+  - At least two arms, and every arm runs exactly the seeds 0, 1 and 2. This implements 05 as written: "`k = 3`
+    seeds per arm, identical values across all arms", with the slots `s0`, `s1`, `s2` "seeded `0`, `1`, `2`"
+    (readiness already checks `configs/study_002/seed-plan.yaml` for them). Arms on seeds 3, 4, 5 fail, even though
+    they agree. Seeds are integers, so `0`, `0.0` and `"0"` are one seed written three ways, not three. A second
+    record for the same arm and seed fails, and so does an arm named only with whitespace. - The arms in `arm_runs`
+    are exactly the arms in the `truncation` table. An arm with run records but no truncation rates, or truncation
+    rates but no run records, fails, and so do run records with no truncation table at all (owner, 2026-10-13). -
+    **Not cross-checked:** comparison rows name no arm (`{id, population, n, margin, delta}`), so an arm that
     appears only in a comparison cannot be matched against `arm_runs` yet.
+  - **Repeat runs (05, "What the two repeats measure").** A repeat's record sits in `arm_runs` with a `repeat`
+    id. `REP-A` must be `C0` on seed 0 ("`C0`, seed `s0`, re-run"). `REP-B` must be `A_M0` ("`A_M0` re-scored
+    under the Study 002 evaluator"), any seed. Each id appears once, and no other id is accepted. A repeat is
+    held to every factor above, since a repeat run under another template or evaluator would not measure
+    nondeterminism or evaluator reproducibility. It is left out of the arm set, the seed count and the
+    one-record-per-run rule, because it is not an arm's scored run. The alternative, a separate bundle key, was
+    not chosen: it would check the same factors in two places (owner's question, 2026-10-13).
   - Anything else is `INVALID_COMPARISON`; no `arm_runs` is `BLOCKED_INPUT_MISSING`.
 - **What it checks and what it does not:** it checks that the arms agree with each other, not that they hold any
   particular value. Prefix caching on in every run agrees. Whether each record is true is the run producer's job,
   as for §37's metric rows.
-- **Tests:** the self-test grew from 30 to 34 cases, the gate from 17 to 18 checks, and readiness check 2 expects
+- **Audit before push:** the first version accepted three spellings of one seed as `k = 3`, empty or
+  placeholder values as recorded, duplicate run records and a whitespace arm name. Each now fails, with a test.
+  The check moved to `study_002_gate_runs.py` to keep the gate module under the 1,000-line limit.
+- **Tests:** the self-test grew from 30 to 38 cases, the gate from 17 to 18 checks, and readiness check 2 expects
   contract 6.

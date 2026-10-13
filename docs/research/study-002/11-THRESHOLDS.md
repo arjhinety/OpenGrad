@@ -195,4 +195,5 @@ stay over all of the flag set.
 
 > **Contract 6, 2026-10-13 (`reports/ERRATA.md` §38).** Check 12c requires every arm's runs to agree on 04's
 > held-fixed evaluation factors (tokenizer and template hashes, evaluator, engine, generation config, prefix
-> caching, device class), to record their provider, and to use the same three seeds. No value above changes.
+> caching, device class), to record their provider, and to run exactly 05's seeds 0, 1 and 2; 05's repeats `REP-A`
+> and `REP-B` are held to the same factors. No value above changes.

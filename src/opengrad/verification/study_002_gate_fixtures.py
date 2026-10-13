@@ -23,7 +23,6 @@ from opengrad.verification.study_002_gate import (
     BASELINE_METRICS,
     CANDIDATE_METRICS,
     CODE_ACCOUNTING,
-    CODE_INVALID_COMPARISON,
     CODE_INVALID_METRIC,
     CODE_MISSING_METRIC,
     CODE_PROVENANCE_INCOMPLETE,
@@ -36,6 +35,7 @@ from opengrad.verification.study_002_gate import (
     PreregParameters,
     study_002_gate,
 )
+from opengrad.verification.study_002_gate_runs import CODE_INVALID_COMPARISON
 
 #: The corpus manifest the healthy fixture binds to (LF on every platform, `.gitattributes`).
 FIXTURE_CORPUS_MANIFEST = "reports/canonical-v3/canonical-v3.manifest.json"
@@ -317,6 +317,27 @@ def self_test() -> dict[str, Any]:
     cases["arm_runs_with_an_arm_the_truncation_table_lacks"] = _case(
         extra_arm, FAIL, CODE_INVALID_COMPARISON
     )
+
+    mixed_seeds = healthy_bundle()
+    for run, seed in zip(mixed_seeds["arm_runs"], (0, 0.0, "0", 0, 0.0, "0")):
+        run["seed"] = seed
+    cases["one_seed_written_three_ways"] = _case(mixed_seeds, FAIL, CODE_INVALID_COMPARISON)
+
+    placeholder = healthy_bundle()
+    for run in placeholder["arm_runs"]:
+        run["tokenizer_sha256"] = ""
+    cases["arm_runs_with_an_empty_hash"] = _case(placeholder, FAIL, CODE_INVALID_COMPARISON)
+
+    other_seeds = healthy_bundle()
+    for run in other_seeds["arm_runs"]:
+        run["seed"] += 3
+    cases["arms_on_seeds_3_4_5"] = _case(other_seeds, FAIL, CODE_INVALID_COMPARISON)
+
+    rep_a_drift = healthy_bundle()
+    rep_a_drift["arm_runs"].append(
+        {**rep_a_drift["arm_runs"][0], "repeat": "REP-A", "chat_template_sha256": "2" * 64}
+    )
+    cases["rep_a_with_a_different_template"] = _case(rep_a_drift, FAIL, CODE_INVALID_COMPARISON)
 
     one_seed_short = healthy_bundle()
     one_seed_short["arm_runs"] = one_seed_short["arm_runs"][:-1]

@@ -104,7 +104,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 32
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 36
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
@@ -726,7 +726,7 @@ def test_missing_arm_runs_block_rather_than_pass() -> None:
     ],
 )
 def test_any_held_fixed_factor_that_differs_between_runs_fails(field: str) -> None:
-    from opengrad.verification.study_002_gate import RUN_IDENTITY_FIELDS
+    from opengrad.verification.study_002_gate_runs import RUN_IDENTITY_FIELDS
 
     assert field in RUN_IDENTITY_FIELDS
     bundle = healthy_bundle()
@@ -785,3 +785,104 @@ def test_without_a_truncation_table_the_runs_cannot_be_matched() -> None:
     bundle = healthy_bundle()
     del bundle["truncation"]
     assert _status(_gate(bundle), "generation_identity") == FAIL
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("tokenizer_sha256", ""),
+        ("chat_template_sha256", "x"),
+        ("chat_template_sha256", "A" * 64),
+        ("evaluator_version", " "),
+        ("engine", ""),
+        ("engine_version", 29),
+        ("device_class", ""),
+        ("max_tokens", {}),
+        ("max_tokens", []),
+        ("max_tokens", {"gsm8k": 0}),
+        ("max_tokens", {"gsm8k": 512.0}),
+        ("max_tokens", {"gsm8k": True}),
+        ("decoding", {}),
+        ("enable_prefix_caching", "no"),
+        ("enable_prefix_caching", 0),
+    ],
+)
+def test_a_placeholder_held_fixed_factor_is_not_recorded(field: str, value) -> None:
+    """Agreement on an empty or placeholder value is not a recorded factor (04 "pinned")."""
+    bundle = healthy_bundle()
+    for run in bundle["arm_runs"]:
+        run[field] = value
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any(CODE_INVALID_COMPARISON in e and field in e for e in errors)
+
+
+@pytest.mark.parametrize("seeds", [(0, 0.0, "0"), (0.5, 1.5, 2.5), ("", 1, 2), (-1, 1, 2)])
+def test_seeds_are_three_distinct_non_negative_integers(seeds) -> None:
+    bundle = healthy_bundle()
+    for run, seed in zip(bundle["arm_runs"], seeds * 2):
+        run["seed"] = seed
+    assert _status(_gate(bundle), "generation_identity") == FAIL
+
+
+def test_a_second_record_for_one_run_fails() -> None:
+    bundle = healthy_bundle()
+    bundle["arm_runs"].append(dict(bundle["arm_runs"][2]))
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any("a second record for one run" in e for e in errors)
+
+
+def test_an_arm_named_only_with_whitespace_fails() -> None:
+    bundle = healthy_bundle()
+    for run in bundle["arm_runs"][:3]:
+        run["arm"] = " "
+    for arms in bundle["truncation"].values():
+        arms[" "] = arms.pop("C0")
+    assert _status(_gate(bundle), "generation_identity") == FAIL
+
+
+@pytest.mark.parametrize("seeds", [(3, 4, 5), (0, 1, 3), (1, 2, 3)])
+def test_every_arm_runs_exactly_the_seeds_05_fixes(seeds) -> None:
+    """05: s0, s1, s2 are seeded 0, 1, 2. Three other seeds, the same in every arm, still fail."""
+    from opengrad.verification.study_002_gate_runs import REQUIRED_SEEDS
+
+    assert REQUIRED_SEEDS == {0, 1, 2}
+    bundle = healthy_bundle()
+    for run, seed in zip(bundle["arm_runs"], seeds * 2):
+        run["seed"] = seed
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any(CODE_INVALID_COMPARISON in e and "05's [0, 1, 2]" in e for e in errors)
+
+
+def _with_repeats(bundle: dict, **changes) -> dict:
+    """The healthy runs plus REP-A (C0, seed 0, re-run) and REP-B (A_M0 re-scored), as 05 defines them."""
+    first = bundle["arm_runs"][0]
+    bundle["arm_runs"] += [
+        {**first, "repeat": "REP-A", **changes.get("rep_a", {})},
+        {**first, "arm": "A_M0", "repeat": "REP-B", **changes.get("rep_b", {})},
+    ]
+    return bundle
+
+
+def test_repeat_records_are_exempt_from_the_one_record_rule_and_the_arm_set() -> None:
+    report = _gate(_with_repeats(healthy_bundle()))
+    assert _status(report, "generation_identity") == PASS
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"rep_a": {"chat_template_sha256": "2" * 64}},
+        {"rep_b": {"engine_version": "0.30.0"}},
+        {"rep_b": {"provider": ""}},
+        {"rep_a": {"seed": 1}},
+        {"rep_a": {"arm": "R1"}},
+        {"rep_b": {"arm": "C0"}},
+        {"rep_a": {"repeat": "REP-C"}},
+        {"rep_a": {"repeat": ["REP-A"]}},
+        {"rep_b": {"repeat": "REP-A", "arm": "C0"}},
+    ],
+)
+def test_a_repeat_is_held_to_every_factor_and_to_05s_definition(changes) -> None:
+    report = _gate(_with_repeats(healthy_bundle(), **changes))
+    assert any(CODE_INVALID_COMPARISON in e for e in _errors(report, "generation_identity"))
+    assert report.overall == FAIL

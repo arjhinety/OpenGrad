@@ -10,8 +10,8 @@ population the bundle cannot measure is ``FAIL_NONVACUOUS``.
 templates, evaluators, generation settings or devices. Contract 6 implements, as written, 04's "Fixed
 across every arm" table (`reports/ERRATA.md` §38; no amendment): check 12c requires every arm's run
 records to agree on the tokenizer and chat-template hashes, the evaluator, the engine and its version,
-the generation config, prefix caching and the device class, to record their provider, and to use the
-same three seeds.
+the generation config, prefix caching and the device class, to record their provider, and to run
+exactly 05's seeds 0, 1, 2. The check itself is in `study_002_gate_runs.py` (module-size limit).
 
 **Contract 5 (2026-10-13).** Contract 4 checked that provenance fields were *named*, and took each
 comparison row's ``n`` on trust. Contract 5 implements, as written, what 15 V3 / V9 and 46 §10 (v14)
@@ -60,7 +60,7 @@ The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 12. ``truncation`` -- a truncation rate in [0, 1] for every sentinel stage and every arm -- ``INVALID_COMPARISON``
 12b. ``truncation_balance`` -- imbalance within the declared factor -- ``INVALID_COMPARISON``
 12c. ``generation_identity`` -- every arm's run records agree on 04's held-fixed evaluation factors
-     (:data:`RUN_IDENTITY_FIELDS`), record a provider, use the same ``k = 3`` seeds, and cover exactly
+     (:data:`RUN_IDENTITY_FIELDS`), record a provider, run exactly 05's seeds 0, 1, 2, and cover exactly
      the arms of the ``truncation`` table -- ``INVALID_COMPARISON``
 13. ``provenance`` -- every metric the verdict reads has a row carrying 15 V3's attachment, bound to the
     pinned partition its metric is measured on (:data:`P_UNANS_PARTITIONS` for ``refusal_correctness``,
@@ -146,6 +146,10 @@ from opengrad.verification.provenance_validators import (
     v9_fingerprint_from_artifact,
 )
 from opengrad.verification.resolvability import at_most, resolvable_margin
+from opengrad.verification.study_002_gate_runs import (
+    CODE_INVALID_COMPARISON,
+    generation_identity_errors,
+)
 
 #: The gate's own contract. Bump when the check set, its discovery rules or its non-vacuity
 #: requirements change, so a PASS under one contract is never read as a PASS under another.
@@ -157,7 +161,6 @@ GATE_VERSION = "study_002_gate_v1"
 
 CODE_ACCOUNTING = "FAIL_ACCOUNTING"
 CODE_PROVENANCE_INCOMPLETE = "PROVENANCE_INCOMPLETE"
-CODE_INVALID_COMPARISON = "INVALID_COMPARISON"
 CODE_WITHIN_NOISE = "WITHIN_NOISE"
 CODE_MISSING_METRIC = "FAIL_MISSING_METRIC"
 CODE_INVALID_METRIC = "FAIL_INVALID_METRIC"
@@ -226,25 +229,6 @@ REQUIRED_SENTINELS: dict[str, tuple[str, ...]] = {
 REQUIRED_STAGES: tuple[str, ...] = tuple(
     sorted({mode for modes in REQUIRED_SENTINELS.values() for mode in modes})
 )
-
-#: 04 "Fixed across every arm": "Tokenizer and chat-template hash | pinned", "Evaluator version, generation
-#: config, decoder | one version", "Device class for primary runs | one class, with the provider recorded".
-#: Every run record carries each field, and all records agree on each. ``max_tokens`` is the per-benchmark
-#: budget map; ``decoding`` holds temperature, top-p, top-k and the rest of the sampling config.
-RUN_IDENTITY_FIELDS = (
-    "tokenizer_sha256",
-    "chat_template_sha256",
-    "evaluator_version",
-    "engine",
-    "engine_version",
-    "max_tokens",
-    "decoding",
-    "enable_prefix_caching",
-    "device_class",
-)
-
-#: 04 "Seeds | ``k = 3``, identical seed values across arms" (05).
-SEEDS_PER_ARM = 3
 
 #: The fingerprints every bundle reads from an artifact (15 V9: "corpus and partition fingerprints").
 REQUIRED_FINGERPRINTS = ("partition", "corpus")
@@ -665,52 +649,9 @@ class Study002Gate:
             return self._blocked(
                 "generation_identity", ["arm_runs"], "no per-run evaluation record"
             )
-        errors: list[str] = []
-        values: dict[str, set[str]] = {field: set() for field in RUN_IDENTITY_FIELDS}
-        seeds: dict[str, set[str]] = {}
-        for index, run in enumerate(runs):
-            run_id = f"{run.get('arm')!r}/seed {run.get('seed')!r}" if run else f"run-{index}"
-            arm, seed = run.get("arm"), run.get("seed")
-            if not isinstance(arm, str) or not arm or seed is None or isinstance(seed, bool):
-                errors.append(f"{run_id}: {CODE_INVALID_COMPARISON}: names no arm or no seed")
-                continue
-            seeds.setdefault(arm, set()).add(json.dumps(seed, default=str))
-            if not isinstance(run.get("provider"), str) or not run["provider"].strip():
-                errors.append(f"{run_id}: {CODE_INVALID_COMPARISON}: records no provider (04, 13)")
-            for field in RUN_IDENTITY_FIELDS:
-                if run.get(field) is None:
-                    errors.append(f"{run_id}: {CODE_INVALID_COMPARISON}: records no {field}")
-                else:
-                    values[field].add(json.dumps(run[field], sort_keys=True, default=str))
-        errors.extend(
-            f"{field}: {CODE_INVALID_COMPARISON}: the runs disagree ({len(seen)} values); 04 holds "
-            "it fixed across every arm"
-            for field, seen in values.items()
-            if len(seen) > 1
-        )
-        # The runs must be the arms the truncation table reports: an arm scored but never checked for
-        # truncation, or reported for truncation but with no run record, cannot be compared. Comparison
-        # rows name no arm, so their arms cannot be cross-checked here (ERRATA §38).
         table = self._truncation_table() or {}
         truncation_arms = {str(arm) for arms in table.values() for arm in arms}
-        if set(seeds) != truncation_arms:
-            errors.append(
-                f"arm_runs: {CODE_INVALID_COMPARISON}: the runs' arms "
-                f"({', '.join(sorted(seeds)) or 'none'}) are not the truncation table's "
-                f"({', '.join(sorted(truncation_arms)) or 'none'})"
-            )
-        if len(seeds) < 2:
-            errors.append(
-                f"arm_runs: {CODE_INVALID_COMPARISON}: {len(seeds)} arm(s); a comparison needs two"
-            )
-        seed_sets = {frozenset(s) for s in seeds.values()}
-        if len(seed_sets) > 1:
-            errors.append(f"arm_runs: {CODE_INVALID_COMPARISON}: the arms ran different seeds")
-        errors.extend(
-            f"{arm}: {CODE_INVALID_COMPARISON}: {len(s)} seed(s), not k = {SEEDS_PER_ARM}"
-            for arm, s in sorted(seeds.items())
-            if len(s) != SEEDS_PER_ARM
-        )
+        errors = generation_identity_errors(runs, truncation_arms)
         return result_from("generation_identity", REQUIRED_NONEMPTY, ["arm_runs"], errors)
 
     def provenance(self) -> ValidationResult:
