@@ -1512,3 +1512,107 @@ What 46 §10 does require and contract 4 does not yet do: a comparison row on a 
 clears M(n) as support, so a `CLARIFY` comparison with a 15-point difference would count. The fix needs each row to
 name its population, which belongs with the artifact-binding work, and is scheduled for contract 4's second part as
 an implementation of v14 (owner, 2026-10-13).
+
+## 36. Study 001 capability and baseline evidence: what a literature-grounded audit changes
+
+**Added 2026-10-13,** from five read-only audits, each checking one failure class from the literature. The
+classes are answer extraction, harness configuration, contamination and leakage, labels, and refusal
+measurement. Every number below was recomputed from the committed per-example score files
+(`results/benchmarks/h200/capability_v1/<STAGE>/*_scores_per_example.jsonl`) and the behavioural partition. No
+frozen file is edited, and no observed accuracy or headline direction changes. One stated interval was not fully
+adversarial, and two diagnostic figures rest on assumptions their reports did not state.
+
+### The truncation interval did not resolve every truncated reply adversarially
+
+- **As written:** `reports/GENERAL_CAPABILITY_REGRESSION.md:154-163` and `reports/FINAL_CAMPAIGN_AUDIT.md:231-232`
+  say the Base − M0 gap "stays positive under the maximally adversarial resolution of every truncated example".
+  They give MMLU-Pro as worst **+6.4pp** / observed +12.0pp / best +33.1pp, and GSM8K 8-shot as worst **+13.9pp**
+  / observed +14.1pp / best +16.3pp. The same interval is quoted at `reports/FINAL_CAMPAIGN_AUDIT.md:287, 289,
+  303`, `docs/EVALUATION.md:32` and `README.md:167`.
+- **Correction:** the interval treated as unresolved only the replies that hit the token cap and were scored
+  *incorrect*. A capped reply scored *correct* kept its point, although its last answer match can come from
+  unfinished reasoning (the extractor takes the last match). Counts of capped replies scored correct:
+
+  | | Base | M0 | M1-v2 |
+  |---|---:|---:|---:|
+  | MMLU-Pro (n = 12,032) | 90 (78 `answer_is`, 12 `trailing_letter`) | 83 | 82 |
+  | GSM8K 8-shot (n = 1,319) | 3 | 0 | 0 |
+
+  Resolving these adversarially too, MMLU-Pro is worst **+5.7pp** / observed +12.0pp / best +33.8pp. Base's floor
+  is 5,810 / 12,032 = 48.3%, not 49.0%. GSM8K 8-shot is worst **+13.7pp** / observed +14.1pp / best +16.3pp. The
+  gap stays positive in both, so no finding changes. Only the stated width of the interval does.
+
+### MMLU-Pro: the `answer_is` pattern ignores case
+
+- **As written:** `scripts/score_mmlu_pro.py:33` compiles `answer\s+is\s*:?\s*\(?([A-J])\)?` with `re.IGNORECASE`.
+  So "the answer is a …" reads as option A.
+- **Measured:** 153 Base replies end on a lower-case match (75 of them "a"). Scoring them case-sensitively
+  through the same extractor chain turns 15 correct replies wrong and 7 wrong replies right. Base moves from
+  49.04% to 48.97%, and the observed gap from 12.0pp to 11.96pp. M0 has no such reply, and M1-v2 has one (+1
+  correct).
+- **Not explained by it:** M0 is parsed as A on 20.2% of attempted items, and M1-v2 on 20.4%, against 11.7% gold A.
+  Base is 13.4%. Since M0 has no lower-case matches, this excess is not the case bug. Its cause is unmeasured and
+  no claim rests on it.
+
+### IFEval: the heuristic refusal flag also catches replies that followed every instruction
+
+- **As written:** `reports/FINAL_CAMPAIGN_AUDIT.md:94-99` reports IFEval "answer rate", "refusal" and "acc given
+  answer" from the regex classifier `HEURISTIC_REGEX_v1` (`src/opengrad/evaluation/capability.py`). Its
+  conditional accuracy falls by **−15.6pp** from Base to M0 (`FINAL_CAMPAIGN_AUDIT.md:215`,
+  `GENERAL_CAPABILITY_REGRESSION.md:71`, `H200_BENCHMARK_RUN.md:222`).
+- **Measured:** the flag marks as refusals some replies that pass every strict IFEval instruction: Base 1, M0 15,
+  M1-v2 18, M1-v1 43. These counts equal each stage's gap between official strict accuracy and diagnostic
+  accuracy. The diagnostic metrics count a flagged reply as unattempted.
+- **If those replies are counted as attempted,** acc given answer is Base 68.0%, M0 53.9%, M1-v2 54.9% and M1-v1
+  55.3%, and the Base → M0 fall is **−14.1pp**, not −15.6pp. The refusal rate is M0 16.3%, M1-v2 16.5% and M1-v1
+  21.4%, not 19.0%, 19.8% and 29.4%.
+- The pattern also matches constructed non-refusals such as "I can't help but notice". How many of the flagged
+  replies that *failed* an instruction are false positives (the `REFUSAL` row of the failure-composition table:
+  1 / 88 / 89 / 116) is unmeasured. Measuring it needs each reply read.
+- The official strict and loose numbers are computed by the upstream checkers and are unaffected.
+
+### The confirmatory partition shares question text with the development partition
+
+- **As written:** the confirmatory set is "disjoint from checkpoint selection"
+  (`reports/CANONICAL_V2_COMPLETION_REPORT.md:249-252`), and is described elsewhere as "pre-registered internal" evidence, not an untouched external
+  benchmark (`reports/M0_CANONICAL_V2_FINAL_EVALUATION.md:15`).
+- **Measured:** the partition is disjoint by item id: 2,373 dev, 1,277 confirmatory, 0 shared
+  (`reports/evaluation/behavioral-heldout-v2-partition.json`). It is not disjoint by question text.
+  - When2Call's 3,652 rows hold 2,299 distinct questions.
+  - 620 of the 1,277 confirmatory items (48.6%) ask a question that a dev item also asks.
+  - In 588 of those 620, the expected decision differs from every dev twin's. When2Call poses one question with its
+    tool offered and again with the tool removed, so the twin usually carries the opposite answer.
+  - In the other 32, the decision is the same.
+  - No two rows sharing a question have identical tool sets (0 of 1,287 groups).
+- **What it changes:** checkpoint selection on dev saw the wording of about half the confirmatory questions, mostly
+  paired with the opposite decision. "Disjoint" holds for items, not for questions.
+- The confirmatory items are also not independent of one another, so they hold less evidence than n = 1,277
+  suggests. Study 001 states no interval on a confirmatory number, so no stated uncertainty is too narrow. Study
+  002's margins inherit the issue and are handled there.
+
+### Records that cannot show a setting
+
+- **B0's prefix caching.** The B0 baseline (`reports/baselines/qwen35_2b_baseline/`) ran at commit `85ddc99`
+  through `VLLMInferenceBackend`. That backend does not pass `enable_prefix_caching`, so vLLM 0.29.0's default
+  applied, and `environment.json` does not record which. The H200 runs set it to `False`, because cached prefixes
+  make results depend on submission order (`scripts/modal/h200_capability.py:201`). The effect on B0 is
+  unmeasured.
+- **Sentinel rows.** The capability-run sentinel rows carry no `max_tokens`, `prompt_sha256` or `finish_reason`.
+  The budget used was 768 tokens, from `results/benchmarks/openweights_parity_cases_v1.json`. The sentinel is
+  already `SUGGESTIVE` only. The four stages' sentinel metadata agree, so this limits what a row can prove, not a
+  comparison.
+- **One generation pass.** Each `capability_v1` stage was generated once. Whether greedy vLLM output is invariant
+  to batch composition was not measured, so per-example run-to-run variation is unknown. A one-item change is
+  0.18pp on IFEval and 0.08pp on GSM8K (`GENERAL_CAPABILITY_REGRESSION.md:243`).
+
+### Checked and not a correction
+
+- **Base architecture.** Base loads as `Qwen3_5ForConditionalGeneration` and the trained stages as
+  `Qwen3_5ForCausalLM`. This is already disclosed at `GENERAL_CAPABILITY_REGRESSION.md:230-234`.
+- **The hash lines in `reports/H200_BENCHMARK_RUN.md:63-65`.** They say "matches frozen" and are true: the run
+  aborts on a mismatch for M1-v2, the one hard-pinned stage. But the generator prints the words without comparing
+  anything (UP-0018).
+- **`scripts/audit_campaign_final.py`.** It counts an MMLU-Pro refusal even when the reply was also attempted. No
+  frozen number is affected: no MMLU-Pro reply in any stage is flagged as a refusal (UP-0018).
+- **Prompts and decoding.** Rendered prompts are identical across stages (per-row `prompt_sha256`), and so are the
+  decoding settings. Few-shot exemplars come from `train` and `validation` splits, never from test items.

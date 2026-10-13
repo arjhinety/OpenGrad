@@ -244,3 +244,21 @@ Later line for UP-0014, 2026-10-13: closed for the gate by contract 4, which req
 baseline. `tool_use_promotion_v6` used on its own still skips them. The "owner's decision" above concerned changing
 what the policy requires; the gate now refuses a baseline without them and the policy is unchanged, on the basis
 ERRATA §35 states (02 H5, 07's policy column, §19).
+
+## UP-0018 — Study 001 scoring and reporting code that the frozen numbers survived (`OURS`)
+
+A literature-grounded audit (ERRATA §36) found code defects that change no frozen number but would mislead on new
+data. Each is reproduced; the fixes belong to the next scoring code, not to Study 001's frozen files.
+- `scripts/score_mmlu_pro.py:33`: `answer_is` uses `re.IGNORECASE`, so "the answer is a …" parses as A (Base: 153
+  replies, net 8 fewer correct when matched case-sensitively).
+- Capped replies (`finish_reason == "length"`) are scored like finished ones; the truncation interval in
+  `scripts/audit_campaign_final.py` and `scripts/build_regression_analysis.py` resolves only the incorrect ones.
+- `HEURISTIC_REGEX_v1` in `src/opengrad/evaluation/capability.py` flags replies that pass every IFEval instruction
+  (M1-v1: 43) and matches non-refusals such as "I can't help but notice".
+- `scripts/build_h200_benchmark_report.py:146-148` prints "matches frozen" / "matches pinned" without comparing.
+- `scripts/audit_campaign_final.py:110` counts an MMLU-Pro refusal even when the reply was attempted, so
+  `answer_rate + refusal_rate` can exceed 1 (no reply was flagged in the frozen run).
+- `VLLMInferenceBackend` (`src/opengrad/evaluation/backends.py`) never sets `enable_prefix_caching`, and the run
+  record does not capture vLLM's default.
+Lesson: a scorer's assumption (a match is an answer, a capped reply is finished, a regex hit is a refusal) needs a
+count of the cases where it fails, recorded beside the number it produces.

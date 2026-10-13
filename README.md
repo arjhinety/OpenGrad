@@ -165,7 +165,8 @@ apparently no regression at all. That was an artifact: Base hit the cap on 37.6%
 M0's 7.2%, so the benchmark was measuring verbosity. Re-run at 2048 tokens, the observed gap is
 12.0pp — a point estimate. Base still hits the cap on 21.8% of items against M0's 6.3%, so the
 truncation-adversarial interval is **6.4–33.1pp**: the gap stays positive however the truncated
-items resolve, but its size is not pinned down. The superseded 768-token runs for these three
+items resolve, but its size is not pinned down. Resolving capped replies that were scored correct
+adversarially too widens it to 5.7–33.8pp, still positive ([ERRATA §36](reports/ERRATA.md)). The superseded 768-token runs for these three
 stages are retained, not deleted.
 
 - Independent audit of every number above: [`reports/FINAL_CAMPAIGN_AUDIT.md`](reports/FINAL_CAMPAIGN_AUDIT.md)

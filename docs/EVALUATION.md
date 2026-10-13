@@ -119,3 +119,7 @@ Study 002 evaluates on four response modes with populations sized by their resol
 sentinel and gate specifications are [`research/study-002/07-METRIC-SPEC.md`](research/study-002/07-METRIC-SPEC.md),
 [`08-SENTINEL-SPEC.md`](research/study-002/08-SENTINEL-SPEC.md) and
 [`11-THRESHOLDS.md`](research/study-002/11-THRESHOLDS.md). Terms: [glossary](GLOSSARY.md).
+
+Later, 2026-10-13: the MMLU-Pro interval in §0.3 (+6.4pp to +33.1pp) counted a capped reply scored correct
+as resolved. Resolving those adversarially too gives +5.7pp to +33.8pp, still positive; see
+[ERRATA §36](../reports/ERRATA.md).
