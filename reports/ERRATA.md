@@ -1784,7 +1784,7 @@ amendment.
     exactly"; under `NON_DETERMINISTIC_KERNEL`, "`REP-A` residual measured and reported".
 - **Contract 6:** the gate never read `REP-A` or a determinism mode.
 - **Contract 7, check 12c:**
-  - Every run declares `determinism_mode`, one of 14's two classes: the arms' runs, `REP-A` and `REP-B`. 14:
+  - Every run declares `determinism_mode`, one of 14's two classes: the arms' runs and `REP-A` (`REP-B`: below). 14:
     "Every run declares one, and the declaration is checked rather than trusted".
   - **`REP-B` declares the mode its checkpoint was trained under (owner, 2026-10-13).** A run's mode, like its
     seed, describes how its checkpoint was trained: 46 §12 chooses it from two training runs. `REP-B` trains
@@ -1794,7 +1794,7 @@ amendment.
     from that config as its seed is read from the run record (§38); a `REP-B` copying the arms' mode is false
     and fails, and `REP-B` is left out of the one-mode-for-every-arm rule. `UNDECLARED` is not one of 14's two
     classes; 14 does not cover a re-score of a checkpoint trained before it existed, and this is listed for the
-    amendment with B10 (48).
+    amendment as B13, beside B10 (48).
   - **Where the mode is recorded (owner, 2026-10-13).** 46 §12: "The mode is recorded in the readiness record
     before Tier A." It is recorded in two files, and the gate and readiness check 1 both read both:
     - `reports/study-002/readiness/gpu-preflight.json` (`determinism_mode`), the GPU preflight record and

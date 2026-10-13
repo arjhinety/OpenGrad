@@ -101,7 +101,11 @@ UNDECLARED = "UNDECLARED"
 
 
 def read_a_m0_mode(root: Path) -> str | None:
-    """The mode ``A_M0`` was trained under, or ``None`` when its config cannot be read."""
+    """The mode ``A_M0`` was trained under, or ``None`` when its config cannot be read.
+
+    Read as ``opengrad.training.determinism.resolve_determinism`` reads it: no ``reproducibility`` or no
+    ``determinism`` is ``UNDECLARED``; a value the trainer would refuse is ``None`` here, never accepted.
+    """
     try:
         config = yaml.safe_load((root / A_M0_CONFIG).read_text(encoding="utf-8"))
     except (OSError, ValueError, yaml.YAMLError):
@@ -109,10 +113,14 @@ def read_a_m0_mode(root: Path) -> str | None:
     if not isinstance(config, dict):
         return None
     reproducibility = config.get("reproducibility")
-    declared = reproducibility.get("determinism") if isinstance(reproducibility, dict) else None
+    if reproducibility is None:
+        return UNDECLARED
+    if not isinstance(reproducibility, dict):
+        return None
+    declared = reproducibility.get("determinism")
     if declared is None:
         return UNDECLARED
-    return declared if isinstance(declared, str) else None
+    return declared if isinstance(declared, str) and declared in DETERMINISM_MODES else None
 
 
 def _text(value: Any) -> bool:
@@ -252,7 +260,7 @@ def determinism_errors(
 
     ``recorded_mode`` is the mode the GPU preflight record holds (:data:`DETERMINISM_RECORD`, readiness check
     1's evidence), or ``None`` when there is no such record. The bundle's declaration is never trusted on its own: with no record the check
-    fails, and every run must declare the recorded mode.
+    fails, and every run except ``REP-B`` must declare the recorded mode.
     """
     errors: list[str] = []
     if recorded_mode not in DETERMINISM_MODES:

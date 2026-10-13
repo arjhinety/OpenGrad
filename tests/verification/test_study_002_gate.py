@@ -1032,6 +1032,11 @@ def test_a_m0_was_trained_undeclared() -> None:
         ("reproducibility:\n  determinism: NON_DETERMINISTIC_KERNEL\n", "NON_DETERMINISTIC_KERNEL"),
         ("- a list\n", None),
         ("reproducibility:\n  determinism: [x]\n", None),
+        ("reproducibility:\n  determinism: foo\n", None),
+        ("reproducibility:\n  determinism: ''\n", None),
+        ("reproducibility: x\n", None),
+        ("reproducibility: [1]\n", None),
+        ("experiment_id: x\n", "UNDECLARED"),
     ],
 )
 def test_the_a_m0_mode_is_read_from_its_config(tmp_path, text: str, expected) -> None:
