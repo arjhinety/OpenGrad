@@ -236,6 +236,7 @@ def test_the_tables_match_the_code_constants() -> None:
     from opengrad.promotion.tool_use_policy import V6_COMPARISON_PLACES, PromotionPolicyV6
     from opengrad.verification import pdet_coverage_metrics as metrics
     from opengrad.verification import study_002_gate as gate
+    from opengrad.verification import study_002_gate_fixtures as gate_fixtures
 
     policy = PromotionPolicyV6()
     assert (policy.min_call_f1_retention, policy.min_macro_recall) == (0.90, 0.40)
@@ -278,7 +279,7 @@ def test_the_tables_match_the_code_constants() -> None:
     assert metrics.MAX_CALL_ON_AMBIGUOUS_IN_M == 0
     # The policy itself, on the gate's healthy bundle: within about 5e-7 on the wrong side of a bar
     # still promotes, 6e-7 does not.
-    bundle = gate.healthy_bundle()
+    bundle = gate_fixtures.healthy_bundle()
 
     def decision(**changes: float) -> str:
         candidate = {**bundle["candidate"], **changes}

@@ -15,9 +15,18 @@ import hashlib
 
 import pytest
 
-from opengrad.promotion.tool_use_policy import NOT_EVALUABLE, PROMOTE, PromotionPolicyV6
+from opengrad.promotion.tool_use_policy import (
+    CODE_NONVACUOUS,
+    NOT_EVALUABLE,
+    PROMOTE,
+    PromotionPolicyV6,
+)
 from opengrad.verification.accounting import BLOCKED_INPUT_MISSING, FAIL, PASS
-from opengrad.verification.population_validators import CODE_UNDER_POWERED, CODE_UNRESOLVED_ROW
+from opengrad.verification.population_validators import (
+    CODE_UNDER_POWERED,
+    CODE_UNRESOLVED_ROW,
+    CODE_VACUOUS_METRIC,
+)
 from opengrad.verification.provenance_validators import CODE_FINGERPRINT, CODE_UNATTACHED_METRIC
 from opengrad.verification.study_002_gate import (
     ADOPTED_PARAMETERS,
@@ -25,18 +34,18 @@ from opengrad.verification.study_002_gate import (
     CODE_INVALID_COMPARISON,
     CODE_INVALID_METRIC,
     CODE_MISSING_METRIC,
-    CODE_NONVACUOUS,
     CODE_PROVENANCE_INCOMPLETE,
-    CODE_VACUOUS_METRIC,
     CODE_WITHIN_NOISE,
     DESCRIPTIVE_POPULATIONS,
     REQUIRED_FINGERPRINTS,
     STUDY_002_GATE_CONTRACT,
     UNDECLARED_PARAMETERS,
+    study_002_gate,
+)
+from opengrad.verification.study_002_gate_fixtures import (
     healthy_bundle,
     self_test,
     self_test_passed,
-    study_002_gate,
 )
 
 

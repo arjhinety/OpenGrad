@@ -31,6 +31,7 @@ import yaml
 
 from opengrad.promotion.tool_use_policy import V6_POLICY_VERSION
 from opengrad.verification import study_002_gate as gate
+from opengrad.verification import study_002_gate_fixtures as gate_fixtures
 from opengrad.verification.accounting import FAIL, PASS
 from opengrad.verification.population_validators import (
     v1_mode_coverage,
@@ -171,6 +172,7 @@ def check_2_gate_version(root: Path) -> Check:
         BLOCKED if gaps else PASS,
         [
             "src/opengrad/verification/study_002_gate.py",
+            "src/opengrad/verification/study_002_gate_fixtures.py",
             "docs/research/study-002/03-PREREGISTRATION.md",
         ],
         gaps,
@@ -488,8 +490,8 @@ def check_12_smoke(root: Path) -> Check:
 
 
 def check_13_gate_can_fail(root: Path) -> Check:
-    cases = gate.self_test()
-    passed = gate.self_test_passed(cases)
+    cases = gate_fixtures.self_test()
+    passed = gate_fixtures.self_test_passed(cases)
     outcomes = {name: case["overall"] for name, case in sorted(cases.items())}
     return Check(
         13,

@@ -282,3 +282,11 @@ Later line for UP-0017, 2026-10-13: "self-declared inputs" is closed in part by 
 Fingerprints are read back from artifacts, each metric row is bound to a pinned partition, the gate reads
 population sizes from the frozen `P-CONF` partition, and check 14 applies 46 §10. A metric row's `n`, arm and
 artifact hash, and the values in the candidate dict, are still declared until the bundle producer re-derives them.
+
+## UP-0020 — a module-size ratchet outside the targeted set, again (`OURS`)
+
+Gate contract 5 grew `src/opengrad/verification/study_002_gate.py` to 1,163 lines. `tests/repo/test_module_size.py`
+caps a `src/` module at 1,000 and failed CI on the push of 45322ee (Linux and Windows). The targeted set covered the
+gate's own tests but not `tests/repo/`. Fixed by moving the healthy fixture and the self-test to
+`study_002_gate_fixtures.py` (the gate is 885 lines); the CLI `--self-test` is unchanged. Same class as UP-0013.
+Lesson: when a change adds more than a few hundred lines to a module, run `tests/repo/` with the targeted set.
