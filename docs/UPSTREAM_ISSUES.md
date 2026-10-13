@@ -241,4 +241,6 @@ Lesson: a gate's fixture should be checked for consistency with itself (its scal
 confusion matrix), and a gate that has only seen synthetic input has not been tested on what it will judge.
 
 Later line for UP-0014, 2026-10-13: closed for the gate by contract 4, which requires the four metrics in the
-baseline. `tool_use_promotion_v6` used on its own still skips them.
+baseline. `tool_use_promotion_v6` used on its own still skips them. The "owner's decision" above concerned changing
+what the policy requires; the gate now refuses a baseline without them and the policy is unchanged, on the basis
+ERRATA §35 states (02 H5, 07's policy column, §19).

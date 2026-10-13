@@ -239,7 +239,9 @@ class Study002Gate:
     def __init__(
         self, bundle: dict[str, Any], parameters: PreregParameters = ADOPTED_PARAMETERS
     ) -> None:
-        self.bundle = bundle
+        # A bundle that is not a mapping is an empty bundle: every input-bearing check blocks, the
+        # policy's missing metrics fail closed, and nothing raises.
+        self.bundle = bundle if isinstance(bundle, dict) else {}
         self.parameters = parameters
         self._verdict: dict[str, Any] | None = None
 

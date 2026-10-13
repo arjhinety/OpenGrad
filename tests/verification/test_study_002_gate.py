@@ -508,3 +508,8 @@ def test_malformed_input_never_raises_and_never_passes(change) -> None:
     # The unhashable provenance entry is ignored beside the real names; every other case must not pass.
     if bundle.get("provenance", {}).get("present", [None])[-1] != ["unhashable"]:
         assert overall != PASS
+
+
+@pytest.mark.parametrize("bundle", [[], "not a bundle", None, 5])
+def test_a_bundle_that_is_not_a_mapping_is_read_as_empty(bundle) -> None:
+    assert _gate(bundle).overall == _gate({}).overall == FAIL

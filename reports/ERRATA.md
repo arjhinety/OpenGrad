@@ -1441,9 +1441,14 @@ entry and no amendment. Contract 4 does the same; no threshold, rule or populati
   entry, a non-dict candidate or baseline, a string matrix count).
   **Contract 4** requires a truncation rate for every sentinel stage (`REQUIRED_STAGES`, the modes of 08's
   inventory) and the same arms, at least two, in every stage; requires the four regression metrics in the
-  baseline (`BASELINE_METRICS`; 02 H5 falsifies on an unmeasured metric); requires whole, non-negative census
-  counts; fails a rate outside [0, 1] (`FAIL_INVALID_METRIC`); and fails, rather than raises, on each malformed
-  input. `population_validators.finite_number` returns `None` for an integer too large for a float.
+  baseline (`BASELINE_METRICS`); requires whole, non-negative census counts; fails a rate outside [0, 1]
+  (`FAIL_INVALID_METRIC`); and no longer raises on these malformed inputs, nor passes a broken bundle: each fails or
+  blocks, an extra unhashable provenance entry is ignored beside the required names, and a bundle that is not a
+  mapping is read as an empty one. **Basis for the baseline requirement:** 02 H5 is falsified when
+  `call_precision` or `clarification_accuracy` degrades "or any of them is unmeasurable rather than measured";
+  `call_recall` and `unsupported_accuracy` are required by 07's policy column, and §19 made v5's `regression.*`
+  checks binding on the gate, which a skipped check silently is not. UP-0014 left the remedy to the owner because
+  it would change what the *policy* requires; contract 4 changes only what the *gate* accepts, and v6 is unchanged. `population_validators.finite_number` returns `None` for an integer too large for a float.
   The healthy fixture's baseline gains the four regression metrics; the self-test grows from 12 to 18 cases.
   `study_002_readiness` check 2 now expects contract 4. **Source:** `tests/verification/test_study_002_gate.py`.
 
