@@ -1675,13 +1675,21 @@ self-declared"; the check 14 gap in §35's last later line).
   naming the population `clarify` and pointing its size at another field. It also bound metric rows to the corpus
   fingerprint, raised on a fingerprint `field` of `7`, and passed a descriptive row with no margin. A second
   audit bound metric rows to any file by naming its entry `partition:<id>`, so that naming was removed and the
-  partitions are pinned by the gate. The version above closes each, with a test for each.
+  partitions are pinned by the gate. It also found that a failing fingerprint entry could knock a valid one with a
+  similar name out of the verified set (each entry is now checked on its own). A third audit found rows for metric
+  names the verdict does not read (`"made_up"`, `"refusal_correctness "`) were accepted and bound to `P-CONF`;
+  they now fail. The version above closes each, with a test for each.
 
 ### Still not enforced after contract 5
 
 - **The values in the bundle.** A metric row's partition fingerprint is checked, but not its `n`, denominator, arm
   or `artifact_sha256` (any well-formed sha256 passes). It does not prove that the candidate dict holds the number
   the row produced. Re-deriving the rates from per-example records is the bundle producer's job (48 item 8).
+- **The `corpus` fingerprint's file.** V9 checks that the value matches the file the bundle names, but no file is
+  pinned: Study 002's arm corpora are not built, so there is nothing to pin yet. Until then any file in the
+  repository satisfies it.
+- **`p_unans_n` (check 4).** The gate pins the two `P-UNANS` strata files, but check 4 still takes the size from
+  the bundle instead of reading it from them.
 - **Arm generation metadata, REP-A's residual and H1's statistics.** These are 48 items 3, 5 and 6, in the order
   the owner approved.
 - **Everything §35 assigns to the numbered amendment.**

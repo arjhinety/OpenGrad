@@ -654,7 +654,15 @@ class Study002Gate:
         # for refusal_correctness, P-CONF for every other metric. Never to the corpus or another file.
         p_unans, unans_errors = self._pinned(P_UNANS_PARTITIONS)
         errors.extend(unans_errors)
+        known = set(CANDIDATE_METRICS) | set(BASELINE_METRICS)
         for index, row in enumerate(rows):
+            if not isinstance(row.get("metric"), str) or row.get("metric") not in known:
+                # A row for a metric the verdict does not read cannot be routed to its partition.
+                errors.append(
+                    f"{row.get('id') or f'row-{index}'}: {CODE_UNATTACHED_METRIC}: "
+                    f"{row.get('metric')!r} is not a metric the verdict reads"
+                )
+                continue
             fingerprint = row.get("partition_fingerprint")
             if fingerprint is None:
                 continue  # V3 reports the missing field

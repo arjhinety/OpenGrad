@@ -655,3 +655,27 @@ def test_malformed_input_never_raises_and_never_passes(change) -> None:
 @pytest.mark.parametrize("bundle", [[], "not a bundle", None, 5])
 def test_a_bundle_that_is_not_a_mapping_is_read_as_empty(bundle) -> None:
     assert _gate(bundle).overall == _gate({}).overall == FAIL
+
+
+@pytest.mark.parametrize(
+    "metric", ["made_up", "refusal_correctness ", ["refusal_correctness"], None]
+)
+def test_a_row_for_a_metric_the_verdict_does_not_read_fails(metric) -> None:
+    bundle = healthy_bundle()
+    bundle["metric_rows"].append({**bundle["metric_rows"][0], "id": "extra", "metric": metric})
+    assert any(CODE_UNATTACHED_METRIC in e for e in _errors(_gate(bundle), "provenance"))
+
+
+def test_a_failing_fingerprint_entry_does_not_unverify_a_valid_one() -> None:
+    """Each entry is read back on its own; a failing entry's name never comes from parsing error text."""
+    from opengrad.verification.study_002_gate import Study002Gate
+
+    bundle = healthy_bundle()
+    good = bundle["fingerprints"][0]
+    bad = {**good, "name": "partition:x", "value": "f" * 64}
+    verified, errors = Study002Gate(bundle)._read_back([good, bad])
+    assert verified == {"partition"}
+    assert len(errors) == 1 and errors[0].startswith("partition:x:")
+    # Two entries under one name, one failing, leave that name unverified.
+    verified, _ = Study002Gate(bundle)._read_back([good, {**good, "value": "f" * 64}])
+    assert verified == set()

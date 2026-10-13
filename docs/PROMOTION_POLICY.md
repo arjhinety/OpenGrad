@@ -126,6 +126,6 @@ so the line numbers the Study 002 preregistration cites above stay stable.
   unchanged (a policy version is immutable).
 
 - **2026-10-13 (later):** `study_002_gate_v1` is at contract 5 ([`reports/ERRATA.md`](../reports/ERRATA.md) §37):
-  every metric the verdict reads needs a row bound to a partition fingerprint read from an artifact, population
+  every metric the verdict reads needs a row bound to the pinned partition it is measured on, population
   sizes come from the frozen `P-CONF` partition, and a comparison on a population resolving more than 10 points
   supports nothing. The values themselves are not yet re-derived. v6 is unchanged.
