@@ -1486,6 +1486,6 @@ arms in every stage" and "at least two arms" are written in none of the three so
 - 11 check 12: "truncation rates reported per stage; imbalance within the declared factor".
 
 The requirement is read from 40 A's pairwise rule: imbalance is defined between two arms, so a stage reporting
-one arm, or omitting an arm another stage reports, can only pass the balance check vacuously. (In the quotations the link to 08 is shown as plain text.) The code is
-unchanged. If the owner judges this reading a new rule rather than an implementation of 40 A, it belongs in the
-numbered amendment with the other (b) items.
+one arm, or omitting an arm another stage reports, can only pass the balance check vacuously. (In the quotations
+the link to 08 is shown as plain text.) The code is unchanged. If the owner judges this reading a new rule rather
+than an implementation of 40 A, it belongs in the numbered amendment with the other (b) items.
