@@ -1472,3 +1472,20 @@ entry and no amendment. Contract 4 does the same; no threshold, rule or populati
   gate; the parser scores "I'm sorry, but I can't assist with that." and an empty reply as `ANSWER` (46 §8's
   instrument is not wired in); `routing_metrics` reports 0.0 for an empty denominator; nothing yet builds a gate
   bundle from a real run, so the gate has only judged synthetic bundles.
+
+**Later, 2026-10-13.** One part of contract 4's truncation check is a reading, not a written rule.
+`study_002_gate.py` requires a rate for every sentinel stage (`REQUIRED_STAGES`) and, in every stage, the same
+arms and at least two. The stages are written: 40 item A gives the unit as "per **stage** (the prompt mode a
+sentinel runs in: `0-shot`, `8-shot`, `elicit`, `5-shot`, 08) per **arm**". **"The same
+arms in every stage" and "at least two arms" are written in none of the three sources:**
+- 40 item A: "A truncation rate is reported per **stage** … per **arm**, as 08 rule 2
+  requires", and "Within a stage, two arms are **imbalanced** when their truncation rates differ by more than
+  **2 percentage points** *and* the larger is more than **2.0×** the smaller";
+- 08 rule 2: "`finish_reason` is recorded for every sentinel and the truncation rate is printed per stage per
+  arm";
+- 11 check 12: "truncation rates reported per stage; imbalance within the declared factor".
+
+The requirement is read from 40 A's pairwise rule: imbalance is defined between two arms, so a stage reporting
+one arm, or omitting an arm another stage reports, can only pass the balance check vacuously. (In the quotations the link to 08 is shown as plain text.) The code is
+unchanged. If the owner judges this reading a new rule rather than an implementation of 40 A, it belongs in the
+numbered amendment with the other (b) items.
