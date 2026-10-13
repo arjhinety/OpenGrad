@@ -1551,7 +1551,8 @@ adversarial, and two diagnostic figures rest on assumptions their reports did no
   49.04% to 48.97%, and the observed gap from 12.0pp to 11.96pp. M0 has no such reply, and M1-v2 has one (+1
   correct).
 - **Not explained by it:** M0 is parsed as A on 20.2% of attempted items, and M1-v2 on 20.4%, against 11.7% gold A.
-  Base is 13.4%. Since M0 has no lower-case matches, this excess is not the case bug. Its cause is unmeasured and
+  Base is 13.4%, against 12.1% gold A among its attempted items. Since M0 has no lower-case matches, this excess is
+  not the case bug. Its cause is unmeasured and
   no claim rests on it.
 
 ### IFEval: the heuristic refusal flag also catches replies that followed every instruction
@@ -1574,16 +1575,20 @@ adversarial, and two diagnostic figures rest on assumptions their reports did no
 ### The confirmatory partition shares question text with the development partition
 
 - **As written:** the confirmatory set is "disjoint from checkpoint selection"
-  (`reports/CANONICAL_V2_COMPLETION_REPORT.md:249-252`), and is described elsewhere as "pre-registered internal" evidence, not an untouched external
-  benchmark (`reports/M0_CANONICAL_V2_FINAL_EVALUATION.md:15`).
+  (`reports/CANONICAL_V2_COMPLETION_REPORT.md:249-252`), and is described elsewhere as "pre-registered internal"
+  evidence, not an untouched external benchmark (`reports/M0_CANONICAL_V2_FINAL_EVALUATION.md:15`).
 - **Measured:** the partition is disjoint by item id: 2,373 dev, 1,277 confirmatory, 0 shared
   (`reports/evaluation/behavioral-heldout-v2-partition.json`). It is not disjoint by question text.
   - When2Call's 3,652 rows hold 2,299 distinct questions.
   - 620 of the 1,277 confirmatory items (48.6%) ask a question that a dev item also asks.
   - In 588 of those 620, the expected decision differs from every dev twin's. When2Call poses one question with its
     tool offered and again with the tool removed, so the twin usually carries the opposite answer.
-  - In the other 32, the decision is the same.
-  - No two rows sharing a question have identical tool sets (0 of 1,287 groups).
+  - In the other 32, the decision matches at least one dev twin's (10 match every twin).
+  - In 21 of the 1,287 groups that share a question, two rows also share the tool set, and B0 received the same
+    prompt for both (identical `prompt_sha256`). Five such pairs agree (both `UNSUPPORTED`). **16 carry
+    contradictory gold, `CALL` against `CLARIFY`, for the same input**, so any model scores at most one of the two.
+    8 of the 16 cross the dev/confirmatory line, and 8 sit within one side. Two agreeing pairs also cross.
+    This is a label conflict in the upstream data (UP-0019).
 - **What it changes:** checkpoint selection on dev saw the wording of about half the confirmatory questions, mostly
   paired with the opposite decision. "Disjoint" holds for items, not for questions.
 - The confirmatory items are also not independent of one another, so they hold less evidence than n = 1,277
@@ -1599,8 +1604,9 @@ adversarial, and two diagnostic figures rest on assumptions their reports did no
   unmeasured.
 - **Sentinel rows.** The capability-run sentinel rows carry no `max_tokens`, `prompt_sha256` or `finish_reason`.
   The budget used was 768 tokens, from `results/benchmarks/openweights_parity_cases_v1.json`. The sentinel is
-  already `SUGGESTIVE` only. The four stages' sentinel metadata agree, so this limits what a row can prove, not a
-  comparison.
+  already `SUGGESTIVE` only. The four stages' decoding settings agree, and the three trained stages share one
+  tokenizer file, while Base's differs (`5f9e4d49…` against `06b95093…`), as its architecture does. So this
+  limits what a row can prove, not a comparison.
 - **One generation pass.** Each `capability_v1` stage was generated once. Whether greedy vLLM output is invariant
   to batch composition was not measured, so per-example run-to-run variation is unknown. A one-item change is
   0.18pp on IFEval and 0.08pp on GSM8K (`GENERAL_CAPABILITY_REGRESSION.md:243`).
@@ -1609,9 +1615,10 @@ adversarial, and two diagnostic figures rest on assumptions their reports did no
 
 - **Base architecture.** Base loads as `Qwen3_5ForConditionalGeneration` and the trained stages as
   `Qwen3_5ForCausalLM`. This is already disclosed at `GENERAL_CAPABILITY_REGRESSION.md:230-234`.
-- **The hash lines in `reports/H200_BENCHMARK_RUN.md:63-65`.** They say "matches frozen" and are true: the run
-  aborts on a mismatch for M1-v2, the one hard-pinned stage. But the generator prints the words without comparing
-  anything (UP-0018).
+- **The hash lines in `reports/H200_BENCHMARK_RUN.md:63-65`.** They say "matches frozen" and are true by value.
+  That run (`scripts/modal/h200_eval.py`, M1-v2 only) stops on a weight or config mismatch (lines 126-129). No code
+  compares the chat-template hash, which equals the pinned value. The generator prints the words without
+  comparing anything (UP-0018).
 - **`scripts/audit_campaign_final.py`.** It counts an MMLU-Pro refusal even when the reply was also attempted. No
   frozen number is affected: no MMLU-Pro reply in any stage is flagged as a refusal (UP-0018).
 - **Prompts and decoding.** Rendered prompts are identical across stages (per-row `prompt_sha256`), and so are the
