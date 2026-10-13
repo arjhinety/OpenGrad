@@ -105,6 +105,8 @@ def read_a_m0_mode(root: Path) -> str | None:
 
     Read as ``opengrad.training.determinism.resolve_determinism`` reads it: no ``reproducibility`` or no
     ``determinism`` is ``UNDECLARED``; a value the trainer would refuse is ``None`` here, never accepted.
+    Stricter in one way: a falsy ``reproducibility`` that is not a mapping (``[]``, ``''``, ``0``) is ``None``
+    here, where ``resolve_determinism`` reads it as ``UNDECLARED``; the SFT trainer's settings refuse it first.
     """
     try:
         config = yaml.safe_load((root / A_M0_CONFIG).read_text(encoding="utf-8"))

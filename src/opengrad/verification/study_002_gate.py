@@ -10,9 +10,10 @@ population the bundle cannot measure is ``FAIL_NONVACUOUS``.
 ("One determinism mode for every arm") and 14's evidence column (`reports/ERRATA.md` §39; no amendment):
 check 12c also requires every arm's runs and ``REP-A`` to declare one determinism mode, a ``REP-A`` record
 in either mode, and, under ``DECLARED_DETERMINISTIC``, ``REP-A``'s metrics to equal ``C0`` seed 0's exactly
-(``FAIL_DETERMINISM``). Every run's mode must be the one recorded before Tier A, in the preflight record
-(`reports/study-002/readiness/gpu-preflight.json`, authoritative) and in `configs/study_002/seed-plan.yaml`,
-which must agree; with either missing or null, or the two differing, 12c fails. How large a residual may be is
+(``FAIL_DETERMINISM``). Every run's mode except ``REP-B``'s must be the one recorded before Tier A, in the
+preflight record (`reports/study-002/readiness/gpu-preflight.json`, authoritative) and in
+`configs/study_002/seed-plan.yaml`, which must agree; with either missing or null, or the two differing, 12c
+fails. ``REP-B`` declares the mode ``A_M0`` was trained under, read from its config (``UNDECLARED``). How large a residual may be is
 not written, so the gate does not judge it.
 
 **Contract 6 (2026-10-13).** Contract 5 compared arms whose runs may have used different tokenizers,
