@@ -180,7 +180,8 @@ when `DIRECT` and `UNSUPPORTED` both qualify. Code: `evaluate`, `src/opengrad/ve
 
 ## 5. The trained model: the gate and the promotion policy
 
-The gate (`study_002_gate_v1`, contract 5 since 2026-10-13; contract 3 when this draft was written) wraps the promotion policy `tool_use_promotion_v6`, whose thresholds are
+The gate (`study_002_gate_v1`, contract 5 since 2026-10-13; contract 3 when this draft was written) wraps the
+promotion policy `tool_use_promotion_v6`, whose thresholds are
 v5's, unchanged. From the confusion matrix $C_{g,p}$ (gold $g$, prediction $p$) over `CALL`, `ANSWER`, `CLARIFY`
 and `UNSUPPORTED`, with $n_g = \sum_p C_{g,p}$:
 
