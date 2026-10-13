@@ -147,6 +147,7 @@ from opengrad.verification.provenance_validators import (
 )
 from opengrad.verification.resolvability import at_most, resolvable_margin
 from opengrad.verification.study_002_gate_runs import (
+    A_M0_RUN_RECORD,
     CODE_INVALID_COMPARISON,
     generation_identity_errors,
 )
@@ -651,7 +652,11 @@ class Study002Gate:
             )
         table = self._truncation_table() or {}
         truncation_arms = {str(arm) for arms in table.values() for arm in arms}
-        errors = generation_identity_errors(runs, truncation_arms)
+        try:
+            a_m0_seed: int | None = int(read_fingerprint(self.root, *A_M0_RUN_RECORD))
+        except (OSError, ValueError, KeyError):
+            a_m0_seed = None
+        errors = generation_identity_errors(runs, truncation_arms, a_m0_seed)
         return result_from("generation_identity", REQUIRED_NONEMPTY, ["arm_runs"], errors)
 
     def provenance(self) -> ValidationResult:

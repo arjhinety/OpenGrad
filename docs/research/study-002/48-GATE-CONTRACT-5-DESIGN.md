@@ -44,6 +44,7 @@ one before anything is adopted.
 | B7 | the ANSWER set keeps only items both labellers agreed on (202 of 1,767 dropped), and the constructed items are all at most 97 characters: a reporting requirement |
 | B8 | contamination: an `INCIDENTAL_OVERLAP` verdict can clear an exact match, and the reviewer is not shown to be a person |
 | B9 | When2Call gives 16 pairs of identical inputs contradictory gold, `CALL` against `CLARIFY` (UP-0019). No pair lies wholly in `P-CONF`: it holds 8 single items whose contradictory twin is in dev. Whether to report those 8 separately is the question |
+| B10 | 05's seed table says seeds 0, 1, 2 cover "both repeated controls", but `REP-B` re-scores `A_M0`, trained on seed 42 in Study 001; the gate reads 42 (ERRATA §38, later line), and 05's wording needs correcting |
 
 ## Order
 
@@ -51,4 +52,4 @@ one before anything is adopted.
 2. Items 3 (contract 6) and 5.
 3. Item 6, after the formula questions are answered.
 4. Item 8, with the bundle producer, after B2.
-5. The amendment draft (B1–B9), shown to the owner before anything is adopted.
+5. The amendment draft (B1–B10), shown to the owner before anything is adopted.

@@ -1752,3 +1752,20 @@ owner's reason for contract 5).
   The check moved to `study_002_gate_runs.py` to keep the gate module under the 1,000-line limit.
 - **Tests:** the self-test grew from 30 to 38 cases, the gate from 17 to 18 checks, and readiness check 2 expects
   contract 6.
+
+**Later, 2026-10-13: `REP-B`'s seed is `A_M0`'s, 42, not one of 0, 1, 2.** The rule above made `REP-B`'s seed one
+of 0, 1, 2, reading 05's seed table ("every arm and both repeated controls"). `A_M0` is "the frozen M0 SFT
+checkpoint" (04), the run `m0_sft_canonical_v2_final` that `reports/data/m0-final-freeze.json` pins. Its seed is
+42 in its config (`configs/experiments/m0_sft_canonical_v2_final.yaml:126`, `seed: 42`), its resolved config
+(`runs/m0_sft_canonical_v2_final/resolved_config.yaml:21`) and its run record
+(`runs/m0_sft_canonical_v2_final/experiment.json:36`, `"random_seed": 42`). Every other Study 001 M0 run that
+records a seed also used 42.
+
+So a truthful `REP-B` record failed the gate, and one claiming seed 0 passed. 05's sentence cannot hold for
+`REP-B`: a re-score trains nothing, and its checkpoint was trained in Study 001, before 05 existed. Evaluation is
+greedy (05: "so that no seed enters the score"), so no seed enters the re-score either. The owner chose
+(2026-10-13) to require `A_M0`'s true seed rather than mark it not applicable. The gate now reads it from
+`runs/m0_sft_canonical_v2_final/experiment.json` (`random_seed`) rather than taking a typed value. A `REP-B` on
+seed 0 or 7 fails, and so does any `REP-B` when that record cannot be read. 05's table is not changed: correcting
+its wording for `REP-B` would take a numbered amendment, and is listed for the next one (48, part (b)). `REP-A`
+is unchanged: it re-runs `C0` on seed 0. Logged as UP-0021.

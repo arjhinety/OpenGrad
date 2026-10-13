@@ -36,9 +36,14 @@ REQUIRED_SEEDS = frozenset({0, 1, 2})
 #: 05 "What the two repeats measure": ``REP-A`` is "``C0``, seed ``s0``, re-run" (the nondeterminism floor);
 #: ``REP-B`` is "``A_M0`` re-scored under the Study 002 evaluator" (configs/study_002/seed-plan.yaml). A
 #: repeat's record carries ``repeat`` and is held to every factor 04 fixes, but it is not an arm's scored
-#: run: it is left out of the arm set, the seed count and the one-record-per-run rule. ``None`` means one
-#: of :data:`REQUIRED_SEEDS` (05's seed table: "every arm and both repeated controls").
+#: run: it is left out of the arm set, the seed count and the one-record-per-run rule. ``None`` means the
+#: seed ``A_M0`` was trained with, read from :data:`A_M0_RUN_RECORD`: a re-score trains nothing, so its seed
+#: is the frozen checkpoint's, 42 in Study 001, not one of 05's 0, 1, 2 (ERRATA §38, later line).
 REPEATS: dict[str, tuple[str, int | None]] = {"REP-A": ("C0", 0), "REP-B": ("A_M0", None)}
+
+#: The Study 001 run behind ``A_M0`` (04: "the frozen M0 SFT checkpoint"; `reports/data/m0-final-freeze.json`
+#: pins its config), and the field holding its training seed.
+A_M0_RUN_RECORD = ("runs/m0_sft_canonical_v2_final/experiment.json", "random_seed")
 
 
 def _text(value: Any) -> bool:
@@ -61,10 +66,13 @@ def _recorded(field: str, value: Any) -> bool:
     return _text(value)
 
 
-def generation_identity_errors(runs: list[dict[str, Any]], truncation_arms: set[str]) -> list[str]:
+def generation_identity_errors(
+    runs: list[dict[str, Any]], truncation_arms: set[str], a_m0_seed: int | None
+) -> list[str]:
     """The reasons the run records fail 04's held-fixed factors and 05's seeds (empty: they pass).
 
     ``truncation_arms`` are the arms of the bundle's truncation table: the runs must cover exactly those.
+    ``a_m0_seed`` is ``A_M0``'s recorded training seed, or ``None`` when its run record cannot be read.
     Comparison rows name no arm, so their arms cannot be cross-checked here (ERRATA §38).
     """
     errors: list[str] = []
@@ -85,13 +93,11 @@ def generation_identity_errors(runs: list[dict[str, Any]], truncation_arms: set[
                 errors.append(
                     f"{run_id}: {CODE_INVALID_COMPARISON}: {repeat!r} is not a repeat 05 names"
                 )
-            elif arm != expected[0] or seed not in (
-                REQUIRED_SEEDS if expected[1] is None else {expected[1]}
-            ):
+            elif arm != expected[0] or seed != (a_m0_seed if expected[1] is None else expected[1]):
+                want = a_m0_seed if expected[1] is None else expected[1]
                 errors.append(
-                    f"{run_id}: {CODE_INVALID_COMPARISON}: {repeat} is {expected[0]}"
-                    + (f", seed {expected[1]}" if expected[1] is not None else "")
-                    + " (05)"
+                    f"{run_id}: {CODE_INVALID_COMPARISON}: {repeat} is {expected[0]}, seed "
+                    + (str(want) if want is not None else "unreadable (no A_M0 run record)")
                 )
             elif repeat in repeats_seen:
                 errors.append(f"{run_id}: {CODE_INVALID_COMPARISON}: a second {repeat} record")

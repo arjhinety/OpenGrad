@@ -290,3 +290,12 @@ caps a `src/` module at 1,000 and failed CI on the push of 45322ee (Linux and Wi
 gate's own tests but not `tests/repo/`. Fixed by moving the healthy fixture and the self-test to
 `study_002_gate_fixtures.py` (the gate is 885 lines); the CLI `--self-test` is unchanged. Same class as UP-0013.
 Lesson: when a change adds more than a few hundred lines to a module, run `tests/repo/` with the targeted set.
+
+## UP-0021 — a repeat's seed rule written from a table, not from the checkpoint (`OURS`)
+
+Gate contract 6 (pushed in 28bd143) required `REP-B`'s seed to be 0, 1 or 2, reading 05's seed table ("every arm
+and both repeated controls"). `REP-B` re-scores `A_M0`, which Study 001 trained on seed 42
+(`runs/m0_sft_canonical_v2_final/experiment.json`, `random_seed`). A truthful record failed and a false one passed.
+Found when the owner asked for the checkpoint's real seed before the rule was committed; it had already been pushed.
+Fixed by reading the seed from that run record (ERRATA §38, later line). Lesson: a rule about an existing artifact
+is checked against the artifact, not only against the document that describes it.

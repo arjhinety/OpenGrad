@@ -863,7 +863,7 @@ def _with_repeats(bundle: dict, **changes) -> dict:
     first = bundle["arm_runs"][0]
     bundle["arm_runs"] += [
         {**first, "repeat": "REP-A", **changes.get("rep_a", {})},
-        {**first, "arm": "A_M0", "repeat": "REP-B", **changes.get("rep_b", {})},
+        {**first, "arm": "A_M0", "seed": 42, "repeat": "REP-B", **changes.get("rep_b", {})},
     ]
     return bundle
 
@@ -886,6 +886,7 @@ def test_repeat_records_are_exempt_from_the_one_record_rule_and_the_arm_set() ->
         {"rep_a": {"repeat": ["REP-A"]}},
         {"rep_b": {"repeat": "REP-A", "arm": "C0"}},
         {"rep_b": {"seed": 7}},
+        {"rep_b": {"seed": 0}},
     ],
 )
 def test_a_repeat_is_held_to_every_factor_and_to_05s_definition(changes) -> None:
@@ -903,3 +904,29 @@ def test_rep_a_must_re_run_an_arm_that_was_scored() -> None:
         arms["C1"] = arms.pop("C0")
     errors = _errors(_gate(bundle), "generation_identity")
     assert any("REP-A" in e and "no scored runs" in e for e in errors)
+
+
+def test_rep_b_carries_the_seed_a_m0_was_trained_with() -> None:
+    """A re-score trains nothing: REP-B's seed is A_M0's, read from its Study 001 run record (42)."""
+    import json
+
+    from opengrad.verification.study_002_gate import REPO_ROOT
+    from opengrad.verification.study_002_gate_runs import A_M0_RUN_RECORD
+
+    path, field = A_M0_RUN_RECORD
+    assert json.loads((REPO_ROOT / path).read_text(encoding="utf-8"))[field] == 42
+    assert _status(_gate(_with_repeats(healthy_bundle())), "generation_identity") == PASS
+
+
+def test_rep_b_fails_when_a_m0s_run_record_cannot_be_read(tmp_path) -> None:
+    import shutil
+
+    from opengrad.verification.study_002_gate import REPO_ROOT, STUDY_002_PARTITION
+
+    # Everything the gate reads except A_M0's run record.
+    for rel in (STUDY_002_PARTITION,):
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(REPO_ROOT / rel, tmp_path / rel)
+    report = study_002_gate(_with_repeats(healthy_bundle()), ADOPTED_PARAMETERS, root=tmp_path)
+    errors = _errors(report, "generation_identity")
+    assert any("REP-B" in e and "unreadable" in e for e in errors)
