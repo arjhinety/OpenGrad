@@ -1490,20 +1490,22 @@ one arm, or omitting an arm another stage reports, can only pass the balance che
 the link to 08 is shown as plain text.) The code is unchanged. If the owner judges this reading a new rule rather
 than an implementation of 40 A, it belongs in the numbered amendment with the other (b) items.
 
-**Later, 2026-10-13: the CLARIFY floor is not a defect; the owner's row-3 choice is withdrawn.** The "Not
-adjudicable but passed" item above relied on 40 item D.2 (`study_002_prereg_v8`), which says
-`min_clarification_accuracy` on `CLARIFY` at n = 371 is not adjudicable and "is reported `WITHIN_NOISE`". A later
-adopted amendment decides floors differently. 46 §10, adopted in `study_002_prereg_v14` (03 records "Check 3's
-margin is 10 points" and the owner adopted "the check 3 reading"), says of `CLARIFY` and `ANSWER-natural`, the two
-populations that resolve more than 10 points: "Floors stay blocking and fail closed: a measured value below a floor
-fails, however close", and "A between-arm difference on those two populations is `WITHIN_NOISE` and supports
-nothing." The gate's treatment of the clarification floor at n = 371 is therefore what v14 requires, and nothing
-needs fixing there.
+**Later, 2026-10-13: the CLARIFY floor is not a defect; the owner's choice recorded in the "Not adjudicable but
+passed" item above is withdrawn.** That item relied on 40 item D.2 (`study_002_prereg_v8`), which says
+`min_clarification_accuracy` on `CLARIFY` at n = 371 is not adjudicable and "is reported `WITHIN_NOISE`", and on
+§19, which says no claim rests on it. A later adopted amendment settles what "not adjudicable" means for a floor.
+46 §10, adopted in `study_002_prereg_v14` (03 records "Check 3's margin is 10 points"; 46 §14 lists "the check 3
+reading" among the proposals adopted with it), keeps item D's status ("`CLARIFY` is not adjudicable at 10 points
+(`study_002_prereg_v8` item D)") and adds, as a general rule, "Floors stay blocking and fail closed: a measured
+value below a floor fails, however close", and for `CLARIFY` and `ANSWER-natural`, "A between-arm difference on
+those two populations is `WITHIN_NOISE` and supports nothing." So the floor blocks while no comparison on those
+populations supports a claim, which agrees with §19. The gate's treatment of the clarification floor at n = 371 is
+what v14 requires, and nothing needs fixing there.
 
 The owner had chosen, earlier the same day, that a non-adjudicable floor blocks PASS. That choice was put to the
 owner on a framing that missed 46 §10, and it would have made the gate unpassable: `CLARIFY` is frozen at 371
 items, below the 385 that resolve 10 points, and 46 §10 records that no source exists to add items. The owner
-withdrew it (2026-10-13); nothing about row 3 goes into the amendment.
+withdrew it (2026-10-13); nothing about that choice goes into the amendment.
 
 What 46 §10 does require and contract 4 does not yet do: a comparison row on a population that resolves more than
 10 points is `WITHIN_NOISE` and supports nothing, whatever its difference. Check 14 counts any row whose difference
