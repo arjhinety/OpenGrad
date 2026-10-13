@@ -31,6 +31,9 @@ description: How to measure models correctly in OpenGrad — the immutable B0 ba
 - **Checkpoint selection** follows a rule written and committed *before* any checkpoint is scored
   (`docs/evaluation/CHECKPOINT_SELECTION_RULE.md`). Max-over-draws selection on the reporting population is the
   documented Study 001 defect. Sweep checkpoints with `scripts/evaluate_sft_checkpoints.py`.
+  `scripts/select_checkpoint.py` accepts `--side dev` only: the confirmatory side never chooses a checkpoint.
+- **vLLM prefix caching is pinned off** in `VLLMInferenceBackend` and recorded in its engine metadata: cached prefixes
+  make a result depend on submission order, and vLLM's default is model-dependent (ERRATA §36).
 
 ## Methodology requirements (`docs/EVALUATION.md` §0)
 

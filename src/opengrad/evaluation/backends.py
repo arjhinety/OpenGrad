@@ -279,6 +279,9 @@ class VLLMInferenceBackend:
             "tensor_parallel_size": self.tensor_parallel_size,
             "enforce_eager": self.enforce_eager,
             "seed": self.seed,
+            # Cached prefixes make a result depend on submission order (the H200 runs pin this
+            # too); vLLM's default is model-dependent and was not recorded for B0 (ERRATA §36).
+            "enable_prefix_caching": False,
             "disable_log_stats": True,
         }
         if self.cache_dir:
@@ -314,6 +317,7 @@ class VLLMInferenceBackend:
             "tensor_parallel_size": self.tensor_parallel_size,
             "enforce_eager": self.enforce_eager,
             "seed": self.seed,
+            "enable_prefix_caching": False,
             "batching": "continuous",
         }
         try:

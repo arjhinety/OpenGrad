@@ -65,7 +65,9 @@ def evaluation_directory(run: Path, side: str) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", default="runs/m0_sft_canonical_v2_final")
-    parser.add_argument("--side", default="dev", choices=["dev", "confirmatory"])
+    # Selection reads the development side only; the confirmatory side scores the selected
+    # checkpoint once and is never an input to choosing it (ERRATA §36).
+    parser.add_argument("--side", default="dev", choices=["dev"])
     parser.add_argument("--output", default=None)
     args = parser.parse_args()
 

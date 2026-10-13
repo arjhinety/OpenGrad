@@ -6,6 +6,7 @@ same engine and version. These tests pin the contract without needing a GPU.
 
 from __future__ import annotations
 
+import importlib
 from pathlib import Path
 from typing import Any
 
@@ -287,3 +288,26 @@ def test_engine_mismatch_between_prompts_and_samples_is_a_loud_error(monkeypatch
 
     with pytest.raises(RuntimeError, match="returned 1 samples for 2 prompts"):
         runner.run_baseline(config_path, root=tmp_path, backend=_ShortBackend(), dry_run=True)
+
+
+def test_vllm_backend_pins_prefix_caching_off_and_records_it(monkeypatch):
+    """Cached prefixes make results depend on submission order; vLLM's default is model-dependent."""
+    captured: dict = {}
+
+    class FakeVLLM:
+        __version__ = "0.0-test"
+
+        @staticmethod
+        def LLM(**kwargs):
+            captured.update(kwargs)
+            return object()
+
+    real_import = importlib.import_module
+    monkeypatch.setattr(
+        importlib, "import_module", lambda name: FakeVLLM if name == "vllm" else real_import(name)
+    )
+    backend = VLLMInferenceBackend(model_id="Qwen/Qwen3.5-2B", revision="a" * 40)
+    monkeypatch.setattr(backend, "_expose_venv_bin_for_jit", lambda: None)
+    backend._load()
+    assert captured["enable_prefix_caching"] is False
+    assert backend.engine_metadata()["enable_prefix_caching"] is False

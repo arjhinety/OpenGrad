@@ -6,6 +6,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -101,3 +103,18 @@ def test_legacy_namespace_is_used_only_when_dev_namespace_is_absent(tmp_path: Pa
     (run / "eval/dev").mkdir()
     assert select_checkpoint.evaluation_directory(run, "dev") == run / "eval/dev"
     assert select_checkpoint.evaluation_directory(run, "confirmatory") == run / "eval/confirmatory"
+
+
+def test_selection_refuses_the_confirmatory_side(tmp_path: Path, monkeypatch) -> None:
+    root = _fixture_root(tmp_path, ["CALL", "CLARIFY", "UNSUPPORTED", "UNSUPPORTED"])
+    monkeypatch.setattr(select_checkpoint, "ROOT", root)
+    monkeypatch.setattr(select_checkpoint, "PARTITION", "partition.json")
+    monkeypatch.setattr(select_checkpoint, "BASELINE_PREDICTIONS", "baseline.jsonl")
+    monkeypatch.setattr(
+        sys, "argv", ["select_checkpoint.py", "--run", "runs/arm", "--side", "confirmatory"]
+    )
+
+    with pytest.raises(SystemExit) as raised:
+        select_checkpoint.main()
+    assert raised.value.code == 2
+    assert not (root / "runs/arm/eval/confirmatory/selection--confirmatory.json").exists()
