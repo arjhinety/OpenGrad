@@ -1787,14 +1787,28 @@ amendment.
 - **Contract 7, check 12c:**
   - Every arm's runs and `REP-A` declare `determinism_mode`, one of 14's two classes, and all declare the same
     one. `REP-B` declares none: it re-scores a Study 001 checkpoint and is not an arm.
+  - **The declared mode must be the recorded one (owner, 2026-10-13).** 46 §12: "The mode is recorded in the
+    readiness record before Tier A." Readiness check 1 reads it from `reports/study-002/readiness/gpu-preflight.json`
+    (`determinism_mode`), and the gate reads the same field. Every declaring run must declare that mode. No such
+    record exists yet, so on today's repository check 12c fails: the bundle's own declaration is not trusted. The
+    self-test and tests pass the recorded mode explicitly; a bundle cannot. `configs/study_002/seed-plan.yaml`
+    also has a `determinism_mode` field (null, "Undecided until then"); the gate does not read it.
   - A `REP-A` record is required in either mode, since 14 lists it as the evidence for both.
   - `REP-A` and `C0`'s seed-0 run both carry `metrics`, a non-empty map of finite numbers, with the same names.
   - Under `DECLARED_DETERMINISTIC`, any difference between them fails with `FAIL_DETERMINISM`. Under
-    `NON_DETERMINISTIC_KERNEL` they may differ.
+    `NON_DETERMINISTIC_KERNEL` they may differ. 14 says why the first is a failure, not a relabelling: "A run
+    that declares `DECLARED_DETERMINISTIC` and fails `REP-A` is a **defect**, not a reclassification: the
+    declaration was checked and found false". So a failed `REP-A` cannot be repaired by re-declaring the run
+    `NON_DETERMINISTIC_KERNEL`, and the recorded mode is fixed before Tier A.
 - **Not implemented, for the amendment (48 B11):** how large a residual may be. 05 says a threshold is rejected
   when `REP-A`'s residual is "larger than" its margin. 11 asks for noise "an order of magnitude smaller", for one
   threshold. Neither defines the residual (per metric, or the largest), and both place the comparison at
   "pre-GPU review", before `REP-A` can run. The gate therefore checks that the residual can be measured, never
   whether it is small enough.
-- **Tests:** the self-test grew from 38 to 41 cases, and readiness check 2 expects contract 7. The check is in
+- **Not settled, for the amendment (48 B12):** 46 §12 chooses `DECLARED_DETERMINISTIC` from training alone (two
+  50-step runs with identical losses), but 14 asks `REP-A` to reproduce the *metric values*, which also pass
+  through evaluation. Greedy vLLM output is not guaranteed to be batch-invariant (ERRATA §36), so a run whose
+  training is deterministic can still fail `REP-A` on a scoring difference. Pinning evaluation to be repeatable,
+  or limiting "exactly" to training, is a choice the documents do not make.
+- **Tests:** the self-test grew from 38 to 43 cases, and readiness check 2 expects contract 7. The check is in
   `study_002_gate_runs.py`.

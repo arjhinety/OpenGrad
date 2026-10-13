@@ -291,9 +291,10 @@ def test_the_tables_match_the_code_constants() -> None:
     assert decision(over_call_rate=0.2000004) == "PROMOTE"
     assert decision(over_call_rate=0.2000006) != "PROMOTE"
     # Check 14 with no comparison rows blocks the whole gate rather than failing or passing.
-    assert str(gate.study_002_gate(bundle).overall) == "PASS"
+    assert str(gate_fixtures.fixture_gate(bundle).overall) == "PASS"
     assert (
-        str(gate.study_002_gate({**bundle, "comparisons": []}).overall) == "BLOCKED_INPUT_MISSING"
+        str(gate_fixtures.fixture_gate({**bundle, "comparisons": []}).overall)
+        == "BLOCKED_INPUT_MISSING"
     )
     # Check 14's row shape: the self-test row carries a margin and a different delta.
     assert bundle["comparisons"] == [

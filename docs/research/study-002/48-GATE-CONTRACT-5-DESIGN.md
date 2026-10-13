@@ -46,6 +46,7 @@ one before anything is adopted.
 | B9 | When2Call gives 16 pairs of identical inputs contradictory gold, `CALL` against `CLARIFY` (UP-0019). No pair lies wholly in `P-CONF`: it holds 8 single items whose contradictory twin is in dev. Whether to report those 8 separately is the question |
 | B10 | 05's seed table says seeds 0, 1, 2 cover "both repeated controls", but `REP-B` re-scores `A_M0`, trained on seed 42 in Study 001; the gate reads 42 (ERRATA §38, later line), and 05's wording needs correcting |
 | B11 | `REP-A`'s noise band: the residual's formula (per metric or the largest), the rule against each threshold's margin (05 "larger than", 11 "an order of magnitude smaller"), and when it is compared (both say "pre-GPU review", before `REP-A` can run) |
+| B12 | 46 §12 picks `DECLARED_DETERMINISTIC` from training alone, but 14 asks `REP-A` to reproduce the metric values, which also pass through evaluation; greedy vLLM output is not guaranteed batch-invariant (ERRATA §36). Pin evaluation, or limit "exactly" to training |
 
 ## Order
 
@@ -53,4 +54,4 @@ one before anything is adopted.
 2. Items 3 (contract 6) and 5 (its written part, contract 7).
 3. Item 6, after the formula questions are answered.
 4. Item 8, with the bundle producer, after B2.
-5. The amendment draft (B1–B11), shown to the owner before anything is adopted.
+5. The amendment draft (B1–B12), shown to the owner before anything is adopted.

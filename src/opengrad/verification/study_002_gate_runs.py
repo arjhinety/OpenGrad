@@ -18,6 +18,10 @@ CODE_DETERMINISM = "FAIL_DETERMINISM"
 #: 14's two classes. 46 §12: "One determinism mode for every arm, chosen by a rule".
 DETERMINISM_MODES = frozenset({"DECLARED_DETERMINISTIC", "NON_DETERMINISTIC_KERNEL"})
 
+#: 46 §12: "The mode is recorded in the readiness record before Tier A". Readiness check 1 reads it from the
+#: GPU preflight record (``study_002_readiness.PREFLIGHT_RECORD``); the gate reads the same field there.
+DETERMINISM_RECORD = ("reports/study-002/readiness/gpu-preflight.json", "determinism_mode")
+
 #: 04 "Fixed across every arm": "Tokenizer and chat-template hash | pinned", "Evaluator version, generation
 #: config, decoder | one version", "Device class for primary runs | one class, with the provider recorded".
 #: Every run record carries each field as a real value (a 64-hex hash, a non-empty string, a bool, a
@@ -163,7 +167,7 @@ def _metrics(value: Any) -> dict[str, float] | None:
     return {str(k): float(v) for k, v in value.items()}
 
 
-def determinism_errors(runs: list[dict[str, Any]]) -> list[str]:
+def determinism_errors(runs: list[dict[str, Any]], recorded_mode: str | None) -> list[str]:
     """46 §12 and 14, as written: one determinism mode for every arm, and the ``REP-A`` evidence it requires.
 
     14, "Evidence required": under ``DECLARED_DETERMINISTIC``, "``REP-A`` ... reproduces the metric values
@@ -171,14 +175,28 @@ def determinism_errors(runs: list[dict[str, Any]]) -> list[str]:
     ``REP-A`` record is required, and it and ``C0``'s seed-0 run carry the same metrics. How large a residual
     is too large is not written (48, part (b)), so this function never judges its size.
     ``REP-B`` re-scores a Study 001 checkpoint and is not an arm, so it declares no mode.
+
+    ``recorded_mode`` is the mode the readiness record holds (:data:`DETERMINISM_RECORD`), or ``None`` when
+    there is no such record. The bundle's declaration is never trusted on its own: with no record the check
+    fails, and every run must declare the recorded mode.
     """
     errors: list[str] = []
+    if recorded_mode not in DETERMINISM_MODES:
+        errors.append(
+            f"determinism_mode: {CODE_INVALID_COMPARISON}: no mode recorded before Tier A in "
+            f"{DETERMINISM_RECORD[0]} (46 §12); the bundle's declaration is not trusted"
+        )
     declaring = [run for run in runs if run.get("repeat") != "REP-B"]
     modes = set()
     for index, run in enumerate(declaring):
         mode = run.get("determinism_mode")
-        if mode in DETERMINISM_MODES:
+        if isinstance(mode, str) and mode in DETERMINISM_MODES:
             modes.add(mode)
+            if recorded_mode in DETERMINISM_MODES and mode != recorded_mode:
+                errors.append(
+                    f"{run.get('arm')!r}/seed {run.get('seed')!r}: {CODE_INVALID_COMPARISON}: declares "
+                    f"{mode}, but the readiness record holds {recorded_mode} (46 §12)"
+                )
         else:
             errors.append(
                 f"{run.get('arm')!r}/seed {run.get('seed')!r}: {CODE_INVALID_COMPARISON}: declares no "
@@ -218,11 +236,11 @@ def determinism_errors(runs: list[dict[str, Any]]) -> list[str]:
             f"REP-A: {CODE_INVALID_COMPARISON}: REP-A and C0 seed 0 report different metrics; the "
             "residual cannot be measured"
         )
-    elif modes == {"DECLARED_DETERMINISTIC"}:
+    elif modes == {"DECLARED_DETERMINISTIC"} and recorded_mode == "DECLARED_DETERMINISTIC":
         differ = sorted(name for name in original if repeated[name] != original[name])
         if differ:
             errors.append(
                 f"REP-A: {CODE_DETERMINISM}: declared DECLARED_DETERMINISTIC, but REP-A does not "
-                f"reproduce C0 seed 0 exactly ({', '.join(differ)}); 14 calls this a defect"
+                f"reproduce C0 seed 0 exactly ({', '.join(differ)}); 14: a defect, not a reclassification"
             )
     return errors

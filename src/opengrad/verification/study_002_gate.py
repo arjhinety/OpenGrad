@@ -10,7 +10,9 @@ population the bundle cannot measure is ``FAIL_NONVACUOUS``.
 ("One determinism mode for every arm") and 14's evidence column (`reports/ERRATA.md` §39; no amendment):
 check 12c also requires every arm's runs and ``REP-A`` to declare one determinism mode, a ``REP-A`` record
 in either mode, and, under ``DECLARED_DETERMINISTIC``, ``REP-A``'s metrics to equal ``C0`` seed 0's exactly
-(``FAIL_DETERMINISM``). How large a residual may be is not written, so the gate does not judge it.
+(``FAIL_DETERMINISM``). Every run's mode must be the one the readiness record holds
+(`reports/study-002/readiness/gpu-preflight.json`); with no record, 12c fails. How large a residual may be is
+not written, so the gate does not judge it.
 
 **Contract 6 (2026-10-13).** Contract 5 compared arms whose runs may have used different tokenizers,
 templates, evaluators, generation settings or devices. Contract 6 implements, as written, 04's "Fixed
@@ -157,6 +159,7 @@ from opengrad.verification.resolvability import at_most, resolvable_margin
 from opengrad.verification.study_002_gate_runs import (
     A_M0_RUN_RECORD,
     CODE_INVALID_COMPARISON,
+    DETERMINISM_RECORD,
     determinism_errors,
     generation_identity_errors,
 )
@@ -331,12 +334,16 @@ class Study002Gate:
         bundle: dict[str, Any],
         parameters: PreregParameters = ADOPTED_PARAMETERS,
         root: Path = REPO_ROOT,
+        recorded_determinism: str | None = None,
     ) -> None:
         # A bundle that is not a mapping is an empty bundle: every input-bearing check blocks, the
         # policy's missing metrics fail closed, and nothing raises.
         self.bundle = bundle if isinstance(bundle, dict) else {}
         self.parameters = parameters
         self.root = root
+        # The determinism mode the readiness record holds (46 §12). ``None`` reads it from that record
+        # under ``root``; tests and the self-test pass it explicitly. A bundle never supplies it.
+        self.recorded_determinism = recorded_determinism
         self._verdict: dict[str, Any] | None = None
 
     # -- inputs ---------------------------------------------------------------------------------
@@ -666,7 +673,13 @@ class Study002Gate:
         except (OSError, ValueError, KeyError):
             a_m0_seed = None
         errors = generation_identity_errors(runs, truncation_arms, a_m0_seed)
-        errors += determinism_errors(runs)
+        recorded = self.recorded_determinism
+        if recorded is None:
+            try:
+                recorded = read_fingerprint(self.root, *DETERMINISM_RECORD)
+            except (OSError, ValueError, KeyError):
+                recorded = None
+        errors += determinism_errors(runs, recorded)
         return result_from("generation_identity", REQUIRED_NONEMPTY, ["arm_runs"], errors)
 
     def provenance(self) -> ValidationResult:
@@ -903,8 +916,9 @@ def study_002_gate(
     bundle: dict[str, Any],
     parameters: PreregParameters = ADOPTED_PARAMETERS,
     root: Path = REPO_ROOT,
+    recorded_determinism: str | None = None,
 ) -> VerificationReport:
-    return Study002Gate(bundle, parameters, root).report()
+    return Study002Gate(bundle, parameters, root, recorded_determinism).report()
 
 
 def main(argv: list[str] | None = None) -> int:

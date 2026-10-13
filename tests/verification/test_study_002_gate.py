@@ -13,6 +13,10 @@ from __future__ import annotations
 import copy
 import hashlib
 
+from opengrad.verification.study_002_gate import P_UNANS_PARTITIONS
+
+P_UNANS_FILES = tuple(P_UNANS_PARTITIONS)
+
 import pytest
 
 from opengrad.promotion.tool_use_policy import (
@@ -43,6 +47,8 @@ from opengrad.verification.study_002_gate import (
     study_002_gate,
 )
 from opengrad.verification.study_002_gate_fixtures import (
+    FIXTURE_DETERMINISM,
+    fixture_gate,
     healthy_bundle,
     self_test,
     self_test_passed,
@@ -51,7 +57,7 @@ from opengrad.verification.study_002_gate_fixtures import (
 
 def _gate(bundle):
     """The gate as a real verdict runs it: the adopted `study_002_prereg_v8` parameters."""
-    return study_002_gate(bundle, ADOPTED_PARAMETERS)
+    return fixture_gate(bundle, ADOPTED_PARAMETERS)
 
 
 def _status(report, name: str) -> str:
@@ -63,11 +69,11 @@ def _errors(report, name: str) -> list[str]:
 
 
 def test_the_gate_is_versioned() -> None:
-    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 7
+    assert fixture_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 7
 
 
 def test_a_healthy_bundle_passes_every_check_under_the_adopted_prereg() -> None:
-    report = study_002_gate(healthy_bundle())
+    report = fixture_gate(healthy_bundle())
     assert report.overall == PASS, [result.all_errors() for result in report.results]
     assert len(report.results) == 18
 
@@ -81,7 +87,7 @@ def test_the_adopted_parameters_are_prereg_v8_items_a_and_b() -> None:
 def test_undeclared_parameters_block_rather_than_pass() -> None:
     assert UNDECLARED_PARAMETERS.truncation_max_ratio is None
     assert UNDECLARED_PARAMETERS.p_unans_min_n is None
-    report = study_002_gate(healthy_bundle(), UNDECLARED_PARAMETERS)
+    report = fixture_gate(healthy_bundle(), UNDECLARED_PARAMETERS)
     assert report.overall == BLOCKED_INPUT_MISSING
     assert _status(report, "safety_regression") == BLOCKED_INPUT_MISSING
     assert _status(report, "truncation_balance") == BLOCKED_INPUT_MISSING
@@ -104,7 +110,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 39
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 41
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
@@ -380,7 +386,12 @@ def test_a_partition_that_is_not_the_frozen_one_binds_nothing(tmp_path) -> None:
     copy_path.write_text(
         '{"components": {"confirmatory_when2call": {"count": 1277}}}', encoding="utf-8"
     )
-    report = study_002_gate(healthy_bundle(), ADOPTED_PARAMETERS, root=tmp_path)
+    report = study_002_gate(
+        healthy_bundle(),
+        ADOPTED_PARAMETERS,
+        root=tmp_path,
+        recorded_determinism=FIXTURE_DETERMINISM,
+    )
     errors = _errors(report, "comparison_margins")
     assert any(CODE_FINGERPRINT in e for e in errors)
     assert report.overall == FAIL
@@ -928,7 +939,12 @@ def test_rep_b_fails_when_a_m0s_run_record_cannot_be_read(tmp_path) -> None:
     for rel in (STUDY_002_PARTITION,):
         (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO_ROOT / rel, tmp_path / rel)
-    report = study_002_gate(_with_repeats(healthy_bundle()), ADOPTED_PARAMETERS, root=tmp_path)
+    report = study_002_gate(
+        _with_repeats(healthy_bundle()),
+        ADOPTED_PARAMETERS,
+        root=tmp_path,
+        recorded_determinism=FIXTURE_DETERMINISM,
+    )
     errors = _errors(report, "generation_identity")
     assert any("REP-B" in e and "unreadable" in e for e in errors)
 
@@ -942,7 +958,10 @@ def test_non_deterministic_runs_may_differ_from_rep_a() -> None:
     for run in bundle["arm_runs"]:
         run["determinism_mode"] = "NON_DETERMINISTIC_KERNEL"
     bundle["arm_runs"][-1]["metrics"]["call_f1"] = 0.76
-    assert _status(_gate(bundle), "generation_identity") == PASS
+    report = study_002_gate(
+        bundle, ADOPTED_PARAMETERS, recorded_determinism="NON_DETERMINISTIC_KERNEL"
+    )
+    assert _status(report, "generation_identity") == PASS
 
 
 def test_under_declared_determinism_any_difference_is_a_defect() -> None:
@@ -982,3 +1001,54 @@ def test_rep_b_declares_no_determinism_mode() -> None:
     bundle = _with_repeats(healthy_bundle())
     bundle["arm_runs"][-1].pop("determinism_mode")
     assert _status(_gate(bundle), "generation_identity") == PASS
+
+
+def test_the_gate_reads_the_mode_readiness_reads() -> None:
+    from opengrad.verification import study_002_readiness
+    from opengrad.verification.study_002_gate_runs import DETERMINISM_RECORD
+
+    assert DETERMINISM_RECORD[0] == study_002_readiness.PREFLIGHT_RECORD
+
+
+def test_with_no_readiness_record_check_12c_fails_closed(tmp_path) -> None:
+    """Today no preflight record exists: the bundle's own declaration is not trusted."""
+    from opengrad.verification.study_002_gate import REPO_ROOT
+
+    assert not (REPO_ROOT / "reports/study-002/readiness/gpu-preflight.json").exists()
+    report = study_002_gate(healthy_bundle(), ADOPTED_PARAMETERS)
+    errors = _errors(report, "generation_identity")
+    assert any("no mode recorded before Tier A" in e for e in errors)
+    assert report.overall == FAIL
+
+
+@pytest.mark.parametrize(
+    "record, expect_pass",
+    [
+        ({"determinism_mode": "DECLARED_DETERMINISTIC"}, True),
+        ({"determinism_mode": "NON_DETERMINISTIC_KERNEL"}, False),
+        ({"determinism_mode": None}, False),
+        ({"status": "READY"}, False),
+        ("not json", False),
+    ],
+)
+def test_the_mode_is_read_from_the_preflight_record(tmp_path, record, expect_pass: bool) -> None:
+    import json
+    import shutil
+
+    from opengrad.verification.study_002_gate import REPO_ROOT, STUDY_002_PARTITION
+    from opengrad.verification.study_002_gate_runs import A_M0_RUN_RECORD, DETERMINISM_RECORD
+
+    for rel in (STUDY_002_PARTITION, A_M0_RUN_RECORD[0], *P_UNANS_FILES):
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(REPO_ROOT / rel, tmp_path / rel)
+    target = tmp_path / DETERMINISM_RECORD[0]
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(record if isinstance(record, str) else json.dumps(record), encoding="utf-8")
+    report = study_002_gate(healthy_bundle(), ADOPTED_PARAMETERS, root=tmp_path)
+    assert (_status(report, "generation_identity") == PASS) is expect_pass
+
+
+def test_an_unhashable_mode_fails_instead_of_raising() -> None:
+    bundle = healthy_bundle()
+    bundle["arm_runs"][0]["determinism_mode"] = ["DECLARED_DETERMINISTIC"]
+    assert _status(_gate(bundle), "generation_identity") == FAIL

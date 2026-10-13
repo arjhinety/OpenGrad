@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Any
 
 from opengrad.promotion.tool_use_policy import CODE_NONVACUOUS
-from opengrad.verification.accounting import BLOCKED_INPUT_MISSING, FAIL, PASS
+from opengrad.verification.accounting import BLOCKED_INPUT_MISSING, FAIL, PASS, VerificationReport
 from opengrad.verification.population_validators import (
     CODE_UNDER_POWERED,
     CODE_UNRESOLVED_ROW,
@@ -167,13 +167,25 @@ def healthy_bundle() -> dict[str, Any]:
     }
 
 
+#: The mode the self-test treats as recorded before Tier A. The real record does not exist yet, so without it
+#: check 12c fails; the self-test passes it explicitly, as a bundle never can.
+FIXTURE_DETERMINISM = "DECLARED_DETERMINISTIC"
+
+
+def fixture_gate(
+    bundle: dict[str, Any], parameters: PreregParameters = ADOPTED_PARAMETERS
+) -> VerificationReport:
+    """The gate with :data:`FIXTURE_DETERMINISM` as the recorded mode."""
+    return study_002_gate(bundle, parameters, recorded_determinism=FIXTURE_DETERMINISM)
+
+
 def _case(
     bundle: dict[str, Any],
     expected: str,
     code: str | None = None,
     parameters: PreregParameters = ADOPTED_PARAMETERS,
 ) -> dict[str, Any]:
-    report = study_002_gate(bundle, parameters)
+    report = fixture_gate(bundle, parameters)
     errors = [error for result in report.results for error in result.all_errors()]
     case: dict[str, Any] = {"overall": report.overall, "expected": expected}
     if code is not None:
@@ -360,6 +372,25 @@ def self_test() -> dict[str, Any]:
     two_modes = healthy_bundle()
     two_modes["arm_runs"][3]["determinism_mode"] = "NON_DETERMINISTIC_KERNEL"
     cases["arms_in_two_determinism_modes"] = _case(two_modes, FAIL, CODE_INVALID_COMPARISON)
+
+    unrecorded = study_002_gate(healthy_bundle(), ADOPTED_PARAMETERS, recorded_determinism="")
+    cases["no_determinism_mode_recorded_before_tier_a"] = {
+        "overall": unrecorded.overall,
+        "expected": FAIL,
+        "expects_code": CODE_INVALID_COMPARISON,
+        "code_found": any(
+            "no mode recorded before Tier A" in error
+            for result in unrecorded.results
+            for error in result.all_errors()
+        ),
+    }
+
+    other_mode = healthy_bundle()
+    for run in other_mode["arm_runs"]:
+        run["determinism_mode"] = "NON_DETERMINISTIC_KERNEL"
+    cases["runs_declare_a_mode_the_record_does_not_hold"] = _case(
+        other_mode, FAIL, CODE_INVALID_COMPARISON
+    )
 
     no_rep_a = healthy_bundle()
     del no_rep_a["arm_runs"][-1]
