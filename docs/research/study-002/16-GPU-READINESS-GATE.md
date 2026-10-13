@@ -230,3 +230,8 @@ Check 7's disposition map gains `SOURCE_EXCLUDED`: under [47](47-PER-SOURCE-FLAG
 (`study_002_prereg_v15`), a ToolACE that fails its per-source floor is excluded, and its flagged records keep
 their text in every arm. A failing Glaive or When2Call stops the corpus intervention instead. The rules are code
 (`flag_triage.triage_decision`).
+
+## Note, 2026-10-13
+
+Check 2 now reads `study_002_gate_v1` at **contract 4** (`reports/ERRATA.md` §35): the same checks and values,
+enforced as 11 and 40 state them. No threshold or amendment changed.

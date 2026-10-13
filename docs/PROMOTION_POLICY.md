@@ -120,3 +120,7 @@ so the line numbers the Study 002 preregistration cites above stay stable.
   Study 002 by `study_002_prereg_v8` ([`research/study-002/40-PREREG-V8-DRAFT.md`](research/study-002/40-PREREG-V8-DRAFT.md)).
 - **`study_002_gate_v1`** wraps v6 and fails whenever v6 does not promote (contract 3, 2026-09-24;
   [`reports/ERRATA.md`](../reports/ERRATA.md) §19, §24).
+
+- **2026-10-13:** `study_002_gate_v1` is at contract 4 ([`reports/ERRATA.md`](../reports/ERRATA.md) §35): it
+  requires every baseline metric v6's regression checks read, so through the gate none is skipped. v6 itself is
+  unchanged (a policy version is immutable).

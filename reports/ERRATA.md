@@ -1420,3 +1420,48 @@ references.
   [`docs/INCIDENT_LOG.md`](../docs/INCIDENT_LOG.md) INC-0002, "The re-label and the comparison".
 - **Decisions (2026-10-04):** the re-labelled references (`*.reference.gemini-r2.*`) are current from now on;
   the frozen ones stay as the record. 38's permissions stand (38 §7).
+
+## 35. Study 002 gate contract 4: rules the documents state, which contract 3 did not enforce
+
+**Added 2026-10-13,** from a three-part audit of the gate, the promotion policy and the code around them (three
+read-only auditors; every finding below was reproduced before acting). No arm has been scored, so no verdict
+changes. **Precedent:** §19, where contract 1 to 2 implemented `11-THRESHOLDS.md` "as written" with an ERRATA
+entry and no amendment. Contract 4 does the same; no threshold, rule or population changes.
+
+### `src/opengrad/verification/study_002_gate.py`
+
+- **As written (contract 3):** check 12 reads truncation "per stage per arm" (40 item A, 08 rule 2), and the
+  policy's non-regression checks are part of the gate (11, `tool_use_promotion_v5`). **Correction:** contract 3
+  passed a bundle whose 5-shot stage reported the candidate arm only (0.40, no `C0`), or omitted a stage, or
+  reported one stage; check 12b skipped a stage with fewer than two arms. It required only `call_f1` and
+  `answer_rate` from the baseline, so the policy skipped every regression check whose baseline value was absent
+  (UP-0014): in the gate's own healthy fixture, no regression check ran. It truncated fractional census counts
+  (`failed = 0.6` passed), accepted rates outside [0, 1] (`call_f1 = 3.0`, `refusal_rate = -1`), and raised
+  instead of failing on malformed input (`n = 10**400`, a non-list sentinel record, an unhashable provenance
+  entry, a non-dict candidate or baseline, a string matrix count).
+  **Contract 4** requires a truncation rate for every sentinel stage (`REQUIRED_STAGES`, the modes of 08's
+  inventory) and the same arms, at least two, in every stage; requires the four regression metrics in the
+  baseline (`BASELINE_METRICS`; 02 H5 falsifies on an unmeasured metric); requires whole, non-negative census
+  counts; fails a rate outside [0, 1] (`FAIL_INVALID_METRIC`); and fails, rather than raises, on each malformed
+  input. `population_validators.finite_number` returns `None` for an integer too large for a float.
+  The healthy fixture's baseline gains the four regression metrics; the self-test grows from 12 to 18 cases.
+  `study_002_readiness` check 2 now expects contract 4. **Source:** `tests/verification/test_study_002_gate.py`.
+
+### Not fixed by contract 4 (recorded so the gate's limits stay visible)
+
+- **Still (a), to come as contract 4's second part:** inputs are self-declared rather than read from artifacts.
+  The baseline values (B0's `call_f1` declared as 0.001 passes), a comparison's `n`, `p_unans_n`, the provenance
+  list and the population identity are not tied to artifacts. §19 said contract 2 "pins the … provenance fields
+  (15 V3, V9) in code"; it pins the field *names* a bundle declares, not an attachment per number. Blocking
+  sentinels' outcomes are never read (08: "a failure is a blocking failure").
+- **Not adjudicable but passed:** `min_clarification_accuracy` on `CLARIFY` at n = 371 (10.18pp) passes, though
+  40 item D.2 and §19 say it is not adjudicable. What a non-adjudicable floor does to the overall verdict is
+  stated nowhere; the owner chose (2026-10-13) that it blocks PASS, which needs a numbered amendment first.
+- **Rules the documents do not contain (amendment):** reconciling declared metrics with the confusion matrix (a
+  matrix that refuses every `ANSWER` item passed beside a declared `answer_rate` of 0.74), the sign of a
+  comparison, thresholds for sentinels that have none (`S-ANS-8`, `S-IF`, `S-MMLU`), and how an empty reply
+  counts.
+- **Outside the gate:** `opengrad promote` records PROMOTED with no evaluation, and no promotion path calls this
+  gate; the parser scores "I'm sorry, but I can't assist with that." and an empty reply as `ANSWER` (46 §8's
+  instrument is not wired in); `routing_metrics` reports 0.0 for an empty denominator; nothing yet builds a gate
+  bundle from a real run, so the gate has only judged synthetic bundles.

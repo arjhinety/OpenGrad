@@ -250,7 +250,14 @@ def test_the_tables_match_the_code_constants() -> None:
     assert (policy.max_answer_rate_drop_vs_base, policy.min_refusal_correctness) == (0.30, 0.70)
     assert (V6_COMPARISON_PLACES, resolvability.COMPARISON_PLACES) == (6, 9)
     assert gate.ADOPTED_PARAMETERS == gate.PreregParameters(2.0, 0.02, 385)
-    assert gate.BASELINE_METRICS == ("call_f1", "answer_rate")
+    assert gate.BASELINE_METRICS == (
+        "call_f1",
+        "answer_rate",
+        "call_precision",
+        "call_recall",
+        "clarification_accuracy",
+        "unsupported_accuracy",
+    )
     assert resolvability.MODE_FLOOR == 200
     assert (ft.POOLED_FLOOR, ft.POOLED_AGREEMENT_FLOOR) == (0.90, 0.80)
     assert (ft.PER_SOURCE_FLOOR, ft.PER_SOURCE_AGREEMENT_FLOOR, ft.MIN_AGREED) == (0.90, 0.80, 100)

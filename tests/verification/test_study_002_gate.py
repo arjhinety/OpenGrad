@@ -1,4 +1,4 @@
-"""Tests for `study_002_gate_v1`, contract 3 (`docs/research/study-002/11-THRESHOLDS.md`, 16 check 2/13).
+"""Tests for `study_002_gate_v1`, contract 4 (`docs/research/study-002/11-THRESHOLDS.md`, 16 check 2/13).
 
 Every check must be able to fail, and the gate must be shown failing on the three fixtures
 `16-GPU-READINESS-GATE.md:43-44` names: an empty required mode, a metric reporting `0.0` beside a
@@ -21,6 +21,7 @@ from opengrad.verification.study_002_gate import (
     ADOPTED_PARAMETERS,
     CODE_ACCOUNTING,
     CODE_INVALID_COMPARISON,
+    CODE_INVALID_METRIC,
     CODE_MISSING_METRIC,
     CODE_NONVACUOUS,
     CODE_PROVENANCE_INCOMPLETE,
@@ -50,7 +51,7 @@ def _errors(report, name: str) -> list[str]:
 
 
 def test_the_gate_is_versioned() -> None:
-    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 3
+    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 4
 
 
 def test_a_healthy_bundle_passes_every_check_under_the_adopted_prereg() -> None:
@@ -91,7 +92,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 10
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 16
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
@@ -441,3 +442,69 @@ def test_an_answer_rate_drop_exactly_at_the_bound_passes_under_v6() -> None:
     report = _gate(bundle)
     assert _status(report, "answer_mode") == PASS
     assert report.overall == PASS, [result.all_errors() for result in report.results]
+
+
+# -- contract 3 passed these (gate audit 2026-10-13, reports/ERRATA.md §35) ------------------------
+
+
+def _mutated(change):
+    bundle = copy.deepcopy(healthy_bundle())
+    change(bundle)
+    return bundle
+
+
+@pytest.mark.parametrize(
+    "change, check, code",
+    [
+        (
+            lambda b: b["truncation"].__setitem__("5-shot", {"R1": 0.40}),
+            "truncation",
+            CODE_INVALID_COMPARISON,
+        ),
+        (lambda b: b["truncation"].pop("5-shot"), "truncation", CODE_INVALID_COMPARISON),
+        (
+            lambda b: b.__setitem__("truncation", {"0-shot": {"C0": 0.02, "R1": 0.03}}),
+            "truncation",
+            CODE_INVALID_COMPARISON,
+        ),
+        (
+            lambda b: b["truncation"].__setitem__("8-shot", {"C0": 0.01}),
+            "truncation_balance",
+            CODE_INVALID_COMPARISON,
+        ),
+        (lambda b: b["baseline"].pop("call_precision"), "metric_values", CODE_MISSING_METRIC),
+        (lambda b: b["census"].update(failed=0.6), "census", CODE_ACCOUNTING),
+        (lambda b: b["census"].update(skipped=0.4), "census", CODE_ACCOUNTING),
+        (lambda b: b["candidate"].update(call_f1=3.0), "metric_values", CODE_INVALID_METRIC),
+        (lambda b: b["candidate"].update(refusal_rate=-1.0), "metric_values", CODE_INVALID_METRIC),
+        (lambda b: b["baseline"].update(answer_rate=1.5), "metric_values", CODE_INVALID_METRIC),
+    ],
+)
+def test_contract_4_fails_what_contract_3_passed(change, check, code) -> None:
+    report = _gate(_mutated(change))
+    assert _status(report, check) == FAIL
+    assert any(code in error for error in _errors(report, check))
+    assert report.overall == FAIL
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda b: b.__setitem__("candidate", [1, 2]),
+        lambda b: b.__setitem__("baseline", "not a dict"),
+        lambda b: b.__setitem__("modes", 5),
+        lambda b: b["sentinels_ran"].__setitem__("S-IF", 5),
+        lambda b: b["provenance"]["present"].append(["unhashable"]),
+        lambda b: b["candidate"]["confusion_matrix"]["CALL"].__setitem__("CALL", "430"),
+        lambda b: b.__setitem__("comparisons", {"a": 1}),
+        lambda b: b.__setitem__("comparisons", ["not a row"]),
+        lambda b: b.__setitem__("comparisons", [{"id": "x", "n": 10**400, "margin": 0.08}]),
+    ],
+)
+def test_malformed_input_never_raises_and_never_passes(change) -> None:
+    # Before contract 4 each of these raised: a caller catching the exception could fail open.
+    bundle = _mutated(change)
+    overall = _gate(bundle).overall  # a raise fails the test, which is the regression being guarded
+    # The unhashable provenance entry is ignored beside the real names; every other case must not pass.
+    if bundle.get("provenance", {}).get("present", [None])[-1] != ["unhashable"]:
+        assert overall != PASS

@@ -48,7 +48,7 @@ Every gate is written so each of those is impossible.
 | Generic promotion rules | `src/opengrad/promotion/policy.py` (`PromotionPolicy`) | experiment `promotion:` block |
 | Tool-use promotion v3 / v4 (parent-relative) | `src/opengrad/promotion/tool_use_policy.py`, `src/opengrad/promotion/m1_calibration.py` | `docs/evaluation/CHECKPOINT_SELECTION_RULE.md` |
 | Tool-use promotion v5 (Study 002: ANSWER floors, `NOT_EVALUABLE`) | `PromotionPolicyV5` in `src/opengrad/promotion/tool_use_policy.py` (subclasses the v3 class, not v4) | `docs/research/study-002/11-THRESHOLDS.md` |
-| Study 002 gate `study_002_gate_v1`, contract 3 (wraps v6; `study_002_prereg_v8`) | `src/opengrad/verification/study_002_gate.py` over `population_validators.py` and `resolvability.py` | `python -m opengrad.verification.study_002_gate --self-test`; undeclared prereg values in `PreregParameters` |
+| Study 002 gate `study_002_gate_v1`, contract 4 (wraps v6; `study_002_prereg_v8`; contract 4 = ERRATA §35) | `src/opengrad/verification/study_002_gate.py` over `population_validators.py` and `resolvability.py` | `python -m opengrad.verification.study_002_gate --self-test`; undeclared prereg values in `PreregParameters` |
 | Study 002 provenance validators `V3`–`V11` | `src/opengrad/verification/provenance_validators.py` (`V1`, `V2`, `V12` are in `population_validators.py`) | `self_test(root)` runs each on its 15 negative fixture |
 | Regression detection | `src/opengrad/promotion/regression.py` | `opengrad compare` output |
 | Quantization preservation | `src/opengrad/promotion/quantization.py` (`quantization_preservation_v1`) | `release/gguf/quantization_preservation_v1.json` |

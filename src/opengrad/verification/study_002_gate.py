@@ -6,6 +6,15 @@ shared accounting contract (`opengrad.verification.accounting`), and it is delib
 no: a required input that is absent is ``BLOCKED_INPUT_MISSING`` (never a pass), and a required
 population the bundle cannot measure is ``FAIL_NONVACUOUS``.
 
+**Contract 4 (2026-10-13).** A gate audit found inputs through which a broken candidate still
+passed. Contract 4 implements, as written, rules the adopted documents already state
+(`reports/ERRATA.md` §35, on the §19 precedent; no amendment): truncation is reported for every
+sentinel stage and every arm (40 A, 08 rule 2), so an omitted stage or a one-arm stage no longer
+escapes the balance check; the baseline carries every metric the non-regression checks read, so none
+is skipped (02 H5: an unmeasured metric falsifies); census counts are whole, non-negative numbers
+(check 2); every rate lies in [0, 1] (07); and malformed input fails the check that reads it instead
+of raising.
+
 **Contract 3 (2026-09-24, ``study_002_prereg_v8``).** The gate wraps ``tool_use_promotion_v6`` instead
 of v5, and runs with the values v8 declares (:data:`ADOPTED_PARAMETERS`). v6 returns
 ``NOT_EVALUABLE`` on any missing input rather than filling a default, so on an incomplete bundle the
@@ -34,7 +43,7 @@ The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 9. ``macro_recall`` over measured modes only -- ``TOOL_POLICY_REGRESSION``
 10. ``parse_valid_rate`` -- ``NOT_EVALUABLE``
 11. ``sentinels`` -- every sentinel in 08 ran, in its mode -- ``PROVENANCE_INCOMPLETE``
-12. ``truncation`` -- a truncation rate in [0, 1] per stage per arm -- ``INVALID_COMPARISON``
+12. ``truncation`` -- a truncation rate in [0, 1] for every sentinel stage and every arm -- ``INVALID_COMPARISON``
 12b. ``truncation_balance`` -- imbalance within the declared factor -- ``INVALID_COMPARISON``
 13. ``provenance`` -- every field 15 V3 / V9 require is present -- ``PROVENANCE_INCOMPLETE``
 14. ``comparison_margins`` -- every row prints ``n`` and a margin; at least one clears its resolvable
@@ -105,7 +114,7 @@ from opengrad.verification.resolvability import at_most
 
 #: The gate's own contract. Bump when the check set, its discovery rules or its non-vacuity
 #: requirements change, so a PASS under one contract is never read as a PASS under another.
-STUDY_002_GATE_CONTRACT = 3
+STUDY_002_GATE_CONTRACT = 4
 GATE_VERSION = "study_002_gate_v1"
 
 CODE_ACCOUNTING = "FAIL_ACCOUNTING"
@@ -113,6 +122,7 @@ CODE_PROVENANCE_INCOMPLETE = "PROVENANCE_INCOMPLETE"
 CODE_INVALID_COMPARISON = "INVALID_COMPARISON"
 CODE_WITHIN_NOISE = "WITHIN_NOISE"
 CODE_MISSING_METRIC = "FAIL_MISSING_METRIC"
+CODE_INVALID_METRIC = "FAIL_INVALID_METRIC"
 
 #: The behavioural checks 4-10, and the policy dimension each reads.
 BEHAVIOUR_CHECKS = (
@@ -144,7 +154,18 @@ CANDIDATE_METRICS = (
     "refusal_correctness",
     "parse_valid_rate",
 )
-BASELINE_METRICS = ("call_f1", "answer_rate")
+#: The baseline carries every metric the policy compares it against: ``call_f1`` (retention),
+#: ``answer_rate`` (the drop) and the four non-regression metrics. The policy skips a regression check
+#: whose baseline value is absent (UP-0014), so contract 4 requires them rather than letting one go
+#: unmeasured (02 H5).
+BASELINE_METRICS = (
+    "call_f1",
+    "answer_rate",
+    "call_precision",
+    "call_recall",
+    "clarification_accuracy",
+    "unsupported_accuracy",
+)
 
 #: The sentinel inventory (08-SENTINEL-SPEC.md, "Sentinel inventory") and the mode each runs in.
 #: ``S-OW7`` never blocks a verdict but must run (08 "Blocking semantics"); ``S-NV`` has no mode.
@@ -160,6 +181,13 @@ REQUIRED_SENTINELS: dict[str, tuple[str, ...]] = {
     "S-OW7": ("0-shot",),
     "S-NV": (),
 }
+
+#: The truncation stages: "the prompt mode a sentinel runs in" (40-PREREG-V8-DRAFT.md item A), so every
+#: mode in the sentinel inventory. Each must report a rate for every arm (08 rule 2); a stage left out,
+#: or reported for one arm only, cannot be checked for imbalance.
+REQUIRED_STAGES: tuple[str, ...] = tuple(
+    sorted({mode for modes in REQUIRED_SENTINELS.values() for mode in modes})
+)
 
 #: The attachment every number carries (15 V3) plus the artifact-read fingerprints (15 V9).
 REQUIRED_PROVENANCE = (
@@ -219,7 +247,13 @@ class Study002Gate:
 
     @property
     def raw_candidate(self) -> dict[str, Any]:
-        return dict(self.bundle.get("candidate") or {})
+        candidate = self.bundle.get("candidate")
+        return dict(candidate) if isinstance(candidate, dict) else {}
+
+    @property
+    def raw_baseline(self) -> dict[str, Any]:
+        baseline = self.bundle.get("baseline")
+        return dict(baseline) if isinstance(baseline, dict) else {}
 
     @property
     def candidate(self) -> dict[str, Any]:
@@ -239,7 +273,7 @@ class Study002Gate:
 
     @property
     def baseline(self) -> dict[str, Any]:
-        raw = dict(self.bundle.get("baseline") or {})
+        raw = self.raw_baseline
         return {key: value for key, value in raw.items() if finite_number(value) is not None}
 
     @property
@@ -263,7 +297,8 @@ class Study002Gate:
         )
 
     def _modes(self) -> dict[str, Any]:
-        return dict(self.bundle.get("modes") or {})
+        modes = self.bundle.get("modes")
+        return dict(modes) if isinstance(modes, dict) else {}
 
     # -- 1-3b: the L1 family --------------------------------------------------------------------
 
@@ -276,10 +311,11 @@ class Study002Gate:
             return self._blocked("census", ["census"], "no execution census in the bundle")
         keys = ("discovered", "checked", "passed", "failed", "blocked", "skipped")
         counts = {key: finite_number(census.get(key)) for key in keys}
+        # A count is a whole, non-negative number; int() would silently truncate 0.6 failed items to 0.
         problems = [
             f"{key} is not a count ({census.get(key)!r})"
             for key, value in counts.items()
-            if value is None
+            if value is None or value < 0 or value != int(value)
         ]
         if not problems:
             c = {key: int(value or 0) for key, value in counts.items()}
@@ -316,10 +352,14 @@ class Study002Gate:
         return result_from("census", REQUIRED_NONEMPTY, ["census"], errors)
 
     def metric_denominators(self) -> ValidationResult:
-        return v2_metric_denominator(self.raw_candidate)
+        # A malformed matrix is reported by check 3b; reading its denominators would raise instead.
+        candidate = self.raw_candidate
+        if "confusion_matrix" in candidate and not _valid_matrix(candidate["confusion_matrix"]):
+            candidate = {k: v for k, v in candidate.items() if k != "confusion_matrix"}
+        return v2_metric_denominator(candidate)
 
     def metric_values(self) -> ValidationResult:
-        candidate, baseline = self.raw_candidate, dict(self.bundle.get("baseline") or {})
+        candidate, baseline = self.raw_candidate, self.raw_baseline
         ids = [f"candidate.{m}" for m in CANDIDATE_METRICS] + [
             f"baseline.{m}" for m in BASELINE_METRICS
         ]
@@ -331,6 +371,17 @@ class Study002Gate:
             )
             for metric in names
             if finite_number(metrics.get(metric)) is None
+        ]
+        # Every metric the policy reads is a rate: a ratio of counts (07), so it lies in [0, 1]. A value
+        # outside that range is not a measurement, whatever threshold it would clear.
+        errors += [
+            f"{side}.{metric}: {CODE_INVALID_METRIC}: {value} is not a rate in [0, 1]"
+            for side, metrics, names in (
+                ("candidate", candidate, CANDIDATE_METRICS),
+                ("baseline", baseline, BASELINE_METRICS),
+            )
+            for metric in names
+            if (value := finite_number(metrics.get(metric))) is not None and not 0.0 <= value <= 1.0
         ]
         if "confusion_matrix" in candidate and not _valid_matrix(candidate["confusion_matrix"]):
             ids.append("candidate.confusion_matrix")
@@ -393,7 +444,12 @@ class Study002Gate:
             if sentinel not in ran:
                 errors.append(f"{sentinel}: {CODE_PROVENANCE_INCOMPLETE}: did not run")
                 continue
-            recorded = set(ran.get(sentinel) or [])
+            modes_ran = ran.get(sentinel)
+            recorded = (
+                {m for m in modes_ran if isinstance(m, str)}
+                if isinstance(modes_ran, (list, tuple))
+                else set()
+            )
             errors.extend(
                 f"{sentinel}: {CODE_PROVENANCE_INCOMPLETE}: did not run in its {mode} mode"
                 for mode in modes
@@ -413,11 +469,27 @@ class Study002Gate:
             return self._blocked(
                 "truncation", ["truncation"], "no per-stage, per-arm truncation record"
             )
-        errors: list[str] = []
+        errors: list[str] = [
+            f"{stage}: {CODE_INVALID_COMPARISON}: no truncation rates reported for this sentinel stage"
+            for stage in REQUIRED_STAGES
+            if stage not in table
+        ]
+        # Every stage reports the same arms, and at least two, so each stage can be compared (40 A).
+        all_arms = {str(arm) for arms in table.values() for arm in arms}
+        if len(all_arms) < 2:
+            errors.append(
+                f"truncation: {CODE_INVALID_COMPARISON}: rates for {len(all_arms)} arm(s); a balance "
+                "check needs at least two"
+            )
         for stage, arms in table.items():
             if not arms:
                 errors.append(
                     f"{stage}: {CODE_INVALID_COMPARISON}: no per-arm truncation rate reported"
+                )
+            missing = sorted(all_arms - {str(arm) for arm in arms})
+            if arms and missing:
+                errors.append(
+                    f"{stage}: {CODE_INVALID_COMPARISON}: no rate for arm(s) {', '.join(missing)}"
                 )
             for arm, rate in arms.items():
                 value = finite_number(rate)
@@ -446,6 +518,10 @@ class Study002Gate:
                 value for value in (finite_number(r) for r in arms.values()) if value is not None
             ]
             if len(rates) < 2:
+                # A one-arm stage cannot be shown balanced; check 12 names the missing arm.
+                errors.append(
+                    f"{stage}: {CODE_INVALID_COMPARISON}: {len(rates)} usable rate(s); balance not checkable"
+                )
                 continue
             low, high = min(rates), max(rates)
             imbalanced = not at_most(high - low, gap) and (
@@ -464,7 +540,12 @@ class Study002Gate:
             return self._blocked(
                 "provenance", list(REQUIRED_PROVENANCE), "no provenance record in the bundle"
             )
-        present = set(provenance.get("present") or [])
+        listed = provenance.get("present")
+        present = (
+            {item for item in listed if isinstance(item, str)}
+            if isinstance(listed, (list, tuple))
+            else set()
+        )
         errors = [
             f"{item}: {CODE_PROVENANCE_INCOMPLETE}: absent"
             for item in REQUIRED_PROVENANCE
@@ -473,7 +554,14 @@ class Study002Gate:
         return result_from("provenance", REQUIRED_NONEMPTY, list(REQUIRED_PROVENANCE), errors)
 
     def comparison_margins(self) -> ValidationResult:
-        result = v12_resolvable_margin(list(self.bundle.get("comparisons") or []))
+        rows = self.bundle.get("comparisons")
+        # A row that is not a mapping is unresolved (no n, no margin), not a crash.
+        rows = (
+            [row if isinstance(row, dict) else {} for row in rows]
+            if isinstance(rows, (list, tuple))
+            else []
+        )
+        result = v12_resolvable_margin(rows)
         # 08 "Blocking semantics": a WITHIN_NOISE row is not a failure but cannot count as a pass,
         # and is excluded from the verdict's support. With no supporting row there is no support.
         if (
@@ -591,7 +679,14 @@ def healthy_bundle() -> dict[str, Any]:
             "skipped": 0,
         },
         "candidate": candidate,
-        "baseline": {"call_f1": 0.62, "answer_rate": 0.98},
+        "baseline": {
+            "call_f1": 0.62,
+            "answer_rate": 0.98,
+            "call_precision": 0.70,
+            "call_recall": 0.75,
+            "clarification_accuracy": 0.78,
+            "unsupported_accuracy": 0.70,
+        },
         "p_unans_n": 400,
         "sentinels_ran": {sentinel: list(modes) for sentinel, modes in REQUIRED_SENTINELS.items()},
         "provenance": {"present": list(REQUIRED_PROVENANCE)},
@@ -687,6 +782,34 @@ def self_test() -> dict[str, Any]:
     cases["null_metric"] = _case(null_metric, FAIL, CODE_MISSING_METRIC)
 
     cases["empty_bundle"] = _case({}, FAIL)
+
+    # -- contract 3 passed these (reports/ERRATA.md §35) -------------------------------------------
+    one_arm = healthy_bundle()
+    one_arm["truncation"]["5-shot"] = {"R1": 0.40}
+    cases["truncation_stage_with_one_arm"] = _case(one_arm, FAIL, CODE_INVALID_COMPARISON)
+
+    no_stage = healthy_bundle()
+    del no_stage["truncation"]["5-shot"]
+    cases["truncation_stage_omitted"] = _case(no_stage, FAIL, CODE_INVALID_COMPARISON)
+
+    no_regression_baseline = healthy_bundle()
+    del no_regression_baseline["baseline"]["clarification_accuracy"]
+    no_regression_baseline["candidate"]["clarification_accuracy"] = 0.55
+    cases["baseline_without_a_regression_metric"] = _case(
+        no_regression_baseline, FAIL, CODE_MISSING_METRIC
+    )
+
+    fractional = healthy_bundle()
+    fractional["census"]["failed"] = 0.6
+    cases["census_with_a_fractional_count"] = _case(fractional, FAIL, CODE_ACCOUNTING)
+
+    impossible = healthy_bundle()
+    impossible["candidate"]["call_f1"] = 3.0
+    cases["metric_outside_zero_one"] = _case(impossible, FAIL, CODE_INVALID_METRIC)
+
+    oversized = healthy_bundle()
+    oversized["comparisons"] = [{"id": "R1_vs_C0", "n": 10**400, "margin": 0.08, "delta": 0.12}]
+    cases["comparison_n_too_large_for_a_float"] = _case(oversized, FAIL, CODE_UNRESOLVED_ROW)
     return cases
 
 

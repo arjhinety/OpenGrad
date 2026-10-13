@@ -180,7 +180,7 @@ when `DIRECT` and `UNSUPPORTED` both qualify. Code: `evaluate`, `src/opengrad/ve
 
 ## 5. The trained model: the gate and the promotion policy
 
-The gate (`study_002_gate_v1`, contract 3) wraps the promotion policy `tool_use_promotion_v6`, whose thresholds are
+The gate (`study_002_gate_v1`, contract 4 since 2026-10-13; contract 3 when this draft was written) wraps the promotion policy `tool_use_promotion_v6`, whose thresholds are
 v5's, unchanged. From the confusion matrix $C_{g,p}$ (gold $g$, prediction $p$) over `CALL`, `ANSWER`, `CLARIFY`
 and `UNSUPPORTED`, with $n_g = \sum_p C_{g,p}$:
 
@@ -198,7 +198,7 @@ Here $\text{acc}_{\text{ANSWER}}$ is `no_call_accuracy`. **Macro recall** is the
 | `no_call_accuracy`, `unsupported_accuracy`, `clarification_accuracy` | ≥ 0.40, ≥ 0.30, ≥ 0.50 |
 | `over_call_rate` | ≤ 0.20 |
 | `parse_valid_rate` | ≥ 0.99 |
-| regression on call precision, call recall, clarification and unsupported accuracy | $x^{\text{cand}} - x^{\text{base}} \ge -0.10$, each checked only when both candidate and baseline carry the metric (open question 8) |
+| regression on call precision, call recall, clarification and unsupported accuracy | $x^{\text{cand}} - x^{\text{base}} \ge -0.10$, each checked only when both candidate and baseline carry the metric (open question 8; the gate requires all four since contract 4) |
 | `answer_rate`, `refusal_rate` on `ANSWER`-gold | ≥ 0.60, ≤ 0.25 |
 | answer-rate drop against the baseline | $\text{answer\_rate}^{\text{base}} - \text{answer\_rate}^{\text{cand}} \le 0.30$ |
 | `refusal_correctness` on `P-UNANS` | ≥ 0.70, with `P-UNANS` $n \ge 385$; a smaller `P-UNANS` fails the gate as `UNDER_POWERED` |
@@ -418,6 +418,10 @@ preregistered rule needs a numbered amendment first.
    in absent metrics the way v5 did, so this looks unintended. It also bears on H5, which 02 falsifies if
    `call_precision` degrades "or any of them is unmeasurable rather than measured": a skipped check is exactly an
    unmeasured one. Logged as UP-0014; no code is changed here.
+
+   *Later, 2026-10-13:* closed for the gate. Gate contract 4 (`reports/ERRATA.md` §35) requires all four in the
+   baseline, so through the gate no regression check is skipped. v6 used on its own still skips them; a policy
+   version is immutable, so that would take a v7.
 
 ## 9. References
 

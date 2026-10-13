@@ -33,6 +33,7 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0013 | 2026-10-04 | OpenGrad tests | `OURS` | A pushed commit grew the hygiene allowlist, and a test pinning the credential count failed CI | Fixed (count 3 -> 9, ERRATA §33) |
 | UP-0014 | 2026-10-06 | `tool_use_policy.py`, `study_002_gate.py` | `OURS` | Regression checks are skipped when the baseline lacks the metric; v6 and the gate require only two baseline metrics | Open; no code changed (formulas draft, open question 8) |
 | UP-0015 | 2026-10-06 | formulas draft | `OURS` | The draft misread the resolvable margin for a paired difference and misstated four other points; independent reviews caught them before push | Fixed in the draft and its test |
+| UP-0017 | 2026-10-13 | `study_002_gate.py`, `tool_use_policy.py`, wiring | `OURS` | A gate audit found inputs through which a broken checkpoint reached PASS | Part fixed (contract 4, ERRATA §35); the rest recorded there |
 | UP-0016 | 2026-10-06 | gstack `outside-review-result.ts` (gstack 1.91.27.0) | `UNCLEAR` | The Codex review validator reported a critical finding because Codex wrote "no [P1] findings" in Chinese | Open; read the review text, not only the verdict |
 
 ---
@@ -226,3 +227,18 @@ bracketed tag matching `\[(P[0-3])\]` as a finding (`outside-review-result.ts`, 
 in isolation with English text: a review reading "no **[P1]** findings." gives `FINDINGS: P1`, exit 3. Still
 `UNCLEAR` until the tracker is searched: the review format reserves `[P1]` for findings, so this may be `NOT A BUG`.
 Found by the re-audit of dea2cd0.
+
+## UP-0017 — a gate that checked what it was told, not what was true (`OURS`)
+
+Three read-only auditors probed the gate, the promotion policy and the wiring around them with one-field mutations
+of the gate's healthy fixture. Every finding was reproduced before acting. Contract 3 passed a one-arm or missing
+truncation stage, skipped every regression check (the baseline carried only two metrics), truncated fractional
+census counts, accepted rates outside [0, 1], and raised on malformed input. Contract 4 fixes those, implementing
+the documents as written (ERRATA §35, on the §19 precedent). Still open, and listed in §35: self-declared inputs
+(V3/V9 never built), unread sentinel outcomes, a non-adjudicable floor that passes, rules no document contains,
+and the wiring (`opengrad promote` without the gate; refusals parsed as answers; no real bundle producer).
+Lesson: a gate's fixture should be checked for consistency with itself (its scalars contradicted its own
+confusion matrix), and a gate that has only seen synthetic input has not been tested on what it will judge.
+
+Later line for UP-0014, 2026-10-13: closed for the gate by contract 4, which requires the four metrics in the
+baseline. `tool_use_promotion_v6` used on its own still skips them.

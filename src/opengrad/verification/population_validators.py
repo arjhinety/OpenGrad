@@ -48,7 +48,10 @@ def finite_number(value: Any) -> float | None:
     """`value` as a float if it is a real, finite number; otherwise None (bool is not a number)."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
-    number = float(value)
+    try:
+        number = float(value)
+    except OverflowError:  # an int too large for a float is not a usable measurement
+        return None
     return number if math.isfinite(number) else None
 
 
