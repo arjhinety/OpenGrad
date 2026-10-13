@@ -162,6 +162,7 @@ from opengrad.verification.study_002_gate_runs import (
     CODE_INVALID_COMPARISON,
     determinism_errors,
     generation_identity_errors,
+    read_a_m0_mode,
     read_determinism,
     reconcile_determinism,
 )
@@ -680,7 +681,9 @@ class Study002Gate:
         else:
             recorded, source_errors = reconcile_determinism(*self.determinism_sources)
         verdict_metrics = frozenset(CANDIDATE_METRICS) | frozenset(BASELINE_METRICS)
-        errors += source_errors + determinism_errors(runs, recorded, verdict_metrics)
+        errors += source_errors + determinism_errors(
+            runs, recorded, verdict_metrics, read_a_m0_mode(self.root)
+        )
         return result_from("generation_identity", REQUIRED_NONEMPTY, ["arm_runs"], errors)
 
     def provenance(self) -> ValidationResult:

@@ -93,6 +93,27 @@ REPEATS: dict[str, tuple[str, int | None]] = {"REP-A": ("C0", 0), "REP-B": ("A_M
 #: pins its config), and the field holding its training seed.
 A_M0_RUN_RECORD = ("runs/m0_sft_canonical_v2_final/experiment.json", "random_seed")
 
+#: ``A_M0``'s Study 001 config. Its mode is ``reproducibility.determinism``; a config that declares none is
+#: ``UNDECLARED`` (``opengrad.training.determinism``), as every Study 001 run was. ``REP-B`` declares the mode
+#: its checkpoint was trained under, as it declares that checkpoint's seed (owner, 2026-10-13).
+A_M0_CONFIG = "configs/experiments/m0_sft_canonical_v2_final.yaml"
+UNDECLARED = "UNDECLARED"
+
+
+def read_a_m0_mode(root: Path) -> str | None:
+    """The mode ``A_M0`` was trained under, or ``None`` when its config cannot be read."""
+    try:
+        config = yaml.safe_load((root / A_M0_CONFIG).read_text(encoding="utf-8"))
+    except (OSError, ValueError, yaml.YAMLError):
+        return None
+    if not isinstance(config, dict):
+        return None
+    reproducibility = config.get("reproducibility")
+    declared = reproducibility.get("determinism") if isinstance(reproducibility, dict) else None
+    if declared is None:
+        return UNDECLARED
+    return declared if isinstance(declared, str) else None
+
 
 def _text(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
@@ -215,6 +236,7 @@ def determinism_errors(
     runs: list[dict[str, Any]],
     recorded_mode: str | None,
     required_metrics: frozenset[str] = frozenset(),
+    a_m0_mode: str | None = None,
 ) -> list[str]:
     """46 §12 and 14, as written: one determinism mode for every arm, and the ``REP-A`` evidence it requires.
 
@@ -222,12 +244,14 @@ def determinism_errors(
     exactly"; under ``NON_DETERMINISTIC_KERNEL``, "``REP-A`` residual measured and reported". Either way a
     ``REP-A`` record is required, and it and ``C0``'s seed-0 run carry the same metrics. How large a residual
     is too large is not written (48, part (b)), so this function never judges its size.
-    14: "Every run declares one, and the declaration is checked rather than trusted", so ``REP-B`` declares
-    the recorded mode too. ``required_metrics`` are the metrics the verdict reads: ``REP-A`` and ``C0`` seed 0
-    must report each of them.
+    14: "Every run declares one, and the declaration is checked rather than trusted". A run's mode, like its
+    seed, describes how its checkpoint was trained (46 §12 chooses it from training runs). ``REP-B`` trains
+    nothing: it declares ``a_m0_mode``, the mode ``A_M0`` was trained under (``UNDECLARED`` in Study 001), read
+    from its config, and is left out of the "one mode for every arm" rule. ``required_metrics`` are the
+    metrics the verdict reads: ``REP-A`` and ``C0`` seed 0 must report each of them.
 
-    ``recorded_mode`` is the mode the readiness record holds (:data:`DETERMINISM_RECORD`), or ``None`` when
-    there is no such record. The bundle's declaration is never trusted on its own: with no record the check
+    ``recorded_mode`` is the mode the GPU preflight record holds (:data:`DETERMINISM_RECORD`, readiness check
+    1's evidence), or ``None`` when there is no such record. The bundle's declaration is never trusted on its own: with no record the check
     fails, and every run must declare the recorded mode.
     """
     errors: list[str] = []
@@ -239,12 +263,25 @@ def determinism_errors(
     modes = set()
     for index, run in enumerate(runs):
         mode = run.get("determinism_mode")
+        if run.get("repeat") == "REP-B":
+            if not isinstance(mode, str) or a_m0_mode is None or mode != a_m0_mode:
+                errors.append(
+                    f"{run.get('arm')!r}/seed {run.get('seed')!r}: {CODE_INVALID_COMPARISON}: REP-B "
+                    f"declares {mode!r}, but A_M0 was trained "
+                    + (
+                        f"{a_m0_mode}"
+                        if a_m0_mode is not None
+                        else "under a mode its config does not show"
+                    )
+                    + f" ({A_M0_CONFIG})"
+                )
+            continue
         if isinstance(mode, str) and mode in DETERMINISM_MODES:
             modes.add(mode)
             if recorded_mode in DETERMINISM_MODES and mode != recorded_mode:
                 errors.append(
                     f"{run.get('arm')!r}/seed {run.get('seed')!r}: {CODE_INVALID_COMPARISON}: declares "
-                    f"{mode}, but the readiness record holds {recorded_mode} (46 §12)"
+                    f"{mode}, but the GPU preflight record holds {recorded_mode} (46 §12)"
                 )
         else:
             errors.append(

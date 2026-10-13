@@ -875,7 +875,14 @@ def _with_repeats(bundle: dict, **changes) -> dict:
     first = {k: v for k, v in bundle["arm_runs"][0].items() if k != "metrics"}
     bundle["arm_runs"][-1].update(changes.get("rep_a", {}))
     bundle["arm_runs"].append(
-        {**first, "arm": "A_M0", "seed": 42, "repeat": "REP-B", **changes.get("rep_b", {})}
+        {
+            **first,
+            "arm": "A_M0",
+            "seed": 42,
+            "repeat": "REP-B",
+            "determinism_mode": "UNDECLARED",
+            **changes.get("rep_b", {}),
+        }
     )
     return bundle
 
@@ -999,12 +1006,42 @@ def test_rep_a_evidence_and_one_mode_are_required(change) -> None:
     assert report.overall == FAIL
 
 
-@pytest.mark.parametrize("mode", [None, "NON_DETERMINISTIC_KERNEL", ["x"]])
-def test_rep_b_declares_the_recorded_mode_too(mode) -> None:
-    """14: "Every run declares one, and the declaration is checked rather than trusted"."""
+@pytest.mark.parametrize(
+    "mode", [None, "DECLARED_DETERMINISTIC", "NON_DETERMINISTIC_KERNEL", ["UNDECLARED"]]
+)
+def test_rep_b_declares_the_mode_a_m0_was_trained_under(mode) -> None:
+    """14: "Every run declares one, and the declaration is checked rather than trusted". REP-B trains
+    nothing; its checkpoint was trained UNDECLARED, so copying the arms' mode is false and fails."""
     bundle = _with_repeats(healthy_bundle())
     bundle["arm_runs"][-1]["determinism_mode"] = mode
-    assert _status(_gate(bundle), "generation_identity") == FAIL
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any("REP-B declares" in e and "UNDECLARED" in e for e in errors)
+
+
+def test_a_m0_was_trained_undeclared() -> None:
+    from opengrad.verification.study_002_gate import REPO_ROOT
+    from opengrad.verification.study_002_gate_runs import read_a_m0_mode
+
+    assert read_a_m0_mode(REPO_ROOT) == "UNDECLARED"
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("reproducibility:\n  seed: 42\n", "UNDECLARED"),
+        ("reproducibility:\n  determinism: NON_DETERMINISTIC_KERNEL\n", "NON_DETERMINISTIC_KERNEL"),
+        ("- a list\n", None),
+        ("reproducibility:\n  determinism: [x]\n", None),
+    ],
+)
+def test_the_a_m0_mode_is_read_from_its_config(tmp_path, text: str, expected) -> None:
+    from opengrad.verification.study_002_gate_runs import A_M0_CONFIG, read_a_m0_mode
+
+    path = tmp_path / A_M0_CONFIG
+    path.parent.mkdir(parents=True)
+    path.write_text(text, encoding="utf-8")
+    assert read_a_m0_mode(tmp_path) == expected
+    assert read_a_m0_mode(tmp_path / "missing") is None
 
 
 def test_the_gate_reads_the_mode_readiness_reads() -> None:

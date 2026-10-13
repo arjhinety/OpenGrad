@@ -1785,19 +1785,29 @@ amendment.
 - **Contract 6:** the gate never read `REP-A` or a determinism mode.
 - **Contract 7, check 12c:**
   - Every run declares `determinism_mode`, one of 14's two classes: the arms' runs, `REP-A` and `REP-B`. 14:
-    "Every run declares one, and the declaration is checked rather than trusted". `REP-B` re-scores a Study 001
-    checkpoint, but it is a run under the Study 002 evaluator, so it declares the recorded mode too.
+    "Every run declares one, and the declaration is checked rather than trusted".
+  - **`REP-B` declares the mode its checkpoint was trained under (owner, 2026-10-13).** A run's mode, like its
+    seed, describes how its checkpoint was trained: 46 §12 chooses it from two training runs. `REP-B` trains
+    nothing; it re-scores `A_M0`, whose config (`configs/experiments/m0_sft_canonical_v2_final.yaml`) has
+    `reproducibility: {seed: 42, precision: bfloat16}` and no `determinism`, which
+    `opengrad.training.determinism` reads as `UNDECLARED`. So `REP-B` must declare `UNDECLARED`, read by the gate
+    from that config as its seed is read from the run record (§38); a `REP-B` copying the arms' mode is false
+    and fails, and `REP-B` is left out of the one-mode-for-every-arm rule. `UNDECLARED` is not one of 14's two
+    classes; 14 does not cover a re-score of a checkpoint trained before it existed, and this is listed for the
+    amendment with B10 (48).
   - **Where the mode is recorded (owner, 2026-10-13).** 46 §12: "The mode is recorded in the readiness record
     before Tier A." It is recorded in two files, and the gate and readiness check 1 both read both:
-    - `reports/study-002/readiness/gpu-preflight.json` (`determinism_mode`), the readiness record. It is
-      **authoritative**, because 46 §12 says the GPU preflight chooses the mode and records it there.
+    - `reports/study-002/readiness/gpu-preflight.json` (`determinism_mode`), the GPU preflight record and
+      readiness check 1's evidence. It is **authoritative**, because 46 §12 says the GPU preflight chooses the
+      mode.
     - `configs/study_002/seed-plan.yaml` (`determinism_mode`), the study's seed plan, whose comment says the mode
       is "chosen by the GPU preflight before Tier A". It must agree.
 
     Either file missing, either value null or not one of 14's classes, or the two differing, fails 12c and
-    blocks readiness check 1. Every run must declare the recorded mode. Neither file holds a mode yet (the
+    blocks readiness check 1. Neither file holds a mode yet (the
     preflight record does not exist, and the seed plan says `null`), so on today's repository both checks fail
     closed rather than trust the bundle. The self-test and tests pass the pair explicitly; a bundle cannot.
+    Every run except `REP-B` must declare the recorded mode.
   - A `REP-A` record is required in either mode, since 14 lists it as the evidence for both. A missing `REP-A`,
     or missing metrics, fails with `INVALID_COMPARISON` rather than blocking, as missing seeds do (§38); doc 48
     had said `BLOCKED`.
