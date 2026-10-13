@@ -9,7 +9,10 @@ from __future__ import annotations
 import json
 import math
 import re
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 CODE_INVALID_COMPARISON = "INVALID_COMPARISON"
 #: 14: "A run that declares ``DECLARED_DETERMINISTIC`` and fails ``REP-A`` is a **defect**".
@@ -21,6 +24,41 @@ DETERMINISM_MODES = frozenset({"DECLARED_DETERMINISTIC", "NON_DETERMINISTIC_KERN
 #: 46 §12: "The mode is recorded in the readiness record before Tier A". Readiness check 1 reads it from the
 #: GPU preflight record (``study_002_readiness.PREFLIGHT_RECORD``); the gate reads the same field there.
 DETERMINISM_RECORD = ("reports/study-002/readiness/gpu-preflight.json", "determinism_mode")
+
+#: The seed plan's copy of the mode ("46 §12: one mode for every arm, chosen by the GPU preflight before Tier
+#: A"). The preflight record is authoritative, since it is where the mode is chosen; the plan must agree.
+SEED_PLAN_MODE = ("configs/study_002/seed-plan.yaml", "determinism_mode")
+
+
+def reconcile_determinism(preflight: Any, plan: Any) -> tuple[str | None, list[str]]:
+    """The recorded mode, or ``None`` with the reasons: either source missing or null, or the two differing."""
+    errors: list[str] = []
+    for value, (path, _) in ((preflight, DETERMINISM_RECORD), (plan, SEED_PLAN_MODE)):
+        if not (isinstance(value, str) and value in DETERMINISM_MODES):
+            errors.append(
+                f"determinism_mode: {CODE_INVALID_COMPARISON}: {path} holds no determinism mode "
+                f"({value!r}; 46 §12)"
+            )
+    if not errors and preflight != plan:
+        errors.append(
+            f"determinism_mode: {CODE_INVALID_COMPARISON}: {DETERMINISM_RECORD[0]} holds {preflight} but "
+            f"{SEED_PLAN_MODE[0]} holds {plan}"
+        )
+    return (None, errors) if errors else (str(preflight), [])
+
+
+def read_determinism(root: Path) -> tuple[str | None, list[str]]:
+    """Read both sources under ``root`` and reconcile them; an unreadable file holds no mode."""
+    values: list[Any] = []
+    for path, field in (DETERMINISM_RECORD, SEED_PLAN_MODE):
+        try:
+            text = (root / path).read_text(encoding="utf-8")
+            document = json.loads(text) if path.endswith(".json") else yaml.safe_load(text)
+            values.append(document.get(field) if isinstance(document, dict) else None)
+        except (OSError, ValueError, yaml.YAMLError):
+            values.append(None)
+    return reconcile_determinism(values[0], values[1])
+
 
 #: 04 "Fixed across every arm": "Tokenizer and chat-template hash | pinned", "Evaluator version, generation
 #: config, decoder | one version", "Device class for primary runs | one class, with the provider recorded".
@@ -159,22 +197,34 @@ def _metrics(value: Any) -> dict[str, float] | None:
     """A non-empty map of metric name to finite number, or ``None``."""
     if not isinstance(value, dict) or not value:
         return None
-    if not all(
-        _text(k) and isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
-        for k, v in value.items()
-    ):
+    try:
+        if not all(
+            _text(k)
+            and isinstance(v, (int, float))
+            and not isinstance(v, bool)
+            and math.isfinite(float(v))
+            for k, v in value.items()
+        ):
+            return None
+    except OverflowError:  # an int too large for a float is not a rate
         return None
     return {str(k): float(v) for k, v in value.items()}
 
 
-def determinism_errors(runs: list[dict[str, Any]], recorded_mode: str | None) -> list[str]:
+def determinism_errors(
+    runs: list[dict[str, Any]],
+    recorded_mode: str | None,
+    required_metrics: frozenset[str] = frozenset(),
+) -> list[str]:
     """46 §12 and 14, as written: one determinism mode for every arm, and the ``REP-A`` evidence it requires.
 
     14, "Evidence required": under ``DECLARED_DETERMINISTIC``, "``REP-A`` ... reproduces the metric values
     exactly"; under ``NON_DETERMINISTIC_KERNEL``, "``REP-A`` residual measured and reported". Either way a
     ``REP-A`` record is required, and it and ``C0``'s seed-0 run carry the same metrics. How large a residual
     is too large is not written (48, part (b)), so this function never judges its size.
-    ``REP-B`` re-scores a Study 001 checkpoint and is not an arm, so it declares no mode.
+    14: "Every run declares one, and the declaration is checked rather than trusted", so ``REP-B`` declares
+    the recorded mode too. ``required_metrics`` are the metrics the verdict reads: ``REP-A`` and ``C0`` seed 0
+    must report each of them.
 
     ``recorded_mode`` is the mode the readiness record holds (:data:`DETERMINISM_RECORD`), or ``None`` when
     there is no such record. The bundle's declaration is never trusted on its own: with no record the check
@@ -186,9 +236,8 @@ def determinism_errors(runs: list[dict[str, Any]], recorded_mode: str | None) ->
             f"determinism_mode: {CODE_INVALID_COMPARISON}: no mode recorded before Tier A in "
             f"{DETERMINISM_RECORD[0]} (46 §12); the bundle's declaration is not trusted"
         )
-    declaring = [run for run in runs if run.get("repeat") != "REP-B"]
     modes = set()
-    for index, run in enumerate(declaring):
+    for index, run in enumerate(runs):
         mode = run.get("determinism_mode")
         if isinstance(mode, str) and mode in DETERMINISM_MODES:
             modes.add(mode)
@@ -231,6 +280,12 @@ def determinism_errors(runs: list[dict[str, Any]], recorded_mode: str | None) ->
             "(a non-empty map of finite numbers)"
         )
         return errors
+    missing = sorted(required_metrics - set(original))
+    if missing:
+        errors.append(
+            f"REP-A: {CODE_INVALID_COMPARISON}: C0 seed 0 does not report {', '.join(missing)}, which the "
+            "verdict reads"
+        )
     if set(repeated) != set(original):
         errors.append(
             f"REP-A: {CODE_INVALID_COMPARISON}: REP-A and C0 seed 0 report different metrics; the "

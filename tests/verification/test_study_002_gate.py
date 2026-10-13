@@ -110,7 +110,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 41
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 42
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
@@ -390,7 +390,7 @@ def test_a_partition_that_is_not_the_frozen_one_binds_nothing(tmp_path) -> None:
         healthy_bundle(),
         ADOPTED_PARAMETERS,
         root=tmp_path,
-        recorded_determinism=FIXTURE_DETERMINISM,
+        determinism_sources=(FIXTURE_DETERMINISM, FIXTURE_DETERMINISM),
     )
     errors = _errors(report, "comparison_margins")
     assert any(CODE_FINGERPRINT in e for e in errors)
@@ -886,24 +886,25 @@ def test_repeat_records_are_exempt_from_the_one_record_rule_and_the_arm_set() ->
 
 
 @pytest.mark.parametrize(
-    "changes",
+    "changes, message",
     [
-        {"rep_a": {"chat_template_sha256": "2" * 64}},
-        {"rep_b": {"engine_version": "0.30.0"}},
-        {"rep_b": {"provider": ""}},
-        {"rep_a": {"seed": 1}},
-        {"rep_a": {"arm": "R1"}},
-        {"rep_b": {"arm": "C0"}},
-        {"rep_a": {"repeat": "REP-C"}},
-        {"rep_a": {"repeat": ["REP-A"]}},
-        {"rep_b": {"repeat": "REP-A", "arm": "C0"}},
-        {"rep_b": {"seed": 7}},
-        {"rep_b": {"seed": 0}},
+        ({"rep_a": {"chat_template_sha256": "2" * 64}}, "the runs disagree"),
+        ({"rep_b": {"engine_version": "0.30.0"}}, "the runs disagree"),
+        ({"rep_b": {"provider": ""}}, "records no provider"),
+        ({"rep_a": {"seed": 1}}, "REP-A is C0, seed 0"),
+        ({"rep_a": {"arm": "R1"}}, "REP-A is C0, seed 0"),
+        ({"rep_b": {"arm": "C0"}}, "REP-B is A_M0, seed 42"),
+        ({"rep_a": {"repeat": "REP-C"}}, "is not a repeat 05 names"),
+        ({"rep_a": {"repeat": ["REP-A"]}}, "is not a repeat 05 names"),
+        ({"rep_b": {"repeat": "REP-A", "arm": "C0"}}, "REP-A is C0, seed 0"),
+        ({"rep_b": {"seed": 7}}, "REP-B is A_M0, seed 42"),
+        ({"rep_b": {"seed": 0}}, "REP-B is A_M0, seed 42"),
     ],
 )
-def test_a_repeat_is_held_to_every_factor_and_to_05s_definition(changes) -> None:
+def test_a_repeat_is_held_to_every_factor_and_to_05s_definition(changes, message: str) -> None:
     report = _gate(_with_repeats(healthy_bundle(), **changes))
-    assert any(CODE_INVALID_COMPARISON in e for e in _errors(report, "generation_identity"))
+    errors = _errors(report, "generation_identity")
+    assert any(CODE_INVALID_COMPARISON in e and message in e for e in errors), errors
     assert report.overall == FAIL
 
 
@@ -943,7 +944,7 @@ def test_rep_b_fails_when_a_m0s_run_record_cannot_be_read(tmp_path) -> None:
         _with_repeats(healthy_bundle()),
         ADOPTED_PARAMETERS,
         root=tmp_path,
-        recorded_determinism=FIXTURE_DETERMINISM,
+        determinism_sources=(FIXTURE_DETERMINISM, FIXTURE_DETERMINISM),
     )
     errors = _errors(report, "generation_identity")
     assert any("REP-B" in e and "unreadable" in e for e in errors)
@@ -959,7 +960,9 @@ def test_non_deterministic_runs_may_differ_from_rep_a() -> None:
         run["determinism_mode"] = "NON_DETERMINISTIC_KERNEL"
     bundle["arm_runs"][-1]["metrics"]["call_f1"] = 0.76
     report = study_002_gate(
-        bundle, ADOPTED_PARAMETERS, recorded_determinism="NON_DETERMINISTIC_KERNEL"
+        bundle,
+        ADOPTED_PARAMETERS,
+        determinism_sources=("NON_DETERMINISTIC_KERNEL", "NON_DETERMINISTIC_KERNEL"),
     )
     assert _status(report, "generation_identity") == PASS
 
@@ -996,11 +999,12 @@ def test_rep_a_evidence_and_one_mode_are_required(change) -> None:
     assert report.overall == FAIL
 
 
-def test_rep_b_declares_no_determinism_mode() -> None:
-    """REP-B re-scores a Study 001 checkpoint; it is not an arm, so 46 §12's mode does not apply."""
+@pytest.mark.parametrize("mode", [None, "NON_DETERMINISTIC_KERNEL", ["x"]])
+def test_rep_b_declares_the_recorded_mode_too(mode) -> None:
+    """14: "Every run declares one, and the declaration is checked rather than trusted"."""
     bundle = _with_repeats(healthy_bundle())
-    bundle["arm_runs"][-1].pop("determinism_mode")
-    assert _status(_gate(bundle), "generation_identity") == PASS
+    bundle["arm_runs"][-1]["determinism_mode"] = mode
+    assert _status(_gate(bundle), "generation_identity") == FAIL
 
 
 def test_the_gate_reads_the_mode_readiness_reads() -> None:
@@ -1036,7 +1040,11 @@ def test_the_mode_is_read_from_the_preflight_record(tmp_path, record, expect_pas
     import shutil
 
     from opengrad.verification.study_002_gate import REPO_ROOT, STUDY_002_PARTITION
-    from opengrad.verification.study_002_gate_runs import A_M0_RUN_RECORD, DETERMINISM_RECORD
+    from opengrad.verification.study_002_gate_runs import (
+        A_M0_RUN_RECORD,
+        DETERMINISM_RECORD,
+        SEED_PLAN_MODE,
+    )
 
     for rel in (STUDY_002_PARTITION, A_M0_RUN_RECORD[0], *P_UNANS_FILES):
         (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
@@ -1044,6 +1052,9 @@ def test_the_mode_is_read_from_the_preflight_record(tmp_path, record, expect_pas
     target = tmp_path / DETERMINISM_RECORD[0]
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(record if isinstance(record, str) else json.dumps(record), encoding="utf-8")
+    plan = tmp_path / SEED_PLAN_MODE[0]
+    plan.parent.mkdir(parents=True, exist_ok=True)
+    plan.write_text("determinism_mode: DECLARED_DETERMINISTIC\n", encoding="utf-8")
     report = study_002_gate(healthy_bundle(), ADOPTED_PARAMETERS, root=tmp_path)
     assert (_status(report, "generation_identity") == PASS) is expect_pass
 
@@ -1052,3 +1063,76 @@ def test_an_unhashable_mode_fails_instead_of_raising() -> None:
     bundle = healthy_bundle()
     bundle["arm_runs"][0]["determinism_mode"] = ["DECLARED_DETERMINISTIC"]
     assert _status(_gate(bundle), "generation_identity") == FAIL
+
+
+@pytest.mark.parametrize(
+    "preflight, plan, ok",
+    [
+        ("DECLARED_DETERMINISTIC", "DECLARED_DETERMINISTIC", True),
+        ("NON_DETERMINISTIC_KERNEL", "NON_DETERMINISTIC_KERNEL", True),
+        ("DECLARED_DETERMINISTIC", "NON_DETERMINISTIC_KERNEL", False),
+        ("DECLARED_DETERMINISTIC", None, False),
+        (None, "DECLARED_DETERMINISTIC", False),
+        (None, None, False),
+        (["DECLARED_DETERMINISTIC"], "DECLARED_DETERMINISTIC", False),
+    ],
+)
+def test_the_preflight_record_and_the_seed_plan_must_agree(preflight, plan, ok: bool) -> None:
+    from opengrad.verification.study_002_gate_runs import reconcile_determinism
+
+    mode, errors = reconcile_determinism(preflight, plan)
+    assert (mode is not None and not errors) is ok
+    if ok:
+        assert mode == preflight
+
+
+def test_the_committed_seed_plan_holds_no_mode_yet() -> None:
+    """Undecided until the GPU preflight; with both sources empty, readiness and the gate fail closed."""
+    from opengrad.verification.study_002_gate import REPO_ROOT
+    from opengrad.verification.study_002_gate_runs import read_determinism
+
+    mode, errors = read_determinism(REPO_ROOT)
+    assert mode is None and len(errors) == 2
+
+
+def test_readiness_check_1_uses_the_same_reconciliation(tmp_path) -> None:
+    import json
+
+    from opengrad.verification import study_002_readiness as readiness
+
+    record = tmp_path / readiness.PREFLIGHT_RECORD
+    record.parent.mkdir(parents=True)
+    record.write_text(
+        json.dumps(
+            {
+                "status": "READY",
+                "compatibility": {"result": "COMPATIBLE"},
+                "determinism_mode": "DECLARED_DETERMINISTIC",
+            }
+        ),
+        encoding="utf-8",
+    )
+    plan = tmp_path / "configs/study_002/seed-plan.yaml"
+    plan.parent.mkdir(parents=True)
+    plan.write_text("determinism_mode: NON_DETERMINISTIC_KERNEL\n", encoding="utf-8")
+    check = readiness.check_1_preflight(tmp_path)
+    assert check.status != "PASS"
+    assert any("seed-plan.yaml holds" in gap for gap in check.gaps)
+    plan.write_text("determinism_mode: DECLARED_DETERMINISTIC\n", encoding="utf-8")
+    assert readiness.check_1_preflight(tmp_path).status == "PASS"
+
+
+@pytest.mark.parametrize("value", [10**400, -(10**400)])
+def test_an_overflowing_metric_fails_instead_of_raising(value) -> None:
+    bundle = healthy_bundle()
+    bundle["arm_runs"][0]["metrics"]["call_f1"] = value
+    bundle["arm_runs"][-1]["metrics"]["call_f1"] = value
+    assert _status(_gate(bundle), "generation_identity") == FAIL
+
+
+def test_rep_a_evidence_covers_the_metrics_the_verdict_reads() -> None:
+    bundle = healthy_bundle()
+    for run in (bundle["arm_runs"][0], bundle["arm_runs"][-1]):
+        run["metrics"] = {"foo": 0.0}
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any("which the verdict reads" in e for e in errors)

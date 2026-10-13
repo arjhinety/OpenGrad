@@ -66,6 +66,11 @@ def test_a_preflight_record_must_be_ready_compatible_and_name_the_determinism_mo
         "determinism_mode": "NON_DETERMINISTIC_KERNEL",
     }
     path.write_text(json.dumps(record), encoding="utf-8")
+    # 46 §12: the seed plan carries the same mode; without it, or with another, the check blocks.
+    assert readiness.check_1_preflight(tmp_path).status == readiness.BLOCKED
+    plan = tmp_path / "configs/study_002/seed-plan.yaml"
+    plan.parent.mkdir(parents=True)
+    plan.write_text("determinism_mode: NON_DETERMINISTIC_KERNEL\n", encoding="utf-8")
     assert readiness.check_1_preflight(tmp_path).status == PASS
     path.write_text(json.dumps(record | {"determinism_mode": None}), encoding="utf-8")
     assert readiness.check_1_preflight(tmp_path).status == readiness.BLOCKED

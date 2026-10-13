@@ -1782,24 +1782,35 @@ amendment.
     measures the residual either way".
   - 14, "Evidence required": under `DECLARED_DETERMINISTIC`, "`REP-A` ... reproduces the metric values
     exactly"; under `NON_DETERMINISTIC_KERNEL`, "`REP-A` residual measured and reported".
-  - 14: "A run that declares `DECLARED_DETERMINISTIC` and fails `REP-A` is a **defect**".
 - **Contract 6:** the gate never read `REP-A` or a determinism mode.
 - **Contract 7, check 12c:**
-  - Every arm's runs and `REP-A` declare `determinism_mode`, one of 14's two classes, and all declare the same
-    one. `REP-B` declares none: it re-scores a Study 001 checkpoint and is not an arm.
-  - **The declared mode must be the recorded one (owner, 2026-10-13).** 46 §12: "The mode is recorded in the
-    readiness record before Tier A." Readiness check 1 reads it from `reports/study-002/readiness/gpu-preflight.json`
-    (`determinism_mode`), and the gate reads the same field. Every declaring run must declare that mode. No such
-    record exists yet, so on today's repository check 12c fails: the bundle's own declaration is not trusted. The
-    self-test and tests pass the recorded mode explicitly; a bundle cannot. `configs/study_002/seed-plan.yaml`
-    also has a `determinism_mode` field (null, "Undecided until then"); the gate does not read it.
-  - A `REP-A` record is required in either mode, since 14 lists it as the evidence for both.
-  - `REP-A` and `C0`'s seed-0 run both carry `metrics`, a non-empty map of finite numbers, with the same names.
+  - Every run declares `determinism_mode`, one of 14's two classes: the arms' runs, `REP-A` and `REP-B`. 14:
+    "Every run declares one, and the declaration is checked rather than trusted". `REP-B` re-scores a Study 001
+    checkpoint, but it is a run under the Study 002 evaluator, so it declares the recorded mode too.
+  - **Where the mode is recorded (owner, 2026-10-13).** 46 §12: "The mode is recorded in the readiness record
+    before Tier A." It is recorded in two files, and the gate and readiness check 1 both read both:
+    - `reports/study-002/readiness/gpu-preflight.json` (`determinism_mode`), the readiness record. It is
+      **authoritative**, because 46 §12 says the GPU preflight chooses the mode and records it there.
+    - `configs/study_002/seed-plan.yaml` (`determinism_mode`), the study's seed plan, whose comment says the mode
+      is "chosen by the GPU preflight before Tier A". It must agree.
+
+    Either file missing, either value null or not one of 14's classes, or the two differing, fails 12c and
+    blocks readiness check 1. Every run must declare the recorded mode. Neither file holds a mode yet (the
+    preflight record does not exist, and the seed plan says `null`), so on today's repository both checks fail
+    closed rather than trust the bundle. The self-test and tests pass the pair explicitly; a bundle cannot.
+  - A `REP-A` record is required in either mode, since 14 lists it as the evidence for both. A missing `REP-A`,
+    or missing metrics, fails with `INVALID_COMPARISON` rather than blocking, as missing seeds do (§38); doc 48
+    had said `BLOCKED`.
+  - `REP-A` and `C0`'s seed-0 run both carry `metrics`, a non-empty map of finite numbers with the same names,
+    including the 12 metrics the verdict reads. The values themselves are still declared by the bundle (48 item
+    8).
   - Under `DECLARED_DETERMINISTIC`, any difference between them fails with `FAIL_DETERMINISM`. Under
-    `NON_DETERMINISTIC_KERNEL` they may differ. 14 says why the first is a failure, not a relabelling: "A run
-    that declares `DECLARED_DETERMINISTIC` and fails `REP-A` is a **defect**, not a reclassification: the
-    declaration was checked and found false". So a failed `REP-A` cannot be repaired by re-declaring the run
-    `NON_DETERMINISTIC_KERNEL`, and the recorded mode is fixed before Tier A.
+    `NON_DETERMINISTIC_KERNEL` they may differ. 14's full sentence: "A run that declares
+    `DECLARED_DETERMINISTIC` and fails `REP-A` is a **defect**, not a reclassification: the declaration was
+    checked and found false, and the run's metrics are reported with the residual as an interval while the
+    defect is recorded." So a failed `REP-A` cannot be repaired by re-declaring the mode. 14 prescribes
+    reporting the metrics and recording the defect; making that defect a gate failure is the gate's reading, and
+    `FAIL_DETERMINISM` is a code neither 11 nor 14 names.
 - **Not implemented, for the amendment (48 B11):** how large a residual may be. 05 says a threshold is rejected
   when `REP-A`'s residual is "larger than" its margin. 11 asks for noise "an order of magnitude smaller", for one
   threshold. Neither defines the residual (per metric, or the largest), and both place the comparison at
@@ -1810,5 +1821,8 @@ amendment.
   through evaluation. Greedy vLLM output is not guaranteed to be batch-invariant (ERRATA §36), so a run whose
   training is deterministic can still fail `REP-A` on a scoring difference. Pinning evaluation to be repeatable,
   or limiting "exactly" to training, is a choice the documents do not make.
-- **Tests:** the self-test grew from 38 to 43 cases, and readiness check 2 expects contract 7. The check is in
+- **Audit before push:** an audit of the first version found a list-valued mode and a metric of `10**400`
+  raising instead of failing, `REP-B` exempted against 14, the defect sentence cut short, and `REP-A`'s metrics
+  not tied to the verdict's. Each is fixed above, with a test.
+- **Tests:** the self-test grew from 38 to 44 cases, and readiness check 2 expects contract 7. The check is in
   `study_002_gate_runs.py`.

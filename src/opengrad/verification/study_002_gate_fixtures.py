@@ -66,7 +66,20 @@ def _metric_row(metric: str, arm: str) -> dict[str, Any]:
 
 
 #: C0 seed 0's metrics, which REP-A reproduces exactly under ``DECLARED_DETERMINISTIC`` (14).
-_C0_SEED_0_METRICS = {"call_f1": 0.75, "answer_rate": 0.74, "refusal_correctness": 0.80}
+_C0_SEED_0_METRICS = {
+    "call_f1": 0.75,
+    "call_precision": 0.73,
+    "call_recall": 0.77,
+    "over_call_rate": 0.15,
+    "clarification_accuracy": 0.80,
+    "unsupported_accuracy": 0.72,
+    "no_call_accuracy": 0.78,
+    "must_call_accuracy": 0.77,
+    "answer_rate": 0.74,
+    "refusal_rate": 0.12,
+    "refusal_correctness": 0.80,
+    "parse_valid_rate": 0.995,
+}
 
 
 def _healthy_runs() -> list[dict[str, Any]]:
@@ -175,8 +188,10 @@ FIXTURE_DETERMINISM = "DECLARED_DETERMINISTIC"
 def fixture_gate(
     bundle: dict[str, Any], parameters: PreregParameters = ADOPTED_PARAMETERS
 ) -> VerificationReport:
-    """The gate with :data:`FIXTURE_DETERMINISM` as the recorded mode."""
-    return study_002_gate(bundle, parameters, recorded_determinism=FIXTURE_DETERMINISM)
+    """The gate with :data:`FIXTURE_DETERMINISM` recorded in both the preflight record and the seed plan."""
+    return study_002_gate(
+        bundle, parameters, determinism_sources=(FIXTURE_DETERMINISM, FIXTURE_DETERMINISM)
+    )
 
 
 def _case(
@@ -373,17 +388,23 @@ def self_test() -> dict[str, Any]:
     two_modes["arm_runs"][3]["determinism_mode"] = "NON_DETERMINISTIC_KERNEL"
     cases["arms_in_two_determinism_modes"] = _case(two_modes, FAIL, CODE_INVALID_COMPARISON)
 
-    unrecorded = study_002_gate(healthy_bundle(), ADOPTED_PARAMETERS, recorded_determinism="")
-    cases["no_determinism_mode_recorded_before_tier_a"] = {
-        "overall": unrecorded.overall,
-        "expected": FAIL,
-        "expects_code": CODE_INVALID_COMPARISON,
-        "code_found": any(
-            "no mode recorded before Tier A" in error
-            for result in unrecorded.results
-            for error in result.all_errors()
+    for name, sources, message in (
+        ("no_determinism_mode_recorded_before_tier_a", (None, None), "holds no determinism mode"),
+        (
+            "preflight_and_seed_plan_disagree",
+            ("DECLARED_DETERMINISTIC", "NON_DETERMINISTIC_KERNEL"),
+            "but configs/study_002/seed-plan.yaml holds",
         ),
-    }
+    ):
+        report = study_002_gate(healthy_bundle(), ADOPTED_PARAMETERS, determinism_sources=sources)
+        cases[name] = {
+            "overall": report.overall,
+            "expected": FAIL,
+            "expects_code": CODE_INVALID_COMPARISON,
+            "code_found": any(
+                message in error for result in report.results for error in result.all_errors()
+            ),
+        }
 
     other_mode = healthy_bundle()
     for run in other_mode["arm_runs"]:

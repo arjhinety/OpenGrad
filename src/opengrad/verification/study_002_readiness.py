@@ -41,6 +41,7 @@ from opengrad.verification.population_validators import (
 from opengrad.verification.provenance_validators import load_sentinel_registry
 from opengrad.verification.provenance_validators import self_test as provenance_self_test
 from opengrad.verification.resolvability import resolvable_margin
+from opengrad.verification.study_002_gate_runs import read_determinism
 
 READY = "READY"
 BLOCKED = "BLOCKED"
@@ -113,8 +114,8 @@ def check_1_preflight(root: Path) -> Check:
         gaps.append(f"preflight status is {record.get('status')!r}")
     if (record.get("compatibility") or {}).get("result") != "COMPATIBLE":
         gaps.append("compatibility.result is not COMPATIBLE")
-    if record.get("determinism_mode") not in ("DECLARED_DETERMINISTIC", "NON_DETERMINISTIC_KERNEL"):
-        gaps.append("no determinism mode chosen (46 §12)")
+    # 46 §12: the mode is chosen by the preflight and recorded before Tier A; the seed plan must agree.
+    gaps.extend(read_determinism(root)[1])
     return Check(1, name, BLOCKED if gaps else PASS, [PREFLIGHT_RECORD], gaps)
 
 
