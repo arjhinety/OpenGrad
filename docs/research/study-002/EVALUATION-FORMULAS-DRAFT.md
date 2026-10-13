@@ -180,7 +180,7 @@ when `DIRECT` and `UNSUPPORTED` both qualify. Code: `evaluate`, `src/opengrad/ve
 
 ## 5. The trained model: the gate and the promotion policy
 
-The gate (`study_002_gate_v1`, contract 4 since 2026-10-13; contract 3 when this draft was written) wraps the promotion policy `tool_use_promotion_v6`, whose thresholds are
+The gate (`study_002_gate_v1`, contract 5 since 2026-10-13; contract 3 when this draft was written) wraps the promotion policy `tool_use_promotion_v6`, whose thresholds are
 v5's, unchanged. From the confusion matrix $C_{g,p}$ (gold $g$, prediction $p$) over `CALL`, `ANSWER`, `CLARIFY`
 and `UNSUPPORTED`, with $n_g = \sum_p C_{g,p}$:
 
@@ -217,9 +217,12 @@ when both of these hold:
 
 $$\lvert r_1 - r_2 \rvert > 0.02 \quad\text{and}\quad \max(r_1, r_2) > 2.0 \cdot \min(r_1, r_2).$$
 
-**Comparison rows** (gate check 14, `v12_resolvable_margin`). A row is `{id, n, margin, delta}`. The check reads $n$
-and the `margin` field, and passes a row when $\lvert\text{margin}\rvert \ge M(n)$ at 9 places:
+**Comparison rows** (gate check 14, `v12_resolvable_margin`). A row is
+`{id, population, n, margin, delta}` (since contract 5, `reports/ERRATA.md` §37). The check reads $n$ and the `margin` field, and passes a row when
+$\lvert\text{margin}\rvert \ge M(n)$ at 9 places:
 - with no comparison rows at all the check is `BLOCKED_INPUT_MISSING`, not a failure, and the gate cannot pass;
+- a row whose population's $n$ is not read back from an artifact, or whose $n$ differs from it, fails as unresolved;
+- a row on `CLARIFY`, `ANSWER-natural`, or any population with $M(n) > 0.10$ is `WITHIN_NOISE` (46 §10);
 - a row with no usable $n$ or no margin fails as unresolved;
 - a row with $n < 200$ is counted `UNDER_POWERED` and skipped;
 - a row below its $M(n)$ is `WITHIN_NOISE` and supports nothing;

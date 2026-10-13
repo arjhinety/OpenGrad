@@ -40,7 +40,7 @@ Study 001's held-out set had no ANSWER items, which is why its regression went u
 | **REP-A** | A re-run of arm C0 at a fixed seed: the nondeterminism floor every threshold margin is compared with. | [05-SEED-AND-REPRODUCIBILITY-POLICY](research/study-002/05-SEED-AND-REPRODUCIBILITY-POLICY.md) |
 | **V1 … V12** | The provenance validators (mode coverage, metric denominators, …, resolvable margin). | [15-PROVENANCE-VALIDATORS](research/study-002/15-PROVENANCE-VALIDATORS.md) |
 | **`study_002_prereg_vN`** | A preregistration version; v1 is the original contract, v2–v15 are amendments (v15 adopted 2026-10-03). | [03-PREREGISTRATION](research/study-002/03-PREREGISTRATION.md) |
-| **`study_002_gate_v1`** | The Study 002 evaluation gate (17 checks at contract 4 since 2026-10-13, ERRATA §35; over `tool_use_promotion_v6`). | [11-THRESHOLDS](research/study-002/11-THRESHOLDS.md) |
+| **`study_002_gate_v1`** | The Study 002 evaluation gate (17 checks at contract 5 since 2026-10-13, ERRATA §35 and §37; over `tool_use_promotion_v6`). | [11-THRESHOLDS](research/study-002/11-THRESHOLDS.md) |
 | **G1 … G17** | Guardrails derived from the claims Study 001 got wrong. | [GUARDRAILS](research/GUARDRAILS.md) |
 
 ## Status words

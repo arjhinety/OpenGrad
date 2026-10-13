@@ -278,3 +278,7 @@ model scores at most one of two; 8 pairs cross OpenGrad's dev/confirmatory parti
 
 Later line for UP-0018, 2026-10-13: the prefix-caching item is fixed in `VLLMInferenceBackend` (pinned `False` and
 recorded in its engine metadata), and `scripts/select_checkpoint.py` now refuses the confirmatory side.
+
+Later line for UP-0017, 2026-10-13: "self-declared inputs" is closed in part by gate contract 5 (ERRATA §37).
+Metric rows, fingerprints and population sizes are read back from artifacts, and check 14 applies 46 §10. The
+values in the candidate dict are still declared until the bundle producer re-derives them.

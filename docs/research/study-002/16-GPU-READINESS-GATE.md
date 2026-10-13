@@ -235,3 +235,8 @@ their text in every arm. A failing Glaive or When2Call stops the corpus interven
 
 Check 2 now reads `study_002_gate_v1` at **contract 4** (`reports/ERRATA.md` §35): the same checks and values,
 enforced as 11 and 40 state them. No threshold or amendment changed.
+
+## Note, 2026-10-13 (later)
+
+Check 2 now reads `study_002_gate_v1` at **contract 5** (`reports/ERRATA.md` §37): checks 13 and 14 bind numbers
+to artifacts (15 V3 / V9) and apply 46 §10. No threshold or amendment changed.

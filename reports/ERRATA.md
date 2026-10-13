@@ -1622,3 +1622,48 @@ adversarial, and two diagnostic figures rest on assumptions their reports did no
   frozen number is affected: no MMLU-Pro reply in any stage is flagged as a refusal (UP-0018).
 - **Prompts and decoding.** Rendered prompts are identical across stages (per-row `prompt_sha256`), and so are the
   decoding settings. Few-shot exemplars come from `train` and `validation` splits, never from test items.
+
+## 37. Study 002 gate contract 5: numbers bound to artifacts, and the v14 rule for descriptive populations
+
+**Added 2026-10-13,** as the first part of the design the owner approved the same day
+([48](../docs/research/study-002/48-GATE-CONTRACT-5-DESIGN.md); ERRATA on the §19 and §35 precedent). No arm has
+been scored, so no verdict changes, and no threshold, rule or population changes. Contract 5 implements what 15
+and 46 §10 already state. These were two of the open items §35 lists as not yet enforced ("inputs are
+self-declared"; the check 14 gap in §35's last later line).
+
+### `src/opengrad/verification/study_002_gate.py`
+
+- **As written:** 15 V3 says "every number carries metric + metric version, arm, seed, partition id + fingerprint,
+  `n`, denominator, evaluator version, artifact sha256". 15 V9 says "corpus and partition fingerprints are read
+  from artifacts, never typed (G4)". 46 §10 (`study_002_prereg_v14`) says "The margin a population is used to test
+  is 10 points, for every comparison between arms" and, of `CLARIFY` and `ANSWER-natural`, "A between-arm
+  difference on those two populations is `WITHIN_NOISE` and supports nothing."
+- **Contract 4:**
+  - Check 13 passed a bundle that merely *listed* the field names (`provenance.present`).
+  - V3 and V9 existed as code but the gate never called them.
+  - Check 14 took each comparison row's `n` on trust, and counted a row as support whenever its difference
+    cleared M(n). A `CLARIFY` row with a 15-point difference therefore supported a claim.
+- **Contract 5, check 13:** the bundle carries `metric_rows`, and V3 runs on them. Every metric the verdict reads
+  needs a row: the gate's own list of 12, not the bundle's. Each row's partition fingerprint must be one the bundle
+  read back from an artifact. The `partition` and `corpus` fingerprints are required, and V9 reads each from the
+  file it names.
+- **Contract 5, check 14:**
+  - Each comparison row names a population.
+  - The population's `n` is read back from an artifact (`populations: {name: {n, artifact, field}}`, checked by
+    V9), and the row's `n` must equal it.
+  - A row on `CLARIFY`, on `ANSWER-natural`, or on any population whose resolvable margin exceeds 10 points is
+    `WITHIN_NOISE`. Beside a resolving row it is excluded; alone it leaves no support, and the check fails.
+- **Bundle shape:** `provenance.present` is gone; a bundle that only names fields is `BLOCKED_INPUT_MISSING` at
+  check 13.
+- **Tests:** the healthy fixture binds to the committed `P-CONF` partition
+  (`reports/study-002/pconf-v1/pconf-v1.partition.json`, LF on every platform) and to the canonical-v3 manifest's
+  corpus fingerprint. The self-test grew from 18 to 24 cases, and readiness check 2 expects contract 5.
+
+### Still not enforced after contract 5
+
+- **The values in the bundle.** A metric row proves where a number came from, not that the candidate dict holds
+  the number that row produced. Re-deriving the rates from per-example records is the bundle producer's job
+  (48 item 8).
+- **Arm generation metadata, REP-A's residual and H1's statistics.** These are 48 items 3, 5 and 6, in the order
+  the owner approved.
+- **Everything §35 assigns to the numbered amendment.**

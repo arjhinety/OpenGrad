@@ -17,6 +17,7 @@ import pytest
 from opengrad.promotion.tool_use_policy import NOT_EVALUABLE, PROMOTE, PromotionPolicyV6
 from opengrad.verification.accounting import BLOCKED_INPUT_MISSING, FAIL, PASS
 from opengrad.verification.population_validators import CODE_UNDER_POWERED, CODE_UNRESOLVED_ROW
+from opengrad.verification.provenance_validators import CODE_FINGERPRINT, CODE_UNATTACHED_METRIC
 from opengrad.verification.study_002_gate import (
     ADOPTED_PARAMETERS,
     CODE_ACCOUNTING,
@@ -27,7 +28,8 @@ from opengrad.verification.study_002_gate import (
     CODE_PROVENANCE_INCOMPLETE,
     CODE_VACUOUS_METRIC,
     CODE_WITHIN_NOISE,
-    REQUIRED_PROVENANCE,
+    DESCRIPTIVE_POPULATIONS,
+    REQUIRED_FINGERPRINTS,
     STUDY_002_GATE_CONTRACT,
     UNDECLARED_PARAMETERS,
     healthy_bundle,
@@ -51,7 +53,7 @@ def _errors(report, name: str) -> list[str]:
 
 
 def test_the_gate_is_versioned() -> None:
-    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 4
+    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 5
 
 
 def test_a_healthy_bundle_passes_every_check_under_the_adopted_prereg() -> None:
@@ -92,7 +94,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 16
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 22
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
@@ -245,23 +247,100 @@ def test_a_sentinel_that_ran_in_the_wrong_mode_fails() -> None:
     assert any("S-ANS-8" in error and "8-shot" in error for error in _errors(report, "sentinels"))
 
 
-def test_the_bundle_cannot_declare_its_own_provenance_requirement() -> None:
+def test_the_bundle_cannot_choose_which_metrics_carry_provenance() -> None:
     bundle = healthy_bundle()
-    bundle["provenance"] = {"required": ["a"], "present": ["a"]}
+    bundle["metric_rows"] = bundle["metric_rows"][:1]
     report = _gate(bundle)
     assert _status(report, "provenance") == FAIL
-    assert len(_errors(report, "provenance")) == len(REQUIRED_PROVENANCE) == 11
+    unattached = [e for e in _errors(report, "provenance") if CODE_UNATTACHED_METRIC in e]
+    # The 6 baseline metrics are among the 12 candidate metrics: 12 names, one of them sent.
+    assert len(unattached) == 11
+
+
+def test_naming_provenance_fields_no_longer_passes() -> None:
+    bundle = healthy_bundle()
+    del bundle["metric_rows"], bundle["fingerprints"]
+    bundle["provenance"] = {"present": ["metric", "arm", "artifact_sha256"]}
+    assert _status(_gate(bundle), "provenance") == BLOCKED_INPUT_MISSING
+    assert _gate(bundle).overall != PASS
+
+
+@pytest.mark.parametrize("name", REQUIRED_FINGERPRINTS)
+def test_each_required_fingerprint_is_read_from_an_artifact(name: str) -> None:
+    bundle = healthy_bundle()
+    bundle["fingerprints"] = [f for f in bundle["fingerprints"] if f["name"] != name]
+    errors = _errors(_gate(bundle), "provenance")
+    assert any(CODE_PROVENANCE_INCOMPLETE in e and name in e for e in errors)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda f: f.update(value="f" * 64),
+        lambda f: f.update(artifact="reports/does-not-exist.json"),
+        lambda f: f.update(artifact="../outside.json"),
+        lambda f: f.update(field="no.such.field"),
+    ],
+)
+def test_a_fingerprint_that_its_artifact_does_not_hold_fails(change) -> None:
+    bundle = healthy_bundle()
+    change(bundle["fingerprints"][0])
+    assert any(CODE_FINGERPRINT in e for e in _errors(_gate(bundle), "provenance"))
+
+
+def test_a_metric_row_bound_to_an_unverified_partition_fails() -> None:
+    bundle = healthy_bundle()
+    bundle["metric_rows"][0]["partition_fingerprint"] = "e" * 64
+    assert any(CODE_FINGERPRINT in e for e in _errors(_gate(bundle), "provenance"))
+
+
+@pytest.mark.parametrize("population", sorted(DESCRIPTIVE_POPULATIONS))
+def test_a_difference_on_a_descriptive_population_supports_nothing(population: str) -> None:
+    """46 §10: a between-arm difference on CLARIFY or ANSWER-natural is WITHIN_NOISE, however large."""
+    bundle = healthy_bundle()
+    n = bundle["populations"][population]["n"]
+    bundle["comparisons"] = [{"id": "r", "population": population, "n": n, "margin": 0.30}]
+    report = _gate(bundle)
+    assert any(CODE_WITHIN_NOISE in e for e in _errors(report, "comparison_margins"))
+    assert report.overall == FAIL
+    # Beside a row that resolves, it is excluded rather than failed.
+    bundle["comparisons"].append(healthy_bundle()["comparisons"][0])
+    assert _status(_gate(bundle), "comparison_margins") == PASS
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda r: r.update(n=5000),
+        lambda r: r.update(population="P-UNKNOWN"),
+        lambda r: r.pop("population"),
+        lambda r: r.update(population=["P-CONF"]),
+    ],
+)
+def test_a_row_whose_population_is_not_bound_to_an_artifact_fails(change) -> None:
+    bundle = healthy_bundle()
+    change(bundle["comparisons"][0])
+    assert any(CODE_UNRESOLVED_ROW in e for e in _errors(_gate(bundle), "comparison_margins"))
+
+
+def test_a_population_size_its_artifact_does_not_hold_binds_nothing() -> None:
+    bundle = healthy_bundle()
+    bundle["populations"]["P-CONF"]["n"] = 5000
+    bundle["comparisons"][0]["n"] = 5000
+    errors = _errors(_gate(bundle), "comparison_margins")
+    assert any(CODE_FINGERPRINT in e for e in errors)
+    assert any(CODE_UNRESOLVED_ROW in e for e in errors)
 
 
 @pytest.mark.parametrize(
     "row",
     [
-        {"id": "r", "n": 1277, "margin": None},
-        {"id": "r", "n": 1277, "margin": float("nan")},
-        {"id": "r", "n": 1277},
-        {"id": "r", "n": 0, "margin": 0.3},
-        {"id": "r", "n": -5, "margin": 0.3},
-        {"id": "r", "margin": 0.08},
+        {"id": "r", "population": "P-CONF", "n": 1277, "margin": None},
+        {"id": "r", "population": "P-CONF", "n": 1277, "margin": float("nan")},
+        {"id": "r", "population": "P-CONF", "n": 1277},
+        {"id": "r", "population": "P-CONF", "n": 0, "margin": 0.3},
+        {"id": "r", "population": "P-CONF", "n": -5, "margin": 0.3},
+        {"id": "r", "population": "P-CONF", "margin": 0.08},
     ],
 )
 def test_an_unresolved_comparison_row_fails(row: dict) -> None:
@@ -274,8 +353,10 @@ def test_an_unresolved_comparison_row_fails(row: dict) -> None:
 @pytest.mark.parametrize(
     "rows",
     [
-        [{"id": "r", "n": 1277, "margin": 0.01}],  # 1pp against a 5.48pp resolvable margin
-        [{"id": "r", "n": 10, "margin": 0.5}],  # under-powered supports nothing
+        # 1pp against a 5.48pp resolvable margin
+        [{"id": "r", "population": "P-CONF", "n": 1277, "margin": 0.01}],
+        # a population that resolves more than 10 points supports nothing (46 §10)
+        [{"id": "r", "population": "ANSWER-natural", "n": 284, "margin": 0.5}],
     ],
 )
 def test_comparisons_that_resolve_nothing_fail_with_within_noise(rows: list) -> None:
@@ -287,7 +368,7 @@ def test_comparisons_that_resolve_nothing_fail_with_within_noise(rows: list) -> 
 
 def test_a_within_noise_row_beside_a_resolving_row_is_excluded_not_failed() -> None:
     bundle = healthy_bundle()
-    bundle["comparisons"].append({"id": "noise", "n": 1277, "margin": 0.01})
+    bundle["comparisons"].append({"id": "noise", "population": "P-CONF", "n": 1277, "margin": 0.01})
     assert _status(_gate(bundle), "comparison_margins") == PASS
 
 
@@ -494,7 +575,10 @@ def test_contract_4_fails_what_contract_3_passed(change, check, code) -> None:
         lambda b: b.__setitem__("baseline", "not a dict"),
         lambda b: b.__setitem__("modes", 5),
         lambda b: b["sentinels_ran"].__setitem__("S-IF", 5),
-        lambda b: b["provenance"]["present"].append(["unhashable"]),
+        lambda b: b["fingerprints"].append(["unhashable"]),
+        lambda b: b.__setitem__("populations", ["P-CONF"]),
+        lambda b: b["populations"].__setitem__("P-CONF", "1277"),
+        lambda b: b.__setitem__("metric_rows", "rows"),
         lambda b: b["candidate"]["confusion_matrix"]["CALL"].__setitem__("CALL", "430"),
         lambda b: b.__setitem__("comparisons", {"a": 1}),
         lambda b: b.__setitem__("comparisons", ["not a row"]),
@@ -505,9 +589,7 @@ def test_malformed_input_never_raises_and_never_passes(change) -> None:
     # Before contract 4 each of these raised: a caller catching the exception could fail open.
     bundle = _mutated(change)
     overall = _gate(bundle).overall  # a raise fails the test, which is the regression being guarded
-    # The unhashable provenance entry is ignored beside the real names; every other case must not pass.
-    if bundle.get("provenance", {}).get("present", [None])[-1] != ["unhashable"]:
-        assert overall != PASS
+    assert overall != PASS
 
 
 @pytest.mark.parametrize("bundle", [[], "not a bundle", None, 5])

@@ -158,6 +158,7 @@ required live in this file, [`ROADMAP.md`](../../../ROADMAP.md) and [`STUDIES.md
 | 45 | **Adopted 2026-10-01:** `study_002_prereg_v13`: constructed `P-UNANS` questions (future winners, future dated measurements, with answerable controls) to reach check 4's 385 | [45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md) |
 | 46 | **Adopted 2026-10-02:** `study_002_prereg_v14`: the readiness gate's design: `R2` and `C1` dropped, supervised tokens held fixed, the flag set and its triage, corrected text, `S2`, one measured instrument for model replies, `S-ANS-E` | [46-READINESS-DESIGN-AMENDMENT-DRAFT.md](46-READINESS-DESIGN-AMENDMENT-DRAFT.md) |
 | 47 | **Adopted 2026-10-03:** `study_002_prereg_v15`: per-source floors for the flag-set triage (a failing Glaive or When2Call stops, ToolACE can be excluded, the pooled floors stay over all of `F`), the stratified trial and recall samples, recall per predicted label | [47-PER-SOURCE-FLAG-PRECISION-DRAFT.md](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md) |
+| 48 | **Plan, 2026-10-13 (not an amendment):** gate contract 5. Rules 15 and 46 §10 already state, now enforced (numbers bound to artifacts, descriptive populations), the order of the rest, and the items for the next amendment | [48-GATE-CONTRACT-5-DESIGN.md](48-GATE-CONTRACT-5-DESIGN.md) |
 
 Frozen P-DET artifacts live outside this directory, beside the other evaluation artifacts:
 `reports/pdet/pdet-v1.population.jsonl` and `reports/pdet/pdet-v1.manifest.json`, verified by

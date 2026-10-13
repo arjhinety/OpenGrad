@@ -219,6 +219,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md`](research/study-002/45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md) | 45 — `P-UNANS`: constructed questions to reach check 4's size (`study_002_prereg_v13`) |
 | [`research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md`](research/study-002/46-READINESS-DESIGN-AMENDMENT-DRAFT.md) | 46 — Readiness design: arms, exposure, flags and instruments (`study_002_prereg_v14`) |
 | [`research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md`](research/study-002/47-PER-SOURCE-FLAG-PRECISION-DRAFT.md) | 47 — Per-source flag precision and agreement for the triage (`study_002_prereg_v15`) |
+| [`research/study-002/48-GATE-CONTRACT-5-DESIGN.md`](research/study-002/48-GATE-CONTRACT-5-DESIGN.md) | 48 — Gate contract 5: the design the owner approved |
 | [`research/study-002/CASE-STUDY-RELATED-WORK.md`](research/study-002/CASE-STUDY-RELATED-WORK.md) | Related work for a possible case study: model-labelled triage in a one-person lab |
 | [`research/study-002/EVALUATION-FORMULAS-DRAFT.md`](research/study-002/EVALUATION-FORMULAS-DRAFT.md) | Study 002's evaluation formulas (draft) |
 | [`research/study-002/HANDOFF.md`](research/study-002/HANDOFF.md) | Study 002 — handoff (2026-09-15) |
@@ -230,4 +231,4 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 |---|---|
 | [`training/reference-recipes.md`](training/reference-recipes.md) | External training reference recipes |
 
-134 documents.
+135 documents.

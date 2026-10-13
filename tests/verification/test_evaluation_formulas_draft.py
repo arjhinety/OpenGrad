@@ -295,14 +295,16 @@ def test_the_tables_match_the_code_constants() -> None:
         str(gate.study_002_gate({**bundle, "comparisons": []}).overall) == "BLOCKED_INPUT_MISSING"
     )
     # Check 14's row shape: the self-test row carries a margin and a different delta.
-    assert bundle["comparisons"] == [{"id": "R1_vs_C0", "n": 1277, "margin": 0.08, "delta": 0.12}]
+    assert bundle["comparisons"] == [
+        {"id": "R1_vs_C0", "population": "P-CONF", "n": 1277, "margin": 0.08, "delta": 0.12}
+    ]
     # Flag precision is rounded to 6 places, then compared with a plain >=.
     triage_source = _flat(Path(ft.__file__).read_text(encoding="utf-8"))
     assert '"precision": round(declines / len(agreed), 6)' in triage_source
     assert 'return "PASS" if value >= floor else "FAIL"' in triage_source
     _in_draft(
         "the gate's self-test gives the two different values (0.08 and 0.12)",
-        "A row is `{id, n, margin, delta}`",
+        "A row is `{id, population, n, margin, delta}`",
         "`BLOCKED_INPUT_MISSING`, not a failure, and the gate cannot pass",
         "(0.120685 pooled, 0.141173 constructed)",
     )
