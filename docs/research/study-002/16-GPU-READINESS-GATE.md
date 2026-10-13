@@ -240,3 +240,6 @@ enforced as 11 and 40 state them. No threshold or amendment changed.
 
 Check 2 now reads `study_002_gate_v1` at **contract 5** (`reports/ERRATA.md` §37): checks 13 and 14 bind numbers
 to artifacts (15 V3 / V9) and apply 46 §10. No threshold or amendment changed.
+
+Later, 2026-10-13: check 2 now reads **contract 6** (`reports/ERRATA.md` §38), which adds check 12c, 04's
+held-fixed evaluation factors. No threshold or amendment changed.

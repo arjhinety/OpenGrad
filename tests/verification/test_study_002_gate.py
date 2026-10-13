@@ -63,13 +63,13 @@ def _errors(report, name: str) -> list[str]:
 
 
 def test_the_gate_is_versioned() -> None:
-    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 5
+    assert study_002_gate(healthy_bundle()).contract == STUDY_002_GATE_CONTRACT == 6
 
 
 def test_a_healthy_bundle_passes_every_check_under_the_adopted_prereg() -> None:
     report = study_002_gate(healthy_bundle())
     assert report.overall == PASS, [result.all_errors() for result in report.results]
-    assert len(report.results) == 17
+    assert len(report.results) == 18
 
 
 def test_the_adopted_parameters_are_prereg_v8_items_a_and_b() -> None:
@@ -104,7 +104,7 @@ def test_the_self_test_passes_and_checks_each_expected_code() -> None:
     assert cases["healthy_under_adopted_prereg"]["overall"] == PASS
     assert cases["healthy_with_undeclared_parameters"]["overall"] == BLOCKED_INPUT_MISSING
     assert all(case["code_found"] for case in cases.values() if "expects_code" in case)
-    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 28
+    assert len([case for case in cases.values() if case["expected"] == FAIL]) == 32
 
 
 def test_the_self_test_catches_a_case_whose_code_is_absent() -> None:
@@ -698,3 +698,90 @@ def test_a_reported_metric_row_binds_to_a_pinned_partition(metric: str) -> None:
     assert _status(_gate(bundle), "provenance") == PASS
     bundle["metric_rows"][-1]["partition_fingerprint"] = bundle["fingerprints"][1]["value"]
     assert any(CODE_FINGERPRINT in e for e in _errors(_gate(bundle), "provenance"))
+
+
+# -- contract 6: 04's held-fixed evaluation factors (reports/ERRATA.md §38) -------------------------
+
+
+def test_missing_arm_runs_block_rather_than_pass() -> None:
+    bundle = healthy_bundle()
+    del bundle["arm_runs"]
+    report = _gate(bundle)
+    assert _status(report, "generation_identity") == BLOCKED_INPUT_MISSING
+    assert report.overall != PASS
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "tokenizer_sha256",
+        "chat_template_sha256",
+        "evaluator_version",
+        "engine",
+        "engine_version",
+        "max_tokens",
+        "decoding",
+        "enable_prefix_caching",
+        "device_class",
+    ],
+)
+def test_any_held_fixed_factor_that_differs_between_runs_fails(field: str) -> None:
+    from opengrad.verification.study_002_gate import RUN_IDENTITY_FIELDS
+
+    assert field in RUN_IDENTITY_FIELDS
+    bundle = healthy_bundle()
+    bundle["arm_runs"][4][field] = {"changed": True}
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any(CODE_INVALID_COMPARISON in e and field in e for e in errors)
+    # Absent is not "agreeing": a run that records no value fails too.
+    bundle = healthy_bundle()
+    del bundle["arm_runs"][0][field]
+    assert any(field in e for e in _errors(_gate(bundle), "generation_identity"))
+
+
+def test_prefix_caching_on_in_every_run_still_agrees() -> None:
+    """04 asks for one generation config, not a particular one; agreement is what is checked."""
+    bundle = healthy_bundle()
+    for run in bundle["arm_runs"]:
+        run["enable_prefix_caching"] = True
+    assert _status(_gate(bundle), "generation_identity") == PASS
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda runs: runs[0].pop("provider"),
+        lambda runs: runs[0].update(provider=" "),
+        lambda runs: runs[0].update(arm=None),
+        lambda runs: runs[0].update(seed=True),
+        lambda runs: runs.__setitem__(slice(3, None), []),
+        lambda runs: runs[3].update(seed=7),
+        lambda runs: runs.append("not a run"),
+    ],
+)
+def test_an_incomplete_or_unpaired_run_record_fails(change) -> None:
+    bundle = healthy_bundle()
+    change(bundle["arm_runs"])
+    report = _gate(bundle)
+    assert _status(report, "generation_identity") == FAIL
+    assert report.overall == FAIL
+
+
+@pytest.mark.parametrize("side", ["runs", "truncation"])
+def test_the_runs_must_cover_exactly_the_truncation_arms(side: str) -> None:
+    bundle = healthy_bundle()
+    if side == "runs":
+        # An arm with full, identical run records but no truncation rates.
+        bundle["arm_runs"] += [{**run, "arm": "S1"} for run in bundle["arm_runs"][:3]]
+    else:
+        # An arm reported for truncation in every stage but with no run record.
+        for arms in bundle["truncation"].values():
+            arms["S1"] = arms["C0"]
+    errors = _errors(_gate(bundle), "generation_identity")
+    assert any(CODE_INVALID_COMPARISON in e and "truncation table" in e for e in errors)
+
+
+def test_without_a_truncation_table_the_runs_cannot_be_matched() -> None:
+    bundle = healthy_bundle()
+    del bundle["truncation"]
+    assert _status(_gate(bundle), "generation_identity") == FAIL

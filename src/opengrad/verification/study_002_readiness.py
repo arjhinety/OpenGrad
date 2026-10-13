@@ -147,7 +147,7 @@ def _study_002_runs(root: Path) -> list[str]:
 def check_2_gate_version(root: Path) -> Check:
     gaps = []
     # Contract 4 (ERRATA §35) implements 11/40/08 as written; no threshold or amendment changed.
-    if gate.GATE_VERSION != "study_002_gate_v1" or gate.STUDY_002_GATE_CONTRACT != 5:
+    if gate.GATE_VERSION != "study_002_gate_v1" or gate.STUDY_002_GATE_CONTRACT != 6:
         gaps.append(f"gate is {gate.GATE_VERSION} contract {gate.STUDY_002_GATE_CONTRACT}")
     params = gate.ADOPTED_PARAMETERS
     declared = (params.truncation_max_ratio, params.truncation_min_gap, params.p_unans_min_n)

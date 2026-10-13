@@ -1695,3 +1695,37 @@ self-declared"; the check 14 gap in §35's last later line).
 - **Arm generation metadata, REP-A's residual and H1's statistics.** These are 48 items 3, 5 and 6, in the order
   the owner approved.
 - **Everything §35 assigns to the numbered amendment.**
+
+## 38. Study 002 gate contract 6: the arms must have been evaluated alike
+
+**Added 2026-10-13,** as item 3 of [48](../docs/research/study-002/48-GATE-CONTRACT-5-DESIGN.md), on the §19, §35
+and §37 precedent. No arm has been scored, so no verdict changes, and no threshold, rule or population changes. It
+is a new contract number because it adds a check, and a PASS under one contract is never a PASS under another (the
+owner's reason for contract 5).
+
+- **As written:** 04, "Fixed across every arm":
+  - "Tokenizer and chat-template hash | pinned";
+  - "Evaluator version, generation config, decoder | one version", because "Study 001 mixed engine and hardware";
+  - "Seeds | `k = 3`, identical seed values across arms";
+  - "Device class for primary runs | one class, with the provider recorded".
+- **Contract 5:** no check read how each arm was evaluated. A bundle whose arms used different tokenizers,
+  templates, token budgets, engines, prefix-caching settings, devices or seeds passed. Study 001's capability
+  ladder is the precedent for why this matters (ERRATA §36).
+- **Contract 6, check 12c `generation_identity`:**
+  - The bundle carries `arm_runs`, one record per scored run.
+  - Every record carries the tokenizer sha256, the chat-template sha256, the evaluator version, the engine and its
+    version, the per-benchmark `max_tokens`, the decoding settings, `enable_prefix_caching` and the device class,
+    and all records agree on each.
+  - Every record names its provider. Providers may differ, since 04 records them, but the device class may not.
+  - At least two arms, every arm with `k = 3` seeds, and the same seeds in every arm.
+  - The arms in `arm_runs` are exactly the arms in the `truncation` table. An arm with run records but no
+    truncation rates, or truncation rates but no run records, fails, and so do run records with no truncation
+    table at all (owner, 2026-10-13).
+  - **Not cross-checked:** comparison rows name no arm (`{id, population, n, margin, delta}`), so an arm that
+    appears only in a comparison cannot be matched against `arm_runs` yet.
+  - Anything else is `INVALID_COMPARISON`; no `arm_runs` is `BLOCKED_INPUT_MISSING`.
+- **What it checks and what it does not:** it checks that the arms agree with each other, not that they hold any
+  particular value. Prefix caching on in every run agrees. Whether each record is true is the run producer's job,
+  as for §37's metric rows.
+- **Tests:** the self-test grew from 30 to 34 cases, the gate from 17 to 18 checks, and readiness check 2 expects
+  contract 6.

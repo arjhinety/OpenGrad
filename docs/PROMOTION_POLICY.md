@@ -129,3 +129,5 @@ so the line numbers the Study 002 preregistration cites above stay stable.
   every metric the verdict reads needs a row bound to the pinned partition it is measured on, population
   sizes come from the frozen `P-CONF` partition, and a comparison on a population resolving more than 10 points
   supports nothing. The values themselves are not yet re-derived. v6 is unchanged.
+- **2026-10-13 (contract 6):** `study_002_gate_v1` also requires the arms to have been evaluated alike, as 04
+  holds them fixed ([`reports/ERRATA.md`](../reports/ERRATA.md) §38). v6 is unchanged.

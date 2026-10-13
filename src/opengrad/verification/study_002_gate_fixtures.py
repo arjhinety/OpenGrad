@@ -124,6 +124,24 @@ def healthy_bundle() -> dict[str, Any]:
                 "field": "corpus_fingerprint",
             },
         ],
+        "arm_runs": [
+            {
+                "arm": arm,
+                "seed": seed,
+                "provider": "nvidia",
+                "tokenizer_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+                "chat_template_sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+                "evaluator_version": "fixture",
+                "engine": "vllm",
+                "engine_version": "0.29.0",
+                "max_tokens": {"P-CONF": 512, "gsm8k": 512, "ifeval": 2560, "mmlu_pro": 2048},
+                "decoding": {"temperature": 0.0, "top_k": 1, "top_p": 1.0},
+                "enable_prefix_caching": False,
+                "device_class": "H200",
+            }
+            for arm in ("C0", "R1")
+            for seed in (0, 1, 2)
+        ],
         "truncation": {
             "0-shot": {"C0": 0.02, "R1": 0.03},
             "8-shot": {"C0": 0.01, "R1": 0.01},
@@ -279,6 +297,30 @@ def self_test() -> dict[str, Any]:
     for row in swapped["metric_rows"]:
         row["partition_fingerprint"] = STUDY_002_PARTITION_SHA256
     cases["refusal_correctness_bound_to_p_conf"] = _case(swapped, FAIL, CODE_FINGERPRINT)
+
+    # -- contract 5 passed these (reports/ERRATA.md §38) -------------------------------------------
+    other_budget = healthy_bundle()
+    other_budget["arm_runs"][3]["max_tokens"] = {
+        **other_budget["arm_runs"][3]["max_tokens"],
+        "mmlu_pro": 768,
+    }
+    cases["arm_runs_with_a_different_budget"] = _case(other_budget, FAIL, CODE_INVALID_COMPARISON)
+
+    other_template = healthy_bundle()
+    other_template["arm_runs"][-1]["chat_template_sha256"] = "1" * 64
+    cases["arm_runs_with_a_different_template"] = _case(
+        other_template, FAIL, CODE_INVALID_COMPARISON
+    )
+
+    extra_arm = healthy_bundle()
+    extra_arm["arm_runs"] += [{**run, "arm": "S1"} for run in extra_arm["arm_runs"][:3]]
+    cases["arm_runs_with_an_arm_the_truncation_table_lacks"] = _case(
+        extra_arm, FAIL, CODE_INVALID_COMPARISON
+    )
+
+    one_seed_short = healthy_bundle()
+    one_seed_short["arm_runs"] = one_seed_short["arm_runs"][:-1]
+    cases["an_arm_with_two_seeds"] = _case(one_seed_short, FAIL, CODE_INVALID_COMPARISON)
 
     bad_field = healthy_bundle()
     bad_field["fingerprints"][1]["field"] = 7

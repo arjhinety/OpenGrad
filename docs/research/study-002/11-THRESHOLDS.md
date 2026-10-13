@@ -192,3 +192,7 @@ stay over all of the flag set.
 > and V9 on every fingerprint, instead of checking that field names are listed. Check 14 reads each comparison row's
 > population size from the frozen `P-CONF` partition, and treats a difference on `CLARIFY`, `ANSWER-natural` or any
 > population resolving more than 10 points as `WITHIN_NOISE` (46 §10). No value above changes.
+
+> **Contract 6, 2026-10-13 (`reports/ERRATA.md` §38).** Check 12c requires every arm's runs to agree on 04's
+> held-fixed evaluation factors (tokenizer and template hashes, evaluator, engine, generation config, prefix
+> caching, device class), to record their provider, and to use the same three seeds. No value above changes.
