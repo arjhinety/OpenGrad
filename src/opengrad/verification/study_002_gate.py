@@ -54,13 +54,15 @@ The checks, and their failure codes (11-THRESHOLDS.md §``study_002_gate_v1``):
 12b. ``truncation_balance`` -- imbalance within the declared factor -- ``INVALID_COMPARISON``
 13. ``provenance`` -- every metric the verdict reads has a row carrying 15 V3's attachment, bound to the
     pinned partition its metric is measured on (:data:`P_UNANS_PARTITIONS` for ``refusal_correctness``,
-    ``P-CONF`` for the rest); the ``corpus`` fingerprint is read from
-    an artifact, and the ``partition`` fingerprint is the frozen ``P-CONF`` partition's --
+    ``P-CONF`` for the rest); a row for a metric 07 reports but the verdict does not read
+    (:data:`REPORTED_METRICS`) binds to either; the ``corpus`` fingerprint is read from an artifact, and
+    the ``partition`` fingerprint is the frozen ``P-CONF`` partition's --
     ``FAIL_UNATTACHED_METRIC`` / ``FAIL_FINGERPRINT`` / ``PROVENANCE_INCOMPLETE``
 14. ``comparison_margins`` -- every row names a population the gate knows, prints the ``n`` the gate
-    reads for it from the frozen ``P-CONF`` partition, and prints a margin; a row on a population that resolves more than 10 points is
-    ``WITHIN_NOISE`` (46 §10); at least one row clears its resolvable margin, the rest are
-    ``WITHIN_NOISE`` and support nothing -- ``FAIL_UNRESOLVED_ROW`` / ``FAIL_FINGERPRINT`` / ``WITHIN_NOISE``
+    reads for it from the frozen ``P-CONF`` partition, and prints a margin; a row on a population that
+    resolves more than 10 points is ``WITHIN_NOISE`` (46 §10); at least one row clears its resolvable
+    margin, the rest are ``WITHIN_NOISE`` and support nothing -- ``FAIL_UNRESOLVED_ROW`` /
+    ``FAIL_FINGERPRINT`` / ``WITHIN_NOISE``
 15. ``policy_decision`` -- ``tool_use_promotion_v6`` returns ``PROMOTE`` -- the v6 failure codes
 
 Two rules the preregistration stated but did not quantify until ``study_002_prereg_v8``
@@ -238,6 +240,17 @@ P_UNANS_PARTITIONS: dict[str, str] = {
         "b51e6bb86b0f8d5a121c183d900b1736df7d8f1b8bbe5dd143ff8dadb2534ded"
     ),
 }
+
+#: Metrics 07 defines that the verdict does not read. Their rows are accepted in ``metric_rows`` and must
+#: still bind to a pinned partition (``P-CONF`` or a ``P-UNANS`` stratum); no check reads their values.
+REPORTED_METRICS = (
+    "accuracy",
+    "accuracy_given_answer",
+    "over_refusal_rate",
+    "macro_behaviour_score",
+    "format_violation_rate",
+    "truncation_rate",
+)
 
 #: Every population a comparison row may name, and the field of :data:`STUDY_002_PARTITION` that holds
 #: its size. An unknown name (``"clarify"``, ``"CLARIFY "``) is unresolved, not a new population.
@@ -654,23 +667,27 @@ class Study002Gate:
         # for refusal_correctness, P-CONF for every other metric. Never to the corpus or another file.
         p_unans, unans_errors = self._pinned(P_UNANS_PARTITIONS)
         errors.extend(unans_errors)
-        known = set(CANDIDATE_METRICS) | set(BASELINE_METRICS)
+        read = set(CANDIDATE_METRICS) | set(BASELINE_METRICS)
         for index, row in enumerate(rows):
-            if not isinstance(row.get("metric"), str) or row.get("metric") not in known:
-                # A row for a metric the verdict does not read cannot be routed to its partition.
+            metric = row.get("metric")
+            if not isinstance(metric, str) or metric not in read | set(REPORTED_METRICS):
+                # A row must name a metric 07 defines, or it cannot be routed to a partition.
                 errors.append(
                     f"{row.get('id') or f'row-{index}'}: {CODE_UNATTACHED_METRIC}: "
-                    f"{row.get('metric')!r} is not a metric the verdict reads"
+                    f"{metric!r} is not a metric 07 defines"
                 )
                 continue
             fingerprint = row.get("partition_fingerprint")
             if fingerprint is None:
                 continue  # V3 reports the missing field
-            allowed = (
-                p_unans
-                if row.get("metric") == "refusal_correctness"
-                else ({STUDY_002_PARTITION_SHA256} if "partition" in verified else set())
-            )
+            p_conf = {STUDY_002_PARTITION_SHA256} if "partition" in verified else set()
+            if metric == "refusal_correctness":
+                allowed = p_unans
+            elif metric in read:
+                allowed = p_conf
+            else:
+                # A reported-only metric (07) may be measured on either pinned population.
+                allowed = p_conf | p_unans
             if str(fingerprint) not in allowed:
                 errors.append(
                     f"{row.get('id') or f'row-{index}'}: {CODE_FINGERPRINT}: its partition "

@@ -660,7 +660,7 @@ def test_a_bundle_that_is_not_a_mapping_is_read_as_empty(bundle) -> None:
 @pytest.mark.parametrize(
     "metric", ["made_up", "refusal_correctness ", ["refusal_correctness"], None]
 )
-def test_a_row_for_a_metric_the_verdict_does_not_read_fails(metric) -> None:
+def test_a_row_for_a_metric_07_does_not_define_fails(metric) -> None:
     bundle = healthy_bundle()
     bundle["metric_rows"].append({**bundle["metric_rows"][0], "id": "extra", "metric": metric})
     assert any(CODE_UNATTACHED_METRIC in e for e in _errors(_gate(bundle), "provenance"))
@@ -679,3 +679,13 @@ def test_a_failing_fingerprint_entry_does_not_unverify_a_valid_one() -> None:
     # Two entries under one name, one failing, leave that name unverified.
     verified, _ = Study002Gate(bundle)._read_back([good, {**good, "value": "f" * 64}])
     assert verified == set()
+
+
+@pytest.mark.parametrize("metric", ["truncation_rate", "accuracy_given_answer"])
+def test_a_reported_metric_row_binds_to_a_pinned_partition(metric: str) -> None:
+    """07 metrics the verdict does not read may have rows, but never bound to another file."""
+    bundle = healthy_bundle()
+    bundle["metric_rows"].append({**bundle["metric_rows"][0], "id": "extra", "metric": metric})
+    assert _status(_gate(bundle), "provenance") == PASS
+    bundle["metric_rows"][-1]["partition_fingerprint"] = bundle["fingerprints"][1]["value"]
+    assert any(CODE_FINGERPRINT in e for e in _errors(_gate(bundle), "provenance"))

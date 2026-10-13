@@ -1673,12 +1673,14 @@ self-declared"; the check 14 gap in §35's last later line).
   corpus fingerprint. The self-test grew from 18 to 30 cases, and readiness check 2 expects contract 5.
 - **Audit of the first version (before any push):** an independent audit made it pass a `CLARIFY` comparison by
   naming the population `clarify` and pointing its size at another field. It also bound metric rows to the corpus
-  fingerprint, raised on a fingerprint `field` of `7`, and passed a descriptive row with no margin. A second
-  audit bound metric rows to any file by naming its entry `partition:<id>`, so that naming was removed and the
-  partitions are pinned by the gate. It also found that a failing fingerprint entry could knock a valid one with a
-  similar name out of the verified set (each entry is now checked on its own). A third audit found rows for metric
-  names the verdict does not read (`"made_up"`, `"refusal_correctness "`) were accepted and bound to `P-CONF`;
-  they now fail. The version above closes each, with a test for each.
+  fingerprint, raised on a fingerprint `field` of `7`, and passed a descriptive row with no margin. A second audit
+  bound metric rows to any file by naming its entry `partition:<id>`, so that naming was removed and the partitions
+  are pinned by the gate. It also found that a failing fingerprint entry could knock a valid one with a similar name
+  out of the verified set (each entry is now checked on its own). A third audit found rows for metric names 07 does
+  not define (`"made_up"`, `"refusal_correctness "`) were accepted and bound to `P-CONF`; they now fail. A metric 07
+  reports but the verdict does not read (`accuracy`, `accuracy_given_answer`, `over_refusal_rate`,
+  `macro_behaviour_score`, `format_violation_rate`, `truncation_rate`) may have a row, bound to `P-CONF` or a
+  `P-UNANS` stratum. The version above closes each, with a test for each.
 
 ### Still not enforced after contract 5
 
