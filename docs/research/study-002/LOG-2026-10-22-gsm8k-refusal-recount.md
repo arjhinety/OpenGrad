@@ -339,3 +339,33 @@ What each rule admits (read from the code):
 Implication, unchanged from section 2: under v4 an answerable item that is refused is not checked. The v4 thresholds are not derived in the repo (no source found in section 2 or in the v4 code path).
 
 No promotion status, frozen file or registry was changed by this section.
+
+## 15. Corrections and the minus-xlam fix (dated 2026-10-22)
+
+**Side-agent note on normalization-v3 (checked; the premise is wrong).** The note said the main agent wrote new `canonical_hash` values into the normalization-v3 files, and that the split of the DIRECT ids had been traced only against v1. Checked:
+- `data/processed/normalization-v3/when2call/` shard mtimes are 2026-09-16T22:40. `git status --short -- data/processed/normalization-v3` is empty, and no file there is newer than this log. Nothing in normalization-v3 was written in this session.
+- The v3 split was checked in this session (section 14 work). Results for the 177 DIRECT ids: stored `canonical_hash` == recomputed `semantic_hash({tools, messages})` in 177/177; v3 hash == labels hash in 177/177; v3 `metadata.source.original_split` = `train` for 177/177. v1 names the same split `train_sft`. So the split statement is the same training split under two names, and it holds under both versions.
+- The 148 mismatched hashes are a normalization difference in `tools`, not a hashing fault. 148/148 mismatched rows differ in `tools` (`parameters` in 403 tool entries, a top-level `required` key in 384). v1 writes Python-style types (`float`, `List[float]`), and v3 writes JSON Schema types (`number`, `array`), adds `nullable`, and moves requiredness into `parameters`. I did not test whether a transform of v1 reproduces the v3 hash; that claim is not made here.
+- Which normalization the training runs consumed is **not established** by these files. That is the open question for the SFT provenance.
+
+**Minus-xlam ablation: superseding manifest (done, uncommitted).** `reports/data/m0-v2-minus-xlam-freeze.json` (v1) is left byte-identical. Its verify fails for three reasons, each checked:
+- 3 pinned items are missing and not recoverable: `.release/hf/toolpolicy-canonical-v2-minus-xlam/release-manifest.json` (its parent release has 176 shards, none present anywhere in the repo or caches), and `environment.json` for the fixed-compute and matched-exposure arms (written at run time; no copy exists).
+- 8 weights files (`unversioned_by_design`) are absent from this checkout.
+- 3 pins changed on disk: `results/registry.jsonl`, `runs/checkpoint_registry.json`, `runs/central_ledger.jsonl`. All three match their git blobs at the manifest's commit `449161ab` (checked with `git show`), so the pinned state is recoverable from git. The ledger is append-only and has grown by 5 lines since, which is by design, so an on-disk pin on it can never stay current.
+
+New manifest `reports/data/m0-v2-minus-xlam-freeze-v2.json`, built by `scripts/freeze_minus_xlam_v2.py`:
+- `present`: 49 pins, verified against the working tree.
+- `git`: 3 pins, verified against `git show 449161ab:<path>`.
+- `unrecoverable`: 11 pins, reported by name with their v1 hashes, and not counted as verified.
+```
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -I scripts/freeze_minus_xlam_v2.py            -> wrote v2: present 49, git 3, unrecoverable 11
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -I scripts/freeze_minus_xlam_v2.py --verify   -> checked present 49, git 3; VERIFY PASSED for every recoverable pin
+git status --short -- reports/data/m0-v2-minus-xlam-freeze.json   -> empty (v1 untouched)
+```
+Not done: the 11 unrecoverable pins cannot be restored from this checkout. Whether the environment and release files exist on the training host is not something this repository can answer.
+
+**Also established in this section.** The commit-order check in section 14 stands. The freeze builder fix and the registry CLI fix from section 12 are committed (`c8f13b6`). The v2 manifest and its script are not yet committed.
+
+**Training corpus provenance (checked; open).** `configs/experiments/m0_sft_canonical_v2_final.yaml` names the training corpus `canonical_v2_final` with hash `8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161`. That hash is the SHA-256 of `.release/hf/toolpolicy-canonical-v2-final/release-manifest.json`, which matches its own pin. The corpus shards are not present in this checkout (the release manifest lists 176 of them, none found on disk or in caches). So which normalization version the When2Call rows in the trained corpus used cannot be checked here. The labels file is built from normalization-v3 (`src/opengrad/data/behaviour_labels.py:64`). The 177 DIRECT rows are in the train split under both versions (v1 `train_sft`, v3 `train`).
+
+**Small Mind re-freeze (done, uncommitted).** `scripts/freeze_study_001.py` `REFREEZE_LOG` and `reports/data/study-001-freeze.json` `refreeze_log` gained the same dated entry for README.md, and the README pin in the manifest now matches the committed README (18090 bytes, sha256 `fd6e8aaa…`). `scripts/freeze_study_001.py --check`: OK, 76 artifacts match. `scripts/validate.py`: exit 0, 143 checks, 0 failed, 1 acknowledged drift, 14 manual.
