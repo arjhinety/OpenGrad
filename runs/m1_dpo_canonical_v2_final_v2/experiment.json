@@ -35,7 +35,7 @@
   "parent_experiment_id": "m0_sft_canonical_v2_final",
   "promotion_decision": null,
   "random_seed": 42,
-  "status": "PROMOTED",
+  "status": "REJECTED",
   "tokenizer_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
   "training_algorithm": "dpo",
   "training_config": {

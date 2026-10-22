@@ -1,6 +1,7 @@
 # M1 DPO evaluation report
 
 **Status:** `PROMOTED` under prospective `tool_use_promotion_v4`
+**Status amendment (2026-10-22):** `NOT PROMOTED`. The PROMOTED status above is withdrawn: v4 has no check for refusals on answerable items, and existing outputs show M1-v2 refusing 100% of zero-shot GSM8K and 19.8% of IFEval items. Original text kept. Log: `docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` §9-10.
 **Experiment:** `m1_dpo_canonical_v2_final_v2`
 **Selected checkpoint:** `dpo-checkpoint-30`
 **Parent:** M0-final-v2 selected checkpoint 1800

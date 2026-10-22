@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "HF_PUBLICATION_RECORD",
+  "published": "2026-10-22",
+  "correction": "Card-only. Each model card gains a license_link to Qwen/Qwen3.5-2B's Apache-2.0 license at the pinned revision and a License and attribution section, and the corpus-v1 evaluation card's license becomes other / composite-per-source (reports/ERRATA.md §23). No weight or other file was written.",
+  "cards": [
+    {
+      "repository": "arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2",
+      "repo_type": "model",
+      "revision_chain_since_previous_record": [],
+      "hub_revision": "e4e1a31c98d0884e67cd18b83fcd68085620f79a",
+      "superseded_hub_revision": "a77d6a8328d3edd8ef3788135b6ecea0ad74ea77",
+      "event_occurred_at": "2026-10-22",
+      "entry_recorded_at": "2026-10-22",
+      "recorded_retroactively": false,
+      "files_replaced": [
+        "README.md"
+      ],
+      "card_source": "release/huggingface/qwen35-2b-m1-dpo-canonicalv2-final-v2/README.md",
+      "card_sha256": "67a26464e8d03f48d7345e10c54d3ac85188f9166f6674323fb2824c81c10aaf",
+      "github_commit": "d74fae2061975b582bbfd7b337d5f1bd56ba5dec",
+      "refetched_and_matched": true
+    }
+  ],
+  "why_this_record_exists": "The weights are immutable; their cards are not. The card corrections of 2026-09-13 were published without a record, which left every recorded revision of these repositories stale; they are recorded retroactively in each revision chain.",
+  "notes": [
+    "Each upload named the live head as its parent commit, so it could not overwrite a change made after the dry run.",
+    "Each card was downloaded again at its new revision and compared byte for byte with the committed file (card_sha256) before this record was written.",
+    "A provenance correction is not a new version of a model: the hub_tag study-001 and every weight revision cited elsewhere still name the same weights."
+  ]
+}

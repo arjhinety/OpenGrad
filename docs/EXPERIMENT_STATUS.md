@@ -17,7 +17,7 @@ below are checked against this table and the registry.
 ## Counting convention
 
 - **Executed post-training interventions with real model evidence: 7.** The B0 baseline is recorded separately and is not an intervention. An arm that only failed to launch (resource, registration, or horizon failure) is execution history, not an intervention.
-- **Promoted models: 1.** A promotion only counts when the record is valid, so
+- **Promoted models: 0.** A promotion only counts when the record is valid, so
   the scaffold-era promotion is excluded by construction.
 - **Invalid/mock records: 1** — preserved as evidence, never counted as trained.
 - **Scaffold-era records: 2** — identity and lifecycle history only; no real
@@ -48,7 +48,7 @@ history. `status` is the lifecycle state, including when that state is historica
 | [`m0_v2_final_minus_xlam_fixed_compute`](../runs/m0_v2_final_minus_xlam_fixed_compute/) | sft | canonical_v2_final | REJECTED | — | — | 0.6030 / 0.4879 | [`reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md`](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [`reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md`](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) | [`arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute) |
 | [`m0_v2_final_minus_xlam_matched_exposure`](../runs/m0_v2_final_minus_xlam_matched_exposure/) | sft | canonical_v2_final | REJECTED | — | — | 0.5557 / 0.4238 | [`reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md`](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EXECUTION.md) · [`reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md`](../reports/M0_V2_FINAL_MINUS_XLAM_ABLATION_EVALUATION.md) | [`arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure) |
 | [`m1_dpo_canonical_v2_final`](../runs/m1_dpo_canonical_v2_final/) | dpo | m1_calibration_preference_pairs_v1 | FAILED | — | — | — | [`reports/M1_DPO_EXECUTION_REPORT.md`](../reports/M1_DPO_EXECUTION_REPORT.md) | — |
-| [`m1_dpo_canonical_v2_final_v2`](../runs/m1_dpo_canonical_v2_final_v2/) | dpo | m1_calibration_preference_pairs_v1 | PROMOTED | — | PROMOTED | 0.7548 / 0.7748 | [`reports/M1_DPO_EXECUTION_REPORT.md`](../reports/M1_DPO_EXECUTION_REPORT.md) · [`reports/M1_DPO_EVALUATION.md`](../reports/M1_DPO_EVALUATION.md) | [`arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) |
+| [`m1_dpo_canonical_v2_final_v2`](../runs/m1_dpo_canonical_v2_final_v2/) | dpo | m1_calibration_preference_pairs_v1 | REJECTED | — | — | 0.7548 / 0.7748 | [`reports/M1_DPO_EXECUTION_REPORT.md`](../reports/M1_DPO_EXECUTION_REPORT.md) · [`reports/M1_DPO_EVALUATION.md`](../reports/M1_DPO_EVALUATION.md) | [`arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) |
 
 Confirmatory scores are the pre-registered partition values quoted in the reports and
 the model cards; the baseline row shows its full-set score, and a row with no

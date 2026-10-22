@@ -145,7 +145,13 @@ def test_every_valid_promotion_has_a_promoted_registered_checkpoint() -> None:
         )["metadata"].get("validity")
         not in {"MOCK_ONLY", "SCAFFOLD_ONLY"}
     ]
-    assert valid_promotions, "the promoted M1-v2 DPO should be a valid promotion"
+    # M1-v2 was the only valid promotion and was withdrawn on 2026-10-22
+    # (docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md, section 10). This is an
+    # explicit statement that no valid promotion remains. A new promotion must add a row here.
+    assert not valid_promotions, (
+        f"unexpected valid promotion(s) {[r['experiment_id'] for r in valid_promotions]}; "
+        "M1-v2 was withdrawn and nothing has replaced it"
+    )
     for row in valid_promotions:
         promoted = row["promotion_checkpoint"]
         assert promoted, f"{row['experiment_id']} is PROMOTED with no promotion_checkpoint"
@@ -154,13 +160,15 @@ def test_every_valid_promotion_has_a_promoted_registered_checkpoint() -> None:
         assert checkpoints[promoted]["promotion_status"] == "PROMOTED"
 
 
-def test_promoted_dpo_is_published_and_quotes_the_confirmatory_score() -> None:
-    """The published-model claim in the documentation must trace to the release record.
+def test_withdrawn_dpo_is_still_traceable_to_its_release_record() -> None:
+    """The M1-v2 record stays in the registry as REJECTED, with its release record intact.
 
-    This is the guard against regressing to "DPO was rejected, no promoted model exists".
+    The promotion was withdrawn on 2026-10-22 (log section 10). The row is kept, not deleted, so
+    the history stays visible, and the publication record still names the same experiment and
+    quotes the confirmatory score it was published with.
     """
     row = _row("m1_dpo_canonical_v2_final_v2")
-    assert row["status"] == "PROMOTED"
+    assert row["status"] == "REJECTED"
     assert row["promotion_checkpoint"].endswith("dpo-checkpoint-30")
 
     release_path = (
@@ -272,7 +280,8 @@ def test_generated_status_document_is_current() -> None:
     )
     # The generated view must agree with the counting convention it documents.
     assert "interventions with real model evidence: 7." in committed
-    assert "Promoted models: 1." in committed
+    # M1-v2 was the only valid promotion; it was withdrawn on 2026-10-22 (log section 10).
+    assert "Promoted models: 0." in committed
 
 
 def test_registry_projection_is_not_stale() -> None:

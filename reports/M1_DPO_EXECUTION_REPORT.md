@@ -1,5 +1,6 @@
 # M1 DPO execution report
 
+**Status amendment (2026-10-22):** `COMPLETED / NOT PROMOTED`. The PROMOTED status below is withdrawn (see `reports/M1_DPO_EVALUATION.md` amendment and log §10). Original text kept.
 **Status:** `COMPLETED / PROMOTED` under `tool_use_promotion_v4`, which was introduced after M0 was
 evaluated; M0 also clears v4 and M1-v2 fails the v3 gate that rejected M0 (see the evaluation report)
 **Experiment:** `m1_dpo_canonical_v2_final_v2`

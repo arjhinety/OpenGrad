@@ -104,10 +104,17 @@ scores 0.6191 / 0.9722. The same results written as a narrative, with the charts
 |---|---|---|---|
 | **B0** | Base `Qwen/Qwen3.5-2B` | 0.6264 / 0.9735 — from a degenerate policy that calls on 62% of no-call items | Baseline |
 | **M0** | Canonical-v2 SFT (checkpoint 1800) | 0.7470 / 0.7594 | Selected; **not promoted** under `tool_use_promotion_v3` (recall-regression check against B0) |
-| **M1** | M1-v2 DPO calibration (checkpoint 30) | **0.7548 / 0.7748** | **PROMOTED** under `tool_use_promotion_v4` (checks against the M0 parent) |
+| **M1** | M1-v2 DPO calibration (checkpoint 30) | **0.7548 / 0.7748** | **NOT PROMOTED** (status change 2026-10-22; was PROMOTED under `tool_use_promotion_v4`, which checks against the M0 parent) |
 | **M2** | On-policy distillation | — | **Not executed** in Study 001 (mock-only scaffold); deferred to Study 003 |
 
-**"Not promoted" → "PROMOTED" is a gate change, not a measured improvement.** M1-v2 is promoted
+**Status change, 2026-10-22: M1-v2 is NOT PROMOTED.** The PROMOTED status below was withdrawn. The v4
+gate has no check that can see refusals on answerable items. On existing outputs, M1-v2 refuses 100%
+of zero-shot GSM8K items (BASE 0%) and 19.8% of IFEval items (BASE 0.4%), while MMLU-Pro shows no
+refusals for any checkpoint. The frozen records `results/registry.jsonl` and `runs/checkpoint_registry.json`,
+and the generated `docs/EXPERIMENT_STATUS.md`, still say PROMOTED; they are not edited, and the status
+is not restored until a gate that measures these cases is in place. Log: `docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` §9-10.
+
+**"Not promoted" → "PROMOTED" is a gate change, not a measured improvement.** M1-v2 was promoted
 under a parent-relative gate (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2
 fails the v3 gate that rejected M0 (all four DEV checkpoints `REJECT`; DEV recall 0.7257 against
 B0's 0.9715). The promotion reflects the gate change; the measured difference from M0 (+0.0078

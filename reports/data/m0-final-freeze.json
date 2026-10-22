@@ -48,7 +48,7 @@
     "decision": {
       "results/registry.jsonl": {
         "bytes": 50576,
-        "sha256": "dc3fcf267d9d7fedebf894c8fadce76aa35bf94c8b399f1bc94a2372f3958c8d"
+        "sha256": "66461601508cfbda5bc8e35754257ea3f6f66b769e42421eb798880d74884ac0"
       },
       "runs/central_ledger.jsonl": {
         "bytes": 34727,
@@ -56,7 +56,7 @@
       },
       "runs/checkpoint_registry.json": {
         "bytes": 29195,
-        "sha256": "b345e2ac55bc3584ba8d942432a5b12a9908400a7c2050c201f48b33fc7555ac"
+        "sha256": "a773081531f93d1f851b24093fada894fc6978af1e86356303e7929eecd7ea32"
       }
     },
     "evaluation": {

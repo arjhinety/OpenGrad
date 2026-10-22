@@ -455,7 +455,7 @@
       "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
       "parent_checkpoint": null,
       "path": "/root/OpenGrad/runs/m1_dpo_canonical_v2_final_v2/checkpoints/dpo-checkpoint-30",
-      "promotion_status": "PROMOTED",
+      "promotion_status": "REJECTED",
       "tokens_seen": 10327,
       "training_loss": 0.6757
     },
