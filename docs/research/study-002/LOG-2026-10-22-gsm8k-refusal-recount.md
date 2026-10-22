@@ -452,3 +452,25 @@ The study owner chose to carry the DIRECT split into the pipeline (section 16, d
 - `src/opengrad/versions.py` is left as it is, naming v1. The owner wants to propose a different fix later.
 - Commit: all work recorded in sections 16 and 17 is committed as one change.
 - Held-out overlap: the training prompt "what is the current weather?" matches held-out uuid `77821b1c-2320-4070-95dd-f8e274536495` exactly. Any comparison that uses the training overlap must exclude that uuid. The held-out partition file is frozen and was not edited to do this. The exclusion is recorded here and applies to any future comparison.
+
+## 18. The 97 DIRECT ids missing from the release (dated 2026-10-22, read-only)
+
+**Question.** Section 16 found 97 of the 177 DIRECT ids absent from the canonical-v2 final release. Why?
+
+**Answer (direct).** They were quarantined by the release's source-schema step, not dropped at random and not leaked.
+- The release manifest (`.release/hf/toolpolicy-canonical-v2-final/release-manifest.json`, `sources[3]` = when2call) reports 15,000 raw rows: accepted 6,505, duplicates 38, rejected 8,457, of which `rejected_SCH_UNSUPPORTED_TYPE` 8,445 and `rejected_duplicate tool name` 12.
+- Raw file: `.cache/normalization/raw/when2call_train_sft_train.parquet` (15,000 rows). Each raw row's id is `og_` + the first 16 hex characters of sha256 of `json.dumps(record, sort_keys=True, ensure_ascii=False)`, the same rule as `src/opengrad/data/adapters.py` lines 122-126. This reproduces all 177 DIRECT ids and the release's opengrad ids.
+- The rule that separates them: a row is rejected when any tool property type is outside the JSON Schema names and outside the bare Python names `str`, `int`, `float`, `bool`, `list`. Forms such as `str, optional`, `int, optional`, `List[int]`, `Dict`, `Tuple[...]` and `set` are rejected. The rule predicts 8,445 rejections and 6,543 kept rows (of which 38 are duplicates, leaving 6,505). It does not predict the 12 duplicate-tool-name rejections, which are a separate check.
+- All 97 missing DIRECT rows are predicted rejections. The rule is stated in `src/opengrad/data/source_schema.py` (docstring): forms that cannot be represented safely are quarantined with a reason, not coerced.
+
+**Consequence.** The 97 rows never entered M0 training, because the M0 corpus is this release. The labels file includes them only because labelling reads normalization-v3, which translates these forms at the adapter boundary (`source_schema.py`). The labels file is therefore wider than the training corpus by 8,457 rows of When2Call.
+
+**Not established.**
+- 175 raw rows match no label id. They are all in the rejected group, so the labeller did not see them. The reason was not checked.
+- The rule was tested against the release manifest's counts, not against the release-building code path itself.
+
+No files were written in this section beyond this log entry. Nothing is committed.
+
+**Decisions after section 18 (the study owner, 2026-10-22).**
+- The 11 unrecoverable pins in `reports/data/m0-v2-minus-xlam-freeze-v2.json` are accepted as unverified. The log does not claim they match, and no further search is planned.
+- The 97 missing DIRECT ids were investigated read-only (section 18). No change was made to the release or the labels.
