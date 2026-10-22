@@ -310,3 +310,32 @@ git diff --numstat: results/registry.jsonl 1/1, runs/checkpoint_registry.json 1/
 ```
 
 **Open.** Commit the restatement set (not done; no instruction to commit it). The publication record `reports/releases/hf-publication-2026-10-22-card-license-correction.json` is untracked. The minus-xlam freeze needs its own decision.
+
+## 14. Commit-order check: v4 gate versus M0 results (dated 2026-10-22, read-only)
+
+Question: was the v4 gate (`tool_use_promotion_v4`, the parent-relative gate that promoted M1-v2) committed after the M0 confirmatory results?
+
+Commands (read-only, `git log` and `git show`):
+```
+git log -1 --format='%h  author %ai  commit %ci  %s' 26234c2
+git log -1 --format='%h  author %ai  commit %ci  %s' 92ca2b9
+git merge-base --is-ancestor 26234c2 92ca2b9   -> true
+git log --format='%h %ci %s' -S "tool_use_promotion_v4" -- src/opengrad/promotion
+git log --format='%h %ci %s' -- runs/m0_sft_canonical_v2_final/eval/confirmatory
+```
+
+| commit | UTC commit time | what it adds |
+|---|---|---|
+| `26234c2` | 2026-09-11 08:58:54 | the definitive M0 SFT run and its evaluation, including `runs/m0_sft_canonical_v2_final/eval/confirmatory` (first appearance) |
+| `92ca2b9` | 2026-09-11 17:10:36 | `tool_use_promotion_v4` first appears in `src/opengrad/promotion` (`-S` finds this commit); `dpo_live.py`, `test_m1_calibration_policy.py` |
+| `078c6fe` | 2026-09-12 23:50:06 (+0800) | a later change to the v4 code path (diagnosis of an SFT-induced regression) |
+
+Result: `26234c2` is an ancestor of `92ca2b9`. The v4 gate was committed about 8 hours 12 minutes after the M0 confirmatory results. The M1-v2 run launched at 17:29:53 (`runs/m1_dpo_canonical_v2_final_v2/experiment.json`, `launch_timestamp`), after `92ca2b9`. The order matches what the card and README say.
+
+What each rule admits (read from the code):
+- v3 (`src/opengrad/promotion/tool_use_policy.py`, `PromotionPolicyV2`, lines 100-234): call_f1 retention >= 0.90 of baseline; macro recall over measurable classes >= 0.40; no-call accuracy >= 0.40 **only when the ANSWER row is non-empty** (skipped otherwise, lines 173-174); unsupported >= 0.30; clarification >= 0.50; over-call rate <= 0.20; parse validity >= 0.99; regression allowance 0.10 on call precision, call recall, clarification and unsupported.
+- v4 (`src/opengrad/promotion/m1_calibration.py`, `M1CalibrationPolicy`): call precision >= 0.65; call recall >= 0.60; macro recall >= 0.60; over-call rate <= 0.20; clarification >= 0.60; unsupported >= 0.40; parse validity >= 0.99; regression allowances against the M0 parent: precision 0.05, recall 0.10, clarification 0.10, unsupported 0.10. **No no-call / ANSWER check at all** (line 118 omits it when the population has no ANSWER examples).
+
+Implication, unchanged from section 2: under v4 an answerable item that is refused is not checked. The v4 thresholds are not derived in the repo (no source found in section 2 or in the v4 code path).
+
+No promotion status, frozen file or registry was changed by this section.
