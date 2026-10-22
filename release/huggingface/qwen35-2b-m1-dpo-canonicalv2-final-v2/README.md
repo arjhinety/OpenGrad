@@ -70,8 +70,15 @@ confirmatory partition (fingerprint `d6d1e394…`) was then scored exactly once 
 
 The `tool_use_promotion_v4` policy passed: precision/recall/macro floors, over-call
 ceiling, clarification/unsupported floors, parse validity, and M0-relative regression checks.
-Checkpoint 30 is **PROMOTED**. This policy does not compare recall to B0's degenerate always-call
+Checkpoint 30 was **PROMOTED** under this policy on 2026-09-11. **That promotion is withdrawn (2026-10-22):
+checkpoint 30 is NOT PROMOTED.** This policy does not compare recall to B0's degenerate always-call
 recall.
+
+**Why the promotion was withdrawn (2026-10-22).** The v4 gate has no check for refusals on answerable
+items. On the existing outputs, this checkpoint refuses 100% of zero-shot GSM8K items (base model: 0%)
+and 19.8% of IFEval items (base model: 0.4%). MMLU-Pro shows no refusals for any checkpoint. The gate
+does not measure this behaviour, so the promotion does not account for it. Read this model with that
+behaviour in mind.
 
 **What the promotion means.** M1-v2 is promoted under a parent-relative gate (v4) introduced after
 M0 was evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that rejected M0. The promotion
