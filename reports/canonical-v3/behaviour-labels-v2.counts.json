@@ -1,0 +1,126 @@
+{
+  "artifact_kind": "BEHAVIOUR_LABELS",
+  "classifier": {
+    "source_sha256_lf": "b3ea0e12b49c984c00f73d5dfaa343912308c59d9fd55cdb58f55b8721d31fb3",
+    "tag": "prose-decision-classifier-v3",
+    "version": "prose-decision-classifier-v3"
+  },
+  "corpus_fingerprint": "60d3123e1c6cef67f904a81f29669dcff44ecc5aeb0e71178a3b5d4e94bfa75a",
+  "input_contract": "prose-decision-input-v2",
+  "labels_version": "behaviour-labels-v2",
+  "normalization_version": "normalization-v3",
+  "sources": {
+    "glaive": {
+      "file": "glaive.labels.jsonl",
+      "labels": {
+        "ABSTAIN": 7425,
+        "CALL_BY_STRUCTURE": 27770,
+        "CLARIFY": 14128,
+        "DECLINE_WITH_CONTENT": 1087,
+        "DIRECT": 32840,
+        "UNLABELLED": 872,
+        "UNSUPPORTED": 14217
+      },
+      "records": 98339,
+      "sha256": "b87df72d355e05cde7c4f14284c3082d044e0090e378f9c87e5c1b3b594b46d7",
+      "unit_kind": {
+        "has_continuation": 55394,
+        "single_exchange": 14303
+      },
+      "unlabelled_reasons": {
+        "EVALUATION_ONLY_OR_HELDOUT": 8,
+        "FIRST_REPLY_EMPTY": 1,
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 28368,
+        "MALFORMED_OR_UNRENDERABLE": 864
+      },
+      "weight_permitted": {}
+    },
+    "toolace": {
+      "file": "toolace.labels.jsonl",
+      "labels": {
+        "ABSTAIN": 366,
+        "CALL": 12,
+        "CALL_BY_STRUCTURE": 8970,
+        "CLARIFY": 697,
+        "DECLINE_WITH_CONTENT": 26,
+        "DIRECT": 60,
+        "UNLABELLED": 52,
+        "UNSUPPORTED": 868
+      },
+      "records": 11051,
+      "sha256": "c4e92d8ad50f5184cea36d7f1d3acb9d3acc3d6ec4f5bfa68baf549f08f6bfad",
+      "unit_kind": {
+        "has_continuation": 57,
+        "single_exchange": 1972
+      },
+      "unlabelled_reasons": {
+        "FIRST_REPLY_EMPTY": 5,
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 9013,
+        "MALFORMED_OR_UNRENDERABLE": 52
+      },
+      "weight_permitted": {}
+    },
+    "when2call": {
+      "file": "when2call.labels.jsonl",
+      "labels": {
+        "CLARIFY": 7189,
+        "DECLINE_WITH_CONTENT": 109,
+        "DIRECT": 68,
+        "UNLABELLED": 1,
+        "UNSUPPORTED": 7334
+      },
+      "records": 14701,
+      "sha256": "9653ea5e762ac853273e4e8d3064d55de75a3df4f3439d5b54e979ddc8aab594",
+      "unit_kind": {
+        "single_exchange": 14700
+      },
+      "unlabelled_reasons": {
+        "EVALUATION_ONLY_OR_HELDOUT": 1
+      },
+      "weight_permitted": {}
+    },
+    "xlam": {
+      "file": "xlam.labels.jsonl",
+      "labels": {
+        "CALL_BY_STRUCTURE": 56111,
+        "UNLABELLED": 1231
+      },
+      "records": 57342,
+      "sha256": "ab2ddc0f95507b0853b23b42a50a0182f82e18396ffe8bd4ae3b7c0453c23c3c",
+      "unit_kind": {},
+      "unlabelled_reasons": {
+        "FIRST_REPLY_IS_STRUCTURAL_CALL": 57342,
+        "MALFORMED_OR_UNRENDERABLE": 1231
+      },
+      "weight_permitted": {}
+    }
+  },
+  "statement": "Behaviour labels for normalization-v3 from the frozen prose-decision-classifier-v3. Labels only: no mixture, no sampling weight, no training corpus. Identical to behaviour-labels-v1 except that a decline with delivered content is DECLINE_WITH_CONTENT, not DIRECT. weight_authorised is false for every row until the 22 \u00a76 retest of this classifier version passes. Never human gold, never evidence of accuracy.",
+  "supersedes_labels": "behaviour-labels-v1",
+  "totals": {
+    "labels": {
+      "ABSTAIN": 7791,
+      "CALL": 12,
+      "CALL_BY_STRUCTURE": 92851,
+      "CLARIFY": 22014,
+      "DECLINE_WITH_CONTENT": 1222,
+      "DIRECT": 32968,
+      "UNLABELLED": 2156,
+      "UNSUPPORTED": 22419
+    },
+    "records": 181433,
+    "unit_kind": {
+      "has_continuation": 55451,
+      "single_exchange": 30975
+    },
+    "unlabelled_reasons": {
+      "EVALUATION_ONLY_OR_HELDOUT": 9,
+      "FIRST_REPLY_EMPTY": 6,
+      "FIRST_REPLY_IS_STRUCTURAL_CALL": 94723,
+      "MALFORMED_OR_UNRENDERABLE": 2147
+    },
+    "weight_permitted": {}
+  },
+  "weight_authorised": false,
+  "weight_authorised_reason": "38 \u00a75 item 3 and 22 \u00a76: a classifier change voids the authorisation until retested"
+}

@@ -369,3 +369,86 @@ Not done: the 11 unrecoverable pins cannot be restored from this checkout. Wheth
 **Training corpus provenance (checked; open).** `configs/experiments/m0_sft_canonical_v2_final.yaml` names the training corpus `canonical_v2_final` with hash `8ced403b996e563d6e279aee7fdb346fc829fe5ff6af9daf8ef47c0a4007e161`. That hash is the SHA-256 of `.release/hf/toolpolicy-canonical-v2-final/release-manifest.json`, which matches its own pin. The corpus shards are not present in this checkout (the release manifest lists 176 of them, none found on disk or in caches). So which normalization version the When2Call rows in the trained corpus used cannot be checked here. The labels file is built from normalization-v3 (`src/opengrad/data/behaviour_labels.py:64`). The 177 DIRECT rows are in the train split under both versions (v1 `train_sft`, v3 `train`).
 
 **Small Mind re-freeze (done, uncommitted).** `scripts/freeze_study_001.py` `REFREEZE_LOG` and `reports/data/study-001-freeze.json` `refreeze_log` gained the same dated entry for README.md, and the README pin in the manifest now matches the committed README (18090 bytes, sha256 `fd6e8aaa…`). `scripts/freeze_study_001.py --check`: OK, 76 artifacts match. `scripts/validate.py`: exit 0, 143 checks, 0 failed, 1 acknowledged drift, 14 manual.
+
+## 16. Canonical-v2 When2Call rows: normalization, DIRECT ids, held-out overlap (dated 2026-10-22)
+
+This section closes the open question in section 15. The release was downloaded from the Hub repo `arrochi112/OpenGrad-ToolPolicy-Canonical-v2` at the pinned revision `66470c07ed0a79941f49a5cf67c1b3b1a7d8196e`. All 176 shards match the SHA-256 values in `.release/hf/toolpolicy-canonical-v2-final/release-manifest.json`. The copies live in the scratchpad, not in the repo. The When2Call part is 7 shards with 6,505 rows. Nothing was trained, and the repo was not edited.
+
+**Which normalization the training corpus used (directly shown for the tool schema; hash identity is strong evidence).**
+- Parameter type names are JSON Schema names. In the first 300 rows the counts are `string` 418, `integer` 164, `array` 8, `number` 3, `boolean` 1. The v1 normalization writes Python-style names such as `float` and `List[float]`, so the release is not v1 form.
+- Each row's stored `canonical_hash` equals `semantic_hash({tools, messages})` recomputed from that row's own content, in 6,505 of 6,505 rows.
+- The same `canonical_hash` equals the one in `data/processed/behaviour-labels-v1/when2call.labels.jsonl` in 6,505 of 6,505 rows. That labels file is built from normalization-v3 (`src/opengrad/data/behaviour_labels.py`, docstring lines 1-3).
+- The release manifest hash is the one named in `configs/experiments/m0_sft_canonical_v2_final.yaml` (`8ced403b…`). So the M0 training corpus is this release, and its When2Call rows use normalization-v3.
+- Not checked: whether the copy on the training host is byte-identical to the Hub copy. The release-manifest hash ties the two together, and the per-shard hashes match.
+
+**DIRECT ids against the release (direct).**
+- 80 of the 177 DIRECT ids appear in the release (matched by `opengrad_id`). All 80 have the same `canonical_hash` as the labels file.
+- 97 DIRECT ids do not appear in the release. The release holds 6,505 of the 14,701 labelled When2Call rows. Its selection rule was not read, so why these 97 are absent is **unknown**.
+- None of the 177 DIRECT ids is in the held-out split. This is the content check from section 14, and it still holds. The ids cannot be matched at the uuid level, because training rows carry no uuid.
+
+**The release's own label field carries no information (direct).** Every one of the 6,505 rows has `behavior_decision` = `ANSWER`. That is the adapter default (`src/opengrad/data/adapters.py` `adapt_when2call`). Every row ends in an assistant prose turn, and zero rows contain a tool call. The actual labels exist only in the labels file: UNSUPPORTED 3,979, CLARIFY 2,445, DIRECT 80, UNLABELLED 1. Anyone reading `behavior_decision` from the release would get the wrong distribution.
+
+**What the DIRECT training targets say (observed; the interpretation is open).** A rough refusal-wording count (`unable`, `apolog`, `cannot`, `can't`, `not able`, `don't have`, `do not have`) on the last assistant turn:
+
+| Label | Refusal-style wording | Rows |
+|---|---|---|
+| UNSUPPORTED | 3,979 | 3,979 |
+| CLARIFY | 29 | 2,445 |
+| DIRECT | 54 | 80 |
+
+- The CLARIFY count is low because clarifying replies are usually phrased as "could you please provide...", which the pattern does not match. So the table is not a clarify count.
+- Two DIRECT examples: "apologies, i'm unable to determine the timezone for a specific date and time. however, cape town, south africa is generally in the south african standard time"; and "apologies, i'm unable to filter profanity from the review. however, i can confirm that the review does contain profanity."
+- So for most DIRECT rows the target is a partial refusal, not a plain answer. This is by design, not a parser error. `src/opengrad/data/decision_classifier.py` (line 9 and the step at lines 409-412) defines DIRECT as "answers or performs the request", and it has an explicit rule `3_decline_with_delivered_content`: a decline followed by a "however ..." clause with content is DIRECT. The labels file records the step for each row. Across the 177 DIRECT labels: `3_decline_with_delivered_content` 109, `4_optional_request_after_content` 20, `7_delivered` 48. The definition is a choice the classifier made, and the mixture inherits it. Whether that choice fits a "can the model answer directly" behaviour is a research decision, not a bug to fix here.
+- By rule, DIRECT rows from When2Call carry no balancing weight (`DIRECT_PERMITTED_SOURCES = {glaive}` in `behaviour_labels.py`).
+
+**Held-out overlap (direct).**
+- The raw held-out MCQ file has 3,652 rows and 2,295 distinct normalized question texts.
+- One release prompt matches a held-out question exactly: "what is the current weather?" (held-out uuid `77821b1c-2320-4070-95dd-f8e274536495`). The release row is labelled UNLABELLED, and its target is "to provide you with the current weather information, i'll need the location. could you please specify the location?"
+- So the claim that the held-out set is disjoint in content needs one qualification: an exact-text overlap of one generic prompt. Its effect is small, but it is not zero. Section 14 was about DIRECT ids only, and that claim still holds for them.
+
+**Still open.**
+- Why 97 DIRECT ids are absent from the release, and what its selection rule was.
+- Whether the classifier's DIRECT rule (decline followed by content counts as DIRECT, decision_classifier.py line 9 and lines 409-412) is the intended meaning for the mixture. It is a definitional choice, now recorded.
+- Whether the overlapping held-out uuid should be excluded from any comparison that depends on the held-out split.
+
+No frozen file, registry, promotion status or held-out file was changed. The log append is uncommitted.
+
+**Decision and derived split (dated 2026-10-22).** The study owner chose to split partial refusals into their own label. Done as a derived file, not a change to the source:
+- Source `data/processed/behaviour-labels-v1/when2call.labels.jsonl` is untouched. The frozen classifier (`src/opengrad/data/decision_classifier.py`) and `behaviour_labels.py` are untouched, because `behaviour_labels.py` refuses to run unless the classifier source is byte-identical to the frozen one. A change to the pipeline would reopen that freeze, which is a separate decision.
+- Derived file `scratchpad/when2call.labels.split-v1.jsonl` (sha256 `f090ab23b4dc81c4cee9b8c3efb7f6d6cbed8e0789fa58d404eaa74397b71495`). Rule: rows labelled DIRECT whose recorded `step` is `3_decline_with_delivered_content` become `DECLINE_WITH_CONTENT`, with `split_from: DIRECT` added. No other row changes. The split uses the classifier's own step field, not the wording regex.
+- Counts, all 14,701 rows: before UNSUPPORTED 7,334, CLARIFY 7,189, DIRECT 177, UNLABELLED 1. After UNSUPPORTED 7,334, CLARIFY 7,189, DECLINE_WITH_CONTENT 109, DIRECT 68, UNLABELLED 1. The 68 remaining DIRECT rows are steps 4 (20) and 7 (48).
+- Release subset (6,505 rows): DECLINE_WITH_CONTENT 54, DIRECT 26. The 54 happens to match the wording-count figure above, but the two were not checked row by row, so the match is not claimed as the same rows.
+- Consequence: the M0 mixture and its weights still use the original labels. Any count that uses the new label is a derived view until the pipeline is changed under a new contract.
+
+## 17. Classifier v3 and behaviour-labels-v2 (dated 2026-10-22)
+
+The study owner chose to carry the DIRECT split into the pipeline (section 16, decision). This section records what was built and what was not.
+
+**Built (new files only; nothing frozen was edited).**
+- `src/opengrad/data/decision_classifier_v3.py`, tag `prose-decision-classifier-v3`. It is v2 with one change: the three places where v2 returns DIRECT at tree step `3_decline_with_delivered_content` now return `DECLINE_WITH_CONTENT`. The `LABELS` tuple gains that label. The step names, the rules and the evidence are unchanged. Its LF sha256 is `b3ea0e12b49c984c00f73d5dfaa343912308c59d9fd55cdb58f55b8721d31fb3`.
+- `src/opengrad/data/decision_classifier_v2.py` is byte-identical to its freeze, sha256 `47436ca9…`. The v2 freeze and the authorisation in doc 38 are unchanged.
+- `src/opengrad/data/behaviour_labels_v3.py` builds `data/processed/behaviour-labels-v2/` (one file per source, plus `manifest.json`). It imports the counting and serialising helpers from `behaviour_labels.py`. It does not replace `behaviour-labels-v1`.
+- `tests/data/test_decision_classifier_v3.py`: freeze pin, v2 byte check, the decline-with-content case (v2 DIRECT at step 3, v3 DECLINE_WITH_CONTENT at step 3), a plain answer that stays DIRECT at step 7, the label set, and zero weight from the labels-v2 weight rule.
+
+**Verification (direct).**
+- `python -m opengrad.data.behaviour_labels_v3 --verify`: PASS, no problems. Exit 0.
+- Row-by-row comparison with `behaviour-labels-v1` over all sources (180,211 + 1,222 = 181,433 rows): every row has the same `id`, `step` and `canonical_hash`. The only label differences are 1,222 rows that were DIRECT at `3_decline_with_delivered_content` and are now DECLINE_WITH_CONTENT: glaive 1,087, toolace 26, when2call 109. No other label changed. v1 DIRECT was therefore 32,968 + 1,222 = 34,190 rows, and v2 DIRECT is 32,968.
+- Labels-v2 counts: DECLINE_WITH_CONTENT 1,222; DIRECT 32,968; CLARIFY 22,014; UNSUPPORTED 22,419; ABSTAIN 7,791; CALL 12; CALL_BY_STRUCTURE 92,851; UNLABELLED 2,156.
+- `pytest tests/data/test_decision_classifier_v3.py tests/data/test_decision_classifier_v2.py tests/data/test_behaviour_labels.py`: 87 passed.
+
+**Weight: none in labels-v2 (direct, by construction).** Every row has `weight_permitted: False`, and the manifest says `weight_authorised: false`. The reason is doc 38 §5 item 3 and 22 §6: a classifier change voids the balancing authorisation until the new version is tested on a new, untouched population. That retest has not been done, and it needs new labelling work and model calls.
+
+**Consequence of the change, stated plainly.** Under v1, glaive DIRECT rows carry weight (38 §2), so the 1,087 glaive rows that move to DECLINE_WITH_CONTENT currently count in the training mix. Under v2 they would not, until the retest passes.
+
+**Decision (the study owner, 2026-10-22).** The training mix keeps the v1 labels and their weights. Labels-v2 is for counts and comparisons only. No retest is scheduled.
+
+**Not done.**
+- `src/opengrad/versions.py` still names `prose-decision-classifier-v1` for `DECISION_CLASSIFIER_VERSION`, and it is not updated here. Any canonical-v3 or balance manifest that is rebuilt on labels-v2 would fail the provenance gate (`FAIL_CLASSIFIER_VERSION`, as in `reports/canonical-v3/provenance-gate-v1.json`). No manifest references labels-v2 at present.
+- No mixture, no balance, no training corpus, and no M0 or M1 result was rebuilt or rerun. No GPU or training job was started.
+- Nothing is committed. The v3 files, the labels-v2 output and the test file are uncommitted.
+
+**Decisions taken after section 17 (the study owner, 2026-10-22).**
+- v3 retest: not now. The training mix stays on v1 labels, with v1 weights. Labels-v2 is for counts only.
+- `src/opengrad/versions.py` is left as it is, naming v1. The owner wants to propose a different fix later.
+- Commit: all work recorded in sections 16 and 17 is committed as one change.
+- Held-out overlap: the training prompt "what is the current weather?" matches held-out uuid `77821b1c-2320-4070-95dd-f8e274536495` exactly. Any comparison that uses the training overlap must exclude that uuid. The held-out partition file is frozen and was not edited to do this. The exclusion is recorded here and applies to any future comparison.
