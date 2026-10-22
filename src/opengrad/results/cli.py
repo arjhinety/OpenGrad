@@ -96,3 +96,7 @@ def results_cli(args: list[str] | None = None) -> int:
 
     parser.print_help()
     return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(results_cli())

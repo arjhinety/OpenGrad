@@ -111,6 +111,22 @@ def arm_paths(run: str, steps: list[int], selected: int) -> dict[str, list[str]]
     }
 
 
+def _dropped_pins(existing: Path, unversioned: dict) -> list[str]:
+    """Pins a previous manifest recorded that this build cannot find.
+
+    A rebuild that cannot find a pinned weights or predictions file must not record it as absent
+    and carry on: the pin is evidence, and erasing it is the same as unfreezing it.
+    """
+    if not existing.is_file():
+        return []
+    previous = json.loads(existing.read_text(encoding="utf-8")).get("unversioned_by_design", {})
+    dropped: list[str] = []
+    for group, entries in previous.items():
+        current = unversioned.get(group, {})
+        dropped.extend(sorted(path for path in entries if path not in current))
+    return dropped
+
+
 def build() -> int:
     evidence: dict[str, dict[str, dict]] = {}
     missing: list[str] = []
@@ -175,6 +191,13 @@ def build() -> int:
             ),
         },
     }
+    dropped = _dropped_pins(ROOT / OUT, unversioned)
+    if dropped:
+        print("REFUSED: this build would drop pinned unversioned files that are absent now:")
+        for relative in dropped:
+            print(f"  - {relative}")
+        print("No manifest written. Restore the files, or remove those pins deliberately.")
+        return 1
     (ROOT / OUT).write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     total = sum(len(v) for v in evidence.values())
     print(f"frozen {total} evidence artifacts")

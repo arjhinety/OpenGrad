@@ -223,6 +223,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`research/study-002/CASE-STUDY-RELATED-WORK.md`](research/study-002/CASE-STUDY-RELATED-WORK.md) | Related work for a possible case study: model-labelled triage in a one-person lab |
 | [`research/study-002/EVALUATION-FORMULAS-DRAFT.md`](research/study-002/EVALUATION-FORMULAS-DRAFT.md) | Study 002's evaluation formulas (draft) |
 | [`research/study-002/HANDOFF.md`](research/study-002/HANDOFF.md) | Study 002 — handoff (2026-09-15) |
+| [`research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md`](research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md) | Study 002 working log: GSM8K refusal recount and When2Call ANSWER check (2026-10-22) |
 | [`research/study-002/README.md`](research/study-002/README.md) | Study 002 — design set |
 
 ## training
@@ -231,4 +232,4 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 |---|---|
 | [`training/reference-recipes.md`](training/reference-recipes.md) | External training reference recipes |
 
-135 documents.
+136 documents.
