@@ -29,6 +29,10 @@ Safeguards:
 * every output records the classifier tag and hash, both contract versions, the corpus fingerprint, and that
   the qualifications behind the permission are provisional ``MODEL_REFERENCE`` ones (37 §8, 38 §2).
 
+One engine serves every labelling pass. A pass is a :class:`LabelSet`: which classifier it applies, which bytes
+it must check, where it writes, and who may carry weight. :data:`V1` is the default and is the pass described
+above. ``behaviour_labels_v3`` is another :class:`LabelSet` for ``prose-decision-classifier-v3``.
+
     python -m opengrad.data.behaviour_labels --build
     python -m opengrad.data.behaviour_labels --verify
 """
@@ -39,18 +43,20 @@ import argparse
 import json
 import sys
 from collections import Counter
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from opengrad.data import versions
 from opengrad.data.classifier_input import (
     CONTRACT_V2_VERSION,
+    ClassifierFeatures,
     HeldoutIndex,
     IneligibleRecord,
     build_first_reply_input,
 )
-from opengrad.data.decision_classifier_v2 import CLASSIFIER_VERSION, classify
+from opengrad.data.decision_classifier_v2 import CLASSIFIER_VERSION, Decision, classify
 from opengrad.data.normalization_v3 import iter_rows
 from opengrad.hashing import sha256_bytes as _sha256
 
@@ -77,14 +83,6 @@ class BehaviourLabelError(RuntimeError):
     """The labelling pass cannot run, or its output does not match its inputs."""
 
 
-def check_frozen(root: Path) -> None:
-    observed = _sha256((root / CLASSIFIER_MODULE).read_bytes().replace(b"\r\n", b"\n"))
-    if observed != FROZEN_SOURCE_SHA256_LF:
-        raise BehaviourLabelError(
-            f"{CLASSIFIER_MODULE.as_posix()} is not the frozen {FROZEN_TAG} (sha256 LF {observed})"
-        )
-
-
 def weight_permitted(label: str, source: str) -> bool:
     """38 §2, as a pure function of the label and the source."""
     if label in WEIGHTED_MODES:
@@ -94,7 +92,71 @@ def weight_permitted(label: str, source: str) -> bool:
     return False
 
 
-def label_record(record: Mapping[str, Any], source: str, heldout: HeldoutIndex) -> dict[str, Any]:
+@dataclass(frozen=True)
+class LabelSet:
+    """One labelling pass: the classifier it applies, the bytes it must check, where it writes, who may carry weight.
+
+    ``classifier_module`` and ``classifier_sha256_lf`` are the source a pass is pinned to. ``rules`` lists any
+    further module the pass depends on, with its own pin; the pass refuses to run unless every one matches.
+    ``policy`` holds the manifest keys that describe the weight rule, so each pass states its own.
+    """
+
+    labels_version: str
+    classify: Callable[[ClassifierFeatures], Decision]
+    classifier_version: str
+    tag: str
+    classifier_module: Path
+    classifier_sha256_lf: str
+    output_dir: Path
+    report: Path
+    weight: Callable[[str, str], bool]
+    weight_citation: str
+    statement: str
+    policy: Mapping[str, Any]
+    rules: tuple[tuple[Path, str], ...] = ()
+
+
+V1 = LabelSet(
+    labels_version=LABELS_VERSION,
+    classify=classify,
+    classifier_version=CLASSIFIER_VERSION,
+    tag=FROZEN_TAG,
+    classifier_module=CLASSIFIER_MODULE,
+    classifier_sha256_lf=FROZEN_SOURCE_SHA256_LF,
+    output_dir=OUTPUT_DIR,
+    report=REPORT,
+    weight=weight_permitted,
+    weight_citation="38 §2",
+    statement=(
+        "Behaviour labels for normalization-v3 from the frozen prose-decision-classifier-v2 (21 phase 3). "
+        "Labels only: no mixture, no sampling weight, no training corpus. The qualifications behind "
+        "weight_permitted are provisional MODEL_REFERENCE ones (37 §8, 38 §2), never human gold, and never "
+        "evidence of accuracy."
+    ),
+    policy={
+        "authorisation": "docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md",
+        "weight_rule": {
+            "permitted_modes": sorted(WEIGHTED_MODES),
+            "direct_permitted_sources": sorted(DIRECT_PERMITTED_SOURCES),
+            "never_weighted": ["CALL", CALL_BY_STRUCTURE, "ABSTAIN", UNLABELLED],
+        },
+    },
+)
+
+
+def check_frozen(root: Path, spec: LabelSet = V1) -> None:
+    """Refuse to run unless the pass's classifier, and every module it depends on, are their frozen bytes."""
+    for module, pinned in ((spec.classifier_module, spec.classifier_sha256_lf), *spec.rules):
+        observed = _sha256((root / module).read_bytes().replace(b"\r\n", b"\n"))
+        if observed != pinned:
+            raise BehaviourLabelError(
+                f"{module.as_posix()} is not the frozen bytes of {spec.tag} (sha256 LF {observed})"
+            )
+
+
+def label_record(
+    record: Mapping[str, Any], source: str, heldout: HeldoutIndex, spec: LabelSet = V1
+) -> dict[str, Any]:
     """One record's behaviour label. Never raises on an ineligible record: it records why."""
     try:
         built = build_first_reply_input(record, heldout)
@@ -112,7 +174,7 @@ def label_record(record: Mapping[str, Any], source: str, heldout: HeldoutIndex) 
             "reasons": list(reasons),
             "weight_permitted": False,
         }
-    decision = classify(built.features)
+    decision = spec.classify(built.features)
     unit_kind = getattr(built.provenance, "unit_kind", None)
     return {
         "id": record["id"],
@@ -123,13 +185,15 @@ def label_record(record: Mapping[str, Any], source: str, heldout: HeldoutIndex) 
         "unit_kind": unit_kind,
         "contract": built.contract_version,
         "reasons": [],
-        "weight_permitted": weight_permitted(decision.label, source),
+        "weight_permitted": spec.weight(decision.label, source),
     }
 
 
-def label_source(root: Path, source: str, heldout: HeldoutIndex) -> Iterator[dict[str, Any]]:
+def label_source(
+    root: Path, source: str, heldout: HeldoutIndex, spec: LabelSet = V1
+) -> Iterator[dict[str, Any]]:
     for record in iter_rows(root / CORPUS_DIR, source):
-        yield label_record(record, source, heldout)
+        yield label_record(record, source, heldout, spec)
 
 
 def summarise(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -160,19 +224,19 @@ def _rows_bytes(rows: Sequence[Mapping[str, Any]]) -> bytes:
     )
 
 
-def build(root: Path = ROOT) -> dict[str, Any]:
+def build(root: Path = ROOT, spec: LabelSet = V1) -> dict[str, Any]:
     """Label every accepted record of every source. Deterministic; overwrites only identical bytes."""
-    check_frozen(root)
+    check_frozen(root, spec)
     corpus_manifest = json.loads((root / CORPUS_MANIFEST).read_text(encoding="utf-8"))
     if corpus_manifest.get("behavior_labels") != "ABSENT":
         raise BehaviourLabelError("the normalization-v3 manifest already declares behaviour labels")
     heldout = HeldoutIndex.load(root)
-    out = root / OUTPUT_DIR
+    out = root / spec.output_dir
     out.mkdir(parents=True, exist_ok=True)
     per_source: dict[str, Any] = {}
     totals: list[Mapping[str, Any]] = []
     for source in sorted(corpus_manifest["sources"]):
-        rows = list(label_source(root, source, heldout))
+        rows = list(label_source(root, source, heldout, spec))
         payload = _rows_bytes(rows)
         path = out / f"{source}.labels.jsonl"
         if path.exists() and path.read_bytes() != payload:
@@ -184,71 +248,70 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         totals.extend(rows)
     manifest = {
         "artifact_kind": "BEHAVIOUR_LABELS",
-        "labels_version": LABELS_VERSION,
-        "statement": (
-            "Behaviour labels for normalization-v3 from the frozen prose-decision-classifier-v2 (21 phase 3). "
-            "Labels only: no mixture, no sampling weight, no training corpus. The qualifications behind "
-            "weight_permitted are provisional MODEL_REFERENCE ones (37 §8, 38 §2), never human gold, and never "
-            "evidence of accuracy."
-        ),
+        "labels_version": spec.labels_version,
+        "statement": spec.statement,
         "classifier": {
-            "version": CLASSIFIER_VERSION,
-            "tag": FROZEN_TAG,
-            "source_sha256_lf": FROZEN_SOURCE_SHA256_LF,
+            "version": spec.classifier_version,
+            "tag": spec.tag,
+            "source_sha256_lf": spec.classifier_sha256_lf,
         },
         "input_contract": CONTRACT_V2_VERSION,
         "normalization_version": versions.NORMALIZATION_VERSION,
         "corpus_fingerprint": corpus_manifest["fingerprint"],
-        "authorisation": "docs/research/study-002/38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md",
-        "weight_rule": {
-            "permitted_modes": sorted(WEIGHTED_MODES),
-            "direct_permitted_sources": sorted(DIRECT_PERMITTED_SOURCES),
-            "never_weighted": ["CALL", CALL_BY_STRUCTURE, "ABSTAIN", UNLABELLED],
-        },
+        **spec.policy,
         "sources": per_source,
         "totals": summarise(totals),
     }
     manifest_bytes = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
     (out / "manifest.json").write_bytes(manifest_bytes)
-    report = root / REPORT
+    report = root / spec.report
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_bytes(manifest_bytes)
     return manifest
 
 
-def verify(root: Path = ROOT) -> dict[str, Any]:
-    """Re-read the written labels and check them against their manifest. Classifies nothing."""
-    check_frozen(root)
-    manifest = json.loads((root / OUTPUT_DIR / "manifest.json").read_text(encoding="utf-8"))
+def verify(root: Path = ROOT, spec: LabelSet = V1) -> dict[str, Any]:
+    """Re-read the written labels and check them against their manifest. Classifies nothing.
+
+    It checks that the labelled sources are the corpus's sources, that each file matches its hash and counts,
+    that each weight permission follows the pass's rule, and that the stored totals are the sum of the rows.
+    """
+    check_frozen(root, spec)
+    manifest = json.loads((root / spec.output_dir / "manifest.json").read_text(encoding="utf-8"))
     problems: list[str] = []
-    if manifest["classifier"]["source_sha256_lf"] != FROZEN_SOURCE_SHA256_LF:
+    if manifest["classifier"]["source_sha256_lf"] != spec.classifier_sha256_lf:
         problems.append("the manifest names another classifier freeze")
     corpus_manifest = json.loads((root / CORPUS_MANIFEST).read_text(encoding="utf-8"))
     if manifest["corpus_fingerprint"] != corpus_manifest["fingerprint"]:
         problems.append("the labels were built on another normalization-v3 artifact")
+    if set(manifest["sources"]) != set(corpus_manifest["sources"]):
+        problems.append("the labelled sources are not the sources of the normalization-v3 corpus")
+    every_row: list[dict[str, Any]] = []
     for source, entry in manifest["sources"].items():
-        payload = (root / OUTPUT_DIR / entry["file"]).read_bytes()
+        payload = (root / spec.output_dir / entry["file"]).read_bytes()
         if _sha256(payload) != entry["sha256"]:
             problems.append(f"{source}: label file does not match its manifest hash")
             continue
         rows = [json.loads(line) for line in payload.decode("utf-8").splitlines() if line]
+        every_row.extend(rows)
         if summarise(rows) != {
             k: entry[k]
             for k in ("records", "labels", "weight_permitted", "unit_kind", "unlabelled_reasons")
         }:
             problems.append(f"{source}: counts do not match the labels")
-        if any(
-            row["weight_permitted"] != weight_permitted(row["label"], row["source"]) for row in rows
-        ):
-            problems.append(f"{source}: a weight permission does not follow 38 §2")
+        if any(row["weight_permitted"] != spec.weight(row["label"], row["source"]) for row in rows):
+            problems.append(f"{source}: a weight permission does not follow {spec.weight_citation}")
+    totals = summarise(every_row)
+    if totals != manifest["totals"]:
+        problems.append("the stored totals are not the sum of the labelled rows")
     return {
         "status": "PASS" if not problems else "FAIL",
         "problems": problems,
-        "totals": manifest["totals"],
+        "totals": totals,
     }
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, spec: LabelSet = V1) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -258,7 +321,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=ROOT)
     args = parser.parse_args(argv)
     if args.build:
-        manifest = build(args.root)
+        manifest = build(args.root, spec)
         print(
             json.dumps(
                 {
@@ -269,7 +332,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         return 0
-    print(json.dumps(verify(args.root), indent=2))
+    print(json.dumps(verify(args.root, spec), indent=2))
     return 0
 
 

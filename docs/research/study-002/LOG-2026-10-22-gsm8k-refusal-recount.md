@@ -474,3 +474,57 @@ No files were written in this section beyond this log entry. Nothing is committe
 **Decisions after section 18 (the study owner, 2026-10-22).**
 - The 11 unrecoverable pins in `reports/data/m0-v2-minus-xlam-freeze-v2.json` are accepted as unverified. The log does not claim they match, and no further search is planned.
 - The 97 missing DIRECT ids were investigated read-only (section 18). No change was made to the release or the labels.
+
+## 19. Wrapper build of classifier v3 and labels-v2 (dated 2026-10-22)
+
+**What changed (uncommitted).**
+- `src/opengrad/data/decision_classifier_v3.py` is now a wrapper over the frozen v2 rules. v2 is byte-identical (sha256 `47436ca9…`). The wrapper turns v2's DIRECT at step `3_decline_with_delivered_content` into `DECLINE_WITH_CONTENT`, and returns every other v2 decision unchanged, apart from v3's `classifier_version`. Its LF sha256 is now `5c092f8e…`. It was `b3ea0e12…` for the 626-line copy it replaces.
+- `src/opengrad/data/behaviour_labels.py` is one labelling engine, parameterised by a `LabelSet`. `V1` keeps v1's defaults, and the v1 module-level names are unchanged. `src/opengrad/data/behaviour_labels_v3.py` is a `LabelSet` over that engine, with its own pin.
+- `check_frozen` now checks the wrapper and the v2 rules on every run. `verify` now checks that the labelled sources are the corpus's sources, and that the stored totals equal the sum of the rows.
+
+**Checks.**
+- labels-v2 rebuilt over 181,433 rows. The four label files are byte-identical to the output before the wrapper. The manifest and the counts report differ from that output only in `classifier.source_sha256_lf` (`b3ea0e12…` to `5c092f8e…`).
+- labels-v1 rebuilt through the shared engine. The four label files, the manifest and the counts report are byte-identical to the snapshot taken before any change.
+- `verify` passes for labels-v1 and for labels-v2.
+- Tests: all of `tests/data`, plus `test_flag_set.py` and `test_prose_classifier_v2_oneshot.py`, pass. `ruff check` is clean on the changed files.
+- `tests/data/test_behaviour_labels.py`: the corpus fixture of one test now lists its source, because the source-set check is new.
+
+**Migration counts, v1 to labels-v2 (field by field, 181,433 rows in both sets).**
+- 1,222 rows change `label`. All of them are DIRECT to DECLINE_WITH_CONTENT.
+- 78,360 rows change `weight_permitted`. v2 sets every row to False. v1 gave weight to every UNSUPPORTED and CLARIFY row and to the glaive DIRECT rows.
+- 78,495 rows differ in at least one field: 135 in the label only, 77,273 in the weight only, and 1,087 in both.
+- The phrase "1,222 rows differ" in earlier notes counted label changes only. Quote all three numbers together.
+
+**Not done.** Nothing is committed. `src/opengrad/versions.py` is untouched. Dia-Grad is untouched. The retest pass condition for labels-v2 is still the owner's to set (38 §5 item 3 gives none). The Small Mind root-script check is still open. The training mix stays on v1 labels, with v1 weights.
+
+## 20. Reconciling the ANSWER count and the over-refusal claim (dated 2026-10-22, read-only)
+
+**Question.** Before any claim that the When2Call tool-use test catches over-refusal: (a) how many held-out items have a correct action of answering directly, from the raw test files and the held-out uuid list; (b) do any of the 177 DIRECT train ids fall in the held-out split?
+
+**Counts.**
+
+| check | result |
+|---|---|
+| `correct_answer = direct` (or `answer`), `when2call_test_mcq.jsonl` (3652 rows) | **0** |
+| `correct_answer = direct` (or `answer`), `when2call_test_llm_judge.jsonl` (300 rows) | **0** |
+| the same, restricted to the 3650 held-out partition uuids | **0** |
+| `correct_answer` values in the held-out split | `cannot_answer` 1295, `tool_call` 1295, `request_for_info` 1060 (sum 3650) |
+| the 2 MCQ uuids outside the partition | both `request_for_info` (`6a9903a1…` "What is the current time?", `77821b1c…` "What is the current weather?") |
+| DIRECT ids reproduced from the raw train parquet (`og_` + sha256 prefix, section 8 rule) | **177 of 177**, behind 178 raw rows |
+| DIRECT train user texts matching any test question (exact, normalized, 40-character substring) | **0**, against 3952 test rows (2299 distinct raw strings; 2295 after whitespace and case normalization) |
+| DIRECT ids in the held-out split | **0** by content. No uuid join is possible, because the train rows carry no uuid. |
+
+**Positive control.** The same content matcher, run over all 15,000 raw train rows, finds the weather prompt in exactly one row (`og_15ed4821407a8b5b`). That row is labelled UNLABELLED with reason `EVALUATION_ONLY_OR_HELDOUT`, so the labeller already excluded it. The matcher works. The overlap the decision section names is a row the labeller excluded, and it is not one of the 177 DIRECT ids.
+
+**Reconciliation.** The two counts agree with each other and with sections 1, 7 and 8. Both say zero. The 2299 and 2295 figures differ only by normalization, not by content. Nothing disagrees, so no stop condition applies.
+
+**The over-refusal claim, narrowed.** The When2Call test has no item whose correct action is a direct answer. Its three gold classes are "call a tool", "ask a follow-up question" and "say the question cannot be answered with these tools". So the test can register a model that refuses when a tool call was correct, or that answers directly when it should not have. It cannot register a model that refuses a question it should answer without a tool, because no such item exists in the gold. Any statement that the tool-use test "catches over-refusal" must say which kind.
+
+**Literature check (pwc, abstract only, not cross-checked).** `pwc search` returns When2Call (arXiv 2504.18851, Ross, Mahabaleshwarkar and Suhara, 2025). Its abstract describes three decisions: when to generate a tool call, when to ask a follow-up, and when to admit the question cannot be answered with the tools. It names no direct-answer gold class. That matches the raw test files. The dataset card and the repository were not read, so whether the released data ever had direct-answer items is not established here.
+
+**Not established.**
+- The content match does not catch a paraphrase of a held-out question, as section 8 already said.
+- The `pwc` result rests on the abstract alone.
+- The two uuids outside the partition were not joined to any train record by uuid.
+
+No frozen file, no `results/registry.jsonl`, no `reports/ERRATA.md`, no manifest and no label file was edited. This section is the only change.

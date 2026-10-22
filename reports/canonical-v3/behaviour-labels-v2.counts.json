@@ -1,7 +1,7 @@
 {
   "artifact_kind": "BEHAVIOUR_LABELS",
   "classifier": {
-    "source_sha256_lf": "b3ea0e12b49c984c00f73d5dfaa343912308c59d9fd55cdb58f55b8721d31fb3",
+    "source_sha256_lf": "5c092f8e44e4bf3b534a68b089fc501a495f71b5d14201a1159439edb7328974",
     "tag": "prose-decision-classifier-v3",
     "version": "prose-decision-classifier-v3"
   },

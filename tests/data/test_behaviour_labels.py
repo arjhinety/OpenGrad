@@ -104,7 +104,7 @@ def test_a_verify_catches_a_permission_that_does_not_follow_the_rule(tmp_path: P
     (out / "toolace.labels.jsonl").write_bytes(payload)
     corpus = tmp_path / labeller.CORPUS_MANIFEST
     corpus.parent.mkdir(parents=True)
-    corpus.write_text(json.dumps({"fingerprint": "f"}), encoding="utf-8")
+    corpus.write_text(json.dumps({"fingerprint": "f", "sources": {"toolace": {}}}), encoding="utf-8")
     manifest = {
         "classifier": {"source_sha256_lf": labeller.FROZEN_SOURCE_SHA256_LF},
         "corpus_fingerprint": "f",
