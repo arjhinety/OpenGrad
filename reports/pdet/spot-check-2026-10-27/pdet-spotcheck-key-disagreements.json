@@ -1,0 +1,82 @@
+{
+ "frame": "pdet-v1.disagreements.jsonl rows whose differing_keys include gold_policy_label",
+ "items": [
+  {
+   "n": "A",
+   "pdet_id": "when2call-sft:1f1778c86f62424b1a0ad2d451d252046b50599885dae8d93f67df67873d8682",
+   "pdet_index": 61,
+   "pass_a": "UNKNOWN",
+   "model_a": "DIRECT"
+  },
+  {
+   "n": "B",
+   "pdet_id": "when2call-sft:261e9889f4d0f3ba6328400011a7eaadd4139ebfce6ffc92d05feb700ac8dafe",
+   "pdet_index": 78,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "CLARIFY"
+  },
+  {
+   "n": "C",
+   "pdet_id": "when2call-sft:48086d6940324afa1bb529281796e246133da6988766b6e734157cf0f53ffdb7",
+   "pdet_index": 163,
+   "pass_a": "CLARIFY",
+   "model_a": "DIRECT"
+  },
+  {
+   "n": "D",
+   "pdet_id": "when2call-sft:6e46b6d6db4e0312b571421ecca3a1383be25b1129725cc647765d7647b73a65",
+   "pdet_index": 262,
+   "pass_a": "CLARIFY",
+   "model_a": "UNSUPPORTED"
+  },
+  {
+   "n": "E",
+   "pdet_id": "when2call-sft:7ab2c66aab13eaccf81833f676f623dbb212a9611e563f48eef31dba1e67c425",
+   "pdet_index": 284,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "CLARIFY"
+  },
+  {
+   "n": "F",
+   "pdet_id": "when2call-sft:8b7883e30f7c0fbd6c75083c3f4887ce8ec4ad4ce8ab4558c24337397a31be59",
+   "pdet_index": 316,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "DIRECT"
+  },
+  {
+   "n": "G",
+   "pdet_id": "when2call-sft:8c8268d67b904a53138b147c4d6f7aabca4575653a825a773a463b62ed7abdda",
+   "pdet_index": 318,
+   "pass_a": "CLARIFY",
+   "model_a": "UNSUPPORTED"
+  },
+  {
+   "n": "H",
+   "pdet_id": "when2call-sft:8df37542f550d9adbc6dc135443ff21e1553f9af78dc7ac2df6806731b9d71e1",
+   "pdet_index": 319,
+   "pass_a": "CLARIFY",
+   "model_a": "UNSUPPORTED"
+  },
+  {
+   "n": "I",
+   "pdet_id": "when2call-sft:9c9d3ef86ac653c80a62178576da50ee207d091bb8e399848b6f270c591311c2",
+   "pdet_index": 357,
+   "pass_a": "CLARIFY",
+   "model_a": "UNSUPPORTED"
+  },
+  {
+   "n": "J",
+   "pdet_id": "when2call-sft:b7ee066405281c5e829058e7a1bed1d90cedc8777344c4ee99d61d35a1e531d0",
+   "pdet_index": 410,
+   "pass_a": "CLARIFY",
+   "model_a": "UNKNOWN"
+  },
+  {
+   "n": "K",
+   "pdet_id": "when2call-sft:e0359fe67ede5d20be40ea2af4335ba2962b1997be16f5f4c9c677c5a948486e",
+   "pdet_index": 512,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "DIRECT"
+  }
+ ]
+}

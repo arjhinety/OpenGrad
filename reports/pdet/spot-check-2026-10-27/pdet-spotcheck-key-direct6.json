@@ -1,0 +1,54 @@
+{
+ "frame": "v1 DIRECT predictions on P-DET-v1 with stored CLARIFY/UNSUPPORTED, not in Set 1 or Set 2",
+ "written_at": "2026-10-27",
+ "items": [
+  {
+   "n": "S1",
+   "pdet_id": "when2call-sft:4acf0ad6a7a099b4d9a957d42d3e320a9d685a433a37c7c69bba7339f5bbd6e7",
+   "pdet_index": 171,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "UNSUPPORTED",
+   "classifier_v1": "DIRECT"
+  },
+  {
+   "n": "S2",
+   "pdet_id": "when2call-sft:19bda23a12b5917cc544b6d7b2d2a9c885f8a7c3173aff38f34d309d4d6b9d73",
+   "pdet_index": 52,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "UNSUPPORTED",
+   "classifier_v1": "DIRECT"
+  },
+  {
+   "n": "S3",
+   "pdet_id": "when2call-sft:e3e6b62056590ab3eed5034f7f90af91f0dc63b4a531678e61a39df385176b04",
+   "pdet_index": 521,
+   "pass_a": "CLARIFY",
+   "model_a": "CLARIFY",
+   "classifier_v1": "DIRECT"
+  },
+  {
+   "n": "S4",
+   "pdet_id": "when2call-sft:f1b9d2a6b74ac2dccb9825f7d1351175ac6cf11d924fd2522f2c7d2693ddc6a9",
+   "pdet_index": 544,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "UNSUPPORTED",
+   "classifier_v1": "DIRECT"
+  },
+  {
+   "n": "S5",
+   "pdet_id": "when2call-sft:042780b45a02bef2aaa86739cfb4360c1262cdb7c0b4d072976a0cb84b871e77",
+   "pdet_index": 7,
+   "pass_a": "CLARIFY",
+   "model_a": null,
+   "classifier_v1": "DIRECT"
+  },
+  {
+   "n": "S6",
+   "pdet_id": "when2call-sft:05102a303b8ae31e173cf08ca26a0ab41463e39805c40e9162f3e260df904cfa",
+   "pdet_index": 8,
+   "pass_a": "CLARIFY",
+   "model_a": null,
+   "classifier_v1": "DIRECT"
+  }
+ ]
+}

@@ -1,0 +1,76 @@
+{
+ "seed": 20261027,
+ "frame": "570 items with a model-a label (pdet-v1)",
+ "items": [
+  {
+   "n": 1,
+   "pdet_id": "when2call-sft:49d24dcab311de2e4dde434ac3efbdba220b0d532a71e29c2ec1e4fde5b003b1",
+   "pdet_index": 167,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "UNSUPPORTED"
+  },
+  {
+   "n": 2,
+   "pdet_id": "when2call-sft:1f1e0fafc9601f1f13d8c7b8f7d340cbb06ec0c2029f8e5ac9d5fafeb13bec8f",
+   "pdet_index": 62,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "UNSUPPORTED"
+  },
+  {
+   "n": 3,
+   "pdet_id": "when2call-sft:3f002b3fa60503aed0164a7aa85569fa85d4d0c6937bf233b9bb941e2fb7d8e6",
+   "pdet_index": 143,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "UNSUPPORTED"
+  },
+  {
+   "n": 4,
+   "pdet_id": "when2call-sft:569aa8c975c000fdcc63adacc74ae6996936d1512e792ea5e600bbe8af0c0cdb",
+   "pdet_index": 206,
+   "pass_a": "CLARIFY",
+   "model_a": "CLARIFY"
+  },
+  {
+   "n": 5,
+   "pdet_id": "when2call-sft:559133bb1f0cc734f6aa8487d4b5508d330f8f42c058d4a96a4749d1eb400d16",
+   "pdet_index": 203,
+   "pass_a": "CLARIFY",
+   "model_a": "CLARIFY"
+  },
+  {
+   "n": 6,
+   "pdet_id": "when2call-sft:c061c3426464b19b2566483598dd97d1c3a513566d1926ac19fecbe0e358708a",
+   "pdet_index": 429,
+   "pass_a": "CLARIFY",
+   "model_a": "CLARIFY"
+  },
+  {
+   "n": 7,
+   "pdet_id": "when2call-sft:353fb0def0fe4a139231bf594f2cc097b96f670a7c21336e79275f3c8619ec76",
+   "pdet_index": 114,
+   "pass_a": "CLARIFY",
+   "model_a": "CLARIFY"
+  },
+  {
+   "n": 8,
+   "pdet_id": "when2call-sft:6712977783b31b9f6cfef102b602decbaf2ff583bf894644519cbaa56e6529b6",
+   "pdet_index": 243,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "UNSUPPORTED"
+  },
+  {
+   "n": 9,
+   "pdet_id": "when2call-sft:121dc973ef67c54f259bf96b54f7525ff38008528222ed50510ca451ba5c9d18",
+   "pdet_index": 37,
+   "pass_a": "CLARIFY",
+   "model_a": "CLARIFY"
+  },
+  {
+   "n": 10,
+   "pdet_id": "when2call-sft:1377acc453ece6145732da804425e9d0c6edf588996372ce5aa133d2ce22af6e",
+   "pdet_index": 39,
+   "pass_a": "UNSUPPORTED",
+   "model_a": "UNSUPPORTED"
+  }
+ ]
+}

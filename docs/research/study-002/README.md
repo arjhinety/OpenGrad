@@ -29,7 +29,7 @@ H200, an A100, an MI300 or a future device is comparable rather than confounded
 | canonical-v3 | **Built; arm `S2`'s corpus since `study_002_prereg_v14` (exploratory, Tier C), and no other arm's.** 88,056 records, 22,014 per decision (CALL/ANSWER/CLARIFY/UNSUPPORTED), decision-balanced under the rule of [39](39-CANONICAL-V3-DECISION-BALANCE-SPEC.md) from normalization-v3 fingerprint `60d3123e…`; every record carries a behaviour label from the frozen `prose-decision-classifier-v2` (`labels.classifier`), and the artifact's `versions` block names that classifier. 0 gate rejections, 88,056/88,056 renderable. The pre-GPU provenance gate ([21](21-C1-IMPLEMENTATION-STATUS.md) phase 6) passes, recorded as `reports/canonical-v3/provenance-gate-v2.json`. Until `study_002_prereg_v14` no arm used it, and 21 phase 8 registered it in [03](03-PREREGISTRATION.md) as built-not-an-arm; v14 made it arm `S2`'s corpus (exploratory, Tier C) and no other arm's; no training is authorised. |
 | Training components | **Every arm trains text-only** (decided 2026-09-16). From `full-model-components-v1` ([policy](../../MODEL_COMPONENT_POLICY.md)) trainers carry vision and MTP by default. Study 002's arms declare `trainer.model_components: {vision: exclude, mtp: exclude}` instead, so they share Study 001's trainer and `C0` stays a true reproduction. The preregistration is unchanged. A training config for an arm that omits the exclusion carries the components and is blocked by the `model_components_validation` readiness gate. |
 | P-DET-COVERAGE-v1 | **Adopted, drawn, labelled by three models; reference built.** Adopted as `study_002_prereg_v4` ([30](30-PDET-COVERAGE-PREREGISTRATION-DRAFT.md)) to cover CALL and DIRECT, which P-DET-v1 cannot. 336 items (sha `755bc16e…`), split into the tasks `pdet-coverage-v1` (306 prose items) and `pdet-coverage-v1-routing` (30 structured-call items). Its reference labels come from a three-model non-Claude consensus (`study_002_prereg_v5`, [34](34-PDET-COVERAGE-MODEL-CONSENSUS-AMENDMENT.md)); no human annotates. Layer B: 291 unanimous, 15 two-of-three, no `NO_CONSENSUS`; UNSUPPORTED 180, CLARIFY 56, DIRECT 44, UNKNOWN 23, CALL 3. Routing: 30 of 30 unanimous CALL. The annotators' audit trail is archived in `reports/pdet-coverage/provenance/external-models/`. **Current reference since 2026-10-04** (Gemini re-labelled under a tool gate, INC-0002): layer B 290 unanimous, 16 two-of-three; UNSUPPORTED 180, CLARIFY 56, DIRECT 43, UNKNOWN 24, CALL 3; routing unchanged (`*.reference.gemini-r2.*`). Used once, for the v1 test; exposed for any classifier v2 (35 §2). |
-| Label-timing finding (P-DET-v1) | **Recorded 2026-09-17, not resolved.** In the tracked `pass-a` change log, 595 saves have a median gap of 0.83 s; 61% came within 1 s of the previous save and 90% within 3 s. Agreement with the blind model pass is 98.1%, and many items are near-repeats, so fast labels are not shown to be wrong. How many would change on a careful read is unmeasured. The 22 §4 re-read covers only the 2 UNKNOWN items here, because nothing was flagged or cited a boundary rule. |
+| Label-timing finding (P-DET-v1) | **Recorded 2026-09-17, not resolved.** In the tracked `pass-a` change log, 595 saves have a median gap of 0.83 s; 61% came within 1 s of the previous save and 90% within 3 s. Agreement with the blind model pass is 98.1%, and many items are near-repeats, so fast labels are not shown to be wrong. How many would change on a careful read is unmeasured. The 22 §4 re-read covers only the 2 UNKNOWN items here, because nothing was flagged or cited a boundary rule. **Addendum 2026-10-27** (below, "Label-timing finding (P-DET-v1): addendum"): the tool was first committed after the session, an owner blind spot-check, and a planned 100-item re-label; still not resolved. |
 | **Done since v6** | `study_002_prereg_v6` adopted ([36](36-FIRST-REPLY-CONTRACT-AND-PDET-COVERAGE-V2-DRAFT.md)); P-DET-COVERAGE-v2 drawn (420 items, sha `8fa4868c…`). Classifier v2 frozen (sha `47436ca9…`) and tested once on 2026-09-18: DIRECT, UNSUPPORTED and CLARIFY qualify, CALL is NOT_EVALUABLE, macro F1 0.956 ([37](37-PROSE-DECISION-CLASSIFIER-V2-DEVELOPMENT-PLAN.md) §8). Under `study_002_prereg_v7`, balancing is permitted provisionally (DIRECT on glaive only) and C1 is authorised ([38](38-BALANCING-PERMISSION-AND-C1-AUTHORISATION.md)). canonical-v3 is built (88,056 records, 22,014 per decision) and registered as **no arm's corpus**. The evaluation gate is executable and fails closed (`study_002_gate_v1` contract 3, 2026-09-24). `study_002_prereg_v8` adopted 2026-09-24 ([40](40-PREREG-V8-DRAFT.md)): the truncation factor (2.0× and 2pp) and `P-UNANS` n ≥ 385 are declared, and the gate wraps `tool_use_promotion_v6`. Annotation is done by models only (owner decision, 2026-09-17). **INC-0002 (2026-10-03/04):** the Gemini labeller of both P-DET-COVERAGE references had browsed the repository (and, in two kept v2 batches, searched the web); it re-labelled every item under a tool gate, no effect was detectable and no classifier qualification changed, the re-labelled references (`*.reference.gemini-r2.*`) are now current, and 38's permissions stand (owner decisions 2026-10-04; [`docs/INCIDENT_LOG.md`](../../INCIDENT_LOG.md)). |
 | `ANSWER` strata set | **Labelled; strata built (`MODEL_REFERENCE`, provisional).** `study_002_prereg_v9` ([41](41-ANSWER-STRATA-AMENDMENT.md)) fixed the source and drew 1,767 candidates before any label: 917 of BFCL's no-call items (pool N) and 850 Natural Questions questions paired with tools that cannot serve them (pool K). `study_002_prereg_v10` ([42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md)) made the reference the label both Gemini 3.8 Flash (High) and deepseek-v4.1-flash give, after Codex refused 41's third model. The two agree on 1,565 of 1,767 items. **`ANSWER-natural`: n = 284, meets the 200 floor only** (short of 385, so it cannot resolve 10 points). **`ANSWER-constructed`: n = 771, resolves 8 points**; 21 constructed items reached another label (construction failures). Pooled, beside them only: 1,055. The natural stratum's prompts range far wider in length than the constructed one's. Numbers: `reports/study-002/answer-strata-v1/answer-strata-v1.strata.json`. |
 | `P-CONF` | **Built and frozen as `P-CONF-v1` (owner decision 2026-09-25, option A).** `src/opengrad/verification/pconf.py` writes `reports/study-002/pconf-v1/`. It is the When2Call confirmatory side unchanged (1,277: `CALL` 453, `UNSUPPORTED` 453, `CLARIFY` 371), plus the `ANSWER` strata as evaluation records (`ANSWER-natural` 284, `ANSWER-constructed` 771). Every mode clears the 200 floor, which is the C1 check. The smallest difference each can resolve (C2): `CALL` and `UNSUPPORTED` 9.2 points, `CLARIFY` 10.2, `ANSWER-natural` 11.6, `ANSWER-constructed` 7.1. No `ANSWER` item shares an id with the held-out set or text with P-DET-COVERAGE or any of the 3,650 When2Call held-out questions. **Balance, measured (41 §11):** `ANSWER` prompts are shorter (median 43 and 45 characters, against 70 to 89 for the other modes) and mostly offer one tool. That is a stated limitation of every `ANSWER` comparison. The `ANSWER` gold is a provisional model reference. Not scored. |
@@ -102,6 +102,228 @@ What follows under the frozen rules:
 Covering CALL and DIRECT needs a validation population drawn from sources that contain them, for example
 records with structured tool calls and records with direct answers. That would be a new, separately
 frozen population. It is a design decision for the study owner, and none has been made.
+
+### Label-timing finding (P-DET-v1): addendum, 2026-10-27
+
+**Status: still not resolved.** This addendum adds evidence. It changes no label, population, manifest
+or result.
+
+*Numbering.* "P-DET index" here is the 0-based `pdet_index` field of `reports/pdet/pdet-v1.population.jsonl`.
+This README's "#N" elsewhere is that index plus 1: index 163 is #164.
+
+#### 1. The "model label never shown" guarantee cannot be shown for the labelling session
+
+`docs/ANNOTATION_TOOL.md` says the tool never shows a model suggestion or pre-fills a label (`:10`), and
+that "a model's label is never shown, before or after a submit" (`:114-115`). That document and the tool
+code (`src/opengrad/annotation/`) were **first committed in `308b4ca`, 2026-09-15 20:12 +08 (12:12Z)**.
+The 570 labels in question were saved **17:21–17:35 local (09:21–09:35Z) the same day**, before that
+commit. The repo therefore cannot show which tool version ran during the session, or whether the
+`model-a` label was visible.
+
+#### 2. Order and timing, recomputed from the two history files
+
+Sources: `reports/pdet/annotation/wip/audit/pdet-v1.history.arjhinety.pass-a.jsonl` and
+`…pdet-v1.history.model.claude-opus-5.model-a.jsonl`.
+
+- **All 570** `pass-a` labels on items that `model-a` also labelled were saved **after** `model-a` had
+  labelled that item. None came first.
+- Those 570 took 797.7 s in total. The median gap between consecutive `pass-a` actions is **0.82 s**, and
+  500 of 570 came within 2 s. (The README's 0.83 s is the median over all 595 saves.)
+- The 11 items labelled before `model-a` ran took a **median of 20.36 s** each.
+- The history file records **14** `relabel` actions; README:24 says 13.
+
+#### 3. Where the 570 are treated as human-sourced
+
+1. Amendment 28 (`28-PDET-MODEL-LABEL-AMENDMENT.md:20-25`): a `pass-a` label is a "human label" and
+   "always wins over a model label". When it was written, `pass-a` covered only #1–#11.
+2. `src/opengrad/annotation/export.py:427-428` stamps `label_source_kind: human` on every `pass-a` gold
+   record, and `export_verify.py:206-207` checks this.
+3. `reports/pdet/annotation/wip/pdet-v1.annotation-manifest.json:15,347` records human 581 and
+   `annotator_kind: human`. It is still `frozen: false`, `gold: null`.
+4. This README, `:23` ("Every item has a human label"), `:24` (581/581 human; 559/570 = 98.1%
+   human–model agreement) and `:44` (reference "all from pass-a").
+5. `reports/ERRATA.md:820-830` ("The human labels are: UNSUPPORTED 298 / CLARIFY 281 / UNKNOWN 2 /
+   DIRECT 0 / CALL 0"). The §14 conclusion that P-DET-v1 cannot authorise arm C1 rests on this
+   distribution.
+6. Classifier v1 one-shot test: `prose_classifier_oneshot.py:9`, and its result file
+   `reports/prose-classifier/test/prose-decision-classifier-v1.test-result.json`
+   (`references/P-DET-v1/kind = "HUMAN, single annotator, not frozen gold"`; 575 classified, 572 usable).
+7. Classifier v2 test, which reports P-DET-v1 but never gates on it: `prose_classifier_v2_oneshot.py:12`.
+8. `reports/incidents/INC-0002-relabel-comparison.json`, which re-scores against the same reference.
+
+Why the label source matters for items 6–8: Kulshreshtha et al. (arXiv 2610.03825, checked with
+`pwc paper info`) held a scored output fixed on a six-language PII benchmark and swapped the reference. The
+score moved by 4.95 and 2.00 F1 points for two outputs (95% CIs [3.23, 6.27] and [0.26, 3.37]). The cause
+there was an undocumented aggregation default that made the shipped reference "a partial copy of an output
+being scored". That is a different benchmark and a different mechanism. It is cited only for the general
+point that a score can depend materially on which reference it is measured against.
+
+**Which decisions depend on the classifier's P-DET-v1 score** (read 2026-10-27 at `7a1a0cd`):
+
+| Where | Depends on the P-DET-v1 score? |
+|---|---|
+| 33 §8 (`:176-205`), classifier v1's single test: UNSUPPORTED and CLARIFY qualify; C1 not authorised | Formally yes for the two qualifications, because a row must pass on every population where it is evaluable (`30-…DRAFT.md:487`). Not sensitive: the margins are large (UNSUPPORTED recall 0.980 vs 0.75; macro F1 0.981 vs 0.75), and the same rows pass on P-DET-COVERAGE-v1. "C1 not authorised" does not depend on the score; it follows from DIRECT being unmeasurable on both populations. |
+| This README `:28` | Describes the result; no decision rests on it. |
+| `reports/ERRATA.md` §14 (`:818-856`), `03-PREREGISTRATION.md:152-153`, and this README's "Finding: P-DET-v1 contains no CALL and no DIRECT item, by construction" | Not on the score. They rest on the stored label counts (0 CALL, 0 DIRECT); see §4. "0 CALL" is shown from the source. "0 DIRECT" rests on the reading that every reply "asks for information or declines", but protocol rule 3 (22 §3) counts a decline that also delivers substantive content as DIRECT. |
+| 35 §2 (`:40-46`), the decision to build classifier v2 | Not on the score. It rests in part on "8 DIRECT predictions on P-DET-v1" being false against the stored labels; see §4. Its other reason (ToolACE: 0 of 9 DIRECT predictions agreed) does not involve P-DET-v1. |
+| 37 (`:386-392`), v2's P-DET-v1 report (macro F1 0.981; "8 DIRECT predictions are all false") | Reported, never gating. |
+| 38, balancing permission and C1 authorisation (the decision in force) | No. It rests on v2 against P-DET-COVERAGE-v2's model reference and leaves P-DET-v1 untouched. |
+| `docs/INCIDENT_LOG.md:252-264` (INC-0002 re-score) | As 33 §8: formally yes for v1's two qualifications, not sensitive. |
+
+Not affected: the classifier development and check sets (`classifier_devset*.py`, `classifier_devcheck.py`)
+and `pdet_coverage.py` all exclude P-DET-v1, and `decision_classifier.py:19` never evaluates against it.
+
+#### 4. Owner spot-check, 2026-10-27
+
+**Procedure.** The owner labelled each item with both the stored `pass-a` label and the `model-a` label
+hidden, using the protocol 22 §3 decision order. Items were shown as tool list, user turn and assistant
+response. The answer keys stayed in a separate file and were opened only after both sets were answered.
+
+**Set 1: 10 items drawn at random from the 570 (seed 20261027).**
+- 0 of 10 changed against the stored label; 0 of 10 differ from `model-a`.
+- **This cannot show whether the model label was visible.** The stored labels already match `model-a` on
+  559 of 570, so a random item will almost always match both. That is the expected result whether the
+  item was read carefully or the model label was copied.
+
+**Set 2: the 11 items where `pass-a` and `model-a` disagree** (`pdet-v1.disagreements.jsonl`; all 11
+differ on `gold_policy_label`; none overlaps Set 1).
+- **Headline, from the first answers, given blind before the key was opened (saved 2026-10-27 10:21:14
+  +08): 10 of 11 changed against the stored label; 5 of 11 differ from `model-a`.**
+- Fast saving was the norm in this session, not a marker of the labels that changed. 9 of the 10 changed
+  stored labels were saved within 1.6 s of the previous `pass-a` action. So were 473 of all 570
+  post-model labels (83.0%), and 463 of the 559 that agree with `model-a` (82.8%). Speed alone therefore
+  does not separate the labels that changed on re-read from those that held. The gap is the same
+  throughout: time since the previous `pass-a` label or relabel action, from
+  `pdet-v1.history.arjhinety.pass-a.jsonl`.
+- **Owner's account** (stated 2026-10-27; not verifiable from the repo): the tool took one keypress per
+  item ("press a number per turn, one look then decide"). In that setup about 1–2 s per item is not
+  unusually short, especially when most items are expected to be UNSUPPORTED. The committed tool binds
+  labels to number keys (`docs/ANNOTATION_TOOL.md:287`;
+  `integrations/annotate-ui/components/AnnotateView.tsx:356-357`). That code was also first committed in
+  `308b4ca`, after the session, so the interface used during the session is unprovable too. The account
+  explains the speed. It does not bear on whether the `model-a` label was visible.
+- Among the 11 disagreements, the stored label was CLARIFY in 6, UNSUPPORTED in 4 and UNKNOWN in 1. An
+  expectation that most items are UNSUPPORTED therefore does not by itself account for these
+  disagreements.
+- Some stored labels differ from the owner's re-read in plain ways. For example, three responses that
+  decline without asking for anything (P-DET indices 318, 319, 357) were stored as CLARIFY, and the
+  re-read gave UNSUPPORTED.
+- No consistent pattern of a label landing on the neighbouring item was found. Which reading is wrong is
+  unknown, so a mis-click explanation remains a hypothesis.
+
+*Revised answers, reported separately.* These were **revised after unblinding, after Claude cited
+protocol rules 3 and 5 and the E reason mismatch; not blind evidence.** They were saved at 10:25:12 +08.
+The owner changed A to DIRECT, D to UNKNOWN (the rationale first given under E was meant for D) and E to
+CLARIFY. With these, 10 of 11 still differ from the stored label, and 3 of 11 differ from `model-a`. The
+revised figures are not used for the headline or for the reading below. Both sets of answers, with
+timestamps, are kept in `reports/pdet/spot-check-2026-10-27/pdet-spotcheck-answers.json`.
+
+**Reading the evidence.**
+- *Directly shown:* where the `pass-a` labels departed from `model-a`, the owner's later blind re-read
+  mostly gave a different label (10 of 11). Both readings come from the same single annotator, with no
+  second rater, so which reading is correct is unknown.
+- *Scope:* Set 2 was selected *because* `pass-a` and `model-a` disagreed, so it is not a sample of the
+  570. Its 10 changed labels (10 of 570, 1.8%) are stored labels that disagree with the owner's own later
+  blind re-read. With a single annotator and no second rater, it is unknown which reading is correct. The
+  random Set 1 found 0 of 10 changed, which fits either careful reading or copying. The change rate among
+  the 559 items where `pass-a` agrees with `model-a` is unknown. Measuring it needs a blind re-label of a
+  random sample whose size is fixed before the sample is drawn.
+- *Not distinguished:* "the model label was visible and was mostly accepted, with occasional differences"
+  versus "labels were entered quickly from the response's shape, with occasional differences".
+
+**Where the re-read meets the classifier results.** The v1 and v2 prediction files hold 9 DIRECT
+predictions on P-DET-v1 (identical for v1 and v2). 8 have a stored label of CLARIFY or UNSUPPORTED, which
+are the "8 DIRECT predictions" that 35 §2 and 37 count as false. The ninth (index 61) has a stored label of
+UNKNOWN. Two of the 8 fall in Set 2. Index 163 (item C) was stored CLARIFY, and index 316 (item F) was stored
+UNSUPPORTED. The owner's blind re-read gave DIRECT for both, as did `model-a`. With one annotator and no second
+rater this does not show those predictions were correct, only that "all 8 are false" depends on the stored
+reading. The other 6 (indices 7, 8, 52, 171, 521, 544) were re-read blind as a third set, saved at 10:58:27
++08 before the key was opened. All 6 matched the stored label (3 UNSUPPORTED, 3 CLARIFY), and none was DIRECT.
+Indices 7 and 8 have no `model-a` label; the other 4 also match `model-a`. Under the owner's blind re-read,
+then, 6 of the 8 predictions are false and 2 are DIRECT. In the blind answers the owner also gave DIRECT for item J
+(index 410), so the "0 DIRECT" count in ERRATA §14 likewise depends on the stored reading. Index 262 (item D)
+is not counted among the blind DIRECT re-reads. D's first blind answer was DIRECT, but the blind
+UNKNOWN-AMBIGUOUS note written under E was later stated (`set2_E_reason_clarification` in
+`reports/pdet/spot-check-2026-10-27/pdet-spotcheck-answers.json`) to belong to D, so D's blind reading is uncertain. §14's conclusion is unaffected:
+qualifying DIRECT needs at least 50 reference DIRECT items.
+
+**Owner decisions on rule conflicts (2026-10-27).** Three items expose places where the 22 §3 rules, or a
+document, pull different ways. The owner decided:
+1. **Decline plus content (rule 3) governs.** A reply that declines but also delivers substantive content
+   is DIRECT, as 22 §3 rule 3 says. Example: index 316 (item F) declines to translate, then gives the
+   translation. The README finding above ("The replies are requests for information or declines") describes
+   the replies' form and does not override rule 3.
+2. **Index 163 (item C) is read as DIRECT.** The reply defines the Piotroski F-Score (the user's question
+   was "What's the Piotroski F-Score?") and then asks for a ticker. Taken in the 22 §3 order, rule 4 (asks for
+   something needed → CLARIFY) comes before rule 7 (substantive content → DIRECT), and rule 8 would make a
+   genuine tie AMBIGUOUS. The owner keeps DIRECT, because the definition answers the question as asked. This
+   is recorded as a departure from the written rule order, not as an application of it.
+3. **A decline that points to a concrete outside source: proposed clarification only.** No change to 22 §3
+   is made here.
+   - The owner's note on item D (index 262; first written under E in the blind answers, then stated to belong
+     to D in the revision), as given: "UNKNOWN-AMBIGUOUS: Reasoning, this specific response is highly detailed
+     and is more than just a simple refusal for an unsupported action, because the redirect/recommendation is
+     the kind of response I would categorize as desirable as it suggests real information that can lead the
+     user to completing the task rather than just giving an ambiguous redirect."
+   - D's reply: "Apologies, I'm unable to fetch specific financial documents. You may find this information on
+     reputable financial websites or through Amazon's investor relations page." D's blind answer was DIRECT;
+     the AMBIGUOUS reading comes from the revised, non-blind answers.
+   - Rule 5 (advice to use an external service instead of doing the task → UNSUPPORTED) would make D
+     UNSUPPORTED.
+   - In the third set, answered blind, the owner labelled two replies of the same shape UNSUPPORTED, as rule 5
+     says: index 171 (S1, "you can use a search engine to find blogs discussing 'digital marketing
+     strategies'") and index 544 (S4, "you can use a programming language like Python with libraries such as
+     Matplotlib to generate the histogram").
+   - So the owner's blind labels do not yet apply the D distinction consistently. The note separates a
+     "highly detailed" pointer that "suggests real information" from "an ambiguous redirect"; where S1 and S4
+     fall on that line is not settled. A written clarification of rule 5 would need to state that line before
+     it could be applied.
+
+#### 5. What remains open
+
+- Whether the `model-a` label was visible during the session. This is unknown and may not be recoverable.
+- How many of the 570 would change on a careful read. The plan below is fixed before anything is drawn.
+
+**Planned blind re-label (fixed 2026-10-27; not yet drawn).**
+- **Question:** among items where the stored `pass-a` label agrees with `model-a`, how often does a careful
+  blind re-read by the owner give a different label?
+- **Sampling frame: 549 items.** These are the 559 P-DET-v1 items where `pass-a` agrees with `model-a`, minus
+  the 10 Set 1 items, which have already been re-read. Excluded by construction: the 11 disagreement items
+  (Set 2) and the 11 items `pass-a` labelled before `model-a` ran. The frame is the sorted list of `pdet_id`s,
+  one per line, with no trailing newline. Its sha256 is
+  `bd902719e40a10fbcae365f7004fa14abe41437339140a3f3368afa663182623`.
+- **Excluded Set 1 IDs** (P-DET index, `pdet_id`):
+  - 37 `when2call-sft:121dc973ef67c54f259bf96b54f7525ff38008528222ed50510ca451ba5c9d18`
+  - 39 `when2call-sft:1377acc453ece6145732da804425e9d0c6edf588996372ce5aa133d2ce22af6e`
+  - 62 `when2call-sft:1f1e0fafc9601f1f13d8c7b8f7d340cbb06ec0c2029f8e5ac9d5fafeb13bec8f`
+  - 114 `when2call-sft:353fb0def0fe4a139231bf594f2cc097b96f670a7c21336e79275f3c8619ec76`
+  - 143 `when2call-sft:3f002b3fa60503aed0164a7aa85569fa85d4d0c6937bf233b9bb941e2fb7d8e6`
+  - 167 `when2call-sft:49d24dcab311de2e4dde434ac3efbdba220b0d532a71e29c2ec1e4fde5b003b1`
+  - 203 `when2call-sft:559133bb1f0cc734f6aa8487d4b5508d330f8f42c058d4a96a4749d1eb400d16`
+  - 206 `when2call-sft:569aa8c975c000fdcc63adacc74ae6996936d1512e792ea5e600bbe8af0c0cdb`
+  - 243 `when2call-sft:6712977783b31b9f6cfef102b602decbaf2ff583bf894644519cbaa56e6529b6`
+  - 429 `when2call-sft:c061c3426464b19b2566483598dd97d1c3a513566d1926ac19fecbe0e358708a`
+- **Size: 100. Seed: 20261028.** Draw with `random.Random(20261028).sample(frame, 100)` on Python 3.12, where
+  `frame` is the sorted list above. Items are presented in the drawn order. Neither the size nor the seed
+  changes after this point. If the frame fingerprint does not match at draw time, stop.
+- **Procedure:** as in §4. Each item is shown as tool list, user turn and assistant response, with the stored
+  `pass-a` label, the `model-a` label and any classifier prediction hidden, using the 22 §3 decision order.
+  Answers are saved before any key is opened. Answers revised after unblinding are recorded separately and
+  never replace the blind answers.
+- **Where the answers go:** a new session, separate from `pass-a`. The composite reference and the gold export
+  stay unchanged. The composite is built only from the sessions named on the command line
+  (`src/opengrad/annotation/export.py:100-101`; the `reference` and `export` commands are run with
+  `--sessions pass-a model-a`), and `label_source_kind` is stamped from the session that supplied each label
+  (`export.py:427-428`). This holds as long as those commands do not name the new session. Using the
+  re-label for the reference would be a separate decision.
+- **What it reports:** the share of the 100 whose blind re-read differs from the stored label, with a 95% Wilson
+  interval. For scale: 0 of 100 gives an upper bound of about 3.7%; 10 of 100 gives roughly 5.5%–17.4%. It is
+  still one annotator against their own earlier labels, so a difference shows the two readings disagree, not
+  which one is correct.
+- Until then, the 570 `pass-a` labels should be described as "single annotator, entered after `model-a`
+  labelled the same items; independence unverified". They should not be described as independent human
+  labels or as human gold. Whether to change `label_source_kind`, the composite rule or any ERRATA entry
+  is a separate decision.
 
 ## Outputs in this directory
 

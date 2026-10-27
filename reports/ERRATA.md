@@ -1836,3 +1836,61 @@ amendment.
   not tied to the verdict's. Each is fixed above, with a test.
 - **Tests:** the self-test grew from 38 to 44 cases, and readiness check 2 expects contract 7. The check is in
   `study_002_gate_runs.py`.
+
+## 40. P-DET-v1: "0 DIRECT" and "8 false DIRECT predictions" rest on the stored `pass-a` reading
+
+**Added 2026-10-27,** with the label-timing addendum to `docs/research/study-002/README.md` (the "Label-timing
+finding (P-DET-v1)" row). This entry changes no label, population, reference, threshold or verdict. It qualifies
+two statements whose truth depends on the stored `pass-a` labels.
+
+- **As written:**
+  - §14: P-DET-v1's human labels are "UNSUPPORTED 298 / CLARIFY 281 / UNKNOWN 2 / DIRECT 0 / CALL 0".
+  - `docs/research/study-002/README.md`, "Finding: P-DET-v1 contains no CALL and no DIRECT item, by
+    construction": "The replies are requests for information or declines."
+  - 35 §2 counts "8 DIRECT predictions on P-DET-v1" as a false-DIRECT weakness. 37 (`:390-391`) says those
+    predictions "are all false against the human labels, which hold no DIRECT".
+- **Numbering:** "P-DET index" is the 0-based `pdet_index` field of `reports/pdet/pdet-v1.population.jsonl`.
+  The study README's "#N" is that index plus 1.
+- **What was found:**
+  - All 570 `pass-a` labels on items `model-a` also labelled were saved after `model-a` had labelled them
+    (README label-timing row and its addendum).
+  - In a blind owner re-read of the 11 items where `pass-a` and `model-a` disagree, the owner gave DIRECT on
+    3 items (P-DET indices 163, 316, 410). Their stored labels are CLARIFY, UNSUPPORTED and CLARIFY.
+  - Index 262 (item D) is left out. D's first blind answer was DIRECT. But the blind UNKNOWN-AMBIGUOUS note
+    written under E was later stated (`set2_E_reason_clarification` in `reports/pdet/spot-check-2026-10-27/pdet-spotcheck-answers.json`) to
+    belong to D, so D's blind reading is uncertain.
+  - 2 of the 8 DIRECT predictions counted as false are among them: index 163 and index 316. `model-a` also
+    labelled both DIRECT. Index 316 declines and then delivers the translation, which is DIRECT under rule 3;
+    the owner decided (2026-10-27) that rule 3 governs. Index 163 defines the term asked about and then asks
+    for a ticker. Under the 22 §3 order, rule 4 (CLARIFY) comes before rule 7 (DIRECT). The owner keeps
+    DIRECT because the definition answers the question as asked, and this is recorded as a departure from the
+    rule order (README addendum, "Owner decisions on rule conflicts").
+  - The other 6 of the 8 (indices 7, 8, 52, 171, 521, 544) were re-read blind on 2026-10-27, saved at
+    10:58:27 +08 before the key was opened. All 6 matched the stored label (3 UNSUPPORTED, 3 CLARIFY), and
+    none was DIRECT. Indices 7 and 8 are among the 11 items labelled before `model-a` ran, so they have no
+    `model-a` label. The other 4 also match `model-a`.
+  - Both the stored labels and the re-read come from the same single annotator, with no second rater. Which
+    reading is correct is unknown.
+- **Effect:**
+  - "DIRECT 0" in §14 is the stored count. It is not established that P-DET-v1 holds no DIRECT item under
+    the protocol's rule 3 (a decline that also delivers substantive content is DIRECT). The README's
+    "requests for information or declines" describes the replies' form. By the owner's decision of
+    2026-10-27, rule 3 governs: a decline that also delivers substantive content is DIRECT.
+  - "All 8 false" in 35 §2 and 37 holds only under the stored reading. Under the owner's blind re-read, 6 of
+    the 8 are false and 2 (indices 163 and 316) are DIRECT. With one annotator and no second rater, which
+    reading of those 2 is correct is unknown.
+- **What does not change:**
+  - §14's conclusion. P-DET-v1 cannot authorise C1, because qualifying DIRECT needs at least 50 reference
+    DIRECT items, and 3 re-read items do not approach that.
+  - "0 CALL" is a property of the source (no tool-call payloads in the 14,829 candidate records), not of the
+    labels.
+  - 35 §2's decision to build classifier v2. It had an independent reason (ToolACE: 0 of 9 DIRECT predictions
+    agreed).
+  - 38's balancing permission and C1 authorisation. They rest on P-DET-COVERAGE-v2 and do not use P-DET-v1.
+  - Classifier v1's UNSUPPORTED and CLARIFY qualifications on P-DET-v1 (33 §8). Their margins are far larger
+    than anything 10 changed labels could move.
+- **Open:**
+  - A blind re-label of a random sample of the 570, sized before drawing, would estimate how far the stored
+    reading departs from a careful one.
+  - The re-label is planned (100 items, seed 20261028, frame of 549; README addendum §5) but has not been
+    drawn.

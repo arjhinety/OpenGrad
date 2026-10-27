@@ -1,0 +1,106 @@
+{
+ "task": "P-DET-v1 owner spot-check (blind re-label), 2026-10-27",
+ "keys": {
+  "set1": {
+   "file": "pdet-spotcheck-key.json",
+   "written_at": "2026-10-27T10:03:08+08:00",
+   "frame": "10 random of the 570 model-a-labelled items, seed 20261027"
+  },
+  "set2": {
+   "file": "pdet-spotcheck-key-disagreements.json",
+   "written_at": "2026-10-27T10:05:33+08:00",
+   "frame": "11 rows of pdet-v1.disagreements.jsonl differing on gold_policy_label"
+  }
+ },
+ "first_answers": {
+  "blind": true,
+  "saved_at": "2026-10-27T10:21:14+08:00",
+  "saved_at_source": "file creation time; both keys were opened in the same command immediately after this save",
+  "set1": {
+   "1": "UNSUPPORTED",
+   "2": "UNSUPPORTED",
+   "3": "UNSUPPORTED",
+   "4": "CLARIFY",
+   "5": "CLARIFY",
+   "6": "CLARIFY",
+   "7": "CLARIFY",
+   "8": "UNSUPPORTED",
+   "9": "CLARIFY",
+   "10": "UNSUPPORTED"
+  },
+  "set2": {
+   "A": "UNSUPPORTED",
+   "B": "CLARIFY",
+   "C": "DIRECT",
+   "D": "DIRECT",
+   "E": "UNKNOWN",
+   "F": "DIRECT",
+   "G": "UNSUPPORTED",
+   "H": "UNSUPPORTED",
+   "I": "UNSUPPORTED",
+   "J": "DIRECT",
+   "K": "UNSUPPORTED"
+  },
+  "headline": {
+   "set1": {
+    "changed_vs_stored": "0/10",
+    "differs_from_model_a": "0/10"
+   },
+   "set2": {
+    "changed_vs_stored": "10/11",
+    "differs_from_model_a": "5/11"
+   }
+  },
+  "set2_E_reason_as_given": "UNKNOWN-AMBIGUOUS: Reasoning, this specific response is highly detailed and is more than just a simple refusal for an unsupported action, because the redirect/recommendation is the kind of response I would categorize as desirable as it suggests real information that can lead the user to completing the task rather than just giving an ambiguous redirect."
+ },
+ "revised_answers": {
+  "blind": false,
+  "saved_at": "2026-10-27T10:25:12+08:00",
+  "saved_at_source": "file modification time of the revision write",
+  "label": "revised after unblinding, after Claude cited protocol rules 3 and 5 and the E reason mismatch; not blind evidence",
+  "changed_items": {
+   "A": "DIRECT",
+   "D": "UNKNOWN",
+   "E": "CLARIFY"
+  },
+  "set2_full": {
+   "A": "DIRECT",
+   "B": "CLARIFY",
+   "C": "DIRECT",
+   "D": "UNKNOWN",
+   "E": "CLARIFY",
+   "F": "DIRECT",
+   "G": "UNSUPPORTED",
+   "H": "UNSUPPORTED",
+   "I": "UNSUPPORTED",
+   "J": "DIRECT",
+   "K": "UNSUPPORTED"
+  },
+  "headline": {
+   "set2": {
+    "changed_vs_stored": "10/11",
+    "differs_from_model_a": "3/11"
+   }
+  },
+  "set2_D_answer_as_given": "Yeah this was where I meant my note on E, UNKNOWN-AMBIGUOUS: Reasoning, this specific response is highly detailed and is more than just a simple refusal for an unsupported action, because the redirect/recommendation is the kind of response I would categorize as desirable as it suggests real information that can lead the user to completing the task rather than just giving an ambiguous redirect.",
+  "set2_E_reason_clarification": {
+   "recorded_at": "2026-10-27T10:25:12+08:00",
+   "recorded_at_source": "same write as the revised answers (file modification time); the exact time the message was sent is not recorded",
+   "text": "The reason first given under E was meant for D (owner's revision message: 'Yeah this was where I meant my note on E').",
+   "blind": false
+  }
+ },
+ "direct6_answers": {
+  "blind": true,
+  "saved_at": "2026-10-27T10:58:27+08:00",
+  "saved_at_source": "clock time of this write; the key was opened in the same command immediately after",
+  "answers": {
+   "S1": "UNSUPPORTED",
+   "S2": "UNSUPPORTED",
+   "S3": "CLARIFY",
+   "S4": "UNSUPPORTED",
+   "S5": "CLARIFY",
+   "S6": "CLARIFY"
+  }
+ }
+}
