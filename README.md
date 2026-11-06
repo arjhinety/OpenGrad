@@ -35,7 +35,7 @@ Arjhine Ty.
 | Base model | `Qwen/Qwen3.5-2B` at revision `15852e8c…` — the only executed target so far |
 | Canonical dataset | **Canonical-v2 final** — 173,237 records, 161,966 trainable, 4 sources, fingerprint `8ced403b…` |
 | Latest completed stage | **General-capability diagnosis** across Base → M0 → M1-v2 on real IFEval, GSM8K and MMLU-Pro. It found a **general-capability regression associated with tool-policy post-training** that the tool-policy gate could not see. It appears after SFT (M0) and also after DPO applied directly to Base (M1-v1), so it is not specific to SFT |
-| Promoted model | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30, promoted under the parent-relative `tool_use_promotion_v4` gate. **Improved on tool policy over Base; within noise of its M0 parent; materially worse than Base on general capability. Not an unqualified improvement** |
+| Withdrawn promotion | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30. The promotion under the parent-relative `tool_use_promotion_v4` gate was withdrawn on 2026-10-22 (commit `ac5b93e`); status REJECTED. **Improved on tool policy over Base; within noise of its M0 parent; materially worse than Base on general capability. Not an unqualified improvement** |
 | Studies | **Study 001 frozen 2026-09-13** at tag [`study-001`](https://github.com/arjhinety/OpenGrad/tree/study-001). **Study 002 reopened (2026-09-25), no model result:** it is to explain the refusal/direct-answer regression before trying to correct it. Its first `P-UNANS` attempt stopped before training when its preregistered stop rule 2 fired: the unanswerable set could not reach its labeller-agreement floor (0.770 against 0.80). A second attempt ([44](docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md), `study_002_prereg_v12`) passed the agreement floor, but only 67 questions are agreed unknowable, under the 385 the safety check needs. With constructed questions (`study_002_prereg_v13`), the safety check's population holds 666 (67 natural, 599 constructed), above the 385 it needs. The readiness design was settled under `study_002_prereg_v14` (29 runs; arms `R2` and `C1` dropped), and `study_002_prereg_v15` gave the triage of the flagged training records per-source floors. The four-mode confirmatory set `P-CONF-v1` was built ([negative result](reports/study-002/punans-v1/NEGATIVE-RESULT.md), [current state](docs/research/study-002/README.md#current-state)). On-policy distillation is deferred to Study 003, speculative decoding to Study 004. See [`docs/research/STUDIES.md`](docs/research/STUDIES.md) |
 | Behavioral held-out | When2Call — 3,650 examples. **Contains no ANSWER examples**, which is why the regression escaped promotion |
 | Largest current limitation | One 2B model, one lineage, no replicate. The promoted checkpoint refuses 100% of bare arithmetic questions |
@@ -110,9 +110,9 @@ scores 0.6191 / 0.9722. The same results written as a narrative, with the charts
 **Status change, 2026-10-22: M1-v2 is NOT PROMOTED.** The PROMOTED status below was withdrawn. The v4
 gate has no check that can see refusals on answerable items. On existing outputs, M1-v2 refuses 100%
 of zero-shot GSM8K items (BASE 0%) and 19.8% of IFEval items (BASE 0.4%), while MMLU-Pro shows no
-refusals for any checkpoint. The frozen records `results/registry.jsonl` and `runs/checkpoint_registry.json`,
-and the generated `docs/EXPERIMENT_STATUS.md`, still say PROMOTED; they are not edited, and the status
-is not restored until a gate that measures these cases is in place. Log: `docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` §9-10.
+refusals for any checkpoint. The records `results/registry.jsonl`, `runs/checkpoint_registry.json` and `docs/EXPERIMENT_STATUS.md`
+were restated to REJECTED in the same commit (`ac5b93e`). The status is not restored until a gate
+that measures these cases is in place. Log: `docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` §9-10.
 
 **"Not promoted" → "PROMOTED" is a gate change, not a measured improvement.** M1-v2 was promoted
 under a parent-relative gate (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2
