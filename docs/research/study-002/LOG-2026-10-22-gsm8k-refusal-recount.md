@@ -528,3 +528,187 @@ No files were written in this section beyond this log entry. Nothing is committe
 - The two uuids outside the partition were not joined to any train record by uuid.
 
 No frozen file, no `results/registry.jsonl`, no `reports/ERRATA.md`, no manifest and no label file was edited. This section is the only change.
+
+## 21. canonical_hash mismatch for the DIRECT ids, and the direct-answer test source (dated 2026-10-22, read-only investigation, owner decisions)
+
+**Finding (read-only).** For the 177 DIRECT ids in `behaviour-labels-v1/when2call.labels.jsonl`:
+- The labels' `canonical_hash` equals the normalization-v3 corpus hash for 177 of 177 ids.
+- The SFT shard hash (`normalization-v1/when2call-sft`) equals the v3 hash for only 29 of 177 ids. For 148 ids the two differ. Each id has one shard hash, so the shards are not internally inconsistent.
+- The cause, checked on one id (`og_f9fdd50763d21b16`): the v1 shard keeps Python-style tool types (`"str"`, `"int"`, `"int, optional"`). The v3 corpus translates them to JSON Schema types (`"string"`, `"integer"`). The content is the same, so the hash changes. The labels therefore agree with the v3 pipeline, and the shard agrees with v1. Neither hash is corrupt.
+- The release rule in section 18 rejected Python-style forms. So the training data follows the v1 types, and the labels follow v3. The labels describe 8,457 When2Call rows that the training release does not contain.
+
+**Owner decision.** Keep the labels on v3 hashes. Record the difference here. Nothing is rebuilt, and no label or shard file is changed.
+
+**Direct-answer test set, decisions.**
+- Source: OR-Bench benign subset (arXiv 2405.20947, Cui et al., 2024). Its over-refusal prompts are benign, so the correct action is to answer. Its labels were generated automatically and have not been checked by a human. It is not about tool use, so it tests direct answering only.
+- Size: 300 items.
+- Precision floor for each label before weight can be given: 90%, on a fresh, untouched, hand-labelled sample.
+
+**Not established.** The OR-Bench licence and whether its prompts overlap the When2Call or training data have not been checked. No item has been sampled or read. This section is the only change; the log is not committed.
+
+## 22. Naming decision, and the retest sample size is not yet set (dated 2026-10-22, owner decisions)
+
+**Naming (owner decision).** One scheme for classifier and label versions: a name says what the module does, and the version lives in its manifest and in `src/opengrad/data/versions.py`. Pinned names stay, because renaming a frozen file breaks its freeze: `decision_classifier_v2.py`, and the v3 wrapper file for now. New names follow the rule. No file is renamed in this section, and no code changes, because no new name is pending.
+
+**Retest sample size (open).** A 90% precision floor is checked on items the classifier puts under each label, not on the whole sample. That makes rare labels the constraint. Using the labels-v2 totals (181,433 rows):
+
+| label | rows | share | fresh random pool needed for 100 items of that label |
+|---|---|---|---|
+| CALL | 12 | 0.007% | about 1,500,000 |
+| DECLINE_WITH_CONTENT | 1,222 | 0.674% | about 14,800 |
+| ABSTAIN | 7,791 | 4.29% | about 2,300 |
+| CLARIFY | 22,014 | 12.1% | about 820 |
+| UNSUPPORTED | 22,419 | 12.4% | about 810 |
+| DIRECT | 32,968 | 18.2% | about 550 |
+
+A random sample of 300 would contain about 2 items the classifier calls DECLINE_WITH_CONTENT, so a pass or fail on that label would mostly reflect chance. The 300 figure in section 21 was for the direct-answer test set, not for the retest.
+
+Pass rule and interval width (one-sided 95% Wilson lower bound, with at least 90% required):
+- 50 items per label: 49 of 50 correct needed. Width of the 95% interval at 90%: about +/- 8 pp.
+- 100 items per label: 95 of 100 correct needed. About +/- 6 pp.
+- 150 items per label: 142 of 150 correct needed. About +/- 5 pp.
+- 200 items per label: 187 of 200 correct needed. About +/- 4 pp.
+
+**Options under consideration (not decided).** Sampling stratified by classifier label, with a fixed number per label, so that each label's precision is estimated from its own items. Requires a fresh pool with enough items under each label. CALL has 12 items in the whole labelled set, so a fresh pool can't supply 100 of them without a targeted source.
+
+**Not decided.** The sample design, the per-label count, and how CALL is handled.
+
+This section changes no label, manifest, freeze or registry file. The log is not committed.
+
+## 23. Retest sampling decisions (dated 2026-10-22, owner decisions)
+
+- **Sample design (owner decision).** 100 fresh items per label, stratified by the label the classifier assigns. Each label is checked on the items the classifier put under it. A label passes its 90% precision floor only if at least 95 of its 100 items are correct (one-sided 95% Wilson lower bound at or above 0.90). Items are drawn from a fresh, untouched population, never from the frozen 181,433-row labelled set.
+- **CALL (owner decision).** CALL has 12 items in the labelled set, so it cannot be checked from the existing data. The owner chose to build a targeted CALL pool, meaning a source that contains textual tool calls, from which fresh items can be sampled. That collection is not yet planned or approved, and no data has been collected.
+- **Direct-answer set.** Still pending. The source was chosen as the OR-Bench benign subset, with 300 items (section 21). Its licence has not been checked, and nothing has been sampled.
+
+**Consequence.** The labels-v2 retest needs a fresh pool with at least 100 items under each label. The DECLINE_WITH_CONTENT label alone needs about 14,800 random rows to reach 100 items, so the pool must be built deliberately, not sampled at random. No weight is given until that retest passes.
+
+This section changes no label, manifest, freeze or registry file. The log is not committed.
+
+## 24. Source checks for the direct-answer set and the CALL pool (dated 2026-10-22, read-only, no data collected)
+
+**Threshold conflict (flagged, not resolved).** Doc 22 §6, the preregistered acceptance criteria, sets `CALL` precision at ≥ 0.95, `DIRECT` precision at ≥ 0.80, `DIRECT` recall at ≥ 0.80, and `UNSUPPORTED` recall at ≥ 0.75. The owner's answer in section 21 chose a 90% per-label precision floor for the retest. That floor is looser than the CALL threshold and does not match the DIRECT thresholds. The retest rule needs the owner's decision before any sample is drawn.
+
+**Direct-answer set: OR-Bench (arXiv 2405.20947).**
+- Dataset card (Hugging Face `bench-llms/or-bench`): licence `cc-by-4.0`. Subsets: or-bench-80k (80.4k rows), or-bench-hard-1k (1.32k rows), or-bench-toxic (655 rows).
+- The card and repository describe an automated pipeline. The toxic prompts were moderated by a model (`gpt4`, per the README). No human verification of labels is mentioned.
+- The 80k subset is treated as answerable because it was generated as benign over-refusal prompts. That is an assumption of the generation process, not a human judgement of each item.
+- Repository licence: Apache-2.0 (sidebar only; the LICENSE text was not read).
+
+**CALL pool: candidates checked.**
+- Already in the labelled corpus, so not fresh: APIGen (the xLAM source), ToolACE, Glaive (adapters in `normalization-v3`).
+- ACEBench (arXiv 2501.12851): the paper page shows a CC BY-NC-ND 4.0 licence badge. That licence covers the paper, not a dataset. No data-release URL was found, and no human verification is stated. Not usable as a pool until the data release is confirmed.
+- Not checked: FunctionChat-Bench (Korean, language mismatch), mind_call (narrow domain), 2509.26553 (contamination-free generator; release unknown).
+
+**Not established.** Textual-call sources with a clear licence and a documented release have not been found. No data has been downloaded or sampled.
+
+This section changes no label, manifest, freeze or registry file. The log is not committed.
+
+## 25. Owner decisions on the retest threshold and the direct-answer set; sample drawn (dated 2026-10-22)
+
+**Retest threshold (owner decision).** The retest uses the preregistered criteria in doc 22 §6, not a flat 90% per label. Those are: `CALL` precision ≥ 0.95; `DIRECT` precision and recall ≥ 0.80; `UNSUPPORTED` recall ≥ 0.75; `CLARIFY` F1 ≥ 0.70; macro F1 ≥ 0.75; abstention rate ≤ 0.15; and per-mode challenge-subset recall ≥ 0.60. The 90% floor from section 21 is superseded for the retest. The superseding change is recorded here, so that no threshold is chosen after seeing retest data. The sample-size analysis in section 22 still applies: each mode needs about 100 items under the classifier's own label, and the 95-of-100 rule was derived for a 90% floor, so it does not carry over unchanged to the 0.95 CALL threshold. That needs its own calculation before sampling.
+
+**Direct-answer set: OR-Bench 80k benign subset.**
+- Source: `bench-llms/or-bench`, file `or-bench-80k.csv`, licence `cc-by-4.0`. Downloaded 80,359 rows. The SHA-256 of the downloaded file is `22e95602…`.
+- Drawn: 300 items, `random.Random(20261022).sample`, saved to `data/raw/or-bench/sample-300-seed20261022.csv` (SHA-256 prefix `427cf209…`). Category counts in the sample: deception 35, harassment 11, harmful 63, hate 18, illegal 28, privacy 37, self-harm 11, sexual 12, unethical 55, violence 30. Prompt text was not printed.
+- Caveat for review: in some categories (self-harm in particular) a direct answer may not be the right action. The review must judge the correct action item by item, not assume a direct answer.
+- Hand-check: 50 items chosen with `random.Random(7)`, written to `data/raw/or-bench/review-50-blind.csv` with no category column. The category key is in `review-50-key.csv`, which must not be shown to the reviewer. No reviewer has been assigned, and no review has been done.
+
+**CALL pool: ACEBench (arXiv 2501.12851).**
+- Repository `chenchen0103/ACEBench`, MIT licence. The data are in `data_all/` (English and Chinese). The README states no separate data licence and no human verification of the data. A 2025-10-29 correction changed the possible answers in three datasets.
+- Limit: the items are user queries with gold call strings. The classifier's `CALL` label needs assistant responses that contain a textual call. Using the gold strings as responses would make the label true by construction, so ACEBench would need model responses generated for each query before it can supply a fresh `CALL` pool.
+
+**Not decided.** The CALL pool approach, the reviewer for the 50-item check, and the sample-size calculation for the 0.95 CALL threshold.
+
+This section changes no label, manifest, freeze or registry file. The log is not committed.
+
+## 26. Sample size for the doc 22 §6 precision thresholds (dated 2026-10-22, calculation only)
+
+Thresholds are the doc 22 §6 values in section 25. Intervals are one-sided 95% Wilson lower bounds, and a label passes when that bound is at or above its threshold.
+
+| threshold | n | correct needed to pass | observed rate |
+|---|---|---|---|
+| CALL precision ≥ 0.95 | 100 | 99 | 99.0% |
+| CALL precision ≥ 0.95 | 200 | 196 | 98.0% |
+| CALL precision ≥ 0.95 | 300 | 292 | 97.3% |
+| DIRECT precision ≥ 0.80 | 100 | 87 | 87.0% |
+| DIRECT precision ≥ 0.80 | 200 | 170 | 85.0% |
+
+Power, meaning the chance of passing when the true precision is above the threshold:
+- CALL, true precision 0.98: about 0.40 at n = 100; 0.63 at n = 200; 0.85 at n = 300.
+- DIRECT, true precision 0.85: about 0.35 at n = 100; 0.55 at n = 200.
+
+**Consequence.** At n = 100, a CALL label that is truly 98% precise fails most of the time. The 100-per-label design from section 23 does not test the doc 22 thresholds reliably. The CALL sample needs about 300 items under the classifier's own CALL label, and each label needs its own count. Section 23's 95-of-100 rule should be replaced by these counts once the owner confirms the design.
+
+This section changes no label, manifest, freeze or registry file. The log is not committed.
+
+## 27. Audit of collected data, and a correction to sections 20, 21 and 25 (dated 2026-10-22, read-only)
+
+**What was checked.**
+- **When2Call test, all six copies.** Two raw jsonl files, two raw parquet files, and two parquet files in `.cache/normalization/raw`. Each copy has 3,652 MCQ rows and 300 llm_judge rows, and the same `correct_answer` values: `cannot_answer`, `tool_call`, `request_for_info`. None is `direct`. Section 20 stands.
+- **OR-Bench (new this session).** `data/raw/or-bench/or-bench-80k.csv`, 80,359 rows, licence cc-by-4.0, SHA-256 `22e95602…`. The 300-item sample and the 50-item blind review sheet are written. The category key is in a separate file. No review has been done.
+- **`.cache/answer-strata/`.** BFCL irrelevance (240 rows), BFCL live irrelevance (884), BFCL simple python (400), and an NQ-open validation parquet (3,610 rows). These are the sources of the answer-strata population below.
+- **`.annotation/` (20 SQLite annotation databases).** Each passes `quick_check`. Their `-shm` files have modification times of 22 October 12:54 or 13:00, before this session's work. No data was written. The main file of each database is unchanged.
+- **`reports/study-002/answer-strata-v1/`.** Population of 1,767 items: NQ-open validation 850 (pool K, constructed), BFCL irrelevance 226 and BFCL live irrelevance 691 (pool N, natural). Each item was labelled by two models, DeepSeek v4.1 flash and Gemini 3.8 flash high, and 1,565 items are unanimous. The reference file has 1,055 `ANSWER`, 80 `CALL`, 148 `CLARIFY`, 197 `UNSUPPORTED`, 85 `UNKNOWN`, and 202 with no consensus. The reference status is `MODEL_REFERENCE_PROVISIONAL`, and the reference statement says these are model judgments, not human gold.
+- **Overlap.** No answer-strata user message equals a When2Call test question.
+
+**Correction.** Sections 20, 21 and 25 said the study had no ANSWER-labelled set outside When2Call that could test over-refusal, and proposed building one from OR-Bench. That was incomplete. The `answer-strata-v1` set already provides 1,055 consensus `ANSWER` items from two models, documented under pre-registration amendments 41 and 42. Section 20's statement about the When2Call test is still correct. The claim that the gate cannot test over-refusal for lack of ANSWER items must be restated, because this set exists.
+
+**Caveats on the answer-strata set.**
+- Its labels are model judgments. No human has checked them, and no adjudication has been recorded.
+- Its population carries `user_message` and `tools` only. It has no assistant responses. Its `CALL` labels are therefore expected-action labels, not classifier output on responses. It cannot serve as the CALL pool for the classifier's textual-call label without response generation, the same limit as ACEBench in section 25.
+
+**Not established.** Whether the study's gate has been run on this set. The `.cache/normalization/raw` files other than the When2Call copies (button, glaive, looptool, toolace, xlam) were inventoried by size and date only.
+
+This section changes no label, manifest, freeze, registry or annotation file. The log is not committed.
+
+## 28. Owner decisions after the audit (dated 2026-10-22)
+
+- **Direct-answer set.** The owner chose to use the existing `answer-strata-v1` consensus `ANSWER` items (reference, 1,055 items, model judgments, provisional) and to drop the OR-Bench plan. The OR-Bench files written this session stay on disk, unused: `data/raw/or-bench/`. The results of the earlier OR-Bench steps (section 25) are superseded for this purpose.
+- **CALL responses.** The owner chose to generate assistant responses for the CALL pool with a named model. No model has been named yet, so nothing has been generated.
+
+This section changes no label, manifest, freeze or registry file. The log is not committed.
+
+## 29. CALL response model named; generation blocked (dated 2026-10-22)
+
+- **Model (owner decision).** `claude-haiku-5-5` (Haiku 5.5) generates the assistant responses for the CALL pool. It is not one of the three models that labelled `answer-strata-v1` (Gemini 3.8 flash high, DeepSeek v4.1 flash, GPT 5.6 sol), so it is an independent choice for response generation.
+- **Blocked.** This environment has no `ANTHROPIC_API_KEY` and no `anthropic` Python package. Nothing has been generated.
+- **Pending.** A generation budget and an approval to run it, and API access in the environment. Nothing is sent to any API until both are given.
+
+This section changes no label, manifest, freeze or registry file. The log is not committed.
+
+## 30. Agreed and disputed split of answer-strata-v1, and the exclusion rule (dated 2026-10-22, read-only)
+
+**Exclusion rule.** The reference label is the label that both annotators give (amendment 42 §2, which amends 41 §9). When the two differ, the item is `NO_CONSENSUS`, is excluded, and is never relabelled. The reference manifest records this as `metric_eligible = False` for those items. Items are not dropped from the population or the annotation database.
+
+**Split.** 1,767 items: 1,565 agreed (`metric_eligible = True`) and 202 disputed (`metric_eligible = False`). The agreed set equals the eligible set exactly.
+
+**Agreed (1,565), reference labels:** `ANSWER` 1,055; `CLARIFY` 148; `UNSUPPORTED` 197; `CALL` 80; `UNKNOWN` 85. By pool: NQ-open 771 `ANSWER`, 19 `UNSUPPORTED`, 2 `UNKNOWN`; BFCL irrelevance 143 `ANSWER`, 4 `CLARIFY`, 30 `UNSUPPORTED`, 15 `CALL`; BFCL live irrelevance 141 `ANSWER`, 144 `CLARIFY`, 148 `UNSUPPORTED`, 65 `CALL`, 83 `UNKNOWN`.
+
+**Disputed (202), individual annotator labels.**
+- DeepSeek: `CLARIFY` 58, `UNSUPPORTED` 67, `UNKNOWN` 42, `CALL` 31, `ANSWER` 4.
+- Gemini: `ANSWER` 132, `UNSUPPORTED` 35, `CLARIFY` 13, `UNKNOWN` 14, `CALL` 8.
+- By pool: BFCL live irrelevance 110; NQ-open 58; BFCL irrelevance 34.
+- The most common disagreement is DeepSeek `UNSUPPORTED` with Gemini `ANSWER` (63 items), followed by DeepSeek `UNKNOWN` with Gemini `ANSWER` (31) and DeepSeek `CLARIFY` with Gemini `ANSWER` (29).
+
+**Selection effect (not yet resolved).** On the agreed set, `ANSWER` is 67.4% of items. DeepSeek labels `ANSWER` for only 2.0% of the disputed items, and Gemini for 65.3%. The disputes are therefore mostly cases where the stricter annotator (DeepSeek) withheld `ANSWER`. Because agreement requires both annotators, the agreed `ANSWER` set is conditioned on DeepSeek's judgement. Any answer rate computed on the agreed set is a rate among items the stricter annotator also called `ANSWER`, not a rate over the population.
+
+**No model responses.** Neither the population, the reference, the annotation databases nor `reports/study-002/pconf-v1/pconf-v1.answer-records.jsonl` holds any model response. That file has 1,055 gold records with empty `candidates`. An over-refusal or answer rate for a model under test cannot be computed from these files. The only figures available are the annotators' label distributions above.
+
+**Reporting restrictions (41 §9, amended by 42).** A pooled figure may be printed only beside the two strata reported separately, never instead of them. The consensus is model-model agreement, `MODEL_REFERENCE` and provisional, never human gold. No figure from this section goes into a summary until the owner has confirmed it.
+
+This section changes no label, manifest, freeze, registry or annotation file. The log is not committed.
+
+**Owner decision on summary reporting (dated 2026-10-22).** Summaries may report counts and ANSWER rates from section 30 for the agreed set (1,565) and the disputed set (202), each rate carrying the selection caveat. These are annotator label distributions, not model over-refusal rates, and they must be labelled that way.
+
+## 31. Status update (dated 2026-11-06, owner instruction "commit and fix everything so it's up to date")
+
+This section records what changed after the entries above were written. The earlier entries are not edited, because they describe the state on 2026-10-22.
+
+- **Section 13, "Open. Commit the restatement set (not done)."** Closed. Commit `ac5b93e` ("docs(results): M1-v2 promotion withdrawn; registries, freeze pins and guards restated") committed the restatement set, including `reports/releases/hf-publication-2026-10-22-card-license-correction.json`, which section 13 listed as untracked.
+- **"The log is not committed" in sections 21 to 30.** Those sentences described the working tree on the day each section was written. Sections 21 to 30 are committed by the commit that adds this section.
+- **Section 24, threshold conflict (flagged, not resolved).** Resolved by the owner's decision in section 25: the retest uses the preregistered thresholds in doc 22 §6.
+- **README.** On `master`, commit `c8de767` relabels the M1-v2 row as a withdrawn promotion (status REJECTED, withdrawn 2026-10-22). It also corrects the status paragraph. The registries it describes already record REJECTED: `results/registry.jsonl` and `docs/EXPERIMENT_STATUS.md` for M1-v2, and `runs/checkpoint_registry.json` for checkpoint 30.
+- **Still open:** the threshold sample-size question (section 26) and the reviewer and approval for the CALL pool (section 29). Nothing in this section decides either.
+
+This section changes no label, manifest, freeze, registry or annotation file.
