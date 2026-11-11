@@ -68,9 +68,10 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
      rejected M0. The promotion reflects the gate change; the measured difference from M0 (+0.0078
      call_f1; 7 more of 453 gold calls recalled; single seed) is within noise. The first M1 identity is preserved as
      a 119/120-step failure. The existing M2 path is mock-only: it has no live teacher, student
-     update, parent checkpoint loading, or valid prompt-state dataset. M1 already passes the
-     intended measured calibration policy, so launching M2 would neither answer a distinct valid
-     question nor justify its infrastructure gaps. See the [M1 evaluation report](reports/M1_DPO_EVALUATION.md)
+     update, parent checkpoint loading, or valid prompt-state dataset. When M2 was decided
+     (2026-09-11), M1 had passed the intended measured calibration policy (v4), so launching M2 would
+     neither answer a distinct valid question nor justify its infrastructure gaps. That promotion was
+     withdrawn on 2026-10-22; M2 remains unrun and is deferred to Study 003. See the [M1 evaluation report](reports/M1_DPO_EVALUATION.md)
      and [M2 decision](reports/M2_DECISION.md).
 
 11. Cross-model replication — PLANNED
