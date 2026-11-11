@@ -88,6 +88,9 @@ when the table sat above the sections; it is kept as written.
 | UP-0029 | 2026-11-11 | `scripts/publish_card_corrections.py` | `OURS` | not-applicable | The Hub commit message and the record's correction text were fixed to the 2026-09-24 license fix, so a later card upload carried that label | Fixed (`--upload` requires `--message`, `--correction`, `--slug`); the 2026-10-22 record left as is (ERRATA §42) |
 | UP-0030 | 2026-11-11 | `tests/publication/test_publish_cards.py` | `OURS` | not-applicable | A test reached the real Hugging Face client and published two cards with the commit message "m" | Fixed (slug checked before import; the test module stubs `huggingface_hub`); ERRATA §43 |
 | UP-0031 | 2026-11-11 | OpenGrad process (agent editing through a shell) | `OURS` | not-applicable | Python edit scripts passed through a shell heredoc or `python -c` lost or changed their escape sequences, once writing a literal backspace into a regex | Fixed (regex corrected; such edits now go through a script file) |
+| UP-0032 | 2026-11-11 | OpenGrad process, `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | The run-records commit was pushed after its targeted tests, which left out the pipe-invariant check in `tests/evaluation/`; master went red | Fixed (reviewed allowlist entry for the continuously drained pipe) |
+| UP-0033 | 2026-11-11 | `tests/verification/test_external_tool_scan.py`, Windows CI | `UNCLEAR` | not-filed | `test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is` failed once on Windows CI with `KeyError: 'any'`; it passes locally | Open; cause not established |
+| UP-0034 | 2026-11-11 | `tests/evaluation/test_capability_benchmarks.py`, `scripts/prepare_capability_benchmarks.py` | `OURS` | not-applicable | A determinism test reruns the dataset preparation in the repository and rewrites the tracked `*_v1.meta.json` files, with CRLF line endings on Windows | Open; files restored by hand each time |
 
 ---
 
@@ -496,5 +499,49 @@ text contains backslashes are now written to a file and run, or made with an exa
 passed through shell quoting. Lessons:
 - After an edit script stops partway, read the whole diff before running anything else (UP-0030).
 - Ruff and the targeted tests caught this one before commit; keep running both on every changed file.
+
+## UP-0032 — a pushed commit failed a check outside its targeted tests (`OURS`)
+
+a346d43 added `run_child`, which launches a command with `stdout=subprocess.PIPE` and reads it until EOF with an
+`os.read` loop before waiting. `tests/evaluation/test_subprocess_pipe_invariants.py` scans for any `Popen` holding a
+`PIPE` with no `communicate()` in the same function. It encodes a real defect: a `llama-server` run sat dead for
+35 minutes on an undrained pipe. It failed on both CI jobs.
+
+Before the push, the targeted set was `tests/runrecords`, `tests/repo`, `tests/skills`, `tests/publication`,
+`tests/results` and `tests/experiments`, and five audit rounds had checked the code. The pipe check lives in
+`tests/evaluation/`, which no one ran.
+
+The pipe is drained continuously, so it cannot fill and block. A `PIPE` is used so that a killed child's output still
+reaches the log. The file is added to the test's own `ALLOWLIST`, with that reason; the check itself is unchanged.
+
+Lesson: a change that adds a `subprocess.Popen` runs `tests/evaluation/test_subprocess_pipe_invariants.py` too. Same
+class as UP-0013 and UP-0020: a repository-wide check outside the targeted set.
+
+## UP-0033 — a time-window test failed once on Windows CI (`UNCLEAR`)
+
+In CI run 43013057249, on `test-windows` for a346d43, `test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is`
+failed with `KeyError: 'any'`. The test creates `conversation.db`, then sets `started_at = time.time() - 1`.
+`scripts/archive_external_model_labels.py::agy_web_calls` counts only files whose `st_ctime` falls in
+`[started_at, started_at + 60]`. With no file counted it returns `{"visible": False, ...}`, which has no `"any"`
+key. So on that runner the new file's creation time fell outside the window.
+
+The test passed three times out of three locally, and on Linux CI in the same run. That run took 232 s on Windows
+against 88 s on Linux, and Windows file timestamps can differ from `time.time()`. Neither is shown to be the cause.
+a346d43 did not touch the script or the test.
+
+Next: if it recurs, record the file's `st_ctime` against `started_at` in the failure. A fix would set `started_at`
+from the file's own timestamp, or widen the window in the test.
+
+## UP-0034 — a test that rewrites tracked files (`OURS`)
+
+`test_prepare_script_is_deterministic` runs `scripts/prepare_capability_benchmarks.py` with `cwd=ROOT`, and the
+script writes `results/benchmarks/datasets/{gsm8k,ifeval,mmlu_pro}_v1.meta.json` with `Path.write_text` and no
+`newline`. On Windows that rewrites the three tracked files with CRLF line endings. Their content is unchanged, but
+`git status` shows them as modified. It happens only where the git-ignored request sets exist locally, so CI skips
+the test and never sees it. Found on 2026-11-11 after running `tests/evaluation`; the files were restored with
+`git checkout`.
+
+Fix to make: the script writes with `newline="\n"`, or the test runs the script against a temporary copy of the
+output folder. Either way, a test must not leave tracked files modified.
 
 <!-- END GENERATED -->

@@ -557,10 +557,12 @@ def run_child(kind: str, command: Sequence[str], root: Path, console: TextIO | N
                     _warn(f"console output failed ({type(exc).__name__}); the log keeps everything")
                     show = lambda _chunk: None
         code = proc.wait()
+        proc.stdout.close()
     except BaseException as exc:
         if proc.poll() is None:
             proc.kill()
         proc.wait()
+        proc.stdout.close()
         interrupted = isinstance(exc, KeyboardInterrupt)
         record.finish(
             None, "INTERRUPTED" if interrupted else "FAILED", f"{type(exc).__name__}: {exc}"

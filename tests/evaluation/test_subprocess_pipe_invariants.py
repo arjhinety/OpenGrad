@@ -29,9 +29,16 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 SCANNED_DIRS = ("scripts", "release", "src")
 
-# Files allowed to hold a PIPE without a same-function drain, each with a reason. Empty by
-# design — an entry here is a deliberate, reviewed exception, not a convenience.
-ALLOWLIST: dict[str, str] = {}
+# Files allowed to hold a PIPE without a same-function drain, each with a reason. An entry here
+# is a deliberate, reviewed exception, not a convenience; it covers the whole file, so a new
+# Popen added to an allowlisted file must be reviewed against the same reason.
+ALLOWLIST: dict[str, str] = {
+    "src/opengrad/runrecords/record.py": (
+        "run_child drains the merged stdout/stderr PIPE continuously in the same function (an os.read loop until "
+        "EOF, copying each chunk to the run log as it arrives) before it waits; it cannot fill and block. Kept as a "
+        "PIPE so a killed child's output reaches the log (UP-0032)."
+    ),
+}
 
 
 def python_files() -> list[Path]:

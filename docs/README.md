@@ -267,5 +267,8 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`upstream/UP-0029.md`](upstream/UP-0029.md) | UP-0029 — a publisher that labelled every upload as the license fix (`OURS`) |
 | [`upstream/UP-0030.md`](upstream/UP-0030.md) | UP-0030 — a test that could publish to the real Hub (`OURS`) |
 | [`upstream/UP-0031.md`](upstream/UP-0031.md) | UP-0031 — escape sequences mangled by shell-quoted edit scripts (`OURS`) |
+| [`upstream/UP-0032.md`](upstream/UP-0032.md) | UP-0032 — a pushed commit failed a check outside its targeted tests (`OURS`) |
+| [`upstream/UP-0033.md`](upstream/UP-0033.md) | UP-0033 — a time-window test failed once on Windows CI (`UNCLEAR`) |
+| [`upstream/UP-0034.md`](upstream/UP-0034.md) | UP-0034 — a test that rewrites tracked files (`OURS`) |
 
-167 documents.
+170 documents.
