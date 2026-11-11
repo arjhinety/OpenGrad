@@ -232,4 +232,39 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 |---|---|
 | [`training/reference-recipes.md`](training/reference-recipes.md) | External training reference recipes |
 
-136 documents.
+## upstream
+
+| Document | Title |
+|---|---|
+| [`upstream/UP-0001.md`](upstream/UP-0001.md) | UP-0001 — a test needed a library CI does not install (`OURS`) |
+| [`upstream/UP-0002.md`](upstream/UP-0002.md) | UP-0002 — case-colliding fixture names (`OURS`) |
+| [`upstream/UP-0003.md`](upstream/UP-0003.md) | UP-0003 — pyarrow has no type information (`UNCLEAR`) |
+| [`upstream/UP-0004.md`](upstream/UP-0004.md) | UP-0004 — CI actions on a deprecated runtime (`OURS`) |
+| [`upstream/UP-0005.md`](upstream/UP-0005.md) | UP-0005 — a cache miss is a `FileNotFoundError` (`NOT A BUG`) |
+| [`upstream/UP-0006.md`](upstream/UP-0006.md) | UP-0006 — agy ignores standard input when started from Python (`UNCLEAR`) |
+| [`upstream/UP-0007.md`](upstream/UP-0007.md) | UP-0007 — cline's `--json` output carries colour codes (`UNCLEAR`) |
+| [`upstream/UP-0008.md`](upstream/UP-0008.md) | UP-0008 — a hygiene finding committed (`OURS`) |
+| [`upstream/UP-0009.md`](upstream/UP-0009.md) | UP-0009 — a report checked the flag set against itself (`OURS`) |
+| [`upstream/UP-0010.md`](upstream/UP-0010.md) | UP-0010 — populations that could not come back (`OURS`) |
+| [`upstream/UP-0011.md`](upstream/UP-0011.md) | UP-0011 — the validator crashes on a malformed reference file (`OURS`) |
+| [`upstream/UP-0012.md`](upstream/UP-0012.md) | UP-0012 — agy could search the web and browse files during labelling (`OURS`, with an `UNCLEAR` upstream part) |
+| [`upstream/UP-0013.md`](upstream/UP-0013.md) | UP-0013 — a ratchet test outside the targeted set (`OURS`) |
+| [`upstream/UP-0014.md`](upstream/UP-0014.md) | UP-0014 — regression checks that skip silently (`OURS`) |
+| [`upstream/UP-0015.md`](upstream/UP-0015.md) | UP-0015 — errors in the formulas draft, caught by review (`OURS`) |
+| [`upstream/UP-0016.md`](upstream/UP-0016.md) | UP-0016 — a review verdict parsed from the wrong language (`UNCLEAR`) |
+| [`upstream/UP-0017.md`](upstream/UP-0017.md) | UP-0017 — a gate that checked what it was told, not what was true (`OURS`) |
+| [`upstream/UP-0018.md`](upstream/UP-0018.md) | UP-0018 — Study 001 scoring and reporting code that the frozen numbers survived (`OURS`) |
+| [`upstream/UP-0019.md`](upstream/UP-0019.md) | UP-0019 — When2Call gives one input two contradictory gold labels (`UPSTREAM`) |
+| [`upstream/UP-0020.md`](upstream/UP-0020.md) | UP-0020 — a module-size ratchet outside the targeted set, again (`OURS`) |
+| [`upstream/UP-0021.md`](upstream/UP-0021.md) | UP-0021 — a repeat's seed rule written from a table, not from the checkpoint (`OURS`) |
+| [`upstream/UP-0022.md`](upstream/UP-0022.md) | UP-0022 — a freeze test hashed raw bytes, and Windows checks out CRLF (`OURS`) |
+| [`upstream/UP-0023.md`](upstream/UP-0023.md) | UP-0023 — the hygiene scan was not rerun before a log was pushed (`OURS`) |
+| [`upstream/UP-0024.md`](upstream/UP-0024.md) | UP-0024 — a local sha256 wrapper in a new script (`OURS`) |
+| [`upstream/UP-0025.md`](upstream/UP-0025.md) | UP-0025 — a stale generated index (`OURS`) |
+| [`upstream/UP-0026.md`](upstream/UP-0026.md) | UP-0026 — master was red for fifteen days unnoticed (`OURS`) |
+| [`upstream/UP-0027.md`](upstream/UP-0027.md) | UP-0027 — a status change that did not reach every document (`OURS`) |
+| [`upstream/UP-0028.md`](upstream/UP-0028.md) | UP-0028 — a generator check that reads two different states (`OURS`) |
+| [`upstream/UP-0029.md`](upstream/UP-0029.md) | UP-0029 — a publisher that labelled every upload as the license fix (`OURS`) |
+| [`upstream/UP-0030.md`](upstream/UP-0030.md) | UP-0030 — a test that could publish to the real Hub (`OURS`) |
+
+166 documents.

@@ -127,9 +127,13 @@ Related rules:
   - a wrong number in a frozen study goes to `reports/ERRATA.md`;
   - an operational mistake that changes what can be claimed goes to `docs/INCIDENT_LOG.md`, with evidence under
     `reports/incidents/`;
-  - every problem hit while working (a test, CI, a library, a CLI, a model API) goes to `docs/UPSTREAM_ISSUES.md`,
-    classed `OURS`, `UPSTREAM` (only with an isolated reproduction, the version and a tracker search), `UNCLEAR`
-    or `NOT A BUG`, in the same commit as its fix, so real upstream bugs can be filed later with the owner's word.
+  - every problem hit while working (a test, CI, a library, a CLI, a model API) goes to the upstream log as one
+    file under `docs/upstream/` named `UP-NNNN.md`, classed `OURS`, `UPSTREAM` (only with an isolated reproduction, the version
+    and a tracker search), `UNCLEAR`, `NOT A BUG` or `FEATURE GAP` (a missing feature we built around, naming the
+    library, version and workaround). Each entry carries an upstream status (`not-applicable`, `not-filed`,
+    `candidate`, `filed`, `merged`, `declined`). It is added in the same commit as its fix, and
+    `scripts/reporting/generate_upstream_log.py` rebuilds `docs/UPSTREAM_ISSUES.md` from the entries, so real
+    upstream bugs and feature requests can be filed later with the owner's word.
 
   Entries are appended and superseded, never rewritten.
 

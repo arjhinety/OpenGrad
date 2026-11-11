@@ -116,5 +116,6 @@ the script's own first docstring line.
 | [`reporting/generate_experiment_status.py`](reporting/generate_experiment_status.py) | Generate the machine-checkable experiment status view at ``docs/EXPERIMENT_STATUS.md``. |
 | [`reporting/generate_indexes.py`](reporting/generate_indexes.py) | Generate the directory indexes ``reports/README.md``, ``scripts/README.md`` and ``docs/README.md``. |
 | [`reporting/generate_source_views.py`](reporting/generate_source_views.py) | Generate the data-source views: ``docs/datasets/SOURCE_REGISTRY.md`` and ``SOURCE_SCREENING.md``. |
+| [`reporting/generate_upstream_log.py`](reporting/generate_upstream_log.py) | Generate the table and entry sections of ``docs/UPSTREAM_ISSUES.md`` from one file per entry. |
 
-91 scripts.
+92 scripts.

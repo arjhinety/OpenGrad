@@ -15,39 +15,79 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 - Nothing is filed upstream without the owner's word. A filed issue or PR gets its link in the entry.
 - An entry is added in the same commit as the fix or workaround. Entries are not rewritten; a later line records
   what changed (reproduced, filed, fixed upstream).
+- **`FEATURE GAP`**: the library or tool works as documented, but lacks something we had to build around, and
+  that it could reasonably offer itself. It names the library, the version and our workaround (the file or
+  mechanism), so the gap can later become a feature request or a pull request.
+- **Upstream status** is separate from the class. The class says whose problem it is; the status says where it
+  stands with the upstream project:
+  - `not-applicable`: nothing to take upstream (most `OURS` and `NOT A BUG` entries);
+  - `not-filed`: may belong upstream, but is not ready;
+  - `candidate`: ready to file, with a minimal reproduction and a search of the upstream tracker recorded;
+  - `filed`, `merged` or `declined`: with the link.
 
-| ID | Date | Where | Class | Summary | State |
-|---|---|---|---|---|---|
-| UP-0001 | 2026-10-03 | OpenGrad tests | `OURS` | A test imported `huggingface_hub`, which CI's dev extra does not install | Fixed (`pytest.importorskip`) |
-| UP-0002 | 2026-10-02 | OpenGrad tests | `OURS` | Two fixtures differed only by case (`c0-s0.yaml`, `C0-s0.yaml`); Linux saw a duplicate | Fixed (37088b6) |
-| UP-0003 | 2026-10-03 | pyarrow 25.0.1 | `UNCLEAR` | No type information shipped, so mypy reports `import-untyped` | Worked around (`# type: ignore[import-untyped]`) |
-| UP-0004 | 2026-10-03 | OpenGrad CI | `OURS` | Pinned `actions/checkout` and `actions/setup-node` v4.4.0 run on deprecated Node.js 20 | Open: bump the pins |
-| UP-0005 | 2026-10-03 | huggingface_hub 1.29.0 | `NOT A BUG` | `LocalEntryNotFoundError` is a `FileNotFoundError`, so catching the latter also hides a cache miss | Handled (`flag_set._input_missing`) |
-| UP-0006 | before 2026-10-03 | agy 1.2.14 (Gemini CLI) | `UNCLEAR` | Ignores standard input when started from Python | Worked around (input as a file) |
-| UP-0007 | before 2026-10-03 | cline 3.0.66 | `UNCLEAR` | `--json` text output interleaves terminal colour codes | Worked around (stripped) |
-| UP-0008 | 2026-10-03 | OpenGrad process | `OURS` | The publication-hygiene scan was not rerun after a rubric edit, so a committed phrase tripped it | Fixed (reworded, scan rerun) |
-| UP-0009 | 2026-10-03 | OpenGrad verification | `OURS` | The triage report checked the flag set against the population it was reporting, i.e. against itself | Fixed (reads the members file) |
-| UP-0010 | 2026-10-03 | OpenGrad verification | `OURS` | Triage `verify` crashed on absent populations; no way to restore them; first `--restore` could write half | Fixed (`BLOCKED_INPUT_MISSING`, `--restore`, check before write) |
-| UP-0011 | 2026-10-03 | OpenGrad registry validation | `OURS` | A malformed `papers.yaml` makes `opengrad-validate` die with a traceback, not a validation error | Open |
-| UP-0012 | 2026-10-03 | OpenGrad runner, agy 1.2.x | `OURS` (+ `UNCLEAR` upstream) | agy ran labelling batches with every tool auto-approved: web search, and file browsing outside its empty directory | Gated in the runner (2026-10-04); upstream part open |
-| UP-0013 | 2026-10-04 | OpenGrad tests | `OURS` | A pushed commit grew the hygiene allowlist, and a test pinning the credential count failed CI | Fixed (count 3 -> 9, ERRATA §33) |
-| UP-0014 | 2026-10-06 | `tool_use_policy.py`, `study_002_gate.py` | `OURS` | Regression checks are skipped when the baseline lacks the metric; v6 and the gate require only two baseline metrics | Open; no code changed (formulas draft, open question 8) |
-| UP-0015 | 2026-10-06 | formulas draft | `OURS` | The draft misread the resolvable margin for a paired difference and misstated four other points; independent reviews caught them before push | Fixed in the draft and its test |
-| UP-0017 | 2026-10-13 | `study_002_gate.py`, `tool_use_policy.py`, wiring | `OURS` | A gate audit found inputs through which a broken checkpoint reached PASS | Part fixed (contract 4, ERRATA §35); the rest recorded there |
-| UP-0016 | 2026-10-06 | gstack `outside-review-result.ts` (gstack 1.91.27.0) | `UNCLEAR` | The Codex review validator reported a critical finding because Codex wrote "no [P1] findings" in Chinese | Open; read the review text, not only the verdict |
-| UP-0018 | 2026-10-13 | Study 001 scoring and reporting code | `OURS` | Scorer and reporting defects that the frozen numbers survived | Part fixed (prefix caching, 2026-10-13); the rest recorded in the section |
-| UP-0019 | 2026-10-13 | `nvidia/When2Call` (rev `0582f77`) | `UPSTREAM` | 16 pairs of identical prompts carry contradictory gold labels (`CALL` against `CLARIFY`) | Open; not yet searched for or reported upstream |
-| UP-0020 | 2026-10-13 | OpenGrad tests | `OURS` | The module-size ratchet failed CI; `tests/repo/` was outside the targeted set | Fixed (fixtures split into a sibling module) |
-| UP-0021 | 2026-10-13 | `study_002_gate.py` | `OURS` | `REP-B`'s seed rule came from a table, not from the checkpoint's run record | Fixed (ERRATA §38, later line) |
-| UP-0022 | 2026-11-11 | OpenGrad tests | `OURS` | A freeze test hashed raw bytes, so a CRLF checkout on the Windows runner failed it | Fixed (hash with CRLF folded to LF) |
-| UP-0023 | 2026-11-11 | OpenGrad process | `OURS` | The hygiene scan flagged three lines of a committed log; the scan was not rerun before the push | Fixed (reworded) |
-| UP-0024 | 2026-11-11 | OpenGrad scripts | `OURS` | A new freeze script defined its own sha256 wrapper; the ratchet in `tests/repo/` failed CI | Fixed (uses `opengrad.hashing`) |
-| UP-0025 | 2026-11-11 | OpenGrad reports | `OURS` | New report files were committed without regenerating `reports/README.md` | Fixed (indexes regenerated) |
-| UP-0026 | 2026-11-11 | OpenGrad process | `OURS` | CI on master was red from 2026-10-27 to 2026-11-11 and nobody noticed | Open; the run-record and CI-intake work is meant to catch this |
-| UP-0027 | 2026-11-11 | OpenGrad docs | `OURS` | The M1-v2 withdrawal commit left "promoted" in four current documents | Fixed in prose; frozen and generated files recorded in ERRATA §41 |
-| UP-0028 | 2026-11-11 | `publish_card_corrections.py` check, OpenGrad process | `OURS` | The card-publish tests failed while the GGUF generator was edited but not yet committed | Resolved by committing generator and card together; no code change |
-| UP-0029 | 2026-11-11 | `scripts/publish_card_corrections.py` | `OURS` | The Hub commit message and the record's correction text were fixed to the 2026-09-24 license fix, so a later card upload carried that label | Fixed (`--upload` requires `--message`, `--correction`, `--slug`); the 2026-10-22 record left as is (ERRATA §42) |
-| UP-0030 | 2026-11-11 | `tests/publication/test_publish_cards.py` | `OURS` | A test reached the real Hugging Face client and published two cards with the commit message "m" | Fixed (slug checked before import; the test module stubs `huggingface_hub`); ERRATA §43 |
+**How an entry is added**
+- Create `docs/upstream/UP-NNNN.md` with the next number. The file starts with a front matter block:
+  - always: `id`, `date`, `where`, `class`, `summary`, `state` and `upstream.status`;
+  - `UPSTREAM` and `FEATURE GAP`: also `library` and `version`;
+  - `FEATURE GAP`: also `workaround`;
+  - `candidate` or later: also `upstream.reproduction` and `upstream.tracker_search`;
+  - `filed` or later: also `upstream.url`.
+
+  The body follows it, starting with the heading `## UP-NNNN — <title>` followed by the class in backticks and
+  parentheses, as in the entries below.
+- Run `python scripts/reporting/generate_upstream_log.py`. It rebuilds everything between the generated markers
+  from the entry files. `tests/repo/test_upstream_log.py` fails CI if this file is stale or an entry is
+  invalid.
+- A later line goes at the end of its own entry's file; the check rejects a later line in another entry.
+
+**History of this log**
+
+Note, 2026-11-11: the table above stopped at UP-0017 while the sections went on to UP-0021. Rows UP-0018 to UP-0021
+were added on this date from their sections; the sections themselves are unchanged.
+
+Note, 2026-11-11: the single hand-written file was split into one file per entry under `docs/upstream/`, and the
+table and sections below are now generated. Every earlier table row and paragraph was carried over unchanged;
+a one-time script (not kept) checked that each appears exactly once, and an independent audit repeated the
+check. Three later lines that had been written inside another entry's section were moved to the end of their
+own entry: UP-0014's, UP-0017's and UP-0018's. The first note above, which sat between UP-0021 and UP-0022,
+moved here. `FEATURE GAP` and
+the upstream status were added the same day. The first note above was written when the table sat above the
+sections; it is kept as written.
+
+<!-- BEGIN GENERATED by scripts/reporting/generate_upstream_log.py from docs/upstream/; do not edit by hand -->
+
+| ID | Date | Where | Class | Upstream | Summary | State |
+|---|---|---|---|---|---|---|
+| UP-0001 | 2026-10-03 | OpenGrad tests | `OURS` | not-applicable | A test imported `huggingface_hub`, which CI's dev extra does not install | Fixed (`pytest.importorskip`) |
+| UP-0002 | 2026-10-02 | OpenGrad tests | `OURS` | not-applicable | Two fixtures differed only by case (`c0-s0.yaml`, `C0-s0.yaml`); Linux saw a duplicate | Fixed (37088b6) |
+| UP-0003 | 2026-10-03 | pyarrow 25.0.1 | `UNCLEAR` | not-filed | No type information shipped, so mypy reports `import-untyped` | Worked around (`# type: ignore[import-untyped]`) |
+| UP-0004 | 2026-10-03 | OpenGrad CI | `OURS` | not-applicable | Pinned `actions/checkout` and `actions/setup-node` v4.4.0 run on deprecated Node.js 20 | Open: bump the pins |
+| UP-0005 | 2026-10-03 | huggingface_hub 1.29.0 | `NOT A BUG` | not-applicable | `LocalEntryNotFoundError` is a `FileNotFoundError`, so catching the latter also hides a cache miss | Handled (`flag_set._input_missing`) |
+| UP-0006 | before 2026-10-03 | agy 1.2.14 (Gemini CLI) | `UNCLEAR` | not-filed | Ignores standard input when started from Python | Worked around (input as a file) |
+| UP-0007 | before 2026-10-03 | cline 3.0.66 | `UNCLEAR` | not-filed | `--json` text output interleaves terminal colour codes | Worked around (stripped) |
+| UP-0008 | 2026-10-03 | OpenGrad process | `OURS` | not-applicable | The publication-hygiene scan was not rerun after a rubric edit, so a committed phrase tripped it | Fixed (reworded, scan rerun) |
+| UP-0009 | 2026-10-03 | OpenGrad verification | `OURS` | not-applicable | The triage report checked the flag set against the population it was reporting, i.e. against itself | Fixed (reads the members file) |
+| UP-0010 | 2026-10-03 | OpenGrad verification | `OURS` | not-applicable | Triage `verify` crashed on absent populations; no way to restore them; first `--restore` could write half | Fixed (`BLOCKED_INPUT_MISSING`, `--restore`, check before write) |
+| UP-0011 | 2026-10-03 | OpenGrad registry validation | `OURS` | not-applicable | A malformed `papers.yaml` makes `opengrad-validate` die with a traceback, not a validation error | Open |
+| UP-0012 | 2026-10-03 | OpenGrad runner, agy 1.2.x | `OURS` (+ `UNCLEAR` upstream) | not-filed | agy ran labelling batches with every tool auto-approved: web search, and file browsing outside its empty directory | Gated in the runner (2026-10-04); upstream part open |
+| UP-0013 | 2026-10-04 | OpenGrad tests | `OURS` | not-applicable | A pushed commit grew the hygiene allowlist, and a test pinning the credential count failed CI | Fixed (count 3 -> 9, ERRATA §33) |
+| UP-0014 | 2026-10-06 | `tool_use_policy.py`, `study_002_gate.py` | `OURS` | not-applicable | Regression checks are skipped when the baseline lacks the metric; v6 and the gate require only two baseline metrics | Open; no code changed (formulas draft, open question 8) |
+| UP-0015 | 2026-10-06 | formulas draft | `OURS` | not-applicable | The draft misread the resolvable margin for a paired difference and misstated four other points; independent reviews caught them before push | Fixed in the draft and its test |
+| UP-0016 | 2026-10-06 | gstack `outside-review-result.ts` (gstack 1.91.27.0) | `UNCLEAR` | not-filed | The Codex review validator reported a critical finding because Codex wrote "no [P1] findings" in Chinese | Open; read the review text, not only the verdict |
+| UP-0017 | 2026-10-13 | `study_002_gate.py`, `tool_use_policy.py`, wiring | `OURS` | not-applicable | A gate audit found inputs through which a broken checkpoint reached PASS | Part fixed (contract 4, ERRATA §35); the rest recorded there |
+| UP-0018 | 2026-10-13 | Study 001 scoring and reporting code | `OURS` | not-applicable | Scorer and reporting defects that the frozen numbers survived | Part fixed (prefix caching, 2026-10-13); the rest recorded in the section |
+| UP-0019 | 2026-10-13 | `nvidia/When2Call` (rev `0582f77`) | `UPSTREAM` | not-filed | 16 pairs of identical prompts carry contradictory gold labels (`CALL` against `CLARIFY`) | Open; not yet searched for or reported upstream |
+| UP-0020 | 2026-10-13 | OpenGrad tests | `OURS` | not-applicable | The module-size ratchet failed CI; `tests/repo/` was outside the targeted set | Fixed (fixtures split into a sibling module) |
+| UP-0021 | 2026-10-13 | `study_002_gate.py` | `OURS` | not-applicable | `REP-B`'s seed rule came from a table, not from the checkpoint's run record | Fixed (ERRATA §38, later line) |
+| UP-0022 | 2026-11-11 | OpenGrad tests | `OURS` | not-applicable | A freeze test hashed raw bytes, so a CRLF checkout on the Windows runner failed it | Fixed (hash with CRLF folded to LF) |
+| UP-0023 | 2026-11-11 | OpenGrad process | `OURS` | not-applicable | The hygiene scan flagged three lines of a committed log; the scan was not rerun before the push | Fixed (reworded) |
+| UP-0024 | 2026-11-11 | OpenGrad scripts | `OURS` | not-applicable | A new freeze script defined its own sha256 wrapper; the ratchet in `tests/repo/` failed CI | Fixed (uses `opengrad.hashing`) |
+| UP-0025 | 2026-11-11 | OpenGrad reports | `OURS` | not-applicable | New report files were committed without regenerating `reports/README.md` | Fixed (indexes regenerated) |
+| UP-0026 | 2026-11-11 | OpenGrad process | `OURS` | not-applicable | CI on master was red from 2026-10-27 to 2026-11-11 and nobody noticed | Open; the run-record and CI-intake work is meant to catch this |
+| UP-0027 | 2026-11-11 | OpenGrad docs | `OURS` | not-applicable | The M1-v2 withdrawal commit left "promoted" in four current documents | Fixed in prose; frozen and generated files recorded in ERRATA §41 |
+| UP-0028 | 2026-11-11 | `publish_card_corrections.py` check, OpenGrad process | `OURS` | not-applicable | The card-publish tests failed while the GGUF generator was edited but not yet committed | Resolved by committing generator and card together; no code change |
+| UP-0029 | 2026-11-11 | `scripts/publish_card_corrections.py` | `OURS` | not-applicable | The Hub commit message and the record's correction text were fixed to the 2026-09-24 license fix, so a later card upload carried that label | Fixed (`--upload` requires `--message`, `--correction`, `--slug`); the 2026-10-22 record left as is (ERRATA §42) |
+| UP-0030 | 2026-11-11 | `tests/publication/test_publish_cards.py` | `OURS` | not-applicable | A test reached the real Hugging Face client and published two cards with the commit message "m" | Fixed (slug checked before import; the test module stubs `huggingface_hub`); ERRATA §43 |
 
 ---
 
@@ -209,6 +249,11 @@ A baseline without one of the four passes that check by skipping it. v6's commen
 metrics the way v5 did, so this looks unintended. Found by the Opus review of the formulas draft, confirmed in the
 code. Not fixed: the policy is preregistered, and changing what it requires is the owner's decision.
 
+Later line for UP-0014, 2026-10-13: closed for the gate by contract 4, which requires the four metrics in the
+baseline. `tool_use_promotion_v6` used on its own still skips them. The "owner's decision" above concerned changing
+what the policy requires; the gate now refuses a baseline without them and the policy is unchanged, on the basis
+ERRATA §35 states (02 H5, 07's policy column, §19).
+
 ## UP-0015 — errors in the formulas draft, caught by review (`OURS`)
 
 `EVALUATION-FORMULAS-DRAFT.md` (8ff3c8e, cbcd437) was reviewed by Codex and an Opus subagent before any push.
@@ -253,10 +298,10 @@ and the wiring (`opengrad promote` without the gate; refusals parsed as answers;
 Lesson: a gate's fixture should be checked for consistency with itself (its scalars contradicted its own
 confusion matrix), and a gate that has only seen synthetic input has not been tested on what it will judge.
 
-Later line for UP-0014, 2026-10-13: closed for the gate by contract 4, which requires the four metrics in the
-baseline. `tool_use_promotion_v6` used on its own still skips them. The "owner's decision" above concerned changing
-what the policy requires; the gate now refuses a baseline without them and the policy is unchanged, on the basis
-ERRATA §35 states (02 H5, 07's policy column, §19).
+Later line for UP-0017, 2026-10-13: "self-declared inputs" is closed in part by gate contract 5 (ERRATA §37).
+Fingerprints are read back from artifacts, each metric row is bound to a pinned partition, the gate reads
+population sizes from the frozen `P-CONF` partition, and check 14 applies 46 §10. A metric row's `n`, arm and
+artifact hash, and the values in the candidate dict, are still declared until the bundle producer re-derives them.
 
 ## UP-0018 — Study 001 scoring and reporting code that the frozen numbers survived (`OURS`)
 
@@ -276,6 +321,9 @@ data. Each is reproduced; the fixes belong to the next scoring code, not to Stud
 Lesson: a scorer's assumption (a match is an answer, a capped reply is finished, a regex hit is a refusal) needs a
 count of the cases where it fails, recorded beside the number it produces.
 
+Later line for UP-0018, 2026-10-13: the prefix-caching item is fixed in `VLLMInferenceBackend` (pinned `False` and
+recorded in its engine metadata), and `scripts/select_checkpoint.py` now refuses the confirmatory side.
+
 ## UP-0019 — When2Call gives one input two contradictory gold labels (`UPSTREAM`)
 
 `nvidia/When2Call` at revision `0582f7749df63a96fdc3070932e83e72396ace53`, the `mcq` test file (cached under
@@ -287,14 +335,6 @@ gold decisions (`expected_decision` in `reports/baselines/qwen35_2b_baseline/pre
 the 16 pairs a model scores at most one of two; 8 pairs cross OpenGrad's dev/confirmatory partition and 8 lie wholly
 in dev (ERRATA §36). Not yet searched for or reported upstream. Study 002's `P-CONF` takes the confirmatory side
 only, so it holds 8 of these items, each with its contradictory twin in dev; no pair lies wholly inside it.
-
-Later line for UP-0018, 2026-10-13: the prefix-caching item is fixed in `VLLMInferenceBackend` (pinned `False` and
-recorded in its engine metadata), and `scripts/select_checkpoint.py` now refuses the confirmatory side.
-
-Later line for UP-0017, 2026-10-13: "self-declared inputs" is closed in part by gate contract 5 (ERRATA §37).
-Fingerprints are read back from artifacts, each metric row is bound to a pinned partition, the gate reads
-population sizes from the frozen `P-CONF` partition, and check 14 applies 46 §10. A metric row's `n`, arm and
-artifact hash, and the values in the candidate dict, are still declared until the bundle producer re-derives them.
 
 ## UP-0020 — a module-size ratchet outside the targeted set, again (`OURS`)
 
@@ -312,9 +352,6 @@ and both repeated controls"). `REP-B` re-scores `A_M0`, which Study 001 trained 
 Found when the owner asked for the checkpoint's real seed before the rule was committed; it had already been pushed.
 Fixed by reading the seed from that run record (ERRATA §38, later line). Lesson: a rule about an existing artifact
 is checked against the artifact, not only against the document that describes it.
-
-Note, 2026-11-11: the table above stopped at UP-0017 while the sections went on to UP-0021. Rows UP-0018 to UP-0021
-were added on this date from their sections; the sections themselves are unchanged.
 
 ## UP-0022 — a freeze test hashed raw bytes, and Windows checks out CRLF (`OURS`)
 
@@ -433,3 +470,5 @@ Lessons:
   boundary, not only through the check under test.
 - After a multi-step edit stops partway, check the whole diff before running anything that can act outside the
   repository.
+
+<!-- END GENERATED -->
