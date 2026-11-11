@@ -1955,3 +1955,12 @@ reports because a script writes them, and pinned or published files because thei
   checkpoint" (`docs/EVALUATION.md:48-49`, `docs/architecture/repository.md:33`, `docs/foundation/README.md:25`,
   `configs/training/preference/README.md:5`, `integrations/executorch/README.md:3`, and
   `docs/research/study-002/08-SENTINEL-SPEC.md:36`) were left for a later decision.
+
+Later line for §41, 2026-11-11 (owner decision, the same day):
+- The five unpinned documents named above, all but `08-SENTINEL-SPEC.md`, now give both dates. That one is a
+  Study 002 design document and is left as written.
+- The M1-v2 card now says "What the promotion meant" and gives both dates.
+- The GGUF card is regenerated from `scripts/build_gguf_card.py`, whose opening sentence now gives both dates.
+  The regeneration changed only that sentence.
+- Both cards are republished with `scripts/publish_card_corrections.py --upload`, which writes the new
+  publication record in `reports/releases/`. The 2026-09-24 and 2026-10-22 records are left unchanged.

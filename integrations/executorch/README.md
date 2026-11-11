@@ -1,6 +1,7 @@
 # OpenGrad × ExecuTorch — custom export path for Qwen3.5
 
-Exporting the promoted OpenGrad model to ExecuTorch is **not a stock one-command export**. Getting
+Exporting OpenGrad's M1-v2 model (it passed v4 on 2026-09-11 and was promoted; the promotion was
+withdrawn on 2026-10-22) to ExecuTorch is **not a stock one-command export**. Getting
 a `.pte` out requires configuration that deviates from the shipped defaults and, for the Snapdragon
 target, source patches to ExecuTorch itself. This directory records all of it so the exports are
 reproducible by someone who does not have this conversation.

@@ -45,8 +45,9 @@ Requirements:
 
 ### 0.4 Aggregate scores hide behavioural change
 
-On the 7-case OpenWeights sentinel, Base and the promoted checkpoint both scored **5/7** — Base by
-answering `trap-arithmetic` and `multi-step-change` *wrongly*, the promoted checkpoint by passing
+On the 7-case OpenWeights sentinel, Base and M1-v2 (promoted at the time; it passed v4 on 2026-09-11, and the promotion was withdrawn on
+2026-10-22) both scored **5/7** — Base by answering `trap-arithmetic` and `multi-step-change`
+*wrongly*, M1-v2 by passing
 `trap-arithmetic` and *refusing* `multi-step-change` and `format-constraint`. Identical score,
 different failures and opposite behaviour. Always inspect failure modes, not just totals, and never let a 7-case suite carry a
 capability conclusion.

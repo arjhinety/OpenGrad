@@ -22,7 +22,7 @@ These documents are preserved unedited, so a reader should know which of their s
 longer hold:
 
 - **"No model inference, training, or model-quality result exists"** (BOOTSTRAP_REPORT). Superseded:
-  B0 and seven post-training interventions have executed, including the promoted M1-v2 DPO; see
+  B0 and seven post-training interventions have executed, including the M1-v2 DPO (passed v4 on 2026-09-11, promotion withdrawn 2026-10-22); see
   [`docs/EXPERIMENT_STATUS.md`](../EXPERIMENT_STATUS.md).
 - **"GPU branches remain UNVERIFIED"** (EXPERIMENT_FOUNDATION_COMPLETION_REPORT). Superseded: the
   GPU boundary smoke passes and real training and evaluation have run on an A100.

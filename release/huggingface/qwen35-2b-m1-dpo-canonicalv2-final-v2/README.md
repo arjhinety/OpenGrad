@@ -80,8 +80,9 @@ and 19.8% of IFEval items (base model: 0.4%). MMLU-Pro shows no refusals for any
 does not measure this behaviour, so the promotion does not account for it. Read this model with that
 behaviour in mind.
 
-**What the promotion means.** M1-v2 is promoted under a parent-relative gate (v4) introduced after
-M0 was evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that rejected M0. The promotion
+**What the promotion meant.** M1-v2 passed v4 on 2026-09-11 and was promoted under that
+parent-relative gate, introduced after M0 was evaluated; the promotion was withdrawn on 2026-10-22
+(above); M0 also clears v4, and M1-v2 fails the v3 gate that rejected M0. The promotion
 reflects the gate change; the measured difference from M0 (+0.0078 `call_f1`, 7 of 453 calls,
 single seed) is within noise. v4 was committed on 2026-09-11 at 17:10 UTC (`92ca2b9`), after M0's
 confirmatory results were committed at 08:58 UTC (`26234c2`). Under `tool_use_promotion_v3`, the

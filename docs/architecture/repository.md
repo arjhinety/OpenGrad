@@ -30,8 +30,9 @@ The accessible pinned sources are normalized, audited, and rendered into local i
 The first empirical model action is B0: unmodified `Qwen/Qwen3.5-2B` inference against the frozen
 held-out evaluation. B0 is executed. The M0 SFT lineage has since closed with five completed arms
 (one negative on corpus v1, one partial recovery on corpus v2, the definitive final-v2, and the
-paired minus-xLAM joint-removal ablations), and the M1-v2 DPO parented on M0-final-v2 is promoted
-under the parent-relative `tool_use_promotion_v4` gate, introduced after M0 was evaluated (M0 also
+paired minus-xLAM joint-removal ablations), and the M1-v2 DPO parented on M0-final-v2 passed
+the parent-relative `tool_use_promotion_v4` gate on 2026-09-11 and was promoted, a promotion withdrawn on
+2026-10-22 (status REJECTED). That gate was introduced after M0 was evaluated (M0 also
 clears v4, M1-v2 fails the v3 gate that rejected M0, and its difference from M0 is within noise).
 M2 on-policy distillation has not run — its scaffold has no live training path. Three external
 benchmarks — IFEval, GSM8K and MMLU-Pro — were executed in the H200 capability campaign
