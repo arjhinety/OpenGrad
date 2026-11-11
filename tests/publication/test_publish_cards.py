@@ -213,3 +213,9 @@ def test_a_record_with_its_own_correction_and_slug_is_found_and_validates(tmp_pa
     current = pcc.current_revisions(root)
     for entry in entries:
         assert current[entry["repository"]] == entry["hub_revision"]
+
+
+def test_a_slug_that_cannot_name_the_record_is_blocked_before_any_network_call() -> None:
+    for slug in ("card-v1.2-fix", "../x", "a/b", "Card", "x:y", " "):
+        args = ["--upload", "--message", "m", "--correction", "c", "--slug", slug]
+        assert pcc.main(args) == pcc.BLOCKED, slug

@@ -22,8 +22,8 @@ Exit codes: 0 PASS, 1 FAIL (a re-fetch mismatch, or a card that differs from its
 credentials are unavailable). Nothing is reported as published without the re-fetch.
 
     python scripts/publish_card_corrections.py            # dry run: diffs only
-    python scripts/publish_card_corrections.py --upload \n        --message "Card correction: ..." --correction "Card-only. ..." --slug card-...-correction
-                                                          # publish, verify, record
+    python scripts/publish_card_corrections.py --upload --message "Card correction: ..."
+        --correction "Card-only. ..." --slug card-example-correction   # publish, verify, record
 
 ``--upload`` needs all three: the Hub commit message, the record's ``correction`` text and the record
 file's slug. They describe this correction only. A fixed default once labelled a different change
@@ -36,6 +36,7 @@ import argparse
 import difflib
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -95,6 +96,7 @@ LICENSE_WHY = (
     "were published without a record, which left every recorded revision of these "
     "repositories stale; they are recorded retroactively in each revision chain."
 )
+SLUG_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 GENERIC_WHY = (
     "The weights are immutable; their cards are not. Every card-only correction is recorded, so "
     "each Hub revision of these cards can be traced to the committed card it serves."
@@ -402,10 +404,21 @@ def main(argv: list[str] | None = None) -> int:
         help="record file name part, e.g. card-promotion-withdrawal (required with --upload)",
     )
     args = parser.parse_args(argv)
-    if args.upload and not (args.message and args.correction and args.slug):
-        # Each upload names its own correction; a fixed default once labelled a different change (UP-0029).
-        print("BLOCKED: --upload needs --message, --correction and --slug")
-        return BLOCKED
+    message, correction, slug = (
+        (value or "").strip() for value in (args.message, args.correction, args.slug)
+    )
+    if not args.upload and (message or correction or slug):
+        print("note: --message, --correction and --slug are used only with --upload; this is a dry run")
+    if args.upload:
+        if not (message and correction and slug):
+            # Each upload names its own correction; a fixed default once labelled another change (UP-0029).
+            print("BLOCKED: --upload needs --message, --correction and --slug")
+            return BLOCKED
+        if not SLUG_PATTERN.fullmatch(slug):
+            # Checked before the upload: a slug that cannot name the record file would fail only after the
+            # Hub commit exists, leaving it unrecorded.
+            print(f"BLOCKED: --slug must match {SLUG_PATTERN.pattern} (lowercase words joined by '-')")
+            return BLOCKED
     try:
         from huggingface_hub import HfApi
     except ImportError:
@@ -419,9 +432,9 @@ def main(argv: list[str] | None = None) -> int:
         return BLOCKED
     if status != PASS or not args.upload:
         return status
-    status, entries = upload(api, items, commit_message=args.message)
+    status, entries = upload(api, items, commit_message=message)
     if entries:
-        path = write_record(entries, correction=args.correction, slug=args.slug, why=GENERIC_WHY)
+        path = write_record(entries, correction=correction, slug=slug, why=GENERIC_WHY)
         print(f"wrote {path.relative_to(ROOT).as_posix()}")
     return status
 

@@ -1974,11 +1974,12 @@ Later line for §41, 2026-11-11 (owner decision, the same day):
     `arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2` has the message "Card correction: license
     attribution (OpenGrad reports/ERRATA.md §23)".
   - Its record, `reports/releases/hf-publication-2026-10-22-card-license-correction.json`, gives the license
-    change of §23 as its `correction`.
+    change of §23 as its `correction`. Its `why_this_record_exists` also comes from that fix: it explains the
+    unrecorded card corrections of 2026-09-13.
 - **What that upload actually changed:** it published the M1-v2 card from `d74fae2`, which states that the
   promotion is withdrawn (§41, and `docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` §12).
 - **Cause:** the publisher's commit message and correction text were constants (UP-0029). They are now
   required arguments of `--upload`.
-- **What stays valid:** the record's revisions, `card_sha256` and re-fetch result are correct. Only its
-  description of the change is wrong. The record and the Hub history are append-only, so both are left as they
+- **What stays valid:** the record's revisions, `card_sha256` and re-fetch result are correct. Its
+  description of the change and its reason for existing are wrong. The record and the Hub history are append-only, so both are left as they
   are, and this entry is the correction.
