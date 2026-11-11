@@ -361,7 +361,7 @@ this log are meant to close it.
 
 ## UP-0027 — a status change that did not reach every document (`OURS`)
 
-`ac5b93e` (2026-10-22) withdrew M1-v2's promotion and restated the registries. `README.md` (five lines),
+`ac5b93e` (2026-10-22) withdrew M1-v2's promotion and restated the registries. `README.md` (six places),
 `ROADMAP.md`, `docs/EXPERIMENT_RESULTS.md` and `docs/PROMOTION_POLICY.md` still described M1-v2 as promoted
 in the present tense. They now give both dates: passed v4 on 2026-09-11, withdrawn 2026-10-22. Frozen,
 generated and published files that also say "promoted" are listed in ERRATA §41 and left as they are. Lesson:

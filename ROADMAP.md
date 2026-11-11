@@ -62,7 +62,7 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
     `reports/M2_DECISION.md` records that the live path raises `NotImplementedError` and that the one M2 run
     was mock-only, and its "what remains justified" list is Study 003's requirement set. No GPU cycles are
     run to fill a schedule.
-     M1-v2 DPO started from the selected M0-final checkpoint, preserved its calibrated frontier, and
+     M1-v2 DPO started from the selected M0-final checkpoint, preserved its calibrated frontier,
      passed `tool_use_promotion_v4` on 2026-09-11 and was promoted; that promotion was withdrawn on 2026-10-22 (status
      REJECTED, commit `ac5b93e`). The v4 gate was parent-relative, introduced after M0 was evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that
      rejected M0. The promotion reflects the gate change; the measured difference from M0 (+0.0078
