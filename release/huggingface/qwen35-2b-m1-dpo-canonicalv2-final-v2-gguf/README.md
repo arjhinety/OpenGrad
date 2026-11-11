@@ -17,8 +17,8 @@ tags:
 
 # OpenGrad — Qwen3.5-2B M1-DPO v2, GGUF
 
-The OpenGrad Study 001 M1-v2 checkpoint (it passed v4 on 2026-09-11 and was promoted; the promotion
-was withdrawn on 2026-10-22),
+The OpenGrad Study 001 M1-v2 checkpoint (it passed the `tool_use_promotion_v4` gate on 2026-09-11 and
+was promoted; the promotion was withdrawn on 2026-10-22),
 [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) (`dpo-checkpoint-30`), converted to
 BF16 GGUF and quantized 9 ways with llama.cpp. Each format was quantized directly from
 the BF16 GGUF with one importance matrix, then scored on the same 1,277 confirmatory

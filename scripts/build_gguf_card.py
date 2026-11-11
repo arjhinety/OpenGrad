@@ -114,8 +114,8 @@ tags:
 
 # OpenGrad — Qwen3.5-2B M1-DPO v2, GGUF
 
-The OpenGrad Study 001 M1-v2 checkpoint (it passed v4 on 2026-09-11 and was promoted; the promotion
-was withdrawn on 2026-10-22),
+The OpenGrad Study 001 M1-v2 checkpoint (it passed the `tool_use_promotion_v4` gate on 2026-09-11 and
+was promoted; the promotion was withdrawn on 2026-10-22),
 [`{PARENT.split("/")[1]}`](https://huggingface.co/{PARENT}) (`{prepare["checkpoint"]}`), converted to
 BF16 GGUF and quantized {len(rungs)} ways with llama.cpp. Each format was quantized directly from
 the BF16 GGUF with one importance matrix, then scored on the same {bf16["records"]:,} confirmatory
