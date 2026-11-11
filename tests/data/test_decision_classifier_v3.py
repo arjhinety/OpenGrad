@@ -42,11 +42,9 @@ def test_v3_source_matches_its_pinned_freeze() -> None:
 
 
 def test_v2_source_is_unchanged_by_the_v3_work() -> None:
-    raw = (ROOT / V2_RULES).read_bytes()
-    assert (
-        hashlib.sha256(raw).hexdigest()
-        == "47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382"
-    )
+    # Hashed with CRLF folded to LF: a Windows checkout (core.autocrlf=true) stores .py files as CRLF, so a
+    # raw-byte hash fails there although the committed file is unchanged (docs/UPSTREAM_ISSUES.md UP-0022).
+    assert _sha(ROOT / V2_RULES) == "47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382"
     assert _sha(ROOT / V2_RULES) == bl3.RULES_SHA256_LF
 
 

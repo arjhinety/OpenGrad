@@ -51,9 +51,9 @@ Terms: [glossary](../docs/GLOSSARY.md).
 |---|---:|---|---|
 | [`audits/`](audits/) | 4 | Study 001 | The Study 001 claim audit: findings, resolutions and the audit's own record |
 | [`baselines/`](baselines/) | 5 | Study 001 | B0 baseline predictions and metrics |
-| [`canonical-v3/`](canonical-v3/) | 5 | Study 002 | canonical-v3 (workstream C1): manifest, balance, provenance gate |
+| [`canonical-v3/`](canonical-v3/) | 6 | Study 002 | canonical-v3 (workstream C1): manifest, balance, provenance gate |
 | [`comparisons/`](comparisons/) | 1 | Study 001 | Stage-to-stage comparison records |
-| [`data/`](data/) | 22 | Study 001 | Corpus, freeze, readiness and ablation records (JSON) |
+| [`data/`](data/) | 23 | Study 001 | Corpus, freeze, readiness and ablation records (JSON) |
 | [`evaluation/`](evaluation/) | 5 | Study 001 | Evaluation manifests of the frozen held-out partitions |
 | [`experiments/`](experiments/) | 1 | Study 001 | Experiment-level records |
 | [`failures/`](failures/) | 2 | Study 001 | Failure clustering |
@@ -61,7 +61,7 @@ Terms: [glossary](../docs/GLOSSARY.md).
 | [`incidents/`](incidents/) | 3 | Study 001 | Incident records (see docs/INCIDENT_LOG.md) |
 | [`normalization-v3/`](normalization-v3/) | 10 | Study 002 | normalization-v3: builds, verification, audits, re-anchoring |
 | [`optimization/`](optimization/) | 1 | Study 001 | Optimization producer records |
-| [`pdet/`](pdet/) | 17 | Study 002 | P-DET-v1: the frozen population, annotation exports, review queue, model-label provenance |
+| [`pdet/`](pdet/) | 22 | Study 002 | P-DET-v1: the frozen population, annotation exports, review queue, model-label provenance |
 | [`pdet-coverage/`](pdet-coverage/) | 62 | Study 002 | P-DET-COVERAGE-v1 (and its routing task): population, three-model labels, reference, audit trails |
 | [`pdet-coverage-v2/`](pdet-coverage-v2/) | 36 | Study 002 | P-DET-COVERAGE-v2: population, three-model labels, reference, audit trails |
 | [`prose-classifier/`](prose-classifier/) | 139 | Study 002 | Decision-classifier development sets, check rounds and one-shot tests; see its README |
@@ -71,4 +71,4 @@ Terms: [glossary](../docs/GLOSSARY.md).
 | [`training/`](training/) | 1 | Study 001 | Pre-training component-gate evidence |
 | [`visual/`](visual/) | 12 | Study 001 | Figures |
 
-495 tracked files in total.
+502 tracked files in total.

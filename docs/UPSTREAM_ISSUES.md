@@ -35,6 +35,15 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0015 | 2026-10-06 | formulas draft | `OURS` | The draft misread the resolvable margin for a paired difference and misstated four other points; independent reviews caught them before push | Fixed in the draft and its test |
 | UP-0017 | 2026-10-13 | `study_002_gate.py`, `tool_use_policy.py`, wiring | `OURS` | A gate audit found inputs through which a broken checkpoint reached PASS | Part fixed (contract 4, ERRATA §35); the rest recorded there |
 | UP-0016 | 2026-10-06 | gstack `outside-review-result.ts` (gstack 1.91.27.0) | `UNCLEAR` | The Codex review validator reported a critical finding because Codex wrote "no [P1] findings" in Chinese | Open; read the review text, not only the verdict |
+| UP-0018 | 2026-10-13 | Study 001 scoring and reporting code | `OURS` | Scorer and reporting defects that the frozen numbers survived | Part fixed (prefix caching, 2026-10-13); the rest recorded in the section |
+| UP-0019 | 2026-10-13 | `nvidia/When2Call` (rev `0582f77`) | `UPSTREAM` | 16 pairs of identical prompts carry contradictory gold labels (`CALL` against `CLARIFY`) | Open; not yet searched for or reported upstream |
+| UP-0020 | 2026-10-13 | OpenGrad tests | `OURS` | The module-size ratchet failed CI; `tests/repo/` was outside the targeted set | Fixed (fixtures split into a sibling module) |
+| UP-0021 | 2026-10-13 | `study_002_gate.py` | `OURS` | `REP-B`'s seed rule came from a table, not from the checkpoint's run record | Fixed (ERRATA §38, later line) |
+| UP-0022 | 2026-11-11 | OpenGrad tests | `OURS` | A freeze test hashed raw bytes, so a CRLF checkout on the Windows runner failed it | Fixed (hash with CRLF folded to LF) |
+| UP-0023 | 2026-11-11 | OpenGrad process | `OURS` | The hygiene scan flagged three lines of a committed log; the scan was not rerun before the push | Fixed (reworded) |
+| UP-0024 | 2026-11-11 | OpenGrad scripts | `OURS` | A new freeze script defined its own sha256 wrapper; the ratchet in `tests/repo/` failed CI | Fixed (uses `opengrad.hashing`) |
+| UP-0025 | 2026-11-11 | OpenGrad reports | `OURS` | New report files were committed without regenerating `reports/README.md` | Fixed (indexes regenerated) |
+| UP-0026 | 2026-11-11 | OpenGrad process | `OURS` | CI on master was red from 2026-10-27 to 2026-11-11 and nobody noticed | Open; the run-record and CI-intake work is meant to catch this |
 
 ---
 
@@ -299,3 +308,50 @@ and both repeated controls"). `REP-B` re-scores `A_M0`, which Study 001 trained 
 Found when the owner asked for the checkpoint's real seed before the rule was committed; it had already been pushed.
 Fixed by reading the seed from that run record (ERRATA §38, later line). Lesson: a rule about an existing artifact
 is checked against the artifact, not only against the document that describes it.
+
+Note, 2026-11-11: the table above stopped at UP-0017 while the sections went on to UP-0021. Rows UP-0018 to UP-0021
+were added on this date from their sections; the sections themselves are unchanged.
+
+## UP-0022 — a freeze test hashed raw bytes, and Windows checks out CRLF (`OURS`)
+
+`tests/data/test_decision_classifier_v3.py::test_v2_source_is_unchanged_by_the_v3_work` asserted
+`sha256(read_bytes())` of `src/opengrad/data/decision_classifier_v2.py` against the v2 freeze pin `47436ca9…`. It failed
+on `test-windows` in CI run 42217506576 (commit 22268f8) with `befea830…a390`, and passed on the Linux job. The file
+is unchanged: it was last modified in d0fdbcd (2026-09-18, the v2 freeze), `git diff d0fdbcd 22268f8` on it is empty,
+neither d66012e nor 7a1a0cd touched it, and the committed blob hashes to `47436ca9…`. The same blob with every LF
+turned into CRLF hashes to exactly `befea830…a390`. The cause is the runner's `core.autocrlf=true`, together with
+`.gitattributes`, which pins LF only for yaml, json, md, sh and jsonl files, not for `.py`. The test's second assert,
+and `behaviour_labels_v3`'s own freeze check, already fold CRLF to LF. No P-DET or behaviour label depends on this
+failure, and the pin and the frozen file are unchanged. Fix: the first assert also folds CRLF to LF and compares
+against the same literal pin. Lesson: a hash of a text file in the repository is taken with CRLF folded to LF, or
+the file type is pinned to LF in `.gitattributes`. Adding `*.py text eol=lf` is left as a separate decision, because it
+renormalises every Python checkout.
+
+## UP-0023 — the hygiene scan was not rerun before a log was pushed (`OURS`)
+
+`docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` (committed in 22268f8) named a side agent's
+note three times, at lines 248, 265 and 345, in a hyphenated phrase that the publication-hygiene rule
+`agent_scratch_language` matches, so the scan failed on both CI jobs. The three phrases are reworded to "side note", and no other text
+changed. This is the same failure as UP-0008. Lesson: rerun `tests/publication/` before pushing any new log or report.
+
+## UP-0024 — a local sha256 wrapper in a new script (`OURS`)
+
+`scripts/freeze_minus_xlam_v2.py` (6603690) defined `_sha`, a local `hashlib.sha256` wrapper.
+`tests/repo/test_hash_helpers.py` forbids new wrappers outside its allowlist, and failed on both jobs. The script now
+imports `opengrad.hashing.sha256_bytes`. Its `--verify` output is byte-identical before and after the change, and it
+passes. Nothing pins the script's own hash. Same class as UP-0013 and UP-0020: a `tests/repo/` ratchet outside the
+targeted set.
+
+## UP-0025 — a stale generated index (`OURS`)
+
+`tests/results/test_generated_indexes.py` found `reports/README.md` stale. Files had been added under
+`reports/canonical-v3/`, `reports/data/` and `reports/pdet/` without running `scripts/reporting/generate_indexes.py`.
+Regenerating it also brought `scripts/README.md` up to date with the new freeze script. Lesson: adding a file under
+`reports/` or `scripts/` means rerunning the index generator in the same commit.
+
+## UP-0026 — master was red for fifteen days unnoticed (`OURS`)
+
+The last green master run was 7664505, on 2026-10-13. Every push after that failed: 5c31217 on 2026-10-27, then
+c8de767 and 22268f8 on 2026-11-06. It was noticed only in a status check on 2026-11-11. UP-0022 to UP-0025 were all
+in CI's output on 2026-11-06. Open: nothing reads CI results after a push. The planned run records and CI intake for
+this log are meant to close it.

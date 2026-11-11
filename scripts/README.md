@@ -64,6 +64,7 @@ the script's own first docstring line.
 | [`freeze_eval_partition.py`](freeze_eval_partition.py) | Freeze the DEV / confirmatory partition of the behavioural evaluation population. |
 | [`freeze_m0_final.py`](freeze_m0_final.py) | Freeze the M0-final result set: hash every artifact the reported numbers rest on. |
 | [`freeze_minus_xlam_ablation.py`](freeze_minus_xlam_ablation.py) | Freeze the paired minus-xLAM result set: hash every artifact both arms' numbers rest on. |
+| [`freeze_minus_xlam_v2.py`](freeze_minus_xlam_v2.py) | Superseding freeze for the minus-xlam ablation, which cannot be verified against its v1 manifest. |
 | [`grade_openweights_parity.py`](grade_openweights_parity.py) | Grade the OpenGrad run of the OpenWeights ParitySuite, using OpenWeights' own graders. |
 | [`measure_ablation_mass.py`](measure_ablation_mass.py) | Measure the training mass of the frozen corpus and of the minus-xLAM ablation view. |
 | [`prepare_capability_benchmarks.py`](prepare_capability_benchmarks.py) | Materialise real IFEval, GSM8K and MMLU-Pro into frozen, hashed request sets. CPU only. |
@@ -116,4 +117,4 @@ the script's own first docstring line.
 | [`reporting/generate_indexes.py`](reporting/generate_indexes.py) | Generate the directory indexes ``reports/README.md``, ``scripts/README.md`` and ``docs/README.md``. |
 | [`reporting/generate_source_views.py`](reporting/generate_source_views.py) | Generate the data-source views: ``docs/datasets/SOURCE_REGISTRY.md`` and ``SOURCE_SCREENING.md``. |
 
-90 scripts.
+91 scripts.

@@ -18,19 +18,16 @@ not counted. The script never writes the v1 manifest.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import subprocess
 import sys
 from pathlib import Path
 
+from opengrad.hashing import sha256_bytes
+
 ROOT = Path(__file__).resolve().parents[1]
 V1 = "reports/data/m0-v2-minus-xlam-freeze.json"
 V2 = "reports/data/m0-v2-minus-xlam-freeze-v2.json"
-
-
-def _sha(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
 
 
 def _git_blob(commit: str, path: str) -> bytes | None:
@@ -56,11 +53,11 @@ def build() -> int:
     records: list[dict] = []
     for pin in _v1_pins(v1):
         path = ROOT / pin["path"]
-        if path.is_file() and _sha(path.read_bytes()) == pin["sha256"]:
+        if path.is_file() and sha256_bytes(path.read_bytes()) == pin["sha256"]:
             records.append({**pin, "state": "present"})
             continue
         blob = _git_blob(commit, pin["path"])
-        if blob is not None and _sha(blob) == pin["sha256"]:
+        if blob is not None and sha256_bytes(blob) == pin["sha256"]:
             records.append({**pin, "state": "git", "git_commit": commit})
             continue
         records.append({**pin, "state": "unrecoverable",
@@ -73,7 +70,7 @@ def build() -> int:
         "artifact_kind": "MINUS_XLAM_PAIRED_RESULT_FREEZE_V2",
         "supersedes": {
             "path": V1,
-            "sha256": _sha(v1_path.read_bytes()),
+            "sha256": sha256_bytes(v1_path.read_bytes()),
             "note": "v1 is kept byte-identical. Its verify fails (missing and changed evidence); see records.",
         },
         "hashes_computed_at_commit": commit,
@@ -95,13 +92,13 @@ def verify() -> int:
     for r in manifest["records"]:
         if r["state"] == "present":
             path = ROOT / r["path"]
-            if not path.is_file() or _sha(path.read_bytes()) != r["sha256"]:
+            if not path.is_file() or sha256_bytes(path.read_bytes()) != r["sha256"]:
                 failures.append(f"present pin no longer matches: {r['path']}")
             else:
                 checked["present"] += 1
         elif r["state"] == "git":
             blob = _git_blob(r.get("git_commit", commit), r["path"])
-            if blob is None or _sha(blob) != r["sha256"]:
+            if blob is None or sha256_bytes(blob) != r["sha256"]:
                 failures.append(f"git pin no longer matches the blob at {commit[:8]}: {r['path']}")
             else:
                 checked["git"] += 1
