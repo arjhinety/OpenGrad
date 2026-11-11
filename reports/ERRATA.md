@@ -2028,3 +2028,18 @@ saying why the promotion was withdrawn. The paragraph links the parent card and 
 - Hub revision: `7ed3e307d909d48dcd78faf5bde055b0555898ae` (parent `9c4a1843`).
 - Record: `reports/releases/hf-publication-2026-11-11-card-gguf-withdrawal-link.json`, uploaded with its own
   commit message and correction text (UP-0029).
+
+## 44. Study 002 `P-CONF`'s source was read on 2026-11-11 by an agent of another study
+
+- **What happened:** an agent for `tool-decision-rl` downloaded `when2call_test_mcq.jsonl` and
+  `when2call_test_llm_judge.jsonl` (`resolve/main`; sha256 `8c3694e5…` and `0b710578…`), then computed row counts, the
+  label and `source` distributions and field names, and printed the full text of 2 items.
+- **Why it matters here:** `P-CONF`'s three-mode items are drawn from the `mcq` file (`study_002_prereg_v16`).
+- **Where it is held:**
+  - the agent's transcript (session `451b7602-e54b-4b32-b727-9c01fdde4185`, `agent-a7139aaf46020fd56.jsonl`, sha256
+    `5bd01b8f…`, 768,973 bytes; not opened);
+  - an inference about `source` fields in `tool-decision-rl/provenance/agent-datasets-hf.md`, also read by the main session.
+
+  The main session saw the label counts only via the 2026-10-22 log. Deletion or quarantine is the owner's decision.
+- **What changed:** nothing in Study 002. No score exists, and no decision used the access.
+- **Record:** `tool-decision-rl/provenance/TEST_SPLIT_ACCESS.md`; Study 002 entry `study_002_prereg_v16`.

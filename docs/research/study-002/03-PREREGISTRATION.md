@@ -542,3 +542,38 @@ Appended here rather than under "Amendments" so that line numbers other document
 - **Arms launched under an earlier version:** none.
 - **Full record:** [47-PER-SOURCE-FLAG-PRECISION-DRAFT.md](47-PER-SOURCE-FLAG-PRECISION-DRAFT.md); the ERRATA
   entry is `reports/ERRATA.md` §32.
+
+### `study_002_prereg_v16` — 2026-11-11
+
+- **Context.** On 2026-11-11, a research agent working for a separate study (`tool-decision-rl`, not Study 002)
+  downloaded both When2Call test files from `nvidia/When2Call` at `resolve/main` and computed statistics on them.
+  `P-CONF`'s three-mode part is the 1,277-item confirmatory side of `behavioral-heldout-v2`, whose population is
+  When2Call's `mcq` split at `0582f7749df63a96fdc3070932e83e72396ace53`
+  (`reports/evaluation/behavioral-heldout-v2.manifest.json`, `splits[0]`). The access therefore touched `P-CONF`'s source.
+- **What was seen** (the agent's own report; full record in `tool-decision-rl/provenance/TEST_SPLIT_ACCESS.md`):
+  - row counts of both files, the `correct_answer` label distribution, the `source` distribution and the field-name sets;
+  - the full text of 2 items, the first row of each file (tool lists removed, cut at 900 characters).
+- **Scope:** the counts cover whole files, so they mix `P-DEV` and `P-CONF` items. Whether either printed item is in
+  `P-CONF` is not checked, because checking needs the test file opened. Revision: `resolve/main`. Head `0582f77…` is
+  inferred, not verified; the HF API at 2026-11-11T10:57:02Z shows `lastModified` 2025-04-29.
+- **Where the exposure is held and who saw it:**
+  - The agent's transcript holds the label and source distributions and the 2 printed items: file
+    `agent-a7139aaf46020fd56.jsonl` in the `subagents/` folder of Claude Code session
+    `451b7602-e54b-4b32-b727-9c01fdde4185` (job-grind project), 768,973 bytes, sha256
+    `5bd01b8f446d679d50fb86630ad4d74211711e4675a5c1ff0d4d876b1d62972e`. It was recorded by size and hash, not opened. The
+    full local path is kept outside this repository, in `tool-decision-rl/provenance/TEST_SPLIT_ACCESS.md`.
+  - The two downloaded test files are still in the session scratchpad (sha256 `8c3694e5…`, `0b710578…`).
+  - `tool-decision-rl/provenance/agent-datasets-hf.md` states, as an inference, that When2Call test items carry
+    BFCL-derived `source` fields. The main session read the same inference in the agent's final report.
+  - The main session saw the When2Call test label counts only through OpenGrad's own
+    `docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` (read on 2026-11-11 while tracing `P-CONF`'s source).
+    It did not see the `source` distribution, the agent's field-name tables or the item texts. The owner did not see the
+    agent's outputs.
+  - The transcript and the downloaded files are deleted or quarantined only on the owner's decision.
+- **Items changed:** none. This entry records exposure. No threshold, partition, arm, seed or rule changes.
+- **Reason:** `P-CONF` is "scored once per arm" and must never be "used for checkpoint selection or hyperparameter
+  choice" (06). An unrecorded look would make that unverifiable.
+- **Open owner decisions:** whether to identify the two printed items by uuid and quarantine any that fall in `P-CONF`;
+  and whether to delete or quarantine the transcript and the downloaded files.
+- **Candidates already scored:** none. **Arms launched under an earlier version:** none.
+- **ERRATA entry:** `reports/ERRATA.md` §44.
