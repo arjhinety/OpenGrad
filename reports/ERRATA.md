@@ -1989,7 +1989,7 @@ planned upload command. See §43. Their record is `reports/releases/hf-publicati
 
 ## 43. The 2026-11-11 card republish was made by a test, with the commit message "m"
 
-**Added 2026-11-11.** This entry changes no record and no Hub revision.
+**Added 2026-11-11.** This entry edits no existing record and no Hub revision.
 
 - **What happened:**
   - At 2026-11-11 09:05 UTC, `tests/publication/test_publish_cards.py` was run locally while an edit to
@@ -2009,7 +2009,7 @@ planned upload command. See §43. Their record is `reports/releases/hf-publicati
   `card-v1.2-fix` by `with_suffix`. It names GitHub commit `1372626`.
 - **What the commits actually contain:** the correction approved by the owner on 2026-11-11 (§41).
   - The M1-v2 card's "What the promotion meant" paragraph and the GGUF card's opening sentence now state that
-    M1-v2 passed `tool_use_promotion_v4` on 2026-09-11 and that the promotion was withdrawn on 2026-10-22.
+    M1-v2 passed the v4 gate (`tool_use_promotion_v4`) on 2026-09-11 and that the promotion was withdrawn on 2026-10-22.
   - A read-only check after the upload found each live card byte-identical to the committed card. No weight or
     other file was written.
 - **Why it is left as it is:** the owner's decision (2026-11-11, option A).
