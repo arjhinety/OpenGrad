@@ -44,6 +44,7 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0024 | 2026-11-11 | OpenGrad scripts | `OURS` | A new freeze script defined its own sha256 wrapper; the ratchet in `tests/repo/` failed CI | Fixed (uses `opengrad.hashing`) |
 | UP-0025 | 2026-11-11 | OpenGrad reports | `OURS` | New report files were committed without regenerating `reports/README.md` | Fixed (indexes regenerated) |
 | UP-0026 | 2026-11-11 | OpenGrad process | `OURS` | CI on master was red from 2026-10-27 to 2026-11-11 and nobody noticed | Open; the run-record and CI-intake work is meant to catch this |
+| UP-0027 | 2026-11-11 | OpenGrad docs | `OURS` | The M1-v2 withdrawal commit left "promoted" in four current documents | Fixed in prose; frozen and generated files recorded in ERRATA §41 |
 
 ---
 
@@ -357,3 +358,12 @@ The last green master run was 7664505, on 2026-10-13. Every push after that fail
 c8de767 and 22268f8 on 2026-11-06. It was noticed only in a status check on 2026-11-11. UP-0022 to UP-0025 were all
 in CI's output from 2026-10-27 (run 40442394817) onwards. Open: nothing reads CI results after a push. The planned run records and CI intake for
 this log are meant to close it.
+
+## UP-0027 — a status change that did not reach every document (`OURS`)
+
+`ac5b93e` (2026-10-22) withdrew M1-v2's promotion and restated the registries. `README.md` (five lines),
+`ROADMAP.md`, `docs/EXPERIMENT_RESULTS.md` and `docs/PROMOTION_POLICY.md` still described M1-v2 as promoted
+in the present tense. They now give both dates: passed v4 on 2026-09-11, withdrawn 2026-10-22. Frozen,
+generated and published files that also say "promoted" are listed in ERRATA §41 and left as they are. Lesson:
+when a status changes, search the whole repository for the old status word, and decide file by file whether to
+edit it (prose), regenerate it (generated) or record it in ERRATA (pinned).

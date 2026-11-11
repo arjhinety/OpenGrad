@@ -38,7 +38,7 @@ Arjhine Ty.
 | Withdrawn promotion | [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) — checkpoint 30. The promotion under the parent-relative `tool_use_promotion_v4` gate was withdrawn on 2026-10-22 (commit `ac5b93e`); status REJECTED. **Improved on tool policy over Base; within noise of its M0 parent; materially worse than Base on general capability. Not an unqualified improvement** |
 | Studies | **Study 001 frozen 2026-09-13** at tag [`study-001`](https://github.com/arjhinety/OpenGrad/tree/study-001). **Study 002 reopened (2026-09-25), no model result:** it is to explain the refusal/direct-answer regression before trying to correct it. Its first `P-UNANS` attempt stopped before training when its preregistered stop rule 2 fired: the unanswerable set could not reach its labeller-agreement floor (0.770 against 0.80). A second attempt ([44](docs/research/study-002/44-PUNANS-V2-AMENDMENT-DRAFT.md), `study_002_prereg_v12`) passed the agreement floor, but only 67 questions are agreed unknowable, under the 385 the safety check needs. With constructed questions (`study_002_prereg_v13`), the safety check's population holds 666 (67 natural, 599 constructed), above the 385 it needs. The readiness design was settled under `study_002_prereg_v14` (29 runs; arms `R2` and `C1` dropped), and `study_002_prereg_v15` gave the triage of the flagged training records per-source floors. The four-mode confirmatory set `P-CONF-v1` was built ([negative result](reports/study-002/punans-v1/NEGATIVE-RESULT.md), [current state](docs/research/study-002/README.md#current-state)). On-policy distillation is deferred to Study 003, speculative decoding to Study 004. See [`docs/research/STUDIES.md`](docs/research/STUDIES.md) |
 | Behavioral held-out | When2Call — 3,650 examples. **Contains no ANSWER examples**, which is why the regression escaped promotion |
-| Largest current limitation | One 2B model, one lineage, no replicate. The promoted checkpoint refuses 100% of bare arithmetic questions |
+| Largest current limitation | One 2B model, one lineage, no replicate. M1-v2 (checkpoint 30; passed v4 on 2026-09-11, promotion withdrawn 2026-10-22) refuses 100% of bare arithmetic questions |
 
 Every experiment record, its validity, selected checkpoint, and published artifact: [`docs/EXPERIMENT_STATUS.md`](docs/EXPERIMENT_STATUS.md) (generated from the run artifacts).
 
@@ -48,7 +48,7 @@ Every experiment record, its validity, selected checkpoint, and published artifa
 |---|---|
 | Read the Study 001 write-up | [Study 001 results][study-001] — the narrative version of the finding |
 | See the latest results | [Latest Results](#latest-results) · [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md) |
-| Download the promoted model | [Hugging Face model](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) |
+| Download M1-v2 (a research artifact; passed v4 on 2026-09-11, promotion withdrawn 2026-10-22) | [Hugging Face model](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) |
 | Browse every Study 001 model and dataset | [OpenGrad Study 001 collection](https://huggingface.co/collections/arjhinety/opengrad-study-001) — in reading order, with a note per item |
 | Run or inspect OpenGrad | [Quick Start](#quick-start) |
 | Check what is executed vs. planned | [`docs/EXPERIMENT_STATUS.md`](docs/EXPERIMENT_STATUS.md) · [`ROADMAP.md`](ROADMAP.md) |
@@ -121,15 +121,15 @@ B0's 0.9715). The promotion reflects the gate change; the measured difference fr
 call_f1; 7 more of 453 gold calls recalled; single seed) is within noise.
 
 - Full intervention record, caveats, and published artifacts: [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md)
-- Promoted evaluation: [`reports/M1_DPO_EVALUATION.md`](reports/M1_DPO_EVALUATION.md)
+- M1-v2 evaluation (written while it was promoted): [`reports/M1_DPO_EVALUATION.md`](reports/M1_DPO_EVALUATION.md)
 - Derived result index: [`results/registry.jsonl`](results/README.md)
 - Corrections to frozen reports and published artifacts: [**Errata**](reports/ERRATA.md)
 - Claim audit, 93 findings across this repository, the Hugging Face cards and the project site, each with its resolution: [**claim-audit.pdf**](https://opengrad.arjhinety.com/studies/001/claim-audit.pdf)
 
 Seven post-training interventions have been executed in total: one negative on corpus v1, one
 partial recovery on corpus v2, the definitive final-v2 (selected, not promoted), two joint-removal
-ablations (both negative), a rejected historical DPO attempt applied directly to Base, and the
-promoted M1-v2. Negative results are not summarized away here; the full record is in
+ablations (both negative), a rejected historical DPO attempt applied directly to Base, and
+M1-v2 (passed v4 on 2026-09-11, promotion withdrawn 2026-10-22). Negative results are not summarized away here; the full record is in
 [`docs/EXPERIMENT_RESULTS.md`](docs/EXPERIMENT_RESULTS.md).
 
 ### The tool-policy gain came with a general-capability regression
@@ -138,7 +138,7 @@ Those `call_f1` numbers are real. They are also not the whole picture. A later d
 checkpoint ladder, on **real upstream IFEval, GSM8K and MMLU-Pro**, found a regression the
 tool-policy gate was structurally unable to detect.
 
-| measure | Base | M0 — SFT | M1-v2 — promoted |
+| measure | Base | M0 — SFT | M1-v2 — DPO (passed v4 2026-09-11, withdrawn 2026-10-22) |
 |---|---:|---:|---:|
 | GSM8K zero-shot accuracy | **67.4%** | **0.0%** | **0.0%** |
 | GSM8K zero-shot refusal rate | 0.0% | **100.0%** | **100.0%** |
@@ -148,7 +148,7 @@ tool-policy gate was structurally unable to detect.
 
 **Two separable failures, both first observed at M0 on the primary lineage:**
 
-1. **A prompt-regime-conditioned refusal policy.** The promoted checkpoint declines every bare
+1. **A prompt-regime-conditioned refusal policy.** M1-v2 declines every bare
    arithmetic question — yet with eight worked exemplars it answers all 1,319 of *the same
    questions* (answer rate 100%) and gets 55.5% of them right. It never refuses 5-shot MMLU-Pro.
    Refusal is conditioned on the request shape, not the subject.

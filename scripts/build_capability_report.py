@@ -33,7 +33,7 @@ OUT = ROOT / "reports/GENERAL_CAPABILITY_REGRESSION.md"
 STAGE_LABEL = {
     "BASE": "Base (Qwen3.5-2B, no SFT, no DPO)",
     "M0_SFT": "M0 — SFT",
-    "M1_DPO_CURRENT": "M1-v2 — DPO (promoted)",
+    "M1_DPO_CURRENT": "M1-v2 — DPO (passed v4 2026-09-11; withdrawn 2026-10-22)",
     "M1_DPO_HISTORICAL": "M1-v1 — DPO (other lineage)",
 }
 
@@ -179,7 +179,7 @@ def main() -> int:
 
     body = f"""# General-capability regression — diagnosis across the OpenGrad checkpoint ladder
 
-**Question.** The OpenWeights sentinel showed the promoted checkpoint declining two tasks it should
+**Question.** The OpenWeights sentinel showed M1-v2 (then promoted; withdrawn 2026-10-22) declining two tasks it should
 be able to do — `100 − 7×12` and a three-element JSON array — while both tool cases passed. The
 frozen tool-policy partition contains **no ANSWER examples**, so nothing in the primary evaluation
 could have detected it. Is that lost capability, learned refusal, or noise from seven cases?

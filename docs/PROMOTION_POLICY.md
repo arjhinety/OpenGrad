@@ -37,7 +37,9 @@ promoted M1-v2 on a frozen partition containing **only** `tool_call`, `request_f
 45.8%). Nothing in the gate could have detected that, because the gate never asked the model to
 simply answer something.
 
-The promotion itself is also weaker than the word suggests. M1-v2 is promoted under a
+M1-v2 passed v4 on 2026-09-11; the promotion was withdrawn on 2026-10-22 (status REJECTED, commit
+`ac5b93e`), for exactly this
+reason. It was also weaker than the word suggests. M1-v2 had been promoted under a
 parent-relative gate (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2 fails the
 v3 gate that rejected M0. The promotion reflects the gate change; the measured difference from M0
 (+0.0078 call_f1, 7 of 453 calls, single seed) is within noise.

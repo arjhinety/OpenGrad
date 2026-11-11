@@ -9,8 +9,10 @@ authoritative run artifacts.
 > **Eight empirical results are recorded: the B0 baseline and seven post-training interventions.**
 > Historical M0-v1 and M1-v1 were negative; partial-v2 recovered from a data defect; definitive
 > M0-final-v2 restored balanced call behavior but did not pass its original promotion gate; both
-> joint-removal ablations reduced recall; and M1-v2 moved within noise of M0 and was promoted.
-> M1-v2 is promoted under a parent-relative gate (v4) introduced after M0 was
+> joint-removal ablations reduced recall; and M1-v2 moved within noise of M0, passed v4 on 2026-09-11 and
+> was promoted, a promotion withdrawn on 2026-10-22 (status REJECTED, commit `ac5b93e`): the v4 gate has no check
+> that can see refusals on answerable items, and M1-v2 refuses 100% of zero-shot GSM8K items.
+> M1-v2 had been promoted under a parent-relative gate (v4) introduced after M0 was
 > evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that rejected M0. The promotion
 > reflects the gate change; the measured difference from M0 (+0.0078 call_f1, 7 of 453 calls,
 > single seed) is within noise.
@@ -98,7 +100,7 @@ Statuses, validity, and reasoning are in [`docs/EXPERIMENT_STATUS.md`](EXPERIMEN
 | --- | --- | --- |
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CanonicalV2-Final) | model | the selected checkpoint (1800) + the findings page |
 | [`OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M0-SFT-CorpusV2) | model | 4 checkpoints (600/1200/1800/2400) — intact |
-| [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) | model | promoted M1-v2; all 4 checkpoints (30/60/90/120), selected checkpoint 30 |
+| [`OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2) | model | M1-v2 (passed v4 2026-09-11, promotion withdrawn 2026-10-22); all 4 checkpoints (30/60/90/120), selected checkpoint 30 |
 | [`OpenGrad-Qwen3.5-2B-M1-DPO`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO) | historical M1-v1 artifact | checkpoint 300 only + the deleted checkpoints' predictions |
 | [`OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-FixedCompute) | model | all 4 checkpoints (600/1200/1800/2400) of the joint-removal fixed-compute arm |
 | [`OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure`](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M0-ABL-MinusXLAM-MatchedExposure) | model | all 4 checkpoints (530/1060/1590/2119) of the joint-removal matched-exposure arm |

@@ -17,7 +17,7 @@ Current evidence (Canonical-v2 era):
 
 - **Canonical-v2 final** is the active training corpus: 173,237 canonical records, 161,966 trainable under the two supervision contracts, across four sources, corpus fingerprint `8ced403b…`. BUTTON and LoopTool stay excluded because their upstreams are unavailable.
 - The frozen behavioral held-out contains 3,652 distinct items; 3,650 were scored after two quarantines. The v1-era planning figures — 213,951 canonical records and a 3,952 pre-deduplication split sum — are historical, and are labelled as such in the publication milestone below.
-- Model inference, training, and model-quality results now exist: the B0 baseline and **seven post-training interventions**, including the promoted M1-v2 DPO (see [Results](README.md#latest-results)). The machine-checkable per-record view is [docs/EXPERIMENT_STATUS.md](docs/EXPERIMENT_STATUS.md).
+- Model inference, training, and model-quality results now exist: the B0 baseline and **seven post-training interventions**, including the M1-v2 DPO, which passed v4 on 2026-09-11 and whose promotion was withdrawn on 2026-10-22 (see [Results](README.md#latest-results)). The machine-checkable per-record view is [docs/EXPERIMENT_STATUS.md](docs/EXPERIMENT_STATUS.md).
 - Canonical dataset publication — v1 (213,951 records, six sources) and Canonical-v2 final (173,237 records, four sources) are published and verified; the 103,036-record partial v2 snapshot is retained as historical evidence, not as the current corpus.
 
 ## Publication milestone
@@ -63,8 +63,8 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
     was mock-only, and its "what remains justified" list is Study 003's requirement set. No GPU cycles are
     run to fill a schedule.
      M1-v2 DPO started from the selected M0-final checkpoint, preserved its calibrated frontier, and
-     was promoted under `tool_use_promotion_v4`. M1-v2 is promoted under a parent-relative gate
-     (v4) introduced after M0 was evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that
+     passed `tool_use_promotion_v4` on 2026-09-11 and was promoted; that promotion was withdrawn on 2026-10-22 (status
+     REJECTED, commit `ac5b93e`). The v4 gate was parent-relative, introduced after M0 was evaluated; M0 also clears v4, and M1-v2 fails the v3 gate that
      rejected M0. The promotion reflects the gate change; the measured difference from M0 (+0.0078
      call_f1; 7 more of 453 gold calls recalled; single seed) is within noise. The first M1 identity is preserved as
      a 119/120-step failure. The existing M2 path is mock-only: it has no live teacher, student
@@ -88,7 +88,7 @@ Canonical dataset publication — CANONICAL_DATASET_PUBLISHED
 
 13. OpenWeights-derived downstream deployment studies — PARITY SUITE RUN; NO DEVICE STUDY
     OpenWeights is an independent project; its observations motivate hypotheses but are not OpenGrad results.
-    The 7-case OpenWeights ParitySuite was run on the H200 against the promoted checkpoint and the base
+    The 7-case OpenWeights ParitySuite was run on the H200 against M1-v2 (then promoted) and the base
     ([report](reports/OPENWEIGHTS_TRANSFER_EVALUATION.md), [errata](reports/ERRATA.md)); both score 5/7,
     so it shows no transfer difference. No post-training on-device study has been executed, so no
     OpenGrad result rests on device measurements.
@@ -191,7 +191,7 @@ B0 baseline                                  -> EXECUTED (REAL_RESULT)
     -> M0/M1/M2 decision                     -> M0 closed; M1 evaluated; M2 not run (mock-only path, not justified)
     -> SFT                                   -> EXECUTED (5 arms: 1 negative on corpus v1, 1 partial recovery, 1 definitive, 2 negative joint-removal ablations; 3 corpus-v1 launches FAILED before an evaluated model)
     -> post-SFT evaluation                   -> EXECUTED (see step 9)
-    -> preference optimization               -> first DPO identity (on Base) rejected/not reproducible; M1-v2 DPO EXECUTED and PROMOTED under v4 (fails v3; within noise of M0)
+    -> preference optimization               -> first DPO identity (on Base) rejected/not reproducible; M1-v2 DPO EXECUTED; passed v4 on 2026-09-11 and PROMOTED, promotion WITHDRAWN 2026-10-22 (fails v3; within noise of M0; refuses 100% of zero-shot GSM8K)
     -> distillation                          -> NOT RUN (scaffold only; live training path unimplemented) -> Study 003
     -> quantization/runtime                  -> GGUF PTQ EXECUTED and CLOSED (Q6_K recommended; gate inside rerun noise); ExecuTorch exported, no behavioural verdict
     -> OpenWeights device validation         -> ParitySuite run on H200 (Base and M1-v2 both 5/7); no on-device study executed
