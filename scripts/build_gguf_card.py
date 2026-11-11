@@ -127,9 +127,9 @@ tool-use examples against a quality gate frozen before any format existed. Produ
 [Experimental Intelligence](https://experimentalintelligence.org/).
 
 **Why the promotion was withdrawn.** The v4 gate has no check for refusals on questions the model should
-simply answer, and M1-v2 refuses every zero-shot GSM8K question (1,319 of 1,319). The explanation is
-on the [parent model card](https://huggingface.co/{PARENT})
-and in OpenGrad's [errata, §41-43]({WITHDRAWAL_ERRATA}).
+simply answer. M1-v2 refuses every zero-shot GSM8K question (below) and 19.8% of IFEval items (base
+model: 0.4%). The explanation is on the [parent model card](https://huggingface.co/{PARENT})
+and in OpenGrad's [errata §41]({WITHDRAWAL_ERRATA}) (§42-43 there cover how the card uploads were labelled).
 The errata link further down is the frozen `study-001` copy, written before the withdrawal.
 
 ## Known limitation: general-capability regression
