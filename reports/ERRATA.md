@@ -2021,3 +2021,10 @@ planned upload command. See §43. Their record is `reports/releases/hf-publicati
     client.
   - The test module replaces `huggingface_hub` with a stub that raises an error. With the slug check removed by
     hand, the test failed on the stub instead of publishing.
+
+Later line for §41, 2026-11-11: with the owner's approval, the GGUF card was republished with a paragraph
+saying why the promotion was withdrawn. The paragraph links the parent card and this file at commit
+`175711c`, because the card's other errata link is the frozen `study-001` copy, which predates the withdrawal.
+- Hub revision: `7ed3e307d909d48dcd78faf5bde055b0555898ae` (parent `9c4a1843`).
+- Record: `reports/releases/hf-publication-2026-11-11-card-gguf-withdrawal-link.json`, uploaded with its own
+  commit message and correction text (UP-0029).
