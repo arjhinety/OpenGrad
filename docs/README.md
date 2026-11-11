@@ -266,5 +266,6 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`upstream/UP-0028.md`](upstream/UP-0028.md) | UP-0028 — a generator check that reads two different states (`OURS`) |
 | [`upstream/UP-0029.md`](upstream/UP-0029.md) | UP-0029 — a publisher that labelled every upload as the license fix (`OURS`) |
 | [`upstream/UP-0030.md`](upstream/UP-0030.md) | UP-0030 — a test that could publish to the real Hub (`OURS`) |
+| [`upstream/UP-0031.md`](upstream/UP-0031.md) | UP-0031 — escape sequences mangled by shell-quoted edit scripts (`OURS`) |
 
-166 documents.
+167 documents.
