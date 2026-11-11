@@ -1962,5 +1962,5 @@ Later line for §41, 2026-11-11 (owner decision, the same day):
 - The M1-v2 card now says "What the promotion meant" and gives both dates.
 - The GGUF card is regenerated from `scripts/build_gguf_card.py`, whose opening sentence now gives both dates.
   The regeneration changed only that sentence.
-- Both cards are republished with `scripts/publish_card_corrections.py --upload`, which writes the new
-  publication record in `reports/releases/`. The 2026-09-24 and 2026-10-22 records are left unchanged.
+- Both cards are to be republished with `scripts/publish_card_corrections.py --upload`, which writes a new
+  publication record in `reports/releases/`. A further later line will name that record once it exists. The 2026-09-24 and 2026-10-22 records are left unchanged.

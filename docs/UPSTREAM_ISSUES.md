@@ -373,7 +373,7 @@ edit it (prose), regenerate it (generated) or record it in ERRATA (pinned).
 
 On 2026-11-11, `scripts/build_gguf_card.py` was edited and the GGUF card regenerated, but neither was committed
 yet. `tests/publication/test_publish_cards.py::test_unrecorded_hub_commits_are_recorded_retroactively_and_the_chain_validates`
-then failed (`assert status == pcc.PASS`, got 1), and four other tests in the file failed with it. The cause:
+then failed (`assert status == pcc.PASS`, got 1), and other tests in the file failed with it. The cause:
 `plan()` first calls `gguf_card_matches_generator`. That imports the generator from the working tree but reads
 the card from the committed blob (`committed_card`). With the edit uncommitted, the new generator text was compared
 with the old committed card, and `plan()` returned FAIL.
