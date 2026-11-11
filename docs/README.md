@@ -270,5 +270,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`upstream/UP-0032.md`](upstream/UP-0032.md) | UP-0032 — a pushed commit failed a check outside its targeted tests (`OURS`) |
 | [`upstream/UP-0033.md`](upstream/UP-0033.md) | UP-0033 — a time-window test failed once on Windows CI (`UNCLEAR`) |
 | [`upstream/UP-0034.md`](upstream/UP-0034.md) | UP-0034 — a test that rewrites tracked files (`OURS`) |
+| [`upstream/UP-0035.md`](upstream/UP-0035.md) | UP-0035 — the hygiene scan misses a single-backslash Windows home path (`OURS`) |
+| [`upstream/UP-0036.md`](upstream/UP-0036.md) | UP-0036 — the scanner's home-path pattern backtracked exponentially (`OURS`) |
 
-170 documents.
+172 documents.

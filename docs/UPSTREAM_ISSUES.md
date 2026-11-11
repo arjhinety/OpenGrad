@@ -519,6 +519,13 @@ reaches the log. The file is added to the test's own `ALLOWLIST`, with that reas
 Lesson: a change that adds a `subprocess.Popen` runs `tests/evaluation/test_subprocess_pipe_invariants.py` too. Same
 class as UP-0013 and UP-0020: a repository-wide check outside the targeted set.
 
+Later line for UP-0032, 2026-11-11: it happened again. 7a91f03 added `docs/upstream/UP-0035.md` and `UP-0036.md` but
+not the regenerated `docs/README.md` index, and `tests/results/test_generated_indexes.py` failed on both CI jobs. The
+targeted set for that commit was `tests/runrecords`, `tests/publication/test_publication_hygiene.py` and
+`tests/repo/test_upstream_log.py`; the
+index test lives in `tests/results/`. Fixed by regenerating the index. Lesson, added: a commit that adds or renames a
+file under `docs/`, `reports/` or `scripts/` runs `python scripts/reporting/generate_indexes.py --check` too.
+
 ## UP-0033 — a time-window test failed once on Windows CI (`UNCLEAR`)
 
 In CI run 43013057249, on `test-windows` for a346d43, `test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is`
