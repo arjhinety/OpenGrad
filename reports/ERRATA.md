@@ -1964,3 +1964,21 @@ Later line for §41, 2026-11-11 (owner decision, the same day):
   The regeneration changed only that sentence.
 - Both cards are to be republished with `scripts/publish_card_corrections.py --upload`, which writes a new
   publication record in `reports/releases/`. A further later line will name that record once it exists. The 2026-09-24 and 2026-10-22 records are left unchanged.
+
+## 42. The 2026-10-22 card republish carries the 2026-09-24 license label
+
+**Added 2026-11-11.** This entry changes no record and no Hub revision.
+
+- **As written:**
+  - The Hub commit `e4e1a31c98d0884e67cd18b83fcd68085620f79a` on
+    `arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2` has the message "Card correction: license
+    attribution (OpenGrad reports/ERRATA.md §23)".
+  - Its record, `reports/releases/hf-publication-2026-10-22-card-license-correction.json`, gives the license
+    change of §23 as its `correction`.
+- **What that upload actually changed:** it published the M1-v2 card from `d74fae2`, which states that the
+  promotion is withdrawn (§41, and `docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` §12).
+- **Cause:** the publisher's commit message and correction text were constants (UP-0029). They are now
+  required arguments of `--upload`.
+- **What stays valid:** the record's revisions, `card_sha256` and re-fetch result are correct. Only its
+  description of the change is wrong. The record and the Hub history are append-only, so both are left as they
+  are, and this entry is the correction.

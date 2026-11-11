@@ -183,3 +183,33 @@ def test_a_second_record_on_the_same_day_does_not_overwrite_the_first(tmp_path: 
     second = pcc.write_record([], tmp_path)
     assert first != second and first.exists() and second.exists()
     assert second.name.endswith("-card-license-correction-2.json")
+
+
+def test_upload_without_its_own_correction_text_is_blocked_before_any_network_call() -> None:
+    # A fixed default once labelled a different change on the Hub and in the record (UP-0029).
+    assert pcc.main(["--upload"]) == pcc.BLOCKED
+    assert pcc.main(["--upload", "--message", "m", "--slug", "s"]) == pcc.BLOCKED
+
+
+def test_a_record_with_its_own_correction_and_slug_is_found_and_validates(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    shutil.copytree(ROOT / "reports/releases", root / "reports/releases")
+    hub = FakeHub(tmp_path / "hub")
+    (tmp_path / "hub").mkdir()
+    _status, items = pcc.plan(hub, ROOT)
+    _status, entries = pcc.upload(hub, items, ROOT, commit_message="Card correction: test")
+    assert {upload["commit_message"] for upload in hub.uploads} == {"Card correction: test"}
+    path = pcc.write_record(
+        entries,
+        root,
+        correction="test correction",
+        slug="card-test-correction",
+        why=pcc.GENERIC_WHY,
+    )
+    assert path.name.endswith("-card-test-correction.json")
+    record = json.loads(path.read_text(encoding="utf-8"))
+    assert record["correction"] == "test correction"
+    assert validate_publication_records(root) == []
+    current = pcc.current_revisions(root)
+    for entry in entries:
+        assert current[entry["repository"]] == entry["hub_revision"]

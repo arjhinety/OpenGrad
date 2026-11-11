@@ -46,6 +46,7 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0026 | 2026-11-11 | OpenGrad process | `OURS` | CI on master was red from 2026-10-27 to 2026-11-11 and nobody noticed | Open; the run-record and CI-intake work is meant to catch this |
 | UP-0027 | 2026-11-11 | OpenGrad docs | `OURS` | The M1-v2 withdrawal commit left "promoted" in four current documents | Fixed in prose; frozen and generated files recorded in ERRATA §41 |
 | UP-0028 | 2026-11-11 | `publish_card_corrections.py` check, OpenGrad process | `OURS` | The card-publish tests failed while the GGUF generator was edited but not yet committed | Resolved by committing generator and card together; no code change |
+| UP-0029 | 2026-11-11 | `scripts/publish_card_corrections.py` | `OURS` | The Hub commit message and the record's correction text were fixed to the 2026-09-24 license fix, so a later card upload carried that label | Fixed (`--upload` requires `--message`, `--correction`, `--slug`); the 2026-10-22 record left as is (ERRATA §42) |
 
 ---
 
@@ -387,3 +388,21 @@ No code, test or publication record was changed. Lesson: commit a card generator
 same commit before running the card tests or the publish dry run. A possible improvement, not made: have
 `gguf_card_matches_generator` load the generator from the same commit as the card, so a mid-edit state reports a
 clear error instead of a FAIL.
+
+## UP-0029 — a publisher that labelled every upload as the license fix (`OURS`)
+
+`scripts/publish_card_corrections.py` was written for the 2026-09-24 license correction (ERRATA §23). The Hub
+commit message (`COMMIT_MESSAGE`), the record's `correction` text and the record's file name
+(`…-card-license-correction.json`) were constants. The 2026-10-22 republish of the M1-v2 card, which added the
+promotion withdrawal, therefore went to the Hub as commit `e4e1a31c` with the message "Card correction: license
+attribution (OpenGrad reports/ERRATA.md §23)". Its record,
+`reports/releases/hf-publication-2026-10-22-card-license-correction.json`, describes the license change too.
+
+The independent audit before the 2026-11-11 republish found this. The fix:
+- `--upload` now refuses unless `--message`, `--correction` and `--slug` are given;
+- the library functions take them as arguments, and default to the 2026-09-24 values so that record stays
+  reproducible.
+
+Two new tests cover the refusal, and confirm that a record with its own slug is found and validates. Record
+discovery reads every `reports/releases/*.json` and does not depend on the file name. The 2026-10-22 record and
+the Hub commit are left as they are (ERRATA §42).

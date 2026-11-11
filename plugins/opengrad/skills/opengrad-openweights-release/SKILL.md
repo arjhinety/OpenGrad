@@ -37,7 +37,9 @@ record is committed and the publication gate passes.
 9. **Card-only corrections** go through `scripts/publish_card_corrections.py`: a dry run by default (diffs
    against the live card, lists Hub commits no record names), `--upload` only on the user's instruction. It
    uploads the **committed** bytes, names the live head as the parent commit, re-fetches and compares, and writes
-   the record, reconstructing unrecorded commits retroactively. Its first dry run (2026-09-24) found seven
+   the record, reconstructing unrecorded commits retroactively. `--upload` requires `--message`, `--correction`
+   and `--slug`, which describe this correction only. Before 2026-11-11 they were fixed to the 2026-09-24
+   license fix, so the 2026-10-22 withdrawal republish carries that label (ERRATA §42, UP-0029). Its first dry run (2026-09-24) found seven
    unrecorded card commits and a GGUF card uploaded with CRLF line endings from a Windows working tree.
 
 Never commit or print tokens. If push protection flags a secret, verify it and let the user decide.

@@ -22,7 +22,12 @@ Exit codes: 0 PASS, 1 FAIL (a re-fetch mismatch, or a card that differs from its
 credentials are unavailable). Nothing is reported as published without the re-fetch.
 
     python scripts/publish_card_corrections.py            # dry run: diffs only
-    python scripts/publish_card_corrections.py --upload   # publish, verify, record
+    python scripts/publish_card_corrections.py --upload \n        --message "Card correction: ..." --correction "Card-only. ..." --slug card-...-correction
+                                                          # publish, verify, record
+
+``--upload`` needs all three: the Hub commit message, the record's ``correction`` text and the record
+file's slug. They describe this correction only. A fixed default once labelled a different change
+(UP-0029).
 """
 
 from __future__ import annotations
@@ -75,7 +80,25 @@ CARDS: dict[str, tuple[str, str]] = {
     ),
 }
 GGUF_CARD = "qwen35-2b-m1-dpo-canonicalv2-final-v2-gguf"
+# The 2026-09-24 license correction, kept as the library default so its record can be reproduced.
+# The CLI does not use it: every --upload names its own correction (UP-0029).
 COMMIT_MESSAGE = "Card correction: license attribution (OpenGrad reports/ERRATA.md §23)"
+LICENSE_CORRECTION = (
+    "Card-only. Each model card gains a license_link to Qwen/Qwen3.5-2B's Apache-2.0 "
+    "license at the pinned revision and a License and attribution section, and the "
+    "corpus-v1 evaluation card's license becomes other / composite-per-source "
+    "(reports/ERRATA.md §23). No weight or other file was written."
+)
+LICENSE_SLUG = "card-license-correction"
+LICENSE_WHY = (
+    "The weights are immutable; their cards are not. The card corrections of 2026-09-13 "
+    "were published without a record, which left every recorded revision of these "
+    "repositories stale; they are recorded retroactively in each revision chain."
+)
+GENERIC_WHY = (
+    "The weights are immutable; their cards are not. Every card-only correction is recorded, so "
+    "each Hub revision of these cards can be traced to the committed card it serves."
+)
 
 PASS, FAIL, BLOCKED = 0, 1, 2
 
@@ -246,7 +269,10 @@ def plan(api: Any, root: Path = ROOT) -> tuple[int, list[dict[str, Any]]]:
 
 
 def upload(
-    api: Any, items: list[dict[str, Any]], root: Path = ROOT
+    api: Any,
+    items: list[dict[str, Any]],
+    root: Path = ROOT,
+    commit_message: str = COMMIT_MESSAGE,
 ) -> tuple[int, list[dict[str, Any]]]:
     """Publish each changed card, re-fetch it, and return the record entries."""
     today = _today()
@@ -289,7 +315,7 @@ def upload(
                     path_in_repo="README.md",
                     repo_id=item["repository"],
                     repo_type=item["repo_type"],
-                    commit_message=COMMIT_MESSAGE,
+                    commit_message=commit_message,
                     parent_commit=item["head"],
                 )
                 revision = info.oid
@@ -319,24 +345,21 @@ def upload(
     return PASS, entries
 
 
-def write_record(entries: list[dict[str, Any]], root: Path = ROOT) -> Path:
+def write_record(
+    entries: list[dict[str, Any]],
+    root: Path = ROOT,
+    correction: str = LICENSE_CORRECTION,
+    slug: str = LICENSE_SLUG,
+    why: str = LICENSE_WHY,
+) -> Path:
     today = _today()
     record = {
         "schema_version": 1,
         "artifact_kind": "HF_PUBLICATION_RECORD",
         "published": today,
-        "correction": (
-            "Card-only. Each model card gains a license_link to Qwen/Qwen3.5-2B's Apache-2.0 "
-            "license at the pinned revision and a License and attribution section, and the "
-            "corpus-v1 evaluation card's license becomes other / composite-per-source "
-            "(reports/ERRATA.md §23). No weight or other file was written."
-        ),
+        "correction": correction,
         "cards": entries,
-        "why_this_record_exists": (
-            "The weights are immutable; their cards are not. The card corrections of 2026-09-13 "
-            "were published without a record, which left every recorded revision of these "
-            "repositories stale; they are recorded retroactively in each revision chain."
-        ),
+        "why_this_record_exists": why,
         "notes": [
             (
                 "Each upload named the live head as its parent commit, so it could not overwrite "
@@ -353,7 +376,7 @@ def write_record(entries: list[dict[str, Any]], root: Path = ROOT) -> Path:
         ],
     }
     # Records are append-only: a second correction on the same day gets its own file.
-    stem = root / "reports" / "releases" / f"hf-publication-{today}-card-license-correction"
+    stem = root / "reports" / "releases" / f"hf-publication-{today}-{slug}"
     path = stem.with_suffix(".json")
     number = 2
     while path.exists():
@@ -368,7 +391,21 @@ def write_record(entries: list[dict[str, Any]], root: Path = ROOT) -> Path:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=(__doc__ or "").split("\n\n")[0])
     parser.add_argument("--upload", action="store_true", help="publish, re-fetch and record")
+    parser.add_argument(
+        "--message", help="Hub commit message for this correction (required with --upload)"
+    )
+    parser.add_argument(
+        "--correction", help="what this correction changes, for the record (required with --upload)"
+    )
+    parser.add_argument(
+        "--slug",
+        help="record file name part, e.g. card-promotion-withdrawal (required with --upload)",
+    )
     args = parser.parse_args(argv)
+    if args.upload and not (args.message and args.correction and args.slug):
+        # Each upload names its own correction; a fixed default once labelled a different change (UP-0029).
+        print("BLOCKED: --upload needs --message, --correction and --slug")
+        return BLOCKED
     try:
         from huggingface_hub import HfApi
     except ImportError:
@@ -382,9 +419,10 @@ def main(argv: list[str] | None = None) -> int:
         return BLOCKED
     if status != PASS or not args.upload:
         return status
-    status, entries = upload(api, items)
+    status, entries = upload(api, items, commit_message=args.message)
     if entries:
-        print(f"wrote {write_record(entries).relative_to(ROOT).as_posix()}")
+        path = write_record(entries, correction=args.correction, slug=args.slug, why=GENERIC_WHY)
+        print(f"wrote {path.relative_to(ROOT).as_posix()}")
     return status
 
 
