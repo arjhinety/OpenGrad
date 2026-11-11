@@ -2,7 +2,7 @@
 
 v3 is the frozen v2 classifier with decline-with-content named DECLINE_WITH_CONTENT. Its freeze is the LF sha256
 pinned in ``behaviour_labels_v3.FROZEN_SOURCE_SHA256_LF`` (the wrapper), and v2's own freeze is checked too.
-v2 must stay byte-identical to its own freeze.
+v2 must stay identical to its own freeze (CRLF folded to LF).
 """
 
 from __future__ import annotations
@@ -44,7 +44,9 @@ def test_v3_source_matches_its_pinned_freeze() -> None:
 def test_v2_source_is_unchanged_by_the_v3_work() -> None:
     # Hashed with CRLF folded to LF: a Windows checkout (core.autocrlf=true) stores .py files as CRLF, so a
     # raw-byte hash fails there although the committed file is unchanged (docs/UPSTREAM_ISSUES.md UP-0022).
-    assert _sha(ROOT / V2_RULES) == "47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382"
+    assert (
+        _sha(ROOT / V2_RULES) == "47436ca990bd4c1846113dd8d28e2c8755cff50837581acaa39654d0d2f2b382"
+    )
     assert _sha(ROOT / V2_RULES) == bl3.RULES_SHA256_LF
 
 

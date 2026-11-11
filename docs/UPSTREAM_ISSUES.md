@@ -316,7 +316,8 @@ were added on this date from their sections; the sections themselves are unchang
 
 `tests/data/test_decision_classifier_v3.py::test_v2_source_is_unchanged_by_the_v3_work` asserted
 `sha256(read_bytes())` of `src/opengrad/data/decision_classifier_v2.py` against the v2 freeze pin `47436ca9…`. It failed
-on `test-windows` in CI run 42217506576 (commit 22268f8) with `befea830…a390`, and passed on the Linux job. The file
+on `test-windows` from the first push after it was written (run 40442394817, 5c31217, 2026-10-27) through CI
+run 42217506576 (commit 22268f8) with `befea830…a390`, and passed on the Linux job. The file
 is unchanged: it was last modified in d0fdbcd (2026-09-18, the v2 freeze), `git diff d0fdbcd 22268f8` on it is empty,
 neither d66012e nor 7a1a0cd touched it, and the committed blob hashes to `47436ca9…`. The same blob with every LF
 turned into CRLF hashes to exactly `befea830…a390`. The cause is the runner's `core.autocrlf=true`, together with
@@ -329,10 +330,11 @@ renormalises every Python checkout.
 
 ## UP-0023 — the hygiene scan was not rerun before a log was pushed (`OURS`)
 
-`docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` (committed in 22268f8) named a side agent's
-note three times, at lines 248, 265 and 345, in a hyphenated phrase that the publication-hygiene rule
-`agent_scratch_language` matches, so the scan failed on both CI jobs. The three phrases are reworded to "side note", and no other text
-changed. This is the same failure as UP-0008. Lesson: rerun `tests/publication/` before pushing any new log or report.
+`docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` named a side agent's note three times (lines 248
+and 265 from ac5b93e, line 345 from 6603690, both 2026-10-22; first pushed, and first failing, with 5c31217 on
+2026-10-27). Each time it used a hyphenated phrase that the publication-hygiene rule
+`agent_scratch_language` matches, so the scan failed on both CI jobs. The three phrases are reworded to
+"side note", and no other text changed. This is the same failure as UP-0008. Lesson: rerun `tests/publication/` before pushing any new log or report.
 
 ## UP-0024 — a local sha256 wrapper in a new script (`OURS`)
 
@@ -353,5 +355,5 @@ Regenerating it also brought `scripts/README.md` up to date with the new freeze 
 
 The last green master run was 7664505, on 2026-10-13. Every push after that failed: 5c31217 on 2026-10-27, then
 c8de767 and 22268f8 on 2026-11-06. It was noticed only in a status check on 2026-11-11. UP-0022 to UP-0025 were all
-in CI's output on 2026-11-06. Open: nothing reads CI results after a push. The planned run records and CI intake for
+in CI's output from 2026-10-27 (run 40442394817) onwards. Open: nothing reads CI results after a push. The planned run records and CI intake for
 this log are meant to close it.
