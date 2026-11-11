@@ -26,6 +26,12 @@ tool-use examples against a quality gate frozen before any format existed. Produ
 [OpenGrad](https://github.com/arjhinety/OpenGrad), the research repository of
 [Experimental Intelligence](https://experimentalintelligence.org/).
 
+**Why the promotion was withdrawn.** The v4 gate has no check for refusals on questions the model should
+simply answer, and M1-v2 refuses every zero-shot GSM8K question (1,319 of 1,319). The explanation is
+on the [parent model card](https://huggingface.co/arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2)
+and in OpenGrad's [errata, §41-43](https://github.com/arjhinety/OpenGrad/blob/175711ca045e6aefb52ca469c91f869f58abccd0/reports/ERRATA.md).
+The errata link further down is the frozen `study-001` copy, written before the withdrawal.
+
 ## Known limitation: general-capability regression
 
 **This model is a research artifact, not a general-purpose assistant.** The unquantized

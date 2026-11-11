@@ -19,6 +19,9 @@ OUT = ROOT / "release" / "huggingface" / "qwen35-2b-m1-dpo-canonicalv2-final-v2-
 PARENT = "arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2"
 TAG = "study-001"
 EVIDENCE = f"https://github.com/arjhinety/OpenGrad/blob/{TAG}"
+# The withdrawal of M1-v2's promotion (2026-10-22) is explained in errata written after the study-001 tag,
+# so this one link is pinned to the first commit that has ERRATA §41-43 on master.
+WITHDRAWAL_ERRATA = "https://github.com/arjhinety/OpenGrad/blob/175711ca045e6aefb52ca469c91f869f58abccd0/reports/ERRATA.md"
 # The base model licence, pinned to the revision in registry/models.yaml (never blob/main).
 QWEN_REVISION = "15852e8c16360a2fea060d615a32b45270f8a8fc"
 QWEN_LICENSE = f"https://huggingface.co/Qwen/Qwen3.5-2B/blob/{QWEN_REVISION}/LICENSE"
@@ -122,6 +125,12 @@ the BF16 GGUF with one importance matrix, then scored on the same {bf16["records
 tool-use examples against a quality gate frozen before any format existed. Produced by
 [OpenGrad](https://github.com/arjhinety/OpenGrad), the research repository of
 [Experimental Intelligence](https://experimentalintelligence.org/).
+
+**Why the promotion was withdrawn.** The v4 gate has no check for refusals on questions the model should
+simply answer, and M1-v2 refuses every zero-shot GSM8K question (1,319 of 1,319). The explanation is
+on the [parent model card](https://huggingface.co/{PARENT})
+and in OpenGrad's [errata, §41-43]({WITHDRAWAL_ERRATA}).
+The errata link further down is the frozen `study-001` copy, written before the withdrawal.
 
 ## Known limitation: general-capability regression
 
