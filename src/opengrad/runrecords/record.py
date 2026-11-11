@@ -73,7 +73,7 @@ SECRET = re.compile(
 )
 #: Kept byte-identical to ``HOME_PATH`` in ``scripts/repo/check_publication_hygiene.py`` (a test checks it).
 HOME_PATH = re.compile(
-    r"(?:[A-Za-z]:(?:\\\\|\\|/)+Users(?:\\\\|\\|/)|/Users/[^/\s\"']+/|/home/[^/\s\"']+/)"
+    r"(?:[A-Za-z]:[\\/]+Users(?:\\\\|\\|/)|/Users/[^/\s\"']+/|/home/[^/\s\"']+/)"
 )
 #: Credentials the scanner's token list does not name.
 GOOGLE_KEY = re.compile(r"\bAIza[0-9A-Za-z_\-]{35}\b")

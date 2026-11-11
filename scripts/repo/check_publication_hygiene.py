@@ -44,7 +44,7 @@ SECRET = re.compile(
     r"|-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----)"
 )
 HOME_PATH = re.compile(
-    r"(?:[A-Za-z]:(?:\\\\|\\|/)+Users(?:\\\\|\\|/)|/Users/[^/\s\"']+/|/home/[^/\s\"']+/)"
+    r"(?:[A-Za-z]:[\\/]+Users(?:\\\\|\\|/)|/Users/[^/\s\"']+/|/home/[^/\s\"']+/)"
 )
 
 PATTERNS: dict[str, re.Pattern[str]] = {

@@ -230,6 +230,17 @@ def test_the_home_path_pattern_is_the_publication_scanners() -> None:
     assert runs_cli.HOME_PATH.pattern == module.HOME_PATH.pattern
 
 
+def test_the_home_path_pattern_stays_fast_on_a_long_backslash_run() -> None:
+    import time
+
+    # UP-0036: an alternation of one and two backslashes under + took exponential time here.
+    # 40 backslashes took the old form about 18 s, so a return of the bug fails here instead of hanging.
+    for text in ("C:" + "\\" * 40, "C:" + "/" * 5_000, "x" + "\\" * 5_000):
+        started = time.monotonic()
+        rr.HOME_PATH.search(text)
+        assert time.monotonic() - started < 1.0, text[:4]
+
+
 @pytest.mark.parametrize(
     ("text", "finding"),
     [

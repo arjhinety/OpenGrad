@@ -91,6 +91,8 @@ when the table sat above the sections; it is kept as written.
 | UP-0032 | 2026-11-11 | OpenGrad process, `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | The run-records commit was pushed after its targeted tests, which left out the pipe-invariant check in `tests/evaluation/`; master went red | Fixed (reviewed allowlist entry for the continuously drained pipe) |
 | UP-0033 | 2026-11-11 | `tests/verification/test_external_tool_scan.py`, Windows CI | `UNCLEAR` | not-filed | `test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is` failed once on Windows CI with `KeyError: 'any'`; it passes locally | Open; cause not established |
 | UP-0034 | 2026-11-11 | `tests/evaluation/test_capability_benchmarks.py`, `scripts/prepare_capability_benchmarks.py` | `OURS` | not-applicable | A determinism test reruns the dataset preparation in the repository and rewrites the tracked `*_v1.meta.json` files, with CRLF line endings on Windows | Open; files restored by hand each time |
+| UP-0035 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` | `OURS` | not-applicable | The text-file `private_path` pattern misses a Windows home path written with single backslashes, such as `C:\Users\<name>\...` | Open; the fix changes allowlist counts across the repository, so it is a change of its own |
+| UP-0036 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` (`HOME_PATH`), copied in `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | `HOME_PATH` took exponential time on a drive letter followed by a run of backslashes | Fixed (`(?:\\\\\|\\\|/)+` replaced by `[\\/]+` in both copies) |
 
 ---
 
@@ -543,5 +545,41 @@ the test and never sees it. Found on 2026-11-11 after running `tests/evaluation`
 
 Fix to make: the script writes with `newline="\n"`, or the test runs the script against a temporary copy of the
 output folder. Either way, a test must not leave tracked files modified.
+
+## UP-0035 — the hygiene scan misses a single-backslash Windows home path (`OURS`)
+
+Reported on 2026-11-11 by the job-grind session, at the owner's request, and reproduced in this session at
+71742c7. In `PATTERNS["private_path"]`, the Windows alternative matches the drive, `Users` and the separators
+only as doubled backslashes, which is the JSON-escaped form, and only for drive `C:` (any other drive letter is
+missed in every form); the forward-slash form is covered separately. A plain
+path written with single backslashes in a Markdown or Python file is not matched. An appended line holding such a path left the scan at
+PASS with unchanged counts: the path was missed, not allowlisted.
+
+`HOME_PATH` in the same file does match all three forms, but it is applied only to data files and archive members
+(`DATA_PATTERNS`).
+The scan of text files therefore misses exactly the form a path copied from a Windows terminal takes. The session
+that found it redacted the path from its own draft before any commit.
+
+Fix to make: give `PATTERNS["private_path"]` the single-backslash form, or use `HOME_PATH` for text files too. Then
+rerun the scan and re-count every `private_path` allowlist entry it changes.
+
+## UP-0036 — the scanner's home-path pattern backtracked exponentially (`OURS`)
+
+Found on 2026-11-11 while timing the run-record redactor. The drive branch of `HOME_PATH` read
+`[A-Za-z]:(?:\\\\|\\|/)+Users`. One alternative is two backslashes, another is one, so a run of n backslashes can be
+split into one- and two-backslash pieces in a Fibonacci number of ways. With no `Users` after the run, the engine
+tried each split: 28 backslashes after `C:` took about 0.05 s, each further backslash multiplied that by about
+1.6, and a few hundred did not finish within two minutes. The upload check searches every log with it and the
+redactor applies it to command arguments and error messages, so one odd log could hang an upload. The scanner
+runs it on data files and archive members, so one such file could hang CI.
+
+Fix: the repeated group is now the character class `[\\/]+`. It matches exactly the same strings, one or more
+backslashes or slashes, but each character can be taken only one way. The two copies stay byte-identical (a test
+checks that). Every count in the scan was unchanged, and the scan still passes. A test now requires
+`HOME_PATH.search` to finish within 1 s on 40 backslashes after a drive letter (the old form took about 18 s, so
+the test fails rather than hangs), and on 5,000 slashes.
+
+Lesson: in a repeated group, no two alternatives may match the same text. Write a separator run as a character
+class, never as an alternation of its lengths.
 
 <!-- END GENERATED -->
