@@ -30,6 +30,7 @@ from opengrad.failures.analyzer import FailureAnalyzer, FailureItem
 from opengrad.readiness import gpu_smoke, readiness, repository_status
 from opengrad.registry.preflight import check
 from opengrad.registry.validate import validate
+from opengrad.runrecords import recorded_call
 
 
 def preflight(root: Path) -> int:
@@ -557,10 +558,11 @@ def main() -> int:
         return handle_inspect_template(args, root)
 
     if args.command == "train":
-        return handle_train(args, root)
+        # Every training and evaluation run gets a full run record (opengrad.runrecords).
+        return recorded_call("training", sys.argv, root, lambda: handle_train(args, root))
 
     if args.command == "evaluate":
-        return _cmd_evaluate(args, root)
+        return recorded_call("evaluation", sys.argv, root, lambda: _cmd_evaluate(args, root))
 
     if args.command == "compare":
         comp = compare_runs(Path(args.baseline), Path(args.candidate))

@@ -13,6 +13,9 @@ dist/
 node_modules/
 build/
 wandb/
+# Full run records (opengrad.runrecords): start record, complete output log and summary per run. Only the
+# redacted summary is committed, under run-records/, by `python -m opengrad.runrecords export`.
+.run-records/
 # Experiment run directories. Bulk artifacts (checkpoints, shards, logs, predictions) stay
 # out of Git; the canonical record and its ledger are small metadata and are committed, so
 # the evidence under reports/ can be validated from a fresh clone.

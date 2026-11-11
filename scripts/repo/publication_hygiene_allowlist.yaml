@@ -139,3 +139,24 @@
   category: private_path
   count: 2
   reason: /tmp inside the Modal container, not a local path.
+
+# -- run records quote the scanner's home-path pattern, and their tests use made-up home paths -------------
+
+- path: src/opengrad/runrecords/record.py
+  category: private_path
+  count: 2
+  reason: >-
+    HOME_PATH, kept byte-identical to the scanner's own pattern (a test checks it), so a log holding a home path
+    is not uploaded. The pattern text is what matches, not a real path.
+- path: tests/runrecords/test_record.py
+  category: private_path
+  count: 2
+  reason: >-
+    Made-up paths under /home/someone/ that the tests feed to the redactor and the upload check, to show they are
+    replaced or refused.
+- path: tests/runrecords/test_record_hardening.py
+  category: private_path
+  count: 4
+  reason: >-
+    Made-up paths under /home/someone/ and C:\Users\someone\ that the tests feed to the redactor, to show they
+    never reach a record.

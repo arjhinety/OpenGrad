@@ -82,6 +82,46 @@ A gate that blocks a correct run is a finding about the gate. Record it; never r
 - Integrations (the `integrations/opengrad-mcp/` MCP server) call `opengrad … --json` and never bypass these
   gates (`docs/AGENT_INTEGRATION.md`).
 
+## Run records
+
+Runs are recorded by `src/opengrad/runrecords/` (owner's rule, 2026-11-11), beside the run store and never inside
+it:
+- `opengrad train` and `opengrad evaluate` record themselves, in process. The log captures what is written through
+  `sys.stdout`, `sys.stderr` and their `.buffer`. It does not capture output that C extensions (CUDA, NCCL) or child
+  processes write straight to the file descriptors.
+- Launch GPU training and evaluation through the launcher, `python -m opengrad.runrecords run --kind training --
+  opengrad train …`, so CUDA, NCCL and worker-process (vLLM) output is in the log too. The launcher tells the
+  child it is recorded (`OPENGRAD_RUN_RECORD_PARENT`), so the in-process record steps aside and each run has one
+  record.
+- Record any other command, with all of its output, as a child process:
+  `python -m opengrad.runrecords run --kind <training|evaluation|freeze|script|annotation|ci> -- <command>`.
+- Each run gets a git-ignored folder, `.run-records/<run_id>/` (`OPENGRAD_RUN_RECORDS_DIR` overrides it; the test
+  suite uses that). It holds the full output, a start record and a summary. A start with no summary reads as
+  `INCOMPLETE`.
+- The summary holds:
+  - the command and any error text, redacted: secrets, credential-named flags and fields (a name part such as
+    `token`, `key`, `password` or `auth`, split at `-`, `_`, `.` and camelCase, or an all-caps name ending in one;
+    `--no-…` and `--use-…` switches keep the next argument), URL credentials, bearer tokens, Google keys and absolute paths;
+  - the commit and the tracked-diff hash;
+  - every installed distribution and the `uv.lock` hash;
+  - the GPU, as reported by `nvidia-smi` or `rocm-smi`;
+  - allowlisted environment variables;
+  - the exit status, the duration and the log's sha256.
+
+  Some forms are not redacted, such as a password attached to a short flag (`-pSecret`), so don't pass
+  credentials on a command line.
+- If a record cannot be started or finished, the run still goes ahead and a warning is printed on stderr.
+- `python -m opengrad.runrecords pending` lists runs that failed, were interrupted or were killed and have no
+  disposition. Dispose of each with `dispose RUN_ID --upstream UP-NNNN`, naming its entry in `docs/upstream/`, or
+  with `--reason`. `export` then copies valid summaries into `run-records/` for committing.
+  `tests/runrecords/test_committed.py` fails CI on a committed run that did not pass and has no disposition, or a
+  summary with a secret, an email address, a home path or an absolute path.
+- `upload --repo OWNER/NAME`, on the owner's word only, sends a durable copy of each log to an existing private
+  dataset repository. It refuses any log holding a secret, an email address, a home path, a Google API key, a
+  bearer token or URL credentials. Annotation logs stay local unless named with `--kind annotation`.
+- Tests record only dummy child commands and stub `huggingface_hub` (UP-0030). Recording on a remote GPU machine
+  is not yet verified.
+
 ## Sources of truth
 
 `docs/EXPERIMENT_FOUNDATION.md` · `docs/TRAINING_LIFECYCLE.md` · `results/README.md` · `docs/architecture/repository.md` ·
