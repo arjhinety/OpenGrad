@@ -45,6 +45,7 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0025 | 2026-11-11 | OpenGrad reports | `OURS` | New report files were committed without regenerating `reports/README.md` | Fixed (indexes regenerated) |
 | UP-0026 | 2026-11-11 | OpenGrad process | `OURS` | CI on master was red from 2026-10-27 to 2026-11-11 and nobody noticed | Open; the run-record and CI-intake work is meant to catch this |
 | UP-0027 | 2026-11-11 | OpenGrad docs | `OURS` | The M1-v2 withdrawal commit left "promoted" in four current documents | Fixed in prose; frozen and generated files recorded in ERRATA §41 |
+| UP-0028 | 2026-11-11 | `publish_card_corrections.py` check, OpenGrad process | `OURS` | The card-publish tests failed while the GGUF generator was edited but not yet committed | Resolved by committing generator and card together; no code change |
 
 ---
 
@@ -367,3 +368,22 @@ in the present tense. They now give both dates: passed v4 on 2026-09-11, withdra
 generated and published files that also say "promoted" are listed in ERRATA §41 and left as they are. Lesson:
 when a status changes, search the whole repository for the old status word, and decide file by file whether to
 edit it (prose), regenerate it (generated) or record it in ERRATA (pinned).
+
+## UP-0028 — a generator check that reads two different states (`OURS`)
+
+On 2026-11-11, `scripts/build_gguf_card.py` was edited and the GGUF card regenerated, but neither was committed
+yet. `tests/publication/test_publish_cards.py::test_unrecorded_hub_commits_are_recorded_retroactively_and_the_chain_validates`
+then failed (`assert status == pcc.PASS`, got 1), and four other tests in the file failed with it. The cause:
+`plan()` first calls `gguf_card_matches_generator`. That imports the generator from the working tree but reads
+the card from the committed blob (`committed_card`). With the edit uncommitted, the new generator text was compared
+with the old committed card, and `plan()` returned FAIL.
+
+This was not a problem that existed before:
+- at the parent commit, with the edits stashed, the file passed 10 of 10;
+- after the generator and the regenerated card were committed together (c7ef083), it passed 10 of 10 again
+  (`-x -vv`).
+
+No code, test or publication record was changed. Lesson: commit a card generator and its regenerated card in the
+same commit before running the card tests or the publish dry run. A possible improvement, not made: have
+`gguf_card_matches_generator` load the generator from the same commit as the card, so a mid-edit state reports a
+clear error instead of a FAIL.
