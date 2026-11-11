@@ -174,18 +174,18 @@ def test_export_refuses_a_failed_run_until_it_is_disposed(tmp_path: Path) -> Non
     assert validate_summary(exported, tmp_path) == []
 
 
-def test_upload_secret_scans_each_log_and_records_the_durable_copy(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    console = SimpleNamespace(write=lambda t: None, flush=lambda: None)
-    rr.run_child("script", [PY, "-c", "print('clean')"], tmp_path, console)
-    rr.run_child("script", [PY, "-c", "print('hf_' + 'b' * 34)"], tmp_path, console)
+def _fake_hub(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, private: bool = True
+) -> dict[str, bytes]:
     sent: dict[str, bytes] = {}
 
     class FakeApi:
+        def repo_info(self, repo: str, **kwargs: object) -> SimpleNamespace:
+            return SimpleNamespace(private=private)
+
         def upload_file(self, **kwargs: object) -> SimpleNamespace:
             sent[str(kwargs["path_in_repo"])] = kwargs["path_or_fileobj"]  # type: ignore[assignment]
-            return SimpleNamespace(oid="rev1")
+            return SimpleNamespace(oid=f"rev{len(sent)}")
 
     def fake_download(repo: str, filename: str, **kwargs: object) -> str:
         path = tmp_path / "dl" / filename
@@ -195,11 +195,30 @@ def test_upload_secret_scans_each_log_and_records_the_durable_copy(
 
     monkeypatch.setattr(sys.modules["huggingface_hub"], "HfApi", FakeApi)
     monkeypatch.setattr(sys.modules["huggingface_hub"], "hf_hub_download", fake_download)
+    return sent
+
+
+def test_a_clean_log_is_uploaded_whole_and_a_private_one_as_a_redacted_copy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    console = SimpleNamespace(write=lambda t: None, flush=lambda: None)
+    rr.run_child("script", [PY, "-c", "print('clean')"], tmp_path, console)
+    token = "hf_" + "b" * 34
+    rr.run_child(
+        "script", [PY, "-c", f"print('{token} and someone@example.org')"], tmp_path, console
+    )
+    sent = _fake_hub(tmp_path, monkeypatch)
     assert runs_main(["upload", "--repo", "owner/run-logs"], tmp_path) == 0
-    assert len(sent) == 1, "the log matching the secret pattern must not be sent"
-    durable = [r["log"]["durable"] for r in rr.read_local(tmp_path)]
-    assert durable.count({"repo": "owner/run-logs", "revision": "rev1"}) == 1
-    assert durable.count(None) == 1
+    assert len(sent) == 2
+    by_copy = {r["log"]["durable"]["copy"]: r for r in rr.read_local(tmp_path)}
+    clean, private = by_copy["original"], by_copy["redacted"]
+    assert sent[clean["log"]["durable"]["path"]].strip() == b"clean"
+    redacted = sent[private["log"]["durable"]["path"]].decode("utf-8")
+    assert token not in redacted and "someone@example.org" not in redacted
+    assert set(private["log"]["durable"]["redacted_because"]) == {"a secret", "an email address"}
+    # The summary keeps the original log's hash and the hash of the copy that was sent.
+    assert private["log"]["sha256"] != private["log"]["durable"]["sha256"]
+    assert private["log"]["durable"]["path"].endswith("output.redacted.log")
 
 
 def test_training_and_evaluation_record_themselves(
@@ -258,18 +277,26 @@ def test_upload_blocks_private_details_beyond_the_token_list(text: str, finding:
     assert private_findings("step 10 loss 0.42") == []
 
 
-def test_annotation_logs_stay_local_unless_named(
+def test_an_annotation_log_is_always_a_redacted_copy(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     console = SimpleNamespace(write=lambda t: None, flush=lambda: None)
     rr.run_child("annotation", [PY, "-c", "print('label batch')"], tmp_path, console)
-    sent: list[str] = []
-
-    class FakeApi:
-        def upload_file(self, **kwargs: object) -> SimpleNamespace:
-            sent.append(str(kwargs["path_in_repo"]))
-            return SimpleNamespace(oid="rev1")
-
-    monkeypatch.setattr(sys.modules["huggingface_hub"], "HfApi", FakeApi)
+    sent = _fake_hub(tmp_path, monkeypatch)
     assert runs_main(["upload", "--repo", "owner/run-logs"], tmp_path) == 0
-    assert sent == []
+    (record,) = rr.read_local(tmp_path)
+    assert record["log"]["durable"]["copy"] == "redacted"
+    assert record["log"]["durable"]["redacted_because"] == ["annotation run"]
+    assert list(sent) == [record["log"]["durable"]["path"]]
+
+
+def test_upload_refuses_a_repository_that_is_not_private(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    console = SimpleNamespace(write=lambda t: None, flush=lambda: None)
+    rr.run_child("script", [PY, "-c", "print('clean')"], tmp_path, console)
+    sent = _fake_hub(tmp_path, monkeypatch, private=False)
+    assert runs_main(["upload", "--repo", "owner/run-logs"], tmp_path) == 2
+    assert sent == {}
+    (record,) = rr.read_local(tmp_path)
+    assert record["log"]["durable"] is None

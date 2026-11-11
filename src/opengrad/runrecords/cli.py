@@ -10,7 +10,9 @@
 
 ``export`` refuses a run that did not pass and has no disposition, and ``tests/runrecords/test_committed.py`` fails
 CI on any committed summary like that, or one that holds a path, a secret or an email address. ``upload`` is never
-run by anything else; it refuses a log holding private details.
+run by anything else, and only to a repository the Hub reports as private. A log holding a credential or a home
+folder (``private_findings``), and every annotation log, is uploaded only as a redacted copy; any other log goes
+byte for byte. The summary records which copy was sent, why, and the sha256 of both.
 """
 
 from __future__ import annotations
@@ -22,21 +24,30 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from opengrad.hashing import sha256_file
+from opengrad.hashing import sha256_bytes, sha256_file
 from opengrad.runrecords.record import (
+    BASIC_AUTH,
     BEARER,
     COMMITTED_DIR,
+    DASHED_KEY,
     EMAIL,
+    EMAIL_ENCODED,
     GOOGLE_KEY,
+    HOME_ENCODED,
     HOME_PATH,
+    HOME_WITH_NAME,
     KINDS,
+    PEM_BLOCK,
     SECRET,
     STATUSES,
     URL_CREDENTIALS,
     _write_json,
+    has_secret_field,
+    has_secret_flag_value,
     local_base,
     log_info,
     read_local,
+    redact_text,
     run_child,
 )
 
@@ -56,11 +67,16 @@ PRIVATE: dict[str, re.Pattern[str]] = {
     "a Google API key": GOOGLE_KEY,
     "a bearer token": BEARER,
     "credentials in a URL": URL_CREDENTIALS,
+    "a private key": PEM_BLOCK,
+    "an API key": DASHED_KEY,
+    "basic-auth credentials": BASIC_AUTH,
+    "an encoded email address": EMAIL_ENCODED,
 }
-#: Annotation runs talk to labelling models and have held private details, so their logs stay local unless the
-#: owner names the kind explicitly. The email pattern also matches harmless text such as git@github.com: such a
-#: log is refused, which is the safe direction.
-UPLOAD_KINDS_DEFAULT = ("training", "evaluation", "freeze", "script", "ci")
+#: Every kind is uploaded (owner's decision, 2026-11-11), so a lost machine loses no log.
+UPLOAD_KINDS_DEFAULT = KINDS
+#: Annotation runs talk to labelling models and have held private details, so their logs are always uploaded as a
+#: redacted copy, whether or not a pattern matches.
+ALWAYS_REDACTED_KINDS = ("annotation",)
 REQUIRED = (
     "schema_version",
     "run_id",
@@ -74,8 +90,62 @@ REQUIRED = (
 )
 
 
+#: The longest line the patterns see, as a safety net. Matching time grows about linearly with a line's length (about
+#: 1 s for 64 KB in the worst shape measured), so ordinary long lines (config and JSON dumps) are matched in full. A
+#: longer line is not matched at all: it counts as a finding and the redacted copy replaces it whole.
+MAX_LINE = 100_000
+_LINE_BREAKS = re.compile(r"(\r\n|\n|\r)")
+
+
+#: Terminal colour and cursor codes: CSI sequences, character-set selections (``ESC ( B`` from ``tput sgr0``) and
+#: the two-character cursor codes. Logging libraries put a colour code right before a value, where it would hide a
+#: token from patterns that start at a word boundary. Escape strings that carry text (window titles, OSC 8
+#: hyperlinks, DCS, SOS, PM, APC) are left in place, so their text is still checked; a token right after a DCS,
+#: SOS or APC introducer is glued to the introducer's character (``P``, ``X``, ``_``) and missed, like any token
+#: glued to a preceding letter.
+ANSI = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b[()*+][0-~]|\x1b[78=>DEHMc]")
+
+
+def _bounded(text: str) -> tuple[str, bool]:
+    """The text with every line longer than ``MAX_LINE`` replaced, and whether any was."""
+    parts = _LINE_BREAKS.split(text)
+    cut = False
+    for i in range(0, len(parts), 2):
+        if len(parts[i]) > MAX_LINE:
+            parts[i] = f"<line of {len(parts[i])} characters removed>"
+            cut = True
+    return "".join(parts), cut
+
+
 def private_findings(text: str) -> list[str]:
-    return [name for name, pattern in PRIVATE.items() if pattern.search(text)]
+    """What in the text must not leave the machine as is. An ordinary path alone is not on the list (owner's
+    choice C, 2026-11-11): a home folder is, in any form, and so is any credential the redactor would hide."""
+    found = [name for name, pattern in PRIVATE.items() if pattern.search(text)]
+    if (HOME_WITH_NAME.search(text) or HOME_ENCODED.search(text)) and "a home-folder path" not in found:
+        found.append("a home-folder path")
+    if has_secret_field(text):
+        found.append("a credential field")
+    if has_secret_flag_value(text):
+        found.append("a credential flag value")
+    return found
+
+
+def log_findings(text: str) -> list[str]:
+    """``private_findings`` for a log: over-long lines are not matched but are a finding themselves."""
+    bounded, cut = _bounded(ANSI.sub("", text))
+    return private_findings(bounded) + (["an over-long line"] if cut else [])
+
+
+def redacted_log(text: str, root: Path) -> str:
+    """A log with every private detail replaced: the command redaction (secrets, credential fields, URL
+    credentials, bearer tokens, Google keys, absolute paths) applied line by line, then email addresses and home
+    paths. Harmless text such as ``git@github.com`` is replaced too, which is the safe direction."""
+    # Colour codes go first, so they hide nothing; then a key block, which spans lines, over the whole text.
+    text = PEM_BLOCK.sub("<redacted private key>", ANSI.sub("", text))
+    text, _ = _bounded(text)
+    lines = [redact_text(line, root) for line in text.split("\n")]
+    out = EMAIL_ENCODED.sub("<email>", EMAIL.sub("<email>", "\n".join(lines)))
+    return HOME_PATH.sub("<absolute-path>/", out)
 
 
 def needs_disposition(summary: dict[str, Any]) -> bool:
@@ -209,12 +279,41 @@ def cmd_export(root: Path) -> int:
     return 1 if blocked else 0
 
 
+def _report_kept(kept: list[str]) -> bool:
+    """List the logs that stayed on this machine only; True when there are any."""
+    if kept:
+        print(f"INCOMPLETE: {len(kept)} log(s) stay on this machine only, with no durable copy:")
+        for run_id in kept:
+            print(f"  {run_id}")
+    return bool(kept)
+
+
 def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
-    """A durable copy of each log not yet uploaded, to a private dataset repository the owner names."""
+    """A durable copy of each log not yet uploaded, to a private dataset repository the owner names.
+
+    A log with no private detail is sent byte for byte. A log holding one, and every annotation log, is sent as a
+    redacted copy (``redacted_log``). It is checked again after redaction and kept local if anything still matches.
+    Each upload is downloaded again and compared with the bytes that were sent. Exit codes: 0 every eligible log
+    uploaded; 1 a log changed since its run or came back different; 2 the repository was refused; 3 some logs stayed
+    local, so they have no durable copy. Logs kept local are listed in every case, exit 1 included.
+    """
     from huggingface_hub import HfApi, hf_hub_download
 
     api = HfApi()
+    # A typo in the name, or a repository that is (or later becomes) public, would publish every log: refuse
+    # anything the Hub does not report as an existing private dataset repository.
+    try:
+        visibility = api.repo_info(repo, repo_type="dataset")
+    except Exception as exc:  # noqa: BLE001 -- a missing repository or no access: nothing is sent
+        print(
+            f"BLOCKED: cannot read dataset repository {repo!r} ({type(exc).__name__}); nothing uploaded"
+        )
+        return 2
+    if getattr(visibility, "private", None) is not True:
+        print(f"BLOCKED: dataset repository {repo!r} is not private; nothing uploaded")
+        return 2
     sent = 0
+    kept: list[str] = []
     for record in read_local(root):
         if (
             record["status"] == "INCOMPLETE"
@@ -224,37 +323,65 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
             continue
         summary_path, summary = _summary(root, record["run_id"])
         log = local_base(root) / record["run_id"] / "output.log"
-        data = log.read_bytes()
-        found = private_findings(data.decode("utf-8", errors="replace"))
-        if found:
-            print(
-                f"not uploaded {record['run_id']}: the log contains {', '.join(found)}; it stays local"
-            )
+        original = log.read_bytes()
+        if sha256_bytes(original) != summary["log"]["sha256"]:
+            print(f"FAIL: {record['run_id']}: the local log changed since the run; nothing more uploaded")
+            _report_kept(kept)
+            return 1
+        try:
+            text = original.decode("utf-8")
+        except UnicodeDecodeError:
+            text = "\x00"
+        if "\x00" in text:
+            print(f"not uploaded {record['run_id']}: not clean UTF-8 text, so it cannot be checked; it stays local")
+            kept.append(record["run_id"])
             continue
+        found = log_findings(text)
+        # Owner's choice C: a redacted copy only when something private is detected, or for an annotation log.
+        # A log whose only absolute paths are ordinary ones is sent byte for byte.
+        redact = bool(found) or record["kind"] in ALWAYS_REDACTED_KINDS
+        data = redacted_log(text, root).encode("utf-8") if redact else original
+        left = ", ".join(log_findings(data.decode("utf-8"))) if redact else ""
+        if left:
+            print(f"not uploaded {record['run_id']}: {left} survived redaction; it stays local")
+            kept.append(record["run_id"])
+            continue
+        name = "output.redacted.log" if redact else "output.log"
         info = api.upload_file(
             path_or_fileobj=data,
-            path_in_repo=f"{record['run_id']}/output.log",
+            path_in_repo=f"{record['run_id']}/{name}",
             repo_id=repo,
             repo_type="dataset",
-            commit_message=f"Run log {record['run_id']}",
+            commit_message=f"Run log {record['run_id']}" + (" (redacted copy)" if redact else ""),
         )
         fetched = Path(
             hf_hub_download(
-                repo, f"{record['run_id']}/output.log", repo_type="dataset", revision=info.oid
+                repo, f"{record['run_id']}/{name}", repo_type="dataset", revision=info.oid
             )
         )
-        if sha256_file(fetched) != summary["log"]["sha256"]:
-            print(f"FAIL: {record['run_id']} came back different from the local log")
+        if sha256_file(fetched) != sha256_bytes(data):
+            print(f"FAIL: {record['run_id']} came back different from what was sent")
+            _report_kept(kept)
             return 1
-        summary["log"]["durable"] = {"repo": repo, "revision": info.oid}
+        summary["log"]["durable"] = {
+            "repo": repo,
+            "revision": info.oid,
+            "path": f"{record['run_id']}/{name}",
+            "copy": "redacted" if redact else "original",
+            "sha256": sha256_bytes(data),
+            "redacted_because": found
+            or (["annotation run"] if record["kind"] in ALWAYS_REDACTED_KINDS else []),
+        }
         _write_json(summary_path, summary)
         committed = root / COMMITTED_DIR / f"{record['run_id']}.json"
         if committed.is_file():
             _write_json(committed, summary)
         sent += 1
-        print(f"uploaded {record['run_id']} @ {info.oid} (re-fetched, bytes match)")
+        kind = "redacted copy" if redact else "original"
+        print(f"uploaded {record['run_id']} ({kind}) @ {info.oid} (re-fetched, bytes match)")
     print(f"{sent} log(s) uploaded")
-    return 0
+    # A log kept local has no backup, so the run does not report success (exit 3).
+    return 3 if _report_kept(kept) else 0
 
 
 def main(argv: list[str] | None = None, root: Path | None = None) -> int:
@@ -286,7 +413,7 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
         dest="kinds",
         action="append",
         choices=KINDS,
-        help="upload only these kinds (repeatable); default: every kind except annotation",
+        help="upload only these kinds (repeatable); default: every kind",
     )
     args = parser.parse_args(argv)
     if args.command == "run":

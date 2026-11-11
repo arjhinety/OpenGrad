@@ -122,3 +122,24 @@ def test_an_open_parent_record_is_the_only_record(
 def test_an_exception_name_keeps_its_message(tmp_path: Path) -> None:
     assert rr.redact_text("KeyError: 'token'", tmp_path) == "KeyError: 'token'"
     assert "abc" not in rr.redact_text("api_key: abc", tmp_path)
+
+
+def test_a_redacted_copy_holds_nothing_the_upload_check_flags(tmp_path: Path) -> None:
+    from opengrad.runrecords.cli import private_findings, redacted_log
+
+    log = "\n".join(
+        [
+            "Cloning into 'x' from git@github.com:owner/repo.git",
+            "token hf_" + "e" * 34,
+            "Authorization: Bearer " + "f" * 30,
+            "key=AIza" + "G" * 35,
+            "fetching https://user:pass@example.org/x",
+            "cache at /home/someone/.cache/huggingface",
+            "contact someone@example.org",
+            "step 10 loss 0.42",
+        ]
+    )
+    copy = redacted_log(log, tmp_path)
+    assert private_findings(log)
+    assert private_findings(copy) == []
+    assert "step 10 loss 0.42" in copy

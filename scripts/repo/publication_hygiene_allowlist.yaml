@@ -160,3 +160,14 @@
   reason: >-
     Made-up paths under /home/someone/ and C:\Users\someone\ that the tests feed to the redactor, to show they
     never reach a record.
+- path: tests/runrecords/test_record_redaction.py
+  category: private_path
+  count: 1
+  reason: >-
+    A made-up path under /home/someone/ in a sample log, to show that a redacted upload copy holds no home path.
+- path: tests/runrecords/test_upload_hardening.py
+  category: private_path
+  count: 11
+  reason: >-
+    Made-up home folders (Jane Doe, jane, o'brien, O'Neil) in sample log lines, to show the redacted upload copy removes the name and
+    that the detector flags them.

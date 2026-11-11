@@ -77,9 +77,31 @@ HOME_PATH = re.compile(
 )
 #: Credentials the scanner's token list does not name.
 GOOGLE_KEY = re.compile(r"\bAIza[0-9A-Za-z_\-]{35}\b")
-BEARER = re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._\-~+/=]{8,}")
-URL_CREDENTIALS = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^/\s@]+@")
-EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+BEARER = re.compile(r"(?i)\bbearer[ \t]+[A-Za-z0-9._\-~+/=]{8,}")
+URL_CREDENTIALS = re.compile(r"(?i)(?<![a-z0-9+.-])([a-z][a-z0-9+.-]*://)[^/\s:@]*:[^/\s@]+@")
+EMAIL = re.compile(r"(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+#: An email address percent-encoded in a URL (``jane%40example.org``).
+EMAIL_ENCODED = re.compile(r"(?i)(?<![A-Za-z0-9._+-])[A-Za-z0-9._+-]+%40[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+#: A whole PEM or PGP private-key block, header to footer (or to the end of the text when the footer is missing).
+PEM_BLOCK = re.compile(
+    r"-----BEGIN [A-Z0-9 ]*PRIVATE KEY(?: BLOCK)?-----.*?(?:-----END [A-Z0-9 ]*PRIVATE KEY(?: BLOCK)?-----|\Z)",
+    re.DOTALL,
+)
+#: API keys in the newer hyphenated formats (``sk-proj-...``, ``sk-ant-api03-...``) that SECRET does not name.
+DASHED_KEY = re.compile(r"\bsk-[A-Za-z0-9]+-[A-Za-z0-9_\-]{20,}")
+BASIC_AUTH = re.compile(r"(?i)\bbasic[ \t]+[A-Za-z0-9+/=]{8,}")
+#: A home folder with the user's name, whatever the drive, case, separator, spaces or apostrophes in the name.
+HOME_WITH_NAME = re.compile(
+    # A match may only start at a drive, a UNC share or the first separator of a run (the lookbehind), so a long run
+    # of slashes is scanned once, not once per starting position.
+    r"(?i)(?:[A-Za-z]:|\\\\[^\\/\s]+|(?<![\\/]))[\\/]+(?:Users|home)[\\/]+(?:[^\\/\n\"']|'(?=[A-Za-z]))+(?:[\\/][^\s\"']*)?"
+)
+#: A percent-encoded home folder (``C%3A%5CUsers%5Cname``). Each separator alternative starts differently, so a run
+#: is taken one way only, and a match starts only at the first separator of a run.
+HOME_ENCODED = re.compile(
+    r"(?i)(?:[A-Za-z]%3A)?(?<![\\/])(?<!%5C)(?<!%2F)(?:%5C|%2F|[\\/])+(?:Users|home)(?:%5C|%2F|[\\/])+"
+    r"(?:[^%\s\\/\"'&?#]|%(?!5C|2F)[0-9A-F]{2})+"
+)
 #: Words that mark a name as holding a credential, when one of them is a whole part of the name.
 SECRET_WORDS = frozenset(
     {
@@ -112,10 +134,37 @@ def name_parts(name: str) -> list[str]:
     return parts
 
 
+#: Special-token names a tokenizer config uses: ``<word>_token``, ``<word>_token_id`` and ``<word>_token_ids``.
+TOKENIZER_WORDS = frozenset(
+    {"pad", "eos", "bos", "unk", "sep", "cls", "mask", "sos", "eot", "boi", "eoi", "boa", "eoa"}
+)
+#: Other tokenizer and model settings named with ``token``, as their name parts.
+TOKENIZER_NAMES = frozenset({("decoder", "start", "token", "id"), ("token", "type", "ids")})
+
+
+def is_tokenizer_name(name: str) -> bool:
+    """A tokenizer setting, not a credential: exactly ``pad_token``, ``eos_token_id``, ``bos_token_ids`` (one word
+    from ``TOKENIZER_WORDS``, then ``token``, then nothing, ``id`` or ``ids``), ``decoder_start_token_id`` or
+    ``token_type_ids``, in any case or separator. A closed list, because the same check redacts command lines in
+    committed summaries: ``hf_token_id`` and ``start_token`` are still credentials."""
+    parts = tuple(name_parts(name))
+    if parts in TOKENIZER_NAMES:
+        return True
+    return (
+        len(parts) in (2, 3)
+        and parts[0] in TOKENIZER_WORDS
+        and parts[1] == "token"
+        and (len(parts) == 2 or parts[2] in ("id", "ids"))
+    )
+
+
 def is_secret_name(name: str) -> bool:
     """True when a flag or field name says it holds a credential. ``HF_TOKEN``, ``api-key``, ``db.password``,
     ``X-Api-Key``, ``accessToken``, ``secretKey`` and ``MYTOKEN`` do; ``max_tokens``, ``author``, ``monkey``,
-    ``passthrough`` and ``tokenizer`` do not."""
+    ``passthrough``, ``tokenizer`` and the tokenizer settings ``is_tokenizer_name`` lists (``pad_token``,
+    ``eos_token_id``) do not."""
+    if is_tokenizer_name(name):
+        return False
     if any(part in SECRET_WORDS for part in name_parts(name)):
         return True
     bare = name.strip("-_.")
@@ -132,6 +181,10 @@ def is_secret_flag(flag: str) -> bool:
     return is_secret_name(flag.lstrip("-"))
 
 
+#: A flag and the value after it, in free text; the value is hidden when ``is_secret_flag`` says so.
+FLAG_VALUE = re.compile(
+    r"""(?<!\S)(--?[A-Za-z][A-Za-z0-9_.-]{0,127})([ \t]+)(?!-)("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\S+)"""
+)
 #: An exception type such as ``KeyError``: in ``KeyError: 'token'`` what follows is the missing key's name, which an
 #: error record needs, not a credential.
 EXCEPTION_NAME = re.compile(r"(?:Error|Exception|Warning)$")
@@ -140,15 +193,19 @@ ASSIGNMENT = re.compile(r"^([A-Za-z_][A-Za-z0-9_.-]*)=.*$", re.DOTALL)
 #: A field anywhere in text: JSON, ``key=value``, ``key: value`` (a header), dotted names, an assignment in the
 #: middle of a shell string. The value may be double-quoted (with ``\"`` escapes), single-quoted or bare. Only a
 #: field whose name passes ``is_secret_name`` has its value hidden.
-FIELD = re.compile(
-    r"""(["']?)([A-Za-z_][A-Za-z0-9_.-]*)\1(\s*[:=]\s*)("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;&"'}\]]+)"""
-)
+#: The name and separator are matched first (``FIELD_HEAD``); the value (``FIELD_VALUE``) only after a credential
+#: name. An unquoted value runs to the end of its line or to the first quote, ``}`` or ``]`` (which keeps compact
+#: JSON intact), so ``password: correct horse`` is hidden whole and the rest of that line goes with it, the safe
+#: direction. The value is matched
+#: only then, so a line of non-credential fields is scanned once instead of once per field to the end of the line.
+FIELD_HEAD = re.compile(r"""(["']?)([A-Za-z_][A-Za-z0-9_.-]{0,127})\1(\s*[:=]\s*)""")
+FIELD_VALUE = re.compile(r""""(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s"'}\]][^\r\n"'}\]]*""")
 
 
 #: An absolute path: drive-letter, UNC, POSIX or file URL. Used for whole arguments and inside text.
 ABSOLUTE_START = re.compile(r"^(?:file:/+|[A-Za-z]:[\\/]|\\\\|/)")
 ABSOLUTE_INSIDE = re.compile(
-    r"(?:file:/+[^\s\"']*|(?<![\w.])[A-Za-z]:[\\/][^\"'\n]*?(?=$|[\"'\n]|\s-)|\\\\[^\s\"']+"
+    r"(?:file:/+[^\s\"']*|(?<![\w.])[A-Za-z]:[\\/][^\s\"']*|\\\\[^\s\"']+"
     r"|(?<![\w.\-])/(?:home|Users|root|mnt|tmp|workspace|opt|data|srv|var|private)/[^\s\"']*)"
 )
 #: Environment variables recorded by name and value. Nothing else from the environment is kept.
@@ -181,29 +238,56 @@ def local_base(root: Path) -> Path:
     return Path(override) if override else root / LOCAL_DIR
 
 
+def has_secret_field(text: str) -> bool:
+    """True when ``hide_secret_fields`` would hide a value. Detection is the redaction itself, so a field nested in
+    another value (``env: HF_TOKEN=x``, ``--set=api_key=x``) is detected exactly when it would be hidden."""
+    return hide_secret_fields(text) != text
+
+
+def hide_secret_flag_values(text: str) -> str:
+    """Hide the value after a credential flag in free text (``--password hunter2``)."""
+    return FLAG_VALUE.sub(
+        lambda m: (
+            f"{m.group(1)}{m.group(2)}<redacted>" if is_secret_flag(m.group(1)) else m.group(0)
+        ),
+        text,
+    )
+
+
+def has_secret_flag_value(text: str) -> bool:
+    """True when ``hide_secret_flag_values`` would hide a value."""
+    return hide_secret_flag_values(text) != text
+
+
 def hide_secret_fields(text: str) -> str:
     """Hide the value of every credential-named field. After a field whose name is not a credential, scanning
     resumes at its value, so ``--set=api_key=x`` still reaches ``api_key``."""
     out: list[str] = []
     pos = 0
-    while (match := FIELD.search(text, pos)) is not None:
+    while (match := FIELD_HEAD.search(text, pos)) is not None:
+        value = None
         if is_secret_name(match.group(2)) and not EXCEPTION_NAME.search(match.group(2)):
-            value = match.group(4)
-            quote = value[0] if value[:1] in {'"', "'"} else ""
-            out.append(text[pos : match.start(4)] + f"{quote}<redacted>{quote}")
-            pos = match.end(4)
+            value = FIELD_VALUE.match(text, match.end())
+        if value is not None:
+            quote = value.group(0)[0] if value.group(0)[:1] in {'"', "'"} else ""
+            out.append(text[pos : value.start()] + f"{quote}<redacted>{quote}")
+            pos = value.end()
         else:
-            out.append(text[pos : match.end(3)])
-            pos = match.end(3)
+            out.append(text[pos : match.end()])
+            pos = match.end()
     out.append(text[pos:])
     return "".join(out)
 
 
 def redact_text(text: str, root: Path) -> str:
     """Free text (an argument, an error message) with credentials and absolute paths removed."""
+    text = PEM_BLOCK.sub("<redacted private key>", text)
     text = SECRET.sub("<redacted>", text)
+    text = DASHED_KEY.sub("<redacted>", text)
     text = GOOGLE_KEY.sub("<redacted>", text)
     text = BEARER.sub("Bearer <redacted>", text)
+    text = BASIC_AUTH.sub("Basic <redacted>", text)
+    text = hide_secret_flag_values(text)
     text = URL_CREDENTIALS.sub(r"\1<redacted>@", text)
     text = hide_secret_fields(text)
     resolved = str(root.resolve())
@@ -214,6 +298,9 @@ def redact_text(text: str, root: Path) -> str:
             lambda m: "" if m.group(0)[-1:] in "\\/" else ".",
             text,
         )
+    # Home folders first, whole: a name with a space, after a word character, under a UNC share.
+    text = HOME_WITH_NAME.sub("<absolute-path>", text)
+    text = HOME_ENCODED.sub("<absolute-path>", text)
     text = ABSOLUTE_INSIDE.sub("<absolute-path>", text)
     return HOME_PATH.sub("<absolute-path>/", text)
 
@@ -239,7 +326,11 @@ def redact_command(argv: Sequence[str], root: Path) -> list[str]:
                 out.append(value)
                 hide_next = True
             continue
-        inside = value.startswith((resolved, resolved.replace("\\", "/")))
+        # Inside the repository only on a full path component: "...\OpenGradX" is not inside "...\OpenGrad".
+        inside = any(
+            value == prefix or value.startswith((prefix + "\\", prefix + "/"))
+            for prefix in (resolved, resolved.replace("\\", "/"))
+        )
         if not inside and ABSOLUTE_START.match(value):
             out.append("<absolute-path>")
             continue
