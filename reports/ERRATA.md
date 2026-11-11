@@ -1981,5 +1981,43 @@ Later line for §41, 2026-11-11 (owner decision, the same day):
 - **Cause:** the publisher's commit message and correction text were constants (UP-0029). They are now
   required arguments of `--upload`.
 - **What stays valid:** the record's revisions, `card_sha256` and re-fetch result are correct. Its
-  description of the change and its reason for existing are wrong. The record and the Hub history are append-only, so both are left as they
-  are, and this entry is the correction.
+  description of the change and its reason for existing are wrong. The record and the Hub history are
+  append-only, so both are left as they are, and this entry is the correction.
+
+Later line for §41, 2026-11-11: the two cards were published that day, by accident, from a test and not by the
+planned upload command. See §43. Their record is `reports/releases/hf-publication-2026-11-11-card-v1.json`.
+
+## 43. The 2026-11-11 card republish was made by a test, with the commit message "m"
+
+**Added 2026-11-11.** This entry changes no record and no Hub revision.
+
+- **What happened:**
+  - At 2026-11-11 09:05 UTC, `tests/publication/test_publish_cards.py` was run locally while an edit to
+    `scripts/publish_card_corrections.py` was half applied. A new test called `main()` with
+    `--upload --message m --correction c --slug card-v1.2-fix`. The test was meant to show that a bad slug is
+    blocked, but the slug check it relied on was not yet in the script.
+  - So `main()` reached the real Hugging Face client and uploaded the two changed cards. It downloaded each again
+    and compared it, then wrote a record.
+- **On the Hub:**
+  - `arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2` is at `b5a90a10016688922ae0fc7fb46fc0fd9253e410`
+    (parent `e4e1a31c`).
+  - `arjhinety/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2-GGUF` is at
+    `9c4a18434fc9a0e81135f89ea5e23e5e7662c83c` (parent `bac260e9`).
+  - Both commits have the message "m".
+- **The record:** `reports/releases/hf-publication-2026-11-11-card-v1.json` is committed exactly as the run
+  wrote it (sha256 `afe10c2c…`). Its `correction` is "c". Its file name was cut short from the slug
+  `card-v1.2-fix` by `with_suffix`. It names GitHub commit `1372626`.
+- **What the commits actually contain:** the correction approved by the owner on 2026-11-11 (§41).
+  - The M1-v2 card's "What the promotion meant" paragraph and the GGUF card's opening sentence now state that
+    M1-v2 passed `tool_use_promotion_v4` on 2026-09-11 and that the promotion was withdrawn on 2026-10-22.
+  - A read-only check after the upload found each live card byte-identical to the committed card. No weight or
+    other file was written.
+- **Why it is left as it is:** the owner's decision (2026-11-11, option A).
+  - A Hub commit message cannot be edited.
+  - Rewriting the Hub history would break the revision chain that the publication records name.
+  - The record shows exactly what was sent.
+- **Cause and fix (UP-0030):**
+  - The script now checks every `--upload` value, including the slug's pattern, before it imports the Hub
+    client.
+  - The test module replaces `huggingface_hub` with a stub that raises an error. With the slug check removed by
+    hand, the test failed on the stub instead of publishing.

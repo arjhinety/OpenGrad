@@ -11,9 +11,12 @@ from __future__ import annotations
 import importlib.util
 import json
 import shutil
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
+
+import pytest
 
 from opengrad.hashing import sha256_bytes
 from opengrad.registry.validators import validate_publication_records
@@ -32,6 +35,23 @@ def _script():
 
 
 pcc = _script()
+
+
+class _NoNetworkHfApi:
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        raise AssertionError("a test reached the real Hugging Face client")
+
+
+@pytest.fixture(autouse=True)
+def _no_real_hub(monkeypatch: pytest.MonkeyPatch) -> None:
+    """No test here may reach the real Hub, even if a check in main() slips (UP-0030).
+
+    On 2026-11-11 a test called main() with --upload before its slug check existed, and it published two
+    cards with the commit message "m" (ERRATA §43). With this stub, the same slip fails the test.
+    """
+    stub = ModuleType("huggingface_hub")
+    stub.HfApi = _NoNetworkHfApi  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "huggingface_hub", stub)
 
 
 class FakeHub:

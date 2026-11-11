@@ -47,6 +47,7 @@ library or tool can later go upstream as an issue or a pull request. Started 202
 | UP-0027 | 2026-11-11 | OpenGrad docs | `OURS` | The M1-v2 withdrawal commit left "promoted" in four current documents | Fixed in prose; frozen and generated files recorded in ERRATA §41 |
 | UP-0028 | 2026-11-11 | `publish_card_corrections.py` check, OpenGrad process | `OURS` | The card-publish tests failed while the GGUF generator was edited but not yet committed | Resolved by committing generator and card together; no code change |
 | UP-0029 | 2026-11-11 | `scripts/publish_card_corrections.py` | `OURS` | The Hub commit message and the record's correction text were fixed to the 2026-09-24 license fix, so a later card upload carried that label | Fixed (`--upload` requires `--message`, `--correction`, `--slug`); the 2026-10-22 record left as is (ERRATA §42) |
+| UP-0030 | 2026-11-11 | `tests/publication/test_publish_cards.py` | `OURS` | A test reached the real Hugging Face client and published two cards with the commit message "m" | Fixed (slug checked before import; the test module stubs `huggingface_hub`); ERRATA §43 |
 
 ---
 
@@ -406,3 +407,29 @@ The independent audit before the 2026-11-11 republish found this. The fix:
 Two new tests cover the refusal, and confirm that a record with its own slug is found and validates. Record
 discovery reads every `reports/releases/*.json` and does not depend on the file name. The 2026-10-22 record and
 the Hub commit are left as they are (ERRATA §42).
+
+Later line for UP-0029, 2026-11-11: the fix above was not in place before something reached the Hub. While it
+was being written, a test published both cards for real (UP-0030, ERRATA §43).
+
+## UP-0030 — a test that could publish to the real Hub (`OURS`)
+
+The fix for UP-0029 was applied in two steps. The first step failed partway: a shell-escaping error stopped the
+edit script after it had appended a new test, but before the slug check reached
+`scripts/publish_card_corrections.py`. The publication tests were then run. The new test calls
+`main(["--upload", "--message", "m", "--correction", "c", "--slug", "card-v1.2-fix"])`, expecting BLOCKED. It
+reached the real `huggingface_hub.HfApi`, found the two cards that differed from the Hub, and uploaded them with
+the message "m". It re-fetched them (byte-identical) and wrote the record `hf-publication-2026-11-11-card-v1.json`
+(correction "c"). The content was the owner-approved correction, but it went out before the audit, before the
+push, and with no meaningful message (ERRATA §43).
+
+Fixes:
+- `main()` checks all three values, including the slug pattern, before importing the Hub client.
+- `tests/publication/test_publish_cards.py` has an autouse fixture that replaces `huggingface_hub` with a stub
+  whose `HfApi` raises an error.
+- Checked by disabling the slug check by hand: the test then failed on the stub, and nothing was sent.
+
+Lessons:
+- A test must not be able to reach a production service through the code it tests. Stub the client at the module
+  boundary, not only through the check under test.
+- After a multi-step edit stops partway, check the whole diff before running anything that can act outside the
+  repository.
