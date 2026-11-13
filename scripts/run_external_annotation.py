@@ -60,6 +60,8 @@ INPUT_FILE = "input.md"
 #: A run with ``tool_gate`` gets ``.agents/hooks.json`` in its isolated directory, whose PreToolUse hook (this script)
 #: allows only reading the input file and logs every decision; an attempt the hook never saw is not recorded.
 TOOL_GATE = ROOT / "scripts" / "agy_tool_gate.py"
+#: The read tools the gate allows (scripts/agy_tool_gate.py READ_TOOLS): ``view_file``, and ``read_file`` (UP-0039).
+READ_TOOLS = ("view_file", "read_file")
 FILE_POINTER = (
     f"Read the file {INPUT_FILE} in your working directory. It contains your complete instructions followed by "
     "the batch to annotate. Follow those instructions exactly. Do not open any other file and run no commands."
@@ -296,8 +298,9 @@ def write_tool_gate(workdir: Path) -> None:
     parts = [sys.executable, str(TOOL_GATE), INPUT_FILE]
     command = " ".join(parts)
     if any(" " in part for part in parts):
-        # cmd /c strips one outer pair of quotes, so a quoted command line is wrapped once more.
-        command = '"' + " ".join(f'"{part}"' for part in parts) + '"'
+        # Each part quoted once. An extra outer pair (for cmd /c) made agy's hook fail to start, which blocks
+        # every read, so a run from a path with a space read nothing (measured 2026-11-13, UP-0039).
+        command = " ".join(f'"{part}"' for part in parts)
     hooks = {
         "opengrad-tool-gate": {
             "PreToolUse": [
@@ -416,9 +419,9 @@ def main(argv: list[str] | None = None) -> int:
             }
             status = "no JSON answer array in the output"
             gate = run.get("tool_gate")
-            if spec.get("tool_gate") and not (gate and gate["allowed"].get("view_file")):
-                # The model must read its input through view_file; if the hook never allowed one, it was not
-                # in force, and the answers are not recorded.
+            if spec.get("tool_gate") and not (gate and any(gate["allowed"].get(t) for t in READ_TOOLS)):
+                # The model must read its input through a read tool the hook allowed; if it never allowed one,
+                # the hook was not in force, and the answers are not recorded.
                 answers = None
                 status = "rejected: the tool gate never allowed reading the input, so it was not in force"
             if answers is not None:

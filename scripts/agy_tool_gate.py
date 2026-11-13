@@ -2,8 +2,11 @@
 
 On this machine agy runs every tool without asking (``toolPermission: always-proceed``), and ``--sandbox`` restricts
 terminal commands only. ``scripts/run_external_annotation.py`` therefore writes ``.agents/hooks.json`` into each
-isolated run directory, so agy calls this script before every tool call. It allows one thing, ``view_file`` of the
-run's own input file, and denies everything else: web search, URL reads, file browsing, MCP tools, commands.
+isolated run directory, so agy calls this script before every tool call. It allows one thing, reading the run's own
+input file (``view_file`` with ``AbsolutePath``, or ``read_file`` with ``Path``, the name newer agy versions use;
+UP-0039), and denies everything else: web search, URL reads, file browsing, MCP tools, commands. A hook that fails
+to start blocked the tool call in the three forms measured on 2026-11-13 (UP-0039); that is not shown for every way
+a hook can fail.
 
 agy runs the hook with the working directory set to the folder holding ``hooks.json`` (``<run dir>/.agents``), the
 tool call as JSON on standard input, and reads the decision as JSON from standard output (agy's hooks guide,
@@ -20,16 +23,18 @@ import sys
 from pathlib import Path
 from typing import Any
 
-ALLOWED_TOOL = "view_file"
+#: The file-reading tools agy has used, with the argument that holds the path: ``view_file`` up to 2026-11,
+#: ``read_file`` after (UP-0039).
+READ_TOOLS = {"view_file": "AbsolutePath", "read_file": "Path"}
 DENY_REASON = "Only reading the input file in the working directory is permitted for this task."
 
 
 def decide(payload: Any, run_dir: Path, input_name: str) -> dict[str, str]:
-    """Allow ``view_file`` of ``run_dir / input_name``; deny anything else, including what does not parse."""
+    """Allow reading ``run_dir / input_name`` (``READ_TOOLS``); deny anything else, including what does not parse."""
     call = payload.get("toolCall") if isinstance(payload, dict) else None
-    if isinstance(call, dict) and call.get("name") == ALLOWED_TOOL:
+    if isinstance(call, dict) and call.get("name") in READ_TOOLS:
         args = call.get("args")
-        target = args.get("AbsolutePath") if isinstance(args, dict) else None
+        target = args.get(READ_TOOLS[call["name"]]) if isinstance(args, dict) else None
         if isinstance(target, str):
             try:
                 if Path(target).resolve() == (run_dir / input_name).resolve():

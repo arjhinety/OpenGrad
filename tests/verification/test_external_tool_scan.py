@@ -81,12 +81,18 @@ def test_the_gate_allows_only_reading_the_input_file(tmp_path: Path) -> None:
     def call(name: str, **args: str) -> dict[str, object]:
         return {"toolCall": {"name": name, "args": args}}
 
-    allowed = gate.decide(
-        call("view_file", AbsolutePath=str(tmp_path / "input.md")), tmp_path, "input.md"
-    )
-    assert allowed == {"decision": "allow"}
+    for allowed in (
+        call("view_file", AbsolutePath=str(tmp_path / "input.md")),
+        call("read_file", Path=str(tmp_path / "input.md")),  # newer agy (UP-0039)
+    ):
+        assert gate.decide(allowed, tmp_path, "input.md") == {"decision": "allow"}
     for denied in (
         call("view_file", AbsolutePath=str(tmp_path / "other.md")),
+        call("read_file", Path=str(tmp_path / "other.md")),
+        call("read_file", Path=str(tmp_path / "sub" / ".." / ".." / "input.md")),
+        call("read_file", AbsolutePath=str(tmp_path / "input.md")),  # each tool only through its own argument
+        call("view_file", Path=str(tmp_path / "input.md")),
+        {"toolCall": {"name": "read_file"}},
         call("view_file", AbsolutePath=str(tmp_path / "sub" / ".." / ".." / "input.md")),
         call("search_web", query="input.md"),
         call("read_url_content", Url="https://example.org"),
@@ -114,6 +120,15 @@ def test_the_runner_writes_the_hook_and_reads_back_what_it_saw(tmp_path: Path) -
         "denied": {"search_web": 1},
     }
     assert runner.ANNOTATORS["model.gemini-3.8-flash-high"]["tool_gate"] is True
+
+
+def test_a_hook_path_with_a_space_is_quoted_once_per_part(tmp_path: Path, monkeypatch) -> None:
+    # The form agy runs (measured 2026-11-13, UP-0039): an extra outer pair of quotes made the hook fail to start.
+    monkeypatch.setattr(runner, "TOOL_GATE", tmp_path / "gate with space" / "agy_tool_gate.py")
+    runner.write_tool_gate(tmp_path)
+    hooks = json.loads((tmp_path / ".agents" / "hooks.json").read_text(encoding="utf-8"))
+    command = hooks["opengrad-tool-gate"]["PreToolUse"][0]["hooks"][0]["command"]
+    assert command == f'"{sys.executable}" "{runner.TOOL_GATE}" "input.md"'
 
 
 def test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is(

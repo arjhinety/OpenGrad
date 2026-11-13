@@ -95,6 +95,7 @@ when the table sat above the sections; it is kept as written.
 | UP-0036 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` (`HOME_PATH`), copied in `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | `HOME_PATH` took exponential time on a drive letter followed by a run of backslashes | Fixed (`(?:\\\\\|\\\|/)+` replaced by `[\\/]+` in both copies) |
 | UP-0037 | 2026-11-13 | `scripts/publish_executorch_artifact.py`, Hub repo `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` | `OURS` | not-applicable | Held-out confirmatory data went public, through an ExecuTorch Hub upload with no publication record and through the public GitHub repository | Hub upload path fixed (held-out files excluded); Hub and GitHub copies left in place (owner); tracking decided after the overfit-clinic interview |
 | UP-0038 | 2026-11-13 | `src/opengrad/runrecords/scripts.py`, `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | Run-record stage 3 gaps deferred to the slice that fills the expected-exit-code table | Open |
+| UP-0039 | 2026-11-13 | `scripts/agy_tool_gate.py`, `scripts/run_external_annotation.py` | `UPSTREAM` | not-filed | agy now reads files with `read_file` (`Path`), so the tool gate denied every read and gated runs read nothing | Fixed (the gate allows `read_file` of the input file through `Path`, as it allowed `view_file` through `AbsolutePath`) |
 
 ---
 
@@ -680,5 +681,33 @@ while the expected-exit-code table is empty and only the annotation entry points
 4. Small: `_code` turns a string returned by `main()` into exit 1 and loses the message; an invalid `upload=` value
    raises before `recorded_call`'s `try`, so it blocks the run (a programming error only); the backslash test of
    the path normalisation only runs its Windows form on Windows.
+
+## UP-0039 — agy renamed its file-reading tool, and the gate denied it (`UPSTREAM`)
+
+Found on 2026-11-13 when Gemini 4 Argon was consulted through agy under the tool gate (INC-0002). Its four attempts
+to read its input were all denied, and it answered that it could not read the file. The gate allowed exactly one
+tool, `view_file` with the argument `AbsolutePath` (UP-0012). The installed agy reads files with `read_file`, whose
+one argument is `Path`. A probe gate that logged argument names, never values, measured that.
+
+Effect: the gate failed closed. Nothing outside the input was read. But a labelling run with this agy version
+would read nothing, and the runner would record no labels, since it requires the gate to have allowed a read.
+A hook that fails to start: three forms were probed with an input holding a word the model could not guess, and
+each blocked the read (the word never appeared): a hook pointing at a missing script; the whole command in one pair
+of quotes; and the runner's own form for a path containing a space, an extra outer pair of quotes around quoted
+parts. Only these three were measured, so "a broken hook blocks the read" is shown for them, not for every way a
+hook can fail. An earlier probe whose model answered "hello" with no gate log does not show a bypass: its input
+said "hello", a word the prompt made easy to guess, which is why later probes used an unguessable one.
+
+Second defect, found by the third form: the runner wrapped a hook command whose path held a space in an extra pair
+of quotes, which made agy's hook fail to start. It failed closed, but a labelling run from such a path would have
+read nothing. Each part quoted once works: the gate ran, allowed the read, and the model returned the word.
+
+Fix: `READ_TOOLS` in the gate maps each read tool to the argument holding its path (`view_file` -> `AbsolutePath`,
+`read_file` -> `Path`). A call is allowed only when that argument resolves to the run's input file. Each tool is
+checked through its own argument only. The runner accepts an allowed read by either tool, and quotes each part of
+the hook command once. Tests cover both tools, other files, `..` escapes, the wrong argument name, a missing
+argument, and the quoting of a path with a space.
+
+Upstream: agy changed the tool name and argument without a note we found; not filed.
 
 <!-- END GENERATED -->
