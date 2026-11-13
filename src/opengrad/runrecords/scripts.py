@@ -35,6 +35,7 @@ import ast
 import io
 import posixpath
 import re
+import subprocess
 import sys
 import tokenize
 import tomllib
@@ -44,14 +45,14 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
-from opengrad.runrecords.record import (
+from opengrad.runrecords.inputs import (
     HELD_OUT_MARKERS,
     argument_values,
     config_state,
     names_held_out,
-    recorded_call,
     repo_relative,
 )
+from opengrad.runrecords.record import recorded_call
 
 
 @dataclass(frozen=True)
@@ -246,8 +247,8 @@ def repo_script(token: str, root: Path) -> str | None:
 def _console_target(token: str, root: Path) -> str | None:
     """The ``module:function`` a console-command token runs: its bare name, or a launcher in the checkout's
     ``.venv``. A program of the same name elsewhere is not this repository's command."""
-    value = str(token).replace("\\", "/")
-    if "/" in value and not value.startswith(".venv/"):
+    value = posixpath.normpath(str(token).replace("\\", "/"))
+    if "/" in value and posixpath.dirname(value).casefold() not in (".venv/scripts", ".venv/bin"):
         return None
     return console_commands(root).get(_LAUNCHER_SUFFIX.sub("", value.rsplit("/", 1)[-1]))
 
@@ -384,8 +385,9 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
     3. ``never``: a subcommand that reads held-out data (``HELD_OUT_SUBCOMMANDS``: ``opengrad baseline``).
     4. Pinned entry points (``PINNED_CONSOLE``): ``never`` when the scan of the entry point as it was on disk when
        the run started (``held_out_reach``) finds more than the pinned review allowed (nothing for the labelling
-       runner, ``EXCLUSION_LOOKUP`` for the others). The labelling runner is then ``allowed`` whatever its
-       arguments name (a P-UNANS session or config); the others go on to the argument checks.
+       runner, ``EXCLUSION_LOOKUP`` for the others). The labelling runner is then ``allowed``, when it started
+       from reviewed code (step 8), whatever its arguments name (a P-UNANS session or config); the others go on
+       to the argument checks.
     5. ``never``: the run's arguments named held-out data when it started (``held_out_inputs``), or the recorded
        arguments, or a ``configs/`` file they name, name a marker.
     6. ``never``: the entry point is in ``HELD_OUT_ENTRY_POINTS``, or, unpinned, its scan at start found any
@@ -393,8 +395,8 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
     7. ``unrecognised``: a named ``configs/`` file is gone, or the command does not trace to an entry point.
     8. ``allowed`` only for an approved entry point: one in ``PINNED_CONSOLE``, or an approved subcommand of an
        approved console command (``APPROVED_CONSOLE``: ``opengrad train`` and ``opengrad evaluate``), that started
-       from the reviewed code (``_as_reviewed``: scanned, nothing it loads and no ``configs/`` file modified or
-       untracked). Anything else is ``unapproved``. An approved run given an existing file outside ``configs/``
+       from reviewed code (``_as_reviewed``: its commit on ``origin/master``'s history, scanned, nothing it loads
+       and no ``configs/`` file modified, untracked or ignored). Anything else is ``unapproved``. An approved run given an existing file outside ``configs/``
        that the checks cannot read (``unchecked_inputs``) is ``unrecognised``.
 
     The kind comes from ``POLICY`` when the entry point has one: the labelling runner launched through ``run
@@ -416,7 +418,7 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
         if reach is not None and not set(reach) <= reviewed:
             return "never", kind
         if entry == LABELLING_RUNNER:
-            return ("allowed" if _as_reviewed(record) else "unapproved"), kind
+            return ("allowed" if _as_reviewed(record, root) else "unapproved"), kind
     if record.get("held_out_inputs") or any(names_held_out(token) for token in command):
         return "never", kind
     configs = [config_state(token, root) for token in command]
@@ -427,18 +429,60 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
     if "missing" in configs or entry is None:
         return "unrecognised", kind
     approved = entry in PINNED_CONSOLE or sub in APPROVED_CONSOLE.get(console_target(command, root) or "", frozenset())
-    if not approved or not _as_reviewed(record):
+    if not approved or not _as_reviewed(record, root):
         return "unapproved", kind
     if record.get("unchecked_inputs"):
         return "unrecognised", kind
     return "allowed", kind
 
 
-def _as_reviewed(record: Mapping[str, Any]) -> bool:
-    """The run started from the reviewed code: its start record has the scan (``held_out_reach``) and no file the
-    entry point loads, nor any ``configs/`` file, was modified or untracked (``entry_modified`` empty). A record
-    from before these checks, or whose check failed, is not vouched for."""
-    return record.get("held_out_reach") is not None and record.get("entry_modified") == []
+#: The history that counts as reviewed: commits pushed to master, which the owner's rule (2026-10-03) has an
+#: independent audit check before every push and CI checks after it. A commit only on a local branch, or on another
+#: branch, has not been. The full ref name, so a local branch or tag called ``origin/master`` cannot stand in for it.
+REVIEWED_REF = "refs/remotes/origin/master"
+
+
+def on_reviewed_branch(sha: object, root: Path) -> bool:
+    """True when ``sha`` is in ``REVIEWED_REF``'s history in this checkout (``git merge-base --is-ancestor``)."""
+    if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", sha):
+        return False
+    try:
+        # The exact ref only (show-ref --verify does no name lookup, so a local branch named like it never counts).
+        ref = subprocess.run(
+            ["git", "--no-optional-locks", "show-ref", "--verify", "--hash", REVIEWED_REF],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        tip = ref.stdout.strip()
+        if ref.returncode != 0 or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", tip):
+            return False
+        done = subprocess.run(
+            ["git", "--no-optional-locks", "merge-base", "--is-ancestor", sha, tip],
+            cwd=root,
+            capture_output=True,
+            timeout=60,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return done.returncode == 0
+
+
+def _as_reviewed(record: Mapping[str, Any], root: Path) -> bool:
+    """The run started from reviewed code: its commit is on ``REVIEWED_REF``'s history, its start record has the scan
+    (``held_out_reach``), and no file the entry point loads, nor any ``configs/`` file, was modified, untracked or
+    ignored (``entry_modified`` empty). A record from before these checks, or whose check failed, is not vouched
+    for."""
+    git = record.get("git")
+    sha = git.get("sha") if isinstance(git, Mapping) else None
+    return (
+        record.get("held_out_reach") is not None
+        and record.get("entry_modified") == []
+        and on_reviewed_branch(sha, root)
+    )
 
 
 def import_closure(entry: str, root: Path, tracked: set[str]) -> set[str]:
@@ -464,7 +508,13 @@ def _module_file(module: str, base: str, tracked: set[str]) -> str | None:
 
 #: The policy files name every marker and every held-out path to define the policy; they read no data, so the scan
 #: neither counts their markers nor follows the paths they list.
-POLICY_FILES = frozenset({"src/opengrad/runrecords/scripts.py", "src/opengrad/runrecords/record.py"})
+POLICY_FILES = frozenset(
+    {
+        "src/opengrad/runrecords/scripts.py",
+        "src/opengrad/runrecords/record.py",
+        "src/opengrad/runrecords/inputs.py",
+    }
+)
 
 
 def _loads(path: str, root: Path, tracked: set[str]) -> set[str]:
@@ -501,6 +551,16 @@ def _loads(path: str, root: Path, tracked: set[str]) -> set[str]:
                 if candidate in tracked:
                     found.add(candidate)
     return found
+
+
+def marked_files(root: Path, paths: set[str]) -> set[str]:
+    """The files among ``paths`` whose code names a held-out marker (the policy files do not count)."""
+    return {
+        path
+        for path in paths
+        if path not in POLICY_FILES
+        and any(m in code_text((root / path).read_text(encoding="utf-8")) for m in HELD_OUT_MARKERS)
+    }
 
 
 def held_out_reach(root: Path, tracked: set[str], entry_points: Sequence[str]) -> dict[str, set[str]]:

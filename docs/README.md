@@ -274,6 +274,7 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`upstream/UP-0036.md`](upstream/UP-0036.md) | UP-0036 — the scanner's home-path pattern backtracked exponentially (`OURS`) |
 | [`upstream/UP-0037.md`](upstream/UP-0037.md) | UP-0037 — held-out confirmatory data went public, on the Hub and on GitHub (`OURS`) |
 | [`upstream/UP-0038.md`](upstream/UP-0038.md) | UP-0038 — run-record stage 3: gaps left for the next slice (`OURS`) |
-| [`upstream/UP-0039.md`](upstream/UP-0039.md) | UP-0039 — agy renamed its file-reading tool, and the gate denied it (`UPSTREAM`) |
+| [`upstream/UP-0039.md`](upstream/UP-0039.md) | UP-0039 — agy 1.5.8 reads files with a tool the gate did not allow (`UPSTREAM`) |
+| [`upstream/UP-0040.md`](upstream/UP-0040.md) | UP-0040 — a run with a tweaked config never gets a backup (`OURS`) |
 
-175 documents.
+176 documents.

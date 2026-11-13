@@ -366,8 +366,10 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
                 print(f"  {run_id}")
         if unapproved:
             print(
-                f"{len(unapproved)} log(s) kept local: the entry point is not approved for upload yet (review its "
-                "console output, then add it in opengrad.runrecords.scripts):"
+                f"{len(unapproved)} log(s) kept local, not approved for upload: the entry point is not approved "
+                "(review its console output, then add it in opengrad.runrecords.scripts), or the run did not start "
+                "from reviewed code (push its commit, or git fetch, and upload again; a run with edited code or "
+                "configs is not uploaded):"
             )
             for run_id in unapproved:
                 print(f"  {run_id}")

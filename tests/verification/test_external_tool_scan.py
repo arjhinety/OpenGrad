@@ -93,6 +93,14 @@ def test_the_gate_allows_only_reading_the_input_file(tmp_path: Path) -> None:
         call("read_file", AbsolutePath=str(tmp_path / "input.md")),  # each tool only through its own argument
         call("view_file", Path=str(tmp_path / "input.md")),
         {"toolCall": {"name": "read_file"}},
+        # Relative paths: the hook runs in .agents, so they would resolve against the wrong folder.
+        call("read_file", Path="../input.md"),
+        call("read_file", Path="input.md"),
+        # read_file was measured with exactly one argument.
+        call("read_file", Path=str(tmp_path / "input.md"), path=str(tmp_path / "other.md")),
+        # Malformed: never a crash.
+        {"toolCall": {"name": ["read_file"], "args": {}}},
+        call("read_file", Path=str(tmp_path / "input.md") + "\x00"),
         call("view_file", AbsolutePath=str(tmp_path / "sub" / ".." / ".." / "input.md")),
         call("search_web", query="input.md"),
         call("read_url_content", Url="https://example.org"),
@@ -160,3 +168,16 @@ def test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is(
         "model-gemini-r2", {**run, "tool_gate": bypass}, tmp_path / "none"
     )
     assert missed["any"] is True and missed["gate_saw_every_call"] is False
+
+
+def test_the_gate_gives_a_decision_on_any_input(tmp_path: Path, monkeypatch, capsys) -> None:
+    import io
+
+    agents = tmp_path / ".agents"
+    agents.mkdir()
+    monkeypatch.chdir(agents)
+    for raw in ("not json", "[" * 100_000 + "]" * 100_000, '{"toolCall": {"name": {"x": 1}}}'):
+        monkeypatch.setattr(sys, "stdin", io.StringIO(raw))
+        assert gate.main(["gate", "input.md"]) == 0
+        assert json.loads(capsys.readouterr().out)["decision"] == "deny"
+

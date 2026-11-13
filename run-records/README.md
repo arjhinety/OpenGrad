@@ -10,11 +10,12 @@ does not report as private; that check is
 the real safety boundary. A log holding a credential or a home folder in a form the tests cover, and every
 annotation log, goes up only as a redacted copy; any other log goes up byte for byte, and one that is not clean
 UTF-8 text stays local. Upload is an allowlist: only a log whose entry point was reviewed and approved is sent
-(`opengrad train`, `opengrad evaluate`, the labelling runner and fifteen reviewed scripts); any other stays local and
-is listed until its entry point is reviewed. Even then, a log is not sent when its run read held-out data, as far
-as the code shows: its command
+(`opengrad train`, `opengrad evaluate`, the labelling runner and fifteen reviewed scripts), and only when the run
+started from reviewed code: a commit pushed to `origin/master` (checked at upload), with nothing it loads and no
+`configs/` file edited, untracked or ignored at the start. Any other stays local and is listed. Even then, a log is
+not sent when its run read held-out data, as far as the code shows: its command
 runs an entry point that names a held-out file or loads code that does, or an argument (or a `configs/` file it
-names) names one. The exception is a short list of entry points whose console a test pins to status lines
+names) names one, `behavioral-heldout` included outside keys reviewed as only documenting or excluding the set. The exception is a short list of entry points whose console a test pins to status lines
 (`PINNED_CONSOLE`): the labelling runner, and fifteen that touch held-out data only to exclude it. Nor is a log
 sent when the command cannot be traced to a repository entry point (a shell, pytest, an outside tool): fail
 closed, listed for a mapping to be added. The committed summary of a run whose log stays local, or of a pinned

@@ -11,6 +11,7 @@ from types import ModuleType, SimpleNamespace
 import pytest
 
 from opengrad.runrecords import cli as runs_cli
+from opengrad.runrecords import inputs as ri
 from opengrad.runrecords import record as rr
 from opengrad.runrecords import scripts as rs
 
@@ -480,7 +481,9 @@ def test_a_labelling_run_launched_as_a_script_uploads_as_a_redacted_annotation_c
     # Traced against the real checkout (the runner's path), recorded in a temporary folder; the runner is not run.
     root = Path(__file__).resolve().parents[2]
     monkeypatch.setenv(rr.LOCAL_DIR_ENV, str(tmp_path / "records"))
-    monkeypatch.setattr(rr, "_modified", lambda root: set())  # as from a clean checkout (CI); this test is about kind
+    # As from a clean checkout of a pushed commit (CI); this test is about kind.
+    monkeypatch.setattr(ri, "_modified", lambda root: set())
+    monkeypatch.setattr(rs, "on_reviewed_branch", lambda sha, root: True)
     argv = ["python", "scripts/run_external_annotation.py", "--session", "punans-v2-trial"]
     assert rr.recorded_call("script", argv, root, lambda: print("batch 01 (5 items) attempt 1: exit 0") or 0) == 0
     sent = _hub(tmp_path, monkeypatch, SimpleNamespace(private=True))
@@ -559,7 +562,7 @@ def test_an_unapproved_log_stays_local_and_is_listed(
     monkeypatch.setattr(runs_cli, "upload_decision", rs.upload_decision)  # undo the helper's stand-in
     assert runs_cli.main(["upload", "--repo", "o/r"], root) == 3
     assert sent == {}
-    assert "1 log(s) kept local: the entry point is not approved for upload yet" in capsys.readouterr().out
+    assert "1 log(s) kept local, not approved for upload" in capsys.readouterr().out
 
 
 MANIFEST = "reports/evaluation/behavioral-heldout-v2.manifest.json"
@@ -610,11 +613,111 @@ def test_the_run_start_scan_lists_modified_files_it_loads(tmp_path: Path, monkey
     (root / "scripts" / "tool.py").write_text("import helper\n", encoding="utf-8")
     (root / "scripts" / "helper.py").write_text("X = 1\n", encoding="utf-8")
     (root / "scripts" / "other.py").write_text("Y = 2\n", encoding="utf-8")
-    monkeypatch.setattr(rr, "_modified", lambda root: {"scripts/helper.py", "scripts/other.py", "configs/a.yaml"})
+    monkeypatch.setattr(ri, "_modified", lambda root: {"scripts/helper.py", "scripts/other.py", "configs/a.yaml"})
+    monkeypatch.setattr(ri, "_tracked", lambda root: {"scripts/tool.py", "scripts/helper.py", "scripts/other.py"})
     assert rr.recorded_call("script", ["scripts/tool.py"], root, lambda: 0) == 0
     (record,) = rr.read_local(root)
     assert record["entry_modified"] == ["configs/a.yaml", "scripts/helper.py"]
-    monkeypatch.setattr(rr, "_modified", lambda root: None)
+    monkeypatch.setattr(ri, "_modified", lambda root: None)
     assert rr.recorded_call("script", ["scripts/tool.py"], root, lambda: 0) == 0
     assert {tuple(r["entry_modified"]) for r in rr.read_local(root)} >= {("<git status failed>",)}
+
+
+def _git(root: Path, *args: str) -> None:
+    import subprocess
+
+    subprocess.run(["git", *args], cwd=root, check=True, capture_output=True)
+
+
+def test_on_reviewed_branch_means_in_origin_masters_history(tmp_path: Path) -> None:
+    import subprocess
+
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "a")
+    pushed = subprocess.run(["git", "rev-parse", "HEAD"], cwd=tmp_path, capture_output=True, text=True, check=True).stdout.strip()
+    _git(tmp_path, "update-ref", "refs/remotes/origin/master", pushed)
+    _git(tmp_path, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "b")
+    local = subprocess.run(["git", "rev-parse", "HEAD"], cwd=tmp_path, capture_output=True, text=True, check=True).stdout.strip()
+    assert rs.on_reviewed_branch(pushed, tmp_path) is True
+    assert rs.on_reviewed_branch(local, tmp_path) is False  # committed but not pushed
+    assert rs.on_reviewed_branch("not-a-sha; rm -rf /", tmp_path) is False
+    assert rs.on_reviewed_branch(None, tmp_path) is False
+    assert rs.on_reviewed_branch(pushed[:12], tmp_path) is False  # only a full commit id
+    # A local branch or tag called origin/master is not the remote ref.
+    _git(tmp_path, "branch", "origin/master", local)
+    _git(tmp_path, "tag", "origin/master", local)
+    assert rs.on_reviewed_branch(local, tmp_path) is False
+
+
+def test_an_ignored_file_the_entry_point_loads_counts_as_modified(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    root = _checkout(tmp_path)
+    (root / "scripts" / "tool.py").write_text("import helper\n", encoding="utf-8")
+    (root / "scripts" / "helper.py").write_text("X = 1\n", encoding="utf-8")
+    (root / "configs").mkdir()
+    (root / "configs" / "build").mkdir()
+    (root / "configs" / "build" / "x.yaml").write_text("a: 1\n", encoding="utf-8")
+    monkeypatch.setattr(ri, "_modified", lambda root: set())  # git status hides ignored files
+    monkeypatch.setattr(ri, "_tracked", lambda root: {"scripts/tool.py"})
+    assert rr.recorded_call("script", ["scripts/tool.py"], root, lambda: 0) == 0
+    (record,) = rr.read_local(root)
+    assert record["entry_modified"] == ["configs/build/x.yaml", "scripts/helper.py"]
+
+
+def test_a_yaml_alias_cannot_hide_a_reading_key_behind_an_exempt_one(tmp_path: Path) -> None:
+    pytest.importorskip("yaml")
+    configs = tmp_path / "configs"
+    configs.mkdir()
+    for body in (
+        "evaluation: &x {manifest: data/behavioral-heldout/m.json}\ncheckpoint_selection_manifest: *x\n",
+        "checkpoint_selection_manifest: &x [data/behavioral-heldout/m.json]\nevaluation: *x\n",
+    ):
+        (configs / "a.yaml").write_text(body, encoding="utf-8")
+        assert rr.config_state("configs/a.yaml", tmp_path) == "held_out", body
+
+
+def test_a_config_spelled_from_another_folder_is_not_trusted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    configs = tmp_path / "configs" / "evaluation"
+    configs.mkdir(parents=True)
+    (configs / "x.yaml").write_text("prompts: release/frozen_prompts_v1.jsonl\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path / "configs")
+    assert rr.unchecked_arguments(["tool", "evaluation/x.yaml"], tmp_path) is True
+    monkeypatch.chdir(tmp_path)
+    assert rr.unchecked_arguments(["tool", "configs/evaluation/x.yaml"], tmp_path) is False
+    assert rr.config_state("configs/evaluation/x.yaml", tmp_path) == "held_out"
+
+
+def test_a_file_git_is_told_to_ignore_edits_to_is_not_counted_as_tracked(tmp_path: Path) -> None:
+    for name in ("a.py", "b.py", "c.py"):
+        (tmp_path / name).write_text("x = 1\n", encoding="utf-8")
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "add", ".")
+    _git(tmp_path, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "-m", "a")
+    _git(tmp_path, "update-index", "--skip-worktree", "b.py")
+    _git(tmp_path, "update-index", "--assume-unchanged", "c.py")
+    assert ri._tracked(tmp_path) == {"a.py"}
+
+
+def test_an_edit_to_the_run_record_package_counts_as_modified(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # The scan does not follow imports out of the policy files, so the package's own files are watched directly.
+    root = _checkout(tmp_path)
+    (root / "scripts" / "tool.py").write_text("X = 1\n", encoding="utf-8")
+    package = root / "src" / "opengrad" / "runrecords"
+    package.mkdir(parents=True)
+    (package / "inputs.py").write_text("Y = 2\n", encoding="utf-8")
+    monkeypatch.setattr(ri, "_modified", lambda root: {"src/opengrad/runrecords/inputs.py"})
+    monkeypatch.setattr(ri, "_tracked", lambda root: {"scripts/tool.py", "src/opengrad/runrecords/inputs.py"})
+    assert rr.recorded_call("script", ["scripts/tool.py"], root, lambda: 0) == 0
+    (record,) = rr.read_local(root)
+    assert record["entry_modified"] == ["src/opengrad/runrecords/inputs.py"]
+
+
+def test_a_local_branch_named_like_the_remote_ref_never_counts(tmp_path: Path) -> None:
+    import subprocess
+
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "a")
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=tmp_path, capture_output=True, text=True, check=True).stdout.strip()
+    # No real refs/remotes/origin/master here: git's name lookup would fall back to this branch.
+    _git(tmp_path, "branch", "refs/remotes/origin/master", head)
+    assert rs.on_reviewed_branch(head, tmp_path) is False
 

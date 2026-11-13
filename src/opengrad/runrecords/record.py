@@ -35,7 +35,6 @@ import importlib.metadata
 import json
 import os
 import platform
-import posixpath
 import re
 import secrets
 import shutil
@@ -49,6 +48,18 @@ from typing import Any, TextIO
 
 from opengrad.env_capture import tracked_tree_provenance
 from opengrad.hashing import sha256_bytes, sha256_file
+from opengrad.runrecords.inputs import (  # noqa: F401 -- re-exported: older imports name them here
+    HELD_OUT_MARKERS,
+    INPUT_EXEMPT_KEYS,
+    INPUT_MARKERS,
+    argument_values,
+    config_state,
+    entry_scan,
+    held_out_arguments,
+    names_held_out,
+    repo_relative,
+    unchecked_arguments,
+)
 
 RECORD_SCHEMA_VERSION = 1
 LOCAL_DIR = Path(".run-records")
@@ -59,25 +70,6 @@ PARENT_ENV = "OPENGRAD_RUN_RECORD_PARENT"
 #: ``allowed``: the log may be uploaded (``python -m opengrad.runrecords upload``). ``never``: the entry point reads
 #: held-out data, so its log stays on this machine (owner's decision, 2026-11-13).
 UPLOAD_POLICIES = ("allowed", "never")
-#: Strings that mark held-out evaluation data: in an entry point's code (``opengrad.runrecords.scripts``), in a
-#: run's arguments, or in a ``configs/`` file a run is given. Such a run's log is never uploaded.
-HELD_OUT_MARKERS = (
-    "frozen_prompts",
-    "when2call_test",
-    "pconf-v1",
-    "answer-records",
-    "behavioral-heldout-v2-partition",
-    "confirmatory",
-    "punans",
-)
-#: Inputs only (a run's arguments and the configs they name), not the code scan: the frozen held-out set's manifest,
-#: partition, quarantine and contamination files all start with it (owner's decision, 2026-11-13, on Fable's and
-#: Gemini 4 Argon's advice). Not counted under ``INPUT_EXEMPT_KEYS``.
-INPUT_MARKERS = (*HELD_OUT_MARKERS, "behavioral-heldout")
-#: Config keys reviewed as documenting or excluding the held-out set, never reading it as data: a value under them
-#: is not checked for ``behavioral-heldout`` (the markers in ``HELD_OUT_MARKERS`` still count). A key not listed
-#: here counts, so a new key that reads the set keeps its run's log local (fail closed).
-INPUT_EXEMPT_KEYS = frozenset({"checkpoint_selection_manifest", "exclude_held_out_namespaces", "contamination_report"})
 COMMITTED_DIR = Path("run-records")
 KINDS = ("training", "evaluation", "freeze", "script", "annotation", "ci")
 STATUSES = ("PASS", "FAILED", "INTERRUPTED", "INCOMPLETE")
@@ -328,219 +320,6 @@ def redact_text(text: str, root: Path) -> str:
     return HOME_PATH.sub("<absolute-path>/", text)
 
 
-def argument_values(token: str) -> list[str]:
-    """The values an argument can carry: itself, the value of ``--flag=value``, and of an attached ``-fvalue``."""
-    value = str(token).replace("\\", "/")
-    values = [value]
-    if value.startswith("-"):
-        if "=" in value:
-            values.append(value.split("=", 1)[1])
-        if not value.startswith("--") and len(value) > 2:
-            values.append(value[2:])
-    return values
-
-
-def names_held_out(token: str) -> bool:
-    """True when an argument names a held-out marker (``INPUT_MARKERS``), in any case."""
-    folded = str(token).replace("\\", "/").casefold()
-    return any(marker in folded for marker in INPUT_MARKERS)
-
-
-#: A piece of a spaced config value that looks like a path or a file name.
-_PATH_LIKE = re.compile(r"[/\\]|\.[A-Za-z0-9]{1,6}$")
-
-
-def _config_identifiers(path: Path, text: str) -> list[tuple[str, bool]]:
-    """What in a config can point at data: its keys and its values with no whitespace (paths, ids, namespaces).
-
-    A description that mentions held-out data in prose ("confirmatory IDs are excluded") does not reach it, just
-    as a marker in a code comment does not. In a value with spaces (a command line, a list of paths), the pieces
-    that look like paths or file names count. A file that does not parse as YAML, JSON or TOML, or of another
-    kind, is read whole: fail closed. Each item comes with whether it sits under a key in ``INPUT_EXEMPT_KEYS``.
-    """
-    suffix = path.suffix.casefold()
-    try:
-        if suffix in (".yaml", ".yml"):
-            import yaml  # optional extra: without it the whole text is read
-
-            documents = list(yaml.safe_load_all(text))
-        elif suffix == ".json":
-            documents = [json.loads(text)]
-        elif suffix == ".toml":
-            import tomllib
-
-            documents = [tomllib.loads(text)]
-        else:
-            return [(text, False)]
-    except Exception:  # noqa: BLE001 -- unparsable: read whole
-        return [(text, False)]
-    found: list[tuple[str, bool]] = []
-    stack: list[tuple[Any, bool]] = [(document, False) for document in documents]
-    seen: set[int] = set()  # a YAML alias can make a node contain itself
-    while stack:
-        item, exempt = stack.pop()
-        if isinstance(item, dict | list):
-            if id(item) in seen:
-                continue
-            seen.add(id(item))
-        if isinstance(item, dict):
-            for key, value in item.items():
-                found.append((str(key), exempt))
-                stack.append((value, exempt or str(key) in INPUT_EXEMPT_KEYS))
-        elif isinstance(item, list):
-            stack.extend((entry, exempt) for entry in item)
-        elif isinstance(item, str):
-            pieces = item.split()
-            if len(pieces) == 1:
-                found.append((pieces[0], exempt))
-            else:
-                # A command line or a list of paths in one value: its path-like pieces count, its words do not.
-                found.extend((piece, exempt) for piece in pieces if _PATH_LIKE.search(piece))
-    return found
-
-
-def repo_relative(value: str, root: Path) -> str:
-    """An argument as a normalised repository-relative path when it is one: an absolute path inside the checkout
-    (any drive-letter case) is made relative, a relative one normalised (``./``, ``//``, ``..``)."""
-    value = str(value).replace("\\", "/")
-    if not value:
-        return ""
-    if re.match(r"^(?:[A-Za-z]:/|/)", value):
-        try:
-            resolved = Path(value).resolve()
-            base = root.resolve()
-            # Compared case-folded: Windows paths ignore case, and a drive letter may be typed either way.
-            if os.path.normcase(str(resolved)).startswith(os.path.normcase(str(base)) + os.sep):
-                return str(resolved)[len(str(base)) + 1 :].replace("\\", "/")
-        except (OSError, ValueError):
-            pass
-        return value
-    return posixpath.normpath(value)
-
-
-def config_state(token: str, root: Path) -> str:
-    """``held_out`` when an argument is a repository ``configs/`` file that names a held-out marker, ``missing`` when
-    it names a ``configs/`` file that is not there, else ``""``.
-
-    A run can reach held-out data through the config it is given, which the argument does not show. Config files
-    hold settings and paths, not test content, so reading one is safe. One level: a config naming another config
-    is not followed. Nothing outside ``configs/`` is read.
-    """
-    base = (root / "configs").resolve()
-    state = ""
-    for value in argument_values(token):
-        relative = repo_relative(value, root)
-        if not relative.casefold().startswith("configs/"):
-            continue
-        path = (root / relative).resolve()
-        if not path.is_relative_to(base):
-            continue
-        try:
-            text = path.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            state = "missing"
-            continue
-        for item, exempt in _config_identifiers(path, text):
-            markers = HELD_OUT_MARKERS if exempt else INPUT_MARKERS
-            if any(marker in item.casefold() for marker in markers):
-                return "held_out"
-    return state
-
-
-def _modified(root: Path) -> set[str] | None:
-    """Repository paths with local edits or not tracked (``git status``); None when git cannot say."""
-    try:
-        done = subprocess.run(
-            ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
-            cwd=root,
-            capture_output=True,
-            timeout=60,
-            check=False,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    if done.returncode != 0:
-        return None
-    paths: set[str] = set()
-    entries = done.stdout.decode("utf-8", "replace").split("\0")
-    i = 0
-    while i < len(entries):
-        entry = entries[i]
-        if len(entry) > 3:
-            paths.add(entry[3:])
-            if entry[0] in "RC":  # a rename or copy is followed by its old path
-                i += 1
-                if i < len(entries) and entries[i]:
-                    paths.add(entries[i])
-        i += 1
-    return paths
-
-
-def _entry_scan(command: Sequence[str], root: Path) -> tuple[list[str] | None, list[str] | None]:
-    """When the run starts: the marker-naming files its entry point loads, scanned as they are on disk, and the files
-    it loads (or any ``configs/`` file) with local edits or not tracked. ``(None, None)`` when the command does not
-    trace to an entry point.
-
-    The tables in ``opengrad.runrecords.scripts`` describe the reviewed, tracked code. A script not tracked yet may
-    reach held-out data they do not list; the scan sees it. An approved entry point uploads only when nothing it
-    loads was modified, since an edit can print what the review found it never prints. Anything that fails reads
-    as reaching held-out data, and as modified (fail closed).
-    """
-    try:
-        from opengrad.runrecords import scripts  # imports this module: loaded at call time
-
-        entry = scripts.command_entry(command, root)
-        if entry is None:
-            return None, None
-        on_disk = {
-            path.relative_to(root).as_posix()
-            for folder in ("scripts", "src")
-            for path in (root / folder).rglob("*.py")
-        }
-        loaded = scripts.import_closure(entry, root, on_disk)
-        reach = sorted(scripts.held_out_reach(root, on_disk, [entry]).get(entry, set()))
-    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
-        return ["<scan failed>"], ["<scan failed>"]
-    changed = _modified(root)
-    if changed is None:
-        return reach, ["<git status failed>"]
-    return reach, sorted(path for path in changed if path in loaded or path.startswith("configs/"))
-
-
-def unchecked_arguments(argv: Sequence[str], root: Path) -> bool:
-    """True when an argument names an existing file the checks cannot read: not under ``configs/`` (read for
-    markers), and not a script under ``scripts/`` or ``src/`` (checked as an entry point). A training config in a
-    scratch folder is one. Fail closed: such a run's log is not uploaded."""
-    try:
-        for token in list(argv)[1:]:
-            for value in argument_values(token):
-                if not value or value.startswith("-"):
-                    continue
-                path = Path(value)
-                candidates = [path] if path.is_absolute() else [root / value, Path.cwd() / value]
-                if not any(candidate.is_file() for candidate in candidates):
-                    continue
-                relative = repo_relative(str(next(c for c in candidates if c.is_file()).resolve()), root)
-                if relative.startswith("configs/"):
-                    continue
-                if relative.startswith(("scripts/", "src/")) and relative.endswith(".py"):
-                    continue
-                return True
-        return False
-    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
-        return True
-
-
-def held_out_arguments(argv: Sequence[str], root: Path) -> bool:
-    """True when a run's arguments, read before redaction, name held-out data: a marker in any argument (a path
-    outside the repository included, which redaction would turn into ``<absolute-path>``), or a ``configs/`` file
-    that names one. Checked when the run starts, so a config edited or removed later does not change the answer."""
-    try:
-        return any(names_held_out(t) or config_state(t, root) == "held_out" for t in argv)
-    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
-        return True
-
-
 def redact_command(argv: Sequence[str], root: Path) -> list[str]:
     out: list[str] = []
     hide_next = False
@@ -716,7 +495,7 @@ class RunRecord:
             self.start["upload_policy"] = self.upload
         if self.held_out_inputs:
             self.start["held_out_inputs"] = True
-        reach, modified = _entry_scan(self.command, self.root)
+        reach, modified = entry_scan(self.command, self.root)
         self.start["held_out_reach"] = reach
         self.start["entry_modified"] = modified
         if self.unchecked_inputs:

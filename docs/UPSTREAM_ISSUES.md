@@ -94,8 +94,9 @@ when the table sat above the sections; it is kept as written.
 | UP-0035 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` | `OURS` | not-applicable | The text-file `private_path` pattern misses a Windows home path written with single backslashes, and any drive other than C | Fixed (any drive, single or doubled backslashes or a slash) |
 | UP-0036 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` (`HOME_PATH`), copied in `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | `HOME_PATH` took exponential time on a drive letter followed by a run of backslashes | Fixed (`(?:\\\\\|\\\|/)+` replaced by `[\\/]+` in both copies) |
 | UP-0037 | 2026-11-13 | `scripts/publish_executorch_artifact.py`, Hub repo `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` | `OURS` | not-applicable | Held-out confirmatory data went public, through an ExecuTorch Hub upload with no publication record and through the public GitHub repository | Hub upload path fixed (held-out files excluded); Hub and GitHub copies left in place (owner); tracking decided after the overfit-clinic interview |
-| UP-0038 | 2026-11-13 | `src/opengrad/runrecords/scripts.py`, `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | Run-record stage 3 gaps deferred to the slice that fills the expected-exit-code table | Open |
-| UP-0039 | 2026-11-13 | `scripts/agy_tool_gate.py`, `scripts/run_external_annotation.py` | `UPSTREAM` | not-filed | agy now reads files with `read_file` (`Path`), so the tool gate denied every read and gated runs read nothing | Fixed (the gate allows `read_file` of the input file through `Path`, as it allowed `view_file` through `AbsolutePath`) |
+| UP-0038 | 2026-11-13 | `src/opengrad/runrecords/scripts.py`, `src/opengrad/runrecords/record.py`, `src/opengrad/runrecords/inputs.py` | `OURS` | not-applicable | Run-record stage 3 gaps deferred to the slice that fills the expected-exit-code table | Open |
+| UP-0039 | 2026-11-13 | `scripts/agy_tool_gate.py`, `scripts/run_external_annotation.py` | `UPSTREAM` | not-filed | agy 1.5.8 reads files with `read_file` (`Path`), so the tool gate denied every read and gated runs read nothing | Fixed (the gate allows `read_file` of the input file through `Path`, as it allowed `view_file` through `AbsolutePath`) |
+| UP-0040 | 2026-11-13 | `src/opengrad/runrecords/scripts.py` (`_as_reviewed`), `src/opengrad/runrecords/inputs.py` (`entry_scan`) | `OURS` | not-applicable | An approved run made with a tweaked config never gets a log backup; planned: back it up once that exact config is pushed | Open (owner's decision 2026-11-13: strict rule now, this refinement in a later slice) |
 
 ---
 
@@ -682,7 +683,7 @@ while the expected-exit-code table is empty and only the annotation entry points
    raises before `recorded_call`'s `try`, so it blocks the run (a programming error only); the backslash test of
    the path normalisation only runs its Windows form on Windows.
 
-## UP-0039 — agy renamed its file-reading tool, and the gate denied it (`UPSTREAM`)
+## UP-0039 — agy 1.5.8 reads files with a tool the gate did not allow (`UPSTREAM`)
 
 Found on 2026-11-13 when Gemini 4 Argon was consulted through agy under the tool gate (INC-0002). Its four attempts
 to read its input were all denied, and it answered that it could not read the file. The gate allowed exactly one
@@ -705,9 +706,49 @@ read nothing. Each part quoted once works: the gate ran, allowed the read, and t
 Fix: `READ_TOOLS` in the gate maps each read tool to the argument holding its path (`view_file` -> `AbsolutePath`,
 `read_file` -> `Path`). A call is allowed only when that argument resolves to the run's input file. Each tool is
 checked through its own argument only. The runner accepts an allowed read by either tool, and quotes each part of
-the hook command once. Tests cover both tools, other files, `..` escapes, the wrong argument name, a missing
-argument, and the quoting of a path with a space.
+the hook command once. After an audit the gate also requires an absolute path (the hook runs in `.agents`, so a
+relative one would resolve against the wrong folder), accepts `read_file` only with exactly its one measured
+argument, and denies anything that raises instead of crashing. Tests cover both tools, other files, `..` escapes,
+relative paths, extra arguments, the wrong argument name, a missing argument, malformed calls, and the quoting of a
+path with a space.
 
-Upstream: agy changed the tool name and argument without a note we found; not filed.
+Upstream: agy 1.5.8 called `read_file` with `Path`; the logged labelling runs had used `view_file` with
+`AbsolutePath`. When the change happened was not measured, and no release note about it was found; not filed.
+
+## UP-0040 — a run with a tweaked config never gets a backup (`OURS`)
+
+Found on 2026-11-13 while deciding what "a run started from reviewed code" requires for run-log upload (an
+allowlist; `docs/upstream/UP-0038.md` lists the slice's other open items). The rule adopted, on Fable's advice:
+
+- the run's commit is on `origin/master`'s history, checked at upload. A clean run from an unpushed commit uploads
+  once that commit is pushed, unless a rebase or squash means its sha never lands;
+- nothing the entry point loads, and no file under `configs/`, had local edits, was untracked or was ignored when
+  the run started (`entry_modified`, written at start). Such a run never uploads.
+
+Why configs cannot simply be exempted (Fable, verified in code): `opengrad evaluate` names no config in its
+command, but reads suite and benchmark configs by name (`src/opengrad/cli.py`, `src/opengrad/benchmarks/runner.py`),
+and the marker check reads only configs named in the arguments. `opengrad train` reads whatever its config points
+at, including an absolute `preference_path` and a `release_dir` with no containment check, so a renamed copy of
+held-out data would pass a name check.
+
+Cost: ordinary work, tweaking a config just before a run, leaves that run's log with no backup. It stays on the
+machine, listed as not approved.
+
+Planned refinement: at run start, record a content hash of each config the run consumes (for `train` the named
+config; for `evaluate` the suite file and the benchmark configs it lists). At upload, allow the log when every hash
+matches the file at a commit on `origin/master`, and replace the "no `configs/` file modified" rule with that. A
+tweaked config then gets its backup once that exact config is pushed and audited, and an unrelated stray file
+under `configs/` stops blocking every approved upload.
+
+Also open, from the same audits:
+
+- **Modal runs.** `scripts/modal/*` copy only `src/opengrad`, with no `.git`, and do not record runs. Backing them
+  up needs another anchor: the commit sha plus source hashes, verified against a pushed commit at upload.
+- **Arguments and the local ref.**
+  - `unchecked_inputs` flags any existing file outside `configs/`, including an output file a re-run overwrites.
+    That fails closed, but it is noisy.
+  - Directory arguments are not checked at all.
+  - Ancestry trusts this checkout's `refs/remotes/origin/master` (by its full name, so a local branch or tag
+    called `origin/master` does not count). That guards against accidents, not against someone editing the ref.
 
 <!-- END GENERATED -->

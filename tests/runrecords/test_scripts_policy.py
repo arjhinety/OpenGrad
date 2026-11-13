@@ -403,8 +403,14 @@ def test_opengrad_evaluate_cannot_reach_held_out_data_through_a_suite() -> None:
     assert named == []
 
 
-#: A start record from the reviewed code: scanned, nothing loaded modified (record.py _entry_scan).
-REVIEWED = {"held_out_reach": [], "entry_modified": []}
+#: A start record from reviewed code: scanned, nothing loaded modified (inputs.py entry_scan), and a commit that
+#: the fixture below treats as on origin/master's history (on_reviewed_branch has its own test).
+REVIEWED = {"held_out_reach": [], "entry_modified": [], "git": {"sha": "0" * 40}}
+
+
+@pytest.fixture(autouse=True)
+def _reviewed_commit(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(rs, "on_reviewed_branch", lambda sha, root: sha == "0" * 40)
 
 
 ABS = str(ROOT / "configs/evaluation/candidates/m0_sft_canonical_v2_final/checkpoint-1800.yaml")
@@ -442,7 +448,7 @@ def test_a_pinned_entry_point_whose_code_reaches_more_than_reviewed_is_never_upl
     clean = {"kind": "script", "command": ["python", "scripts/audit_pdet_v1_representation.py"], **REVIEWED}
     reviewed = {**clean, "held_out_reach": ["src/opengrad/data/classifier_input.py"]}
     edited = {**clean, "held_out_reach": ["src/opengrad/data/classifier_input.py", "scripts/x.py"]}
-    runner = {"kind": "script", "command": ["python", RUNNER], "held_out_reach": ["scripts/x.py"], "entry_modified": []}
+    runner = {"kind": "script", "command": ["python", RUNNER], **REVIEWED, "held_out_reach": ["scripts/x.py"]}
     assert rs.upload_decision(reviewed, ROOT)[0] == "allowed"
     assert rs.upload_decision(edited, ROOT)[0] == "never"
     assert rs.upload_decision(runner, ROOT)[0] == "never"
@@ -507,6 +513,20 @@ def test_an_approved_entry_point_uploads_only_from_the_reviewed_code(start: dict
 
 
 def test_an_approved_run_given_a_file_outside_configs_is_not_uploaded() -> None:
-    record = {"kind": "training", "command": ["opengrad", "train", "scratch/x.yaml"], "unchecked_inputs": True}
+    record = {"kind": "training", "command": ["opengrad", "train", "configs/benchmark_suites/smoke.yaml"],
+              "unchecked_inputs": True}
     assert rs.upload_decision({**REVIEWED, **record}, ROOT)[0] == "unrecognised"
+
+
+def test_a_run_from_a_commit_not_on_the_reviewed_branch_is_not_approved() -> None:
+    record = {"kind": "training", "command": ["opengrad", "train", "configs/benchmark_suites/smoke.yaml"], **REVIEWED}
+    assert rs.upload_decision(record, ROOT)[0] == "allowed"
+    assert rs.upload_decision({**record, "git": {"sha": "1" * 40}}, ROOT)[0] == "unapproved"
+    assert rs.upload_decision({**record, "git": {"sha": None}}, ROOT)[0] == "unapproved"
+
+
+@pytest.mark.parametrize("launcher", [".venv/../tools/opengrad", ".venv/x/opengrad.cmd", ".venv/Scripts/../../evil/opengrad.exe"])
+def test_only_the_checkouts_own_launcher_counts_as_the_console_command(launcher: str) -> None:
+    record = {"kind": "training", "command": [launcher, "train", "configs/benchmark_suites/smoke.yaml"], **REVIEWED}
+    assert rs.upload_decision(record, ROOT)[0] != "allowed"
 
