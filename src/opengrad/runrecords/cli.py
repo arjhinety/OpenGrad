@@ -279,6 +279,7 @@ def _exportable(record: dict[str, Any], root: Path) -> dict[str, Any]:
         return record
     kept = {
         "never": "held-out data",
+        "routine": "routine check",
         "unrecognised": "command not recognised",
         "unapproved": "not approved for upload",
     }.get(decision, "held-out data")
@@ -325,7 +326,7 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
     before the failure).
 
     ``upload_decision`` is applied first: a log from a run that read held-out data is never sent and is listed as
-    kept by policy (not counted for exit 3); a log whose command cannot be traced to an entry point is never sent
+    kept by policy (not counted for exit 3), and so is a routine check's (``ROUTINE_CHECKS``); a log whose command cannot be traced to an entry point is never sent
     and is listed (counted for exit 3, since a mapping would give it a backup); so is a log whose entry point is
     not approved for upload yet (an allowlist, owner's decision 2026-11-13). The kind it is uploaded as comes
     from the entry point's policy, so a labelling run launched through ``run --kind script`` is still redacted.
@@ -348,6 +349,7 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
     sent = 0
     kept: list[str] = []
     by_policy: list[str] = []
+    routine: list[str] = []
     unrecognised: list[str] = []
     unapproved: list[str] = []
 
@@ -356,6 +358,10 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
         if by_policy:
             print(f"{len(by_policy)} log(s) kept local by policy (held-out data), not counted as missing:")
             for run_id in by_policy:
+                print(f"  {run_id}")
+        if routine:
+            print(f"{len(routine)} log(s) of routine checks kept local by policy, not counted as missing:")
+            for run_id in routine:
                 print(f"  {run_id}")
         if unrecognised:
             print(
@@ -368,8 +374,8 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
             print(
                 f"{len(unapproved)} log(s) kept local, not approved for upload: the entry point is not approved "
                 "(review its console output, then add it in opengrad.runrecords.scripts), or the run did not start "
-                "from reviewed code (push its commit, or git fetch, and upload again; a run with edited code or "
-                "configs is not uploaded):"
+                "from reviewed code (push its commit and the configs it used, or git fetch, and upload again; a run "
+                "with edited code, or an edit to a config it did not use, is not uploaded):"
             )
             for run_id in unapproved:
                 print(f"  {run_id}")
@@ -384,6 +390,10 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
         if decision == "never":
             # The run read held-out data (opengrad.runrecords.scripts): its log stays here by policy.
             by_policy.append(record["run_id"])
+            continue
+        if decision == "routine":
+            # Owner's decision, 2026-11-14: routine checks record, but their logs stay here by policy.
+            routine.append(record["run_id"])
             continue
         if decision == "unrecognised":
             # Owner's decision, 2026-11-13: a command that cannot be checked for held-out data stays local.
@@ -480,6 +490,7 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
     ci_p.add_argument("--since", default=None, help="ISO time; default: the inbox's start")
     ci_p.add_argument("--limit", type=int, default=100, help="how many failed runs to ask GitHub for")
     ci_p.add_argument("--check", action="store_true", help="write nothing, only report")
+    ci_p.add_argument("--branch", default=None, help="whose failures count (default: master)")
     cid_p = sub.add_parser("ci-dispose", help="record what a failed CI run was")
     cid_p.add_argument("ci_run", help="the workflow run id, or CI-<id>")
     cid_p.add_argument("--attempt", type=int, default=1, help="which attempt of the run (default 1)")
@@ -517,7 +528,13 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
 
         if args.command == "ci-dispose":
             return ci_intake.cmd_dispose(root, args.ci_run, args.attempt, args.upstream, args.reason)
-        return ci_intake.cmd_intake(root, args.since or ci_intake.INTAKE_SINCE, args.limit, args.check)
+        return ci_intake.cmd_intake(
+            root,
+            args.since or ci_intake.INTAKE_SINCE,
+            args.limit,
+            args.check,
+            branch=args.branch or ci_intake.BRANCH,
+        )
     return cmd_upload(root, args.repo, tuple(args.kinds or UPLOAD_KINDS_DEFAULT))
 
 

@@ -247,7 +247,15 @@ def _option(command: Sequence[str], name: str) -> str | None:
 def consumed_configs(command: Sequence[str], root: Path) -> list[str] | None:
     """The ``configs/`` files a run reads as its configuration: those its arguments name, and for ``opengrad
     evaluate`` the suite file and the benchmark configs it lists (resolved as ``opengrad.benchmarks.runner`` does).
-    None when they cannot be determined, for example a benchmark config outside ``configs/`` (fail closed)."""
+    None when they cannot be determined: a suite that is missing or does not parse, a benchmark config outside
+    ``configs/benchmarks/``, any error (fail closed). Never raises."""
+    try:
+        return _consumed_configs(command, root)
+    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
+        return None
+
+
+def _consumed_configs(command: Sequence[str], root: Path) -> list[str] | None:
     from opengrad.runrecords import scripts  # imports this module: loaded at call time
 
     found: set[str] = set()
@@ -271,10 +279,29 @@ def consumed_configs(command: Sequence[str], root: Path) -> list[str] | None:
         for name in map(str, names):
             candidates = (base / f"{name}.yaml", base / f"{name.replace('-', '_')}.yaml")
             hit = next((c for c in candidates if c.is_file()), None)
-            if hit is None:
-                return None  # the runner would fall back to an arbitrary path: not vouched for
+            if hit is None or posixpath.normpath(hit.relative_to(root).as_posix()) != hit.relative_to(root).as_posix():
+                return None  # the runner would fall back to an arbitrary path, or the name climbs out: not vouched for
             found.add(hit.relative_to(root).as_posix())
     return sorted(found)
+
+
+def git_blob(root: Path, relative: str, data: bytes) -> str | None:
+    """The git blob id these bytes get when committed at ``relative``: git's own conversion (line endings,
+    ``.gitattributes``) applied, as ``git hash-object --path`` does, so a CRLF checkout of a pushed LF file matches.
+    None when git fails."""
+    try:
+        done = subprocess.run(
+            ["git", "--no-optional-locks", "hash-object", f"--path={relative}", "--stdin"],
+            cwd=root,
+            input=data,
+            capture_output=True,
+            timeout=60,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    blob = done.stdout.decode("ascii", errors="replace").strip()
+    return blob if done.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", blob) else None
 
 
 def entry_scan(command: Sequence[str], root: Path) -> tuple[list[str] | None, list[str] | None]:
@@ -363,9 +390,21 @@ def config_blobs(command: Sequence[str], root: Path) -> dict[str, str] | None:
         consumed = consumed_configs(command, root)
         if consumed is None:
             return None
-        return {path: blob_sha((root / path).read_bytes()) for path in consumed}
+        blobs = {path: git_blob(root, path, (root / path).read_bytes()) for path in consumed}
+        if any(blob is None for blob in blobs.values()):
+            return None
+        return {path: str(blob) for path, blob in blobs.items()}
     except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
         return None
+
+
+def consumed_held_out(command: Sequence[str], root: Path) -> bool:
+    """True when a config the run consumes names held-out data: for ``opengrad evaluate``, the suite and the
+    benchmark configs it lists, which no argument names. Fails closed."""
+    try:
+        return any(config_state(path, root) == "held_out" for path in consumed_configs(command, root) or [])
+    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
+        return True
 
 
 def held_out_arguments(argv: Sequence[str], root: Path) -> bool:

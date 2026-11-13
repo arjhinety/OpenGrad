@@ -745,11 +745,15 @@ Refinement, done 2026-11-13:
 - At run start, `inputs.consumed_configs` lists the configs the run consumes: every `configs/` file its arguments
   name and, for `opengrad evaluate`, the suite file (`--suite`, default `smoke`) and each benchmark config the suite
   lists, resolved as `opengrad.benchmarks.runner` does. A benchmark the runner would load from outside
-  `configs/benchmarks/`, or a suite that cannot be read, makes the answer unknown, and the run never uploads.
-- `config_blobs` records the git blob id of each, from the bytes the run read (what `git hash-object` prints).
+  `configs/benchmarks/`, or a suite that cannot be read or does not parse, makes the answer unknown: the run is
+  recorded and never uploads. Each consumed config is also read for held-out names at start, so a benchmark
+  config that a suite lists, and no argument names, counts (`consumed_held_out`).
+- `config_blobs` records the git blob id of each, from the bytes the run read, with git's own conversion applied
+  (`git hash-object --path`), so a CRLF checkout of a file git stores with LF still matches.
   These configs are left out of `entry_modified`; any other `configs/` edit still counts there and blocks.
 - At upload, `scripts.configs_pushed` requires each blob to appear at that same path in `origin/master`'s history
-  (`git log --raw`, with literal pathspecs). A version pushed earlier counts, since it was reviewed when pushed. A
+  (`git log --raw`, with literal pathspecs; a path that is not already normal, such as one with `..`, is refused).
+  A version pushed earlier counts, since it was reviewed when pushed. A
   version that only a merge commit introduced is not seen, which fails closed.
 - Getting the consumed set wrong is safe in one direction only, by design. A config the run reads but the list
   misses stays under the old rule, so an edit to it still blocks.

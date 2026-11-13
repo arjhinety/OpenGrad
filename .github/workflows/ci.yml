@@ -2,9 +2,10 @@ name: quality
 on:
   push:
   pull_request:
-# The workflow reads the repository and nothing else.
+# The workflow reads the repository, and the repository's earlier workflow runs (the CI inbox check), nothing else.
 permissions:
   contents: read
+  actions: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,6 +25,13 @@ jobs:
       - run: uv run opengrad-validate
       - run: uv run python scripts/preserve_h200_state.py --verify
       - run: uv run python scripts/repo/check_publication_hygiene.py
+      # Failed CI runs on master must be dealt with (run-record stage 4, owner's decision 2026-11-14): this stays
+      # red until each has a disposed entry in run-records/ci-inbox/, so the commit that fixes a failure commits
+      # its entry too (`python -m opengrad.runrecords ci-intake`, then `ci-dispose`). Read-only gh queries.
+      - run: uv run python -m opengrad.runrecords ci-intake --check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
   # The owner develops on Windows with core.autocrlf=true, the runner's default too. Line endings are
   # where the byte-pinned checks (sha256 sidecars, code hashes, the preserved state, hygiene) differ
   # from Linux, so those run here as well as the tests. Lint and types are platform-independent.

@@ -8,9 +8,9 @@ The policy for each entry point is fixed here, not inferred at run time:
 
 * ``kind``: the run kind. An ``annotation`` log that uploads goes as a redacted copy.
 * ``expected_exit_codes``: non-zero codes the script returns by design, each with a reason. Examples are a ``--check``
-  generator reporting stale output, or a scan reporting findings. Such a run is recorded as ``PASS`` with its exit
-  code kept, so it needs no disposition (owner's decision, 2026-11-13). Any other non-zero code, or a crash, is
-  ``FAILED`` and needs one.
+  generator reporting stale output, or a scan reporting findings. Such a run would be recorded as ``PASS`` with its
+  exit code kept, so it needs no disposition. Only a code ``main()`` returns counts, never ``SystemExit``. The table
+  is empty for now (owner's decision, 2026-11-13): every non-zero code, or a crash, is ``FAILED`` and needs one.
 * held-out data: an entry point whose code reads held-out evaluation data (``HELD_OUT_MARKERS``) is listed in
   ``HELD_OUT_ENTRY_POINTS``. Its log is recorded locally but never uploaded (owner's decision, 2026-11-13).
   ``tests/runrecords/test_scripts_policy.py`` keeps that list, together with ``PINNED_CONSOLE``, equal to a scan
@@ -271,7 +271,8 @@ def trace(command: Sequence[str], root: Path) -> tuple[str | None, int]:
 
     Understood: ``VAR=value`` prefixes (not ones that run other code, such as ``PYTHONSTARTUP``), ``uv run`` with no
     options, a Python interpreter with plain options (``-u``, ``-I``, ``-X utf8``, ``-W x``, ``--``), ``-m module``,
-    a script under ``scripts/`` or ``src/``, and the repository's console commands. Anything else (a shell, pytest,
+    a script under ``scripts/`` or ``src/``, the repository's console commands, and ``modal run`` of a script
+    under ``scripts/modal/`` (``_modal_entry``). Anything else (a shell, pytest,
     an outside tool, ``-c``, an option this does not know) is None, and its log is kept local (owner's decision,
     2026-11-13: fail closed).
     """
@@ -334,7 +335,9 @@ def _modal_entry(tokens: list[str], i: int, root: Path) -> tuple[str | None, int
         i += 1
     if i >= len(tokens) or tokens[i].startswith("-"):
         return None, 0
-    return repo_script(tokens[i].split("::", 1)[0], root), i + 1
+    script = repo_script(tokens[i].split("::", 1)[0], root)
+    # Only a Modal launcher: anything else after "modal run" is not what the tables describe.
+    return (script if script is not None and script.startswith("scripts/modal/") else None), i + 1
 
 
 def command_entry(command: Sequence[str], root: Path) -> str | None:
@@ -369,6 +372,21 @@ APPROVED_CONSOLE: Mapping[str, frozenset[str]] = MappingProxyType(
     {"opengrad.cli:main": frozenset({"train", "evaluate"})}
 )
 #: The run-record command: a run it wraps is recorded as its own run, so one that wraps another cannot be traced.
+#: Routine checks: the hygiene scan, the generated-index and upstream-log generators (run with ``--check`` in
+#: review), the publication verifier and the registry validator. They record like any entry point, but their logs
+#: are kept local by policy and listed as such, not counted as missing (owner's decision, 2026-11-14): what matters
+#: about them is their result in CI, not a backup of their output. An entry point that reads held-out data is
+#: ``never`` first, so none is listed here.
+ROUTINE_CHECKS = frozenset(
+    {
+        "scripts/repo/check_publication_hygiene.py",
+        "scripts/reporting/generate_indexes.py",
+        "scripts/reporting/generate_source_views.py",
+        "scripts/reporting/generate_upstream_log.py",
+        "scripts/verify_publication.py",
+        "src/opengrad/registry/validate.py",
+    }
+)
 RECORDER = frozenset({"src/opengrad/runrecords/__main__.py", "src/opengrad/runrecords/cli.py"})
 
 
@@ -396,7 +414,8 @@ def named_entry_points(command: Sequence[str], root: Path) -> set[str]:
 def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
     """Whether a recorded run's log may be uploaded, and the kind to upload it as.
 
-    ``never`` (held-out data; listed as kept by policy), ``unrecognised`` (cannot be checked; kept local and listed,
+    ``never`` (held-out data; listed as kept by policy), ``routine`` (a routine check; listed as kept by policy),
+    ``unrecognised`` (cannot be checked; kept local and listed,
     owner's decision 2026-11-13: fail closed), ``unapproved`` (not reviewed for upload yet; kept local and listed)
     or ``allowed``. An allowlist (owner's decision, 2026-11-13): only a reviewed entry point uploads. In order:
 
@@ -414,10 +433,12 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
     6. ``never``: the entry point is in ``HELD_OUT_ENTRY_POINTS``, or, unpinned, its scan at start found any
        marker-naming file (a script not tracked yet, or with local edits).
     7. ``unrecognised``: a named ``configs/`` file is gone, or the command does not trace to an entry point.
+       ``routine``: the entry point is a routine check (``ROUTINE_CHECKS``).
     8. ``allowed`` only for an approved entry point: one in ``PINNED_CONSOLE``, or an approved subcommand of an
        approved console command (``APPROVED_CONSOLE``: ``opengrad train`` and ``opengrad evaluate``), that started
        from reviewed code (``_as_reviewed``: its commit on ``origin/master``'s history, scanned, nothing it loads
-       and no ``configs/`` file modified, untracked or ignored). Anything else is ``unapproved``. An approved run given an existing file outside ``configs/``
+       and no other ``configs/`` file modified, untracked or ignored; each config it consumes pushed in that exact
+       version, ``configs_pushed``). Anything else is ``unapproved``. An approved run given an existing file outside ``configs/``
        that the checks cannot read (``unchecked_inputs``) is ``unrecognised``.
 
     The kind comes from ``POLICY`` when the entry point has one: the labelling runner launched through ``run
@@ -449,6 +470,8 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
         return "never", kind
     if "missing" in configs or entry is None:
         return "unrecognised", kind
+    if entry in ROUTINE_CHECKS:
+        return "routine", kind
     approved = entry in PINNED_CONSOLE or sub in APPROVED_CONSOLE.get(console_target(command, root) or "", frozenset())
     if not approved or not _as_reviewed(record, root):
         return "unapproved", kind
@@ -518,7 +541,13 @@ def configs_pushed(blobs: object, root: Path) -> bool:
     if tip is None:
         return False
     for path, blob in blobs.items():
-        if not (isinstance(path, str) and path.startswith("configs/") and isinstance(blob, str) and _OBJECT_ID.fullmatch(blob)):
+        if not (
+            isinstance(path, str)
+            and path.startswith("configs/")
+            and posixpath.normpath(path) == path
+            and isinstance(blob, str)
+            and _OBJECT_ID.fullmatch(blob)
+        ):
             return False
         try:
             # Literal pathspecs: a recorded path is a file name, never a pattern. Path-limited history skips a

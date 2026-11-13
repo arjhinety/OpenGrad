@@ -55,6 +55,7 @@ from opengrad.runrecords.inputs import (  # noqa: F401 -- re-exported: older imp
     argument_values,
     config_blobs,
     config_state,
+    consumed_held_out,
     entry_scan,
     held_out_arguments,
     names_held_out,
@@ -494,7 +495,7 @@ class RunRecord:
             self.start["expected_exit_codes"] = {str(k): v for k, v in sorted(self.expected_exit_codes.items())}
         if self.upload != "allowed":
             self.start["upload_policy"] = self.upload
-        if self.held_out_inputs:
+        if self.held_out_inputs or consumed_held_out(self.command, self.root):
             self.start["held_out_inputs"] = True
         reach, modified = entry_scan(self.command, self.root)
         self.start["held_out_reach"] = reach

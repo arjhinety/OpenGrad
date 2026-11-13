@@ -21,13 +21,15 @@ def test_every_committed_inbox_entry_is_dealt_with() -> None:
     assert problems == [], "\n".join(problems)
 
 
-def _run(run_id: int, created: str, conclusion: str = "failure", attempt: int = 1, event: str = "push") -> dict:
+def _run(
+    run_id: int, created: str, conclusion: str = "failure", attempt: int = 1, event: str = "push", branch: str = "master"
+) -> dict:
     return {
         "databaseId": run_id,
         "attempt": attempt,
         "workflowName": "quality",
         "event": event,
-        "headBranch": "master",
+        "headBranch": branch,
         "headSha": SHA,
         "createdAt": created,
         "conclusion": conclusion,
@@ -58,7 +60,8 @@ def _fake_gh(runs: list[dict], calls: list[list[str]]):
         if args[:2] == ["run", "list"]:
             status = args[args.index("--status") + 1]
             assert args[args.index("--event") + 1] == "push"
-            return json.dumps([r for r in runs if r["conclusion"] == status])
+            branch = args[args.index("--branch") + 1]
+            return json.dumps([r for r in runs if r["conclusion"] == status and r["headBranch"] == branch])
         assert args[:2] == ["run", "view"]
         return json.dumps(JOBS)
 
@@ -77,6 +80,7 @@ def test_intake_drafts_each_new_failure_and_needs_attention_until_each_is_dealt_
         _run(43039193997, "2026-11-11T14:30:54Z"),  # before the inbox's start
         _run(43500000000, "2026-11-14T01:00:00Z", conclusion="timed_out"),
         _run(43500000001, "2026-11-14T02:00:00Z", conclusion="cancelled"),  # superseded on purpose
+        _run(43500000002, "2026-11-14T03:00:00Z", branch="feat/x"),  # work in progress on another branch
     ]
     calls: list[list[str]] = []
     assert ci.cmd_intake(tmp_path, ci.INTAKE_SINCE, 100, False, _fake_gh(runs, calls)) == 3
@@ -113,6 +117,16 @@ def test_a_failed_rerun_of_a_run_dealt_with_is_a_new_draft(tmp_path: Path) -> No
     again = [_run(5, "2026-11-14T00:00:00Z", attempt=2)]
     assert ci.cmd_intake(tmp_path, ci.INTAKE_SINCE, 100, False, _fake_gh(again, [])) == 3
     assert sorted(ci.entries(tmp_path)) == ["CI-5-1.json", "CI-5-2.json"]
+    # The name intake prints is accepted as it is; a malformed one is a usage error.
+    assert ci.cmd_dispose(tmp_path, "CI-5-x", 1, None, "x") == 2
+    assert ci.cmd_dispose(tmp_path, "CI-5-2", 1, None, "flaky again") == 0
+    assert ci.cmd_intake(tmp_path, ci.INTAKE_SINCE, 100, False, _fake_gh(again, [])) == 0
+
+
+def test_another_branch_counts_only_when_named(tmp_path: Path) -> None:
+    runs = [_run(9, "2026-11-14T00:00:00Z", branch="feat/x")]
+    assert ci.cmd_intake(tmp_path, ci.INTAKE_SINCE, 100, True, _fake_gh(runs, [])) == 0
+    assert ci.cmd_intake(tmp_path, ci.INTAKE_SINCE, 100, True, _fake_gh(runs, []), branch="feat/x") == 3
 
 
 def test_since_is_compared_as_a_time_and_a_bad_one_is_refused(tmp_path: Path) -> None:
@@ -165,6 +179,7 @@ def test_a_disposition_must_name_a_real_entry_or_give_a_reason(tmp_path: Path) -
     for bad in ({"reason": ["x"]}, {"reason": "ok", "note": "text"}):
         assert ci.validate_entry("CI-5-1.json", {**entry, "disposition": bad}, tmp_path) != []
     assert ci.validate_entry("CI-5-1.json", {**entry, "note": "text"}, tmp_path) != []
+    assert "event is not push" in " ".join(ci.validate_entry("CI-5-1.json", {**entry, "event": "pull_request"}, tmp_path))
 
 
 def test_an_entry_with_a_private_detail_or_a_wrong_name_is_refused(tmp_path: Path) -> None:

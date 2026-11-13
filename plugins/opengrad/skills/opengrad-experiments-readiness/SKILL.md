@@ -117,11 +117,16 @@ it:
     untracked, ignored, or marked skip-worktree or assume-unchanged when it started (`entry_modified`; such a run
     never uploads). The configs it consumes (`consumed_configs`: those its arguments name, and for `evaluate` the
     suite and benchmark configs) are checked by content instead: `config_blobs` records each one's git blob id at
-    start, and upload waits until each is in `origin/master`'s history at that path (`configs_pushed`, UP-0040).
-    A run made with a tweaked config uploads once that exact config is pushed; an unknown consumed set never does.
+    start, with git's own line-ending conversion (`git hash-object --path`), and upload waits until each is in
+    `origin/master`'s history at that path (`configs_pushed`, UP-0040). A run made with a tweaked config uploads
+    once that exact config is pushed; an unknown consumed set (a suite that does not parse included) never does.
+    Each consumed config is also read for held-out names at start (`consumed_held_out`), so a benchmark config
+    that a suite lists, and no argument names, counts for `held_out_inputs`.
     An approved run given an existing file outside `configs/` (a training config in a scratch folder) is
-    unrecognised. Any other log stays local and is listed as not approved, counted for exit 3, until its entry
-    point's console output is reviewed and it is added. The checks below still apply to an approved entry point;
+    unrecognised. Routine checks (`ROUTINE_CHECKS`: the hygiene scan, the index and upstream-log generators, the
+    publication verifier, `opengrad-validate`) record, but their logs are kept local by policy and listed as such,
+    not counted for exit 3 (owner, 2026-11-14). Any other log stays local and is listed as not approved, counted
+    for exit 3, until its entry point's console output is reviewed and it is added. The checks below still apply to an approved entry point;
     they were the whole rule before, and five audits each found a new way past them.
   - Upload decides again from each record's command (`upload_decision`, whose docstring gives the order), so it
     also covers a script launched through `python -m opengrad.runrecords run`, records made before a script
@@ -213,18 +218,21 @@ it:
   `tests/runrecords/test_committed.py` fails CI on a committed run that did not pass and has no disposition, or a
   summary with a secret, an email address, a home path or an absolute path.
 - Failed CI runs land in a draft inbox that has to be dealt with (stage 4, `opengrad.runrecords.ci_intake`).
-  `python -m opengrad.runrecords ci-intake` asks GitHub, read-only through `gh`, for push-triggered runs whose
+  `python -m opengrad.runrecords ci-intake` asks GitHub, read-only through `gh`, for runs triggered by a push to
+  master (`--branch` names another; other branches are work in progress and do not count) whose
   latest attempt failed, timed out or could not start since 2026-11-13 (`INTAKE_SINCE`; `--since` takes an ISO
   time with an offset, or a date, and refuses anything else) and drafts `run-records/ci-inbox/CI-<run id>-<attempt>.json`
   for each new attempt, so a failed re-run gets its own draft. Reaching `--limit` is an error, not a silent cut.
   It exits 3 while any failed attempt has no entry, an entry has no disposition, or an inbox file cannot be read.
   Pull-request runs are left out: a fork's pull request runs its own workflow file, so its author would choose the
   names an entry copies. An attempt re-run to success before the intake runs is not seen. Deal with each draft by
-  `ci-dispose <id> [--attempt N] --upstream UP-NNNN` or `--reason`, then commit the entry; `tests/runrecords/test_ci_inbox.py`
-  fails CI on a committed entry with no valid disposition. An entry keeps metadata only (run id, attempt,
+  `ci-dispose CI-<id>-<attempt>` (the printed name; or `<id> --attempt N`) with `--upstream UP-NNNN` or
+  `--reason`, then commit the entry; `tests/runrecords/test_ci_inbox.py` fails CI on a committed entry with no
+  valid disposition. An entry keeps metadata only (run id, attempt,
   workflow, event, branch, commit, start time, failed job and step names), never log text: a failing test's output
-  can quote the data it compared. `ci-intake --check` writes nothing; CI does not run it, since it would keep CI
-  red until every earlier failure is dealt with (the owner's decision).
+  can quote the data it compared. CI runs `ci-intake --check` (writes nothing) on every push (owner, 2026-11-14),
+  so after a red run on master CI stays red until its entry is committed and disposed: the commit that fixes a
+  failure takes it in and disposes it too. The workflow has `actions: read` for this, nothing more.
 - `upload --repo OWNER/NAME`, on the owner's word only, sends a durable copy of every log (each kind) to a
   dataset repository. It refuses, sending nothing, unless the Hub reports the repository as existing and private.
   That check is the real safety boundary: redaction is best effort (owner's choice, 2026-11-11), and promises only

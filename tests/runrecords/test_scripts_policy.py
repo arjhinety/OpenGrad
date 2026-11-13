@@ -144,6 +144,8 @@ def test_a_modal_launch_is_traced_to_its_script() -> None:
     assert rs.command_entry(["modal", "run", "--env", "x", script], ROOT) is None  # an option that takes a value
     assert rs.command_entry(["modal", "deploy", script], ROOT) is None
     assert rs.command_entry(["modal", "run"], ROOT) is None
+    # Only a Modal launcher: a script the tables approve is not traced when modal runs it.
+    assert rs.command_entry(["modal", "run", "scripts/run_external_annotation.py"], ROOT) is None
 
 
 def test_a_modal_launch_records_the_cli_by_name(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -512,3 +514,21 @@ def test_a_declared_code_counts_only_when_main_returns_it(tmp_path: Path, monkey
     assert rs.run_script(str(path), lambda: 1) == 1
     statuses = sorted((r["exit_code"], r["status"]) for r in rr.read_local(tmp_path))
     assert statuses == [(1, "FAILED"), (1, "PASS"), (2, "FAILED")]
+
+
+def test_routine_checks_are_recording_entry_points_kept_local_by_policy() -> None:
+    entries = _entry_points()
+    for path in rs.ROUTINE_CHECKS:
+        assert path in entries, path
+        assert _calls(_main_block(entries[path]) or ast.Module([], [])) & RECORDING_CALLS, path
+    # Held-out entry points are "never" first; a routine check is never also approved for upload.
+    assert not rs.ROUTINE_CHECKS & (rs.HELD_OUT_ENTRY_POINTS | set(rs.PINNED_CONSOLE))
+    for command in (
+        ["scripts/repo/check_publication_hygiene.py"],
+        ["python", "scripts/reporting/generate_indexes.py", "--check"],
+        [".venv/Scripts/opengrad-validate"],
+    ):
+        assert rs.upload_decision({**REVIEWED, "kind": "script", "command": command}, ROOT)[0] == "routine", command
+    # A reporting generator that reads held-out data is not a routine check: it stays "never".
+    command = ["scripts/reporting/generate_experiment_status.py"]
+    assert rs.upload_decision({**REVIEWED, "kind": "script", "command": command}, ROOT)[0] == "never"

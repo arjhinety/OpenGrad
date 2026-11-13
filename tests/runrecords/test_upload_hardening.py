@@ -850,3 +850,71 @@ def test_evaluate_consumes_its_suite_and_the_benchmark_configs_it_lists(tmp_path
     )  # fails closed
     assert ri.consumed_configs(["opengrad", "evaluate", "m", "--suite=none"], root) is None
     assert ri.config_blobs(["opengrad", "evaluate", "m", "--suite", "wide"], root) is None
+
+
+def test_a_suite_that_does_not_parse_is_recorded_and_never_vouched_for(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    pytest.importorskip("yaml")
+    # The suite is edited: with the consumed set unknown, the edit counts under the strict rule.
+    monkeypatch.setattr(ri, "_modified", lambda root: {"configs/benchmark_suites/smoke.yaml"})
+    monkeypatch.setattr(ri, "_tracked", lambda root: {"src/opengrad/cli.py", "configs/benchmark_suites/smoke.yaml"})
+    root = _checkout(tmp_path)
+    (root / "pyproject.toml").write_text(
+        '[project]\nname = "x"\n[project.scripts]\nopengrad = "opengrad.cli:main"\n', encoding="utf-8"
+    )
+    (root / "src" / "opengrad").mkdir()
+    (root / "src" / "opengrad" / "cli.py").write_text("def main():\n    return 0\n", encoding="utf-8")
+    (root / "configs" / "benchmark_suites").mkdir(parents=True)
+    (root / "configs" / "benchmark_suites" / "smoke.yaml").write_text("benchmarks: [a\n", encoding="utf-8")
+    assert ri.consumed_configs(["opengrad", "evaluate", "m"], root) is None
+    assert rr.recorded_call("evaluation", ["opengrad", "evaluate", "m"], root, lambda: 0) == 0
+    (record,) = rr.read_local(root)  # recorded, not skipped
+    assert record["config_blobs"] is None
+    assert "configs/benchmark_suites/smoke.yaml" in record["entry_modified"]
+
+
+def test_a_benchmark_config_a_suite_lists_is_checked_for_held_out_data(tmp_path: Path) -> None:
+    pytest.importorskip("yaml")
+    root = _checkout(tmp_path)
+    (root / "pyproject.toml").write_text(
+        '[project]\nname = "x"\n[project.scripts]\nopengrad = "opengrad.cli:main"\n', encoding="utf-8"
+    )
+    (root / "src" / "opengrad").mkdir()
+    (root / "src" / "opengrad" / "cli.py").write_text("def main():\n    return 0\n", encoding="utf-8")
+    for folder in ("benchmark_suites", "benchmarks"):
+        (root / "configs" / folder).mkdir(parents=True)
+    (root / "configs" / "benchmark_suites" / "smoke.yaml").write_text("benchmarks: [a, b]\n", encoding="utf-8")
+    (root / "configs" / "benchmarks" / "a.yaml").write_text("x: 1\n", encoding="utf-8")
+    (root / "configs" / "benchmarks" / "b.yaml").write_text("prompts: release/frozen_prompts_v1.jsonl\n", encoding="utf-8")
+    assert ri.consumed_held_out(["opengrad", "evaluate", "m"], root) is True
+    assert rr.recorded_call("evaluation", ["opengrad", "evaluate", "m"], root, lambda: 0) == 0
+    (record,) = rr.read_local(root)
+    assert record.get("held_out_inputs") is True
+    (root / "configs" / "benchmarks" / "b.yaml").write_text("x: 2\n", encoding="utf-8")
+    assert ri.consumed_held_out(["opengrad", "evaluate", "m"], root) is False
+
+
+def test_a_crlf_checkout_of_a_pushed_lf_config_matches_its_blob(tmp_path: Path) -> None:
+    import subprocess
+
+    (tmp_path / ".gitattributes").write_bytes(b"*.yaml text eol=lf\n")
+    (tmp_path / "configs").mkdir()
+    (tmp_path / "configs" / "run.yaml").write_bytes(b"a: 1\nb: 2\n")
+    _git(tmp_path, "init", "-q")
+    head = _commit(tmp_path, "a")
+    pushed = subprocess.run(
+        ["git", "rev-parse", f"{head}:configs/run.yaml"], cwd=tmp_path, capture_output=True, text=True, check=True
+    ).stdout.strip()
+    # What a Windows editor or checkout leaves on disk: the same file with CRLF line endings.
+    assert ri.git_blob(tmp_path, "configs/run.yaml", b"a: 1\r\nb: 2\r\n") == pushed
+    assert ri.blob_sha(b"a: 1\r\nb: 2\r\n") != pushed  # the raw bytes alone would never match
+
+
+def test_a_config_path_that_climbs_out_is_not_vouched_for(tmp_path: Path) -> None:
+    (tmp_path / "README.md").write_bytes(b"x\n")
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "config", "core.autocrlf", "false")
+    _git(tmp_path, "update-ref", "refs/remotes/origin/master", _commit(tmp_path, "a"))
+    blob = ri.blob_sha(b"x\n")
+    assert rs.configs_pushed({"configs/../README.md": blob}, tmp_path) is False

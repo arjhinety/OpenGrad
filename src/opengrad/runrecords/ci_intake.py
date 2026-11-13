@@ -1,7 +1,7 @@
 """Failed CI runs land in a draft inbox that has to be dealt with (run-record stage 4).
 
 ``python -m opengrad.runrecords ci-intake`` asks GitHub (read-only, through the ``gh`` CLI) for the workflow runs
-started by a push since ``INTAKE_SINCE`` whose latest attempt failed, timed out or could not start
+started by a push to ``BRANCH`` (master; ``--branch`` names another) since ``INTAKE_SINCE`` whose latest attempt failed, timed out or could not start
 (``FAILED``), and writes one draft per run attempt to ``run-records/ci-inbox/CI-<run id>-<attempt>.json``. A
 failed re-run of a run already dealt with is a new attempt, so it gets its own draft. A draft has no
 disposition. ``ci-dispose`` gives it one: the ``docs/upstream/`` entry the failure is logged under, or a reason
@@ -12,8 +12,9 @@ has a disposition:
   cannot be read; the same "needs attention" code as ``upload``;
 * ``tests/runrecords/test_ci_inbox.py`` fails CI on a committed entry without a valid disposition, so a draft
   cannot be committed until it is dealt with;
-* ``ci-intake --check`` writes nothing and reports the same. CI does not run it (whether it should is the owner's
-  decision: it would turn CI red until every earlier failure is dealt with).
+* ``ci-intake --check`` writes nothing and reports the same. CI runs it on every push (owner's decision,
+  2026-11-14), so CI stays red until every earlier failure on master is dealt with: the commit that fixes a
+  failure also commits its entry. Failures on other branches are work in progress and are not counted.
 
 What it does not see: a failed attempt re-run to success before the intake runs (GitHub reports the latest
 attempt only), and pull-request runs. Pull requests are left out on purpose: a pull request from a fork runs its
@@ -35,6 +36,8 @@ from pathlib import Path
 from typing import Any
 
 INBOX = Path("run-records") / "ci-inbox"
+#: The branch whose failures must be dealt with: the one everything lands on.
+BRANCH = "master"
 #: Failures before this were dealt with when they happened (fixed in later commits); the inbox starts here.
 INTAKE_SINCE = "2026-11-13T00:00:00Z"
 SCHEMA = "opengrad.ci-inbox/1"
@@ -68,8 +71,8 @@ def utc(text: str) -> datetime:
     return (value if value.tzinfo else value.replace(tzinfo=UTC)).astimezone(UTC)
 
 
-def failed_runs(run_gh: Gh, since: str, limit: int) -> list[dict[str, Any]]:
-    """Push-triggered runs whose latest attempt is in ``FAILED``, started at or after ``since``. Raises when GitHub
+def failed_runs(run_gh: Gh, since: str, limit: int, branch: str = BRANCH) -> list[dict[str, Any]]:
+    """Runs triggered by a push to ``branch`` whose latest attempt is in ``FAILED``, started at or after ``since``. Raises when GitHub
     returns ``limit`` runs for a status, since older failures could then be missing."""
     start = utc(since)
     created = f">={start.strftime('%Y-%m-%dT%H:%M:%SZ')}"
@@ -77,14 +80,19 @@ def failed_runs(run_gh: Gh, since: str, limit: int) -> list[dict[str, Any]]:
     for status in FAILED:
         runs = json.loads(
             run_gh(
-                ["run", "list", "--status", status, "--event", "push", "--created", created,
-                 "--limit", str(limit), "--json", RUN_FIELDS]
+                ["run", "list", "--status", status, "--event", "push", "--branch", branch,
+                 "--created", created, "--limit", str(limit), "--json", RUN_FIELDS]
             )
         )
         if len(runs) >= limit:
             raise RuntimeError(f"GitHub returned {limit} {status} runs, the limit; raise --limit so none is missed")
         for run in runs:
-            if run.get("conclusion") in FAILED and utc(str(run["createdAt"])) >= start and run.get("event") == "push":
+            if (
+                run.get("conclusion") in FAILED
+                and utc(str(run["createdAt"])) >= start
+                and run.get("event") == "push"
+                and run.get("headBranch") == branch
+            ):
                 found[int(run["databaseId"])] = run
     return [found[k] for k in sorted(found)]
 
@@ -166,6 +174,10 @@ def validate_entry(name: str, entry: object, root: Path) -> list[str]:
         errors.append(f"keys are not {sorted(ENTRY_KEYS)}")
     if entry.get("schema") != SCHEMA:
         errors.append(f"schema is not {SCHEMA}")
+    if entry.get("event") != "push":
+        errors.append("event is not push: only push-triggered runs are taken in")
+    if not all(isinstance(entry.get(k), str) for k in ("workflow", "branch", "created_at")):
+        errors.append("workflow, branch and created_at must be text")
     if name != f"CI-{entry.get('ci_run')}-{entry.get('attempt')}.json" or not _NAME.fullmatch(name):
         errors.append("file name does not match ci_run and attempt")
     if not _SHA.fullmatch(str(entry.get("sha"))):
@@ -204,7 +216,9 @@ def _summary(entry: dict[str, Any]) -> str:
     return f"{entry.get('branch')} {str(entry.get('sha'))[:12]}  {steps}"
 
 
-def cmd_intake(root: Path, since: str, limit: int, check: bool, run_gh: Gh | None = None) -> int:
+def cmd_intake(
+    root: Path, since: str, limit: int, check: bool, run_gh: Gh | None = None, branch: str = BRANCH
+) -> int:
     """Write a draft for each new failed run attempt (none with ``check``); exit 3 while any is not dealt with."""
     run_gh = run_gh or gh
     try:
@@ -213,7 +227,7 @@ def cmd_intake(root: Path, since: str, limit: int, check: bool, run_gh: Gh | Non
         print(f"ci-intake: --since: {exc}")
         return 2
     try:
-        runs = failed_runs(run_gh, since, limit)
+        runs = failed_runs(run_gh, since, limit, branch)
         new = 0
         for run in runs:
             path = entry_path(root, run["databaseId"], run.get("attempt") or 1)
@@ -250,7 +264,12 @@ def cmd_dispose(root: Path, run_id: str, attempt: int, upstream: str | None, rea
         print("give exactly one of --upstream UP-NNNN or --reason TEXT")
         return 2
     try:
-        path = entry_path(root, run_id.removeprefix("CI-"), attempt)
+        # The name intake prints, CI-<id>-<attempt>, is accepted as well as an id with --attempt.
+        name = run_id.removeprefix("CI-")
+        if "-" in name:
+            name, _, given = name.partition("-")
+            attempt = int(given) if given.isdigit() else -1
+        path = entry_path(root, name, attempt)
     except ValueError as exc:
         print(exc)
         return 2
