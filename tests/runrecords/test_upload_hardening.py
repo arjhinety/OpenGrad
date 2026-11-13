@@ -480,6 +480,7 @@ def test_a_labelling_run_launched_as_a_script_uploads_as_a_redacted_annotation_c
     # Traced against the real checkout (the runner's path), recorded in a temporary folder; the runner is not run.
     root = Path(__file__).resolve().parents[2]
     monkeypatch.setenv(rr.LOCAL_DIR_ENV, str(tmp_path / "records"))
+    monkeypatch.setattr(rr, "_modified", lambda root: set())  # as from a clean checkout (CI); this test is about kind
     argv = ["python", "scripts/run_external_annotation.py", "--session", "punans-v2-trial"]
     assert rr.recorded_call("script", argv, root, lambda: print("batch 01 (5 items) attempt 1: exit 0") or 0) == 0
     sent = _hub(tmp_path, monkeypatch, SimpleNamespace(private=True))
@@ -592,4 +593,28 @@ def test_an_argument_naming_the_held_out_manifest_keeps_the_log_local(tmp_path: 
     (record,) = rr.read_local(tmp_path)
     assert record["held_out_inputs"] is True
     assert rs.upload_decision(record, tmp_path)[0] == "never"
+
+
+def test_a_training_config_outside_configs_is_flagged_when_the_run_starts(tmp_path: Path) -> None:
+    root = _checkout(tmp_path)
+    (root / "scratch").mkdir()
+    (root / "scratch" / "x.yaml").write_text("datasets:\n  manifest_paths: [elsewhere.json]\n", encoding="utf-8")
+    assert rr.recorded_call("training", ["opengrad", "train", "scratch/x.yaml"], root, lambda: 0) == 0
+    assert rr.recorded_call("training", ["opengrad", "train", "--steps", "3"], root, lambda: 0) == 0
+    flagged = {tuple(r["command"]): r.get("unchecked_inputs", False) for r in rr.read_local(root)}
+    assert flagged == {("opengrad", "train", "scratch/x.yaml"): True, ("opengrad", "train", "--steps", "3"): False}
+
+
+def test_the_run_start_scan_lists_modified_files_it_loads(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    root = _checkout(tmp_path)
+    (root / "scripts" / "tool.py").write_text("import helper\n", encoding="utf-8")
+    (root / "scripts" / "helper.py").write_text("X = 1\n", encoding="utf-8")
+    (root / "scripts" / "other.py").write_text("Y = 2\n", encoding="utf-8")
+    monkeypatch.setattr(rr, "_modified", lambda root: {"scripts/helper.py", "scripts/other.py", "configs/a.yaml"})
+    assert rr.recorded_call("script", ["scripts/tool.py"], root, lambda: 0) == 0
+    (record,) = rr.read_local(root)
+    assert record["entry_modified"] == ["configs/a.yaml", "scripts/helper.py"]
+    monkeypatch.setattr(rr, "_modified", lambda root: None)
+    assert rr.recorded_call("script", ["scripts/tool.py"], root, lambda: 0) == 0
+    assert {tuple(r["entry_modified"]) for r in rr.read_local(root)} >= {("<git status failed>",)}
 

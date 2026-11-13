@@ -10,11 +10,13 @@
 
 ``export`` refuses a run that did not pass and has no disposition, and ``tests/runrecords/test_committed.py`` fails
 CI on any committed summary like that, or one that holds a path, a secret or an email address. ``upload`` is never
-run by anything else, and only to a repository the Hub reports as private. A log holding a credential or a home
-folder (``private_findings``), and every annotation log, is uploaded only as a redacted copy; any other log goes
-byte for byte. The summary records which copy was sent, why, and the sha256 of both. A log from a run that read
-held-out data, or whose command cannot be traced to a repository entry point, is never uploaded
-(``opengrad.runrecords.scripts.upload_decision``), and ``export`` keeps only the exception type of its error.
+run by anything else, and only to a repository the Hub reports as private. Upload is an allowlist
+(``opengrad.runrecords.scripts.upload_decision``): only a log whose entry point was reviewed and approved, and
+whose run started from the reviewed code, is sent; a run that read held-out data, or whose command cannot be
+traced, is never sent. A log holding a credential or a home folder (``private_findings``), and every annotation
+log, is sent only as a redacted copy; any other goes byte for byte. The summary records which copy was sent, why,
+and the sha256 of both. The committed summary of a run whose log stays local, or of a pinned one, keeps only the
+exception type of its error.
 """
 
 from __future__ import annotations
@@ -75,10 +77,11 @@ PRIVATE: dict[str, re.Pattern[str]] = {
     "basic-auth credentials": BASIC_AUTH,
     "an encoded email address": EMAIL_ENCODED,
 }
-#: Every kind is uploaded (owner's decision, 2026-11-11), so a lost machine loses no log.
+#: Every kind is considered for upload (owner's decision, 2026-11-11); which logs go is upload_decision's allowlist
+#: (owner's decision, 2026-11-13).
 UPLOAD_KINDS_DEFAULT = KINDS
-#: Annotation runs talk to labelling models and have held private details, so their logs are always uploaded as a
-#: redacted copy, whether or not a pattern matches.
+#: Annotation runs talk to labelling models and have held private details, so a log of theirs that uploads goes as
+#: a redacted copy, whether or not a pattern matches.
 ALWAYS_REDACTED_KINDS = ("annotation",)
 REQUIRED = (
     "schema_version",

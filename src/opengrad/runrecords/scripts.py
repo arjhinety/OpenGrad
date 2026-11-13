@@ -6,7 +6,7 @@ run-record folder, like ``opengrad train``, without changing what the script doe
 
 The policy for each entry point is fixed here, not inferred at run time:
 
-* ``kind``: the run kind. ``annotation`` logs are always uploaded as redacted copies.
+* ``kind``: the run kind. An ``annotation`` log that uploads goes as a redacted copy.
 * ``expected_exit_codes``: non-zero codes the script returns by design, each with a reason. Examples are a ``--check``
   generator reporting stale output, or a scan reporting findings. Such a run is recorded as ``PASS`` with its exit
   code kept, so it needs no disposition (owner's decision, 2026-11-13). Any other non-zero code, or a crash, is
@@ -21,7 +21,7 @@ The policy for each entry point is fixed here, not inferred at run time:
   decision, 2026-11-13: annotation logs go up as redacted copies).
 
 Upload is an allowlist (owner's decision, 2026-11-13): a log uploads only when its entry point was reviewed and
-approved (``PINNED_CONSOLE``, ``APPROVED_SUBCOMMANDS``); any other stays local and is listed until it is. The checks
+approved (``PINNED_CONSOLE``, ``APPROVED_CONSOLE``); any other stays local and is listed until it is. The checks
 below still apply to an approved entry point. The decision is made when a log is uploaded (``upload_decision``),
 from the recorded command, so it also
 covers a script launched through ``python -m opengrad.runrecords run``, a script not converted yet, and a run
@@ -230,7 +230,37 @@ def repo_script(token: str, root: Path) -> str | None:
     relative = posixpath.normpath(value)
     if not relative.casefold().startswith(("scripts/", "src/")) or not relative.casefold().endswith(".py"):
         return None
-    return _known(relative) if (root / relative).is_file() else None
+    if not (root / relative).is_file():
+        return None
+    known = _known(relative)
+    if known != relative:
+        # On a case-sensitive file system a differently-cased name is another file: it gets no table entry.
+        try:
+            if not (root / relative).samefile(root / known):
+                return relative
+        except OSError:
+            return relative
+    return known
+
+
+def _console_target(token: str, root: Path) -> str | None:
+    """The ``module:function`` a console-command token runs: its bare name, or a launcher in the checkout's
+    ``.venv``. A program of the same name elsewhere is not this repository's command."""
+    value = str(token).replace("\\", "/")
+    if "/" in value and not value.startswith(".venv/"):
+        return None
+    return console_commands(root).get(_LAUNCHER_SUFFIX.sub("", value.rsplit("/", 1)[-1]))
+
+
+def console_target(command: Sequence[str], root: Path) -> str | None:
+    """The ``module:function`` of the repository console command a recorded command runs, if it runs one."""
+    tokens = [str(t).replace("\\", "/") for t in command]
+    i = 0
+    while i < len(tokens) and "=" in tokens[i] and not tokens[i].startswith("-"):
+        i += 1
+    if i + 1 < len(tokens) and _LAUNCHER_SUFFIX.sub("", tokens[i].rsplit("/", 1)[-1]).casefold() == "uv":
+        i += 2 if tokens[i + 1] == "run" else len(tokens)
+    return _console_target(tokens[i], root) if i < len(tokens) else None
 
 
 def trace(command: Sequence[str], root: Path) -> tuple[str | None, int]:
@@ -279,7 +309,7 @@ def trace(command: Sequence[str], root: Path) -> tuple[str | None, int]:
         if tokens[i] == "-m":
             return (_module_path(tokens[i + 1], root), i + 2) if i + 1 < len(tokens) else (None, i)
         return repo_script(tokens[i], root), i + 1
-    target = console_commands(root).get(_LAUNCHER_SUFFIX.sub("", program))
+    target = _console_target(tokens[i], root)
     if target is not None:
         return _module_path(target.split(":", 1)[0], root), i + 1
     return repo_script(tokens[i], root), i + 1
@@ -308,11 +338,13 @@ EXCLUSION_LOOKUP = "src/opengrad/data/classifier_input.py"
 #: appear in its command.
 HELD_OUT_SUBCOMMANDS: Mapping[str, frozenset[str]] = MappingProxyType({"src/opengrad/cli.py": frozenset({"baseline"})})
 #: Approved for upload (owner's decision, 2026-11-13: an allowlist). A log uploads only when its entry point was
-#: reviewed and approved: the entry points in ``PINNED_CONSOLE``, and these subcommands. Any other log stays local
+#: reviewed and approved: the entry points in ``PINNED_CONSOLE``, and these subcommands of these console commands
+#: (matched by ``module:function``: ``opengrad-data-audit`` shares ``opengrad.cli`` but is not approved). Any other
+#: log stays local
 #: and is listed as not approved, until its entry point's console output is reviewed and it is added here or to
 #: ``PINNED_CONSOLE``. The checks before it still apply to an approved entry point.
-APPROVED_SUBCOMMANDS: Mapping[str, frozenset[str]] = MappingProxyType(
-    {"src/opengrad/cli.py": frozenset({"train", "evaluate"})}
+APPROVED_CONSOLE: Mapping[str, frozenset[str]] = MappingProxyType(
+    {"opengrad.cli:main": frozenset({"train", "evaluate"})}
 )
 #: The run-record command: a run it wraps is recorded as its own run, so one that wraps another cannot be traced.
 RECORDER = frozenset({"src/opengrad/runrecords/__main__.py", "src/opengrad/runrecords/cli.py"})
@@ -359,8 +391,11 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
     6. ``never``: the entry point is in ``HELD_OUT_ENTRY_POINTS``, or, unpinned, its scan at start found any
        marker-naming file (a script not tracked yet, or with local edits).
     7. ``unrecognised``: a named ``configs/`` file is gone, or the command does not trace to an entry point.
-    8. ``allowed`` only for an approved entry point: one in ``PINNED_CONSOLE``, or an approved subcommand
-       (``APPROVED_SUBCOMMANDS``: ``opengrad train`` and ``opengrad evaluate``). Anything else is ``unapproved``.
+    8. ``allowed`` only for an approved entry point: one in ``PINNED_CONSOLE``, or an approved subcommand of an
+       approved console command (``APPROVED_CONSOLE``: ``opengrad train`` and ``opengrad evaluate``), that started
+       from the reviewed code (``_as_reviewed``: scanned, nothing it loads and no ``configs/`` file modified or
+       untracked). Anything else is ``unapproved``. An approved run given an existing file outside ``configs/``
+       that the checks cannot read (``unchecked_inputs``) is ``unrecognised``.
 
     The kind comes from ``POLICY`` when the entry point has one: the labelling runner launched through ``run
     --kind script`` still uploads as a redacted annotation copy.
@@ -381,7 +416,7 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
         if reach is not None and not set(reach) <= reviewed:
             return "never", kind
         if entry == LABELLING_RUNNER:
-            return "allowed", kind
+            return ("allowed" if _as_reviewed(record) else "unapproved"), kind
     if record.get("held_out_inputs") or any(names_held_out(token) for token in command):
         return "never", kind
     configs = [config_state(token, root) for token in command]
@@ -391,9 +426,19 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
         return "never", kind
     if "missing" in configs or entry is None:
         return "unrecognised", kind
-    if entry in PINNED_CONSOLE or (entry is not None and sub in APPROVED_SUBCOMMANDS.get(entry, frozenset())):
-        return "allowed", kind
-    return "unapproved", kind
+    approved = entry in PINNED_CONSOLE or sub in APPROVED_CONSOLE.get(console_target(command, root) or "", frozenset())
+    if not approved or not _as_reviewed(record):
+        return "unapproved", kind
+    if record.get("unchecked_inputs"):
+        return "unrecognised", kind
+    return "allowed", kind
+
+
+def _as_reviewed(record: Mapping[str, Any]) -> bool:
+    """The run started from the reviewed code: its start record has the scan (``held_out_reach``) and no file the
+    entry point loads, nor any ``configs/`` file, was modified or untracked (``entry_modified`` empty). A record
+    from before these checks, or whose check failed, is not vouched for."""
+    return record.get("held_out_reach") is not None and record.get("entry_modified") == []
 
 
 def import_closure(entry: str, root: Path, tracked: set[str]) -> set[str]:
@@ -463,15 +508,18 @@ def held_out_reach(root: Path, tracked: set[str], entry_points: Sequence[str]) -
 
     The policy files (``POLICY_FILES``) do not count.
     """
-    marked = {
-        path
-        for path in tracked
-        if path not in POLICY_FILES
-        and any(m in code_text((root / path).read_text(encoding="utf-8")) for m in HELD_OUT_MARKERS)
-    }
+    cache: dict[str, bool] = {}
+
+    def marked(path: str) -> bool:
+        if path not in cache:
+            cache[path] = path not in POLICY_FILES and any(
+                m in code_text((root / path).read_text(encoding="utf-8")) for m in HELD_OUT_MARKERS
+            )
+        return cache[path]
+
     reach: dict[str, set[str]] = {}
     for entry in entry_points:
-        hits = import_closure(entry, root, tracked) & marked
+        hits = {path for path in import_closure(entry, root, tracked) if marked(path)}
         if hits:
             reach[entry] = hits
     return reach

@@ -108,10 +108,14 @@ it:
     docstrings. Its log is recorded but never uploaded; upload lists it as kept local by policy (owner,
     2026-11-13).
   - Upload is an allowlist (owner, 2026-11-13): a log uploads only when its entry point was reviewed and
-    approved: `opengrad train` and `opengrad evaluate` (`APPROVED_SUBCOMMANDS`), the labelling runner and the
-    fifteen pinned scripts (`PINNED_CONSOLE`). Any other log stays local and is listed as not approved, counted
-    for exit 3, until its entry point's console output is reviewed and it is added. The checks below still apply
-    to an approved entry point; they were the whole rule before, and three audits each found a new way past them.
+    approved: `opengrad train` and `opengrad evaluate` run as the `opengrad` console command (`APPROVED_CONSOLE`,
+    by `module:function`), the labelling runner and the fifteen pinned scripts (`PINNED_CONSOLE`). An approved run
+    also must have started from the reviewed code: its start record has the scan, and nothing it loads, nor any
+    `configs/` file, had local edits or was untracked (`entry_modified`). An approved run given an existing file
+    outside `configs/` (a training config in a scratch folder) is unrecognised. Any other log stays local and is
+    listed as not approved, counted for exit 3, until its entry point's console output is reviewed and it is
+    added. The checks below still apply to an approved entry point; they were the whole rule before, and three
+    audits each found a new way past them.
   - Upload decides again from each record's command (`upload_decision`, whose docstring gives the order), so it
     also covers a script launched through `python -m opengrad.runrecords run`, one not converted yet, and
     in-process `opengrad train`/`evaluate`. A held-out entry point named anywhere in the command keeps the log
@@ -122,7 +126,9 @@ it:
   - When a run starts, two checks are recorded before redaction. `held_out_inputs`: a marker in any argument (a
     path outside the repository included), or a `configs/` file (relative or absolute) that names one.
     `held_out_reach`: the marker-naming files the entry point loads, scanned on disk, so a script not tracked
-    yet, or with local edits, that reaches held-out data stays local. A config counts by its keys, single-word
+    yet that names held-out data stays local; `entry_modified` (above) covers edits that do not name a marker.
+    `unchecked_inputs`: an argument names an existing file outside `configs/`. A config counts by its keys,
+    single-word
     values, and the path-like pieces of spaced values, not prose: a description saying "confirmatory IDs are
     excluded" reaches nothing. A config that does not parse, or is not YAML/JSON/TOML, is read whole. In
     arguments and configs (not the code scan), `behavioral-heldout` also counts (`INPUT_MARKERS`): the frozen

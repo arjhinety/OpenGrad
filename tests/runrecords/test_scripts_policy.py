@@ -385,7 +385,7 @@ def test_a_recorded_command_is_traced_to_its_entry_point(command: list[str], ent
     ],
 )
 def test_the_upload_decision_is_made_from_the_recorded_command(record: dict, expected: tuple[str, str]) -> None:
-    assert rs.upload_decision(record, ROOT) == expected
+    assert rs.upload_decision({**REVIEWED, **record}, ROOT) == expected
 
 
 
@@ -401,6 +401,10 @@ def test_opengrad_evaluate_cannot_reach_held_out_data_through_a_suite() -> None:
         and any(m in path.read_text(encoding="utf-8", errors="replace").lower() for m in rs.HELD_OUT_MARKERS)
     ]
     assert named == []
+
+
+#: A start record from the reviewed code: scanned, nothing loaded modified (record.py _entry_scan).
+REVIEWED = {"held_out_reach": [], "entry_modified": []}
 
 
 ABS = str(ROOT / "configs/evaluation/candidates/m0_sft_canonical_v2_final/checkpoint-1800.yaml")
@@ -435,10 +439,10 @@ def test_an_absolute_config_path_inside_the_checkout_is_read(tmp_path: Path) -> 
 
 
 def test_a_pinned_entry_point_whose_code_reaches_more_than_reviewed_is_never_uploaded() -> None:
-    clean = {"kind": "script", "command": ["python", "scripts/audit_pdet_v1_representation.py"]}
+    clean = {"kind": "script", "command": ["python", "scripts/audit_pdet_v1_representation.py"], **REVIEWED}
     reviewed = {**clean, "held_out_reach": ["src/opengrad/data/classifier_input.py"]}
     edited = {**clean, "held_out_reach": ["src/opengrad/data/classifier_input.py", "scripts/x.py"]}
-    runner = {"kind": "script", "command": ["python", RUNNER], "held_out_reach": ["scripts/x.py"]}
+    runner = {"kind": "script", "command": ["python", RUNNER], "held_out_reach": ["scripts/x.py"], "entry_modified": []}
     assert rs.upload_decision(reviewed, ROOT)[0] == "allowed"
     assert rs.upload_decision(edited, ROOT)[0] == "never"
     assert rs.upload_decision(runner, ROOT)[0] == "never"
@@ -451,7 +455,11 @@ def test_a_pinned_entry_point_whose_code_reaches_more_than_reviewed_is_never_upl
     [
         (["opengrad", "train", "configs/benchmark_suites/smoke.yaml"], "allowed"),
         ([".venv/Scripts/opengrad.exe", "evaluate", "some-model", "--suite", "smoke"], "allowed"),
-        (["python", "-m", "opengrad.cli", "--json", "evaluate", "m"], "allowed"),
+        # opengrad.cli has no __main__ block, so this runs nothing; approval is by console command.
+        (["python", "-m", "opengrad.cli", "--json", "evaluate", "m"], "unapproved"),
+        # Another console command sharing the module, and a program of the same name elsewhere.
+        (["opengrad-data-audit", "--config", "train"], "unapproved"),
+        (["tools/opengrad", "train", "configs/benchmark_suites/smoke.yaml"], "unrecognised"),
         # Not reviewed: another subcommand, an unlisted clean script, the annotation CLI.
         (["opengrad", "compare", "a", "b"], "unapproved"),
         (["python", "scripts/prepare_capability_benchmarks.py"], "unapproved"),
@@ -463,12 +471,15 @@ def test_a_pinned_entry_point_whose_code_reaches_more_than_reviewed_is_never_upl
 )
 def test_only_an_approved_entry_point_uploads(command: list[str], decision: str) -> None:
     # Owner's decision, 2026-11-13: an allowlist. Everything not reviewed stays local, listed.
-    assert rs.upload_decision({"kind": "script", "command": command}, ROOT)[0] == decision
+    assert rs.upload_decision({"kind": "script", "command": command, **REVIEWED}, ROOT)[0] == decision
 
 
 def test_every_approved_entry_point_exists() -> None:
-    for path in (*rs.PINNED_CONSOLE, *rs.APPROVED_SUBCOMMANDS):
+    for path in rs.PINNED_CONSOLE:
         assert (ROOT / path).is_file(), path
+    scripts = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["scripts"]
+    for target in rs.APPROVED_CONSOLE:
+        assert target in scripts.values(), target
 
 
 def test_the_training_configs_keep_their_backup_and_the_reading_configs_do_not() -> None:
@@ -477,4 +488,25 @@ def test_the_training_configs_keep_their_backup_and_the_reading_configs_do_not()
         assert rr.config_state(path.relative_to(ROOT).as_posix(), ROOT) == "", path.name
     assert rr.config_state("configs/evaluation/tool_calling/qwen35_2b_baseline.yaml", ROOT) == "held_out"
     assert rr.config_state("configs/data/preferences/toolpolicy_dpo_v1.yaml", ROOT) == ""
+
+
+@pytest.mark.parametrize(
+    "start",
+    [
+        {},  # a record from before the run-start checks
+        {"held_out_reach": [], "entry_modified": ["scripts/audit_pdet_v1_representation.py"]},  # a local edit
+        {"held_out_reach": [], "entry_modified": ["configs/benchmark_suites/smoke.yaml"]},
+        {"held_out_reach": [], "entry_modified": ["<git status failed>"]},
+        {"held_out_reach": None, "entry_modified": None},
+    ],
+)
+def test_an_approved_entry_point_uploads_only_from_the_reviewed_code(start: dict) -> None:
+    for command in (["opengrad", "train", "configs/benchmark_suites/smoke.yaml"], ["python", RUNNER],
+                    ["python", "scripts/audit_pdet_v1_representation.py"]):
+        assert rs.upload_decision({"kind": "script", "command": command, **start}, ROOT)[0] == "unapproved"
+
+
+def test_an_approved_run_given_a_file_outside_configs_is_not_uploaded() -> None:
+    record = {"kind": "training", "command": ["opengrad", "train", "scratch/x.yaml"], "unchecked_inputs": True}
+    assert rs.upload_decision({**REVIEWED, **record}, ROOT)[0] == "unrecognised"
 

@@ -447,28 +447,88 @@ def config_state(token: str, root: Path) -> str:
     return state
 
 
-def _entry_reach(command: Sequence[str], root: Path) -> list[str] | None:
-    """The marker-naming files the run's entry point loads, scanned as they are on disk when it starts; None when
-    the command does not trace to an entry point.
+def _modified(root: Path) -> set[str] | None:
+    """Repository paths with local edits or not tracked (``git status``); None when git cannot say."""
+    try:
+        done = subprocess.run(
+            ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
+            cwd=root,
+            capture_output=True,
+            timeout=60,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if done.returncode != 0:
+        return None
+    paths: set[str] = set()
+    entries = done.stdout.decode("utf-8", "replace").split("\0")
+    i = 0
+    while i < len(entries):
+        entry = entries[i]
+        if len(entry) > 3:
+            paths.add(entry[3:])
+            if entry[0] in "RC":  # a rename or copy is followed by its old path
+                i += 1
+                if i < len(entries) and entries[i]:
+                    paths.add(entries[i])
+        i += 1
+    return paths
 
-    The tables in ``opengrad.runrecords.scripts`` describe the tracked code. A script that is not tracked yet, or
-    has local edits, may reach held-out data they do not list; upload compares this scan with them. A scan that
-    fails reads as reaching held-out data (fail closed).
+
+def _entry_scan(command: Sequence[str], root: Path) -> tuple[list[str] | None, list[str] | None]:
+    """When the run starts: the marker-naming files its entry point loads, scanned as they are on disk, and the files
+    it loads (or any ``configs/`` file) with local edits or not tracked. ``(None, None)`` when the command does not
+    trace to an entry point.
+
+    The tables in ``opengrad.runrecords.scripts`` describe the reviewed, tracked code. A script not tracked yet may
+    reach held-out data they do not list; the scan sees it. An approved entry point uploads only when nothing it
+    loads was modified, since an edit can print what the review found it never prints. Anything that fails reads
+    as reaching held-out data, and as modified (fail closed).
     """
     try:
         from opengrad.runrecords import scripts  # imports this module: loaded at call time
 
         entry = scripts.command_entry(command, root)
         if entry is None:
-            return None
+            return None, None
         on_disk = {
             path.relative_to(root).as_posix()
             for folder in ("scripts", "src")
             for path in (root / folder).rglob("*.py")
         }
-        return sorted(scripts.held_out_reach(root, on_disk, [entry]).get(entry, set()))
+        loaded = scripts.import_closure(entry, root, on_disk)
+        reach = sorted(scripts.held_out_reach(root, on_disk, [entry]).get(entry, set()))
     except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
-        return ["<scan failed>"]
+        return ["<scan failed>"], ["<scan failed>"]
+    changed = _modified(root)
+    if changed is None:
+        return reach, ["<git status failed>"]
+    return reach, sorted(path for path in changed if path in loaded or path.startswith("configs/"))
+
+
+def unchecked_arguments(argv: Sequence[str], root: Path) -> bool:
+    """True when an argument names an existing file the checks cannot read: not under ``configs/`` (read for
+    markers), and not a script under ``scripts/`` or ``src/`` (checked as an entry point). A training config in a
+    scratch folder is one. Fail closed: such a run's log is not uploaded."""
+    try:
+        for token in list(argv)[1:]:
+            for value in argument_values(token):
+                if not value or value.startswith("-"):
+                    continue
+                path = Path(value)
+                candidates = [path] if path.is_absolute() else [root / value, Path.cwd() / value]
+                if not any(candidate.is_file() for candidate in candidates):
+                    continue
+                relative = repo_relative(str(next(c for c in candidates if c.is_file()).resolve()), root)
+                if relative.startswith("configs/"):
+                    continue
+                if relative.startswith(("scripts/", "src/")) and relative.endswith(".py"):
+                    continue
+                return True
+        return False
+    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
+        return True
 
 
 def held_out_arguments(argv: Sequence[str], root: Path) -> bool:
@@ -630,6 +690,7 @@ class RunRecord:
         self.log_path = self.dir / "output.log"
         self.command = redact_command(argv, root)
         self.held_out_inputs = held_out_arguments(argv, root)
+        self.unchecked_inputs = unchecked_arguments(argv, root)
         self.started = time.monotonic()
         self.start: dict[str, Any] = {}
         if upload not in UPLOAD_POLICIES:
@@ -655,7 +716,11 @@ class RunRecord:
             self.start["upload_policy"] = self.upload
         if self.held_out_inputs:
             self.start["held_out_inputs"] = True
-        self.start["held_out_reach"] = _entry_reach(self.command, self.root)
+        reach, modified = _entry_scan(self.command, self.root)
+        self.start["held_out_reach"] = reach
+        self.start["entry_modified"] = modified
+        if self.unchecked_inputs:
+            self.start["unchecked_inputs"] = True
         # Written before the run starts, so a run that is killed still leaves a record (read as INCOMPLETE).
         _write_json(self.dir / "start.json", self.start)
         self.log_path.touch()
