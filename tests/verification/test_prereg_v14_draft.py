@@ -31,8 +31,9 @@ def test_the_amendment_is_adopted_and_recorded_twice() -> None:
     assert "> **Status: ADOPTED 2026-10-02, as drafted.**" in text
     assert "> **As drafted:** *Status: DRAFT, not adopted." in text
     prereg = (ROOT / "docs/research/study-002/03-PREREGISTRATION.md").read_text(encoding="utf-8")
-    # v14 was the current version until v15 (47) was adopted on 2026-10-03.
-    assert "`study_002_prereg_v15` (2026-10-03).**" in prereg.splitlines()[2]
+    # v14 was the current version until v15 (47) was adopted on 2026-10-03; the header names v17 since 2026-11-13.
+    assert "`study_002_prereg_v17` (2026-11-13).**" in prereg.splitlines()[2]
+    assert "### `study_002_prereg_v15` — 2026-10-03" in prereg
     assert "### `study_002_prereg_v14` — 2026-10-02" in prereg
     errata = (ROOT / "reports/ERRATA.md").read_text(encoding="utf-8")
     assert "## 31. `study_002_prereg_v14` adopted: the readiness gate's design" in errata

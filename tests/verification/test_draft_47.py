@@ -606,7 +606,8 @@ def test_v15_is_adopted_and_recorded_twice_with_the_artifacts_numbers() -> None:
     prereg = " ".join(
         (ROOT / "docs/research/study-002/03-PREREGISTRATION.md").read_text(encoding="utf-8").split()
     )
-    assert "> **Current version: `study_002_prereg_v15` (2026-10-03).**" in prereg
+    # v15 was the current version until v17 was adopted on 2026-11-13 (v16 did not update the header).
+    assert "> **Current version: `study_002_prereg_v17` (2026-11-13).**" in prereg
     entry = prereg.split("### `study_002_prereg_v15` — 2026-10-03")[1]
     trial, recall = f["trial"], f["recall"]
     for phrase in (

@@ -2063,3 +2063,52 @@ Later line for §44, 2026-11-13 (owner decisions, the same day):
   read-only folder outside the repository, with identical sha256 before and after. The two test files are byte-identical
   to OpenGrad's `data/raw/when2call/test/` copies, so the seal mainly protects the transcript.
 - **Record:** `tool-decision-rl/provenance/TEST_SPLIT_ACCESS.md`; Study 002 later line on `study_002_prereg_v16`.
+
+Later line for §44, 2026-11-13: a further look. An audit agent's repository-wide search matched inside the tracked file
+`release/executorch/cpu/frozen_prompts_confirmatory_v1.jsonl` and showed a 2 KB preview of one row: `P-CONF` item
+`ae34fdce-e074-4d27-ae30-d11c533f69a6`, its gold decision and the start of its prompt (two tool descriptions). The agent's
+report passed the id, gold decision and two tool names to the session. No score was read. Setting this item aside is
+deferred like `276e4475…`. The repository root's `.ignore` now keeps ripgrep-based search tools out of the files that hold
+confirmatory text. `git grep` and plain `grep` do not read it, so searches are scoped by hand as well.
+
+
+## 45. `study_002_prereg_v17` adopted: `P-CONF` kept, with a contamination caveat
+
+- **What happened:** on 2026-09-12 the ExecuTorch publisher uploaded the whole handoff folder, including
+  `frozen_prompts_confirmatory_v1.jsonl`, to the public repository
+  `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` (commit `02f7e48efa`). Each row holds an item's
+  `example_id`, gold `expected_decision`, rendered prompt and token ids, for the confirmatory partition only. This is
+  per the earliest committed writer, `078c6fe`, committed after the upload. Found on 2026-11-13 from Hub file names
+  only. No publication record under `reports/releases/` names that upload (UP-0037).
+- **And on GitHub:** an audit on 2026-11-13 found that the public repository `arjhinety/OpenGrad` already held the same
+  data, and earlier. Push times to `master`:
+  - the confirmatory id list, 2026-09-11T09:00:12Z; with upstream labels, that gives the selection with its gold
+    decisions;
+  - the frozen prompts, 2026-09-13T03:43:02Z;
+  - `P-CONF`'s ANSWER records, 2026-09-25T07:42:36Z.
+
+  Public status by 2026-09-11 is strongly suggested (stars on 2026-09-10 and 2026-09-11), not proven. The
+  2026-09-13 time is a force push.
+- **Why it matters:** `P-CONF` is meant to be a population no choice has touched. When2Call's test items were already
+  public upstream (since 2025-04-26). OpenGrad's copies add its confirmatory selection with gold decisions, and the
+  gold records of `P-CONF`'s ANSWER part.
+- **Decision (owner, 2026-11-13):** keep `P-CONF`, with a caveat (`study_002_prereg_v17`), confirmed on the corrected
+  facts. Results state every exposure, for both parts. An arm whose pinned base-model revision was committed on the
+  Hub after 2026-09-11T09:00:12Z is not scored on `P-CONF` as confirmatory until a contamination check is
+  preregistered.
+- **Contamination check preregistered (owner, 2026-11-13):** the pinned `Qwen/Qwen3.5-2B` (`15852e8c…`) is tested
+  against When2Call's public test split with the canonical-order test of arXiv 2310.17623. It runs after the
+  overfit-clinic interview and before any `P-CONF` scoring. A one-sided p below 0.05 demotes `P-CONF` to secondary
+  for arms on that model. The test rests on exchangeability (with no contamination, every ordering of an exchangeable
+  benchmark is equally likely). As OpenGrad's own safeguard, not a step from that paper: if the file turns out to be
+  ordered or grouped (for example by `source`), the comparison shuffles permute items only within those groups, so
+  grouping alone is not read as contamination. Whether it is grouped cannot be checked now under the no-looks rule. A
+  script-only, metadata-level check of the file's order runs together with the test, before any `P-CONF` scoring,
+  and needs the owner's go-ahead. A negative result does not show the model is clean: arXiv 2510.02386 reports that brief
+  GRPO training can conceal the signals most detection methods rely on. So the caveat stays either way. The check
+  has not been run, and no test file was opened to write this.
+- Nothing else changes.
+- **Not changed:** the Hub and GitHub copies are left in place (owner's decision). Whether to stop tracking held-out
+  files is decided after the overfit-clinic interview. The partition and its pinned sha256 are unchanged.
+  Setting aside `276e4475…` and `ae34fdce…` is deferred until the overfit-clinic interview.
+- **Record:** `tool-decision-rl/provenance/TEST_SPLIT_ACCESS.md`; `study_002_prereg_v17`.

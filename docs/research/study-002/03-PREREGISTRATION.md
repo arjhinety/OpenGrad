@@ -1,7 +1,7 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v15` (2026-10-03).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v15 at
+> **Current version: `study_002_prereg_v17` (2026-11-13).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v17 at
 > the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
 > [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md),
 > [44](44-PUNANS-V2-AMENDMENT-DRAFT.md), [45](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md),
@@ -585,3 +585,94 @@ an `mcq` row). That read was itself a new look at the test split. Setting the `P
 identification work, is deferred until the `tool-decision-rl` overfit-clinic interview finishes, and then needs
 the owner's word. Until then, no item, partition, threshold or rule changes. The agent's transcript and the downloaded
 files are sealed outside the repository. Full record: `reports/ERRATA.md` §44, later line of 2026-11-13.
+
+### `study_002_prereg_v17` — 2026-11-13
+
+- **Context.** `P-CONF` has two parts. The three-mode part is the 1,277-item confirmatory side of
+  `behavioral-heldout-v2`, drawn from When2Call's test split. The ANSWER part is the ANSWER strata records. Three
+  public copies bear on it:
+  - **Upstream.** `nvidia/When2Call` has been public and ungated since 2025-04-26 (created 2025-04-26T08:56:01Z, last
+    modified 2025-04-29T00:14:10Z, head `0582f774…`). The items' text, tools and labels were available to any model
+    trained on later data. The pinned base model, `Qwen/Qwen3.5-2B` at `15852e8c…` (repository created 2026-02-28;
+    that revision committed 2026-03-02T11:26:29Z), postdates it. Whether it saw those items is unknown, as it was for Study 001.
+  - **Ours, on the Hub.** The public repository `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` has held
+    `frozen_prompts_confirmatory_v1.jsonl` since 2026-09-12T08:18:08Z (commit `02f7e48efa`). It was uploaded with
+    the whole ExecuTorch handoff folder. The earliest committed writer, `scripts/build_executorch_handoff.py` at
+    `078c6fe`, was committed about 7.5 hours after that upload, so the version that ran is not in git. It writes, for
+    the confirmatory partition only: `example_id`, `expected_decision`, the rendered `prompt`, `prompt_sha256`,
+    `input_tokens` and `token_ids`. The Hub file's bytes were not compared with any local file. This copy adds
+    the exact rendered prompts and token ids.
+  - **Ours, on GitHub.** The public repository `arjhinety/OpenGrad` tracks held-out data. Push times to `master`, from
+    GitHub's repository activity log (push and force-push entries):
+    - the confirmatory id list (`reports/evaluation/behavioral-heldout-v2-partition.json`), 2026-09-11T09:00:12Z.
+      With the upstream gold labels, that list gives OpenGrad's confirmatory selection with its gold decisions.
+    - both `frozen_prompts_confirmatory_v1.jsonl` files and `results/quantization/frozen_prompts_v1.json`,
+      2026-09-13T03:43:02Z;
+    - `P-CONF`'s ANSWER records (`reports/study-002/pconf-v1/pconf-v1.answer-records.jsonl`), with gold records,
+      2026-09-25T07:42:36Z.
+
+    The repository being public by 2026-09-11 is strongly suggested (stars on 2026-09-10 and 2026-09-11), not
+    proven: no log seen records a visibility change. The earliest public exposure of OpenGrad's
+    confirmatory selection is therefore taken as 2026-09-11T09:00:12Z. The pinned base model predates all of it.
+- **Decision (owner, 2026-11-13): keep `P-CONF`, with a contamination caveat.** Chosen over rebuilding it from fresh
+  items, or demoting it to secondary, and confirmed on the corrected facts above (three copies, not two).
+- **Items changed:**
+  - Every reported `P-CONF` result states its exposures, for both parts:
+    - the three-mode items' text and upstream labels, public since 2025-04-26;
+    - OpenGrad's confirmatory selection with gold decisions, public since 2026-09-11, with rendered prompts and
+      token ids since 2026-09-12 (Hub) and 2026-09-13 (GitHub);
+    - the ANSWER part's gold records, public on GitHub since 2026-09-25.
+  - **Base-model rule.** If an arm's pinned base-model revision was committed on the Hub after 2026-09-11T09:00:12Z
+    (its commit date, from `list_repo_commits`), `P-CONF` is not scored as confirmatory for that arm until a later
+    entry preregisters a contamination check for it. This binds the S1 model choice, which is still open.
+  - **Contamination check of the pinned base model, preregistered here.**
+    - **What:** `Qwen/Qwen3.5-2B` at `15852e8c…` against When2Call's public test split.
+    - **Method:** the canonical-order test of Oren et al., *Proving Test Set Contamination in Black Box Language
+      Models* (arXiv 2310.17623). It flags contamination "whenever the likelihood of a canonically ordered benchmark
+      dataset is significantly higher than the likelihood after shuffling the examples". Run it with the authors'
+      published implementation, on `when2call_test_mcq.jsonl` in its upstream order at
+      `0582f774…`. The 300 `llm_judge` rows are copies of `mcq` rows.
+    - **Assumption:** the test rests on exchangeability. In the paper's words, "when there is no data contamination,
+      all orderings of an exchangeable benchmark should be equally likely".
+    - **Our safeguard (not a step from that paper):** the upstream file may be ordered or grouped, for example by
+      `source`. If it is, the comparison shuffles permute items only within those groups, so grouping alone is not
+      read as contamination.
+    - **Order check:** whether the file is grouped cannot be checked now, under the no-looks rule. A script-only
+      check of the file's order runs together with the test, before any `P-CONF` scoring. It works at the metadata
+      level, for example runs of the `source` field and row counts per group, and prints no item text. It needs the
+      owner's go-ahead.
+    - **When:** after the `tool-decision-rl` overfit-clinic interview, which governs looks at the test split, and
+      before any `P-CONF` scoring. Running it reads the test file by program. That access is recorded like any
+      other look; nobody reads items.
+    - **Positive result:** a one-sided p-value below 0.05. `P-CONF` is then demoted to secondary for every arm on
+      that model. No confirmatory claim rests on it until a later entry preregisters a primary population.
+    - **Negative result:** this does not show the model is clean. Wang et al., *On The Fragility of Benchmark
+      Contamination Detection in Reasoning Models* (arXiv 2510.02386), report that "even a brief Group Relative
+      Policy Optimization (GRPO) training can markedly conceal contamination signals that most detection methods
+      rely on". Their abstract does not say whether that includes the canonical-order test. The published model
+      is post-trained. So the caveat above stays whatever the result.
+    - **Not decided here:** the implementation's settings (number of shuffles or shards). They are fixed and
+      recorded before the check runs, without looking at any item.
+    - **Scope:** the check covers the three-mode part only. The ANSWER part is not from When2Call. Its exposure is
+      OpenGrad's own GitHub copy since 2026-09-25, after the pinned model, and it is covered by the caveat.
+  - No population, partition, threshold, arm or seed changes. `reports/study-002/pconf-v1/pconf-v1.partition.json` and
+    its pinned sha256 stay as they are.
+- **Looks recorded.** 10's look discipline asks for such looks in the run log. No Study 002 run exists yet, so they are
+  recorded here and in ERRATA §44:
+  - 2026-11-13, by the OpenGrad session: the uuid only of `P-CONF` item `276e4475-e087-4660-9a3a-1fe295fa452c` (see the
+    later line on v16).
+  - 2026-11-13, by an audit agent's repository-wide search: a 2 KB preview of `P-CONF` item
+    `ae34fdce-e074-4d27-ae30-d11c533f69a6` (its id, gold decision and the start of its prompt). The agent's report
+    passed the id, gold decision and two tool names to the session.
+
+  Neither look read a score. Setting either item aside is deferred until the `tool-decision-rl` overfit-clinic
+  interview finishes, and then needs the owner's word.
+- **Reason:** results on a population whose selection is public must say so, or the confirmatory label overstates what
+  they show. A base model trained after the selection went public could have trained on it.
+- **Not changed:** the Hub and GitHub copies stay. Whether to stop tracking held-out files in the public repository
+  is decided after the overfit-clinic interview (owner, 2026-11-13). Removing them would not remove them from
+  history or from clones.
+- **Candidates already scored:** none. **Arms launched under an earlier version:** none.
+- **ERRATA entry:** `reports/ERRATA.md` §45.
+- **Note:** v16 (2026-11-11) did not update this document's "Current version" header. This entry updates it from v15 to
+  v17.
