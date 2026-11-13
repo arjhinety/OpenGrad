@@ -124,7 +124,11 @@ it:
     `held_out_reach`: the marker-naming files the entry point loads, scanned on disk, so a script not tracked
     yet, or with local edits, that reaches held-out data stays local. A config counts by its keys, single-word
     values, and the path-like pieces of spaced values, not prose: a description saying "confirmatory IDs are
-    excluded" reaches nothing. A config that does not parse, or is not YAML/JSON/TOML, is read whole. Upload
+    excluded" reaches nothing. A config that does not parse, or is not YAML/JSON/TOML, is read whole. In
+    arguments and configs (not the code scan), `behavioral-heldout` also counts (`INPUT_MARKERS`): the frozen
+    held-out set's manifest and its files. It is not counted under keys reviewed as documenting or excluding the
+    set (`INPUT_EXEMPT_KEYS`: `checkpoint_selection_manifest`, `exclude_held_out_namespaces`,
+    `contamination_report`); an unknown key counts (owner, 2026-11-13, on Fable's and Gemini 4 Argon's advice). Upload
     checks the recorded arguments again. `opengrad evaluate` reaches data only through suite and benchmark
     configs, which a test keeps free of held-out names.
   - Fail closed (owner, 2026-11-13): a command it cannot trace to a repository entry point (a shell, pytest, an

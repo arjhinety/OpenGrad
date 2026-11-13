@@ -559,3 +559,37 @@ def test_an_unapproved_log_stays_local_and_is_listed(
     assert runs_cli.main(["upload", "--repo", "o/r"], root) == 3
     assert sent == {}
     assert "1 log(s) kept local: the entry point is not approved for upload yet" in capsys.readouterr().out
+
+
+MANIFEST = "reports/evaluation/behavioral-heldout-v2.manifest.json"
+
+
+@pytest.mark.parametrize(
+    ("body", "state"),
+    [
+        # Owner's decision, 2026-11-13 (Fable's and Gemini 4 Argon's advice): the set read as data keeps a log local.
+        (f"evaluations:\n  behavioral_manifest: {MANIFEST}\n", "held_out"),
+        ("calibration_dataset_id: behavioral-heldout-v2\n", "held_out"),
+        (f"some_new_key: {MANIFEST}\n", "held_out"),  # unknown key: fail closed
+        # Reviewed keys that document or exclude the set do not.
+        (f"checkpoint_selection_manifest: {MANIFEST}\n", ""),
+        (f"exclude_held_out_namespaces:\n  - {MANIFEST}\n  - bfcl_v4\n", ""),
+        ("contamination_report: reports/data/behavioral-heldout-v2-contamination.json\n", ""),
+        # Under an exempt key, the original markers still count.
+        ("exclude_held_out_namespaces:\n  - reports/evaluation/behavioral-heldout-v2-partition.json\n", "held_out"),
+    ],
+)
+def test_behavioral_heldout_counts_except_under_reviewed_keys(tmp_path: Path, body: str, state: str) -> None:
+    pytest.importorskip("yaml")
+    configs = tmp_path / "configs"
+    configs.mkdir()
+    (configs / "c.yaml").write_text(body, encoding="utf-8")
+    assert rr.config_state("configs/c.yaml", tmp_path) == state
+
+
+def test_an_argument_naming_the_held_out_manifest_keeps_the_log_local(tmp_path: Path) -> None:
+    assert rr.recorded_call("training", ["opengrad", "train", f"--eval-manifest={MANIFEST}"], tmp_path, lambda: 0) == 0
+    (record,) = rr.read_local(tmp_path)
+    assert record["held_out_inputs"] is True
+    assert rs.upload_decision(record, tmp_path)[0] == "never"
+

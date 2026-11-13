@@ -469,3 +469,12 @@ def test_only_an_approved_entry_point_uploads(command: list[str], decision: str)
 def test_every_approved_entry_point_exists() -> None:
     for path in (*rs.PINNED_CONSOLE, *rs.APPROVED_SUBCOMMANDS):
         assert (ROOT / path).is_file(), path
+
+
+def test_the_training_configs_keep_their_backup_and_the_reading_configs_do_not() -> None:
+    # checkpoint_selection_manifest is exempt (only checked for existence); behavioral_manifest reads the set.
+    for path in sorted((ROOT / "configs/experiments").glob("m0_*.yaml")):
+        assert rr.config_state(path.relative_to(ROOT).as_posix(), ROOT) == "", path.name
+    assert rr.config_state("configs/evaluation/tool_calling/qwen35_2b_baseline.yaml", ROOT) == "held_out"
+    assert rr.config_state("configs/data/preferences/toolpolicy_dpo_v1.yaml", ROOT) == ""
+

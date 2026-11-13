@@ -70,6 +70,14 @@ HELD_OUT_MARKERS = (
     "confirmatory",
     "punans",
 )
+#: Inputs only (a run's arguments and the configs they name), not the code scan: the frozen held-out set's manifest,
+#: partition, quarantine and contamination files all start with it (owner's decision, 2026-11-13, on Fable's and
+#: Gemini 4 Argon's advice). Not counted under ``INPUT_EXEMPT_KEYS``.
+INPUT_MARKERS = (*HELD_OUT_MARKERS, "behavioral-heldout")
+#: Config keys reviewed as documenting or excluding the held-out set, never reading it as data: a value under them
+#: is not checked for ``behavioral-heldout`` (the markers in ``HELD_OUT_MARKERS`` still count). A key not listed
+#: here counts, so a new key that reads the set keeps its run's log local (fail closed).
+INPUT_EXEMPT_KEYS = frozenset({"checkpoint_selection_manifest", "exclude_held_out_namespaces", "contamination_report"})
 COMMITTED_DIR = Path("run-records")
 KINDS = ("training", "evaluation", "freeze", "script", "annotation", "ci")
 STATUSES = ("PASS", "FAILED", "INTERRUPTED", "INCOMPLETE")
@@ -333,22 +341,22 @@ def argument_values(token: str) -> list[str]:
 
 
 def names_held_out(token: str) -> bool:
-    """True when an argument names a held-out marker, in any case."""
+    """True when an argument names a held-out marker (``INPUT_MARKERS``), in any case."""
     folded = str(token).replace("\\", "/").casefold()
-    return any(marker in folded for marker in HELD_OUT_MARKERS)
+    return any(marker in folded for marker in INPUT_MARKERS)
 
 
 #: A piece of a spaced config value that looks like a path or a file name.
 _PATH_LIKE = re.compile(r"[/\\]|\.[A-Za-z0-9]{1,6}$")
 
 
-def _config_identifiers(path: Path, text: str) -> list[str]:
+def _config_identifiers(path: Path, text: str) -> list[tuple[str, bool]]:
     """What in a config can point at data: its keys and its values with no whitespace (paths, ids, namespaces).
 
     A description that mentions held-out data in prose ("confirmatory IDs are excluded") does not reach it, just
     as a marker in a code comment does not. In a value with spaces (a command line, a list of paths), the pieces
     that look like paths or file names count. A file that does not parse as YAML, JSON or TOML, or of another
-    kind, is read whole: fail closed.
+    kind, is read whole: fail closed. Each item comes with whether it sits under a key in ``INPUT_EXEMPT_KEYS``.
     """
     suffix = path.suffix.casefold()
     try:
@@ -363,30 +371,31 @@ def _config_identifiers(path: Path, text: str) -> list[str]:
 
             documents = [tomllib.loads(text)]
         else:
-            return [text]
+            return [(text, False)]
     except Exception:  # noqa: BLE001 -- unparsable: read whole
-        return [text]
-    found: list[str] = []
-    stack: list[Any] = documents
+        return [(text, False)]
+    found: list[tuple[str, bool]] = []
+    stack: list[tuple[Any, bool]] = [(document, False) for document in documents]
     seen: set[int] = set()  # a YAML alias can make a node contain itself
     while stack:
-        item = stack.pop()
+        item, exempt = stack.pop()
         if isinstance(item, dict | list):
             if id(item) in seen:
                 continue
             seen.add(id(item))
         if isinstance(item, dict):
-            found.extend(str(key) for key in item)
-            stack.extend(item.values())
+            for key, value in item.items():
+                found.append((str(key), exempt))
+                stack.append((value, exempt or str(key) in INPUT_EXEMPT_KEYS))
         elif isinstance(item, list):
-            stack.extend(item)
+            stack.extend((entry, exempt) for entry in item)
         elif isinstance(item, str):
             pieces = item.split()
             if len(pieces) == 1:
-                found.append(pieces[0])
+                found.append((pieces[0], exempt))
             else:
                 # A command line or a list of paths in one value: its path-like pieces count, its words do not.
-                found.extend(piece for piece in pieces if _PATH_LIKE.search(piece))
+                found.extend((piece, exempt) for piece in pieces if _PATH_LIKE.search(piece))
     return found
 
 
@@ -431,8 +440,10 @@ def config_state(token: str, root: Path) -> str:
         except OSError:
             state = "missing"
             continue
-        if any(marker in item.casefold() for item in _config_identifiers(path, text) for marker in HELD_OUT_MARKERS):
-            return "held_out"
+        for item, exempt in _config_identifiers(path, text):
+            markers = HELD_OUT_MARKERS if exempt else INPUT_MARKERS
+            if any(marker in item.casefold() for marker in markers):
+                return "held_out"
     return state
 
 
