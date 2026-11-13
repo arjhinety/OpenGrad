@@ -1,0 +1,8 @@
+# Search tools that read this file (ripgrep, and agents built on it) skip these paths. They hold the text of held-out
+# confirmatory items (Study 002's P-CONF, Study 001's confirmatory side). A repository-wide search once showed a preview
+# of one (reports/ERRATA.md §44, later line of 2026-11-13). git grep and plain grep do not read this file: scope those by
+# hand. To read one of these files on purpose, name it directly.
+release/**/frozen_prompts_*
+results/**/frozen_prompts_*
+results/**/*confirmatory*
+reports/study-002/pconf-v1/*.jsonl
