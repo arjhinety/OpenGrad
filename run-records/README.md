@@ -2,12 +2,24 @@
 
 One JSON summary per recorded run, written by `python -m opengrad.runrecords export` from the git-ignored
 `.run-records/` folder. Each holds the run's command (redacted), commit and whether tracked files differed from it,
-the installed library versions, the GPU, the exit status, duration and the sha256 of its full output log. The log
-itself is never committed. With the owner's word, `python -m opengrad.runrecords upload` keeps a durable copy of
-every log in a dataset repository, and refuses any repository the Hub does not report as private; that check is
+the installed library versions, the GPU, the exit status, duration and the sha256 of its full output log. Scripts
+record themselves through `opengrad.runrecords.scripts`: a non-zero code a script returns by design records as a
+pass with the code kept. The log itself is never committed. With the owner's word, `python -m opengrad.runrecords
+upload` keeps a durable copy of each log it may send in a dataset repository, and refuses any repository the Hub
+does not report as private; that check is
 the real safety boundary. A log holding a credential or a home folder in a form the tests cover, and every
 annotation log, goes up only as a redacted copy; any other log goes up byte for byte, and one that is not clean
-UTF-8 text stays local. The summary records which copy was sent, why, and the sha256 of both. Redaction is best
+UTF-8 text stays local. Upload is an allowlist: only a log whose entry point was reviewed and approved is sent
+(`opengrad train`, `opengrad evaluate`, the labelling runner and fifteen reviewed scripts); any other stays local and
+is listed until its entry point is reviewed. Even then, a log is not sent when its run read held-out data, as far
+as the code shows: its command
+runs an entry point that names a held-out file or loads code that does, or an argument (or a `configs/` file it
+names) names one. The exception is a short list of entry points whose console a test pins to status lines
+(`PINNED_CONSOLE`): the labelling runner, and fifteen that touch held-out data only to exclude it. Nor is a log
+sent when the command cannot be traced to a repository entry point (a shell, pytest, an outside tool): fail
+closed, listed for a mapping to be added. The committed summary of a run whose log stays local, or of a pinned
+one, keeps only the exception type of its error. The summary records which copy was sent, why, and the sha256 of
+both. Redaction is best
 effort: the skill `opengrad-experiments-readiness` lists the forms it covers and its known misses, so a run
 should not print credentials.
 

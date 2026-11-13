@@ -16,6 +16,7 @@ from types import ModuleType, SimpleNamespace
 import pytest
 
 from opengrad.hashing import sha256_file
+from opengrad.runrecords import cli as runs_cli_module
 from opengrad.runrecords import record as rr
 from opengrad.runrecords.cli import main as runs_main
 from opengrad.runrecords.cli import validate_summary
@@ -195,6 +196,15 @@ def _fake_hub(
 
     monkeypatch.setattr(sys.modules["huggingface_hub"], "HfApi", FakeApi)
     monkeypatch.setattr(sys.modules["huggingface_hub"], "hf_hub_download", fake_download)
+    # These tests are about redaction: their ``python -c`` commands stand in for repository scripts. The
+    # fail-closed rule for commands that cannot be traced has its own tests (test_scripts_policy.py).
+    real = runs_cli_module.upload_decision
+
+    def traced(record: dict, root: Path) -> tuple[str, str]:
+        decision, kind = real(record, root)
+        return ("allowed", kind) if decision == "unrecognised" else (decision, kind)
+
+    monkeypatch.setattr(runs_cli_module, "upload_decision", traced)
     return sent
 
 

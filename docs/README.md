@@ -273,5 +273,6 @@ current state is in [`research/study-002/README.md`](research/study-002/README.m
 | [`upstream/UP-0035.md`](upstream/UP-0035.md) | UP-0035 — the hygiene scan misses a single-backslash Windows home path (`OURS`) |
 | [`upstream/UP-0036.md`](upstream/UP-0036.md) | UP-0036 — the scanner's home-path pattern backtracked exponentially (`OURS`) |
 | [`upstream/UP-0037.md`](upstream/UP-0037.md) | UP-0037 — held-out confirmatory data went public, on the Hub and on GitHub (`OURS`) |
+| [`upstream/UP-0038.md`](upstream/UP-0038.md) | UP-0038 — run-record stage 3: gaps left for the next slice (`OURS`) |
 
-173 documents.
+174 documents.

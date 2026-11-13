@@ -39,7 +39,7 @@ opengrad-contamination = "opengrad.contamination.cli:main"
 opengrad-data-audit = "opengrad.cli:data_audit_cli"
 opengrad-data = "opengrad.data.cli:main"
 opengrad-benchmark = "opengrad.benchmarks.cli:benchmark_cli"
-opengrad-annotate = "opengrad.annotation.cli:main"
+opengrad-annotate = "opengrad.annotation.cli:recorded_main"
 
 [build-system]
 requires = ["hatchling"]

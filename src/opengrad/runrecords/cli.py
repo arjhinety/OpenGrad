@@ -12,7 +12,9 @@
 CI on any committed summary like that, or one that holds a path, a secret or an email address. ``upload`` is never
 run by anything else, and only to a repository the Hub reports as private. A log holding a credential or a home
 folder (``private_findings``), and every annotation log, is uploaded only as a redacted copy; any other log goes
-byte for byte. The summary records which copy was sent, why, and the sha256 of both.
+byte for byte. The summary records which copy was sent, why, and the sha256 of both. A log from a run that read
+held-out data, or whose command cannot be traced to a repository entry point, is never uploaded
+(``opengrad.runrecords.scripts.upload_decision``), and ``export`` keeps only the exception type of its error.
 """
 
 from __future__ import annotations
@@ -50,6 +52,7 @@ from opengrad.runrecords.record import (
     redact_text,
     run_child,
 )
+from opengrad.runrecords.scripts import PINNED_CONSOLE, command_entry, upload_decision
 
 UPSTREAM_ID = re.compile(r"UP-\d{4}")
 #: An absolute path in a committed summary would leak the machine's layout. Repository-relative paths and
@@ -256,9 +259,28 @@ def cmd_dispose(root: Path, run_id: str, upstream: str | None, reason: str | Non
     _write_json(path, summary)
     committed = root / COMMITTED_DIR / f"{run_id}.json"
     if committed.is_file():
-        _write_json(committed, summary)
+        _write_json(committed, _exportable(summary, root))
     print(f"{run_id}: disposition recorded")
     return 0
+
+
+def _exportable(record: dict[str, Any], root: Path) -> dict[str, Any]:
+    """The summary as committed, by ``export``, ``dispose`` and ``upload`` alike. A run whose log stays local, or
+    whose entry point reaches held-out data (``PINNED_CONSOLE``), keeps only its exception type: the message could
+    quote held-out data, and redaction removes private details, not test content."""
+    decision, _ = upload_decision(record, root)
+    error = record.get("error")
+    command = [str(t) for t in record.get("command") or []]
+    pinned = command_entry(command, root) in PINNED_CONSOLE
+    if (decision == "allowed" and not pinned) or not error:
+        return record
+    kept = {
+        "never": "held-out data",
+        "unrecognised": "command not recognised",
+        "unapproved": "not approved for upload",
+    }.get(decision, "held-out data")
+    head = str(error).split(":", 1)[0].strip()
+    return {**record, "error": f"{head} (message kept local: {kept})"}
 
 
 def cmd_export(root: Path) -> int:
@@ -266,6 +288,7 @@ def cmd_export(root: Path) -> int:
     for record in read_local(root):
         if record["status"] == "INCOMPLETE" and not record.get("disposition"):
             continue
+        record = _exportable(record, root)
         errors = validate_summary(record, root)
         if errors:
             blocked += 1
@@ -295,7 +318,14 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
     redacted copy (``redacted_log``). It is checked again after redaction and kept local if anything still matches.
     Each upload is downloaded again and compared with the bytes that were sent. Exit codes: 0 every eligible log
     uploaded; 1 a log changed since its run or came back different; 2 the repository was refused; 3 some logs stayed
-    local, so they have no durable copy. Logs kept local are listed in every case, exit 1 included.
+    local, so they have no durable copy. Logs kept local are listed on exit 0, 3 and 1 (on exit 1, those seen
+    before the failure).
+
+    ``upload_decision`` is applied first: a log from a run that read held-out data is never sent and is listed as
+    kept by policy (not counted for exit 3); a log whose command cannot be traced to an entry point is never sent
+    and is listed (counted for exit 3, since a mapping would give it a backup); so is a log whose entry point is
+    not approved for upload yet (an allowlist, owner's decision 2026-11-13). The kind it is uploaded as comes
+    from the entry point's policy, so a labelling run launched through ``run --kind script`` is still redacted.
     """
     from huggingface_hub import HfApi, hf_hub_download
 
@@ -314,19 +344,56 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
         return 2
     sent = 0
     kept: list[str] = []
+    by_policy: list[str] = []
+    unrecognised: list[str] = []
+    unapproved: list[str] = []
+
+    def report() -> bool:
+        """List every log left on this machine; True when one has no durable copy and should have."""
+        if by_policy:
+            print(f"{len(by_policy)} log(s) kept local by policy (held-out data), not counted as missing:")
+            for run_id in by_policy:
+                print(f"  {run_id}")
+        if unrecognised:
+            print(
+                f"{len(unrecognised)} log(s) kept local: the command is not a known entry point, so it cannot be "
+                "checked for held-out data (add it in opengrad.runrecords.scripts):"
+            )
+            for run_id in unrecognised:
+                print(f"  {run_id}")
+        if unapproved:
+            print(
+                f"{len(unapproved)} log(s) kept local: the entry point is not approved for upload yet (review its "
+                "console output, then add it in opengrad.runrecords.scripts):"
+            )
+            for run_id in unapproved:
+                print(f"  {run_id}")
+        return _report_kept(kept) or bool(unrecognised) or bool(unapproved)
+
     for record in read_local(root):
-        if (
-            record["status"] == "INCOMPLETE"
-            or record["log"].get("durable")
-            or record["kind"] not in kinds
-        ):
+        if record["status"] == "INCOMPLETE" or record["log"].get("durable"):
+            continue
+        decision, kind = upload_decision(record, root)
+        if kind not in kinds:  # the policy's kind: a labelling run launched as `run --kind script` is annotation
+            continue
+        if decision == "never":
+            # The run read held-out data (opengrad.runrecords.scripts): its log stays here by policy.
+            by_policy.append(record["run_id"])
+            continue
+        if decision == "unrecognised":
+            # Owner's decision, 2026-11-13: a command that cannot be checked for held-out data stays local.
+            unrecognised.append(record["run_id"])
+            continue
+        if decision == "unapproved":
+            # Owner's decision, 2026-11-13: only a reviewed, approved entry point uploads.
+            unapproved.append(record["run_id"])
             continue
         summary_path, summary = _summary(root, record["run_id"])
         log = local_base(root) / record["run_id"] / "output.log"
         original = log.read_bytes()
         if sha256_bytes(original) != summary["log"]["sha256"]:
             print(f"FAIL: {record['run_id']}: the local log changed since the run; nothing more uploaded")
-            _report_kept(kept)
+            report()
             return 1
         try:
             text = original.decode("utf-8")
@@ -339,7 +406,7 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
         found = log_findings(text)
         # Owner's choice C: a redacted copy only when something private is detected, or for an annotation log.
         # A log whose only absolute paths are ordinary ones is sent byte for byte.
-        redact = bool(found) or record["kind"] in ALWAYS_REDACTED_KINDS
+        redact = bool(found) or kind in ALWAYS_REDACTED_KINDS
         data = redacted_log(text, root).encode("utf-8") if redact else original
         left = ", ".join(log_findings(data.decode("utf-8"))) if redact else ""
         if left:
@@ -361,7 +428,7 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
         )
         if sha256_file(fetched) != sha256_bytes(data):
             print(f"FAIL: {record['run_id']} came back different from what was sent")
-            _report_kept(kept)
+            report()
             return 1
         summary["log"]["durable"] = {
             "repo": repo,
@@ -370,18 +437,18 @@ def cmd_upload(root: Path, repo: str, kinds: tuple[str, ...]) -> int:
             "copy": "redacted" if redact else "original",
             "sha256": sha256_bytes(data),
             "redacted_because": found
-            or (["annotation run"] if record["kind"] in ALWAYS_REDACTED_KINDS else []),
+            or (["annotation run"] if kind in ALWAYS_REDACTED_KINDS else []),
         }
         _write_json(summary_path, summary)
         committed = root / COMMITTED_DIR / f"{record['run_id']}.json"
         if committed.is_file():
-            _write_json(committed, summary)
+            _write_json(committed, _exportable(summary, root))
         sent += 1
         kind = "redacted copy" if redact else "original"
         print(f"uploaded {record['run_id']} ({kind}) @ {info.oid} (re-fetched, bytes match)")
     print(f"{sent} log(s) uploaded")
-    # A log kept local has no backup, so the run does not report success (exit 3).
-    return 3 if _report_kept(kept) else 0
+    # A log kept local has no backup, so the run does not report success (exit 3); held-out logs are by design.
+    return 3 if report() else 0
 
 
 def main(argv: list[str] | None = None, root: Path | None = None) -> int:

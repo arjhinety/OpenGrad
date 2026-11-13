@@ -95,6 +95,62 @@ it:
   record.
 - Record any other command, with all of its output, as a child process:
   `python -m opengrad.runrecords run --kind <training|evaluation|freeze|script|annotation|ci> -- <command>`.
+- Every script and module entry point records itself (run-record stage 3, owner's rule). Its
+  `if __name__ == "__main__":` block calls `run_script(__file__, main)` from `src/opengrad/runrecords/scripts.py`,
+  never `main()` itself, so a test calling `main()` records nothing. A console command points at a
+  `recorded_main` wrapper.
+  - That module holds the policy table: each entry point's kind, and the non-zero exit codes it returns by design,
+    each with a reason (a `--check` reporting stale output, a scan reporting findings). Such a run records as
+    `PASS` with its code kept, so it needs no disposition (owner, 2026-11-13).
+  - An entry point that reaches held-out data is listed in `HELD_OUT_ENTRY_POINTS`: its own code, or a module it
+    imports, names a marker (`HELD_OUT_MARKERS`: `frozen_prompts`, `when2call_test`, `pconf-v1`, `answer-records`,
+    `behavioral-heldout-v2-partition`, `confirmatory`, `punans`). The scan reads code only, not comments or
+    docstrings. Its log is recorded but never uploaded; upload lists it as kept local by policy (owner,
+    2026-11-13).
+  - Upload is an allowlist (owner, 2026-11-13): a log uploads only when its entry point was reviewed and
+    approved: `opengrad train` and `opengrad evaluate` (`APPROVED_SUBCOMMANDS`), the labelling runner and the
+    fifteen pinned scripts (`PINNED_CONSOLE`). Any other log stays local and is listed as not approved, counted
+    for exit 3, until its entry point's console output is reviewed and it is added. The checks below still apply
+    to an approved entry point; they were the whole rule before, and three audits each found a new way past them.
+  - Upload decides again from each record's command (`upload_decision`, whose docstring gives the order), so it
+    also covers a script launched through `python -m opengrad.runrecords run`, one not converted yet, and
+    in-process `opengrad train`/`evaluate`. A held-out entry point named anywhere in the command keeps the log
+    local: a script path in any spelling (`./`, `//`, `..`, any case, absolute inside the checkout), one inside a
+    shell string (`bash -c "python scripts/x.py"`), a module after `-m`. The run-record command wrapping
+    another run cannot be traced. `opengrad baseline`, which runs a model on the held-out set with a default
+    config its command does not show, is never uploaded (`HELD_OUT_SUBCOMMANDS`).
+  - When a run starts, two checks are recorded before redaction. `held_out_inputs`: a marker in any argument (a
+    path outside the repository included), or a `configs/` file (relative or absolute) that names one.
+    `held_out_reach`: the marker-naming files the entry point loads, scanned on disk, so a script not tracked
+    yet, or with local edits, that reaches held-out data stays local. A config counts by its keys, single-word
+    values, and the path-like pieces of spaced values, not prose: a description saying "confirmatory IDs are
+    excluded" reaches nothing. A config that does not parse, or is not YAML/JSON/TOML, is read whole. Upload
+    checks the recorded arguments again. `opengrad evaluate` reaches data only through suite and benchmark
+    configs, which a test keeps free of held-out names.
+  - Fail closed (owner, 2026-11-13): a command it cannot trace to a repository entry point (a shell, pytest, an
+    outside tool, `-c`, a `uv run` option, an interpreter option it does not know, `PYTHONSTARTUP`), or one naming
+    a `configs/` file that is gone, stays local and is listed, counted for exit 3.
+  - `export`, `dispose` and `upload` all write the committed summary through `_exportable`: a run whose log
+    stays local, or whose entry point is pinned (below), keeps only the exception type of its error, since
+    redaction does not remove test content.
+  - `PINNED_CONSOLE` lists the entry points that upload although the scan reaches held-out data, each with the
+    test that pins its console to status lines (ids, counts, codes, fixed text). Only one reaching held-out data
+    through `classifier_input.py` alone (the When2Call questions loaded as an exclusion set, never printed) may be
+    added, after its printed objects are checked (owner, 2026-11-13). `tests/runrecords/test_console_pins.py`
+    snapshots the console calls of each such entry point and every file it loads; it does not see a change to
+    what a pinned call prints (`summary()` returning new fields), so whoever changes such a function reviews the
+    printed object again before regenerating the snapshot; exception text is not pinned either. These fifteen
+    still pass the argument checks: given a held-out config, they stay local. A pinned entry point whose scan at
+    start finds more than its review allowed stays local. The labelling runner
+    (`scripts/run_external_annotation.py`) is pinned by `tests/annotation/test_run_external_annotation.py`: its
+    logs go up as redacted annotation copies even on a P-UNANS session or config (owner, 2026-11-13); model
+    transcripts stay in the batch folder.
+  - `tests/runrecords/test_scripts_policy.py` checks every `__main__` block and console command. It keeps the
+    held-out list equal to the scan (`held_out_reach`: imports, relative ones included, and `.py` files loaded by
+    path; the policy files themselves are not followed) minus `PINNED_CONSOLE`. The allowlists of entry points not
+    yet converted have ceilings; lower them as entry points are converted, and raise them only with the owner's
+    word. Open gaps for the next slice: `docs/upstream/UP-0038.md`.
+  - Converted so far: the annotation entry points (`opengrad-annotate`, `scripts/run_external_annotation.py`).
 - Each run gets a git-ignored folder, `.run-records/<run_id>/` (`OPENGRAD_RUN_RECORDS_DIR` overrides it; the test
   suite uses that). It holds the full output, a start record and a summary. A start with no summary reads as
   `INCOMPLETE`.

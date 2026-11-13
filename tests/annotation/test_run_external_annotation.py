@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import sys
 from pathlib import Path
@@ -93,3 +94,66 @@ def test_the_version_check_carries_the_same_overrides_as_a_run(monkeypatch) -> N
     spec = runner.ANNOTATORS["model.deepseek-v4.1-flash"]
     assert runner.cli_version("cline", spec["version_argv"], spec["env"]) == "3.0.66"
     assert seen["CLINE_NO_AUTO_UPDATE"] == "1"
+
+
+# The runner's console output is its run log, uploaded as a redacted copy (owner's decision, 2026-11-13). Redaction
+# hides private details, not test content, so the console must carry status only: ids, counts, codes and fixed text.
+# The models' transcripts and answers go to files in the batch folder, never to the console.
+CONSOLE_VALUES = {
+    "spec['session']",
+    "progress['completed']",
+    "progress['total']",
+    "batch['batch_id']",
+    "len(batch['item_ids'])",
+    "attempt",
+    "run['exit_code']",
+    "run['seconds']",
+    "status",
+    "args.attempts",
+}
+#: ``problems[0]`` is the first line of a ``BatchError``: fixed text and ids, the model's own text only on later
+#: lines (pinned in tests/annotation/test_annotation_model_annotation.py).
+STATUS_VALUES = {"result['recorded']", "result['flagged']", "problems[0]"}
+
+
+def _interpolated(node: ast.expr) -> set[str]:
+    if isinstance(node, ast.Constant):
+        return set()
+    assert isinstance(node, ast.JoinedStr), ast.unparse(node)
+    return {ast.unparse(part.value) for part in node.values if isinstance(part, ast.FormattedValue)}
+
+
+def test_the_runner_prints_status_only_never_model_or_item_text() -> None:
+    source = (ROOT / "scripts/run_external_annotation.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    # Every other route to the console is refused outright.
+    for route in ("sys.stdout", "sys.stderr", "__stdout__", "__stderr__", "os.write", "logging", "warnings",
+                  "traceback", "pprint", "breakpoint"):
+        assert route not in source, route
+    assert not [n for n in ast.walk(tree) if isinstance(n, (ast.AugAssign, ast.AnnAssign))
+                and ast.unparse(n.target) == "status"], "status is built only by plain assignment"
+    prints = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and getattr(n.func, "id", "") == "print"]
+    assert prints
+    for call in prints:
+        assert not call.keywords, ast.unparse(call)
+        for arg in call.args:
+            assert _interpolated(arg) <= CONSOLE_VALUES, ast.unparse(call)
+    statuses = [
+        n.value
+        for n in ast.walk(tree)
+        if isinstance(n, ast.Assign) and [ast.unparse(t) for t in n.targets] == ["status"]
+    ]
+    assert statuses
+    for value in statuses:
+        assert _interpolated(value) <= STATUS_VALUES, ast.unparse(value)
+    problems = [
+        ast.unparse(n.value)
+        for n in ast.walk(tree)
+        if isinstance(n, ast.Assign) and [ast.unparse(t) for t in n.targets] == ["problems"]
+    ]
+    assert problems == ["str(exc).splitlines()"]
+    # A child CLI's output is captured, never passed through to the console.
+    runs = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and ast.unparse(n.func) == "subprocess.run"]
+    assert runs
+    for call in runs:
+        assert any(k.arg == "capture_output" and ast.unparse(k.value) == "True" for k in call.keywords)

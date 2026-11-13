@@ -94,6 +94,7 @@ when the table sat above the sections; it is kept as written.
 | UP-0035 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` | `OURS` | not-applicable | The text-file `private_path` pattern misses a Windows home path written with single backslashes, and any drive other than C | Fixed (any drive, single or doubled backslashes or a slash) |
 | UP-0036 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` (`HOME_PATH`), copied in `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | `HOME_PATH` took exponential time on a drive letter followed by a run of backslashes | Fixed (`(?:\\\\\|\\\|/)+` replaced by `[\\/]+` in both copies) |
 | UP-0037 | 2026-11-13 | `scripts/publish_executorch_artifact.py`, Hub repo `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` | `OURS` | not-applicable | Held-out confirmatory data went public, through an ExecuTorch Hub upload with no publication record and through the public GitHub repository | Hub upload path fixed (held-out files excluded); Hub and GitHub copies left in place (owner); tracking decided after the overfit-clinic interview |
+| UP-0038 | 2026-11-13 | `src/opengrad/runrecords/scripts.py`, `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | Run-record stage 3 gaps deferred to the slice that fills the expected-exit-code table | Open |
 
 ---
 
@@ -655,5 +656,29 @@ Later line for UP-0037, 2026-11-13: the missing publication record is written, a
 `reports/releases/hf-publication-2026-11-13-executorch-cpu-retroactive.json`. It reconstructs the four Hub commits of
 2026-09-12 from commit history and file metadata only, each marked `recorded_retroactively`. Nothing was downloaded.
 The publication gate passes with it (`scripts/verify_publication.py`, online).
+
+## UP-0038 — run-record stage 3: gaps left for the next slice (`OURS`)
+
+Found on 2026-11-13 by the independent audit of the first stage 3 slice. Its blocker (held-out logs could still be
+uploaded through `python -m opengrad.runrecords run`) and the import scan were fixed in that slice: upload now
+decides from the recorded command (`upload_decision`). These four findings were left open, because none applies
+while the expected-exit-code table is empty and only the annotation entry points are converted.
+
+1. A declared exit code would also cover a crash with that code. `SystemExit("message")` exits 1, argparse usage
+   errors exit 2, and a refusal such as `raise SystemExit(...)` in `scripts/run_external_annotation.py` exits
+   non-zero, so declaring 1 or 2 would record those as PASS. Under `run_child` the parent sees only the code,
+   and a converted script under a parent runs unrecorded, so declared codes do not apply there at all. Before the
+   table gets an entry: apply declared codes only to a code `main()` returns, never to `SystemExit`, and decide
+   how a child reports that to its parent.
+2. An entry point at a path outside both tables records with the default policy. A non-editable install inside
+   the checkout resolves to `.venv/.../site-packages/opengrad/...`, so a held-out module started with `python -m`
+   would record as an uploadable `script`, and the annotation CLI would lose kind `annotation`. Upload re-decides
+   from the command, which covers the held-out case, but the kind is still wrong. `repo_root` also accepts any
+   `pyproject.toml`, so a copy installed in another project records into that project.
+3. A `recorded_main` in a module with no `__main__` block, named as a console command target, is not checked to
+   call `run_script`.
+4. Small: `_code` turns a string returned by `main()` into exit 1 and loses the message; an invalid `upload=` value
+   raises before `recorded_call`'s `try`, so it blocks the run (a programming error only); the backslash test of
+   the path normalisation only runs its Windows form on Windows.
 
 <!-- END GENERATED -->

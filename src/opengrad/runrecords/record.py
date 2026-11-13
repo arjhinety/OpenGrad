@@ -35,13 +35,14 @@ import importlib.metadata
 import json
 import os
 import platform
+import posixpath
 import re
 import secrets
 import shutil
 import subprocess
 import sys
 import time
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, TextIO
@@ -55,6 +56,20 @@ LOCAL_DIR_ENV = "OPENGRAD_RUN_RECORDS_DIR"
 #: Set by ``run_child`` for its child. A recorded call inside such a child is already captured in full by the
 #: parent's record (including C-extension and worker-process output), so it does not start a second record.
 PARENT_ENV = "OPENGRAD_RUN_RECORD_PARENT"
+#: ``allowed``: the log may be uploaded (``python -m opengrad.runrecords upload``). ``never``: the entry point reads
+#: held-out data, so its log stays on this machine (owner's decision, 2026-11-13).
+UPLOAD_POLICIES = ("allowed", "never")
+#: Strings that mark held-out evaluation data: in an entry point's code (``opengrad.runrecords.scripts``), in a
+#: run's arguments, or in a ``configs/`` file a run is given. Such a run's log is never uploaded.
+HELD_OUT_MARKERS = (
+    "frozen_prompts",
+    "when2call_test",
+    "pconf-v1",
+    "answer-records",
+    "behavioral-heldout-v2-partition",
+    "confirmatory",
+    "punans",
+)
 COMMITTED_DIR = Path("run-records")
 KINDS = ("training", "evaluation", "freeze", "script", "annotation", "ci")
 STATUSES = ("PASS", "FAILED", "INTERRUPTED", "INCOMPLETE")
@@ -305,6 +320,156 @@ def redact_text(text: str, root: Path) -> str:
     return HOME_PATH.sub("<absolute-path>/", text)
 
 
+def argument_values(token: str) -> list[str]:
+    """The values an argument can carry: itself, the value of ``--flag=value``, and of an attached ``-fvalue``."""
+    value = str(token).replace("\\", "/")
+    values = [value]
+    if value.startswith("-"):
+        if "=" in value:
+            values.append(value.split("=", 1)[1])
+        if not value.startswith("--") and len(value) > 2:
+            values.append(value[2:])
+    return values
+
+
+def names_held_out(token: str) -> bool:
+    """True when an argument names a held-out marker, in any case."""
+    folded = str(token).replace("\\", "/").casefold()
+    return any(marker in folded for marker in HELD_OUT_MARKERS)
+
+
+#: A piece of a spaced config value that looks like a path or a file name.
+_PATH_LIKE = re.compile(r"[/\\]|\.[A-Za-z0-9]{1,6}$")
+
+
+def _config_identifiers(path: Path, text: str) -> list[str]:
+    """What in a config can point at data: its keys and its values with no whitespace (paths, ids, namespaces).
+
+    A description that mentions held-out data in prose ("confirmatory IDs are excluded") does not reach it, just
+    as a marker in a code comment does not. In a value with spaces (a command line, a list of paths), the pieces
+    that look like paths or file names count. A file that does not parse as YAML, JSON or TOML, or of another
+    kind, is read whole: fail closed.
+    """
+    suffix = path.suffix.casefold()
+    try:
+        if suffix in (".yaml", ".yml"):
+            import yaml  # optional extra: without it the whole text is read
+
+            documents = list(yaml.safe_load_all(text))
+        elif suffix == ".json":
+            documents = [json.loads(text)]
+        elif suffix == ".toml":
+            import tomllib
+
+            documents = [tomllib.loads(text)]
+        else:
+            return [text]
+    except Exception:  # noqa: BLE001 -- unparsable: read whole
+        return [text]
+    found: list[str] = []
+    stack: list[Any] = documents
+    seen: set[int] = set()  # a YAML alias can make a node contain itself
+    while stack:
+        item = stack.pop()
+        if isinstance(item, dict | list):
+            if id(item) in seen:
+                continue
+            seen.add(id(item))
+        if isinstance(item, dict):
+            found.extend(str(key) for key in item)
+            stack.extend(item.values())
+        elif isinstance(item, list):
+            stack.extend(item)
+        elif isinstance(item, str):
+            pieces = item.split()
+            if len(pieces) == 1:
+                found.append(pieces[0])
+            else:
+                # A command line or a list of paths in one value: its path-like pieces count, its words do not.
+                found.extend(piece for piece in pieces if _PATH_LIKE.search(piece))
+    return found
+
+
+def repo_relative(value: str, root: Path) -> str:
+    """An argument as a normalised repository-relative path when it is one: an absolute path inside the checkout
+    (any drive-letter case) is made relative, a relative one normalised (``./``, ``//``, ``..``)."""
+    value = str(value).replace("\\", "/")
+    if not value:
+        return ""
+    if re.match(r"^(?:[A-Za-z]:/|/)", value):
+        try:
+            resolved = Path(value).resolve()
+            base = root.resolve()
+            # Compared case-folded: Windows paths ignore case, and a drive letter may be typed either way.
+            if os.path.normcase(str(resolved)).startswith(os.path.normcase(str(base)) + os.sep):
+                return str(resolved)[len(str(base)) + 1 :].replace("\\", "/")
+        except (OSError, ValueError):
+            pass
+        return value
+    return posixpath.normpath(value)
+
+
+def config_state(token: str, root: Path) -> str:
+    """``held_out`` when an argument is a repository ``configs/`` file that names a held-out marker, ``missing`` when
+    it names a ``configs/`` file that is not there, else ``""``.
+
+    A run can reach held-out data through the config it is given, which the argument does not show. Config files
+    hold settings and paths, not test content, so reading one is safe. One level: a config naming another config
+    is not followed. Nothing outside ``configs/`` is read.
+    """
+    base = (root / "configs").resolve()
+    state = ""
+    for value in argument_values(token):
+        relative = repo_relative(value, root)
+        if not relative.casefold().startswith("configs/"):
+            continue
+        path = (root / relative).resolve()
+        if not path.is_relative_to(base):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            state = "missing"
+            continue
+        if any(marker in item.casefold() for item in _config_identifiers(path, text) for marker in HELD_OUT_MARKERS):
+            return "held_out"
+    return state
+
+
+def _entry_reach(command: Sequence[str], root: Path) -> list[str] | None:
+    """The marker-naming files the run's entry point loads, scanned as they are on disk when it starts; None when
+    the command does not trace to an entry point.
+
+    The tables in ``opengrad.runrecords.scripts`` describe the tracked code. A script that is not tracked yet, or
+    has local edits, may reach held-out data they do not list; upload compares this scan with them. A scan that
+    fails reads as reaching held-out data (fail closed).
+    """
+    try:
+        from opengrad.runrecords import scripts  # imports this module: loaded at call time
+
+        entry = scripts.command_entry(command, root)
+        if entry is None:
+            return None
+        on_disk = {
+            path.relative_to(root).as_posix()
+            for folder in ("scripts", "src")
+            for path in (root / folder).rglob("*.py")
+        }
+        return sorted(scripts.held_out_reach(root, on_disk, [entry]).get(entry, set()))
+    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
+        return ["<scan failed>"]
+
+
+def held_out_arguments(argv: Sequence[str], root: Path) -> bool:
+    """True when a run's arguments, read before redaction, name held-out data: a marker in any argument (a path
+    outside the repository included, which redaction would turn into ``<absolute-path>``), or a ``configs/`` file
+    that names one. Checked when the run starts, so a config edited or removed later does not change the answer."""
+    try:
+        return any(names_held_out(t) or config_state(t, root) == "held_out" for t in argv)
+    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
+        return True
+
+
 def redact_command(argv: Sequence[str], root: Path) -> list[str]:
     out: list[str] = []
     hide_next = False
@@ -436,7 +601,14 @@ class RunRecord:
     """One run's files under the local run-record folder."""
 
     def __init__(
-        self, root: Path, kind: str, argv: Sequence[str], run_id: str | None = None
+        self,
+        root: Path,
+        kind: str,
+        argv: Sequence[str],
+        run_id: str | None = None,
+        *,
+        expected_exit_codes: Mapping[int, str] | None = None,
+        upload: str = "allowed",
     ) -> None:
         if kind not in KINDS:
             raise ValueError(f"kind {kind!r} is not one of {KINDS}")
@@ -446,8 +618,14 @@ class RunRecord:
         self.dir = local_base(root) / self.run_id
         self.log_path = self.dir / "output.log"
         self.command = redact_command(argv, root)
+        self.held_out_inputs = held_out_arguments(argv, root)
         self.started = time.monotonic()
         self.start: dict[str, Any] = {}
+        if upload not in UPLOAD_POLICIES:
+            raise ValueError(f"upload {upload!r} is not one of {UPLOAD_POLICIES}")
+        #: Non-zero codes the entry point returns by design (``opengrad.runrecords.scripts``): recorded as PASS.
+        self.expected_exit_codes = {int(k): str(v) for k, v in (expected_exit_codes or {}).items() if int(k) != 0}
+        self.upload = upload
         self.finished = False
 
     def begin(self) -> None:
@@ -460,6 +638,13 @@ class RunRecord:
             "started_at": _now(),
             **environment_snapshot(self.root),
         }
+        if self.expected_exit_codes:
+            self.start["expected_exit_codes"] = {str(k): v for k, v in sorted(self.expected_exit_codes.items())}
+        if self.upload != "allowed":
+            self.start["upload_policy"] = self.upload
+        if self.held_out_inputs:
+            self.start["held_out_inputs"] = True
+        self.start["held_out_reach"] = _entry_reach(self.command, self.root)
         # Written before the run starts, so a run that is killed still leaves a record (read as INCOMPLETE).
         _write_json(self.dir / "start.json", self.start)
         self.log_path.touch()
@@ -487,6 +672,10 @@ class RunRecord:
         except Exception as exc:  # noqa: BLE001 -- see the docstring
             _warn(f"could not finish {self.run_id}: {type(exc).__name__}: {exc}")
             return None
+
+    def status_for(self, code: int) -> str:
+        """PASS for 0 or a code the entry point returns by design; FAILED otherwise."""
+        return "PASS" if code == 0 or code in self.expected_exit_codes else "FAILED"
 
 
 def _write_json(path: Path, data: dict[str, Any]) -> None:
@@ -535,7 +724,15 @@ class _Tee:
         return getattr(self.stream, name)
 
 
-def recorded_call(kind: str, argv: Sequence[str], root: Path, call: Callable[[], int]) -> int:
+def recorded_call(
+    kind: str,
+    argv: Sequence[str],
+    root: Path,
+    call: Callable[[], int],
+    *,
+    expected_exit_codes: Mapping[int, str] | None = None,
+    upload: str = "allowed",
+) -> int:
     """Run ``call()`` in this process as a recorded run and return its exit code.
 
     An exception or ``SystemExit`` is recorded and then re-raised unchanged. If the record cannot be started, the
@@ -550,7 +747,7 @@ def recorded_call(kind: str, argv: Sequence[str], root: Path, call: Callable[[],
         # A marker left over in the environment (an exported variable, a shell started by the launcher) must not
         # switch recording off: record anyway.
         _warn(f"{PARENT_ENV}={parent} names no open run record; recording this run itself")
-    record = RunRecord(root, kind, argv)
+    record = RunRecord(root, kind, argv, expected_exit_codes=expected_exit_codes, upload=upload)
     try:
         record.begin()
         log: TextIO = record.log_path.open(
@@ -572,7 +769,7 @@ def recorded_call(kind: str, argv: Sequence[str], root: Path, call: Callable[[],
         sys.stdout, sys.stderr = out, err
         log.close()
         code = exc.code if isinstance(exc.code, int) else (0 if exc.code is None else 1)
-        record.finish(code, "PASS" if code == 0 else "FAILED")
+        record.finish(code, record.status_for(code))
         raise
     except BaseException as exc:
         sys.stdout, sys.stderr = out, err
@@ -581,7 +778,7 @@ def recorded_call(kind: str, argv: Sequence[str], root: Path, call: Callable[[],
         raise
     sys.stdout, sys.stderr = out, err
     log.close()
-    record.finish(code, "PASS" if code == 0 else "FAILED")
+    record.finish(code, record.status_for(code))
     return code
 
 
@@ -659,7 +856,7 @@ def run_child(kind: str, command: Sequence[str], root: Path, console: TextIO | N
             None, "INTERRUPTED" if interrupted else "FAILED", f"{type(exc).__name__}: {exc}"
         )
         raise
-    record.finish(code, "PASS" if code == 0 else "FAILED")
+    record.finish(code, record.status_for(code))
     return code
 
 

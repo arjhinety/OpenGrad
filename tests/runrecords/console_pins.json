@@ -1,0 +1,274 @@
+{
+ "scripts/audit_pdet_coverage_supply_v3.py": {
+  "scripts/audit_pdet_coverage_supply.py": [
+   "print('   ', {s: v['records'] for s, v in data['layer_b_strata'].items()})",
+   "print(f'wrote {OUT.relative_to(ROOT)}')",
+   "print(source, data['shape'])"
+  ],
+  "scripts/audit_pdet_coverage_supply_v3.py": [
+   "print(f'wrote {OUT.relative_to(ROOT)}')",
+   "print(name, data['eligible_records'], {s: v['records'] for s, v in data['strata'].items()})",
+   "print({s: (v['supply_distinct_skeletons_all_layer_b_sources'], v['shortage']) for s, v in coverage.items()})"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ]
+ },
+ "scripts/audit_pdet_v1_representation.py": {
+  "scripts/audit_pdet_v1_representation.py": [
+   "print(f'wrote {OUT.relative_to(ROOT)}')",
+   "print(f'{key:60} {value}')"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ]
+ },
+ "src/opengrad/data/behaviour_labels.py": {
+  "src/opengrad/data/behaviour_labels.py": [
+   "print(json.dumps(verify(args.root, spec), indent=2))",
+   "print(json.dumps({'totals': manifest['totals'], 'sources': {s: v['labels'] for s, v in manifest['sources'].items()}}, indent=2))"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ]
+ },
+ "src/opengrad/data/behaviour_labels_v3.py": {
+  "src/opengrad/data/behaviour_labels.py": [
+   "print(json.dumps(verify(args.root, spec), indent=2))",
+   "print(json.dumps({'totals': manifest['totals'], 'sources': {s: v['labels'] for s, v in manifest['sources'].items()}}, indent=2))"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ]
+ },
+ "src/opengrad/data/canonical_v3.py": {
+  "src/opengrad/data/behaviour_labels.py": [
+   "print(json.dumps(verify(args.root, spec), indent=2))",
+   "print(json.dumps({'totals': manifest['totals'], 'sources': {s: v['labels'] for s, v in manifest['sources'].items()}}, indent=2))"
+  ],
+  "src/opengrad/data/canonical_v3.py": [
+   "print(json.dumps(verify(args.root), indent=2))",
+   "print(json.dumps({'counts': manifest['counts'], 'renderability': manifest['gates']['renderability']}, indent=2))"
+  ],
+  "src/opengrad/data/canonical_v3_balance.py": [
+   "print(json.dumps(verify(args.root), indent=2))",
+   "print(json.dumps({'counts': plan['counts'], 'composition': plan['composition']}, indent=2))"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ]
+ },
+ "src/opengrad/data/canonical_v3_balance.py": {
+  "src/opengrad/data/behaviour_labels.py": [
+   "print(json.dumps(verify(args.root, spec), indent=2))",
+   "print(json.dumps({'totals': manifest['totals'], 'sources': {s: v['labels'] for s, v in manifest['sources'].items()}}, indent=2))"
+  ],
+  "src/opengrad/data/canonical_v3_balance.py": [
+   "print(json.dumps(verify(args.root), indent=2))",
+   "print(json.dumps({'counts': plan['counts'], 'composition': plan['composition']}, indent=2))"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ]
+ },
+ "src/opengrad/data/provenance_gate.py": {
+  "src/opengrad/data/behaviour_labels.py": [
+   "print(json.dumps(verify(args.root, spec), indent=2))",
+   "print(json.dumps({'totals': manifest['totals'], 'sources': {s: v['labels'] for s, v in manifest['sources'].items()}}, indent=2))"
+  ],
+  "src/opengrad/data/canonical_v3.py": [
+   "print(json.dumps(verify(args.root), indent=2))",
+   "print(json.dumps({'counts': manifest['counts'], 'renderability': manifest['gates']['renderability']}, indent=2))"
+  ],
+  "src/opengrad/data/canonical_v3_balance.py": [
+   "print(json.dumps(verify(args.root), indent=2))",
+   "print(json.dumps({'counts': plan['counts'], 'composition': plan['composition']}, indent=2))"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ],
+  "src/opengrad/data/provenance_gate.py": [
+   "print(json.dumps(document, indent=2, sort_keys=True))"
+  ]
+ },
+ "src/opengrad/verification/classifier_devcheck.py": {
+  "scripts/audit_pdet_coverage_supply.py": [
+   "print('   ', {s: v['records'] for s, v in data['layer_b_strata'].items()})",
+   "print(f'wrote {OUT.relative_to(ROOT)}')",
+   "print(source, data['shape'])"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ],
+  "src/opengrad/verification/call_fidelity.py": [
+   "print(json.dumps(measure(Path.cwd()), indent=2, sort_keys=True))"
+  ],
+  "src/opengrad/verification/classifier_devcheck.py": [
+   "print(json.dumps(result, indent=2))",
+   "print(json.dumps({'population_sha256': manifest['population_sha256'], 'counts': manifest['counts']}, indent=2))"
+  ],
+  "src/opengrad/verification/classifier_devset.py": [
+   "print(json.dumps(result, indent=2))",
+   "print(json.dumps({'population_sha256': manifest['population_sha256'], 'counts': manifest['counts']}, indent=2))"
+  ],
+  "src/opengrad/verification/pdet_coverage.py": [
+   "print(json.dumps(report, indent=2, sort_keys=True))",
+   "print(json.dumps(summary(record), indent=2, sort_keys=True))",
+   "print(json.dumps(summary(written), indent=2, sort_keys=True))"
+  ]
+ },
+ "src/opengrad/verification/classifier_devset.py": {
+  "scripts/audit_pdet_coverage_supply.py": [
+   "print('   ', {s: v['records'] for s, v in data['layer_b_strata'].items()})",
+   "print(f'wrote {OUT.relative_to(ROOT)}')",
+   "print(source, data['shape'])"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ],
+  "src/opengrad/verification/call_fidelity.py": [
+   "print(json.dumps(measure(Path.cwd()), indent=2, sort_keys=True))"
+  ],
+  "src/opengrad/verification/classifier_devset.py": [
+   "print(json.dumps(result, indent=2))",
+   "print(json.dumps({'population_sha256': manifest['population_sha256'], 'counts': manifest['counts']}, indent=2))"
+  ],
+  "src/opengrad/verification/pdet_coverage.py": [
+   "print(json.dumps(report, indent=2, sort_keys=True))",
+   "print(json.dumps(summary(record), indent=2, sort_keys=True))",
+   "print(json.dumps(summary(written), indent=2, sort_keys=True))"
+  ]
+ },
+ "src/opengrad/verification/classifier_devset_v2.py": {
+  "scripts/audit_pdet_coverage_supply.py": [
+   "print('   ', {s: v['records'] for s, v in data['layer_b_strata'].items()})",
+   "print(f'wrote {OUT.relative_to(ROOT)}')",
+   "print(source, data['shape'])"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ],
+  "src/opengrad/verification/call_fidelity.py": [
+   "print(json.dumps(measure(Path.cwd()), indent=2, sort_keys=True))"
+  ],
+  "src/opengrad/verification/classifier_devset_v2.py": [
+   "print(json.dumps(result, indent=2))",
+   "print(json.dumps({'population_sha256': manifest['population_sha256'], 'counts': manifest['counts']}, indent=2))"
+  ],
+  "src/opengrad/verification/pdet_coverage.py": [
+   "print(json.dumps(report, indent=2, sort_keys=True))",
+   "print(json.dumps(summary(record), indent=2, sort_keys=True))",
+   "print(json.dumps(summary(written), indent=2, sort_keys=True))"
+  ],
+  "src/opengrad/verification/pdet_coverage_v2.py": [
+   "print(json.dumps(report, indent=2, sort_keys=True))",
+   "print(json.dumps(summary(record), indent=2, sort_keys=True))"
+  ]
+ },
+ "src/opengrad/verification/flag_set.py": {
+  "src/opengrad/verification/flag_set.py": [
+   "print(json.dumps(result, indent=2))",
+   "print(json.dumps({k: manifest[k] for k in ('flag_set', 'answer_labelled_first_replies', 'prior_heuristic_regex_v1')}, indent=2))"
+  ],
+  "src/opengrad/verification/prose_classifier_oneshot.py": [
+   "print(json.dumps(summary(run(args.root)), indent=2, default=str))",
+   "print(json.dumps({'frozen_classifier': 'matches', 'coverage_layer_b': sum((1 for r in inputs['coverage_population'] if r['layer'] == 'B')), 'coverage_references': len(inputs['coverage_references']), 'pdet_v1_items': len(inputs['pdet_population']), 'pdet_v1_human_labels': len(inputs['pdet_labels']), 'pdet_v1_not_in_input': len(inputs['pdet_not_in_input']), 'result_exists': (args.root / OUTPUT_DIR / RESULT_NAME).exists()}, indent=2))"
+  ],
+  "src/opengrad/verification/prose_classifier_v2_oneshot.py": [
+   "print(json.dumps(report, indent=2))",
+   "print(json.dumps(summary(run(args.root)), indent=2, default=str))"
+  ]
+ },
+ "src/opengrad/verification/pdet_coverage.py": {
+  "scripts/audit_pdet_coverage_supply.py": [
+   "print('   ', {s: v['records'] for s, v in data['layer_b_strata'].items()})",
+   "print(f'wrote {OUT.relative_to(ROOT)}')",
+   "print(source, data['shape'])"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ],
+  "src/opengrad/verification/call_fidelity.py": [
+   "print(json.dumps(measure(Path.cwd()), indent=2, sort_keys=True))"
+  ],
+  "src/opengrad/verification/pdet_coverage.py": [
+   "print(json.dumps(report, indent=2, sort_keys=True))",
+   "print(json.dumps(summary(record), indent=2, sort_keys=True))",
+   "print(json.dumps(summary(written), indent=2, sort_keys=True))"
+  ]
+ },
+ "src/opengrad/verification/pdet_coverage_v2.py": {
+  "scripts/audit_pdet_coverage_supply.py": [
+   "print('   ', {s: v['records'] for s, v in data['layer_b_strata'].items()})",
+   "print(f'wrote {OUT.relative_to(ROOT)}')",
+   "print(source, data['shape'])"
+  ],
+  "src/opengrad/data/normalization_v3.py": [
+   "print('FAIL', problem)",
+   "print('PASS' if not problems else f'FAIL ({len(problems)} problems)')",
+   "print('fingerprint', top['fingerprint'])",
+   "print(name, summary['counts'], summary['content_hash'][:16])"
+  ],
+  "src/opengrad/verification/call_fidelity.py": [
+   "print(json.dumps(measure(Path.cwd()), indent=2, sort_keys=True))"
+  ],
+  "src/opengrad/verification/pdet_coverage.py": [
+   "print(json.dumps(report, indent=2, sort_keys=True))",
+   "print(json.dumps(summary(record), indent=2, sort_keys=True))",
+   "print(json.dumps(summary(written), indent=2, sort_keys=True))"
+  ],
+  "src/opengrad/verification/pdet_coverage_v2.py": [
+   "print(json.dumps(report, indent=2, sort_keys=True))",
+   "print(json.dumps(summary(record), indent=2, sort_keys=True))"
+  ]
+ },
+ "src/opengrad/verification/prose_classifier_oneshot.py": {
+  "src/opengrad/verification/prose_classifier_oneshot.py": [
+   "print(json.dumps(summary(run(args.root)), indent=2, default=str))",
+   "print(json.dumps({'frozen_classifier': 'matches', 'coverage_layer_b': sum((1 for r in inputs['coverage_population'] if r['layer'] == 'B')), 'coverage_references': len(inputs['coverage_references']), 'pdet_v1_items': len(inputs['pdet_population']), 'pdet_v1_human_labels': len(inputs['pdet_labels']), 'pdet_v1_not_in_input': len(inputs['pdet_not_in_input']), 'result_exists': (args.root / OUTPUT_DIR / RESULT_NAME).exists()}, indent=2))"
+  ]
+ },
+ "src/opengrad/verification/prose_classifier_v2_oneshot.py": {
+  "src/opengrad/verification/prose_classifier_oneshot.py": [
+   "print(json.dumps(summary(run(args.root)), indent=2, default=str))",
+   "print(json.dumps({'frozen_classifier': 'matches', 'coverage_layer_b': sum((1 for r in inputs['coverage_population'] if r['layer'] == 'B')), 'coverage_references': len(inputs['coverage_references']), 'pdet_v1_items': len(inputs['pdet_population']), 'pdet_v1_human_labels': len(inputs['pdet_labels']), 'pdet_v1_not_in_input': len(inputs['pdet_not_in_input']), 'result_exists': (args.root / OUTPUT_DIR / RESULT_NAME).exists()}, indent=2))"
+  ],
+  "src/opengrad/verification/prose_classifier_v2_oneshot.py": [
+   "print(json.dumps(report, indent=2))",
+   "print(json.dumps(summary(run(args.root)), indent=2, default=str))"
+  ]
+ }
+}

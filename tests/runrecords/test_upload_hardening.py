@@ -12,6 +12,7 @@ import pytest
 
 from opengrad.runrecords import cli as runs_cli
 from opengrad.runrecords import record as rr
+from opengrad.runrecords import scripts as rs
 
 PY = sys.executable
 QUIET = SimpleNamespace(write=lambda t: None, flush=lambda: None, encoding="utf-8")
@@ -51,6 +52,15 @@ def _hub(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, info: object) -> dict[
 
     monkeypatch.setattr(sys.modules["huggingface_hub"], "HfApi", FakeApi)
     monkeypatch.setattr(sys.modules["huggingface_hub"], "hf_hub_download", download)
+    # These tests are about redaction: their ``python -c`` commands stand in for repository scripts. The
+    # fail-closed rule for commands that cannot be traced has its own tests (test_scripts_policy.py).
+    real = runs_cli.upload_decision
+
+    def traced(record: dict, root: Path) -> tuple[str, str]:
+        decision, kind = real(record, root)
+        return ("allowed", kind) if decision == "unrecognised" else (decision, kind)
+
+    monkeypatch.setattr(runs_cli, "upload_decision", traced)
     return sent
 
 
@@ -384,3 +394,168 @@ def test_a_credential_flag_named_like_a_token_id_is_redacted_on_the_command_line
     out = rr.redact_command(["train", "--hf-token-id", "abcd1234secretvalue", "--pad-token-id", "0"], tmp_path)
     assert "abcd1234secretvalue" not in out and out[-1] == "0", out
 
+
+def test_a_held_out_policy_log_is_kept_local_and_not_counted_as_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def held_out() -> int:
+        print("scored 10 items")
+        return 0
+
+    assert rr.recorded_call("script", ["score.py"], tmp_path, held_out, upload="never") == 0
+    _log(tmp_path, "training", "step 1\n")
+    sent = _hub(tmp_path, monkeypatch, SimpleNamespace(private=True))
+    assert runs_cli.main(["upload", "--repo", "o/r"], tmp_path) == 0
+    assert len(sent) == 1
+    out = capsys.readouterr().out
+    assert "1 log(s) kept local by policy" in out and "INCOMPLETE" not in out
+    kept = [r for r in rr.read_local(tmp_path) if r.get("upload_policy") == "never"]
+    assert len(kept) == 1 and kept[0]["log"]["durable"] is None
+
+
+def test_a_log_whose_command_cannot_be_traced_stays_local_and_is_listed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Owner's decision, 2026-11-13: fail closed. ``python -c`` is not a repository entry point.
+    _log(tmp_path, "script", "step 1\n")
+    sent = _hub(tmp_path, monkeypatch, SimpleNamespace(private=True))
+    monkeypatch.setattr(runs_cli, "upload_decision", rs.upload_decision)  # undo the helper's stand-in
+    assert runs_cli.main(["upload", "--repo", "o/r"], tmp_path) == 3
+    assert sent == {}
+    out = capsys.readouterr().out
+    assert "1 log(s) kept local: the command is not a known entry point" in out
+
+
+def test_export_keeps_only_the_exception_type_of_a_held_out_run(tmp_path: Path) -> None:
+    def leaks() -> int:
+        raise ValueError("the held-out question text")
+
+    with pytest.raises(ValueError):
+        rr.recorded_call("script", ["score.py"], tmp_path, leaks, upload="never")
+    (record,) = rr.read_local(tmp_path)
+    assert runs_cli.main(["dispose", record["run_id"], "--reason", "test"], tmp_path) == 0
+    assert runs_cli.main(["export"], tmp_path) == 0
+    committed = (tmp_path / rr.COMMITTED_DIR / f"{record['run_id']}.json").read_text(encoding="utf-8")
+    assert "held-out question" not in committed
+    assert "ValueError (message kept local: held-out data)" in committed
+
+
+def test_dispose_after_export_does_not_put_the_message_back(tmp_path: Path) -> None:
+    def leaks() -> int:
+        raise ValueError("the held-out question text")
+
+    with pytest.raises(ValueError):
+        rr.recorded_call("script", ["score.py"], tmp_path, leaks, upload="never")
+    (record,) = rr.read_local(tmp_path)
+    assert runs_cli.main(["dispose", record["run_id"], "--reason", "test"], tmp_path) == 0
+    assert runs_cli.main(["export"], tmp_path) == 0
+    assert runs_cli.main(["dispose", record["run_id"], "--reason", "looked again"], tmp_path) == 0
+    committed = (tmp_path / rr.COMMITTED_DIR / f"{record['run_id']}.json").read_text(encoding="utf-8")
+    assert "held-out question" not in committed
+
+
+def test_a_held_out_path_outside_the_repository_is_caught_before_redaction(tmp_path: Path) -> None:
+    outside = "D:\\elsewhere\\when2call_test.parquet"
+    assert rr.recorded_call("script", ["score.py", f"--input={outside}"], tmp_path, lambda: 0) == 0
+    (record,) = rr.read_local(tmp_path)
+    assert "when2call_test" not in " ".join(record["command"])  # redacted to <absolute-path>
+    assert record["held_out_inputs"] is True
+    assert rs.upload_decision(record, tmp_path)[0] == "never"
+
+
+def test_a_config_naming_held_out_data_is_caught_when_the_run_starts(tmp_path: Path) -> None:
+    config = tmp_path / "configs" / "eval.yaml"
+    config.parent.mkdir()
+    config.write_text("prompts: release/x/frozen_prompts_v1.jsonl\n", encoding="utf-8")
+    assert rr.recorded_call("script", ["score.py", "configs/eval.yaml"], tmp_path, lambda: 0) == 0
+    config.write_text("prompts: elsewhere\n", encoding="utf-8")  # edited after the run
+    (record,) = rr.read_local(tmp_path)
+    assert record["held_out_inputs"] is True
+    assert rs.upload_decision(record, tmp_path)[0] == "never"
+
+
+def test_a_labelling_run_launched_as_a_script_uploads_as_a_redacted_annotation_copy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Traced against the real checkout (the runner's path), recorded in a temporary folder; the runner is not run.
+    root = Path(__file__).resolve().parents[2]
+    monkeypatch.setenv(rr.LOCAL_DIR_ENV, str(tmp_path / "records"))
+    argv = ["python", "scripts/run_external_annotation.py", "--session", "punans-v2-trial"]
+    assert rr.recorded_call("script", argv, root, lambda: print("batch 01 (5 items) attempt 1: exit 0") or 0) == 0
+    sent = _hub(tmp_path, monkeypatch, SimpleNamespace(private=True))
+    monkeypatch.setattr(runs_cli, "upload_decision", rs.upload_decision)  # undo the helper's stand-in
+    assert runs_cli.main(["upload", "--repo", "o/r", "--kind", "annotation"], root) == 0
+    (name,) = sent
+    assert name.endswith("output.redacted.log")
+
+
+
+def test_a_config_counts_values_not_prose(tmp_path: Path) -> None:
+    configs = tmp_path / "configs"
+    configs.mkdir()
+    (configs / "prose.yaml").write_text("description: |\n  Confirmatory IDs are excluded.\nlr: 1e-5\n", encoding="utf-8")
+    (configs / "path.yaml").write_text("eval:\n  prompts: release/x/Frozen_Prompts_v1.jsonl\n", encoding="utf-8")
+    (configs / "key.json").write_text('{"confirmatory_split": "x"}', encoding="utf-8")
+    (configs / "broken.yaml").write_text("a: [unclosed confirmatory\n", encoding="utf-8")
+    (configs / "notes.md").write_text("we never touch the confirmatory set\n", encoding="utf-8")
+    assert rr.config_state("configs/prose.yaml", tmp_path) == ""
+    assert rr.config_state("configs/path.yaml", tmp_path) == "held_out"
+    assert rr.config_state("configs/key.json", tmp_path) == "held_out"
+    assert rr.config_state("configs/broken.yaml", tmp_path) == "held_out"  # unparsable: read whole
+    assert rr.config_state("configs/notes.md", tmp_path) == "held_out"  # not structured: read whole
+    assert rr.config_state("configs/../pyproject.toml", tmp_path) == ""  # nothing outside configs/ is read
+
+
+def _checkout(tmp_path: Path) -> Path:
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "x"\n', encoding="utf-8")
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "src").mkdir()
+    return tmp_path
+
+
+def test_a_new_script_that_names_held_out_data_is_never_uploaded(tmp_path: Path) -> None:
+    # Not in any table (not tracked yet): the scan of the entry point on disk at start finds the marker.
+    root = _checkout(tmp_path)
+    (root / "scripts" / "new_eval.py").write_text('PROMPTS = "release/x/frozen_prompts_v1.jsonl"\n', encoding="utf-8")
+    (root / "scripts" / "clean.py").write_text('print("ok")\n', encoding="utf-8")
+    assert rr.recorded_call("script", ["scripts/new_eval.py"], root, lambda: 0) == 0
+    assert rr.recorded_call("script", ["scripts/clean.py"], root, lambda: 0) == 0
+    by_command = {r["command"][0]: r for r in rr.read_local(root)}
+    assert by_command["scripts/new_eval.py"]["held_out_reach"] == ["scripts/new_eval.py"]
+    assert by_command["scripts/clean.py"]["held_out_reach"] == []
+    assert rs.upload_decision(by_command["scripts/new_eval.py"], root)[0] == "never"
+    # Clean but not reviewed: the allowlist keeps it local until approved (owner, 2026-11-13).
+    assert rs.upload_decision(by_command["scripts/clean.py"], root)[0] == "unapproved"
+
+
+def test_a_self_referencing_yaml_config_does_not_hang(tmp_path: Path) -> None:
+    pytest.importorskip("yaml")
+    configs = tmp_path / "configs"
+    configs.mkdir()
+    (configs / "loop.yaml").write_text("a: &a [*a, release/frozen_prompts_v1.jsonl]\n", encoding="utf-8")
+    started = time.monotonic()
+    assert rr.config_state("configs/loop.yaml", tmp_path) == "held_out"
+    assert time.monotonic() - started < 5
+
+
+def test_a_spaced_config_value_counts_its_path_like_pieces(tmp_path: Path) -> None:
+    configs = tmp_path / "configs"
+    configs.mkdir()
+    (configs / "cmd.yaml").write_text("command: python scripts/score.py --input release/frozen_prompts.jsonl\n", encoding="utf-8")
+    (configs / "prose.yaml").write_text("note: the confirmatory set is never used here\n", encoding="utf-8")
+    assert rr.config_state("configs/cmd.yaml", tmp_path) == "held_out"
+    assert rr.config_state("configs/prose.yaml", tmp_path) == ""
+
+
+
+def test_an_unapproved_log_stays_local_and_is_listed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = _checkout(tmp_path)
+    (root / "scripts" / "clean.py").write_text('print("ok")\n', encoding="utf-8")
+    assert rr.recorded_call("script", ["scripts/clean.py"], root, lambda: 0) == 0
+    sent = _hub(tmp_path, monkeypatch, SimpleNamespace(private=True))
+    monkeypatch.setattr(runs_cli, "upload_decision", rs.upload_decision)  # undo the helper's stand-in
+    assert runs_cli.main(["upload", "--repo", "o/r"], root) == 3
+    assert sent == {}
+    assert "1 log(s) kept local: the entry point is not approved for upload yet" in capsys.readouterr().out

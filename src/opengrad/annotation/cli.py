@@ -653,5 +653,12 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
 
+def recorded_main() -> int:
+    """The ``opengrad-annotate`` command: ``main()`` as a recorded annotation run (``opengrad.runrecords.scripts``)."""
+    from opengrad.runrecords.scripts import run_script
+
+    return run_script(__file__, main)
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(recorded_main())

@@ -145,6 +145,17 @@ def test_ingest_records_every_answer_or_none(mws: Workspace) -> None:
         ingest_batch(mws, batch, [answer(i) for i in ids])
 
 
+def test_a_rejected_batch_keeps_the_model_s_text_off_the_first_line(mws: Workspace) -> None:
+    # The labelling runner prints only this first line to its uploaded run log (owner's decision, 2026-11-13).
+    batch = prepare_batch(mws, "model-a", MODEL, size=3, defer_to=["pass-a"], batch_id="01")
+    echoed = [answer("user message 2"), answer(batch["item_ids"][1], "UNKNOWN", ambiguity_status="NONE")]
+    with pytest.raises(BatchError) as caught:
+        ingest_batch(mws, batch, echoed)
+    first, *rest = str(caught.value).splitlines()
+    assert first == "4 problems; nothing was recorded:"
+    assert any("user message 2" in line for line in rest)
+
+
 # ── exports say what the labels are ─────────────────────────────────────────────────────────────
 
 
