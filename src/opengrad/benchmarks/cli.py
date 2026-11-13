@@ -228,4 +228,3 @@ def recorded_benchmark_cli() -> int:
     from opengrad.runrecords.scripts import run_script
 
     return run_script(__file__, benchmark_cli)
-

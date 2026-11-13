@@ -448,6 +448,31 @@ class CapabilityEngine:
 @app.local_entrypoint()
 def main(stage: str, jobs: str = "ifeval,gsm8k,sentinel", mmlu_limit: int = 0,
          gsm8k_arms: str = ""):
+    _record_launch(lambda: _main(stage, jobs, mmlu_limit, gsm8k_arms))
+
+
+def _record_launch(launch) -> None:
+    """Record this launch in the checkout's run records, like any other entry point (``opengrad.runrecords``).
+
+    Only the local side runs here; the container has no checkout. The modal CLI's Python may not have the opengrad
+    package, so it is loaded from ``src/``. If that fails the launch still runs, unrecorded, with a warning.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+    try:
+        from opengrad.runrecords.scripts import run_script
+    except ImportError as exc:
+        print(f"warning: this launch is not recorded: {exc}", file=sys.stderr)
+        launch()
+        return
+    code = run_script(__file__, launch)
+    if code:
+        raise SystemExit(code)
+
+
+def _main(stage: str, jobs: str = "ifeval,gsm8k,sentinel", mmlu_limit: int = 0,
+          gsm8k_arms: str = ""):
     if stage not in LADDER:
         raise SystemExit(f"unknown stage {stage!r}; known: {sorted(LADDER)}")
     job_list = [j.strip() for j in jobs.split(",") if j.strip()]

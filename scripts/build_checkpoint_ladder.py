@@ -405,6 +405,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    from opengrad.runrecords.scripts import run_script
-
+    try:
+        from opengrad.runrecords.scripts import run_script
+    except ImportError:  # a standalone script: it also runs, unrecorded, without the opengrad package
+        raise SystemExit(main()) from None
     raise SystemExit(run_script(__file__, main))

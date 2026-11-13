@@ -91,6 +91,30 @@ def upload(repo_id: str, volume_path: str, path_in_repo: str | None = None) -> d
 
 @app.local_entrypoint()
 def main(repo: str, volume_path: str, path_in_repo: str = ""):
+    _record_launch(lambda: _main(repo, volume_path, path_in_repo))
+
+
+def _record_launch(launch) -> None:
+    """Record this launch in the checkout's run records, like any other entry point (``opengrad.runrecords``).
+
+    Only the local side runs here; the container has no checkout. The modal CLI's Python may not have the opengrad
+    package, so it is loaded from ``src/``. If that fails the launch still runs, unrecorded, with a warning.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+    try:
+        from opengrad.runrecords.scripts import run_script
+    except ImportError as exc:
+        print(f"warning: this launch is not recorded: {exc}", file=sys.stderr)
+        launch()
+        return
+    code = run_script(__file__, launch)
+    if code:
+        raise SystemExit(code)
+
+
+def _main(repo: str, volume_path: str, path_in_repo: str = ""):
     # Runs on the host, before the remote job: a private-only repository is never a target. The container image
     # has no opengrad package, so the check lives here, and a host without it refuses rather than skips.
     try:

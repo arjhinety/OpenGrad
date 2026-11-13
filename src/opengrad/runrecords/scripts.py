@@ -103,6 +103,8 @@ HELD_OUT_ENTRY_POINTS = frozenset(
         "scripts/freeze_m0_final.py",
         "scripts/freeze_minus_xlam_ablation.py",
         "scripts/grade_openweights_parity.py",
+        "scripts/modal/gguf_study.py",
+        "scripts/modal/h200_eval.py",
         "scripts/prepare_imatrix_calibration.py",
         "scripts/prepare_quantization_inputs.py",
         "scripts/preserve_h200_state.py",
@@ -289,6 +291,8 @@ def trace(command: Sequence[str], root: Path) -> tuple[str | None, int]:
     if i >= len(tokens):
         return None, 0
     program = tokens[i].rsplit("/", 1)[-1]
+    if _LAUNCHER_SUFFIX.sub("", program).casefold() == "modal":
+        return _modal_entry(tokens, i, root)
     if _PYTHON.match(program):
         launcher = program.casefold().startswith("py") and not program.casefold().startswith("python")
         i += 1
@@ -314,6 +318,23 @@ def trace(command: Sequence[str], root: Path) -> tuple[str | None, int]:
     if target is not None:
         return _module_path(target.split(":", 1)[0], root), i + 1
     return repo_script(tokens[i], root), i + 1
+
+
+#: ``modal run`` options that take no value. Any other option may take one, so what runs cannot be told apart.
+_MODAL_FLAGS = frozenset({"-d", "--detach", "-q", "--quiet", "-i", "--interactive"})
+
+
+def _modal_entry(tokens: list[str], i: int, root: Path) -> tuple[str | None, int]:
+    """``modal run [flags] scripts/modal/x.py[::function] [arguments]``: the script whose local entrypoint runs here.
+    Only ``run``, and only the flags in ``_MODAL_FLAGS``; anything else cannot be traced."""
+    if i + 1 >= len(tokens) or tokens[i + 1] != "run":
+        return None, 0
+    i += 2
+    while i < len(tokens) and tokens[i] in _MODAL_FLAGS:
+        i += 1
+    if i >= len(tokens) or tokens[i].startswith("-"):
+        return None, 0
+    return repo_script(tokens[i].split("::", 1)[0], root), i + 1
 
 
 def command_entry(command: Sequence[str], root: Path) -> str | None:
@@ -670,7 +691,10 @@ def run_script(file: str, main: Callable[[], object]) -> int:
         as_file = bool(first) and Path(first).resolve() == path
     except OSError:
         as_file = False
-    argv0 = relative if as_file or not first else first
+    # Under ``modal run`` the first argument is the modal CLI, often installed outside the checkout (its path would
+    # be redacted and the command untraceable): record it by name, so ``trace`` finds the script after ``run``.
+    launcher = _LAUNCHER_SUFFIX.sub("", first.replace("\\", "/").rsplit("/", 1)[-1]).casefold()
+    argv0 = relative if as_file or not first else ("modal" if launcher == "modal" else first)
     return recorded_call(
         policy.kind,
         [argv0, *sys.argv[1:]],

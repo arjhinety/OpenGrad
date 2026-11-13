@@ -38,8 +38,9 @@ write straight to the file descriptors. Launch GPU runs through the launcher ins
 in-process record then steps aside, so each run has one record. Any other command can be recorded with
 `python -m opengrad.runrecords run --kind <kind> -- <command>`.
 
-**Remote GPU runs are not yet verified.** For Modal, the plan is to record the local launch, for example
-`python -m opengrad.runrecords run --kind training -- modal run scripts/modal/<script>.py`. The launch command
-streams the remote run's output to this console, so the record captures it. The library versions and GPU in
+**Remote GPU runs are not yet verified.** A Modal launch (`modal run scripts/modal/<script>.py`) records itself
+from its local entrypoint, like any other entry point; if the modal CLI's Python cannot load the recorder from
+`src/`, the launch runs unrecorded with a warning. The launch command streams the remote run's output to this
+console, and the record captures what reaches `sys.stdout` and `sys.stderr`. The library versions and GPU in
 such a record describe this machine, not the remote one, until the remote side writes its own snapshot. No
 authorised GPU run has exercised any of this.

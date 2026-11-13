@@ -647,4 +647,3 @@ def recorded_data_audit_cli() -> int:
     from opengrad.runrecords.scripts import run_script
 
     return run_script(__file__, data_audit_cli)
-

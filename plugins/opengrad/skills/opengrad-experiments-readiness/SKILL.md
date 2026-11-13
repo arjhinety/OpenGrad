@@ -171,10 +171,21 @@ it:
     word. Open gaps for the next slice: `docs/upstream/UP-0038.md`.
   - Every entry point and console command records itself (stage 3 finished 2026-11-13), except those in the test's
     allowlist, each with its reason: the agy tool gate (runs inside a recorded annotation run), the run-record command
-    itself, the preprocessing worker process (the run that starts it records), and 23 files whose source a frozen
-    artifact hashes (a builder code check or a code fingerprint, such as `normalization_v3.py`): editing them would
-    change that hash, so they are recorded only when launched through `python -m opengrad.runrecords run`. Before
-    converting a file, check whether anything hashes its source (`FROZEN_HASH`). `opengrad` records `train` and
+    itself, the preprocessing worker process (the run that starts it records), and 24 frozen files: 14 whose
+    source a frozen artifact hashes (a builder code check or a code fingerprint, such as `normalization_v3.py`;
+    `FROZEN_HASH`), 9 that a frozen artifact names as its builder or whose source a frozen study reads, with no
+    hash found in readable code (`FROZEN_BUILDER`), and `pdet.py`, which the Study 002 handoff forbids modifying
+    (`FROZEN_DOC`). They are recorded only when launched through `python -m opengrad.runrecords run`. Before
+    converting a file, check whether anything hashes it, names it as a builder, or a document freezes it. Five
+    standalone scripts (`tests/repo/test_hash_helpers.py`) import the recorder inside `try`: without the opengrad
+    package they run unrecorded, as before.
+  - Modal launches record themselves (code only; no Modal run has exercised it). Each `scripts/modal/*.py` local
+    entrypoint calls `_record_launch`, which loads the recorder from `src/` (the modal CLI's Python may lack the
+    package; then the launch runs unrecorded with a warning) and calls `run_script`. The record names the CLI
+    `modal`, so `trace` follows `modal run [-d|-q|-i] scripts/modal/x.py[::fn]` to the script (any other option
+    cannot be traced). The record is of the local side: its git state covers what the launch shipped, but its
+    library versions and GPU are this machine's. `gguf_study.py` and `h200_eval.py` reach held-out data and are in
+    `HELD_OUT_ENTRY_POINTS`; no Modal launcher is approved for upload. `opengrad` records `train` and
     `evaluate` in process; its other console commands go through `recorded_*` wrappers, and the record keeps the
     command's own name, so two commands in one module stay apart. A value `main()` returns that is not an int is
     printed to standard error and exits 1, as `raise SystemExit(main())` did.

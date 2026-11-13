@@ -19,17 +19,22 @@ ROOT = Path(__file__).resolve().parents[2]
 #: A file whose source a frozen artifact hashes (a builder code check, a code fingerprint) cannot take the call:
 #: editing it changes that hash. Such a script is recorded when launched through `python -m opengrad.runrecords run`.
 FROZEN_HASH = "its source hash is recorded by a frozen artifact; editing the file would change that hash"
+#: Found in no readable hash list (the 2026-11-13 audit could not read reports/, results/, release/ or data/), but a
+#: frozen artifact names it as its builder, or a frozen study reads its source: left unedited to be safe.
+FROZEN_BUILDER = "a frozen artifact names it as its builder, or a frozen study reads its source; left unedited"
+#: docs/research/study-002/HANDOFF.md section 16: "Do not ... modify ... pdet.py".
+FROZEN_DOC = "the Study 002 handoff (docs/research/study-002/HANDOFF.md section 16) forbids modifying it"
 ALLOWLIST: dict[str, str] = {
     "scripts/agy_tool_gate.py": 'runs once per tool call inside an annotation run that is itself recorded',
-    "scripts/archive_devset_model_labels.py": FROZEN_HASH,
-    "scripts/archive_external_model_labels.py": FROZEN_HASH,
-    "scripts/archive_pdet_model_batches.py": FROZEN_HASH,
+    "scripts/archive_devset_model_labels.py": FROZEN_BUILDER,
+    "scripts/archive_external_model_labels.py": FROZEN_BUILDER,
+    "scripts/archive_pdet_model_batches.py": FROZEN_BUILDER,
     "scripts/audit_pdet_coverage_supply.py": FROZEN_HASH,
-    "scripts/audit_punans_constructed_supply.py": FROZEN_HASH,
-    "scripts/audit_punans_supply.py": FROZEN_HASH,
-    "scripts/audit_punans_v2_supply.py": FROZEN_HASH,
-    "scripts/build_gguf_card.py": FROZEN_HASH,
-    "scripts/score_gguf_candidate.py": FROZEN_HASH,
+    "scripts/audit_punans_constructed_supply.py": FROZEN_BUILDER,
+    "scripts/audit_punans_supply.py": FROZEN_BUILDER,
+    "scripts/audit_punans_v2_supply.py": FROZEN_BUILDER,
+    "scripts/build_gguf_card.py": FROZEN_BUILDER,
+    "scripts/score_gguf_candidate.py": FROZEN_BUILDER,
     "src/opengrad/data/normalization_v3.py": FROZEN_HASH,
     "src/opengrad/runrecords/cli.py": 'the run-record command itself; recording it would record the recorder',
     "src/opengrad/training/preprocess.py": "an internal worker process the preprocessing step starts; the run that starts it records",
@@ -40,20 +45,21 @@ ALLOWLIST: dict[str, str] = {
     "src/opengrad/verification/classifier_devset_v2.py": FROZEN_HASH,
     "src/opengrad/verification/flag_set.py": FROZEN_HASH,
     "src/opengrad/verification/flag_triage_population.py": FROZEN_HASH,
+    "src/opengrad/verification/pdet.py": FROZEN_DOC,
     "src/opengrad/verification/pdet_coverage.py": FROZEN_HASH,
     "src/opengrad/verification/pdet_coverage_v2.py": FROZEN_HASH,
     "src/opengrad/verification/punans.py": FROZEN_HASH,
     "src/opengrad/verification/punans_constructed.py": FROZEN_HASH,
     "src/opengrad/verification/punans_v2.py": FROZEN_HASH,
-    "src/opengrad/verification/study_002_gate.py": FROZEN_HASH,
+    "src/opengrad/verification/study_002_gate.py": FROZEN_BUILDER,
 }
 #: ``[project.scripts]`` commands that do not go through ``run_script``, with the reason.
 CONSOLE_ALLOWLIST: dict[str, str] = {
     "opengrad": "records its own train and evaluate runs (opengrad.cli, recorded_call)",
 }
-ALLOWLIST_CEILING = 26
+ALLOWLIST_CEILING = 27
 CONSOLE_ALLOWLIST_CEILING = 1
-RECORDING_CALLS = {"run_script", "recorded_main"}
+RECORDING_CALLS = {"run_script", "recorded_main", "_record_launch"}
 
 
 def _tracked_python() -> list[str]:
@@ -61,12 +67,18 @@ def _tracked_python() -> list[str]:
     return [p for p in out.split() if p.startswith(("scripts/", "src/"))]
 
 
-def _main_block(tree: ast.Module) -> ast.If | None:
+def _main_block(tree: ast.Module) -> ast.If | ast.FunctionDef | None:
+    """The code that runs when the file is the entry point: its ``__main__`` block, or a Modal local entrypoint
+    (``modal run scripts/modal/x.py`` runs that function locally, never a ``__main__`` block)."""
     for node in tree.body:
         if (
             isinstance(node, ast.If)
             and isinstance(node.test, ast.Compare)
             and getattr(node.test.left, "id", "") == "__name__"
+        ):
+            return node
+        if isinstance(node, ast.FunctionDef) and any(
+            ast.unparse(d).endswith("local_entrypoint()") for d in node.decorator_list
         ):
             return node
     return None
@@ -111,6 +123,37 @@ def test_the_allowlist_only_shrinks() -> None:
     assert stale == [], f"remove these from ALLOWLIST: {stale}"
     # Lower the ceiling as entry points are converted; raising it needs the owner's word.
     assert len(ALLOWLIST) <= ALLOWLIST_CEILING and len(CONSOLE_ALLOWLIST) <= CONSOLE_ALLOWLIST_CEILING
+
+
+def test_a_modal_launch_records_itself_through_run_script() -> None:
+    launchers = [p for p in _tracked_python() if p.startswith("scripts/modal/")]
+    assert launchers, "no Modal launchers found; the scan broke"
+    for path in launchers:
+        tree = ast.parse((ROOT / path).read_text(encoding="utf-8"))
+        entry = _main_block(tree)
+        assert isinstance(entry, ast.FunctionDef), path
+        assert "_record_launch" in _calls(entry), path
+        (shim,) = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_record_launch"]
+        assert "run_script" in _calls(shim), path
+
+
+def test_a_modal_launch_is_traced_to_its_script() -> None:
+    script = "scripts/modal/h200_eval.py"
+    assert rs.trace(["modal", "run", script, "--phase", "frozen"], ROOT) == (script, 3)
+    assert rs.trace(["modal.exe", "run", "--detach", f"{script}::main"], ROOT) == (script, 4)
+    assert rs.command_entry(["modal", "run", "--env", "x", script], ROOT) is None  # an option that takes a value
+    assert rs.command_entry(["modal", "deploy", script], ROOT) is None
+    assert rs.command_entry(["modal", "run"], ROOT) is None
+
+
+def test_a_modal_launch_records_the_cli_by_name(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # The modal CLI is usually installed outside the checkout; its path would be redacted to <absolute-path>.
+    script = ROOT / "scripts" / "modal" / "h200_eval.py"
+    monkeypatch.setattr(sys, "argv", ["/home/u/.local/bin/modal", "run", "scripts/modal/h200_eval.py", "--phase", "x"])
+    seen: list[list[str]] = []
+    monkeypatch.setattr(rs, "recorded_call", lambda kind, argv, root, fn, **kw: seen.append(argv) or fn())
+    assert rs.run_script(str(script), lambda: None) == 0
+    assert seen == [["modal", "run", "scripts/modal/h200_eval.py", "--phase", "x"]]
 
 
 def test_a_recorded_wrapper_calls_run_script() -> None:

@@ -312,4 +312,3 @@ def recorded_main() -> int:
     from opengrad.runrecords.scripts import run_script
 
     return run_script(__file__, main)
-

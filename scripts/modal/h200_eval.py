@@ -509,6 +509,30 @@ def _load_frozen(partition: str) -> list[dict]:
 
 @app.local_entrypoint()
 def main(phase: str = "validate", partition: str = "confirmatory", sizes: str = "32,64,128,256"):
+    _record_launch(lambda: _main(phase, partition, sizes))
+
+
+def _record_launch(launch) -> None:
+    """Record this launch in the checkout's run records, like any other entry point (``opengrad.runrecords``).
+
+    Only the local side runs here; the container has no checkout. The modal CLI's Python may not have the opengrad
+    package, so it is loaded from ``src/``. If that fails the launch still runs, unrecorded, with a warning.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+    try:
+        from opengrad.runrecords.scripts import run_script
+    except ImportError as exc:
+        print(f"warning: this launch is not recorded: {exc}", file=sys.stderr)
+        launch()
+        return
+    code = run_script(__file__, launch)
+    if code:
+        raise SystemExit(code)
+
+
+def _main(phase: str = "validate", partition: str = "confirmatory", sizes: str = "32,64,128,256"):
     out = ROOT / "results/benchmarks/h200"
     out.mkdir(parents=True, exist_ok=True)
     engine = Engine()

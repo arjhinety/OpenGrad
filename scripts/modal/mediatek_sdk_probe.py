@@ -120,6 +120,30 @@ def probe() -> dict:
 
 @app.local_entrypoint()
 def main():
+    _record_launch(lambda: _main())
+
+
+def _record_launch(launch) -> None:
+    """Record this launch in the checkout's run records, like any other entry point (``opengrad.runrecords``).
+
+    Only the local side runs here; the container has no checkout. The modal CLI's Python may not have the opengrad
+    package, so it is loaded from ``src/``. If that fails the launch still runs, unrecorded, with a warning.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+    try:
+        from opengrad.runrecords.scripts import run_script
+    except ImportError as exc:
+        print(f"warning: this launch is not recorded: {exc}", file=sys.stderr)
+        launch()
+        return
+    code = run_script(__file__, launch)
+    if code:
+        raise SystemExit(code)
+
+
+def _main():
     result = probe.remote()
     out = ROOT / "results/quantization/executorch"
     out.mkdir(parents=True, exist_ok=True)
