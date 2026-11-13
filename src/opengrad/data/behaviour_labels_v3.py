@@ -17,7 +17,6 @@ passes, ``weight_permitted`` is False for every row, and the manifest says so.
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -102,4 +101,6 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    from opengrad.runrecords.scripts import run_script
+
+    raise SystemExit(run_script(__file__, main))

@@ -20,7 +20,6 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
-import sys
 from pathlib import Path
 
 from opengrad.hashing import sha256_bytes
@@ -125,4 +124,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    from opengrad.runrecords.scripts import run_script
+
+    raise SystemExit(run_script(__file__, main))

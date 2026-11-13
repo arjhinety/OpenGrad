@@ -198,4 +198,6 @@ and ExecuTorch. The gap is entirely in general capability, not tool use.
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    from opengrad.runrecords.scripts import run_script
+
+    raise SystemExit(run_script(__file__, main))

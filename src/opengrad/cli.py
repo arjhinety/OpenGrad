@@ -633,3 +633,18 @@ def preflight_cli() -> int:
     )
     parser.parse_args()
     return preflight(Path.cwd())
+
+
+def recorded_preflight_cli() -> int:
+    """The ``opengrad-preflight`` command: ``preflight_cli()`` as a recorded run (``opengrad.runrecords.scripts``)."""
+    from opengrad.runrecords.scripts import run_script
+
+    return run_script(__file__, preflight_cli)
+
+
+def recorded_data_audit_cli() -> int:
+    """The ``opengrad-data-audit`` command: ``data_audit_cli()`` as a recorded run (``opengrad.runrecords.scripts``)."""
+    from opengrad.runrecords.scripts import run_script
+
+    return run_script(__file__, data_audit_cli)
+

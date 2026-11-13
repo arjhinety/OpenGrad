@@ -13,7 +13,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import sys
 from collections import Counter
 from pathlib import Path
 
@@ -213,4 +212,6 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    from opengrad.runrecords.scripts import run_script
+
+    raise SystemExit(run_script(__file__, main))

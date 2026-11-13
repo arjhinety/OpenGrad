@@ -305,3 +305,11 @@ def main() -> int:
             )
         )
     return 0
+
+
+def recorded_main() -> int:
+    """The ``opengrad-data`` command: ``main()`` as a recorded run (``opengrad.runrecords.scripts``)."""
+    from opengrad.runrecords.scripts import run_script
+
+    return run_script(__file__, main)
+

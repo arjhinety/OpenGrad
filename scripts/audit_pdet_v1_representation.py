@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -165,4 +164,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    from opengrad.runrecords.scripts import run_script
+
+    raise SystemExit(run_script(__file__, main))

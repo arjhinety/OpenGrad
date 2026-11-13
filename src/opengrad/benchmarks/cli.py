@@ -221,3 +221,11 @@ def benchmark_cli(args: list[str] | None = None) -> int:
 
     parser.print_help()
     return 0
+
+
+def recorded_benchmark_cli() -> int:
+    """The ``opengrad-benchmark`` command: ``benchmark_cli()`` as a recorded run (``opengrad.runrecords.scripts``)."""
+    from opengrad.runrecords.scripts import run_script
+
+    return run_script(__file__, benchmark_cli)
+

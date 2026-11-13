@@ -99,4 +99,6 @@ def results_cli(args: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(results_cli())
+    from opengrad.runrecords.scripts import run_script
+
+    raise SystemExit(run_script(__file__, results_cli))

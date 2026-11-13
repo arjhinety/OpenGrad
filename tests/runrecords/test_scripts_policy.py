@@ -15,142 +15,44 @@ from opengrad.runrecords import record as rr
 from opengrad.runrecords import scripts as rs
 
 ROOT = Path(__file__).resolve().parents[2]
-#: Not converted yet; later slices of stage 3 remove these. An entry may only leave this list.
-PENDING = "not yet converted (run-record stage 3, a later slice)"
-#: Entry points without the recording call, with the reason. The list may only shrink.
+#: Entry points without the recording call, with the reason (stage 3 converted every other one, 2026-11-13).
+#: A file whose source a frozen artifact hashes (a builder code check, a code fingerprint) cannot take the call:
+#: editing it changes that hash. Such a script is recorded when launched through `python -m opengrad.runrecords run`.
+FROZEN_HASH = "its source hash is recorded by a frozen artifact; editing the file would change that hash"
 ALLOWLIST: dict[str, str] = {
     "scripts/agy_tool_gate.py": 'runs once per tool call inside an annotation run that is itself recorded',
-    "scripts/archive_devset_model_labels.py": PENDING,
-    "scripts/archive_external_model_labels.py": PENDING,
-    "scripts/archive_pdet_model_batches.py": PENDING,
-    "scripts/assemble_m1_preference_dataset.py": PENDING,
-    "scripts/audit_bfcl_answer_supply.py": PENDING,
-    "scripts/audit_campaign_final.py": PENDING,
-    "scripts/audit_canonical_v2_final_direct.py": PENDING,
-    "scripts/audit_corpus_direct_prevalence.py": PENDING,
-    "scripts/audit_executorch_quantization.py": PENDING,
-    "scripts/audit_first_reply_supply.py": PENDING,
-    "scripts/audit_ladder_tokenizer_divergence.py": PENDING,
-    "scripts/audit_normalization_v3_structure.py": PENDING,
-    "scripts/audit_pdet_coverage_supply.py": PENDING,
-    "scripts/audit_pdet_coverage_supply_v3.py": PENDING,
-    "scripts/audit_pdet_coverage_v2_supply.py": PENDING,
-    "scripts/audit_pdet_v1_representation.py": PENDING,
-    "scripts/audit_punans_constructed_supply.py": PENDING,
-    "scripts/audit_punans_supply.py": PENDING,
-    "scripts/audit_punans_v2_supply.py": PENDING,
-    "scripts/audit_sft_refusal_supervision.py": PENDING,
-    "scripts/audit_toolace_call_final_shape.py": PENDING,
-    "scripts/audit_xlam_normalization.py": PENDING,
-    "scripts/build_capability_cost_ledger.py": PENDING,
-    "scripts/build_capability_evidence.py": PENDING,
-    "scripts/build_capability_report.py": PENDING,
-    "scripts/build_checkpoint_ladder.py": PENDING,
-    "scripts/build_engine_parity_report.py": PENDING,
-    "scripts/build_executorch_handoff.py": PENDING,
-    "scripts/build_final_verdict.py": PENDING,
-    "scripts/build_final_yield_report.py": PENDING,
-    "scripts/build_findings_visual.py": PENDING,
-    "scripts/build_gguf_card.py": PENDING,
-    "scripts/build_gguf_handoff.py": PENDING,
-    "scripts/build_h200_benchmark_report.py": PENDING,
-    "scripts/build_m1_local_preference_pairs.py": PENDING,
-    "scripts/build_minus_xlam_release.py": PENDING,
-    "scripts/build_ptq_evaluation_report.py": PENDING,
-    "scripts/build_quantization_visual.py": PENDING,
-    "scripts/build_regression_analysis.py": PENDING,
-    "scripts/build_tokenizer_regression_fixtures.py": PENDING,
-    "scripts/build_when2call_preference_pairs.py": PENDING,
-    "scripts/build_xlam_from_derivative.py": PENDING,
-    "scripts/characterize_refusal.py": PENDING,
-    "scripts/close_ptq_phase.py": PENDING,
-    "scripts/compare_gemini_relabel.py": PENDING,
-    "scripts/derive_ablation_yield_report.py": PENDING,
-    "scripts/evaluate_prose_classifier_dev.py": PENDING,
-    "scripts/evaluate_prose_classifier_v2_dev.py": PENDING,
-    "scripts/evaluate_sft_checkpoints.py": PENDING,
-    "scripts/fetch_and_score_capability.py": PENDING,
-    "scripts/freeze_eval_partition.py": PENDING,
-    "scripts/freeze_m0_final.py": PENDING,
-    "scripts/freeze_minus_xlam_ablation.py": PENDING,
-    "scripts/freeze_minus_xlam_v2.py": PENDING,
-    "scripts/grade_openweights_parity.py": PENDING,
-    "scripts/measure_ablation_mass.py": PENDING,
-    "scripts/prepare_capability_benchmarks.py": PENDING,
-    "scripts/prepare_imatrix_calibration.py": PENDING,
-    "scripts/prepare_quantization_inputs.py": PENDING,
-    "scripts/preserve_h200_state.py": PENDING,
-    "scripts/publish_card_corrections.py": PENDING,
-    "scripts/publish_executorch_artifact.py": PENDING,
-    "scripts/rebuild_eval_splits.py": PENDING,
-    "scripts/render_frozen_prompts.py": PENDING,
-    "scripts/repo/check_publication_hygiene.py": PENDING,
-    "scripts/report_toolace_call_prediction.py": PENDING,
-    "scripts/reporting/generate_experiment_status.py": PENDING,
-    "scripts/reporting/generate_indexes.py": PENDING,
-    "scripts/reporting/generate_source_views.py": PENDING,
-    "scripts/reporting/generate_upstream_log.py": PENDING,
-    "scripts/run_gguf_ladder.py": PENDING,
-    "scripts/sanity_check_rendered_samples.py": PENDING,
-    "scripts/score_gguf_candidate.py": PENDING,
-    "scripts/score_gsm8k.py": PENDING,
-    "scripts/score_ifeval.py": PENDING,
-    "scripts/score_mmlu_pro.py": PENDING,
-    "scripts/score_quantized_artifact.py": PENDING,
-    "scripts/score_sentinel.py": PENDING,
-    "scripts/select_checkpoint.py": PENDING,
-    "scripts/smoke_gpu_dpo_opd.py": PENDING,
-    "scripts/update_quantization_ledger.py": PENDING,
-    "scripts/verify_publication.py": PENDING,
-    "src/opengrad/data/behaviour_labels.py": PENDING,
-    "src/opengrad/data/behaviour_labels_v3.py": PENDING,
-    "src/opengrad/data/canonical_v3.py": PENDING,
-    "src/opengrad/data/canonical_v3_balance.py": PENDING,
-    "src/opengrad/data/normalization_v3.py": PENDING,
-    "src/opengrad/data/provenance_gate.py": PENDING,
-    "src/opengrad/optimization/__main__.py": PENDING,
-    "src/opengrad/registry/validate.py": PENDING,
-    "src/opengrad/results/cli.py": PENDING,
+    "scripts/archive_devset_model_labels.py": FROZEN_HASH,
+    "scripts/archive_external_model_labels.py": FROZEN_HASH,
+    "scripts/archive_pdet_model_batches.py": FROZEN_HASH,
+    "scripts/audit_pdet_coverage_supply.py": FROZEN_HASH,
+    "scripts/audit_punans_constructed_supply.py": FROZEN_HASH,
+    "scripts/audit_punans_supply.py": FROZEN_HASH,
+    "scripts/audit_punans_v2_supply.py": FROZEN_HASH,
+    "scripts/build_gguf_card.py": FROZEN_HASH,
+    "scripts/score_gguf_candidate.py": FROZEN_HASH,
+    "src/opengrad/data/normalization_v3.py": FROZEN_HASH,
     "src/opengrad/runrecords/cli.py": 'the run-record command itself; recording it would record the recorder',
-    "src/opengrad/training/exposure_planner.py": PENDING,
-    "src/opengrad/training/preprocess.py": PENDING,
-    "src/opengrad/verification/answer_strata.py": PENDING,
-    "src/opengrad/verification/answer_strata_report.py": PENDING,
-    "src/opengrad/verification/call_fidelity.py": PENDING,
-    "src/opengrad/verification/classifier_devcheck.py": PENDING,
-    "src/opengrad/verification/classifier_devset.py": PENDING,
-    "src/opengrad/verification/classifier_devset_v2.py": PENDING,
-    "src/opengrad/verification/flag_set.py": PENDING,
-    "src/opengrad/verification/flag_triage_population.py": PENDING,
-    "src/opengrad/verification/flag_triage_report.py": PENDING,
-    "src/opengrad/verification/pconf.py": PENDING,
-    "src/opengrad/verification/pdet.py": PENDING,
-    "src/opengrad/verification/pdet_coverage.py": PENDING,
-    "src/opengrad/verification/pdet_coverage_reference.py": PENDING,
-    "src/opengrad/verification/pdet_coverage_v2.py": PENDING,
-    "src/opengrad/verification/prose_classifier_oneshot.py": PENDING,
-    "src/opengrad/verification/prose_classifier_v2_oneshot.py": PENDING,
-    "src/opengrad/verification/punans.py": PENDING,
-    "src/opengrad/verification/punans_constructed.py": PENDING,
-    "src/opengrad/verification/punans_constructed_report.py": PENDING,
-    "src/opengrad/verification/punans_report.py": PENDING,
-    "src/opengrad/verification/punans_v2.py": PENDING,
-    "src/opengrad/verification/punans_v2_report.py": PENDING,
-    "src/opengrad/verification/study_002_gate.py": PENDING,
-    "src/opengrad/verification/study_002_readiness.py": PENDING,
+    "src/opengrad/training/preprocess.py": "an internal worker process the preprocessing step starts; the run that starts it records",
+    "src/opengrad/verification/answer_strata.py": FROZEN_HASH,
+    "src/opengrad/verification/call_fidelity.py": FROZEN_HASH,
+    "src/opengrad/verification/classifier_devcheck.py": FROZEN_HASH,
+    "src/opengrad/verification/classifier_devset.py": FROZEN_HASH,
+    "src/opengrad/verification/classifier_devset_v2.py": FROZEN_HASH,
+    "src/opengrad/verification/flag_set.py": FROZEN_HASH,
+    "src/opengrad/verification/flag_triage_population.py": FROZEN_HASH,
+    "src/opengrad/verification/pdet_coverage.py": FROZEN_HASH,
+    "src/opengrad/verification/pdet_coverage_v2.py": FROZEN_HASH,
+    "src/opengrad/verification/punans.py": FROZEN_HASH,
+    "src/opengrad/verification/punans_constructed.py": FROZEN_HASH,
+    "src/opengrad/verification/punans_v2.py": FROZEN_HASH,
+    "src/opengrad/verification/study_002_gate.py": FROZEN_HASH,
 }
 #: ``[project.scripts]`` commands that do not go through ``run_script``, with the reason.
 CONSOLE_ALLOWLIST: dict[str, str] = {
     "opengrad": "records its own train and evaluate runs (opengrad.cli, recorded_call)",
-    "opengrad-preflight": PENDING,
-    "opengrad-validate": PENDING,
-    "opengrad-contamination": PENDING,
-    "opengrad-data-audit": PENDING,
-    "opengrad-data": PENDING,
-    "opengrad-benchmark": PENDING,
 }
-ALLOWLIST_CEILING = 119
-CONSOLE_ALLOWLIST_CEILING = 7
+ALLOWLIST_CEILING = 26
+CONSOLE_ALLOWLIST_CEILING = 1
 RECORDING_CALLS = {"run_script", "recorded_main"}
 
 
@@ -211,20 +113,25 @@ def test_the_allowlist_only_shrinks() -> None:
     assert len(ALLOWLIST) <= ALLOWLIST_CEILING and len(CONSOLE_ALLOWLIST) <= CONSOLE_ALLOWLIST_CEILING
 
 
-def test_a_recorded_main_wrapper_calls_run_script() -> None:
-    for path, tree in _entry_points().items():
-        wrappers = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "recorded_main"]
+def test_a_recorded_wrapper_calls_run_script() -> None:
+    for path in sorted(set(_tracked_python()) - rs.POLICY_FILES):  # the recorder itself defines recorded_call
+        tree = ast.parse((ROOT / path).read_text(encoding="utf-8"))
+        wrappers = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name.startswith("recorded_")]
         for wrapper in wrappers:
-            assert "run_script" in _calls(wrapper), path
+            assert "run_script" in _calls(wrapper), (path, wrapper.name)
 
 
 def test_every_console_command_records_or_is_allowlisted() -> None:
     scripts = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["scripts"]
     for name, target in scripts.items():
+        module, function = target.split(":", 1)
+        tree = ast.parse((ROOT / "src" / (module.replace(".", "/") + ".py")).read_text(encoding="utf-8"))
+        (func,) = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == function]
+        records = "run_script" in _calls(func)
         if name in CONSOLE_ALLOWLIST:
-            assert not target.endswith(":recorded_main"), f"{name} records now; remove it from CONSOLE_ALLOWLIST"
+            assert not records, f"{name} records now; remove it from CONSOLE_ALLOWLIST"
             continue
-        assert target.endswith(":recorded_main"), f"{name} -> {target} does not record its runs"
+        assert records, f"{name} -> {target} does not record its runs"
     assert set(CONSOLE_ALLOWLIST) <= set(scripts), "CONSOLE_ALLOWLIST names a command that no longer exists"
 
 
@@ -539,3 +446,26 @@ def test_a_held_out_script_in_another_letter_case_is_still_held_out() -> None:
     record = {"kind": "script", "command": ["python", upper], **REVIEWED}
     expected = "never" if (ROOT / upper).is_file() else "unrecognised"
     assert rs.upload_decision(record, ROOT)[0] == expected
+
+
+def test_a_declared_code_counts_only_when_main_returns_it(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # argparse usage errors (2) and SystemExit("message") (1) leave through SystemExit: failures, whatever the number.
+    path = _script(tmp_path, "scripts/check_thing.py")
+    monkeypatch.setattr(
+        rs, "POLICY", {"scripts/check_thing.py": rs.ScriptPolicy(expected_exit_codes={1: "stale", 2: "x"})}
+    )
+    monkeypatch.setattr(sys, "argv", ["check_thing.py"])
+
+    def usage_error() -> int:
+        raise SystemExit(2)
+
+    def refusal() -> int:
+        raise SystemExit("refused")
+
+    with pytest.raises(SystemExit):
+        rs.run_script(str(path), usage_error)
+    with pytest.raises(SystemExit):
+        rs.run_script(str(path), refusal)
+    assert rs.run_script(str(path), lambda: 1) == 1
+    statuses = sorted((r["exit_code"], r["status"]) for r in rr.read_local(tmp_path))
+    assert statuses == [(1, "FAILED"), (1, "PASS"), (2, "FAILED")]

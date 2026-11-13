@@ -62,7 +62,10 @@ def snapshot() -> dict[str, dict[str, list[str]]]:
     tracked = _tracked()
     out: dict[str, dict[str, list[str]]] = {}
     for entry in sorted(set(rs.PINNED_CONSOLE) - {RUNNER}):
-        files = {path: _console(path) for path in sorted(rs.import_closure(entry, ROOT, tracked))}
+        # The recorder's own files (rs.POLICY_FILES) are left out: an entry point imports them only to record itself,
+        # their console handling copies the program's own output, and tests/runrecords covers them.
+        loaded = sorted(rs.import_closure(entry, ROOT, tracked) - rs.POLICY_FILES)
+        files = {path: _console(path) for path in loaded}
         out[entry] = {path: calls for path, calls in files.items() if calls}
     return out
 

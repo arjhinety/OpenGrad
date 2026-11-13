@@ -590,11 +590,14 @@ def policy_for(relative: str) -> ScriptPolicy:
 
 
 def _code(result: object) -> int:
+    """The exit code ``raise SystemExit(result)`` would give: 0 for None, the int itself, else 1 with the value
+    printed to standard error (as SystemExit prints a message), so converting an entry point changes nothing."""
     if result is None:
         return 0
-    if isinstance(result, bool):
+    if isinstance(result, int):
         return int(result)
-    return result if isinstance(result, int) else 1
+    print(result, file=sys.stderr)
+    return 1
 
 
 def run_script(file: str, main: Callable[[], object]) -> int:
@@ -609,9 +612,17 @@ def run_script(file: str, main: Callable[[], object]) -> int:
         return _code(main())
     relative = path.relative_to(root).as_posix()
     policy = policy_for(relative)
+    # The script's own repository path when it was run as a file (from any folder); a console command keeps its
+    # own name, so two commands in one module stay apart in the record.
+    first = sys.argv[0] if sys.argv else ""
+    try:
+        as_file = bool(first) and Path(first).resolve() == path
+    except OSError:
+        as_file = False
+    argv0 = relative if as_file or not first else first
     return recorded_call(
         policy.kind,
-        [relative, *sys.argv[1:]],
+        [argv0, *sys.argv[1:]],
         root,
         lambda: _code(main()),
         expected_exit_codes=dict(policy.expected_exit_codes),

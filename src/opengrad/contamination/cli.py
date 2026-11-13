@@ -385,3 +385,11 @@ def main() -> int:
     if args.command == "quarantine":
         return _quarantine(args)
     return 1
+
+
+def recorded_main() -> int:
+    """The ``opengrad-contamination`` command: ``main()`` as a recorded run (``opengrad.runrecords.scripts``)."""
+    from opengrad.runrecords.scripts import run_script
+
+    return run_script(__file__, main)
+

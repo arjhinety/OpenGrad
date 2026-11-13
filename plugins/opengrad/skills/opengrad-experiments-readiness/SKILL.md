@@ -122,8 +122,8 @@ it:
     they were the whole rule before, and five audits each found a new way past them. Planned refinement:
     `docs/upstream/UP-0040.md`.
   - Upload decides again from each record's command (`upload_decision`, whose docstring gives the order), so it
-    also covers a script launched through `python -m opengrad.runrecords run`, one not converted yet, and
-    in-process `opengrad train`/`evaluate`. A held-out entry point named anywhere in the command keeps the log
+    also covers a script launched through `python -m opengrad.runrecords run`, records made before a script
+    recorded itself, and in-process `opengrad train`/`evaluate`. A held-out entry point named anywhere in the command keeps the log
     local: a script path in any spelling (`./`, `//`, `..`, any case, absolute inside the checkout), one inside a
     shell string (`bash -c "python scripts/x.py"`), a module after `-m`. The run-record command wrapping
     another run cannot be traced. `opengrad baseline`, which runs a model on the held-out set with a default
@@ -167,7 +167,15 @@ it:
     path; the policy files themselves are not followed) minus `PINNED_CONSOLE`. The allowlists of entry points not
     yet converted have ceilings; lower them as entry points are converted, and raise them only with the owner's
     word. Open gaps for the next slice: `docs/upstream/UP-0038.md`.
-  - Converted so far: the annotation entry points (`opengrad-annotate`, `scripts/run_external_annotation.py`).
+  - Every entry point and console command records itself (stage 3 finished 2026-11-13), except those in the test's
+    allowlist, each with its reason: the agy tool gate (runs inside a recorded annotation run), the run-record command
+    itself, the preprocessing worker process (the run that starts it records), and 23 files whose source a frozen
+    artifact hashes (a builder code check or a code fingerprint, such as `normalization_v3.py`): editing them would
+    change that hash, so they are recorded only when launched through `python -m opengrad.runrecords run`. Before
+    converting a file, check whether anything hashes its source (`FROZEN_HASH`). `opengrad` records `train` and
+    `evaluate` in process; its other console commands go through `recorded_*` wrappers, and the record keeps the
+    command's own name, so two commands in one module stay apart. A value `main()` returns that is not an int is
+    printed to standard error and exits 1, as `raise SystemExit(main())` did.
 - Each run gets a git-ignored folder, `.run-records/<run_id>/` (`OPENGRAD_RUN_RECORDS_DIR` overrides it; the test
   suite uses that). It holds the full output, a start record and a summary. A start with no summary reads as
   `INCOMPLETE`.

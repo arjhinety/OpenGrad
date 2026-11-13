@@ -522,9 +522,14 @@ def main() -> int:
     return int(bool(errors))
 
 
+def recorded_main() -> int:
+    """The ``opengrad-validate`` command: ``main()`` as a recorded run (``opengrad.runrecords.scripts``)."""
+    from opengrad.runrecords.scripts import run_script
+
+    return run_script(__file__, main)
+
+
 if __name__ == "__main__":
-    # Without this guard, `python -m opengrad.registry.validate` imports the module,
-    # runs nothing and exits 0 -- which is indistinguishable from a passing
-    # validation. Only the `opengrad-validate` console script actually ran the
-    # check, so any report of this validation passing via `-m` was vacuous.
-    raise SystemExit(main())
+    from opengrad.runrecords.scripts import run_script
+
+    raise SystemExit(run_script(__file__, main))

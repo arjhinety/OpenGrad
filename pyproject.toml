@@ -33,12 +33,12 @@ dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11", "pyyaml>=6.0", "jsonschema>=4.2
 
 [project.scripts]
 opengrad = "opengrad.cli:main"
-opengrad-preflight = "opengrad.cli:preflight_cli"
-opengrad-validate = "opengrad.registry.validate:main"
-opengrad-contamination = "opengrad.contamination.cli:main"
-opengrad-data-audit = "opengrad.cli:data_audit_cli"
-opengrad-data = "opengrad.data.cli:main"
-opengrad-benchmark = "opengrad.benchmarks.cli:benchmark_cli"
+opengrad-preflight = "opengrad.cli:recorded_preflight_cli"
+opengrad-validate = "opengrad.registry.validate:recorded_main"
+opengrad-contamination = "opengrad.contamination.cli:recorded_main"
+opengrad-data-audit = "opengrad.cli:recorded_data_audit_cli"
+opengrad-data = "opengrad.data.cli:recorded_main"
+opengrad-benchmark = "opengrad.benchmarks.cli:recorded_benchmark_cli"
 opengrad-annotate = "opengrad.annotation.cli:recorded_main"
 
 [build-system]

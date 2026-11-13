@@ -624,7 +624,9 @@ def recorded_call(
         sys.stdout, sys.stderr = out, err
         log.close()
         code = exc.code if isinstance(exc.code, int) else (0 if exc.code is None else 1)
-        record.finish(code, record.status_for(code))
+        # Declared exit codes cover only a code main() returns: SystemExit also carries argparse usage errors (2)
+        # and refusals such as SystemExit("message") (1), which are failures whatever their number.
+        record.finish(code, "PASS" if code == 0 else "FAILED")
         raise
     except BaseException as exc:
         sys.stdout, sys.stderr = out, err
