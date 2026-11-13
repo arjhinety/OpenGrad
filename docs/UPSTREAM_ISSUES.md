@@ -90,7 +90,7 @@ when the table sat above the sections; it is kept as written.
 | UP-0031 | 2026-11-11 | OpenGrad process (agent editing through a shell) | `OURS` | not-applicable | Python edit scripts passed through a shell heredoc or `python -c` lost or changed their escape sequences, once writing a literal backspace into a regex | Fixed (regex corrected; such edits now go through a script file) |
 | UP-0032 | 2026-11-11 | OpenGrad process, `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | The run-records commit was pushed after its targeted tests, which left out the pipe-invariant check in `tests/evaluation/`; master went red | Fixed (reviewed allowlist entry for the continuously drained pipe) |
 | UP-0033 | 2026-11-11 | `tests/verification/test_external_tool_scan.py`, Windows CI | `UNCLEAR` | not-filed | `test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is` failed once on Windows CI with `KeyError: 'any'`; it passes locally | Open; cause not established |
-| UP-0034 | 2026-11-11 | `tests/evaluation/test_capability_benchmarks.py`, `scripts/prepare_capability_benchmarks.py` | `OURS` | not-applicable | A determinism test reruns the dataset preparation in the repository and rewrites the tracked `*_v1.meta.json` files, with CRLF line endings on Windows | Open; files restored by hand each time |
+| UP-0034 | 2026-11-11 | `tests/evaluation/test_capability_benchmarks.py`, `scripts/prepare_capability_benchmarks.py` | `OURS` | not-applicable | A determinism test reruns the dataset preparation in the repository and rewrites the tracked `*_v1.meta.json` files, with CRLF line endings on Windows | Fixed (meta files written with LF; the test checks them byte for byte) |
 | UP-0035 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` | `OURS` | not-applicable | The text-file `private_path` pattern misses a Windows home path written with single backslashes, such as `C:\Users\<name>\...` | Open; the fix changes allowlist counts across the repository, so it is a change of its own |
 | UP-0036 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` (`HOME_PATH`), copied in `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | `HOME_PATH` took exponential time on a drive letter followed by a run of backslashes | Fixed (`(?:\\\\\|\\\|/)+` replaced by `[\\/]+` in both copies) |
 | UP-0037 | 2026-11-13 | `scripts/publish_executorch_artifact.py`, Hub repo `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` | `OURS` | not-applicable | Held-out confirmatory data went public, through an ExecuTorch Hub upload with no publication record and through the public GitHub repository | Hub upload path fixed (held-out files excluded); Hub and GitHub copies left in place (owner); tracking decided after the overfit-clinic interview |
@@ -553,6 +553,11 @@ the test and never sees it. Found on 2026-11-11 after running `tests/evaluation`
 
 Fix to make: the script writes with `newline="\n"`, or the test runs the script against a temporary copy of the
 output folder. Either way, a test must not leave tracked files modified.
+
+Later line for UP-0034, 2026-11-13: fixed. `prepare_capability_benchmarks.py` writes both `*_v1.meta.json` paths with
+`newline="\n"`. The tracked files are already LF (`.gitattributes` pins `*.json` to `eol=lf`). The determinism test now
+also checks that each meta file comes back byte for byte. Run locally where the request sets exist: it passed, and `git
+status` stayed clean.
 
 ## UP-0035 — the hygiene scan misses a single-backslash Windows home path (`OURS`)
 

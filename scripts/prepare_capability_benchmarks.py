@@ -111,7 +111,7 @@ def write(name: str, records: list[dict], meta: dict) -> None:
     meta["request_file_sha256"] = hashlib.sha256(raw).hexdigest()
     meta["request_count"] = len(records)
     (OUTDIR / f"{name}_v1.meta.json").write_text(
-        json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
     )
     print(f"  wrote {len(records):>6} requests -> {path.name}  sha256 {meta['request_file_sha256'][:12]}")
 
@@ -317,7 +317,7 @@ def main() -> int:
             (OUTDIR / f"{name}_v1.meta.json").write_text(
                 json.dumps({"benchmark": name, "status": "BLOCKED_NO_DATASET",
                             "reason": f"{type(exc).__name__}: {exc}", "source": pin},
-                           indent=2, sort_keys=True) + "\n", encoding="utf-8")
+                           indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
             summary[name] = "BLOCKED_NO_DATASET"
             continue
 

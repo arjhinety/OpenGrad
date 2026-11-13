@@ -458,6 +458,8 @@ def test_prepare_script_is_deterministic():
     """Re-running preparation must reproduce byte-identical request files."""
     before = {n: (DATASETS / f"{n}_v1.jsonl").read_bytes() for n in BENCHMARKS
               if (DATASETS / f"{n}_v1.jsonl").exists()}
+    # The tracked meta files must come back byte-identical too, line endings included (UP-0034).
+    meta_before = {n: (DATASETS / f"{n}_v1.meta.json").read_bytes() for n in before}
     if not before:
         pytest.skip("datasets not prepared")
     proc = subprocess.run(
@@ -467,3 +469,4 @@ def test_prepare_script_is_deterministic():
     assert proc.returncode == 0, proc.stdout + proc.stderr
     for name, blob in before.items():
         assert (DATASETS / f"{name}_v1.jsonl").read_bytes() == blob, f"{name} not reproducible"
+        assert (DATASETS / f"{name}_v1.meta.json").read_bytes() == meta_before[name], f"{name} meta rewritten"
