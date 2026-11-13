@@ -2112,3 +2112,17 @@ confirmatory text. `git grep` and plain `grep` do not read it, so searches are s
   files is decided after the overfit-clinic interview. The partition and its pinned sha256 are unchanged.
   Setting aside `276e4475…` and `ae34fdce…` is deferred until the overfit-clinic interview.
 - **Record:** `tool-decision-rl/provenance/TEST_SPLIT_ACCESS.md`; `study_002_prereg_v17`.
+
+## 46. `study_002_prereg_v18` adopted: `P-UNANS` gets the same exposure caveat as `P-CONF`
+
+- **What happened:** v17 (§45) added a public-exposure caveat to `P-CONF` only. `P-UNANS`, the other population
+  scored once, is exposed in the same way. The public GitHub repository has tracked its population files since
+  2026-09-25 (v1, v2) and 2026-09-30 (constructed). Its reference labels, model annotations and disagreements followed
+  between 2026-09-25 and 2026-10-01. Its natural
+  items also come from public datasets (KUQ, SelfAware). Found on 2026-11-13 from file names and code only.
+- **Decision (owner, 2026-11-13):** the same caveat (`study_002_prereg_v18`). Results state every exposure. An arm
+  whose pinned base-model revision was committed after 2026-09-25T08:57:37Z is not scored on `P-UNANS` as
+  confirmatory until a contamination check is preregistered. The pinned `Qwen/Qwen3.5-2B` (2026-03-02) predates it.
+- **Not changed:** populations, strata, thresholds and manifests. The GitHub copies stay. P-UNANS's item and label
+  files are added to the root `.ignore`.
+- **Record:** `study_002_prereg_v18`.

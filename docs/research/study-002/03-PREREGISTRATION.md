@@ -1,7 +1,7 @@
 # 03 — Pre-registration
 
-> **Current version: `study_002_prereg_v17` (2026-11-13).** The text below is v1, the original contract;
-> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v17 at
+> **Current version: `study_002_prereg_v18` (2026-11-13).** The text below is v1, the original contract;
+> amendments v2–v6 follow under "Amendments", v7 after "Registration of the unit of analysis", and v8–v18 at
 > the end of this document ([40](40-PREREG-V8-DRAFT.md), [41](41-ANSWER-STRATA-AMENDMENT.md),
 > [42](42-ANSWER-STRATA-TWO-MODEL-AMENDMENT.md), [43](43-PUNANS-AMENDMENT-DRAFT.md),
 > [44](44-PUNANS-V2-AMENDMENT-DRAFT.md), [45](45-PUNANS-CONSTRUCTED-AMENDMENT-DRAFT.md),
@@ -676,3 +676,45 @@ files are sealed outside the repository. Full record: `reports/ERRATA.md` §44, 
 - **ERRATA entry:** `reports/ERRATA.md` §45.
 - **Note:** v16 (2026-11-11) did not update this document's "Current version" header. This entry updates it from v15 to
   v17.
+
+### `study_002_prereg_v18` — 2026-11-13
+
+- **Context.** `P-UNANS` is Study 002's other population scored once per arm (10). Check 4's population is the union of
+  P-UNANS-v2's natural unknowable stratum and `P-UNANS-v2-constructed` (v13). Its exposure was not covered by v17,
+  which addressed `P-CONF` only. Checked on 2026-11-13 from file names, code and metadata only; no item file was
+  opened.
+  - **Upstream, natural items.** The natural items are drawn from public datasets: KUQ (`amayuelas/KUQ`, on the Hub
+    since 2024-06-03, pinned at `f99b53aa…`) and SelfAware (`yinzhangyue/SelfAware`, on GitHub since 2022-12-01,
+    pinned at `f0bad1ff…`). Their question text was public before the pinned base model (`Qwen/Qwen3.5-2B`,
+    revision committed 2026-03-02T11:26:29Z), which may have seen them. That is unknown.
+  - **Ours, on GitHub.** The public repository `arjhinety/OpenGrad` tracks each P-UNANS version's population file,
+    its reference labels (`reference/*.reference.jsonl`), the two labelling models' annotations and their
+    disagreements. First pushes to `master` (repository activity log, push and force-push entries), population
+    file then reference labels:
+    - `punans-v1`: population 2026-09-25T08:57:37Z (`33ef7a6`), labels 2026-09-25T11:43:53Z (`65da9e4`);
+    - `punans-v2`: population 2026-09-25T13:10:26Z (`6d22955`), labels 2026-09-30T16:36:34Z (`61d1f56`);
+    - `punans-v2-constructed`: population 2026-09-30T17:13:31Z (`4ce273f`), labels 2026-10-01T10:15:27Z
+      (`f37a923`).
+
+    This adds OpenGrad's selection and its reference labels. For the constructed items, built from a pinned Wikidata
+    snapshot, it is the only public copy of the questions themselves. The pinned base model predates all of it.
+- **Decision (owner, 2026-11-13): the same caveat as `P-CONF` (v17).**
+- **Items changed:**
+  - Every reported `P-UNANS` result states its exposures:
+    - natural items' text public upstream (KUQ since 2024-06-03, SelfAware since 2022-12-01);
+    - OpenGrad's selection on GitHub since 2026-09-25, its reference labels since 2026-09-25 (v1) and 2026-09-30
+      (v2);
+    - the constructed items' text on GitHub since 2026-09-30, their labels since 2026-10-01.
+  - **Base-model rule.** If an arm's pinned base-model revision was committed on the Hub after
+    2026-09-25T08:57:37Z, `P-UNANS` is not scored as confirmatory for that arm until a later entry preregisters a
+    contamination check for it. This binds the S1 model choice, which is still open. It applies alongside v17's rule for
+    `P-CONF`, whose cutoff is 2026-09-11T09:00:12Z.
+  - No contamination check is preregistered here for the pinned model on `P-UNANS`. v17's check covers When2Call only.
+  - No population, stratum, threshold, arm or seed changes. The P-UNANS manifests and their pinned sha256 stay as they
+    are.
+- **Not changed:** the GitHub copies stay. Whether to stop tracking held-out files is decided after the overfit-clinic
+  interview, as for `P-CONF`. The root `.ignore` now keeps search tools out of P-UNANS's item and label files.
+- **Reason:** as for v17. A population whose items and labels are public must say so in its results. A base model
+  trained after they went public could have trained on them.
+- **Candidates already scored:** none. **Arms launched under an earlier version:** none.
+- **ERRATA entry:** `reports/ERRATA.md` §46.
