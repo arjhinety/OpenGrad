@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "HF_PUBLICATION_RECORD",
+  "published": "2026-11-13",
+  "experiment": "M1-v2 ExecuTorch XNNPACK CPU export (OpenGrad Study 001), EXPORTED_PENDING_EVALUATION",
+  "public": true,
+  "why_this_record_exists": "The 2026-09-12 upload was made with scripts/publish_executorch_artifact.py and no publication record (UP-0037). This record reconstructs it on 2026-11-13, at the owner's word, from Hub metadata only: commit history and file metadata. Nothing was downloaded, and no file under release/ was opened.",
+  "uploads": [
+    {
+      "repository": "experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU",
+      "repo_type": "model",
+      "hub_revision": "928dc850231f65c383268cc511093e14619cfdd3",
+      "event_occurred_at": "2026-09-12",
+      "event_occurred_at_utc": "2026-09-12T08:10:13Z",
+      "entry_recorded_at": "2026-11-13",
+      "recorded_retroactively": true,
+      "what": "initial commit",
+      "reconstruction_evidence": {
+        "kind": "HUB_COMMIT_HISTORY",
+        "observed_from": "huggingface_hub list_repo_commits('experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU', repo_type='model'), read 2026-11-13",
+        "immutable_identifier": "928dc850231f65c383268cc511093e14619cfdd3",
+        "transcribed_not_rederived": true,
+        "contemporaneous_record_exists": false
+      }
+    },
+    {
+      "repository": "experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU",
+      "repo_type": "model",
+      "hub_revision": "f11cefd8653474e7246f24c23d878bb3bd049f45",
+      "event_occurred_at": "2026-09-12",
+      "event_occurred_at_utc": "2026-09-12T08:14:43Z",
+      "entry_recorded_at": "2026-11-13",
+      "recorded_retroactively": true,
+      "what": "Add qwen3_5_2b_8da4w.pte (3,098,349,184 bytes)",
+      "reconstruction_evidence": {
+        "kind": "HUB_COMMIT_HISTORY",
+        "observed_from": "huggingface_hub list_repo_commits('experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU', repo_type='model'), read 2026-11-13",
+        "immutable_identifier": "f11cefd8653474e7246f24c23d878bb3bd049f45",
+        "transcribed_not_rederived": true,
+        "contemporaneous_record_exists": false
+      },
+      "superseded_hub_revision": "928dc850231f65c383268cc511093e14619cfdd3"
+    },
+    {
+      "repository": "experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU",
+      "repo_type": "model",
+      "hub_revision": "9d6b96daaca2c0a9d844e1631a5dee30bd7e10a8",
+      "event_occurred_at": "2026-09-12",
+      "event_occurred_at_utc": "2026-09-12T08:16:35Z",
+      "entry_recorded_at": "2026-11-13",
+      "recorded_retroactively": true,
+      "what": "Add qwen3_5_2b_fp32.pte (9,565,151,872 bytes)",
+      "reconstruction_evidence": {
+        "kind": "HUB_COMMIT_HISTORY",
+        "observed_from": "huggingface_hub list_repo_commits('experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU', repo_type='model'), read 2026-11-13",
+        "immutable_identifier": "9d6b96daaca2c0a9d844e1631a5dee30bd7e10a8",
+        "transcribed_not_rederived": true,
+        "contemporaneous_record_exists": false
+      },
+      "superseded_hub_revision": "f11cefd8653474e7246f24c23d878bb3bd049f45"
+    },
+    {
+      "repository": "experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU",
+      "repo_type": "model",
+      "hub_revision": "02f7e48efa78e11dcf1c9dc2781505bfe75b7817",
+      "event_occurred_at": "2026-09-12",
+      "event_occurred_at_utc": "2026-09-12T08:18:08Z",
+      "entry_recorded_at": "2026-11-13",
+      "recorded_retroactively": true,
+      "what": "ExecuTorch XNNPACK CPU export of m1_dpo_canonical_v2_final_v2::dpo-checkpoint-30 (EXPORTED_PENDING_EVALUATION)",
+      "reconstruction_evidence": {
+        "kind": "HUB_COMMIT_HISTORY",
+        "observed_from": "huggingface_hub list_repo_commits('experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU', repo_type='model'), read 2026-11-13",
+        "immutable_identifier": "02f7e48efa78e11dcf1c9dc2781505bfe75b7817",
+        "transcribed_not_rederived": true,
+        "contemporaneous_record_exists": false
+      },
+      "superseded_hub_revision": "9d6b96daaca2c0a9d844e1631a5dee30bd7e10a8"
+    }
+  ],
+  "current_hub_revision_files": [
+    {
+      "name": ".gitattributes",
+      "bytes": 1705
+    },
+    {
+      "name": "PARITY_NOTES.md",
+      "bytes": 3332
+    },
+    {
+      "name": "README.md",
+      "bytes": 5359
+    },
+    {
+      "name": "frozen_prompts_confirmatory_v1.jsonl",
+      "bytes": 11639166,
+      "hub_lfs_sha256": "cdd21b640109c90ba00a0d3a43a4005eeec0ce5a442e426e1afdf86e9209dedf"
+    },
+    {
+      "name": "m1_v2_reference.json",
+      "bytes": 3884
+    },
+    {
+      "name": "manifest.json",
+      "bytes": 53046
+    },
+    {
+      "name": "opengrad_min/__init__.py",
+      "bytes": 77
+    },
+    {
+      "name": "opengrad_min/parser.py",
+      "bytes": 8381
+    },
+    {
+      "name": "opengrad_min/policy.py",
+      "bytes": 4145
+    },
+    {
+      "name": "opengrad_min/routing.py",
+      "bytes": 2276
+    },
+    {
+      "name": "quantization_preservation_v1.json",
+      "bytes": 1052
+    },
+    {
+      "name": "qwen3_5_2b_8da4w.pte",
+      "bytes": 3098349184,
+      "hub_lfs_sha256": "46807edc32fc9c3bc607f35b0ec703480f55810286a36645a3026b44970770bb"
+    },
+    {
+      "name": "qwen3_5_2b_fp32.pte",
+      "bytes": 9565151872,
+      "hub_lfs_sha256": "5f5e37a3a5b2b9b1f6ba710513a7bf42edfd20e5eb0391f4d8373d54f015243b"
+    },
+    {
+      "name": "score_generations.py",
+      "bytes": 5693
+    }
+  ],
+  "notes": [
+    "Each event is reconstructed (recorded_retroactively); none was recorded at the time.",
+    "frozen_prompts_confirmatory_v1.jsonl holds held-out confirmatory items and should not have been uploaded (UP-0037, reports/ERRATA.md §45). Its Hub sha256 is the one the Hub reports. It was not compared with any local file, because that would mean opening a held-out file. The file stays on the Hub by the owner's decision.",
+    "The Hub reports the repository public and not gated (model_info). It is listed in the collection experimentalmachines/qwengrad-executorch-6aa5008c9414ee393594e3a8 (get_collection, read 2026-11-13).",
+    "File sizes and sha256 values are the Hub's own metadata, from model_info(files_metadata=True), and were not re-derived. The .pte hashes were not compared with the export records."
+  ]
+}
