@@ -123,8 +123,8 @@ it:
     Each consumed config is also read for held-out names at start (`consumed_held_out`), so a benchmark config
     that a suite lists, and no argument names, counts for `held_out_inputs`.
     An approved run given an existing file outside `configs/` (a training config in a scratch folder) is
-    unrecognised. Routine checks (`ROUTINE_CHECKS`: the hygiene scan, the index and upstream-log generators, the
-    publication verifier, `opengrad-validate`) record, but their logs are kept local by policy and listed as such,
+    unrecognised. Routine checks (`ROUTINE_CHECKS`: the hygiene scan, the index, source-view and upstream-log
+    generators, the publication verifier, `opengrad-validate`) record, but their logs are kept local by policy and listed as such,
     not counted for exit 3 (owner, 2026-11-14). Any other log stays local and is listed as not approved, counted
     for exit 3, until its entry point's console output is reviewed and it is added. The checks below still apply to an approved entry point;
     they were the whole rule before, and five audits each found a new way past them.
@@ -232,7 +232,9 @@ it:
   workflow, event, branch, commit, start time, failed job and step names), never log text: a failing test's output
   can quote the data it compared. CI runs `ci-intake --check` (writes nothing) on every push (owner, 2026-11-14),
   so after a red run on master CI stays red until its entry is committed and disposed: the commit that fixes a
-  failure takes it in and disposes it too. The workflow has `actions: read` for this, nothing more.
+  failure takes it in and disposes it too. A run that is red only because of this check is itself a failed
+  run on master and needs its own entry, so take every failure in before pushing the fix; a run that fails after
+  a later run's check passed is caught on the next push. The workflow has `actions: read` for this, nothing more.
 - `upload --repo OWNER/NAME`, on the owner's word only, sends a durable copy of every log (each kind) to a
   dataset repository. It refuses, sending nothing, unless the Hub reports the repository as existing and private.
   That check is the real safety boundary: redaction is best effort (owner's choice, 2026-11-11), and promises only

@@ -36,10 +36,10 @@ Failed CI runs land in `ci-inbox/`, one draft per failed attempt of a run trigge
 failed attempt has no entry, an entry has no disposition, or an inbox file cannot be read. `ci-dispose
 CI-<id>-<attempt>` with `--upstream UP-NNNN` or `--reason` deals with one, and `tests/runrecords/test_ci_inbox.py`
 fails CI on a committed entry without a disposition. CI also runs `ci-intake --check` on every push, so it stays
-red until each failure on master is dealt with. Entries hold metadata only (run id, commit, branch, failed job and
+red until each failure on master is dealt with; a run red only because of that check needs its own entry too. Entries hold metadata only (run id, commit, branch, failed job and
 step names), never log text.
 
-Routine checks (the hygiene scan, the index and upstream-log generators, the publication verifier,
+Routine checks (the hygiene scan, the index, source-view and upstream-log generators, the publication verifier,
 `opengrad-validate`) record like any entry point, but their logs stay local by policy and are not counted as
 missing.
 

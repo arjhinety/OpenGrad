@@ -371,9 +371,8 @@ HELD_OUT_SUBCOMMANDS: Mapping[str, frozenset[str]] = MappingProxyType({"src/open
 APPROVED_CONSOLE: Mapping[str, frozenset[str]] = MappingProxyType(
     {"opengrad.cli:main": frozenset({"train", "evaluate"})}
 )
-#: The run-record command: a run it wraps is recorded as its own run, so one that wraps another cannot be traced.
-#: Routine checks: the hygiene scan, the generated-index and upstream-log generators (run with ``--check`` in
-#: review), the publication verifier and the registry validator. They record like any entry point, but their logs
+#: Routine checks: the hygiene scan, the generated-index, source-view and upstream-log generators (run with
+#: ``--check`` in review), the publication verifier and the registry validator. They record like any entry point, but their logs
 #: are kept local by policy and listed as such, not counted as missing (owner's decision, 2026-11-14): what matters
 #: about them is their result in CI, not a backup of their output. An entry point that reads held-out data is
 #: ``never`` first, so none is listed here.
@@ -387,6 +386,7 @@ ROUTINE_CHECKS = frozenset(
         "src/opengrad/registry/validate.py",
     }
 )
+#: The run-record command: a run it wraps is recorded as its own run, so one that wraps another cannot be traced.
 RECORDER = frozenset({"src/opengrad/runrecords/__main__.py", "src/opengrad/runrecords/cli.py"})
 
 
