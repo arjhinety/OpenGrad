@@ -6,3 +6,4 @@ release/**/frozen_prompts_*
 results/**/frozen_prompts_*
 results/**/*confirmatory*
 reports/study-002/pconf-v1/*.jsonl
+reports/study-002/punans-*/**/*.jsonl
