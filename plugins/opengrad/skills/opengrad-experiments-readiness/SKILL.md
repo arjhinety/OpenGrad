@@ -213,10 +213,14 @@ it:
   `tests/runrecords/test_committed.py` fails CI on a committed run that did not pass and has no disposition, or a
   summary with a secret, an email address, a home path or an absolute path.
 - Failed CI runs land in a draft inbox that has to be dealt with (stage 4, `opengrad.runrecords.ci_intake`).
-  `python -m opengrad.runrecords ci-intake` asks GitHub, read-only through `gh`, for runs that failed since
-  2026-11-13 (`INTAKE_SINCE`; `--since` reaches further back) and drafts `run-records/ci-inbox/CI-<run id>.json`
-  for each new one. It exits 3 while any failed run has no entry or an entry has no disposition. Deal with each by
-  `ci-dispose <id> --upstream UP-NNNN` or `--reason`, then commit the entry; `tests/runrecords/test_ci_inbox.py`
+  `python -m opengrad.runrecords ci-intake` asks GitHub, read-only through `gh`, for push-triggered runs whose
+  latest attempt failed, timed out or could not start since 2026-11-13 (`INTAKE_SINCE`; `--since` takes an ISO
+  time with an offset, or a date, and refuses anything else) and drafts `run-records/ci-inbox/CI-<run id>-<attempt>.json`
+  for each new attempt, so a failed re-run gets its own draft. Reaching `--limit` is an error, not a silent cut.
+  It exits 3 while any failed attempt has no entry, an entry has no disposition, or an inbox file cannot be read.
+  Pull-request runs are left out: a fork's pull request runs its own workflow file, so its author would choose the
+  names an entry copies. An attempt re-run to success before the intake runs is not seen. Deal with each draft by
+  `ci-dispose <id> [--attempt N] --upstream UP-NNNN` or `--reason`, then commit the entry; `tests/runrecords/test_ci_inbox.py`
   fails CI on a committed entry with no valid disposition. An entry keeps metadata only (run id, attempt,
   workflow, event, branch, commit, start time, failed job and step names), never log text: a failing test's output
   can quote the data it compared. `ci-intake --check` writes nothing; CI does not run it, since it would keep CI

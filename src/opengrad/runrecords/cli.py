@@ -482,6 +482,7 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
     ci_p.add_argument("--check", action="store_true", help="write nothing, only report")
     cid_p = sub.add_parser("ci-dispose", help="record what a failed CI run was")
     cid_p.add_argument("ci_run", help="the workflow run id, or CI-<id>")
+    cid_p.add_argument("--attempt", type=int, default=1, help="which attempt of the run (default 1)")
     cid_p.add_argument("--upstream", help="the docs/upstream entry it is logged under, UP-NNNN")
     cid_p.add_argument("--reason", help="why it needs no entry")
     up_p = sub.add_parser(
@@ -515,7 +516,7 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
         from opengrad.runrecords import ci_intake
 
         if args.command == "ci-dispose":
-            return ci_intake.cmd_dispose(root, args.ci_run, args.upstream, args.reason)
+            return ci_intake.cmd_dispose(root, args.ci_run, args.attempt, args.upstream, args.reason)
         return ci_intake.cmd_intake(root, args.since or ci_intake.INTAKE_SINCE, args.limit, args.check)
     return cmd_upload(root, args.repo, tuple(args.kinds or UPLOAD_KINDS_DEFAULT))
 

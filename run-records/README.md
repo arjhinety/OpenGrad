@@ -31,8 +31,8 @@ A run that did not pass carries a disposition: the `docs/upstream/` entry it is 
 none. `tests/runrecords/test_committed.py` fails CI on a summary without one, or one that holds an absolute path or
 a secret.
 
-Failed CI runs land in `ci-inbox/`, one draft per run, from `python -m opengrad.runrecords ci-intake` (read-only
-`gh` queries; failures since 2026-11-13). It exits 3 while a failed run has no entry or an entry has no
+Failed CI runs land in `ci-inbox/`, one draft per failed attempt of a push-triggered run, from
+`python -m opengrad.runrecords ci-intake` (read-only `gh` queries; failures since 2026-11-13). It exits 3 while a failed run has no entry or an entry has no
 disposition; `ci-dispose <id> --upstream UP-NNNN` or `--reason` deals with one, and
 `tests/runrecords/test_ci_inbox.py` fails CI on a committed entry without a disposition. Entries hold metadata
 only (run id, commit, branch, failed job and step names), never log text.
