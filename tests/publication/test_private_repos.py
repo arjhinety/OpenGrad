@@ -123,3 +123,23 @@ def test_the_modal_container_copy_of_the_list_matches() -> None:
 def test_the_hub_write_pattern_covers_other_write_calls(line: str) -> None:
     assert HUB_WRITE.search(line), line
 
+
+def test_the_executorch_publisher_never_uploads_held_out_prompts() -> None:
+    import ast
+    from fnmatch import fnmatchcase as fnmatch  # huggingface_hub matches case-sensitively
+
+    module = _load("scripts/publish_executorch_artifact.py", "publish_executorch_held_out_test")
+    patterns = module.HELD_OUT_PATTERNS
+    held_out = ["frozen_prompts_confirmatory_v1.jsonl", "frozen_prompts_dev_v1.jsonl", "sub/frozen_prompts_x.jsonl"]
+    shipped = ["manifest.json", "qwen3_5_2b_8da4w.pte", "score_generations.py", "opengrad_min/parser.py", "README.md"]
+    assert all(any(fnmatch(name, p) for p in patterns) for name in held_out)
+    assert not any(fnmatch(name, p) for name in shipped for p in patterns)
+    # The one upload_folder call passes them.
+    tree = ast.parse((ROOT / "scripts/publish_executorch_artifact.py").read_text(encoding="utf-8"))
+    calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and getattr(n.func, "attr", "") == "upload_folder"]
+    assert len(calls) == 1
+    passed = {k.arg: k.value for k in calls[0].keywords}
+    assert "ignore_patterns" in passed
+    # It must pass HELD_OUT_PATTERNS itself, not an empty or other list.
+    assert "HELD_OUT_PATTERNS" in ast.unparse(passed["ignore_patterns"])
+    assert patterns, "HELD_OUT_PATTERNS is empty"

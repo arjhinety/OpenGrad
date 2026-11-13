@@ -449,11 +449,12 @@ config nevertheless declares `get_bos_id: {BOS_TOKEN_ID}` in its metadata, and {
 `<|im_start|>` — the token every rendered prompt *already starts with*. A runner that honours that
 metadata emits `<|im_start|><|im_start|>system…` and measures a different model.
 
-`frozen_prompts_{{partition}}_v1.jsonl` ships `token_ids` for exactly this reason. Feeding ids
+`frozen_prompts_{{partition}}_v1.jsonl` carries `token_ids` for exactly this reason. It is held out and
+not uploaded with the package; it is shared on request. Feeding ids
 directly is the safest path; if you feed text, disable BOS insertion and verify the first token id
 is {BOS_TOKEN_ID} exactly once.
 
-## 2. Use the shipped prompt bytes verbatim
+## 2. Use the prompt bytes verbatim
 
 Do not re-apply a chat template. The prompts were rendered once with the pinned renderer
 (`qwen3_5_2b_v1`, template hash `{PINNED_TEMPLATE_HASH}`). `prompt_sha256` is in the file; check a

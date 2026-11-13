@@ -8,9 +8,11 @@ of preserved behaviour. The card carries the frozen thresholds so whoever runs i
 compares against the same numbers rather than inventing their own.
 
 The upload is the handoff package built by `scripts/build_executorch_handoff.py`: the `.pte`, the
-tokenizer, the pre-tokenized frozen prompts, the vendored scorer, and the parity notes. Shipping
-the prompts pre-tokenized is what removes the BOS ambiguity — the stock ExecuTorch metadata
-declares `get_bos_id: 248045`, which is the `<|im_start|>` every prompt already begins with.
+vendored scorer, and the parity notes. The pre-tokenized frozen prompts are held-out
+evaluation items and are **not** uploaded (``HELD_OUT_PATTERNS``, UP-0037); the manifest keeps their
+sha256. Shipping them pre-tokenized is what removes the BOS ambiguity for whoever is given them —
+the stock ExecuTorch metadata declares `get_bos_id: 248045`, which is the `<|im_start|>` every prompt
+already begins with.
 
 Usage:
     python scripts/publish_executorch_artifact.py --target cpu \\
@@ -28,6 +30,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 COLLECTION_SLUG = "experimentalmachines/qwengrad-executorch-6aa5008c9414ee393594e3a8"
+#: Files in the handoff folder that hold held-out evaluation items and are never uploaded: the frozen prompts
+#: (example ids, gold decisions, rendered prompts, token ids). The 2026-09-12 upload published them (UP-0037).
+HELD_OUT_PATTERNS = ("*frozen_prompts_*", "*confirmatory*")
 PARENT_MODEL = "arrochi112/OpenGrad-Qwen3.5-2B-M1-DPO-CanonicalV2-Final-v2"
 PARENT_REVISION = "f33d20308982f37deb459076f489e794d5521ee3"
 
@@ -125,8 +130,9 @@ nevertheless declares `get_bos_id: {contract['bos_token_id_declared_by_pte_metad
 `<|im_start|>`, the token every rendered prompt **already starts with**. A runner that honours that
 metadata emits `<|im_start|><|im_start|>system…` and silently measures a different model.
 
-`{manifest['files']['prompts']}` therefore ships `token_ids` alongside the text. Feeding ids is the
-safe path. Read `PARITY_NOTES.md` before running anything.
+`{manifest['files']['prompts']}` therefore carries `token_ids` alongside the text. It is held out and
+not part of this package (see "How to score a run"). Feeding ids is the safe path. Read
+`PARITY_NOTES.md` before running anything.
 
 ## The gate this must pass
 
@@ -149,11 +155,15 @@ into an apparent collapse.
 ## How to score a run
 
 ```bash
-python score_generations.py --generations my_run.jsonl --artifact {target}
+python score_generations.py --generations my_run.jsonl --artifact {target} \\
+    --prompts /path/to/{manifest['files']['prompts']}
 ```
 
 `my_run.jsonl` is one object per example: `{{"example_id": "...", "raw": "...", "truncated": false}}`.
-The scorer **refuses** a run whose generations do not reconcile exactly with the submitted prompts —
+The frozen prompts it scores against are held-out evaluation items. They are not part of this package:
+they are shared on request, and the manifest records their sha256 so a copy can be checked. Pass the
+path with `--prompts`. The scorer **refuses** a run whose generations do not reconcile exactly with
+the submitted prompts —
 missing, duplicate, unknown, or errored rows are errors, not omissions. A shrinking denominator
 would report a better score for having answered less.
 
@@ -219,12 +229,15 @@ def main() -> int:
         repo_id=args.repo,
         folder_path=str(package),
         repo_type="model",
+        ignore_patterns=list(HELD_OUT_PATTERNS),
         commit_message=(
             f"ExecuTorch {TARGET_LABELS[args.target]} export of "
             f"{manifest['parent_checkpoint']} ({manifest['status']})"
         ),
     )
     print(f"uploaded -> https://huggingface.co/{args.repo}")
+    # upload_folder never deletes files already in the repo: a copy of the held-out prompts uploaded before
+    # HELD_OUT_PATTERNS existed stays there (UP-0037).
 
     try:
         api.add_collection_item(

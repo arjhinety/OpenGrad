@@ -74,6 +74,10 @@ Never commit or print tokens. If push protection flags a secret, verify it and l
 - **Export:** `scripts/modal/executorch_export.py`, `scripts/build_executorch_handoff.py` and
   `scripts/publish_executorch_artifact.py`. Released bundles live in `release/executorch/`, and
   `integrations/executorch/` holds the integration.
+- **Held-out files never ship:** the handoff folder also holds the frozen prompts, which are held-out evaluation
+  items. The publisher excludes them with `HELD_OUT_PATTERNS` (UP-0037: the 2026-09-12 upload published
+  `frozen_prompts_confirmatory_v1.jsonl`). Any new folder upload needs the same exclusion and a test. Don't open
+  those files or search `release/` or `results/` broadly; the root `.ignore` keeps ripgrep out of them.
 - **On-device testing and parity grading:** `docs/evaluation/OPENWEIGHTS_ON_DEVICE_TESTING.md`,
   `scripts/grade_openweights_parity.py` and the benchmark config `configs/benchmarks/openweights.yaml`.
   OpenWeights is an independent downstream environment, not a dependency (`docs/openweights/README.md`).

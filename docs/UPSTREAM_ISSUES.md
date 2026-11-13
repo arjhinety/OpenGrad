@@ -93,6 +93,7 @@ when the table sat above the sections; it is kept as written.
 | UP-0034 | 2026-11-11 | `tests/evaluation/test_capability_benchmarks.py`, `scripts/prepare_capability_benchmarks.py` | `OURS` | not-applicable | A determinism test reruns the dataset preparation in the repository and rewrites the tracked `*_v1.meta.json` files, with CRLF line endings on Windows | Open; files restored by hand each time |
 | UP-0035 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` | `OURS` | not-applicable | The text-file `private_path` pattern misses a Windows home path written with single backslashes, such as `C:\Users\<name>\...` | Open; the fix changes allowlist counts across the repository, so it is a change of its own |
 | UP-0036 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` (`HOME_PATH`), copied in `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | `HOME_PATH` took exponential time on a drive letter followed by a run of backslashes | Fixed (`(?:\\\\\|\\\|/)+` replaced by `[\\/]+` in both copies) |
+| UP-0037 | 2026-11-13 | `scripts/publish_executorch_artifact.py`, Hub repo `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` | `OURS` | not-applicable | Held-out confirmatory data went public, through an ExecuTorch Hub upload with no publication record and through the public GitHub repository | Hub upload path fixed (held-out files excluded); Hub and GitHub copies left in place (owner); tracking decided after the overfit-clinic interview |
 
 ---
 
@@ -588,5 +589,49 @@ the test fails rather than hangs), and on 5,000 slashes.
 
 Lesson: in a repeated group, no two alternatives may match the same text. Write a separator run as a character
 class, never as an alternation of its lengths.
+
+## UP-0037 — held-out confirmatory data went public, on the Hub and on GitHub (`OURS`)
+
+Found on 2026-11-13 from Hub file names only, without opening the file or downloading it. The public repository
+`experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` has held `frozen_prompts_confirmatory_v1.jsonl` since
+2026-09-12T08:18:08Z (commit `02f7e48efa`). `publish_executorch_artifact.py` called `upload_folder` on the whole
+`release/executorch/<target>/` folder with no ignore patterns, and `build_executorch_handoff.py` writes the prompts
+file into that folder. Per the earliest committed writer, `078c6fe`, each row holds an item's `example_id`, gold
+`expected_decision`, rendered prompt and token ids. That writer was committed about 7.5 hours after the upload, so the
+version that ran is not in git.
+
+The GitHub repository `arjhinety/OpenGrad` is public, and it tracks the same held-out data. It reached GitHub `master`
+as follows (times from GitHub's repository activity log, push and force-push entries):
+- `reports/evaluation/behavioral-heldout-v2-partition.json`, the confirmatory id list, at 2026-09-11T09:00:12Z.
+  When2Call's public test split carries every item's gold label, so the confirmatory side with its gold decisions
+  could be rebuilt from then on.
+- Both `frozen_prompts_confirmatory_v1.jsonl` files (ExecuTorch and GGUF handoffs) and
+  `results/quantization/frozen_prompts_v1.json`, at 2026-09-13T03:43:02Z.
+- `reports/study-002/pconf-v1/pconf-v1.answer-records.jsonl`, `P-CONF`'s ANSWER part with gold records, at
+  2026-09-25T07:42:36Z.
+
+The repository being public by 2026-09-11 is strongly suggested, not proven. It had stars on 2026-09-10 and
+2026-09-11, and no log seen records a visibility change. The activity log reaches back to the repository's creation
+on 2026-09-02 but does not record visibility; the events log starts on 2026-10-13. Found by an audit on 2026-11-13.
+
+Three gaps:
+- **No publication record.** No record under `reports/releases/` names this upload. The publishing steps of the release
+  skill (record the Hub revision, run the gate) were not followed for it. No retroactive record is written without the
+  owner's word.
+- **Held-out data in a published folder.** Nothing kept evaluation items out of an upload.
+- **Held-out data in a public repository.** A push to a public git repository is also a publication, and nothing
+  keeps held-out files out of the tracked tree.
+
+Fix: the publisher passes `ignore_patterns` (`HELD_OUT_PATTERNS`: `*frozen_prompts_*`, `*confirmatory*`), and the card
+says the frozen prompts are held out and shared on request, to be passed with `--prompts`; the manifest keeps
+their sha256. `upload_folder` never deletes a file already in the repository, so the 2026-09-12 copy stays.
+The GitHub copies stay too: removing them from the tree would not remove them from history or from clones, and
+whether to stop tracking them is decided after the overfit-clinic interview (owner, 2026-11-13).
+`tests/publication/test_private_repos.py` checks the patterns and that the one `upload_folder` call passes them. The
+consequences for Study 002 are in `reports/ERRATA.md` §45
+(`study_002_prereg_v17`).
+
+Lesson: a folder upload, and a push to a public repository, ships whatever it holds. Held-out data kept next to
+released files needs an explicit exclusion and a test, not care at publish time.
 
 <!-- END GENERATED -->
