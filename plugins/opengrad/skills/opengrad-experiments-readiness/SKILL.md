@@ -121,7 +121,9 @@ it:
 - `upload --repo OWNER/NAME`, on the owner's word only, sends a durable copy of every log (each kind) to a
   dataset repository. It refuses, sending nothing, unless the Hub reports the repository as existing and private.
   That check is the real safety boundary: redaction is best effort (owner's choice, 2026-11-11), and promises only
-  the forms its tests cover.
+  the forms its tests cover. The repository is `arjhinety/opengrad-run-logs`, created private on 2026-11-13. The
+  check runs only at upload time, so never make that repository public and never include it in a release, card
+  publication or other publish step: whatever redaction missed in the logs already there would be published.
 - Detection ignores terminal colour and cursor codes (CSI sequences, character-set selections, two-character
   cursor codes); escape strings that carry text (titles, hyperlinks) are checked as text. It covers, and a
   redacted copy removes:
