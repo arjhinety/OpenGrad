@@ -10,7 +10,7 @@ and is not persisted as a named Modal secret. Small handoff files (prompts, scor
 uploaded from the host instead, so the only thing this function needs the credential for is the
 single large blob.
 
-Usage:
+Usage (from the repository root, with ``PYTHONPATH=src`` so the private-repository check can import opengrad):
     modal run scripts/modal/upload_artifact.py \\
         --repo experimentalmachines/QwenGrad-... --volume-path /vol/executorch/qwen3_5_2b_8da4w.pte
 """
@@ -38,6 +38,9 @@ def _repo_root() -> Path:
 
 
 ROOT = _repo_root()
+#: A copy of ``opengrad.publication.private_repos.PRIVATE_ONLY_REPOS`` for the container, which has no opengrad
+#: package. ``tests/publication/test_private_repos.py`` keeps the two equal.
+PRIVATE_ONLY_REPOS = frozenset({"arjhinety/opengrad-run-logs", "arrochi112/opengrad-run-logs"})
 
 
 @app.function(
@@ -51,6 +54,9 @@ def upload(repo_id: str, volume_path: str, path_in_repo: str | None = None) -> d
     """Push one file, verifying its hash on the way out so provenance survives the transfer."""
     from huggingface_hub import HfApi
 
+    # Checked here too: `modal run upload_artifact.py::upload` calls this function without the entry point.
+    if repo_id.strip().strip("/").lower() in PRIVATE_ONLY_REPOS:
+        raise RuntimeError(f"{repo_id!r} holds private run logs and must never be a publish target")
     if not os.environ.get("HF_TOKEN"):
         raise RuntimeError("no HF_TOKEN reached the container; set OPENGRAD_HF_TOKEN locally")
     source = Path(volume_path)
@@ -85,6 +91,16 @@ def upload(repo_id: str, volume_path: str, path_in_repo: str | None = None) -> d
 
 @app.local_entrypoint()
 def main(repo: str, volume_path: str, path_in_repo: str = ""):
+    # Runs on the host, before the remote job: a private-only repository is never a target. The container image
+    # has no opengrad package, so the check lives here, and a host without it refuses rather than skips.
+    try:
+        from opengrad.publication.private_repos import refuse_private_only
+    except ImportError as exc:
+        raise SystemExit(
+            "opengrad is not importable here, so the private-repository check cannot run; "
+            "run from the repository root with PYTHONPATH=src"
+        ) from exc
+    refuse_private_only(repo)
     result = upload.remote(repo, volume_path, path_in_repo or None)
     print(f"uploaded {result['file']}  {result['bytes']:,} bytes")
     print(f"  sha256 {result['sha256']}")

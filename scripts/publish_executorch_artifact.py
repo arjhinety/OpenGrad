@@ -182,6 +182,9 @@ def main() -> int:
     parser.add_argument("--private", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
+    from opengrad.publication.private_repos import refuse_private_only
+
+    refuse_private_only(args.repo)
 
     package = ROOT / "release/executorch" / args.target
     manifest_path = package / "manifest.json"

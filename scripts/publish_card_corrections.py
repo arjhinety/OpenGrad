@@ -44,6 +44,7 @@ from pathlib import Path
 from typing import Any
 
 from opengrad.hashing import sha256_bytes
+from opengrad.publication.private_repos import is_private_only
 from opengrad.registry.provenance import read_evidence_bytes
 from opengrad.registry.validators import _canonical_repository, _walk_dicts
 
@@ -277,6 +278,10 @@ def upload(
     commit_message: str = COMMIT_MESSAGE,
 ) -> tuple[int, list[dict[str, Any]]]:
     """Publish each changed card, re-fetch it, and return the record entries."""
+    blocked = [item["repository"] for item in items if is_private_only(str(item["repository"]))]
+    if blocked:
+        print(f"BLOCKED: {blocked} must never be a publish target (opengrad.publication.private_repos)")
+        return BLOCKED, []
     today = _today()
     commit = github_commit(root)
     entries: list[dict[str, Any]] = []

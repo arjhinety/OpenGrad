@@ -124,6 +124,8 @@ it:
   the forms its tests cover. The repository is `arjhinety/opengrad-run-logs`, created private on 2026-11-13. The
   check runs only at upload time, so never make that repository public and never include it in a release, card
   publication or other publish step: whatever redaction missed in the logs already there would be published.
+  The publish scripts refuse it (`src/opengrad/publication/private_repos.py`), but changing its visibility on the
+  Hub website is not guarded.
 - Detection ignores terminal colour and cursor codes (CSI sequences, character-set selections, two-character
   cursor codes); escape strings that carry text (titles, hyperlinks) are checked as text. It covers, and a
   redacted copy removes:

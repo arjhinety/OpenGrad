@@ -17,6 +17,12 @@ record is committed and the publication gate passes.
    the policy version that promoted the checkpoint, caveats (G12), and whether the checkpoint is text-only
    (every pre-`full-model-components-v1` checkpoint is).
 3. **Upload only on the user's explicit instruction.** Remote jobs use `scripts/modal/upload_artifact.py`.
+   Every script that writes to the Hub first calls `refuse_private_only` or `is_private_only`
+   (`src/opengrad/publication/private_repos.py`), which refuses the private run-log dataset
+   `arjhinety/opengrad-run-logs`; only `python -m opengrad.runrecords upload` writes there.
+   `tests/publication/test_private_repos.py` fails CI when a tracked file makes one of the Hub-write calls it
+   lists without naming the check; it cannot see aliased or indirect calls. Changing the dataset's visibility
+   on the Hub website is not guarded.
 4. **Record** the Hub revision in a publication record under `reports/releases/`, and update the release table in
    `docs/publishing/huggingface-datasets.md` in the same commit (G16/G17).
 5. **Run the gate:** `python scripts/verify_publication.py` (use `--offline` when the network is unavailable; it
