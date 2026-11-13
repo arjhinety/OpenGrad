@@ -91,7 +91,7 @@ when the table sat above the sections; it is kept as written.
 | UP-0032 | 2026-11-11 | OpenGrad process, `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | The run-records commit was pushed after its targeted tests, which left out the pipe-invariant check in `tests/evaluation/`; master went red | Fixed (reviewed allowlist entry for the continuously drained pipe) |
 | UP-0033 | 2026-11-11 | `tests/verification/test_external_tool_scan.py`, Windows CI | `UNCLEAR` | not-filed | `test_a_search_the_gate_denied_is_not_counted_and_a_bypass_is` failed once on Windows CI with `KeyError: 'any'`; it passes locally | Open; cause not established |
 | UP-0034 | 2026-11-11 | `tests/evaluation/test_capability_benchmarks.py`, `scripts/prepare_capability_benchmarks.py` | `OURS` | not-applicable | A determinism test reruns the dataset preparation in the repository and rewrites the tracked `*_v1.meta.json` files, with CRLF line endings on Windows | Fixed (meta files written with LF; the test checks them byte for byte) |
-| UP-0035 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` | `OURS` | not-applicable | The text-file `private_path` pattern misses a Windows home path written with single backslashes, such as `C:\Users\<name>\...` | Open; the fix changes allowlist counts across the repository, so it is a change of its own |
+| UP-0035 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` | `OURS` | not-applicable | The text-file `private_path` pattern misses a Windows home path written with single backslashes, and any drive other than C | Fixed (any drive, single or doubled backslashes or a slash) |
 | UP-0036 | 2026-11-11 | `scripts/repo/check_publication_hygiene.py` (`HOME_PATH`), copied in `src/opengrad/runrecords/record.py` | `OURS` | not-applicable | `HOME_PATH` took exponential time on a drive letter followed by a run of backslashes | Fixed (`(?:\\\\\|\\\|/)+` replaced by `[\\/]+` in both copies) |
 | UP-0037 | 2026-11-13 | `scripts/publish_executorch_artifact.py`, Hub repo `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` | `OURS` | not-applicable | Held-out confirmatory data went public, through an ExecuTorch Hub upload with no publication record and through the public GitHub repository | Hub upload path fixed (held-out files excluded); Hub and GitHub copies left in place (owner); tracking decided after the overfit-clinic interview |
 
@@ -575,6 +575,18 @@ that found it redacted the path from its own draft before any commit.
 
 Fix to make: give `PATTERNS["private_path"]` the single-backslash form, or use `HOME_PATH` for text files too. Then
 rerun the scan and re-count every `private_path` allowlist entry it changes.
+
+Later line for UP-0035, 2026-11-13: fixed. The text-file `private_path` pattern now matches any drive letter followed by
+one or more backslashes or slashes and `Users`, with one character class per separator run, so matching stays linear.
+The wider pattern found five more matches, each checked by file and line before any change:
+- three made-up paths in tests: allowlist counts for `tests/registry/test_provenance_portable_path.py` go from 2 to 3,
+  and for `tests/runrecords/test_record_hardening.py` from 4 to 5;
+- this entry's own example path, now described in words;
+- **one real leak:** `docs/research/study-002/LOG-2026-10-22-gsm8k-refusal-recount.md` named the owner's home folder on
+  two lines. Both lines are rewritten in place, so cited line numbers hold. The file has been in the public repository
+  since 2026-10-22 (`ac5b93e`), and editing it does not remove the path from git history.
+
+The dry run tallied findings by file only, so no matching line from a held-out file was displayed.
 
 ## UP-0036 — the scanner's home-path pattern backtracked exponentially (`OURS`)
 

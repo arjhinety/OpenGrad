@@ -121,7 +121,7 @@
   reason: Synthetic roots ("/workspace/opengrad", "/tmp/other") that the path-confinement tests use.
 - path: tests/registry/test_provenance_portable_path.py
   category: private_path
-  count: 2
+  count: 3
   reason: Made-up absolute paths ("someone") that portable_path is tested on.
 - path: tests/evaluation/test_subprocess_pipe_invariants.py
   category: private_path
@@ -156,7 +156,7 @@
     replaced or refused.
 - path: tests/runrecords/test_record_hardening.py
   category: private_path
-  count: 4
+  count: 5
   reason: >-
     Made-up paths under /home/someone/ and C:\Users\someone\ that the tests feed to the redactor, to show they
     never reach a record.

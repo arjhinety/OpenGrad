@@ -91,7 +91,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/Scripts/python.exe -I scripts/sco
 git status --short -- results scripts src docs reports      # empty: no tracked or repo file changed by the scorer runs
 ```
 
-Scratch files are in `C:\Users\arro\AppData\Local\Temp\claude\C--Users-arro-Downloads\c50bc2d7-32e8-4105-9629-f8425da6478d\scratchpad\`.
+Scratch files are in that session's scratchpad folder (path withheld: it named a home folder; UP-0035).
 
 Scorer note: `scripts/score_gsm8k.py` writes its output only to the path given with `--out`, and the git status above shows no repo change.
 
@@ -111,7 +111,7 @@ Method, all read-only, no training or GPU:
 - Study 001 eval wiring: `reports/data/m0-final-freeze.json` and `configs/experiments/m0_sft_canonical_v2_final.yaml` point at this partition (`scripts/evaluate_sft_checkpoints.py ... --partition reports/evaluation/behavioral-heldout-v2-partition.json --partition-side confirmatory|dev`). The M0 freeze file has 0 mentions of `when2call`, so the When2Call linkage runs through the partition, not through a named split in the freeze.
 - Label-to-split join: each `DIRECT` label id was looked up in the normalized When2Call shards `data/processed/normalization-v1/when2call-sft/shard-*.parquet` (columns `id`, `canonical_hash`, `metadata`). `metadata.source.original_split` gives the split of origin.
 
-Commands (run from `C:\Users\arro\Downloads\OpenGrad`, `PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -I`):
+Commands (run from the repository root, `PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -I`):
 ```
 # 1. partition vs When2Call test uuids
 ids = partition.example_ids.confirmatory U partition.example_ids.dev   -> 3650

@@ -64,7 +64,7 @@ PATTERNS: dict[str, re.Pattern[str]] = {
         re.IGNORECASE,
     ),
     "private_path": re.compile(
-        r"(?:/home/|/Users/|C:\\\\Users\\\\|C:/Users/|/mnt/data/|/workspace/|/tmp/)", re.IGNORECASE
+        r"(?:/home/|/Users/|[A-Z]:[\\/]+Users[\\/]|/mnt/data/|/workspace/|/tmp/)", re.IGNORECASE
     ),
     "tracking_url": re.compile(r"[?&]utm_[^\s)]+", re.IGNORECASE),
     "api_secret": SECRET,
