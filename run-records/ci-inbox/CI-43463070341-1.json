@@ -1,0 +1,27 @@
+{
+  "schema": "opengrad.ci-inbox/1",
+  "ci_run": 43463070341,
+  "attempt": 1,
+  "workflow": "quality",
+  "event": "push",
+  "branch": "master",
+  "sha": "539473c2772dadcefd93f1d3aadb4d61ede0a05c",
+  "created_at": "2026-11-13T16:28:34Z",
+  "failed_jobs": [
+    {
+      "name": "test-windows",
+      "failed_steps": [
+        "Run uv run pytest"
+      ]
+    },
+    {
+      "name": "test",
+      "failed_steps": [
+        "Run uv run pytest"
+      ]
+    }
+  ],
+  "disposition": {
+    "reason": "The publication hygiene scan (tests/publication/test_publication_hygiene.py) flagged made-up example paths added in the run-record tests and one source comment. Fixed in the commit that adds this entry: the comment is reworded and the test fixtures are allowlisted with exact counts."
+  }
+}

@@ -165,6 +165,19 @@
   count: 1
   reason: >-
     A made-up path under /home/someone/ in a sample log, to show that a redacted upload copy holds no home path.
+- path: tests/runrecords/test_ci_inbox.py
+  category: private_path
+  count: 3
+  reason: >-
+    A made-up workflow step naming a scratch folder under /tmp/ (twice: as GitHub reports it and as the entry keeps
+    it), to show such a step name does not block a disposition; and a made-up job name under C:\Users\someone\, to
+    show an entry holding a home folder is refused.
+- path: tests/runrecords/test_scripts_policy.py
+  category: private_path
+  count: 1
+  reason: >-
+    A made-up modal CLI path under /home/u/, to show a launch from outside the checkout is recorded by the name
+    "modal".
 - path: tests/runrecords/test_upload_hardening.py
   category: private_path
   count: 11

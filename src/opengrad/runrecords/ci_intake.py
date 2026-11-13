@@ -195,7 +195,8 @@ def validate_entry(name: str, entry: object, root: Path) -> list[str]:
     errors += disposition_errors(entry.get("disposition"), root)
     text = json.dumps(entry, ensure_ascii=False)
     errors += [f"the entry contains {finding}" for finding in private_findings(text)]
-    # Step names are commands from the public workflow file ("Run rm -rf /tmp/x"): only the rest must hold no path.
+    # Step names are commands from the public workflow file, which may name a scratch path: only the rest must hold
+    # no path.
     if ABSOLUTE.search(json.dumps({k: v for k, v in entry.items() if k != "failed_jobs"}, ensure_ascii=False)):
         errors.append("the entry contains an absolute path")
     return errors
