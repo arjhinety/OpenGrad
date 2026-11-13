@@ -474,6 +474,16 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
     dis_p.add_argument("--upstream", help="the docs/upstream entry it is logged under, UP-NNNN")
     dis_p.add_argument("--reason", help="why it needs no entry")
     sub.add_parser("export", help="copy finished, valid summaries into run-records/ for committing")
+    ci_p = sub.add_parser(
+        "ci-intake", help="draft an inbox entry for each failed CI run (exit 3 while any is not dealt with)"
+    )
+    ci_p.add_argument("--since", default=None, help="ISO time; default: the inbox's start")
+    ci_p.add_argument("--limit", type=int, default=100, help="how many failed runs to ask GitHub for")
+    ci_p.add_argument("--check", action="store_true", help="write nothing, only report")
+    cid_p = sub.add_parser("ci-dispose", help="record what a failed CI run was")
+    cid_p.add_argument("ci_run", help="the workflow run id, or CI-<id>")
+    cid_p.add_argument("--upstream", help="the docs/upstream entry it is logged under, UP-NNNN")
+    cid_p.add_argument("--reason", help="why it needs no entry")
     up_p = sub.add_parser(
         "upload", help="owner's word only: durable copy of each log to a private dataset repo"
     )
@@ -501,6 +511,12 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
         return cmd_dispose(root, args.run_id, args.upstream, args.reason)
     if args.command == "export":
         return cmd_export(root)
+    if args.command in ("ci-intake", "ci-dispose"):
+        from opengrad.runrecords import ci_intake
+
+        if args.command == "ci-dispose":
+            return ci_intake.cmd_dispose(root, args.ci_run, args.upstream, args.reason)
+        return ci_intake.cmd_intake(root, args.since or ci_intake.INTAKE_SINCE, args.limit, args.check)
     return cmd_upload(root, args.repo, tuple(args.kinds or UPLOAD_KINDS_DEFAULT))
 
 

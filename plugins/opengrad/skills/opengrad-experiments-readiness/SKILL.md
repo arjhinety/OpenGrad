@@ -212,6 +212,15 @@ it:
   with `--reason`. `export` then copies valid summaries into `run-records/` for committing.
   `tests/runrecords/test_committed.py` fails CI on a committed run that did not pass and has no disposition, or a
   summary with a secret, an email address, a home path or an absolute path.
+- Failed CI runs land in a draft inbox that has to be dealt with (stage 4, `opengrad.runrecords.ci_intake`).
+  `python -m opengrad.runrecords ci-intake` asks GitHub, read-only through `gh`, for runs that failed since
+  2026-11-13 (`INTAKE_SINCE`; `--since` reaches further back) and drafts `run-records/ci-inbox/CI-<run id>.json`
+  for each new one. It exits 3 while any failed run has no entry or an entry has no disposition. Deal with each by
+  `ci-dispose <id> --upstream UP-NNNN` or `--reason`, then commit the entry; `tests/runrecords/test_ci_inbox.py`
+  fails CI on a committed entry with no valid disposition. An entry keeps metadata only (run id, attempt,
+  workflow, event, branch, commit, start time, failed job and step names), never log text: a failing test's output
+  can quote the data it compared. `ci-intake --check` writes nothing; CI does not run it, since it would keep CI
+  red until every earlier failure is dealt with (the owner's decision).
 - `upload --repo OWNER/NAME`, on the owner's word only, sends a durable copy of every log (each kind) to a
   dataset repository. It refuses, sending nothing, unless the Hub reports the repository as existing and private.
   That check is the real safety boundary: redaction is best effort (owner's choice, 2026-11-11), and promises only

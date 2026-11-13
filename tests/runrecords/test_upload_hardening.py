@@ -481,8 +481,10 @@ def test_a_labelling_run_launched_as_a_script_uploads_as_a_redacted_annotation_c
     # Traced against the real checkout (the runner's path), recorded in a temporary folder; the runner is not run.
     root = Path(__file__).resolve().parents[2]
     monkeypatch.setenv(rr.LOCAL_DIR_ENV, str(tmp_path / "records"))
-    # As from a clean checkout of a pushed commit (CI); this test is about kind.
-    monkeypatch.setattr(ri, "_modified", lambda root: set())
+    # As from a clean checkout of a pushed commit (CI); this test is about kind. The real scan still runs, but its
+    # list of modified files is dropped: a file not committed yet in this working tree must not decide the test.
+    scan = rr.entry_scan
+    monkeypatch.setattr(rr, "entry_scan", lambda command, root: (scan(command, root)[0], []))
     monkeypatch.setattr(rs, "on_reviewed_branch", lambda sha, root: True)
     argv = ["python", "scripts/run_external_annotation.py", "--session", "punans-v2-trial"]
     assert rr.recorded_call("script", argv, root, lambda: print("batch 01 (5 items) attempt 1: exit 0") or 0) == 0
