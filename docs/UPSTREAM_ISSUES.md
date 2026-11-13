@@ -672,6 +672,11 @@ while the expected-exit-code table is empty and only the annotation entry points
    and a converted script under a parent runs unrecorded, so declared codes do not apply there at all. Before the
    table gets an entry: apply declared codes only to a code `main()` returns, never to `SystemExit`, and decide
    how a child reports that to its parent.
+   **Done in part, 2026-11-13.** `recorded_call` now records any non-zero `SystemExit` as `FAILED`, so a declared
+   code covers only a code `main()` returns. The owner was shown the candidates (generators run with `--check`
+   that report stale output, scans that report findings) and chose to leave the table empty for now: every
+   non-zero exit is `FAILED` and needs a disposition. How a child reports a declared code to its parent under
+   `run_child` stays open, for the slice that gives the table its first entry.
 2. An entry point at a path outside both tables records with the default policy. A non-editable install inside
    the checkout resolves to `.venv/.../site-packages/opengrad/...`, so a held-out module started with `python -m`
    would record as an uploadable `script`, and the annotation CLI would lose kind `annotation`. Upload re-decides
@@ -679,7 +684,8 @@ while the expected-exit-code table is empty and only the annotation entry points
    `pyproject.toml`, so a copy installed in another project records into that project.
 3. A `recorded_main` in a module with no `__main__` block, named as a console command target, is not checked to
    call `run_script`.
-4. Small: `_code` turns a string returned by `main()` into exit 1 and loses the message; an invalid `upload=` value
+4. Small: `_code` turned a string returned by `main()` into exit 1 and lost the message (fixed in stage 3: it
+   prints the value to standard error, as `SystemExit` does); an invalid `upload=` value
    raises before `recorded_call`'s `try`, so it blocks the run (a programming error only); the backslash test of
    the path normalisation only runs its Windows form on Windows.
 
