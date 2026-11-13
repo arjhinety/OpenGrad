@@ -577,3 +577,11 @@ Appended here rather than under "Amendments" so that line numbers other document
   and whether to delete or quarantine the transcript and the downloaded files.
 - **Candidates already scored:** none. **Arms launched under an earlier version:** none.
 - **ERRATA entry:** `reports/ERRATA.md` §44.
+
+Later line for `study_002_prereg_v16`, 2026-11-13: the two printed items were identified by uuid only (line 1 of each
+local test file, nothing else displayed). The `mcq` item `5ce19067-938e-41f5-acd5-0e8e66683f62` is in `P-DEV`. The
+`llm_judge` item `276e4475-e087-4660-9a3a-1fe295fa452c` is in `P-CONF` (every `llm_judge` row is a byte-identical copy of
+an `mcq` row). That read was itself a new look at the test split. Setting the `P-CONF` item aside, and any further
+identification work, is deferred until the `tool-decision-rl` overfit-clinic interview finishes, and then needs
+the owner's word. Until then, no item, partition, threshold or rule changes. The agent's transcript and the downloaded
+files are sealed outside the repository. Full record: `reports/ERRATA.md` §44, later line of 2026-11-13.

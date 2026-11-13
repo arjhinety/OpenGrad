@@ -2043,3 +2043,23 @@ saying why the promotion was withdrawn. The paragraph links the parent card and 
   The main session saw the label counts only via the 2026-10-22 log. Deletion or quarantine is the owner's decision.
 - **What changed:** nothing in Study 002. No score exists, and no decision used the access.
 - **Record:** `tool-decision-rl/provenance/TEST_SPLIT_ACCESS.md`; Study 002 entry `study_002_prereg_v16`.
+
+Later line for §44, 2026-11-13 (owner decisions, the same day):
+- **The two printed items, identified by uuid.** The owner chose to identify them and set aside any in `P-CONF`. Acting
+  on that, the OpenGrad session hashed both local copies in `data/raw/when2call/test/` (each sha256 equals the agent's
+  download), parsed line 1 of each file and displayed only its `uuid`, then checked it against
+  `reports/evaluation/behavioral-heldout-v2-partition.json`. No other field was printed. The positions come from the
+  agent's report that it printed the first row of each file; its transcript was not opened to confirm.
+  - `when2call_test_mcq.jsonl` line 1, uuid `5ce19067-938e-41f5-acd5-0e8e66683f62`: the dev side, so no action.
+  - `when2call_test_llm_judge.jsonl` line 1, uuid `276e4475-e087-4660-9a3a-1fe295fa452c`: **in `P-CONF`.** An `llm_judge`
+    item can be in `P-CONF` because all 300 `llm_judge` rows are byte-identical copies of `mcq` rows
+    (`reports/evaluation/behavioral-heldout-v2.manifest.json`, `deduplication.note`).
+- **This was a new look.** It was made before the owner restated, for this task, the rule of no further looks at the
+  When2Call test split until the `tool-decision-rl` overfit-clinic interview finishes. It is recorded as a look.
+- **Deferred:** setting aside `276e4475…`, and any further identification work, waits until that interview finishes,
+  and then needs the owner's word. Nothing in
+  Study 002 changed: no partition, population, threshold or rule, and no score exists.
+- **Sealed:** the agent's transcript, its metadata file and the two downloaded test files were moved, unopened, to a
+  read-only folder outside the repository, with identical sha256 before and after. The two test files are byte-identical
+  to OpenGrad's `data/raw/when2call/test/` copies, so the seal mainly protects the transcript.
+- **Record:** `tool-decision-rl/provenance/TEST_SPLIT_ACCESS.md`; Study 002 later line on `study_002_prereg_v16`.
