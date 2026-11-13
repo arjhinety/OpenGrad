@@ -96,7 +96,7 @@ when the table sat above the sections; it is kept as written.
 | UP-0037 | 2026-11-13 | `scripts/publish_executorch_artifact.py`, Hub repo `experimentalmachines/QwenGrad-Qwen3.5-2B-M1-DPO-v2-ExecuTorch-CPU` | `OURS` | not-applicable | Held-out confirmatory data went public, through an ExecuTorch Hub upload with no publication record and through the public GitHub repository | Hub upload path fixed (held-out files excluded); Hub and GitHub copies left in place (owner); tracking decided after the overfit-clinic interview |
 | UP-0038 | 2026-11-13 | `src/opengrad/runrecords/scripts.py`, `src/opengrad/runrecords/record.py`, `src/opengrad/runrecords/inputs.py` | `OURS` | not-applicable | Run-record stage 3 gaps deferred to the slice that fills the expected-exit-code table | Open |
 | UP-0039 | 2026-11-13 | `scripts/agy_tool_gate.py`, `scripts/run_external_annotation.py` | `UPSTREAM` | not-filed | agy 1.5.8 reads files with `read_file` (`Path`), so the tool gate denied every read and gated runs read nothing | Fixed (the gate allows `read_file` of the input file through `Path`, as it allowed `view_file` through `AbsolutePath`) |
-| UP-0040 | 2026-11-13 | `src/opengrad/runrecords/scripts.py` (`_as_reviewed`), `src/opengrad/runrecords/inputs.py` (`entry_scan`) | `OURS` | not-applicable | An approved run made with a tweaked config never gets a log backup; planned: back it up once that exact config is pushed | Open (owner's decision 2026-11-13: strict rule now, this refinement in a later slice) |
+| UP-0040 | 2026-11-13 | `src/opengrad/runrecords/scripts.py` (`_as_reviewed`), `src/opengrad/runrecords/inputs.py` (`entry_scan`) | `OURS` | not-applicable | An approved run made with a tweaked config never got a log backup; now it is backed up once that exact config is pushed | Fixed in ours, 2026-11-13 (config_blobs; the strict rule shipped first, by the owner's decision). The open items below remain |
 
 ---
 
@@ -734,11 +734,23 @@ held-out data would pass a name check.
 Cost: ordinary work, tweaking a config just before a run, leaves that run's log with no backup. It stays on the
 machine, listed as not approved.
 
-Planned refinement: at run start, record a content hash of each config the run consumes (for `train` the named
-config; for `evaluate` the suite file and the benchmark configs it lists). At upload, allow the log when every hash
-matches the file at a commit on `origin/master`, and replace the "no `configs/` file modified" rule with that. A
-tweaked config then gets its backup once that exact config is pushed and audited, and an unrelated stray file
-under `configs/` stops blocking every approved upload.
+Refinement, done 2026-11-13:
+
+- At run start, `inputs.consumed_configs` lists the configs the run consumes: every `configs/` file its arguments
+  name and, for `opengrad evaluate`, the suite file (`--suite`, default `smoke`) and each benchmark config the suite
+  lists, resolved as `opengrad.benchmarks.runner` does. A benchmark the runner would load from outside
+  `configs/benchmarks/`, or a suite that cannot be read, makes the answer unknown, and the run never uploads.
+- `config_blobs` records the git blob id of each, from the bytes the run read (what `git hash-object` prints).
+  These configs are left out of `entry_modified`; any other `configs/` edit still counts there and blocks.
+- At upload, `scripts.configs_pushed` requires each blob to appear at that same path in `origin/master`'s history
+  (`git log --raw`, with literal pathspecs). A version pushed earlier counts, since it was reviewed when pushed. A
+  version that only a merge commit introduced is not seen, which fails closed.
+- Getting the consumed set wrong is safe in one direction only, by design. A config the run reads but the list
+  misses stays under the old rule, so an edit to it still blocks.
+- An unrelated stray file under `configs/` still blocks every approved upload. Narrowing that needs to know
+  everything a config itself points at (`opengrad train` follows paths inside it), so it stays strict.
+- Tests: `tests/runrecords/test_upload_hardening.py` (`test_a_tweaked_config_uploads_once_that_exact_version_is_pushed`
+  and its neighbours).
 
 Also open, from the same audits:
 

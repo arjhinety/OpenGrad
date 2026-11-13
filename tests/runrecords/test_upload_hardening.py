@@ -721,3 +721,130 @@ def test_a_local_branch_named_like_the_remote_ref_never_counts(tmp_path: Path) -
     _git(tmp_path, "branch", "refs/remotes/origin/master", head)
     assert rs.on_reviewed_branch(head, tmp_path) is False
 
+
+
+def _commit(root: Path, message: str) -> str:
+    import subprocess
+
+    _git(root, "add", "-A")
+    _git(
+        root,
+        "-c",
+        "user.email=t@t",
+        "-c",
+        "user.name=t",
+        "commit",
+        "-q",
+        "--allow-empty",
+        "-m",
+        message,
+    )
+    return subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, check=True
+    ).stdout.strip()
+
+
+def test_a_consumed_config_is_vouched_for_by_its_content_not_listed_as_modified(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = _checkout(tmp_path)
+    (root / "scripts" / "tool.py").write_text("X = 1\n", encoding="utf-8")
+    (root / "configs").mkdir()
+    # The bytes the run reads are what is hashed (write_text would write CRLF on Windows).
+    (root / "configs" / "run.yaml").write_bytes(b"steps: 3\n")
+    (root / "configs" / "other.yaml").write_bytes(b"steps: 4\n")
+    monkeypatch.setattr(ri, "_modified", lambda root: {"configs/run.yaml", "configs/other.yaml"})
+    monkeypatch.setattr(
+        ri, "_tracked", lambda root: {"scripts/tool.py", "configs/run.yaml", "configs/other.yaml"}
+    )
+    assert rr.recorded_call("script", ["scripts/tool.py", "configs/run.yaml"], root, lambda: 0) == 0
+    (record,) = rr.read_local(root)
+    # An edit to a config the run does not consume still counts.
+    assert record["entry_modified"] == ["configs/other.yaml"]
+    assert record["config_blobs"] == {"configs/run.yaml": ri.blob_sha(b"steps: 3\n")}
+
+
+def test_blob_sha_is_what_git_hash_object_prints(tmp_path: Path) -> None:
+    import subprocess
+
+    (tmp_path / "a.yaml").write_bytes(b"steps: 3\n")
+    out = subprocess.run(
+        ["git", "hash-object", "a.yaml"], cwd=tmp_path, capture_output=True, text=True, check=True
+    )
+    assert ri.blob_sha(b"steps: 3\n") == out.stdout.strip()
+
+
+def test_a_tweaked_config_uploads_once_that_exact_version_is_pushed(tmp_path: Path) -> None:
+    (tmp_path / "configs").mkdir()
+    config = tmp_path / "configs" / "run.yaml"
+    config.write_bytes(b"steps: 3\n")
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "config", "core.autocrlf", "false")
+    _git(tmp_path, "update-ref", "refs/remotes/origin/master", _commit(tmp_path, "a"))
+    pushed = ri.blob_sha(b"steps: 3\n")
+    tweaked = ri.blob_sha(b"steps: 5\n")
+    assert rs.configs_pushed({"configs/run.yaml": pushed}, tmp_path) is True
+    # A run made with an unpushed edit, then with the edit committed but not pushed.
+    assert rs.configs_pushed({"configs/run.yaml": tweaked}, tmp_path) is False
+    config.write_bytes(b"steps: 5\n")
+    local = _commit(tmp_path, "b")
+    assert rs.configs_pushed({"configs/run.yaml": tweaked}, tmp_path) is False
+    _git(tmp_path, "update-ref", "refs/remotes/origin/master", local)
+    assert rs.configs_pushed({"configs/run.yaml": tweaked}, tmp_path) is True
+    # A version pushed earlier was reviewed too.
+    assert rs.configs_pushed({"configs/run.yaml": pushed}, tmp_path) is True
+    # The same content pushed under another path does not vouch for this one, and a recorded path is never a
+    # pattern that could match a different file.
+    assert rs.configs_pushed({"configs/elsewhere.yaml": pushed}, tmp_path) is False
+    assert rs.configs_pushed({"configs/*.yaml": pushed}, tmp_path) is False
+    assert rs.configs_pushed({":(glob)configs/**": pushed}, tmp_path) is False
+    assert rs.configs_pushed({"configs/run.yaml": pushed[:12]}, tmp_path) is False
+    assert rs.configs_pushed(None, tmp_path) is False  # consumed configs unknown
+    assert rs.configs_pushed("x", tmp_path) is False
+    assert rs.configs_pushed({}, tmp_path) is True
+
+
+def test_a_tweaked_config_counts_in_the_reviewed_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(rs, "on_reviewed_branch", lambda sha, root: True)
+    monkeypatch.setattr(
+        rs, "configs_pushed", lambda blobs, root: blobs == {"configs/run.yaml": "pushed"}
+    )
+    base = {"held_out_reach": [], "entry_modified": [], "git": {"sha": "a" * 40}}
+    assert (
+        rs._as_reviewed({**base, "config_blobs": {"configs/run.yaml": "pushed"}}, tmp_path) is True
+    )
+    assert (
+        rs._as_reviewed({**base, "config_blobs": {"configs/run.yaml": "local"}}, tmp_path) is False
+    )
+
+
+def test_evaluate_consumes_its_suite_and_the_benchmark_configs_it_lists(tmp_path: Path) -> None:
+    pytest.importorskip("yaml")
+    root = _checkout(tmp_path)
+    (root / "pyproject.toml").write_text(
+        '[project]\nname = "x"\n[project.scripts]\nopengrad = "opengrad.cli:main"\n', encoding="utf-8"
+    )
+    (root / "src" / "opengrad").mkdir()
+    (root / "src" / "opengrad" / "cli.py").write_text("def main():\n    return 0\n", encoding="utf-8")
+    for folder in ("benchmark_suites", "benchmarks"):
+        (root / "configs" / folder).mkdir(parents=True)
+    (root / "configs" / "benchmark_suites" / "smoke.yaml").write_text(
+        "benchmarks: [a, b-c]\n", encoding="utf-8"
+    )
+    (root / "configs" / "benchmark_suites" / "wide.yaml").write_text(
+        "benchmarks: [a, missing]\n", encoding="utf-8"
+    )
+    (root / "configs" / "benchmarks" / "a.yaml").write_text("x: 1\n", encoding="utf-8")
+    (root / "configs" / "benchmarks" / "b_c.yaml").write_text("x: 2\n", encoding="utf-8")
+    assert ri.consumed_configs(["opengrad", "evaluate", "m"], root) == [
+        "configs/benchmark_suites/smoke.yaml",
+        "configs/benchmarks/a.yaml",
+        "configs/benchmarks/b_c.yaml",
+    ]
+    assert (
+        ri.consumed_configs(["opengrad", "evaluate", "m", "--suite", "wide"], root) is None
+    )  # fails closed
+    assert ri.consumed_configs(["opengrad", "evaluate", "m", "--suite=none"], root) is None
+    assert ri.config_blobs(["opengrad", "evaluate", "m", "--suite", "wide"], root) is None

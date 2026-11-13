@@ -12,7 +12,10 @@ annotation log, goes up only as a redacted copy; any other log goes up byte for 
 UTF-8 text stays local. Upload is an allowlist: only a log whose entry point was reviewed and approved is sent
 (`opengrad train`, `opengrad evaluate`, the labelling runner and fifteen reviewed scripts), and only when the run
 started from reviewed code: a commit pushed to `origin/master` (checked at upload), with nothing it loads and no
-`configs/` file edited, untracked or ignored at the start. Any other stays local and is listed. Even then, a log is
+other `configs/` file edited, untracked or ignored at the start, and each config it consumes (named in its
+arguments; for `opengrad evaluate`, the suite and benchmark configs) present, exactly as the run read it, in
+`origin/master`'s history at upload. A run made with a tweaked config uploads once that config is pushed. Any other
+stays local and is listed. Even then, a log is
 not sent when its run read held-out data, as far as the code shows: its command
 runs an entry point that names a held-out file or loads code that does, or an argument (or a `configs/` file it
 names) names one, `behavioral-heldout` included outside keys reviewed as only documenting or excluding the set. The exception is a short list of entry points whose console a test pins to status lines

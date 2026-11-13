@@ -181,5 +181,7 @@ def test_ordinary_summary_content_is_not_flagged() -> None:
     assert validate_summary(summary, ROOT) == []
 
 
-def test_the_suite_never_writes_run_records_into_the_repository() -> None:
-    assert not (ROOT / ".run-records").exists() or not any((ROOT / ".run-records").iterdir())
+def test_the_suite_never_writes_run_records_into_the_repository(run_records_at_start: frozenset[str]) -> None:
+    # Records from real runs made before the suite started are not the suite's (every entry point records itself).
+    records = ROOT / ".run-records"
+    assert not records.is_dir() or {p.name for p in records.iterdir()} <= run_records_at_start

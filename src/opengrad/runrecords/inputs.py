@@ -5,6 +5,7 @@ a run starts; ``opengrad.runrecords.scripts.upload_decision`` reads them. Moved 
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import posixpath
@@ -228,6 +229,54 @@ def _tracked(root: Path) -> set[str] | None:
     return tracked
 
 
+def blob_sha(data: bytes) -> str:
+    """The git blob id of these bytes (what ``git hash-object`` prints), so a pushed version can be found."""
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def _option(command: Sequence[str], name: str) -> str | None:
+    tokens = [str(t) for t in command]
+    for i, token in enumerate(tokens):
+        if token == name and i + 1 < len(tokens):
+            return tokens[i + 1]
+        if token.startswith(name + "="):
+            return token.split("=", 1)[1]
+    return None
+
+
+def consumed_configs(command: Sequence[str], root: Path) -> list[str] | None:
+    """The ``configs/`` files a run reads as its configuration: those its arguments name, and for ``opengrad
+    evaluate`` the suite file and the benchmark configs it lists (resolved as ``opengrad.benchmarks.runner`` does).
+    None when they cannot be determined, for example a benchmark config outside ``configs/`` (fail closed)."""
+    from opengrad.runrecords import scripts  # imports this module: loaded at call time
+
+    found: set[str] = set()
+    for token in command:
+        for value in argument_values(token):
+            relative = _resolved_file(value, root)
+            if relative is not None and relative.startswith("configs/"):
+                found.add(relative)
+    if scripts.console_target(command, root) == "opengrad.cli:main" and scripts.subcommand(command, root) == "evaluate":
+        import yaml  # the benchmark runner needs it too
+
+        suite = root / "configs" / "benchmark_suites" / f"{_option(command, '--suite') or 'smoke'}.yaml"
+        if not suite.is_file():
+            return None
+        found.add(suite.relative_to(root).as_posix())
+        data = yaml.safe_load(suite.read_text(encoding="utf-8"))
+        names = data.get("benchmarks") if isinstance(data, dict) else None
+        if not isinstance(names, list):
+            return None
+        base = root / "configs" / "benchmarks"
+        for name in map(str, names):
+            candidates = (base / f"{name}.yaml", base / f"{name.replace('-', '_')}.yaml")
+            hit = next((c for c in candidates if c.is_file()), None)
+            if hit is None:
+                return None  # the runner would fall back to an arbitrary path: not vouched for
+            found.add(hit.relative_to(root).as_posix())
+    return sorted(found)
+
+
 def entry_scan(command: Sequence[str], root: Path) -> tuple[list[str] | None, list[str] | None]:
     """When the run starts: the marker-naming files its entry point loads, scanned as they are on disk, and the files
     it loads (or any ``configs/`` file) with local edits or not tracked. ``(None, None)`` when the command does not
@@ -235,8 +284,10 @@ def entry_scan(command: Sequence[str], root: Path) -> tuple[list[str] | None, li
 
     The tables in ``opengrad.runrecords.scripts`` describe the reviewed, tracked code. A script not tracked yet may
     reach held-out data they do not list; the scan sees it. An approved entry point uploads only when nothing it
-    loads was modified, since an edit can print what the review found it never prints. Anything that fails reads
-    as reaching held-out data, and as modified (fail closed).
+    loads was modified, since an edit can print what the review found it never prints. The configs the run
+    consumes (``consumed_configs``) are left out here: ``config_blobs`` records their content, and upload waits
+    until those versions are pushed. Anything that fails reads as reaching held-out data, and as modified (fail
+    closed).
     """
     try:
         from opengrad.runrecords import scripts  # imports this module: loaded at call time
@@ -266,10 +317,13 @@ def entry_scan(command: Sequence[str], root: Path) -> tuple[list[str] | None, li
     tracked = _tracked(root)
     if changed is None or tracked is None:
         return reach, ["<git status failed>"]
+    # The configs the run consumes are vouched for by their content instead (config_blobs: uploaded once those
+    # exact versions are on origin/master, UP-0040); any other configs/ change still counts.
+    consumed = set(consumed_configs(command, root) or [])
     # Modified or untracked (git status), or not tracked at all, which also catches an ignored file.
-    watched = loaded | configs | policy
+    watched = loaded | (configs - consumed) | policy
     # A changed configs/ path counts even when it is gone from disk (a deleted config is a change).
-    edited = {path for path in changed if path in watched or path.startswith("configs/")}
+    edited = {path for path in changed if path in watched or (path.startswith("configs/") and path not in consumed)}
     return reach, sorted(edited | (watched - tracked))
 
 
@@ -301,6 +355,17 @@ def unchecked_arguments(argv: Sequence[str], root: Path) -> bool:
         return False
     except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
         return True
+
+
+def config_blobs(command: Sequence[str], root: Path) -> dict[str, str] | None:
+    """Each consumed config's git blob id as the run read it; None when they cannot be determined."""
+    try:
+        consumed = consumed_configs(command, root)
+        if consumed is None:
+            return None
+        return {path: blob_sha((root / path).read_bytes()) for path in consumed}
+    except Exception:  # noqa: BLE001 -- recording never blocks a run; an unreadable answer fails closed
+        return None
 
 
 def held_out_arguments(argv: Sequence[str], root: Path) -> bool:

@@ -53,6 +53,7 @@ from opengrad.runrecords.inputs import (  # noqa: F401 -- re-exported: older imp
     INPUT_EXEMPT_KEYS,
     INPUT_MARKERS,
     argument_values,
+    config_blobs,
     config_state,
     entry_scan,
     held_out_arguments,
@@ -498,6 +499,7 @@ class RunRecord:
         reach, modified = entry_scan(self.command, self.root)
         self.start["held_out_reach"] = reach
         self.start["entry_modified"] = modified
+        self.start["config_blobs"] = config_blobs(self.command, self.root)
         if self.unchecked_inputs:
             self.start["unchecked_inputs"] = True
         # Written before the run starts, so a run that is killed still leaves a record (read as INCOMPLETE).

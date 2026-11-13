@@ -442,12 +442,14 @@ def upload_decision(record: Mapping[str, Any], root: Path) -> tuple[str, str]:
 REVIEWED_REF = "refs/remotes/origin/master"
 
 
-def on_reviewed_branch(sha: object, root: Path) -> bool:
-    """True when ``sha`` is in ``REVIEWED_REF``'s history in this checkout (``git merge-base --is-ancestor``)."""
-    if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", sha):
-        return False
+#: A full git object id (SHA-1 or SHA-256).
+_OBJECT_ID = re.compile(r"[0-9a-f]{40}|[0-9a-f]{64}")
+
+
+def _reviewed_tip(root: Path) -> str | None:
+    """The commit ``REVIEWED_REF`` points at; None when it does not exist. ``show-ref --verify`` does no name lookup,
+    so a local branch or tag named like it never counts."""
     try:
-        # The exact ref only (show-ref --verify does no name lookup, so a local branch named like it never counts).
         ref = subprocess.run(
             ["git", "--no-optional-locks", "show-ref", "--verify", "--hash", REVIEWED_REF],
             cwd=root,
@@ -456,9 +458,20 @@ def on_reviewed_branch(sha: object, root: Path) -> bool:
             timeout=60,
             check=False,
         )
-        tip = ref.stdout.strip()
-        if ref.returncode != 0 or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", tip):
-            return False
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    tip = ref.stdout.strip()
+    return tip if ref.returncode == 0 and _OBJECT_ID.fullmatch(tip) else None
+
+
+def on_reviewed_branch(sha: object, root: Path) -> bool:
+    """True when ``sha`` is in ``REVIEWED_REF``'s history in this checkout (``git merge-base --is-ancestor``)."""
+    if not isinstance(sha, str) or not _OBJECT_ID.fullmatch(sha):
+        return False
+    tip = _reviewed_tip(root)
+    if tip is None:
+        return False
+    try:
         done = subprocess.run(
             ["git", "--no-optional-locks", "merge-base", "--is-ancestor", sha, tip],
             cwd=root,
@@ -471,17 +484,55 @@ def on_reviewed_branch(sha: object, root: Path) -> bool:
     return done.returncode == 0
 
 
+def configs_pushed(blobs: object, root: Path) -> bool:
+    """True when every consumed config, as the run read it, exists at that path in ``REVIEWED_REF``'s history: a
+    run made with a tweaked config uploads once that exact config is pushed (UP-0040)."""
+    if blobs is None:
+        return False  # the consumed configs could not be determined
+    if not isinstance(blobs, Mapping):
+        return False
+    if not blobs:
+        return True
+    tip = _reviewed_tip(root)
+    if tip is None:
+        return False
+    for path, blob in blobs.items():
+        if not (isinstance(path, str) and path.startswith("configs/") and isinstance(blob, str) and _OBJECT_ID.fullmatch(blob)):
+            return False
+        try:
+            # Literal pathspecs: a recorded path is a file name, never a pattern. Path-limited history skips a
+            # version that only a merge commit introduced, which fails closed.
+            log = subprocess.run(
+                ["git", "--no-optional-locks", "--literal-pathspecs", "log", tip, "--format=", "--raw", "--no-abbrev",
+                 "--no-renames", "--", path],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return False
+        # ":100644 100644 <old blob> <new blob> M\t<path>": every version the path has had on that history.
+        versions = {line.split()[3] for line in log.stdout.splitlines() if line.startswith(":") and len(line.split()) > 4}
+        if log.returncode != 0 or blob not in versions:
+            return False
+    return True
+
+
 def _as_reviewed(record: Mapping[str, Any], root: Path) -> bool:
     """The run started from reviewed code: its commit is on ``REVIEWED_REF``'s history, its start record has the scan
-    (``held_out_reach``), and no file the entry point loads, nor any ``configs/`` file, was modified, untracked or
-    ignored (``entry_modified`` empty). A record from before these checks, or whose check failed, is not vouched
-    for."""
+    (``held_out_reach``), no file the entry point loads, nor any ``configs/`` file it does not consume, was modified,
+    untracked or ignored (``entry_modified`` empty), and each config it consumes, as it read it, exists at that path
+    in ``REVIEWED_REF``'s history (``config_blobs``). A record from before these checks, or whose check failed, is
+    not vouched for."""
     git = record.get("git")
     sha = git.get("sha") if isinstance(git, Mapping) else None
     return (
         record.get("held_out_reach") is not None
         and record.get("entry_modified") == []
         and on_reviewed_branch(sha, root)
+        and configs_pushed(record.get("config_blobs", {}), root)
     )
 
 

@@ -6,6 +6,17 @@ from pathlib import Path
 
 import pytest
 
+_RECORDS = Path(__file__).resolve().parents[1] / ".run-records"
+#: Run records already in the repository when the suite starts: real runs of converted scripts (stage 3 records
+#: every entry point), not the suite's doing.
+_RECORDS_AT_START = frozenset(p.name for p in _RECORDS.iterdir()) if _RECORDS.is_dir() else frozenset()
+
+
+@pytest.fixture
+def run_records_at_start() -> frozenset[str]:
+    """The names in the repository's ``.run-records/`` when the suite started."""
+    return _RECORDS_AT_START
+
 
 @pytest.fixture(autouse=True)
 def _run_records_outside_the_repository(

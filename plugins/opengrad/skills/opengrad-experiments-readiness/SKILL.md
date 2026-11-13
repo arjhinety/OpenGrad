@@ -113,14 +113,16 @@ it:
     pinned scripts (`PINNED_CONSOLE`). An approved run also must have started from reviewed code (owner,
     2026-11-13, on Fable's advice): its commit is on `origin/master`'s history (checked at upload, so a clean run
     from an unpushed commit uploads once that commit is pushed, unless a rebase or squash drops it), and nothing it
-    loads, nor any `configs/` file, nor the run-record package itself, had local edits or was untracked, ignored,
-    or marked skip-worktree or assume-unchanged when it started (`entry_modified`;
-    such a run never uploads). To back up a run made with a tweaked config, commit and push the config first.
+    loads, nor any `configs/` file it does not consume, nor the run-record package itself, had local edits or was
+    untracked, ignored, or marked skip-worktree or assume-unchanged when it started (`entry_modified`; such a run
+    never uploads). The configs it consumes (`consumed_configs`: those its arguments name, and for `evaluate` the
+    suite and benchmark configs) are checked by content instead: `config_blobs` records each one's git blob id at
+    start, and upload waits until each is in `origin/master`'s history at that path (`configs_pushed`, UP-0040).
+    A run made with a tweaked config uploads once that exact config is pushed; an unknown consumed set never does.
     An approved run given an existing file outside `configs/` (a training config in a scratch folder) is
     unrecognised. Any other log stays local and is listed as not approved, counted for exit 3, until its entry
     point's console output is reviewed and it is added. The checks below still apply to an approved entry point;
-    they were the whole rule before, and five audits each found a new way past them. Planned refinement:
-    `docs/upstream/UP-0040.md`.
+    they were the whole rule before, and five audits each found a new way past them.
   - Upload decides again from each record's command (`upload_decision`, whose docstring gives the order), so it
     also covers a script launched through `python -m opengrad.runrecords run`, records made before a script
     recorded itself, and in-process `opengrad train`/`evaluate`. A held-out entry point named anywhere in the command keeps the log
