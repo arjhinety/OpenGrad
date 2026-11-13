@@ -360,8 +360,8 @@ def test_a_recorded_command_is_traced_to_its_entry_point(command: list[str], ent
         # Set when the run started, before redaction turned an outside path into <absolute-path>.
         ({"kind": "script", "command": ["python", "scripts/x.py", "<absolute-path>"], "held_out_inputs": True},
          ("never", "script")),
-        # A path that is not normalised, or in another case, is still the held-out entry point.
-        ({"kind": "script", "command": ["python", "scripts/../scripts/FREEZE_EVAL_PARTITION.py"]}, ("never", "script")),
+        # A path that is not normalised is still the held-out entry point.
+        ({"kind": "script", "command": ["python", "scripts/../scripts/freeze_eval_partition.py"]}, ("never", "script")),
         ({"kind": "script", "command": ["python", "scripts//freeze_eval_partition.py"]}, ("never", "script")),
         # A held-out script handed to a pinned one, or loaded by -c, or run first through PYTHONSTARTUP.
         ({"kind": "script", "command": ["python", "scripts/audit_pdet_v1_representation.py", "scripts/freeze_eval_partition.py"]},
@@ -530,3 +530,12 @@ def test_only_the_checkouts_own_launcher_counts_as_the_console_command(launcher:
     record = {"kind": "training", "command": [launcher, "train", "configs/benchmark_suites/smoke.yaml"], **REVIEWED}
     assert rs.upload_decision(record, ROOT)[0] != "allowed"
 
+
+
+def test_a_held_out_script_in_another_letter_case_is_still_held_out() -> None:
+    # Only where file names ignore case (Windows, macOS by default) does that spelling run the same file; on Linux it
+    # names no file, so it cannot run and is unrecognised (kept local) instead.
+    upper = "scripts/FREEZE_EVAL_PARTITION.py"
+    record = {"kind": "script", "command": ["python", upper], **REVIEWED}
+    expected = "never" if (ROOT / upper).is_file() else "unrecognised"
+    assert rs.upload_decision(record, ROOT)[0] == expected
